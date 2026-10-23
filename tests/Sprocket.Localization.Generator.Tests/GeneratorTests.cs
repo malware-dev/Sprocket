@@ -36,6 +36,24 @@ public class GeneratorTests
         Assert.Single(run.GeneratedTrees);
     }
 
+    /// <summary>The game's own file of texts holds one of every other file's class and loads them with its own, so a new file needs no code to be loaded.</summary>
+    [Fact]
+    public void TheGamesFileLoadsEveryOther()
+    {
+        var run = Run(
+            ("MyTexts.resx", Resx(("Mod.Greeting", "Hello"))),
+            ("Codex.resx", Resx(("Mod.Term.Slot", "A slot."))),
+            ("Codex.no.resx", Resx(("Mod.Term.Slot", "En plass."))));
+
+        Assert.Empty(run.Diagnostics);
+        var texts = run.GeneratedTrees.Single(tree => tree.FilePath.EndsWith("Texts.g.cs")).ToString();
+        var codex = run.GeneratedTrees.Single(tree => tree.FilePath.EndsWith("Codex.g.cs")).ToString();
+        Assert.Contains("public Codex Codex { get; } = new Codex();", texts);
+        Assert.Contains("Codex.Load(source);", texts);
+        Assert.Contains("public void Load(", codex);
+        Assert.DoesNotContain("new Texts()", codex);
+    }
+
     /// <summary>A file that is not XML is reported, and makes nothing.</summary>
     [Fact]
     public void UnreadableTextsAreReported()

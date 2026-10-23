@@ -55,11 +55,12 @@ change, and is read against it.
 
 ## Check the codex
 
-**Every change a player can see keeps the codex true.** For each one in the diff - a new button, a
-screen that behaves differently, a rule that changed - name the codex page that covers it
-(`Content/Data/Codex/en/`) and read what that page says against the change. A page left saying what is
-no longer so is a finding, and so is a new function no page mentions where a player would look for it.
-The page is mended in the same change, in both languages, by the `writing` skill.
+**Every change a player can see keeps the codex true.** For each one in the diff (a new button, a
+screen that behaves differently, a rule that changed), find the codex tips that cover it, in
+`Content/Data/Localization/Codex.resx`: the element's own tip and the term pages it links. Read what they
+say against the change. A tip left saying what is no longer so is a finding, and so is a new element with
+no tip where one is needed. The tip is mended in the same change, in both languages, by the `writing`
+skill.
 
 A function added without its page goes unnoticed: `Update from library` reached the screens and no page
 mentioned it until a reader test happened to ask how a construct gets a newer blueprint.

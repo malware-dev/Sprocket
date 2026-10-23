@@ -108,7 +108,7 @@ public class RenameTests
 
         var name = screen.Text("Test Rig");
         var at = Screen.Ui(name.At.X + 8f, screen.MiddleOf(name));
-        screen.Do("move", Say(at.X), Say(at.Y));
+        screen.Do("move", Say(at.X), Say(at.Y), "tick", EditorView.TipDelay.ToString());
 
         Assert.True(screen.Legible.Any(t => t.Contains("You can rename the grid here")), "resting on the grid's name said nothing about it");
     }

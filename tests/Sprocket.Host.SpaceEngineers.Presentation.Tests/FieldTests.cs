@@ -146,7 +146,7 @@ public class FieldTests
         Assert.Equal("Option 2 must be between 0 and 255.", form.Wrong);
     }
 
-    /// <summary>What a field is about is told where it is filled in, on its name and on the field itself; a field about nothing more tells nothing.</summary>
+    /// <summary>What a field is about is told where it is filled in, on its name and on what is seen of the field; a field about nothing more tells nothing.</summary>
     [Fact]
     public void AFieldSaysWhatItIsAboutWhereItIsFilledIn()
     {
@@ -155,7 +155,7 @@ public class FieldTests
         var form = new FieldSet();
         form.Show(new[] { about, Field.Called("speed") }, new string[0], new ColorOffer(new Hsv[0], null, null), new Texts());
 
-        Assert.NotNull(((Element)form.Fields[0]).Tip);
+        Assert.NotNull(((Element)form.Fields[0]).GetVisualChild(0).Tip);
         Assert.Null(((Element)form.Fields[1]).Tip);
         Assert.NotNull(Assert.Single(form.Within().OfType<Label>(), l => l.Text == "when stuck").Tip);
     }

@@ -161,7 +161,7 @@ public class SystemSwitchTests
         sim.Editor.SwitchOn();
         sim.Tick();
         Assert.True(system.Enabled);
-        Assert.Equal(sim.Texts.RowSwitchBlueprintOff, sim.Editor.Screen.SwitchAbout);
+        Assert.Equal(sim.Texts.Codex.RowSwitchBlueprintOff, sim.Editor.Screen.SwitchAbout);
 
         sim.Editor.Screen.Flip!.Execute();
         sim.Tick();

@@ -15,6 +15,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Features.Admin
 {
     /// <summary>The world's settings, for an admin to change: a tab for this world and one for every world, each setting a list of its choices.</summary>
+    /// <remarks>A trial has no default under this world.</remarks>
     public sealed class AdminDialog : Dialog
     {
         const float Wide = 600f;
@@ -47,8 +48,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         HeaderStyle = Styles.Tab,
                         Tabs =
                         {
-                            new Tab { Header = texts.AdminThisWorld, Tip = Tip.For(null, texts.AdminThisWorldAbout), Content = Page(texts, true) },
-                            new Tab { Header = texts.AdminEveryWorld, Tip = Tip.For(null, texts.AdminEveryWorldAbout), Content = Page(texts, false) }
+                            new Tab { Header = texts.AdminThisWorld, Tip = Tip.For(null, texts.Codex.AdminThisWorldAbout), Content = Page(texts, true) },
+                            new Tab { Header = texts.AdminEveryWorld, Tip = Tip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
                         }
                     },
                     new Button { Style = Styles.Primary, Text = texts.AdminClose, Align = Align.Right, Command = close }
@@ -86,7 +87,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
                         layer => layer.DebugLog.HasValue ? Switch(layer.DebugLog.Value) : -1,
                         settings => Switch(settings.DefaultDebugLog),
-                        (layer, at) => layer.WithDebugLog(at < 0 ? (bool?)null : at == 0)))
+                        (layer, at) => layer.WithDebugLog(at < 0 ? (bool?)null : at == 0))),
+                    new Label { Style = Styles.Heading, Text = texts.AdminTrials },
+                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminTrialsAbout },
+                    Setting(texts.AdminTips, texts.AdminTipsAbout, Choose(texts, world,
+                        new[] { texts.AdminTipsStay, texts.AdminTipsAlt },
+                        null,
+                        layer => layer.TipKeeping.HasValue ? Keeping(layer.TipKeeping.Value) : -1,
+                        settings => Keeping(settings.DefaultTipKeeping),
+                        (layer, at) => layer.WithTipKeeping(at < 0 ? (TipKeeping?)null : at == 0 ? TipKeeping.Stay : TipKeeping.Alt)))
                 }
             };
         }
@@ -106,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
 
             var field = new ListField(listed) { Align = Align.Left };
             if (defaulted)
-                field.Explain(0, Tip.For(null, texts.AdminDefaultAbout));
+                field.Explain(0, Tip.For(null, texts.Codex.AdminDefaultAbout));
 
             var choice = new Choice(world, field, words, defaulted ? defaults : null, given, standing, giving);
             field.Edited += () => Change(choice);
@@ -144,6 +153,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                 choice.Field.Respell(0, choice.Defaults[standing]);
                 choice.Field.Text = given < 0 ? choice.Defaults[standing] : choice.Words[given];
             }
+        }
+
+        /// <summary>Where <paramref name="keeping" /> stands among its words: staying, then kept by Alt.</summary>
+        static int Keeping(TipKeeping keeping)
+        {
+            return keeping == TipKeeping.Stay ? 0 : 1;
         }
 
         /// <summary>Where a switch being <paramref name="on" /> stands among its words: on, then off.</summary>

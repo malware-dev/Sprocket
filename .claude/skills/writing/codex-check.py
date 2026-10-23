@@ -1,11 +1,12 @@
 """The codex's own checks, run over its pages: python .claude/skills/writing/codex-check.py
 
+Every entry of Codex.resx and Codex.no.resx is a page.
+
     name      the product's name in running text; a ::: player box and `quoted` text are left out, since a
               file name or a path can carry it there
-    links     a term linked more than once on one page
-    title     a mark in a page's title, which the contents and the history name the page by
+    links     a page linked more than once from one page
     marks     a mark followed by a plain space, where &nbsp; keeps it on one line with the word after it
-    pairs     a page or tooltip in one language with no partner in the other
+    pairs     a page in one language with no partner in the other
 
 Every hit is a fault; a check that has to be argued with is a check that needs mending.
 """
@@ -13,15 +14,22 @@ Every hit is a fault; a check that has to be argued with is a check that needs m
 import os
 import re
 import sys
+import xml.etree.ElementTree as ET
 
-ROOT = os.path.join("src", "Sprocket.Host.SpaceEngineers", "Content", "Data", "Codex")
-LANGUAGES = ("en", "no")
+FOLDER = os.path.join("src", "Sprocket.Host.SpaceEngineers", "Content", "Data", "Localization")
+FILES = {"en": "Codex.resx", "no": "Codex.no.resx"}
 NAME = re.compile(r"sprocket", re.I)
-LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([a-z-]+)\)")
+LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\)")
 QUOTED = re.compile(r"`[^`]*`")
 SPACED = re.compile(r"\]\(mark:[a-z-]+\)[ \t]+\S")
 # Pages the name may stand on: the home page names the product by design.
-NAMED = {"home.md", "home.tldr.md"}
+NAMED = {"Sprocket.Term.Home"}
+
+
+def pages(language):
+    """Every page of one language, by key."""
+    root = ET.parse(os.path.join(FOLDER, FILES[language])).getroot()
+    return dict((data.get("name"), data.findtext("value") or "") for data in root.findall("data"))
 
 
 def running(text):
@@ -46,24 +54,22 @@ def running(text):
     return lines
 
 
-def check(language, name, text, say):
-    if name not in NAMED:
+def check(language, key, text, say):
+    if key not in NAMED:
         for number, line in running(text):
             if NAME.search(line):
-                say("name", "%s/%s:%d: %s" % (language, name, number, line.strip()))
+                say("name", "%s %s:%d: %s" % (language, key, number, line.strip()))
 
     seen = {}
-    for target in LINK.findall(text):
+    for target in LINK.findall(QUOTED.sub("", text)):
         seen[target] = seen.get(target, 0) + 1
     for target, count in sorted(seen.items()):
         if count > 1:
-            say("links", "%s/%s: %s linked %d times" % (language, name, target, count))
+            say("links", "%s %s: %s linked %d times" % (language, key, target, count))
 
     for number, line in enumerate(text.splitlines(), 1):
-        if line.startswith("# ") and "mark:" in line:
-            say("title", "%s/%s:%d: %s" % (language, name, number, line.strip()))
         if SPACED.search(QUOTED.sub("", line)):
-            say("marks", "%s/%s:%d: %s" % (language, name, number, line.strip()))
+            say("marks", "%s %s:%d: %s" % (language, key, number, line.strip()))
 
 
 def main():
@@ -73,18 +79,16 @@ def main():
     def say(kind, what):
         hits.append("%-6s %s" % (kind, what))
 
-    files = {}
-    for language in LANGUAGES:
-        folder = os.path.join(ROOT, language)
-        files[language] = set(f for f in os.listdir(folder) if f.endswith(".md"))
-        for name in sorted(files[language]):
-            with open(os.path.join(folder, name), encoding="utf-8") as page:
-                check(language, name, page.read(), say)
+    read = {}
+    for language in FILES:
+        read[language] = pages(language)
+        for key in sorted(read[language]):
+            check(language, key, read[language][key], say)
 
-    for language in LANGUAGES:
-        for other in LANGUAGES:
-            for name in sorted(files[language] - files[other]):
-                say("pairs", "%s/%s has no %s partner" % (language, name, other))
+    for language in FILES:
+        for other in FILES:
+            for key in sorted(set(read[language]) - set(read[other])):
+                say("pairs", "%s %s has no %s partner" % (language, key, other))
 
     for hit in hits:
         print(hit)

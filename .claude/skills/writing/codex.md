@@ -1,66 +1,62 @@
-# Codex pages
+# Codex tips
 
-The codex is the editor's own small wiki: a page per term, each with a one-sentence tooltip. Its reader is
-a player in the target group, inexperienced, who may never have heard a word the editor uses. The
-playtest showed "construct", "logic system" and "installation" losing a reader who can read code; a real
-player struggles harder. Mal: "It's sad... but true. We just have to do this job."
+The codex is the mod's tips. Every tip is a codex page: a short page that opens beside the element it belongs to,
+whose links open further pages inside it, with back and forward. Its reader is a player in the target group,
+inexperienced, who may never have heard a word the editor uses. Mal: "It's sad... but true. We just have to do this
+job." Each tip is "short, to the point and clear as day", and a term is explained on a page of its own instead of on
+every tip that uses it.
 
 ## Where the pages are
 
-`Content/Data/Codex/<language>/<id>.md` is a page and `<id>.tldr.md` its tooltip, one sentence. `index`
-lists the terms in the order the contents show them. Every page and tooltip exists in `en/` and `no/`.
+Every tip is a codex page: one entry in `Content/Data/Localization/Codex.resx`, with its Norwegian in
+`Codex.no.resx`, written in rich text. A page links another by its key without the `Sprocket.` prefix:
+`[slot](Term.Slot)`. A link to a page that does not exist fails the build. Text shown anywhere in the mod outside a
+tip lives in `MyTexts.resx`, never in the codex; a text that only ever shows inside a tip stays in the codex.
+
+A page has a title row, its subject with its mark, and a body of a few short lines. It never scrolls.
+
+## Which element gets a tip
+
+- **Something self-explanatory gets no tip.**
+- **A tip that only repeats its element's label or words is removed.** A tip on an element that shows a value (a
+  name, a number, a state) and says what that value is does not repeat it; it says what the field is for.
+- **An icon that is part of a text needs no tip of its own. An icon that alone stands for an action keeps its tip,**
+  so people understand without a doubt what they are doing.
+- **A part of a sentence that shows something live keeps its tip,** such as which blocks fill a slot. A part that
+  only restates itself has none.
+- **An element that is itself a term shows that term's page as its tip,** the way the home headings show the logic
+  system and installation pages. It gets no tip of its own that links the same word.
+- **A term on a screen is explained once:** where a heading with a term is repeated on a screen, only its first
+  occurrence has the term look and the tip.
+- **Undo and redo say exactly what happens,** never "undo the last action": the change, by the item's name and
+  where it is, and what undoing makes of it.
 
 ## How a page is written
 
-- **The codex explains everything that is built, and grows with the editor.** Mal: "Explain what we have.
-  We just need to make damn sure we update the codex as Sprocket grows." Something not built yet is left
-  out until it is, and the code review's codex step catches the change that builds it.
-- **The codex teaches the editor, never the script.** What is on the screens and what to press; the
-  script's syntax and keywords do not appear in a page.
-- **Link a term once per page**, the first time it matters: `[logic systems](logic-system)`. Mal: the
-  wiki rule.
+- **Short, to the point and clear as day.** A page that does not fit is too long.
+- **It says only what the person needs.** Mal, on a tip saying a rename applies "everywhere it is used": "Why does
+  the user need to know this?"
+- **It never explains the obvious.**
+- **It says what the thing does, never what it doesn't.**
+- **Terms get their own pages, linked.** A tip does not explain a term in place.
+- **A link explains the word it is on. Never a "see the..." link.**
+- **Link a term once per page**, the first time it matters. Mal: the wiki rule.
+- **The codex teaches the editor, never the script.** What is on the screens and what to press; the script's syntax
+  and keywords do not appear in a page.
 - **A kind's mark sits beside a link or a bold term**, never beside plain running text:
-  `![](mark:blueprint)&nbsp;[blueprints](blueprint)`, with empty words. Mal: "[icon] signal slot" makes sense,
-  "sends the [icon] signal" does not. A page's title carries no mark, since the contents and the history
-  name the page by its title; a heading inside a page may.
-- **Every mark is joined to the word after it by `&nbsp;`**, a button's mark as well as a kind's, so a line
-  never ends between them (Mal, 2026-10-14).
+  `![](mark:blueprint)&nbsp;[blueprints](Term.Blueprint)`. Mal: "[icon] signal slot" makes sense, "sends the [icon]
+  signal" does not.
+- **Every mark is joined to the word after it by `&nbsp;`**, so a line never ends between them (Mal, 2026-10-14).
+- **An icon is shown, never described.** `![](mark:<name>)` draws the real symbol, and the words say what it means.
+  Mal: "it's a very bad idea to describe the icons by words. They can change at any time."
 - **What is on screen is quoted as it is on screen**, in backticks: `Make blueprint`.
-- **A detail belongs to the page about the thing it is a detail of.** What only one kind of block or
-  one action does goes on that block's or action's page, not on a general page that happens to meet it.
-  Mal, on a vent's "move on" written into the sequence page: "the place it would belong, would be a page
-  that describes that action specifically."
-- **No list that pretends to be complete.** Where the cases depend on the block or the action (the ways
-  a run can fail, the reasons a step holds), state the rule and give an example, not a list. Mal: "there's
-  any number of errors that might stop a sequence, that is per-action determined."
+- **A detail belongs to the page about the thing it is a detail of.** Mal: "the place it would belong, would be a
+  page that describes that action specifically."
+- **No list that pretends to be complete.** Where the cases depend on the block or the action, state the rule and
+  give an example. Mal: "there's any number of errors that might stop a sequence, that is per-action determined."
 - **Say a thing once,** on the page that owns it, and link there from the others.
-- **Explain what a player would get wrong, and trust them with the rest.** A page that spells out what a
-  player sees for themselves on the screen talks down to them.
-- **Table-talk goes in the `::: player` box.** A passage about the game itself rather than the world (a file
-  on the player's computer, a limit the game puts on mods) is table-talk, as `screen.md` defines it, and on a
-  page it sits in that box.
-- **A page describes the product for its own purpose.** A guide once said text "draws as a sign" because
-  signs were the test case; what the format was tested on is not what it is for.
-- **An icon is shown, never described.** `![](mark:<name>)` draws the real symbol, kinds and buttons alike
-  (`mark:play`, `mark:delete`), and the words say what it means. Mal: "it's a very bad idea to describe the
-  icons by words. They can change at any time."
-- **A worked example is a page of its own,** under the `> examples` section of the index, ending "Back to
-  examples"; a reference page links to it in one line. Mal: "I want examples to be a separate thing, in a
-  separate list, able to be looked at standalone."
-- **Out-of-world facts go in the `::: player` box, and the line above stays in the world.** The line says
-  "your blueprints, which you can use everywhere"; the box says they are files on the player's computer.
-  The people in the world are engineers, never players.
-- **A page opens by saying what the thing is,** its scope, and where it is found: "A logic system is the
-  automation for one machine, like an airlock, with all the jobs that go with running that machine." Where
-  the idea is one non-programmers get stuck on, like branching, it opens from the need instead ("Sometimes
-  you need a sequence to do one thing or another") and walks through a case.
-- **The codex describes the finished design,** including what a ticket has settled and is not built yet, and
-  nothing a ticket leaves open. Where a trial shows two designs, both are described, each under a heading of
-  its own beneath a `::: player` box saying both are being tried, so the dropped one is deleted whole.
-- **Small structure is prose, not a heading.** "A logic system consists of the following parts:" and a list,
-  not a heading over three lines.
-- **There is no glossary page.** Every linked term already shows its tooltip; a word that needs a
-  definition gets a term page of its own, as `tick` does.
+- **Out-of-world facts go in the `::: player` box.** The people in the world are engineers, never players.
+- **The codex describes the finished design,** and nothing a ticket leaves open.
 
 ## Facts the pages rest on
 
@@ -75,24 +71,27 @@ lists the terms in the order the contents show them. Every page and tooltip exis
 - A blueprint is a copy in the library; editing the construct's logic system leaves the blueprint as it
   was.
 
-## Checks of its own
+## Checks
+
+Both scripts read `Codex.resx` and `Codex.no.resx`, where every entry is a page. Run them from the repository root.
 
 ```
-# The name in running text, a term linked twice, a mark in a page's title, a mark spaced from its word, a page without its partner language
 python .claude/skills/writing/codex-check.py
-
-# Habits that make a page read as machine-written, counted per page; --show <page> lists every hit
-python .claude/skills/writing/tells.py Content/Data/Codex/en/*.md
+python .claude/skills/writing/tells.py src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/Codex.resx
+python .claude/skills/writing/tells.py --show src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/Codex.resx <key>
 ```
 
-`codex-check.py` leaves `::: player` boxes and `quoted` text out of the name check, since a file name or a
-path can carry the name there. Every hit it reports is a fault.
+`codex-check.py` reports the product's name in running text outside `::: player` boxes and quotes, a page linked
+twice from one page, a mark followed by a plain space, and a page with no partner in the other language. Every hit is a
+fault.
 
-The tester's first remark on the codex was that it reads as AI-written. `tells.py` counts the habits behind
-that: a page opening on a definition, "such as" and lists of three, pointing elsewhere, padding, uncontracted
-negatives, every sentence the same length, and sheer length. Its counts are signals, never verdicts.
+`tells.py` gives one line of counts per page, worst first: openers that define the subject, "such as", lists of three,
+signposts, filler, uncontracted negatives, how much sentence length varies, and length. `--show` lists every hit on one
+page with its sentence. A count is a signal, not a verdict.
 
 ## The reader test
+
+A tip is a page here: the reader is given the tip pages and the term pages they link.
 
 A page, or a set of them, is read by a second, simpler reader before Mal sees it. It is the gate in
 front of his reading, not in front of a commit: it takes out the plain faults so fewer drafts go back and
@@ -130,5 +129,5 @@ that comes from the screens themselves rather than the words.
 
 ## Open
 
-- Whether pages address the player as "you". Mal's home page and every page he approved on 2026-10-14 do,
-  and he has not ruled on it as a rule.
+- Whether pages address the player as "you". Mal's home page and every page he approved on 2026-10-14 do, and he has
+  not ruled on it as a rule.

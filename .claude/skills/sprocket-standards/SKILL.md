@@ -27,10 +27,8 @@ The general rules are in **csharp-standards**. These hold only here.
   made-up blocks.
 - `src/Sprocket.Localization.Generator` writes `Texts` from `MyTexts.resx` at build time and reports
   every text that cannot be said. Roslyn source generator, `netstandard2.0`.
-- `tools/Sprocket.Wiki` writes the GitHub wiki from the codex. It compiles Lumel's markdown-lite reader
-  from `src/Lumel/Text`, `net10.0`.
 - Test projects reference the mod, or the harness where they need a screen, and drive the editor
-  through `Driving/Target`. The generator and the wiki tool have test projects of their own.
+  through `Driving/Target`. The generator has a test project of its own.
 - The game is reached through two interfaces only: `Lumel/Drawing/IScreenSpace` for drawing and
   `World/ISlots` for toolbars. The harness answers both. Everything else (mod storage, grid events,
   block interfaces) the harness uses for real through Castle proxies (`Fakes/Pretend.cs`).

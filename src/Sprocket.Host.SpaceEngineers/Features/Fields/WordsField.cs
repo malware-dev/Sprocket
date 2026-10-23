@@ -79,6 +79,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public Element Keyboard => this;
 
+        /// <summary>Gives <paramref name="about" />, in markdown-lite, as the tip of what is seen of the field: its row of words, and the list they fold into.</summary>
+        public void Explain(string about)
+        {
+            _line.Tip = Tip.For(_line.Tip, about);
+            _list.Tip = _line.Tip;
+        }
+
         /// <summary>Only the form that shows, so the keyboard and the pointer reach nothing hidden.</summary>
         public override int VisualChildCount => 1;
 

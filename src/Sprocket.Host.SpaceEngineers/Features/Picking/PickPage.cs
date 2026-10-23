@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -229,9 +228,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public IList<string> Replacing { get; set; }
 
         /// <inheritdoc />
-        public override string Help => Terms.Picking;
-
-        /// <inheritdoc />
         public override bool Asks => true;
 
         /// <inheritdoc />
@@ -242,10 +238,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override bool CanPrimary => IsComplete && (_aim == null || _aim.Finishes);
 
         /// <inheritdoc />
-        public override string PrimaryAbout => Editor.Texts.PickDoneAbout;
+        public override string PrimaryAbout => Editor.Texts.Codex.PickDoneAbout;
 
         /// <inheritdoc />
-        public override string PrimaryWaits => Editor.Texts.PickDoneFirst;
+        public override string PrimaryWaits => Editor.Texts.Codex.PickDoneFirst;
 
         /// <summary>What each value the chosen action takes wants, one field each, and empty where it takes none.</summary>
         public IList<Field> Fields => Wanted();

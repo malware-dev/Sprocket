@@ -63,19 +63,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             // Where types and states can be added, the ways to add them say it all.
             _panel.Empty = _types.Count == 0 && _states.Count == 0 && !editable ? texts.SystemNoState : "";
             _panel.TypesHeading.Text = texts.StateTypes.ToUpperInvariant();
-            _panel.TypesHeading.Tip = Tip.For(_panel.TypesHeading.Tip, texts.StateTypesAbout);
+            _panel.TypesHeading.Tip = Tip.For(_panel.TypesHeading.Tip, texts.Codex.StateTypesAbout);
             _panel.StatesHeading.Text = texts.StateStates.ToUpperInvariant();
-            _panel.StatesHeading.Tip = Tip.For(_panel.StatesHeading.Tip, texts.StateStatesAbout);
+            _panel.StatesHeading.Tip = Tip.For(_panel.StatesHeading.Tip, texts.Codex.StateStatesAbout);
             _panel.TypesHeading.IsVisible = _types.Count != 0;
             _panel.StatesHeading.IsVisible = _states.Count != 0;
             _panel.Adds = editable;
 
             _panel.AddType.Text = StatusRow.Plus + texts.StateTypeAdd;
             _panel.AddType.Command = _changes(CommandKind.AddType, AddType);
-            _panel.AddType.Tip = Tip.For(_panel.AddType.Tip, texts.StateTypeAddAbout);
+            _panel.AddType.Tip = Tip.For(_panel.AddType.Tip, texts.Codex.StateTypeAddAbout);
             _panel.AddState.Text = StatusRow.Plus + texts.StateStateAdd;
             _panel.AddState.Command = _changes(CommandKind.AddState, AddState);
-            _panel.AddState.Tip = Tip.For(_panel.AddState.Tip, texts.StateStateAddAbout);
+            _panel.AddState.Tip = Tip.For(_panel.AddState.Tip, texts.Codex.StateStateAddAbout);
 
             _typeRows.Show(_types);
             foreach (var type in _types)
@@ -114,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             TypeEditing.Show(texts, row, type);
             row.Name.Command = _changes(CommandKind.RenameType, () => _editor.Rename(row.Name, TypeNaming(type)));
             row.Name.CanRename = row.Name.Command != null;
-            row.Name.About = editable ? texts.StateTypeRenameAbout : locked;
+            row.Name.About = editable ? texts.Codex.StateTypeRenameAbout : locked;
 
             // A type keeps two choices at least, so two can only be renamed; past two, a choice may also be removed.
             var removable = type.Choices.Count > 2;
@@ -126,18 +126,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     ? _changes(CommandKind.ChangeChoice, () => Choice(type, named, chip))
                     : _changes(CommandKind.ChangeChoice, () => _editor.Rename(chip, ChoiceNaming(type, named)));
                 chip.CanRename = !removable && chip.Command != null;
-                chip.About = !editable ? locked : removable ? texts.StateChoiceAbout : null;
+                chip.About = !editable ? locked : removable ? texts.Codex.StateChoiceAbout : null;
             }
 
             row.AddChoice.Command = _changes(CommandKind.AddChoice,
                 () => _editor.Do(_system, new AddChoice(type, NumberedName.Free(texts.StateChoiceNumbered, type.Choices.Count, type.Has), type.Choices.Count)));
-            row.AddChoice.Tip = Tip.For(row.AddChoice.Tip, texts.StateChoiceAddAbout);
+            row.AddChoice.Tip = Tip.For(row.AddChoice.Tip, texts.Codex.StateChoiceAddAbout);
             row.AddChoice.IsVisible = editable;
 
             var removes = new RemoveType(_system, type).Changes;
             row.Removes = removes ? _changes(CommandKind.RemoveType, () => _editor.Do(_system, new RemoveType(_system, type))) : null;
-            row.RemovesAbout = !editable ? locked : removes ? texts.StateTypeRemove : texts.StateTypeKept;
-            row.Grips(editable, editable ? texts.StateTypeDrag : locked);
+            row.RemovesAbout = !editable ? locked : removes ? texts.Codex.StateTypeRemove : texts.Codex.StateTypeKept;
+            row.Grips(editable, editable ? texts.Codex.StateTypeDrag : locked);
         }
 
         void ArrangeState(Texts texts, StateRow row, State state, bool editable, string locked)
@@ -145,25 +145,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.Name.Text = state.Name;
             row.Name.Command = _changes(CommandKind.RenameState, () => _editor.Rename(row.Name, StateNaming(state)));
             row.Name.CanRename = row.Name.Command != null;
-            row.Name.About = editable ? texts.StateStateRenameAbout : locked;
+            row.Name.About = editable ? texts.Codex.StateStateRenameAbout : locked;
             row.Kind = Template.Fill(texts.StateHolds, "type", state.IsFlag ? texts.StateFlag : state.Type);
 
             var held = StateMentions.Mentions(_system, state.Name);
             row.KindOpens = held ? null : _changes(CommandKind.ChangeStart, () => Types(state));
-            row.KindAbout = !editable ? locked : held ? texts.StateKindKept : texts.StateHoldsAbout;
+            row.KindAbout = !editable ? locked : held ? texts.Codex.StateKindKept : texts.Codex.StateHoldsAbout;
             row.StartsLead = texts.StateStarts;
-            row.StartsAbout = texts.StateStartsAbout;
+            row.StartsAbout = texts.Codex.StateStartsAbout;
             row.Start.Text = state.Start.Said;
             row.Start.Command = _changes(CommandKind.ChangeStart, () => Starts(state));
             row.Start.Style = row.Start.Command != null ? Styles.SlotName : Styles.SlotNameStill;
             row.Start.Tip = Tip.For(row.Start.Tip, editable ? null : locked);
             row.NowLead = texts.StateNow;
-            row.NowAbout = texts.StateNowAbout;
+            row.NowAbout = texts.Codex.StateNowAbout;
 
             var removes = new RemoveState(_system, state).Changes;
             row.Removes = removes ? _changes(CommandKind.RemoveState, () => _editor.Do(_system, new RemoveState(_system, state))) : null;
-            row.RemovesAbout = !editable ? locked : removes ? texts.StateStateRemove : texts.StateStateKept;
-            row.Grips(editable, editable ? texts.StateStateDrag : locked);
+            row.RemovesAbout = !editable ? locked : removes ? texts.Codex.StateStateRemove : texts.Codex.StateStateKept;
+            row.Grips(editable, editable ? texts.Codex.StateStateDrag : locked);
         }
 
         /// <summary>Offers renaming the choice <paramref name="choice" /> of <paramref name="type" />, and removing it where nothing holds it there.</summary>

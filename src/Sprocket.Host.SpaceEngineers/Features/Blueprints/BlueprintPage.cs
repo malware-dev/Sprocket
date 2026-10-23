@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -45,9 +44,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool Edits => true;
 
         /// <inheritdoc />
-        public override string Help => Terms.InstallationPanel;
-
-        /// <inheritdoc />
         public override string CustomName => Title;
 
         /// <summary>The installation can be renamed here; the panel is named for its blueprint, which is renamed on its logic system screen.</summary>
@@ -60,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool SwitchIsOn => Blockset != null && Blockset.Enabled;
 
         /// <summary>The blockset's switch stops that one and nothing else made from the blueprint; while the blueprint is off, it says to switch that on first.</summary>
-        public override string SwitchAbout => _system.Enabled ? StatusRow.Switching(Editor.Texts, false, SwitchIsOn) : Editor.Texts.RowSwitchBlueprintFirst;
+        public override string SwitchAbout => _system.Enabled ? StatusRow.Switching(Editor.Texts, false, SwitchIsOn) : Editor.Texts.Codex.RowSwitchBlueprintFirst;
 
         /// <summary>The blockset's switch waits for the blueprint's while that is off.</summary>
         public override bool SwitchLocked => !_system.Enabled;
@@ -70,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _made != null && _made.Name == _madeName && _made.Enabled == _madeOn && _made.IsEmpty;
 
         /// <inheritdoc />
-        public override string NameAbout => Editor.Texts.BlueprintNameAbout;
+        public override string NameAbout => Editor.Texts.Codex.BlueprintNameAbout;
 
         /// <summary>An installation has to be called something, since it is told from the others by its name.</summary>
         public override bool NameRequired => true;
@@ -135,13 +131,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             base.Heading(parts);
             parts[0].Mark = Blockset == null ? Symbols.LogicSystem : Symbols.Installation;
-            parts[0].MarkAbout = Blockset == null ? Editor.Texts.HeadingLogicSystem : Editor.Texts.HeadingInstallation;
+            parts[0].MarkAbout = Blockset == null ? Editor.Texts.Codex.HeadingLogicSystem : Editor.Texts.Codex.HeadingInstallation;
 
             // Pushed, so Back returns to the blocks being filled.
             var from = new HeadingPart(_system.Name);
             from.Mark = Symbols.LogicSystem;
-            from.MarkAbout = Editor.Texts.HeadingLogicSystem;
-            from.About = Template.Fill(Editor.Texts.SystemsEditBlueprint, "name", _system.Name);
+            from.MarkAbout = Editor.Texts.Codex.HeadingLogicSystem;
+            from.About = Template.Fill(Editor.Texts.Codex.SystemsEditBlueprint, "name", _system.Name);
             from.Opens = Editor.Act(CommandKind.OpenSystem, () => Editor.Push(new LogicSystemPage(Editor, _system)));
             parts.Insert(0, from);
         }

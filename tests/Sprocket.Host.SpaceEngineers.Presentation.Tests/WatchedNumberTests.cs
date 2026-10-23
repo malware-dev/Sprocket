@@ -135,10 +135,10 @@ public class WatchedNumberTests
         var texts = rig.Editor.Texts;
         var tips = row.Starts.Select(part => row.ChipOf(part)!.Tip?.Text).ToArray();
         Assert.All(tips, Assert.NotNull);
-        Assert.Equal(texts.SequenceReadAbout, tips[0]);
-        Assert.Equal(texts.PartWatchedAbout, tips[1]);
-        Assert.Equal(texts.SequenceComparedAbout, tips[3]);
-        Assert.Equal(texts.SequenceCheckedAbout, tips[4]);
+        Assert.Equal(texts.Codex.SequenceReadAbout, tips[0]);
+        Assert.Equal(texts.Codex.PartWatchedAbout, tips[1]);
+        Assert.Equal(texts.Codex.SequenceComparedAbout, tips[3]);
+        Assert.Equal(texts.Codex.SequenceCheckedAbout, tips[4]);
     }
 
     static Simulation Made()

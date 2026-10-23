@@ -49,9 +49,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>The construct's own history: logic systems and installations made and taken out.</summary>
         public override bool HasHistory => true;
 
-        /// <inheritdoc />
-        public override string Help => Terms.Home;
-
         /// <summary>Whether a change to the construct can be walked back, which a copy lent to look at never can.</summary>
         public override bool CanUndo => Editor.Holder == null && Editor.CanUndoConstruct();
 
@@ -83,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         public override bool CanRename => Editor.World.CanRename;
 
         /// <inheritdoc />
-        public override string NameAbout => Editor.Texts.SystemsNameAbout;
+        public override string NameAbout => Editor.Texts.Codex.SystemsNameAbout;
 
         /// <inheritdoc />
         public override bool NameRequired => true;
@@ -194,7 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 // exactly the ones that were on.
                 var installed = system.IsBlueprint;
                 var own = installed ? instance.Enabled : on;
-                var held = installed && !system.Enabled ? texts.RowSwitchBlueprintFirst : null;
+                var held = installed && !system.Enabled ? texts.Codex.RowSwitchBlueprintFirst : null;
                 var going = SystemSummary.IsRunning(system, Editor.Runner, instance);
                 changed |= row.SwitchIsOn != own || row.SwitchLocked != held || row.Running != going;
                 row.SwitchIsOn = own;
@@ -247,7 +244,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             _new.Command = Editor.Act(CommandKind.NewSystem, Make);
             _groups = new KeyedChildren<AutomationSystem, SystemGroup>(_list.Children, system => new SystemGroup(Editor, this, system));
-            Editor.Codex.Wire(_heading, Editor.OpenCodex);
+            Editor.Codex.Explain(_heading);
             _search.Text = _searched;
             _search.Edited += delegate
             {
@@ -281,11 +278,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         void Arrange(Texts texts)
         {
             _new.Text = StatusRow.Plus + texts.SystemsNew;
-            _new.Tip = Tip.For(_new.Tip, texts.SystemsNewAbout);
+            _new.Tip = Tip.For(_new.Tip, texts.Codex.SystemsNewAbout);
 
             _groups.Show(_systems);
 
-            _heading.Markdown = Terms.Link(texts.SystemsHeading.ToUpperInvariant(), Terms.LogicSystem);
+            _heading.Markdown = CodexPages.Link(texts.SystemsHeading.ToUpperInvariant(), CodexPages.LogicSystem);
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
             _search.Hint = texts.PickSearch;

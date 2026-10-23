@@ -11,6 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Localization
 
         readonly string[] _said;
 
+        Dictionary<string, Phrase> _keyed;
+
         /// <summary>The texts in <paramref name="phrases" />, each at its own index, said as written until <see cref="Load" /> is given a language.</summary>
         public Phrasebook(IList<Phrase> phrases)
         {
@@ -26,9 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Localization
             Load(null);
         }
 
-        /// <summary>Where the codex's pages and tooltips are read in the language loaded, by file name, or null where there are none.</summary>
-        public ITextSource Pages { get; set; }
-
         /// <summary>Reads every text from <paramref name="source" />, or goes back to the texts as written where it is null.</summary>
         public void Load(ITextSource source)
         {
@@ -43,6 +42,21 @@ namespace Sprocket.Host.SpaceEngineers.Localization
         public string Say(Phrase phrase)
         {
             return _said[phrase.Index];
+        }
+
+        /// <summary>The text keyed <paramref name="key" /> in the language loaded, or null where the book has no such text.</summary>
+        /// <remarks>The keys are gathered the first time this is asked, for a text found by a name written in other text, such as a link's.</remarks>
+        public string Find(string key)
+        {
+            if (_keyed == null)
+            {
+                _keyed = new Dictionary<string, Phrase>(_phrases.Count, StringComparer.Ordinal);
+                foreach (var phrase in _phrases)
+                    _keyed[phrase.Key] = phrase;
+            }
+
+            Phrase found;
+            return key != null && _keyed.TryGetValue(key, out found) ? _said[found.Index] : null;
         }
     }
 }

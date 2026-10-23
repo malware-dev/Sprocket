@@ -14,6 +14,9 @@ namespace Lumel.Screens
         /// <summary>Where the pointer is, set before anything else each frame.</summary>
         Vector2 Pointer { set; }
 
+        /// <summary>Asks whether the host's keep key, which keeps a tip open, is held now; given once, as the screen opens.</summary>
+        System.Func<bool> IsKeepKeyHeld { set; }
+
         /// <summary>Whether a caret is drawn this half of its blink, which the screen keeps from its own clock.</summary>
         bool CaretVisible { set; }
 

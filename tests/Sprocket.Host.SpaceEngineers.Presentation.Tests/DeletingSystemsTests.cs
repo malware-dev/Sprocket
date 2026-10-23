@@ -15,7 +15,7 @@ public class DeletingSystemsTests
         var row = sim.Editor.RootRows().Single();
 
         Assert.Null(row.Deletes);
-        Assert.Equal(sim.Texts.SystemsKeepsOne, row.Locked);
+        Assert.Equal(sim.Texts.Codex.SystemsKeepsOne, row.Locked);
 
         sim.Editor.DeleteInstance(system, system.Instances[0]);
         Assert.Equal("", sim.Editor.Question());
@@ -95,12 +95,12 @@ public class DeletingSystemsTests
         sim.Editor.OpenBlueprintSystem(0);
         sim.Tick();
 
-        Assert.Equal(sim.Texts.SystemDelete, sim.Editor.Screen.DeleteAbout);
+        Assert.Equal(sim.Texts.Codex.SystemDelete, sim.Editor.Screen.DeleteAbout);
         sim.Editor.Screen.Deletes!.Execute();
         sim.Tick();
 
         Assert.Empty(sim.Editor.Program.Systems);
-        Assert.Equal(sim.Texts.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
+        Assert.Equal(sim.Texts.Codex.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
 
         sim.Editor.Screen.Undo!.Execute();
         sim.Tick();
@@ -146,7 +146,7 @@ public class DeletingSystemsTests
         sim.Tick();
         Assert.Equal(2, sim.Editor.Program.Systems.Count);
 
-        Assert.Equal(sim.Texts.ChangeAddSystem, sim.Editor.Screen.UndoText);
+        Assert.Equal(sim.Texts.Codex.ChangeAddSystem, sim.Editor.Screen.UndoText);
         sim.Editor.Screen.Undo!.Execute();
         sim.Tick();
         Assert.Single(sim.Editor.Program.Systems);
@@ -169,7 +169,7 @@ public class DeletingSystemsTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        Assert.NotEqual(sim.Texts.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
+        Assert.NotEqual(sim.Texts.Codex.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
     }
 
     /// <summary>A lent editor, which may only look, offers no bin.</summary>

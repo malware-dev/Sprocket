@@ -115,15 +115,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public string About(Texts texts)
         {
             if (_holds == ArgumentRole.NewValue)
-                return texts.SequenceNewValueAbout;
+                return texts.Codex.SequenceNewValueAbout;
 
             if (_holds == ArgumentRole.Compared)
-                return texts.SequenceComparedAbout;
+                return texts.Codex.SequenceComparedAbout;
 
             if (_holds == ArgumentRole.Read)
-                return texts.SequenceReadAbout;
+                return texts.Codex.SequenceReadAbout;
 
-            return _holds == ArgumentRole.Checked ? texts.SequenceCheckedAbout : texts.SequenceOptionsAbout;
+            return _holds == ArgumentRole.Checked ? texts.Codex.SequenceCheckedAbout : texts.Codex.SequenceOptionsAbout;
         }
     }
 }

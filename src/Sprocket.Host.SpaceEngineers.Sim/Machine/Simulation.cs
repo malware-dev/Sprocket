@@ -6,7 +6,6 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Sim.Content;
 
 namespace Sprocket.Sim.Machine;
 
@@ -110,7 +109,6 @@ public sealed class Simulation
         _backups = new Backups(_worldFolder);
         _backups.Read();
         _saidBefore = GameLog.Lines.Count;
-        _texts.Book.Pages = new CodexFiles(CodexFiles.Beside, "");
 
         // Before the unit, which reads the program out of this the moment it is built.
         _rig.Install();

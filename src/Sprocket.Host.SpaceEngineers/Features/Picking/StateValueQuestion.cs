@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var fields = tests ? ComparisonQuestion.StateFields() : new List<Field>();
             var words = Words(system, state, made);
             var value = Field.Among(texts.PickStateFixedValue, words, words);
-            value.About = texts.PickStateFixedValueAbout;
+            value.About = texts.Codex.PickStateFixedValueAbout;
             value.Entry = FieldInput.Name;
             value.Default = "";
             fields.Add(value);

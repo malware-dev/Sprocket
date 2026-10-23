@@ -18,7 +18,7 @@ public class ScriptWordsTests
         sim.Editor.NewButtonSystem("Luftsluse");
         sim.Editor.Back();
         sim.Tick();
-        sim.Texts.Book.Load(new ResxTexts(ResxTexts.Beside, "no"));
+        sim.Texts.Load(new ResxTexts(ResxTexts.Beside, "no"));
         sim.Editor.Invalidate();
         sim.Tick();
 

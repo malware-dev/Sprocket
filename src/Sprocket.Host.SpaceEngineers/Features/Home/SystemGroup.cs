@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             });
             _heading.AboutArguments = _named;
             _another.Command = editor.Act(CommandKind.AddInstance, () => page.Another(system));
-            editor.Codex.Wire(_installations, editor.OpenCodex);
+            editor.Codex.Explain(_installations);
             _rows = new KeyedChildren<SystemInstance, StatusRow>(_list.Children, Made);
         }
 
@@ -82,19 +82,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             _named.Set("name", _system.Name);
             _heading.Summary = _system.Name;
-            _heading.About = texts.SystemsEditBlueprint;
+            _heading.About = texts.Codex.SystemsEditBlueprint;
 
             var stored = _editor.Holdings.Stored(_system);
             _heading.BinMark = stored ? Symbols.Minus : null;
             _heading.Deletes = stored ? _takesOff : _deletes;
-            _heading.DeleteText = stored ? texts.LibraryTakeOff : texts.LibraryDeletes;
+            _heading.DeleteText = stored ? texts.Codex.LibraryTakeOff : texts.Codex.LibraryDeletes;
 
             var shelf = _editor.Shelf;
             var newer = stored && !_editor.Holdings.ChangedSince(_system);
             _heading.Offers = shelf == null || stored && shelf.Holds(_system) ? null : newer ? _renews : _shelves;
             _heading.ButtonText = !stored ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
-            _heading.ButtonAbout = !stored ? texts.SystemsMakeBlueprintAbout
-                : newer ? texts.SystemsUpdateFromLibraryAbout : texts.SystemsUpdateBlueprintAbout;
+            _heading.ButtonAbout = !stored ? texts.Codex.SystemsMakeBlueprintAbout
+                : newer ? texts.Codex.SystemsUpdateFromLibraryAbout : texts.Codex.SystemsUpdateBlueprintAbout;
 
             // A version comes or goes only with a change that arranges the group again.
             _waiting = _editor.Versions.Rival(_system) != null;
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             {
                 _heading.Offers = _chooses;
                 _heading.ButtonText = texts.SystemsChooseVersion;
-                _heading.ButtonAbout = Template.Fill(texts.SystemsChooseVersionAbout, "name", _system.Name);
+                _heading.ButtonAbout = Template.Fill(texts.Codex.SystemsChooseVersionAbout, "name", _system.Name);
             }
 
             _keys.Clear();
@@ -119,20 +119,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 var instance = instances[n];
                 var row = _rows[instance];
                 row.Summary = SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, _system, instance);
-                row.About = texts.SystemsOpenInstanceAbout;
+                row.About = texts.Codex.SystemsOpenInstanceAbout;
                 row.AboutArguments.Set("name", row.Summary);
                 row.Deletes = only ? null : _editor.Act(CommandKind.DeleteInstance, () => _editor.DeleteInstance(_system, instance));
-                row.DeleteText = texts.SystemDeleteInstallation;
-                row.Locked = only ? texts.SystemsKeepsOne : "";
+                row.DeleteText = texts.Codex.SystemDeleteInstallation;
+                row.Locked = only ? texts.Codex.SystemsKeepsOne : "";
             }
 
             _installationsWord = texts.SystemsInstallations.ToUpperInvariant();
             HeadInstallations();
             _another.Text = StatusRow.Plus + texts.SystemsAddAnother;
-            _another.Tip = Tip.For(_another.Tip, texts.SystemsAddAnotherAbout, _named);
+            _another.Tip = Tip.For(_another.Tip, texts.Codex.SystemsAddAnotherAbout, _named);
         }
 
-        /// <summary>Whether the heading over the installations links to the codex's page on them: only the first shown on the screen does, as a page links a term once.</summary>
+        /// <summary>Whether the heading over the installations is the term, explained by the codex's page on it: only the first shown on the screen is, as a page explains a term once.</summary>
         public bool LinksTerm
         {
             get { return _linksTerm; }
@@ -146,10 +146,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             }
         }
 
-        /// <summary>Gives the heading over the installations its words, a link to the codex where <see cref="LinksTerm" /> says so.</summary>
+        /// <summary>Gives the heading over the installations its words, the term the codex explains where <see cref="LinksTerm" /> says so.</summary>
         void HeadInstallations()
         {
-            _installations.Markdown = _linksTerm ? Terms.Link(_installationsWord, Terms.Installation) : Markdown.Escape(_installationsWord);
+            _installations.Markdown = _linksTerm ? CodexPages.Link(_installationsWord, CodexPages.Installation) : Markdown.Escape(_installationsWord);
         }
 
         /// <summary>

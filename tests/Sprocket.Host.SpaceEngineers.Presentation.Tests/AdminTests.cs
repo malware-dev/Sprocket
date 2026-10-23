@@ -85,6 +85,20 @@ public class AdminTests
         Assert.Null(screen.Scene.Ship.Runner.Log);
     }
 
+    /// <summary>The tip trial is chosen under the trials, for this world, and the editor's tips follow it at once.</summary>
+    [Fact]
+    public void TheTipTrialIsChosenForThisWorld()
+    {
+        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
+        Assert.True(screen.Shows("Trials"));
+
+        Choose(screen, "Always stay", "Hold Alt to keep open");
+
+        Assert.Equal(TipKeeping.Alt, screen.Scene.Ship.Settings.World.TipKeeping);
+        Assert.Null(screen.Scene.Ship.Settings.Global.TipKeeping);
+        Assert.Equal(TipKeeping.Alt, screen.Editor.TipKeeping);
+    }
+
     /// <summary>The default under this world gives the setting back to every world.</summary>
     [Fact]
     public void TheDefaultLeavesItToEveryWorld()

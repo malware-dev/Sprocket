@@ -82,8 +82,7 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Says everything in <paramref name="culture" />, such as <c>no</c>, read from the mod's own texts; one frame passes while the screen is built again in it.</summary>
         public void Speak(string culture)
         {
-            _ship.Texts.Book.Load(new ResxTexts(ResxTexts.Beside, culture));
-            _ship.Texts.Book.Pages = new CodexFiles(CodexFiles.Beside, culture);
+            _ship.Texts.Load(new ResxTexts(ResxTexts.Beside, culture));
             _ship.Editor.Invalidate();
             Tick();
         }
@@ -313,6 +312,19 @@ namespace Sprocket.Sim.Simulation
 
         /// <summary>How many times the screen has written what the editor says onto its controls.</summary>
         public int Wires => _view.Wires;
+
+        /// <summary>The tip the screen shows for whatever the pointer rests on.</summary>
+        public CodexTip CodexTip => _view.CodexTip;
+
+        /// <summary>Whether the keep key is held, as the game's screen answers the view when it asks.</summary>
+        public bool IsKeepKeyHeld
+        {
+            set
+            {
+                var held = value;
+                _view.IsKeepKeyHeld = () => held;
+            }
+        }
 
         /// <summary>How many questions the mod has asked the game, in total.</summary>
         public int Asked => Fakes.Pretend.Asked;

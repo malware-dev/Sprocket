@@ -136,9 +136,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What opens the blueprint library from this page, or null where it is not offered.</summary>
         public virtual ICommand Library => null;
 
-        /// <summary>The codex entry about this screen, by the id a link names it by, or null where the screen has none.</summary>
-        public virtual string Help => null;
-
         /// <summary>Whether this page is a question asked for the screen under it, rather than a screen of its own.</summary>
         public virtual bool Asks => false;
 
@@ -147,14 +144,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>How far down the screen's scroller stood when the page was last left, given back when it is shown again.</summary>
         public float Scrolled { get; set; }
-
-        /// <summary>Opens the codex at the entry <see cref="Help" /> names.</summary>
-        public virtual void ShowHelp()
-        {
-            var term = Editor.Codex.Find(Help);
-            if (term != null)
-                Editor.OpenCodex(term);
-        }
 
         /// <summary>
         /// Whether this page's subject can be switched on and off.
@@ -248,7 +237,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public virtual bool CanPrimary => true;
 
         /// <summary>What the header's button does, said as its note while it can be pressed.</summary>
-        public virtual string PrimaryAbout => Edits ? Editor.Texts.ChromeDoneAbout : "";
+        public virtual string PrimaryAbout => Edits ? Editor.Texts.Codex.ChromeDoneAbout : "";
 
         /// <summary>What has to happen before the header's button can be pressed, said as its note while it cannot.</summary>
         public virtual string PrimaryWaits => "";

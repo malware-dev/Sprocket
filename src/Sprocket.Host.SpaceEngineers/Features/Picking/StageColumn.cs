@@ -40,13 +40,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _kindNarrow.Hint = texts.PickSearch;
 
 
-            _narrowClear.Tip = Tip.For(null, texts.PickClearTyped);
-            _kindNarrowClear.Tip = Tip.For(null, texts.PickClearTyped);
-            _kindClear.Tip = Tip.For(null, texts.PickEveryKind);
-            _showHidden = texts.PickShowHidden;
-            _hideHidden = texts.PickHideHidden;
+            _narrowClear.Tip = Tip.For(null, texts.Codex.PickClearTyped);
+            _kindNarrowClear.Tip = Tip.For(null, texts.Codex.PickClearTyped);
+            _kindClear.Tip = Tip.For(null, texts.Codex.PickEveryKind);
+            _showHidden = texts.Codex.PickShowHidden;
+            _hideHidden = texts.Codex.PickHideHidden;
             ShowsHidden = false;
-            _kindLine.Tip = Tip.For(null, texts.PickKindAbout);
+            _kindLine.Tip = Tip.For(null, texts.Codex.PickKindAbout);
 
             _narrow.Edited += () => Typed(_narrow, _narrowClear, Narrowed);
             _narrowClear.Command = new Relay(() => Emptied(_narrow, _narrowClear, Narrowed));

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Ownership
@@ -18,9 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
 
         /// <inheritdoc />
         public override string Title => Editor.Texts.PausedTitle;
-
-        /// <inheritdoc />
-        public override string Help => Terms.ChangingHands;
 
         /// <inheritdoc />
         public override bool ScrollsItself => true;

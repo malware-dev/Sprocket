@@ -58,7 +58,7 @@ public class SlotActionTests
         var part = editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single();
         var tip = editor.StepRows()[0].ChipOf(part)!.Tip!.Text;
         Assert.Contains(slot, tip);
-        Assert.Contains(editor.Texts.PartSlotEmpty, tip);
+        Assert.Contains(editor.Texts.Codex.PartSlotEmpty, tip);
     }
 
     /// <summary>A type of block takes a slot only where it offers what the slot's steps do with it, which is named where it does not.</summary>

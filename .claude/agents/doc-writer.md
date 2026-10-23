@@ -25,14 +25,15 @@ may be behind or ahead of it.
 
 You may read the code and the texts to quote the screens exactly: button and heading texts are in
 `src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/MyTexts.resx` (Norwegian in `MyTexts.no.resx`),
-and the existing pages are in `src/Sprocket.Host.SpaceEngineers/Content/Data/Codex/`. Read the existing
-pages first; a new page matches their voice and links into them.
+and the codex pages are the entries of `src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/Codex.resx`
+(Norwegian in `Codex.no.resx`). Read the existing pages first; a new page matches their voice and links into
+them.
 
 Where the brief and the code disagree, write what the brief says and report the disagreement.
 
 ## What you produce
 
-- Each page and its tooltip, in `en/` and `no/`, with the index updated where a term is new.
+- Each page, in `Codex.resx` and `Codex.no.resx`.
 - The mechanical check from both skill files, run on every file you touched, with every hit fixed or
   justified in the report.
 - For the reader test: three to six questions per page that a player would come to it for, each with the

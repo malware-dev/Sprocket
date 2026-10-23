@@ -40,7 +40,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Muted, Padding = new Thickness(8f, 8f, 0f, 0f) }
         };
 
-        /// <summary>The note beside the pointer: quiet words, strong ones bold and emphasized ones italic.</summary>
+        /// <summary>A codex tip: the chrome's color, edged, with room inside the edge.</summary>
+        public static readonly ElementStyle CodexTip = new ElementStyle
+        {
+            Base = { Background = Palette.Chrome, Edge = Palette.Line, Padding = new Thickness(12f, 8f) }
+        };
+
+        /// <summary>The words of a codex tip: quiet words, strong ones bold and emphasized ones italic, under a title in the bright ink.</summary>
         public static readonly RichTextStyle Tip = new RichTextStyle
         {
             Base =
@@ -61,10 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 HeadingColor = Palette.Ink,
                 RuleColor = Palette.Line,
                 BlockSpacing = 8f,
-                Indent = 20f,
-                Background = Palette.Chrome,
-                Edge = Palette.Line,
-                Padding = new Thickness(12f, 8f)
+                Indent = 20f
             }
         };
 
@@ -147,8 +150,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Padding = new Thickness(0f) }
         };
 
-        /// <summary>The codex's window: the page's own color, edged, with nothing veiled behind it, casting a floating window's shadow.</summary>
-        public static readonly WindowStyle CodexWindow = new WindowStyle
+        /// <summary>The guide to rich text's window: the page's own color, edged, with nothing veiled behind it, casting a floating window's shadow.</summary>
+        public static readonly WindowStyle GuideWindow = new WindowStyle
         {
             Base = { Background = Palette.Page, Edge = Palette.Line, Shadow = Shadow }
         };
@@ -645,41 +648,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.PanelHot, Tint = Palette.Ink },
             Disabled = { Tint = Palette.Dim }
         };
-
-        /// <summary>The question mark that opens the codex, an icon drawn from the lettering, which the symbol font has no mark for.</summary>
-        public static readonly GlyphStyle Help = new GlyphStyle(Icon)
-        {
-            Base = { Font = MyFontEnum.White, FontSize = 28f }
-        };
-
-        /// <summary>A term in the codex's margin, which moves the codex there when pressed.</summary>
-        public static readonly ButtonStyle CodexEntry = new ButtonStyle(Plain)
-        {
-            Base = { FontSize = 20f, Padding = new Thickness(12f, 6f) }
-        };
-
-        /// <summary>The term in the codex's margin that is being read.</summary>
-        public static readonly ButtonStyle CodexEntryShown = new ButtonStyle(CodexEntry)
-        {
-            Base = { Color = Palette.Ink, Background = Palette.Panel },
-            Hot = { Background = Palette.PanelHot }
-        };
-
-        /// <summary>The term in the codex's margin that heads a section, the terms of the section listed under it.</summary>
-        public static readonly ButtonStyle CodexSection = new ButtonStyle(CodexEntry)
-        {
-            Base = { Font = TextSizes.Bold, Padding = new Thickness(12f, 16f, 12f, 6f) }
-        };
-
-        /// <summary>The section heading in the codex's margin whose page is being read.</summary>
-        public static readonly ButtonStyle CodexSectionShown = new ButtonStyle(CodexSection)
-        {
-            Base = { Color = Palette.Ink, Background = Palette.Panel },
-            Hot = { Background = Palette.PanelHot }
-        };
-
-        /// <summary>How far in from a section's heading the codex's margin lists the terms of that section.</summary>
-        public const float CodexIndent = 16f;
 
         /// <summary>The mark a drop-down line ends with, smaller than a symbol pressed on its own.</summary>
         public static readonly GlyphStyle ListMark = new GlyphStyle

@@ -167,7 +167,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             foreach (var chip in _chips)
                 chip.Glow = MarksLit && !IsOff ? Glow : Palette.None;
 
-            _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.MemberWaits : Kind == StepKind.Await ? texts.SequenceAwaitRow : null);
+            _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.Codex.MemberWaits : Kind == StepKind.Await ? texts.Codex.SequenceAwaitRow : null);
 
             var adds = Kind == StepKind.End || Kind == StepKind.Adds;
             var branch = adds || Kind == StepKind.OtherwiseIf || Kind == StepKind.Otherwise;
@@ -186,7 +186,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 _chips[i].Texts = texts;
                 var press = Slots[i].Opens == null ? Why() : About(texts, Kind, Slots[i]);
-                _chips[i].Tip = Tip.For(_chips[i].Tip, PartTips.Of(texts, world, Slots[i], texts.PartStepBlocks, press));
+                _chips[i].Tip = Tip.For(_chips[i].Tip, PartTips.Of(texts, world, Slots[i], texts.Codex.PartStepBlocks, press));
                 Part(i, Slots[i], world);
             }
 
@@ -202,18 +202,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fixedInPlace = branch && Kind != StepKind.OtherwiseIf;
             _grip.Color = fixedInPlace ? Palette.None : _grip.CanCarry ? Palette.Faint : Palette.Dim;
-            _grip.Tip = Tip.For(_grip.Tip, _grip.CanCarry ? texts.SequenceDragStep : Why());
+            _grip.Tip = Tip.For(_grip.Tip, _grip.CanCarry ? texts.Codex.SequenceDragStep : Why());
             _duplicate.Command = Copies;
             _duplicate.IsEnabled = Copies != null;
-            _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.SequenceCopyStep : Why());
+            _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.Codex.SequenceCopyStep : Why());
             _delete.Command = Deletes;
             _delete.IsEnabled = Deletes != null;
-            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.SequenceDeleteStep : Why());
+            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.Codex.SequenceDeleteStep : Why());
 
             _pause.Style = IsOff ? Styles.Held : Styles.Holds;
             _pause.Command = Pauses;
             _pause.IsEnabled = Pauses != null;
-            _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.SequenceUnpauseStep : texts.SequencePauseStep);
+            _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.Codex.SequenceUnpauseStep : texts.Codex.SequencePauseStep);
 
             Background = IsCarried
                 ? Palette.SlotFill
@@ -267,25 +267,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         static string About(Texts texts, StepKind kind, SentenceSlot part)
         {
             if (part is SequenceSlot)
-                return kind == StepKind.Stop ? texts.PartStopsAbout : texts.PartRunsAbout;
+                return kind == StepKind.Stop ? texts.Codex.PartStopsAbout : texts.Codex.PartRunsAbout;
 
             if (part is ActionSlot)
-                return texts.SequenceActionAbout;
+                return texts.Codex.SequenceActionAbout;
 
             if (part is EntitiesSlot)
-                return texts.SequenceBlocksAbout;
+                return texts.Codex.SequenceBlocksAbout;
 
             var given = part as ArgumentsSlot;
             if (given != null)
                 return given.About(texts);
 
             if (part is StateSlot)
-                return texts.SequenceStateAbout;
+                return texts.Codex.SequenceStateAbout;
 
             if (part is SystemStateSlot)
-                return texts.SequenceSystemStateAbout;
+                return texts.Codex.SequenceSystemStateAbout;
 
-            return part is DurationSlot ? texts.SequenceLengthAbout : null;
+            return part is DurationSlot ? texts.Codex.SequenceLengthAbout : null;
         }
 
         /// <summary>The chip <paramref name="part" /> is drawn as, or null where the row does not show it yet.</summary>

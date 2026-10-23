@@ -33,8 +33,7 @@ game, share a grid blueprint holding the logic, or the blueprint files themselve
 ## Getting started
 
 Subscribe to Sprocket Automation on the Steam Workshop, then find any programmable block in
-the terminal and press **Automation**. The in-game codex, behind the question mark on every screen, walks you through
-your first airlock step by step.
+the terminal and press **Automation**.
 
 ## Why I made it
 

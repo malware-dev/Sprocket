@@ -37,6 +37,12 @@ namespace Lumel.Screens
         }
 
         /// <inheritdoc />
+        System.Func<bool> IScreenView.IsKeepKeyHeld
+        {
+            set { }
+        }
+
+        /// <inheritdoc />
         public bool CaretVisible
         {
             set

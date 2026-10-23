@@ -28,7 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                         Spacing = 16f,
                         Children =
                         {
-                            new RichText { Style = Styles.HeadingTerm, Placement = Flex.Grow }.As(out _heading),
+                            new RichText { Style = Styles.HeadingTerm }.As(out _heading),
+                            new VStack { Placement = Flex.Grow },
                             new TextBox { Style = Styles.Search, Focusable = true, Placement = FixedSize.Wide(SearchWide) }.As(out _search)
                         }
                     }.As(out _headingLine),

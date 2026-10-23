@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -52,9 +51,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public override string Title => Editor.Texts.SystemsLoad;
 
         /// <inheritdoc />
-        public override string Help => Terms.Library;
-
-        /// <inheritdoc />
         public override bool ScrollsItself => true;
 
         /// <summary>The list, its headings and lines included, for whoever reads it back.</summary>
@@ -78,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _search.Edited += Narrow;
             _add.Text = texts.LibraryAdd;
             _add.Command = _adds;
-            _add.Tip = Tip.For(_add.Tip, texts.LibraryPutOn);
+            _add.Tip = Tip.For(_add.Tip, texts.Codex.LibraryPutOn);
             _keep.Command = _keeps;
             _reset.Command = _resets;
             _copy.Command = _copies;
@@ -199,7 +195,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Depth = 1,
                 Status = Template.Fill(texts.LibraryLost, "time", Time(backup.Lost)),
                 Deletes = Editor.Act(CommandKind.ForgetBackup, () => Editor.Holdings.ForgetBackup(backup)),
-                DeleteText = texts.LibraryForgetBackup
+                DeleteText = texts.Codex.LibraryForgetBackup
             });
         }
 
@@ -238,7 +234,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     Depth = 1,
                     Status = Made(volume, texts),
                     Deletes = Editor.Act(CommandKind.Unshelve, () => Editor.Holdings.Unshelve(volume)),
-                    DeleteText = texts.LibraryForget
+                    DeleteText = texts.Codex.LibraryForget
                 };
 
                 if (entry.Read == null)
@@ -353,17 +349,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _keep.IsVisible = kept != null && shelf != null;
             _keep.Text = volume == null ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
             _keeps.CanExecute = !same;
-            _keep.Tip = Tip.For(_keep.Tip, same ? texts.LibrarySame
-                : newer ? texts.SystemsUpdateFromLibraryAbout
-                : volume == null ? texts.SystemsMakeBlueprintAbout : texts.SystemsUpdateBlueprintAbout);
+            _keep.Tip = Tip.For(_keep.Tip, same ? texts.Codex.LibrarySame
+                : newer ? texts.Codex.SystemsUpdateFromLibraryAbout
+                : volume == null ? texts.Codex.SystemsMakeBlueprintAbout : texts.Codex.SystemsUpdateBlueprintAbout);
 
             _reset.IsVisible = here && live != null && volume != null && !same && !newer;
             _reset.Text = texts.LibraryReset;
-            _reset.Tip = Tip.For(_reset.Tip, texts.LibraryResetAbout);
+            _reset.Tip = Tip.For(_reset.Tip, texts.Codex.LibraryResetAbout);
 
             _copy.Text = texts.LibraryCopy;
             _copies.CanExecute = free && system != null;
-            _copy.Tip = Tip.For(_copy.Tip, texts.LibraryCopyAbout);
+            _copy.Tip = Tip.For(_copy.Tip, texts.Codex.LibraryCopyAbout);
 
             var trouble = _refused.Length > 0 ? _refused : system == null ? entry.Trouble : "";
             _trouble.Text = trouble;

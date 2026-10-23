@@ -125,14 +125,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             if (_fills != null)
             {
-                Fixed(_fillsText, true, texts.PickSlotMatched);
+                Fixed(_fillsText, true, texts.Codex.PickSlotMatched);
                 return;
             }
 
             // The slot the picks change keeps its name, so the heading names it as it is.
             if (_forecast?.Changes != null)
             {
-                Fixed(_forecast.Changes.Id, false, texts.PickSlotChanges);
+                Fixed(_forecast.Changes.Id, false, texts.Codex.PickSlotChanges);
                 return;
             }
 
@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _part.Text = NewName;
             _part.Name = _slotName;
             _part.Emphasized = false;
-            _part.About = texts.PickSlotNameAbout;
+            _part.About = texts.Codex.PickSlotNameAbout;
             _part.Accepts = _accepts;
             _part.Renames = _renames;
 

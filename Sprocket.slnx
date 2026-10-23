@@ -24,9 +24,5 @@
     <Project Path="tests/Sprocket.Host.SpaceEngineers.Presentation.Tests/Sprocket.Host.SpaceEngineers.Presentation.Tests.csproj" />
     <Project Path="tests/Sprocket.Localization.Generator.Tests/Sprocket.Localization.Generator.Tests.csproj" />
     <Project Path="tests/Sprocket.Standards.Tests/Sprocket.Standards.Tests.csproj" />
-    <Project Path="tests/Sprocket.Wiki.Tests/Sprocket.Wiki.Tests.csproj" />
-  </Folder>
-  <Folder Name="/tools/">
-    <Project Path="tools/Sprocket.Wiki/Sprocket.Wiki.csproj" />
   </Folder>
 </Solution>

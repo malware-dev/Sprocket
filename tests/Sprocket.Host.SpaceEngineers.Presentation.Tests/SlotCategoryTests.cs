@@ -174,7 +174,7 @@ public class SlotCategoryTests
         var add = page.View.Within().OfType<Button>().Single(button => button.Text.EndsWith(screen.Editor.Texts.CategoryAdd));
         Assert.Null(add.Command);
         Assert.False(Shown(add), "the button to add a category shows");
-        Assert.Equal(screen.Editor.Texts.SystemTurnOffToEdit, category.Grip.Tip?.Text);
+        Assert.Equal(screen.Editor.Texts.Codex.SystemTurnOffToEdit, category.Grip.Tip?.Text);
     }
 
     /// <summary>An installation's own panel stands its slots the same way, under the names of the categories that hold any, with nothing to carry.</summary>

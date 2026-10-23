@@ -1,0 +1,1161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The codex, in English, which is the language the others are translated from: every page a tip shows, one text
+    each. A page is markdown-lite, as the texts in MyTexts.resx are. A first line starting "# " is the page's title,
+    and a link names the page it leads to by its key without "Sprocket.", as in [slot](Term.Slot).
+
+    A translation is a copy of this file named for its language, such as Codex.no.resx, holding the pages it
+    translates. Whatever it leaves out is said in English.
+-->
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Sprocket.Term.Home" xml:space="preserve">
+    <value># Welcome to Sprocket Automation
+
+The **home screen** is the total overview of all your logic systems on this construct.</value>
+    <comment>Codex page on "Welcome to Sprocket Automation", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.LogicSystem" xml:space="preserve">
+    <value># ![](mark:logic-system)&amp;nbsp;Logic system
+
+A ![](mark:logic-system)&amp;nbsp;**logic system** is the automation for one machine, like an airlock, with all the jobs that go with running it.</value>
+    <comment>Codex page on "Logic system", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Installation" xml:space="preserve">
+    <value># ![](mark:installation)&amp;nbsp;Installation
+
+An ![](mark:installation)&amp;nbsp;**installation** is a set of blocks and signals a logic system works on, like one airlock among several.</value>
+    <comment>Codex page on "Installation", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.InstallationPanel" xml:space="preserve">
+    <value># Installation panel
+
+The **installation panel** is where you set up an installation, selecting the blocks and signals for each of its slots.</value>
+    <comment>Codex page on "Installation panel", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Slot" xml:space="preserve">
+    <value># Slot
+
+A **slot** is a named place in a logic system, like the inner door, that each installation fills with its own blocks or signal.</value>
+    <comment>Codex page on "Slot", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
+    <value># Logic system states
+
+The **logic system's states** are values it keeps between runs, each installation its own, like which side of the airlock its engineer is on.</value>
+    <comment>Codex page on "Logic system states", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Undo" xml:space="preserve">
+    <value># ![](mark:undo)&amp;nbsp;Undo
+
+![](mark:undo)&amp;nbsp;**Undo** takes back the last change made on the screen you're on.</value>
+    <comment>Codex page on "Undo", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.RichText" xml:space="preserve">
+    <value># Rich text
+
+**Rich text** is plain text with a few marks typed into it that turn it into headings, lists, tables, and bold or italic words.</value>
+    <comment>Codex page on "Rich text", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Sequence" xml:space="preserve">
+    <value># ![](mark:sequence)&amp;nbsp;Sequence
+
+A ![](mark:sequence)&amp;nbsp;**sequence** is a list of steps a logic system runs from top to bottom.</value>
+    <comment>Codex page on "Sequence", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Step" xml:space="preserve">
+    <value># Step
+
+A **step** is one line of a sequence.</value>
+    <comment>Codex page on "Step", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Action" xml:space="preserve">
+    <value># ![](mark:action)&amp;nbsp;Action
+
+An ![](mark:action)&amp;nbsp;**action** is something a block can do, like opening a door or extending a piston.</value>
+    <comment>Codex page on "Action", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Delay" xml:space="preserve">
+    <value># Delay
+
+A **delay** is a step that holds its sequence for a set time.</value>
+    <comment>Codex page on "Delay", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.If" xml:space="preserve">
+    <value># If
+
+An **if** is a step that checks blocks, or one of the logic system's states, and runs the steps under it only when its condition passes.</value>
+    <comment>Codex page on "If", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.RunAndStop" xml:space="preserve">
+    <value># Run and stop
+
+**Run** and **stop** are steps that start or stop another sequence of the same logic system.</value>
+    <comment>Codex page on "Run and stop", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Tick" xml:space="preserve">
+    <value># Tick
+
+A **tick** is the smallest step of time, sixty to a second.</value>
+    <comment>Codex page on "Tick", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Selector" xml:space="preserve">
+    <value># Selector
+
+A **selector** is where you select what a step, an if or a trigger works with: blocks and what to do with them or check on them, or one of the logic system's states.</value>
+    <comment>Codex page on "Selector", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Trigger" xml:space="preserve">
+    <value># ![](mark:trigger)&amp;nbsp;Trigger
+
+A ![](mark:trigger)&amp;nbsp;**trigger** runs or stops a sequence when something happens, like a button being pressed.</value>
+    <comment>Codex page on "Trigger", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Signal" xml:space="preserve">
+    <value># ![](mark:signal)&amp;nbsp;Signal
+
+A ![](mark:signal)&amp;nbsp;**signal** is what a block sends to fire a trigger, from a slot on its toolbar or from a change in the block itself.</value>
+    <comment>Codex page on "Signal", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Library" xml:space="preserve">
+    <value># Library
+
+The **library** holds your blueprints, along with the logic systems on this construct and backups of constructs that lost their automation.</value>
+    <comment>Codex page on "Library", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Blueprint" xml:space="preserve">
+    <value># ![](mark:blueprint)&amp;nbsp;Blueprint
+
+A ![](mark:blueprint)&amp;nbsp;**blueprint** is a copy of a logic system kept in the library, ready to put on another construct.</value>
+    <comment>Codex page on "Blueprint", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Construct" xml:space="preserve">
+    <value># Construct
+
+A **construct** is a set of grids joined by mechanical blocks, like rotors and pistons. Grids held by landing gear or connectors stay apart.</value>
+    <comment>Codex page on "Construct", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.ChangingHands" xml:space="preserve">
+    <value># Changing hands
+
+A construct's automation belongs to the engineers who own the most blocks on it. **Changing hands** outside its sharing pauses it until one of the new owners resumes it.</value>
+    <comment>Codex page on "Changing hands", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.Examples" xml:space="preserve">
+    <value># Examples
+
+The **examples** build logic systems step by step, from the start.</value>
+    <comment>Codex page on "Examples", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.SimpleAirlock" xml:space="preserve">
+    <value># Simple airlock
+
+The **simple airlock** example builds an airlock that cycles out at the press of a button.</value>
+    <comment>Codex page on "Simple airlock", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.DrillArm" xml:space="preserve">
+    <value># Drill arm
+
+The **drill arm** example pushes a drill arm out with its drills running, and brings it back.</value>
+    <comment>Codex page on "Drill arm", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Term.HangarDoor" xml:space="preserve">
+    <value># Hangar door
+
+The **hangar door** example opens and closes a hangar with two buttons.</value>
+    <comment>Codex page on "Hangar door", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+  </data>
+  <data name="Sprocket.Chrome.Back" xml:space="preserve">
+    <value>Back</value>
+    <comment>Tooltip on the back arrow at the left end of the editor's heading bar, shown on every screen except the home screen. Pressing it returns to the screen before.</comment>
+  </data>
+  <data name="Sprocket.Chrome.Close" xml:space="preserve">
+    <value>Close the editor</value>
+    <comment>Tooltip on the close cross at the far right of the editor's heading bar, shown only on the home screen, where there is no screen to go back to. Pressing it closes the editor.</comment>
+  </data>
+  <data name="Sprocket.Chrome.Undo" xml:space="preserve">
+    <value>Undo {action}</value>
+    <comment>Tooltip on the undo arrow in the editor's heading bar, shown while there is a change to undo. {action} is filled with what undoing takes back, such as "rename".</comment>
+  </data>
+  <data name="Sprocket.Chrome.Redo" xml:space="preserve">
+    <value>Redo {action}</value>
+    <comment>Tooltip on the redo arrow in the editor's heading bar, shown while there is an undone change to make again. {action} is filled with what redoing does again, such as "rename".</comment>
+  </data>
+  <data name="Sprocket.Row.Broken" xml:space="preserve">
+    <value>**Something needs mending**
+Open it to see what.</value>
+    <comment>Tooltip on the round light at the start of a row in a list (a logic system, installation or sequence on the home screen or a logic system's screen) while the light is red because something in what the row opens needs mending.</comment>
+  </data>
+  <data name="Sprocket.Row.Ran" xml:space="preserve">
+    <value>**Ran just now**</value>
+    <comment>Tooltip on the round light at the start of a row in a list (a logic system, installation or sequence on the home screen or a logic system's screen) while the light flashes green just after the thing ran.</comment>
+  </data>
+  <data name="Sprocket.Row.Idle" xml:space="preserve">
+    <value>**Idle**
+Lights green when it runs, and red when something in it needs mending.</value>
+    <comment>Tooltip on the round light at the start of a row in a list (a logic system, installation or sequence on the home screen or a logic system's screen) while the light is dark: nothing ran a moment ago and nothing is broken.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
+    <value>Switch this installation on</value>
+    <comment>Tooltip on an installation's on/off switch while the switch is off, on the installation's row on the home screen and in the heading bar of the installation panel. Shown only while the installation's logic system is switched on.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchOff" xml:space="preserve">
+    <value>Switch this installation off and stop any running sequences.</value>
+    <comment>Tooltip on an installation's on/off switch while the switch is on, on the installation's row on the home screen and in the heading bar of the installation panel. Shown only while the installation's logic system is switched on.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchSystemOn" xml:space="preserve">
+    <value>Switch this logic system on, locking it against changes.</value>
+    <comment>Tooltip on the on/off switch of a logic system that has no installations, while it is off: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
+    <value>Switch this logic system off, stopping its sequences and unlocking it for changes.</value>
+    <comment>Tooltip on the on/off switch of a logic system that has no installations, while it is on: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
+    <value>Switch on every installation of this logic system</value>
+    <comment>Tooltip on the on/off switch of a logic system that has installations, while it is off: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens. Each installation then runs where its own switch is on.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchBlueprintFirst" xml:space="preserve">
+    <value>The logic system must be switched on first.</value>
+    <comment>Tooltip on an installation's on/off switch while its logic system is switched off and the installation's switch is dimmed and cannot be pressed: on the installation's row on the home screen and in the heading bar of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
+    <value>Switch off every installation of this logic system</value>
+    <comment>Tooltip on the on/off switch of a logic system that has installations, while it is on: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens.</comment>
+  </data>
+  <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
+    <value>This grid's name. You can rename the grid here, same as in the control panel's Info tab.</value>
+    <comment>Tooltip on the grid's name in the home screen's heading, where pressing the name renames the grid.</comment>
+  </data>
+  <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
+    <value>Start a new logic system on this construct.</value>
+    <comment>Tooltip on the home screen's button that adds a new logic system to the construct.</comment>
+  </data>
+  <data name="Sprocket.Systems.OpenInstanceAbout" xml:space="preserve">
+    <value>Open the installation panel for **{name}**.</value>
+    <comment>Tooltip on an installation's row on the home screen, under its logic system; pressing the row opens that installation's installation panel. {name} is filled with the installation's name.</comment>
+  </data>
+  <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
+    <value>The **library**: the logic systems on this construct, backups of constructs that lost their automation, and the blueprints in storage.</value>
+    <comment>Tooltip on the button in the editor's heading bar on the home screen that opens the library. The library holds the logic systems on this construct, backups of constructs that lost their automation, and the blueprints in storage.</comment>
+  </data>
+  <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
+    <value>Keep a copy of this logic system in the library as a **blueprint**.</value>
+    <comment>Tooltip on the button that makes a blueprint of a logic system, on its heading row on the home screen and in the library's details, shown while the library holds no blueprint of it.</comment>
+  </data>
+  <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
+    <value>Two constructs joined, each with its own version of {name}. Both stay switched off until you keep one.</value>
+    <comment>Tooltip on the Choose a version button on a logic system's heading row on the home screen. {name} is the logic system's name.</comment>
+  </data>
+  <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
+    <value>The blueprint in the library has more recent changes. Update your construct's version.</value>
+    <comment>Tooltip on the button on a logic system's heading row on the home screen, and in the library's details, that puts the library's newer blueprint in the logic system's place; shown where the blueprint was changed after the logic system.</comment>
+  </data>
+  <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
+    <value>Update the blueprint from the copy on your current construct.</value>
+    <comment>Tooltip on the button on a logic system's heading row on the home screen, and in the library's details, that brings the library's blueprint up to date from the logic system; shown once the library holds a blueprint and the logic system was changed after it.</comment>
+  </data>
+  <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
+    <value>Opens the **{name}** logic system editor.</value>
+    <comment>Tooltip on a logic system's heading row on the home screen, and on the logic system's name in the editor's heading bar on the installation panel; pressing either opens the logic system's screen. {name} is filled with the logic system's name.</comment>
+  </data>
+  <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
+    <value>Install the **{name}** logic system on another set of blocks.</value>
+    <comment>Tooltip on the home screen's button under a logic system's installations that adds another installation. {name} is filled with the logic system's name.</comment>
+  </data>
+  <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
+    <value>Name this slot and say what it is for.</value>
+    <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's page, where it is named and described.</comment>
+  </data>
+  <data name="Sprocket.System.NameAbout" xml:space="preserve">
+    <value>This logic system's name.</value>
+    <comment>Tooltip on a logic system's name in the editor's heading bar on its own screen, where pressing the name renames the logic system.</comment>
+  </data>
+  <data name="Sprocket.System.Delete" xml:space="preserve">
+    <value>Delete this logic system, and every installation of it</value>
+    <comment>Tooltip on the bin in the editor's heading bar on a logic system's screen, which deletes the logic system together with every installation of it.</comment>
+  </data>
+  <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
+    <value>Delete this installation</value>
+    <comment>Tooltip on the bin of an installation's row on the home screen, which deletes that installation.</comment>
+  </data>
+  <data name="Sprocket.System.UsingAbout" xml:space="preserve">
+    <value>Select the installation this screen works on. Its blocks fill the slots in the steps below, and blocks picked here go into its slots.</value>
+    <comment>Tooltip on the list of a logic system's installations at the top of its screen; the installation picked there fills the slots named in the screen's sentences.</comment>
+  </data>
+  <data name="Sprocket.System.WhenAbout" xml:space="preserve">
+    <value>Perform a task when a block sends a signal or reaches a requested state.</value>
+    <comment>Tooltip on the choice in the add-trigger menu on a logic system's screen that adds a trigger started by a block's signal or state.</comment>
+  </data>
+  <data name="Sprocket.System.EveryAbout" xml:space="preserve">
+    <value>Repeat a task at a set interval.</value>
+    <comment>Tooltip on the choice in the add-trigger menu on a logic system's screen that adds a trigger started on a timer.</comment>
+  </data>
+  <data name="Sprocket.Trigger.StateAbout" xml:space="preserve">
+    <value>Select another state, or another value for it.</value>
+    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names one of the logic system's states; pressing it opens the picker the trigger was made with.</comment>
+  </data>
+  <data name="Sprocket.System.TriggerAbout" xml:space="preserve">
+    <value>Add a trigger that determines what starts a sequence.</value>
+    <comment>Tooltip on the plus button under the triggers on a logic system's screen, which opens the menu of triggers to add.</comment>
+  </data>
+  <data name="Sprocket.System.NewSequenceAbout" xml:space="preserve">
+    <value>Add a sequence that can run several steps in order.</value>
+    <comment>Tooltip on the plus button under the sequences on a logic system's screen, which adds a new sequence.</comment>
+  </data>
+  <data name="Sprocket.System.Copy" xml:space="preserve">
+    <value>Copy this sequence. The copy starts switched off and without triggers.</value>
+    <comment>Tooltip on the copy mark of a sequence's row on a logic system's screen, for a sequence that a trigger starts.</comment>
+  </data>
+  <data name="Sprocket.System.CopyUnstarted" xml:space="preserve">
+    <value>Copy this sequence. The copy starts switched off.</value>
+    <comment>Tooltip on the copy mark of a sequence's row on a logic system's screen, for a sequence that no trigger starts.</comment>
+  </data>
+  <data name="Sprocket.System.OpenSequence" xml:space="preserve">
+    <value>Open **{name}** to see and change its steps.</value>
+    <comment>Tooltip on a sequence's row on a logic system's screen; pressing the row opens the sequence's screen. {name} is filled with the sequence's name.</comment>
+  </data>
+  <data name="Sprocket.Trigger.Delete" xml:space="preserve">
+    <value>Delete this trigger</value>
+    <comment>Tooltip on the bin at the end of a trigger's row on a logic system's screen, while the trigger can be deleted.</comment>
+  </data>
+  <data name="Sprocket.Trigger.Copy" xml:space="preserve">
+    <value>Duplicate this trigger.</value>
+    <comment>Tooltip on the copy mark near the end of a trigger's row on a logic system's screen, while the trigger can be copied.</comment>
+  </data>
+  <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
+    <value>Select the block that fires this trigger.</value>
+    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the block that starts it. Pressing the part changes the block.</comment>
+  </data>
+  <data name="Sprocket.Trigger.WhatAbout" xml:space="preserve">
+    <value>Select what the block must do to fire this trigger.</value>
+    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names what happens to the block to start it. Pressing the part changes it.</comment>
+  </data>
+  <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
+    <value>Select what this trigger does.</value>
+    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the sequence it starts or the action it does. Pressing the part changes it.</comment>
+  </data>
+  <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
+    <value>Change how often it should run.</value>
+    <comment>Tooltip on the length in an Every trigger's sentence on a logic system's screen, which says how often the trigger runs. Pressing it opens the length panel.</comment>
+  </data>
+  <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
+    <value>Select which blocks this trigger acts on.</value>
+    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the blocks the trigger's own action acts on. Pressing the part changes them.</comment>
+  </data>
+  <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
+    <value>This sequence's name.</value>
+    <comment>Tooltip on a sequence's name in the editor's heading bar on its own screen, where pressing the name renames the sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
+    <value>Perform an action on blocks or set one of their values.</value>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a task: an action on blocks, or setting one of their values.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StepAbout" xml:space="preserve">
+    <value>Add a step here.</value>
+    <comment>Tooltip on the plus button on a sequence's screen, at the end of the sequence or of a branch of an if, that opens the menu of steps to add.</comment>
+  </data>
+  <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
+    <value>Delay the next step by a set time.</value>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a wait of a set time.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Delete" xml:space="preserve">
+    <value>Delete this sequence</value>
+    <comment>Tooltip on the bin of a sequence's row on a logic system's screen, and on the bin in the editor's heading bar on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DeleteStep" xml:space="preserve">
+    <value>Delete this step</value>
+    <comment>Tooltip on the bin at the end of a step's row on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Sequence.CopyStep" xml:space="preserve">
+    <value>Duplicate this step.</value>
+    <comment>Tooltip on the copy mark of a step's row on a sequence's screen. An if is copied with the steps in it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.ActionAbout" xml:space="preserve">
+    <value>Select what this step does.</value>
+    <comment>Tooltip on the action named in a step's sentence on a sequence's screen; pressing it opens the picker to choose what the step does.</comment>
+  </data>
+  <data name="Sprocket.Sequence.BlocksAbout" xml:space="preserve">
+    <value>Select which blocks this step acts on.</value>
+    <comment>Tooltip on the blocks named in a step's sentence on a sequence's screen; pressing them opens the picker to choose which blocks the step acts on.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OptionsAbout" xml:space="preserve">
+    <value>Change the action's options.</value>
+    <comment>Tooltip on the options of an action, such as a piston's position and speed, in a step's sentence on a sequence's screen and in a trigger's sentence on a logic system's screen; pressing them opens the picker on the action's options.</comment>
+  </data>
+  <data name="Sprocket.Sequence.NewValueAbout" xml:space="preserve">
+    <value>Change the value to set.</value>
+    <comment>Tooltip on the new value in the sentence of a step or trigger that sets a value of blocks, on a sequence's screen and on a logic system's screen; pressing it opens the picker on that value.</comment>
+  </data>
+  <data name="Sprocket.Sequence.ComparedAbout" xml:space="preserve">
+    <value>Choose how it is compared.</value>
+    <comment>Tooltip on the comparison in an if's sentence on a sequence's screen, such as "is" or "is below"; pressing it opens a menu of the comparisons the value can be checked with.</comment>
+  </data>
+  <data name="Sprocket.Sequence.ReadAbout" xml:space="preserve">
+    <value>Choose how the blocks are read.</value>
+    <comment>Tooltip on how an if reads its blocks in its sentence on a sequence's screen, where it names several: "any", "all", "the sum of" or "the average of"; pressing it opens a menu of those.</comment>
+  </data>
+  <data name="Sprocket.Sequence.CheckedAbout" xml:space="preserve">
+    <value>Change the value to check for.</value>
+    <comment>Tooltip on the value an if checks blocks for, in the if's sentence on a sequence's screen; pressing it opens the picker on that value.</comment>
+  </data>
+  <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
+    <value>Change how long the delay is.</value>
+    <comment>Tooltip on a wait step's length in its sentence on a sequence's screen; pressing it opens the panel where the length is given.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DragStep" xml:space="preserve">
+    <value>Drag to move this step.</value>
+    <comment>Tooltip on the drag handle of a step's row on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Sequence.PauseStep" xml:space="preserve">
+    <value>Pause this step. The sequence skips it until it is resumed.</value>
+    <comment>Tooltip on the pause mark of a step's row on a sequence's screen, while the step is not paused; pressing it pauses the step.</comment>
+  </data>
+  <data name="Sprocket.Sequence.UnpauseStep" xml:space="preserve">
+    <value>Paused: the sequence skips this step. Press to resume it.</value>
+    <comment>Tooltip on the pause mark of a step's row on a sequence's screen, lit while the step is paused; pressing it resumes the step.</comment>
+  </data>
+  <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
+    <value>60 ticks is one second.</value>
+    <comment>Tooltip on the number box where a length of time is typed: in the panel for a wait's length on a sequence's screen, the panel for a timer trigger's interval on a logic system's screen, and the column choosing how often a new timer trigger fires.</comment>
+  </data>
+  <data name="Sprocket.Part.RunsAbout" xml:space="preserve">
+    <value>Select which sequence this step runs.</value>
+    <comment>Tooltip on the sequence a run step names, on a sequence's screen, such as Cycle Out in "run Cycle Out". Pressing it opens the list of sequences to choose another.</comment>
+  </data>
+  <data name="Sprocket.Part.StopsAbout" xml:space="preserve">
+    <value>Select which sequence this step stops.</value>
+    <comment>Tooltip on the sequence a stop step names, on a sequence's screen, such as Cycle Out in "stop Cycle Out". Pressing it opens the list of sequences to choose another.</comment>
+  </data>
+  <data name="Sprocket.Part.WatchedAbout" xml:space="preserve">
+    <value>Select which value this trigger watches.</value>
+    <comment>Tooltip on the value a trigger on a number watches, on a logic system's screen, such as power in "when any power of Battery &lt; 20". Pressing it opens the trigger's picker on the value.</comment>
+  </data>
+  <data name="Sprocket.Part.FillsAbout" xml:space="preserve">
+    <value>Select what fills this slot.</value>
+    <comment>Tooltip on a slot's blocks, and on the signal beside them, on an installation panel. Pressing either opens the picker the slot is filled with.</comment>
+  </data>
+  <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
+    <value>Blocks this step acts on:</value>
+    <comment>First line of the tooltip on the blocks of a step or an if on a sequence's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
+  </data>
+  <data name="Sprocket.Part.TriggerBlocks" xml:space="preserve">
+    <value>Blocks that fire this trigger:</value>
+    <comment>First line of the tooltip on the blocks a trigger watches, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
+  </data>
+  <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
+    <value>Blocks this trigger acts on:</value>
+    <comment>First line of the tooltip on the blocks a trigger's own action acts on, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
+  </data>
+  <data name="Sprocket.Part.FromSlot" xml:space="preserve">
+    <value>From the slot {slots}.</value>
+    <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks: the slot of the logic system the blocks fill. {slots} is the slot's name, in bold.</comment>
+  </data>
+  <data name="Sprocket.Part.SlotEmpty" xml:space="preserve">
+    <value>Nothing fills it in this installation.</value>
+    <comment>PLACEHOLDER, to be written. In the tooltip on the slot a step or a trigger names, under the line naming the slot, where the installation shown has no block in it.</comment>
+  </data>
+  <data name="Sprocket.Part.FromSlots" xml:space="preserve">
+    <value>From the slots {slots}.</value>
+    <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks, where they come from more than one slot. {slots} is the slots' names, in bold, separated by commas.</comment>
+  </data>
+  <data name="Sprocket.Chrome.DoneAbout" xml:space="preserve">
+    <value>Keep any changes and return.</value>
+    <comment>Tooltip on the Done button in the editor's heading bar on a logic system's screen, a sequence's screen, the installation panel and a blueprint slot's screen, where every change is kept as soon as it is made.</comment>
+  </data>
+  <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
+    <value>Select something in every column first.</value>
+    <comment>Tooltip on the Done button in the editor's heading bar in the picker, and on the page choosing how often a timer trigger fires, while it cannot be pressed yet.</comment>
+  </data>
+  <data name="Sprocket.Pick.DoneAbout" xml:space="preserve">
+    <value>Use what is selected and return.</value>
+    <comment>Tooltip on the Done button in the editor's heading bar in the picker, and on the page choosing how often a timer trigger fires, once it can be pressed; pressing it uses what is chosen and goes back.</comment>
+  </data>
+  <data name="Sprocket.Pick.Back" xml:space="preserve">
+    <value>Back</value>
+    <comment>Tooltip on the narrow folded column at the left edge of the picker, which turns back to the picker's page before.</comment>
+  </data>
+  <data name="Sprocket.Pick.Next" xml:space="preserve">
+    <value>Next</value>
+    <comment>Tooltip on the narrow folded column at the right edge of the picker, which turns on to the picker's page after.</comment>
+  </data>
+  <data name="Sprocket.Pick.ClearTyped" xml:space="preserve">
+    <value>Clear what is typed</value>
+    <comment>Tooltip on the cross at the end of a search box in the picker, which empties the box.</comment>
+  </data>
+  <data name="Sprocket.Pick.EveryKind" xml:space="preserve">
+    <value>Show every kind again</value>
+    <comment>Tooltip on the cross beside the kind of block that the picker's column of blocks is narrowed to; pressing it shows every kind again.</comment>
+  </data>
+  <data name="Sprocket.Pick.ShowHidden" xml:space="preserve">
+    <value>Show blocks hidden from toolbars</value>
+    <comment>Tooltip on the closed eye at the end of the heading of the picker's column of blocks; pressing it also lists the blocks set not to show in the toolbar config.</comment>
+  </data>
+  <data name="Sprocket.Pick.HideHidden" xml:space="preserve">
+    <value>Hide blocks hidden from toolbars</value>
+    <comment>Tooltip on the open eye at the end of the heading of the picker's column of blocks; pressing it takes the blocks set not to show in the toolbar config out of the list again.</comment>
+  </data>
+  <data name="Sprocket.Pick.KindAbout" xml:space="preserve">
+    <value>Show only one kind of block.</value>
+    <comment>Tooltip on the line in the picker's column of blocks that opens the list of kinds of block.</comment>
+  </data>
+  <data name="Sprocket.Member.Waits" xml:space="preserve">
+    <value>This takes time to finish. The sequence can wait for it, or go straight on while it runs.</value>
+    <comment>Tooltip on an action marked with the clock, one that takes time to finish: on its row in the picker and on its part of a sentence. Also the tooltip on a step's sentence on a sequence's screen when the step starts such an action and goes straight on.</comment>
+  </data>
+  <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
+    <value>Start the sequence selected below</value>
+    <comment>Tooltip on the choice at the top of the picker's column choosing what a trigger does that makes the trigger start the sequence chosen in that column.</comment>
+  </data>
+  <data name="Sprocket.Pick.StopAbout" xml:space="preserve">
+    <value>Stop the sequence selected below</value>
+    <comment>Tooltip on the choice at the top of the picker's column choosing what a trigger does that makes the trigger stop the sequence chosen in that column.</comment>
+  </data>
+  <data name="Sprocket.Pick.SingleActionAbout" xml:space="preserve">
+    <value>Perform a single task on some blocks.</value>
+    <comment>Tooltip on the choice in the picker's column choosing what a trigger does that makes the trigger do a single task of its own on some blocks, without a sequence.</comment>
+  </data>
+  <data name="Sprocket.Pick.NewSequenceAbout" xml:space="preserve">
+    <value>Make a new sequence for this trigger to start.</value>
+    <comment>Tooltip on the choice in the picker's column choosing what a trigger does that makes a new sequence for the trigger to start.</comment>
+  </data>
+  <data name="Sprocket.Pick.NewStateAbout" xml:space="preserve">
+    <value>Make a new state and use it here.</value>
+    <comment>Tooltip on the A new state choice at the end of the column of states in the picker that sets, tests or watches one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateFixedValueAbout" xml:space="preserve">
+    <value>Use one of these values.</value>
+    <comment>Said where the pointer rests on the label before the buttons for the state's own values, in the selector that sets, tests or watches one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.State.TypeAddAbout" xml:space="preserve">
+    <value>Adds a type: a named set of choices a state can hold.</value>
+    <comment>Tooltip on the + type button under the types on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.ChoiceAddAbout" xml:space="preserve">
+    <value>Adds a choice to the type.</value>
+    <comment>Tooltip on the + choice button after a type's choices on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.StateAddAbout" xml:space="preserve">
+    <value>Adds a state: a value each installation keeps between runs.</value>
+    <comment>Tooltip on the + state button under the states on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.TypeRenameAbout" xml:space="preserve">
+    <value>Renames the type, everywhere it is used.</value>
+    <comment>Tooltip on a type's name on a logic system's State tab. Pressing it lets the name be typed.</comment>
+  </data>
+  <data name="Sprocket.State.ChoiceAbout" xml:space="preserve">
+    <value>Renames or removes the choice.</value>
+    <comment>Tooltip on one of a type's choices on a logic system's State tab. Pressing it opens a menu offering to rename or remove it.</comment>
+  </data>
+  <data name="Sprocket.State.StateRenameAbout" xml:space="preserve">
+    <value>Renames the state, everywhere it is used.</value>
+    <comment>Tooltip on a state's name on a logic system's State tab. Pressing it lets the name be typed.</comment>
+  </data>
+  <data name="Sprocket.State.TypeRemove" xml:space="preserve">
+    <value>Removes the type.</value>
+    <comment>Tooltip on the bin beside a type on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.TypeKept" xml:space="preserve">
+    <value>A state holds this type, so it cannot be removed.</value>
+    <comment>Tooltip on the dimmed bin beside a type on a logic system's State tab, where a state holds one of its choices.</comment>
+  </data>
+  <data name="Sprocket.State.StateRemove" xml:space="preserve">
+    <value>Removes the state.</value>
+    <comment>Tooltip on the bin beside a state on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.StateKept" xml:space="preserve">
+    <value>A step or trigger uses this state, so it cannot be removed.</value>
+    <comment>Tooltip on the dimmed bin beside a state on a logic system's State tab, where a step sets it or something tests or watches it.</comment>
+  </data>
+  <data name="Sprocket.State.TypeDrag" xml:space="preserve">
+    <value>Drag to move the type.</value>
+    <comment>Tooltip on the grip beside a type on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.StateDrag" xml:space="preserve">
+    <value>Drag to move the state.</value>
+    <comment>Tooltip on the grip beside a state on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.TypesAbout" xml:space="preserve">
+    <value>A type is a list of choices. A state picks its value from the type it uses.</value>
+    <comment>Said where the pointer rests on the heading over the types on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.StatesAbout" xml:space="preserve">
+    <value>What this logic system remembers. Each installation keeps its own values.</value>
+    <comment>Said where the pointer rests on the heading over the states on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.CanBeAbout" xml:space="preserve">
+    <value>A state of this type will be one of these values.</value>
+    <comment>Said where the pointer rests on the words before a type's choices, on the State tab and in the picker that sets, tests or watches a state.</comment>
+  </data>
+  <data name="Sprocket.State.HoldsAbout" xml:space="preserve">
+    <value>Change this state's type. Its starting value becomes the first value of the new type.</value>
+    <comment>Said where the pointer rests on what a state holds, after its name on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.State.StartsAbout" xml:space="preserve">
+    <value>The value the state has when the logic system starts.</value>
+    <comment>Said where the pointer rests on the words before a state's starting value, on the State tab and in the picker that sets, tests or watches a state.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateNameAbout" xml:space="preserve">
+    <value>The name the new state will go by. Every slot, type and state in a logic system needs its own name.</value>
+    <comment>Said where the pointer rests on the name of a new state in the picker that sets, tests or watches a state.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
+    <value>The type the new state uses, which decides the values it can have.</value>
+    <comment>Said where the pointer rests on the type of a new state in the picker that sets, tests or watches a state.</comment>
+  </data>
+  <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
+    <value>The name of the new type. Every slot, type and state in a logic system needs its own name.</value>
+    <comment>Said where the pointer rests on the name of a new type in the picker that sets, tests or watches a state.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateSetToAbout" xml:space="preserve">
+    <value>The value this step sets the state to when it runs.</value>
+    <comment>Said where the pointer rests on the heading over the value a set state step gives, in the picker that sets one.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateCheckAbout" xml:space="preserve">
+    <value>Check whether the state is, or is not, a certain value.</value>
+    <comment>Said where the pointer rests on the heading over how an if or an otherwise if compares a state, in the picker that tests one.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateWatchAbout" xml:space="preserve">
+    <value>The trigger fires when the state becomes this value.</value>
+    <comment>Said where the pointer rests on the heading over the value a when trigger waits for, in the picker that watches a state.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">
+    <value>Use whatever value another state has when this runs.</value>
+    <comment>Said where the pointer rests on the other states whose value can be taken, in the picker that sets, tests or watches a state.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotMatched" xml:space="preserve">
+    <value>These slots are already made, so this names them as they are.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the picker's heading while it shows, in italics, the names of slots the logic system already has: either the blocks picked fill them exactly, or they were picked by name with the Existing slot source. These names cannot be changed here.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
+    <value>The slot the blocks picked change. It keeps its name.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the picker's heading while it shows the name of the slot a step or a trigger names, which the blocks picked will change because no slot holds them already. Where other steps or triggers use the slot too, Done asks whether to change it for all of them.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
+    <value>The name of the new slot the blocks picked make. Press to rename it.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the picker's heading while it shows the name of the slot the blocks picked will make, which no slot the logic system has fills exactly. Pressing it renames the slot before it is made; the name starts as the next numbered slot name.</comment>
+  </data>
+  <data name="Sprocket.State.KindKept" xml:space="preserve">
+    <value>The type can't be changed while a step, if or trigger uses this state.</value>
+    <comment>Said where the pointer rests on what a state holds, on its row on a logic system's State tab, while a step or a trigger uses the state, so its type cannot be changed.</comment>
+  </data>
+  <data name="Sprocket.State.NowAbout" xml:space="preserve">
+    <value>The value this state has right now in the installation shown.</value>
+    <comment>Tooltip on what the installation shown holds in a state, on its row on a logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
+    <value>This installation's name.</value>
+    <comment>Tooltip on the installation's name in the editor's heading bar on the installation panel. Pressing the name renames the installation.</comment>
+  </data>
+  <data name="Sprocket.Heading.LogicSystem" xml:space="preserve">
+    <value>Logic system</value>
+    <comment>Tooltip on the logic-system mark that leads a screen's heading, saying what kind of thing the name after it is. Shown on a logic system's screen and on the installation panel, where the heading names the logic system the installation is of.</comment>
+  </data>
+  <data name="Sprocket.Heading.Installation" xml:space="preserve">
+    <value>Installation</value>
+    <comment>Tooltip on the installation mark that leads the installation panel's heading, saying the name after it is an installation of a logic system.</comment>
+  </data>
+  <data name="Sprocket.Heading.Sequence" xml:space="preserve">
+    <value>Sequence</value>
+    <comment>Tooltip on the sequence mark that leads a sequence's screen heading, saying the name after it is a sequence.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.NameBoxAbout" xml:space="preserve">
+    <value>The slot's name, as everyone filling in this logic system sees it.</value>
+    <comment>Tooltip on the slot's name in the editor's heading bar on a slot's page. Pressing the name renames the slot.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.RequiredAbout" xml:space="preserve">
+    <value>Set whether an installation of this logic system may leave this slot empty.</value>
+    <comment>Tooltip on the required/optional switch on a slot's page.</comment>
+  </data>
+  <data name="Sprocket.Writing.OpenAbout" xml:space="preserve">
+    <value>Write the whole text on a page of its own.</value>
+    <comment>Tooltip on the Edit button at the right end of a step's field for text written over several lines.</comment>
+  </data>
+  <data name="Sprocket.Writing.PreviewAbout" xml:space="preserve">
+    <value>Show the text as others will see it.</value>
+    <comment>The tooltip on the button by the description box on a logic system's screen and on a slot's screen that shows the text as it will read.</comment>
+  </data>
+  <data name="Sprocket.Color.Hue" xml:space="preserve">
+    <value>Hue</value>
+    <comment>Tooltip on the H slider of the color picker in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.Saturation" xml:space="preserve">
+    <value>Saturation</value>
+    <comment>Tooltip on the S slider of the color picker in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.Brightness" xml:space="preserve">
+    <value>Brightness</value>
+    <comment>Tooltip on the V slider of the color picker in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.Red" xml:space="preserve">
+    <value>Red</value>
+    <comment>Tooltip on the R slider of the color picker's RGB tab in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.Green" xml:space="preserve">
+    <value>Green</value>
+    <comment>Tooltip on the G slider of the color picker's RGB tab in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.Blue" xml:space="preserve">
+    <value>Blue</value>
+    <comment>Tooltip on the B slider of the color picker's RGB tab in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.PlaneAbout" xml:space="preserve">
+    <value>Saturation across, brightness up.</value>
+    <comment>Tooltip on the square of the color picker where saturation and brightness are chosen together.</comment>
+  </data>
+  <data name="Sprocket.Color.CodeAbout" xml:space="preserve">
+    <value>Enter a color as #RRGGBB, or #RRGGBBAA to include its opacity.</value>
+    <comment>Tooltip on the box under the sliders of the color picker, in the picker's values column, where a color code is typed.</comment>
+  </data>
+  <data name="Sprocket.System.TurnOffToEdit" xml:space="preserve">
+    <value>The system must be turned off in order to make changes safely.</value>
+    <comment>Tooltip on a part or button that cannot be pressed while its logic system is switched on: the copy marks and bins of trigger and sequence rows and the slot rows on a logic system's screen, and the parts of steps on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
+    <value>Run this sequence manually now</value>
+    <comment>Tooltip on the play button in the editor's heading bar on a sequence's screen, and on the play button of each sequence's row on a logic system's screen, while the sequence is not running; pressing it runs the sequence by hand.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StopNow" xml:space="preserve">
+    <value>Stop this sequence where it is</value>
+    <comment>Tooltip on the stop button in the editor's heading bar on a sequence's screen, and on the stop button of each sequence's row on a logic system's screen, while the sequence is running; pressing it stops the sequence and leaves every block as it is.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Events" xml:space="preserve">
+    <value>*The game keeps this block's events from mods. Set this in the terminal.*</value>
+    <comment>Tooltip on a dimmed member in the picker that cannot be chosen, because the game keeps this block's events from mods.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Camera" xml:space="preserve">
+    <value>*The automation can't select a camera yet. Set it in the terminal.*</value>
+    <comment>Tooltip on a dimmed member in the picker that cannot be chosen yet, one that chooses a camera.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Rotor" xml:space="preserve">
+    <value>*The automation can't select a rotor yet. Set it in the terminal.*</value>
+    <comment>Tooltip on a dimmed member in the picker that cannot be chosen yet, one that chooses a rotor.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Ammo" xml:space="preserve">
+    <value>*The automation can't select ammunition yet. Set it in the terminal.*</value>
+    <comment>Tooltip on a dimmed member in the picker that cannot be chosen yet, one that chooses ammunition.</comment>
+  </data>
+  <data name="Sprocket.Withheld.Unread" xml:space="preserve">
+    <value>*The game doesn't hand over this value's list of choices, so the automation can't set it. Set it in the terminal.*</value>
+    <comment>Tooltip on a dimmed member in the picker that cannot be chosen yet, because its values cannot be read yet.</comment>
+  </data>
+  <data name="Sprocket.Wait.Shorter" xml:space="preserve">
+    <value>Shorter</value>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the tooltip on the minus button left of the number, which makes the length shorter.</comment>
+  </data>
+  <data name="Sprocket.Wait.Longer" xml:space="preserve">
+    <value>Longer</value>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the tooltip on the plus button right of the number, which makes the length longer.</comment>
+  </data>
+  <data name="Sprocket.Wait.TickAbout" xml:space="preserve">
+    <value>A tick is the smallest step of time, sixty to a second.</value>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the tooltip on the option that gives the length in ticks.</comment>
+  </data>
+  <data name="Sprocket.Change.Describe" xml:space="preserve">
+    <value>changing the description</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to the logic system's description, written on its screen.</comment>
+  </data>
+  <data name="Sprocket.Change.PickButton" xml:space="preserve">
+    <value>selecting a button</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is picking the toolbar button a trigger answers to.</comment>
+  </data>
+  <data name="Sprocket.Change.Step" xml:space="preserve">
+    <value>changing a step</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a step on a sequence's screen: what it points at and does, which sequence it runs or stops, or what an if tests.</comment>
+  </data>
+  <data name="Sprocket.Change.When" xml:space="preserve">
+    <value>changing when it runs</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to what starts a trigger: its blocks and the moment it starts on, picked in the picker.</comment>
+  </data>
+  <data name="Sprocket.Change.ForgetTrigger" xml:space="preserve">
+    <value>deleting a trigger</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a trigger.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveStep" xml:space="preserve">
+    <value>moving a step</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is moving a step to another place in a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.Target" xml:space="preserve">
+    <value>changing what it does</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to what a trigger does: the sequence it runs or stops, or an action of its own.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveStep" xml:space="preserve">
+    <value>deleting a step</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a step from a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.Rename" xml:space="preserve">
+    <value>renaming</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameSlot" xml:space="preserve">
+    <value>renaming a slot</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a slot on its slot's screen.</comment>
+  </data>
+  <data name="Sprocket.Change.Trigger" xml:space="preserve">
+    <value>changing the trigger</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to both what starts a trigger and what it does, made with one pick.</comment>
+  </data>
+  <data name="Sprocket.Change.Cadence" xml:space="preserve">
+    <value>changing how often it runs</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how often a repeating trigger comes round.</comment>
+  </data>
+  <data name="Sprocket.Change.SlotType" xml:space="preserve">
+    <value>changing a slot's type</value>
+    <comment>PLACEHOLDER, to be written. On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is changing the type of block a slot takes, on its slot's screen.</comment>
+  </data>
+  <data name="Sprocket.Change.Optional" xml:space="preserve">
+    <value>making a slot optional</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a slot optional on its slot's screen, so an installation may leave it empty.</comment>
+  </data>
+  <data name="Sprocket.Change.Required" xml:space="preserve">
+    <value>making a slot required</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a slot required on its slot's screen, so every installation has to fill it.</comment>
+  </data>
+  <data name="Sprocket.Change.Wait" xml:space="preserve">
+    <value>changing a delay</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how long a wait step on a sequence's screen waits.</comment>
+  </data>
+  <data name="Sprocket.Change.PauseStep" xml:space="preserve">
+    <value>switching a step off</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is switching a step off on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Change.ResumeStep" xml:space="preserve">
+    <value>switching a step on</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is switching a step back on on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Change.TakeOver" xml:space="preserve">
+    <value>taking a button over</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is picking a toolbar button that another trigger or installation already used, which takes the button from it.</comment>
+  </data>
+  <data name="Sprocket.Change.AddStep" xml:space="preserve">
+    <value>adding a step</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a step to a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.AddWait" xml:space="preserve">
+    <value>adding a delay</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a wait step to a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.ShortenSlot" xml:space="preserve">
+    <value>changing a slot's short name</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a signal slot's short name, written on its slot's screen.</comment>
+  </data>
+  <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
+    <value>The label shown on each button and toolbar slot that sends this signal. Left empty, they show the slot's name.</value>
+    <comment>Tooltip on the short name box on a signal slot's screen, under the Short name heading.</comment>
+  </data>
+  <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
+    <value>describing a slot</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a slot's description, written on its slot's screen.</comment>
+  </data>
+  <data name="Sprocket.Change.AddIf" xml:space="preserve">
+    <value>adding an if</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding an if to a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.AddBranch" xml:space="preserve">
+    <value>adding a branch</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding an otherwise if or an otherwise to an if in a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveIf" xml:space="preserve">
+    <value>deleting an if</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a whole if from a sequence, with the steps in it.</comment>
+  </data>
+  <data name="Sprocket.Change.Unwrap" xml:space="preserve">
+    <value>taking an if away</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is taking an if out of a sequence while keeping the steps that were in it.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveBranch" xml:space="preserve">
+    <value>deleting a branch</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting an otherwise if or an otherwise branch from an if in a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveBranch" xml:space="preserve">
+    <value>moving a branch</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is moving a branch of an if to another place in its chain.</comment>
+  </data>
+  <data name="Sprocket.Change.DeleteSequence" xml:space="preserve">
+    <value>deleting a sequence</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a sequence, with the triggers that run it.</comment>
+  </data>
+  <data name="Sprocket.Change.NewSequence" xml:space="preserve">
+    <value>making a sequence</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a new sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.CopySequence" xml:space="preserve">
+    <value>copying a sequence</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameSystem" xml:space="preserve">
+    <value>renaming the logic system</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming the logic system.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameInstallation" xml:space="preserve">
+    <value>renaming an installation</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming an installation on its installation panel.</comment>
+  </data>
+  <data name="Sprocket.Change.FillSlot" xml:space="preserve">
+    <value>filling a slot</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is filling a slot of an installation with blocks.</comment>
+  </data>
+  <data name="Sprocket.Change.AddTrigger" xml:space="preserve">
+    <value>adding a trigger</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a trigger.</comment>
+  </data>
+  <data name="Sprocket.Change.PutOnSystem" xml:space="preserve">
+    <value>adding a logic system from the library</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is putting a blueprint or a backup from the library on the construct as a logic system.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyBlueprint" xml:space="preserve">
+    <value>copying a blueprint</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is putting a copy of a blueprint on the construct from the library, as a separate logic system.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameConstruct" xml:space="preserve">
+    <value>renaming the construct</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is renaming the construct.</comment>
+  </data>
+  <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
+    <value>deleting a logic system</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is deleting a logic system that has no blueprint in the library.</comment>
+  </data>
+  <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
+    <value>updating a logic system from the library</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is replacing a logic system with its newer blueprint from the library.</comment>
+  </data>
+  <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
+    <value>choosing a version of a logic system</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is keeping one of two versions of a logic system that met when two constructs joined.</comment>
+  </data>
+  <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
+    <value>resetting a logic system to its blueprint</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is resetting a logic system to its blueprint in the library, dropping its changes since.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyStep" xml:space="preserve">
+    <value>duplicating a step</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a step in a sequence.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyTrigger" xml:space="preserve">
+    <value>duplicating a trigger</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a trigger.</comment>
+  </data>
+  <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
+    <value>taking a logic system off</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is taking a logic system whose blueprint is in the library off the construct.</comment>
+  </data>
+  <data name="Sprocket.Change.DeleteInstallation" xml:space="preserve">
+    <value>deleting an installation</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is deleting an installation of a logic system.</comment>
+  </data>
+  <data name="Sprocket.Change.AddSystem" xml:space="preserve">
+    <value>adding a logic system</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is making a new logic system.</comment>
+  </data>
+  <data name="Sprocket.Change.AddInstallation" xml:space="preserve">
+    <value>adding an installation</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is adding another installation to a logic system.</comment>
+  </data>
+  <data name="Sprocket.Library.ForgetBackup" xml:space="preserve">
+    <value>Forget this backup</value>
+    <comment>In the library, the tooltip on the bin at the end of a backup's row in the section of backups.</comment>
+  </data>
+  <data name="Sprocket.Library.Forget" xml:space="preserve">
+    <value>Delete it from storage</value>
+    <comment>In the library, the tooltip on the bin at the end of a blueprint's row in the section of blueprints kept in storage.</comment>
+  </data>
+  <data name="Sprocket.Library.PutOn" xml:space="preserve">
+    <value>Add this blueprint to this construct as a logic system, with its first installation.</value>
+    <comment>In the library, the tooltip on the button in the details of the chosen blueprint that puts it on the construct the editor was opened on.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOff" xml:space="preserve">
+    <value>Take this logic system and its installations off this construct.</value>
+    <comment>On the home screen, the tooltip on the minus in a logic system's heading row, shown where the logic system's blueprint is in the library.</comment>
+  </data>
+  <data name="Sprocket.Library.Same" xml:space="preserve">
+    <value>The blueprint in the library is the same as this logic system.</value>
+    <comment>In the library, the tooltip on the button in the chosen blueprint's details that makes or updates its blueprint, while the button cannot be pressed because the logic system and its blueprint in the library are the same.</comment>
+  </data>
+  <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
+    <value>A logic system needs at least one installation.</value>
+    <comment>Tooltip on the dimmed bin of an installation's row on the home screen, shown when it is the logic system's only installation and so cannot be deleted.</comment>
+  </data>
+  <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
+    <value>Add a copy of this blueprint to this construct as a separate logic system.</value>
+    <comment>In the library, the tooltip on the button in the chosen blueprint's details that puts a copy of it on the construct as a separate logic system.</comment>
+  </data>
+  <data name="Sprocket.Library.Deletes" xml:space="preserve">
+    <value>Delete this logic system, with its installations. It has no blueprint in the library, so this is its only copy.</value>
+    <comment>On the home screen, the tooltip on the bin in a logic system's heading row, shown where the logic system has no blueprint in the library.</comment>
+  </data>
+  <data name="Sprocket.Library.ResetAbout" xml:space="preserve">
+    <value>Reset this logic system to its blueprint in the library. Installations keep their blocks.</value>
+    <comment>In the library, the tooltip on the button in the chosen logic system's details that puts its blueprint back in its place, shown while it has changed since that blueprint.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
+    <value>Start another sequence.</value>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a step starting another sequence.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StopAbout" xml:space="preserve">
+    <value>Stop another sequence where it is.</value>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a step stopping another sequence where it is.</comment>
+  </data>
+  <data name="Sprocket.Sequence.IfAbout" xml:space="preserve">
+    <value>Run the steps below only if a condition passes.</value>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds an if.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
+    <value>Check another condition when none above passed.</value>
+    <comment>Tooltip on the choice in the add-branch menu on the row closing an if, on a sequence's screen, that adds an otherwise if branch.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
+    <value>Run this when none of the conditions above pass.</value>
+    <comment>Tooltip on the choice in the add-branch menu on the row closing an if, on a sequence's screen, that adds an otherwise branch.</comment>
+  </data>
+  <data name="Sprocket.Sequence.BranchAbout" xml:space="preserve">
+    <value>Add a branch to this if.</value>
+    <comment>Tooltip on the plus button on the row closing an if on a sequence's screen, which opens the menu of branches to add to the if.</comment>
+  </data>
+  <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
+    <value>Add a condition to this branch.</value>
+    <comment>Tooltip on the button on an if's otherwise line on a sequence's screen that gives the branch something to check, which makes it an otherwise if.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StateAbout" xml:space="preserve">
+    <value>Select the condition that must pass.</value>
+    <comment>Tooltip on the part of an if's sentence on a sequence's screen that says what it checks of its blocks, such as "is closed"; pressing it chooses another check.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SetStateAbout" xml:space="preserve">
+    <value>Give one of this logic system's states a new value.</value>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a step setting one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SystemStateAbout" xml:space="preserve">
+    <value>Select another state, or another value for it.</value>
+    <comment>Tooltip on the part of a step's sentence on a sequence's screen that names one of the logic system's states; pressing it opens the picker the step was made with.</comment>
+  </data>
+  <data name="Sprocket.Admin.ThisWorldAbout" xml:space="preserve">
+    <value>Settings for this world only.</value>
+    <comment>In the admin settings, the tooltip on the tab for the settings of the world being played.</comment>
+  </data>
+  <data name="Sprocket.Admin.EveryWorldAbout" xml:space="preserve">
+    <value>The defaults, used by any world that does not set a value itself. On a dedicated server, they cover every world the server hosts. In single player or a game you host, they cover all your worlds.</value>
+    <comment>In the admin settings, the tooltip on the tab for the defaults every world follows.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultAbout" xml:space="preserve">
+    <value>Use the value set under Every world, and follow it if it changes later.</value>
+    <comment>In the admin settings, the tooltip on the first choice in each setting's list on the tab for this world, the choice that follows the value set on the tab for every world. Every world in the text is that tab's name.</comment>
+  </data>
+  <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
+    <value>Wait until every ![](mark:awaited) task started above has finished.</value>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a row waiting for every task started before it. ![](mark:awaited) draws the mark a task waited for carries.</comment>
+  </data>
+  <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
+    <value>The ![](mark:awaited) tasks started above, back to the last wait for pending tasks, run together. The sequence waits here until every task has finished.</value>
+    <comment>Tooltip on the words of a row waiting for every task started before it, on a sequence's screen. The row reads "wait for pending tasks", which stays English; ![](mark:awaited) draws the mark a task waited for carries.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
+    <value>moving a slot</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a slot to another place on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveCategory" xml:space="preserve">
+    <value>moving a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a category of slots, with its slots, to another place on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.AddCategory" xml:space="preserve">
+    <value>adding a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a category of slots on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameCategory" xml:space="preserve">
+    <value>renaming a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a category of slots on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
+    <value>removing a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a category of slots on the logic system's Installation panel tab, which leaves its slots under no category.</comment>
+  </data>
+  <data name="Sprocket.Change.AddType" xml:space="preserve">
+    <value>adding a type</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a type, a named set of choices, to the logic system.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameType" xml:space="preserve">
+    <value>renaming a type</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming one of the logic system's types.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveType" xml:space="preserve">
+    <value>removing a type</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing one of the logic system's types.</comment>
+  </data>
+  <data name="Sprocket.Change.AddChoice" xml:space="preserve">
+    <value>adding a choice</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a choice to one of the logic system's types.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameChoice" xml:space="preserve">
+    <value>renaming a choice</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a choice of one of the logic system's types.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveChoice" xml:space="preserve">
+    <value>removing a choice</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a choice from one of the logic system's types.</comment>
+  </data>
+  <data name="Sprocket.Change.AddState" xml:space="preserve">
+    <value>adding a state</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a state, a value each installation keeps, to the logic system.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameState" xml:space="preserve">
+    <value>renaming a state</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveState" xml:space="preserve">
+    <value>removing a state</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveType" xml:space="preserve">
+    <value>moving a type</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a type to another place on the logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveState" xml:space="preserve">
+    <value>moving a state</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a state to another place on the logic system's State tab.</comment>
+  </data>
+  <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
+    <value>changing a starting value</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is changing the value one of the logic system's states starts at.</comment>
+  </data>
+  <data name="Sprocket.Category.AddAbout" xml:space="preserve">
+    <value>Adds a category, which slots can be dragged into to group them on the installation panel.</value>
+    <comment>Tooltip on the + Category button under the slots on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
+    <value>Renames the category.</value>
+    <comment>Tooltip on a category's name, a heading among the slots on a logic system's Installation panel tab. Pressing it lets the name be typed.</comment>
+  </data>
+  <data name="Sprocket.Category.Remove" xml:space="preserve">
+    <value>Removes the category. Its slots stay, under no category.</value>
+    <comment>Tooltip on the bin beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Category.Drag" xml:space="preserve">
+    <value>Drag to move the category with its slots.</value>
+    <comment>Tooltip on the grip beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Slot.Drag" xml:space="preserve">
+    <value>Drag to move the slot, into a category or out of one.</value>
+    <comment>Tooltip on the grip beside a slot's name on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
+    <value>The type of block this slot takes. Press to choose another.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the type of block a block slot takes, under the Expects heading on the slot's page. Pressing it opens a picker listing the types the slot can take, wider or narrower, down to one kind of block; only those offering everything the slot's steps and triggers do with it.</comment>
+  </data>
+  <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
+    <value>Show the guide to formatting text.</value>
+    <comment>The tooltip on the button by the description box on a logic system's screen and on a slot's screen that opens the guide to formatting text.</comment>
+  </data>
+  <data name="Sprocket.Tip.KeepHint" xml:space="preserve">
+    <value>Hold Alt to keep open</value>
+    <comment>The last line of every tip while the admin's tip trial asks for Alt to keep a tip open. Placeholder until the texts are written.</comment>
+  </data>
+</root>

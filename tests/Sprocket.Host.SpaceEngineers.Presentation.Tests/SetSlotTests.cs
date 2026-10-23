@@ -248,7 +248,7 @@ public class SetSlotTests
         var row = Assert.Single(editor.SystemSlots(), r => r.Mark == Symbols.Block);
         Assert.Null(row.Opens);
         Assert.Null(row.Fills);
-        Assert.Equal(editor.Texts.SystemTurnOffToEdit, row.OpensAbout);
+        Assert.Equal(editor.Texts.Codex.SystemTurnOffToEdit, row.OpensAbout);
 
         var page = (Features.LogicSystems.LogicSystemPage)editor.Current!;
         Assert.False(page.About.IsVisible, "the description box was offered while the logic system may run");

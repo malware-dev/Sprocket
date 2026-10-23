@@ -80,11 +80,24 @@ public class RunLookTests
         Assert.Equal(MyFontEnum.White, Word(easel, "plain").Font);
     }
 
-    /// <summary>A link is underlined in its own color, under its own words: the line runs across the space inside it and stops at its last word.</summary>
+    /// <summary>A link stands out by its color alone unless its style asks for a line under it.</summary>
+    [Fact]
+    public void ALinkHasNoLineUnderItUnlessAsked()
+    {
+        var easel = Laid("Pick a [logic system](logic-system) now", text => text.LinkColor = Blue);
+
+        Assert.DoesNotContain(easel.Sprites, sprite => sprite.Color == Blue);
+    }
+
+    /// <summary>A link asked to be underlined is, in its own color, under its own words: the line runs across the space inside it and stops at its last word.</summary>
     [Fact]
     public void ALinkIsUnderlinedAcrossItsWordsOnly()
     {
-        var easel = Laid("Pick a [logic system](logic-system) now", text => text.LinkColor = Blue);
+        var easel = Laid("Pick a [logic system](logic-system) now", text =>
+        {
+            text.LinkColor = Blue;
+            text.LinkUnderline = 1f;
+        });
 
         var link = Word(easel, "logic system");
         var line = Assert.Single(easel.Sprites, sprite => sprite.Color == Blue);

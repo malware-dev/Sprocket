@@ -219,11 +219,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public static string Switching(Texts texts, bool governsAll, bool isOn)
         {
             if (!governsAll)
-                return isOn ? texts.RowSwitchOff : texts.RowSwitchOn;
+                return isOn ? texts.Codex.RowSwitchOff : texts.Codex.RowSwitchOn;
 
             return isOn
-                ? texts.RowSwitchSystemOff
-                : texts.RowSwitchSystemOn;
+                ? texts.Codex.RowSwitchSystemOff
+                : texts.Codex.RowSwitchSystemOn;
         }
 
         /// <summary>Shows what it has been told, saying its fixed words in <paramref name="texts" />.</summary>
@@ -269,10 +269,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     : Palette.Dim;
 
             _light.Tip = Tip.For(_light.Tip, wrong
-                ? texts.RowBroken
+                ? texts.Codex.RowBroken
                 : JustRan
-                    ? texts.RowRan
-                    : texts.RowIdle);
+                    ? texts.Codex.RowRan
+                    : texts.Codex.RowIdle);
 
             _status.Text = Status;
             _lastRun.Text = LastRun;

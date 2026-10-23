@@ -22,11 +22,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             switch (why)
             {
-                case UnreadyReason.Events: return texts.WithheldEvents;
-                case UnreadyReason.Camera: return texts.WithheldCamera;
-                case UnreadyReason.Rotor: return texts.WithheldRotor;
-                case UnreadyReason.Ammo: return texts.WithheldAmmo;
-                case UnreadyReason.Unread: return texts.WithheldUnread;
+                case UnreadyReason.Events: return texts.Codex.WithheldEvents;
+                case UnreadyReason.Camera: return texts.Codex.WithheldCamera;
+                case UnreadyReason.Rotor: return texts.Codex.WithheldRotor;
+                case UnreadyReason.Ammo: return texts.Codex.WithheldAmmo;
+                case UnreadyReason.Unread: return texts.Codex.WithheldUnread;
                 default: return "";
             }
         }

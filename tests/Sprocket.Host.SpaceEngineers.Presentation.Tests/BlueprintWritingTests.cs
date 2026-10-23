@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -251,9 +250,9 @@ public class BlueprintWritingTests
         Assert.Equal("", system.Annotation);
     }
 
-    /// <summary>The guide button beside each description box opens the codex on writing text.</summary>
+    /// <summary>The guide button beside each description box opens the guide to rich text in a window of its own.</summary>
     [Fact]
-    public void TheGuideButtonOpensTheCodexOnWriting()
+    public void TheGuideButtonOpensTheGuideToRichText()
     {
         var screen = OnTheSystem();
         var editor = screen.Editor;
@@ -285,7 +284,7 @@ public class BlueprintWritingTests
         Assert.Equal(0, Notes(editor));
     }
 
-    /// <summary>Presses the guide button of every description box in <paramref name="view" />, each opening the codex on writing.</summary>
+    /// <summary>Presses the guide button of every description box in <paramref name="view" />, each opening the guide to rich text.</summary>
     static void Guides(Screen screen, Lumel.Element view)
     {
         var editor = screen.Editor;
@@ -293,14 +292,14 @@ public class BlueprintWritingTests
         Assert.NotEmpty(composers);
         foreach (var composer in composers)
         {
-            if (editor.CodexOpen)
-                editor.Windows!.Close(editor.CodexWindow!);
+            if (editor.Guide != null)
+                editor.Windows!.Close(editor.Guide);
 
             composer.Guides!.Execute();
             screen.Run(2);
 
-            Assert.True(editor.CodexOpen, "the codex did not open");
-            Assert.Equal(Terms.Writing, editor.CodexWindow!.Term!.Id);
+            Assert.True(editor.Guide != null && editor.Windows!.IsOpen(editor.Guide), "the guide did not open");
+            Assert.True(screen.Shows("Rich text"), "the guide is not titled with its page's heading");
         }
     }
 

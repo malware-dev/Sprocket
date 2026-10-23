@@ -18,13 +18,14 @@ public class TextsTests
         Assert.Equal("Automation for {name}", texts.SystemsTitle);
     }
 
-    /// <summary>Each translation shipped beside the texts translates only texts there are.</summary>
+    /// <summary>Each translation shipped beside the texts and the codex translates only texts there are.</summary>
     [Theory]
-    [InlineData("no")]
-    public void EachTranslationTranslatesTextsThereAre(string culture)
+    [InlineData("MyTexts", "no")]
+    [InlineData("Codex", "no")]
+    public void EachTranslationTranslatesTextsThereAre(string stem, string culture)
     {
-        var written = Keys("MyTexts.resx");
-        foreach (var key in Keys("MyTexts." + culture + ".resx"))
+        var written = Keys(stem + ".resx");
+        foreach (var key in Keys(stem + "." + culture + ".resx"))
             Assert.Contains(key, written);
     }
 
@@ -33,10 +34,10 @@ public class TextsTests
     public void NorwegianIsSaid()
     {
         var texts = new Texts();
-        texts.Book.Load(new ResxTexts(ResxTexts.Beside, "no"));
+        texts.Load(new ResxTexts(ResxTexts.Beside, "no"));
 
         Assert.Equal("Automasjon for {name}", texts.SystemsTitle);
-        Assert.Equal("Installer logikksystemet **{name}** på et annet sett med blokker.", texts.SystemsAddAnotherAbout);
+        Assert.Equal("Installer logikksystemet **{name}** på et annet sett med blokker.", texts.Codex.SystemsAddAnotherAbout);
     }
 
     static HashSet<string> Keys(string file)

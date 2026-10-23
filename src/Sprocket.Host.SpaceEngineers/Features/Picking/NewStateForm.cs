@@ -41,9 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _starts.Edited += StartsEdited;
             _choices = new KeyedChildren<string, NamePlate>(_chips.Children, delegate { return new NamePlate(false); });
             _choicesLabel.Text = texts.StateCanBe;
-            _choicesLabel.Tip = Tip.For(_choicesLabel.Tip, texts.StateCanBeAbout);
+            _choicesLabel.Tip = Tip.For(_choicesLabel.Tip, texts.Codex.StateCanBeAbout);
             _addChoice.Text = StatusRow.Plus + texts.StateChoiceAdd;
-            _addChoice.Tip = Tip.For(_addChoice.Tip, texts.StateChoiceAddAbout);
+            _addChoice.Tip = Tip.For(_addChoice.Tip, texts.Codex.StateChoiceAddAbout);
             _addChoice.Command = editor.Act(CommandKind.AddChoice, delegate
             {
                 _made.Choices.Add(NumberedName.Free(texts.StateChoiceNumbered, _made.Choices.Count, _made.Has));
@@ -145,12 +145,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var texts = _editor.Texts;
             var name = Field.Called(texts.StateName);
             name.Entry = FieldInput.Text;
-            name.About = texts.PickStateNameAbout;
+            name.About = texts.Codex.PickStateNameAbout;
 
             var types = TypeWords;
             var type = Field.Among(texts.PickStateType, types, types);
             type.Entry = FieldInput.Name;
-            type.About = texts.PickStateTypeAbout;
+            type.About = texts.Codex.PickStateTypeAbout;
 
             _heading = new List<Field> { name, type };
             var filled = new List<string> { _name, made != null ? NewTypeWord : _start.Type.Length == 0 ? texts.StateFlag : _start.Type };
@@ -158,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var named = Field.Called(texts.PickTypeName);
                 named.Entry = FieldInput.Text;
-                named.About = texts.PickTypeNameAbout;
+                named.About = texts.Codex.PickTypeNameAbout;
                 _heading.Add(named);
                 filled.Add(made.Name);
             }
@@ -186,7 +186,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 chip.Command = removes
                     ? _editor.Act(CommandKind.ChangeChoice, () => ChoiceMenu(named, chip))
                     : _editor.Act(CommandKind.ChangeChoice, () => _editor.Rename(chip, ChoiceNaming(named)));
-                chip.About = removes ? _editor.Texts.StateChoiceAbout : null;
+                chip.About = removes ? _editor.Texts.Codex.StateChoiceAbout : null;
             }
         }
 
@@ -205,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var starts = Field.Among(texts.StateStarts, words, words);
             starts.Entry = FieldInput.Name;
-            starts.About = texts.StateStartsAbout;
+            starts.About = texts.Codex.StateStartsAbout;
             _starts.Show(new List<Field> { starts }, new[] { _start.Word }, null, texts);
         }
 

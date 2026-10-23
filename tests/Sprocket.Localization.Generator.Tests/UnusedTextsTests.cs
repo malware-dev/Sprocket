@@ -53,10 +53,37 @@ public class UnusedTextsTests
         Assert.Equal(10, problem.Location.GetLineSpan().StartLinePosition.Line);
     }
 
-    /// <summary>The diagnostics the analyzer reports on <see cref="Code" />, built with the class the generator writes from <see cref="Texts" />.</summary>
-    static ImmutableArray<Diagnostic> Reported()
+    /// <summary>A text a link names counts as read, and a link naming no text is an error at the text it is in; a picture's locator is no link.</summary>
+    [Fact]
+    public void ALinkReadsItsTextAndOneToNothingFails()
     {
-        var files = ImmutableArray.Create<AdditionalText>(new Written("MyTexts.resx", Texts), new Written("LCDTextures.sbc", Definition));
+        const string codex = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <root>
+              <data name="Mod.Term.Slot" xml:space="preserve">
+                <value>A slot.</value>
+                <comment>A page.</comment>
+              </data>
+              <data name="Mod.Term.Page" xml:space="preserve">
+                <value>![](mark:slot) See [slot](Term.Slot) and [gone](Term.Gone).</value>
+                <comment>A page.</comment>
+              </data>
+            </root>
+            """;
+
+        var reported = Reported(new Written("Codex.resx", codex));
+
+        Assert.DoesNotContain(reported, problem => problem.GetMessage().Contains("Mod.Term.Slot "));
+        var nowhere = Assert.Single(reported, problem => problem.Id == "LOC021");
+        Assert.Equal(DiagnosticSeverity.Error, nowhere.Severity);
+        Assert.Contains("Term.Gone", nowhere.GetMessage());
+        Assert.DoesNotContain(reported, problem => problem.GetMessage().Contains("mark:slot"));
+    }
+
+    /// <summary>The diagnostics the analyzer reports on <see cref="Code" />, built with the classes the generator writes from <see cref="Texts" /> and <paramref name="more" />.</summary>
+    static ImmutableArray<Diagnostic> Reported(params AdditionalText[] more)
+    {
+        var files = ImmutableArray.Create<AdditionalText>(new Written("MyTexts.resx", Texts), new Written("LCDTextures.sbc", Definition)).AddRange(more);
         var properties = new Properties(new Dictionary<string, string>
         {
             ["build_property.RootNamespace"] = "Mod",

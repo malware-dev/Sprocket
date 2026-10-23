@@ -986,7 +986,7 @@ public class LibraryTests
 
         var heading = Assert.Single(rig.Editor.RootHeadings());
         Assert.Null(heading.BinMark);
-        Assert.Equal(rig.Texts.LibraryDeletes, heading.DeleteText);
+        Assert.Equal(rig.Texts.Codex.LibraryDeletes, heading.DeleteText);
         heading.Deletes!.Execute();
         rig.Tick();
         Assert.Empty(rig.Editor.Program.Systems);
@@ -1000,7 +1000,7 @@ public class LibraryTests
 
         heading = Assert.Single(rig.Editor.RootHeadings());
         Assert.Equal(Symbols.Minus, heading.BinMark);
-        Assert.Equal(rig.Texts.LibraryTakeOff, heading.DeleteText);
+        Assert.Equal(rig.Texts.Codex.LibraryTakeOff, heading.DeleteText);
         heading.Deletes!.Execute();
         Assert.StartsWith(rig.Texts.LibraryTakeOffQuestion, rig.Editor.Question());
         rig.Editor.PressChoice(rig.Texts.LibraryTakeOffKeep);
@@ -1015,7 +1015,7 @@ public class LibraryTests
         Assert.Empty(rig.Editor.Program.Systems);
 
         // Taken off, it comes back with undo; the library's copy stays either way.
-        Assert.Equal(rig.Texts.ChangeTakeOffSystem, rig.Editor.Screen.UndoText);
+        Assert.Equal(rig.Texts.Codex.ChangeTakeOffSystem, rig.Editor.Screen.UndoText);
         rig.Editor.Screen.Undo!.Execute();
         rig.Tick();
         Assert.Same(blueprint, Assert.Single(rig.Editor.Program.Systems));
@@ -1186,7 +1186,7 @@ public class LibraryTests
 
         rig.Editor.GoToRoot();
         rig.Tick();
-        Assert.Equal(rig.Texts.ChangeResetToBlueprint, rig.Editor.Screen.UndoText);
+        Assert.Equal(rig.Texts.Codex.ChangeResetToBlueprint, rig.Editor.Screen.UndoText);
         rig.Editor.Screen.Undo!.Execute();
         rig.Tick();
         Assert.Equal("Airlock Mk II", Assert.Single(rig.Editor.Program.Systems).Name);

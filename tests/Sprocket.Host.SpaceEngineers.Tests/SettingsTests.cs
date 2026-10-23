@@ -30,6 +30,19 @@ public class SettingsTests
         Assert.False(Settings.Of(new Settings(false).Written()).DeveloperMode);
     }
 
+    /// <summary>Tips stay open unless a file asks for Alt, the world's file winning; the choice is written and read back, and a word that is neither is left.</summary>
+    [Fact]
+    public void TipsStayUnlessAltIsAsked()
+    {
+        Assert.Equal(TipKeeping.Stay, Settings.From(null, null).TipKeeping);
+        Assert.Equal(TipKeeping.Alt, Settings.From("[Sprocket]\ntipKeeping=alt\n", null).TipKeeping);
+        Assert.Equal(TipKeeping.Stay, Settings.From("[Sprocket]\ntipKeeping=alt\n", "[Sprocket]\ntipKeeping=stay\n").TipKeeping);
+        Assert.Null(Settings.From(null, "[Sprocket]\ntipKeeping=sometimes\n").World.TipKeeping);
+
+        var written = new Settings(SettingsLayer.Empty, SettingsLayer.Empty.WithTipKeeping(TipKeeping.Alt));
+        Assert.Equal(TipKeeping.Alt, Settings.Of(written.Written()).TipKeeping);
+    }
+
     /// <summary>The debug log is off unless a file says otherwise, the world's file winning, and it is handed to a client as it is.</summary>
     [Fact]
     public void TheDebugLogIsOffUnlessSaid()

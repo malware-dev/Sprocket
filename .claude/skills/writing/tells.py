@@ -1,8 +1,8 @@
 """Counts the habits that make a page read as machine-written, so a draft can be cut and rewritten where they gather.
 
 Usage:
-    python tells.py <page.md> [<page.md> ...]     one line of counts per page, worst first
-    python tells.py --show <page.md>              every hit on one page, with its sentence
+    python tells.py <file.resx> [<file.resx> ...]   one line of counts per page, worst first; every entry is a page
+    python tells.py --show <file.resx> <key>        every hit on one page, with its sentence
 
 Every count is a signal, never a verdict: a page with no hits can still read flat, and a hit can be the right word.
 What it looks for:
@@ -19,6 +19,7 @@ What it looks for:
 import re
 import statistics
 import sys
+import xml.etree.ElementTree as ET
 
 OPENER = re.compile(r"^(?:An?|The)\s+(?:\S+\s+){0,4}?(?:is|are)\s", re.I)
 SUCH_AS = re.compile(r"\bsuch as\b", re.I)
@@ -50,8 +51,14 @@ def sentences(text):
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+(?=[A-Z`])", flat) if len(s.split()) > 2]
 
 
-def measure(path):
-    text = prose(open(path, encoding="utf-8").read())
+def pages(path):
+    """Every entry of a .resx file, by key: each one a page."""
+    root = ET.parse(path).getroot()
+    return [(data.get("name"), data.findtext("value") or "") for data in root.findall("data")]
+
+
+def measure(page):
+    text = prose(page)
     said = sentences(text)
     lengths = [len(s.split()) for s in said]
     words = sum(lengths)
@@ -69,10 +76,13 @@ def measure(path):
 
 
 def main(args):
+    sys.stdout.reconfigure(encoding="utf-8")
     if args and args[0] == "--show":
-        for path in args[1:]:
-            words, spread, hits = measure(path)
-            print("%s: %d words, rhythm %.2f" % (path, words, spread))
+        for key, page in pages(args[1]):
+            if key != args[2]:
+                continue
+            words, spread, hits = measure(page)
+            print("%s: %d words, rhythm %.2f" % (key, words, spread))
             for name, found in hits.items():
                 for s in found:
                     print("  %-8s %s" % (name, s))
@@ -80,15 +90,16 @@ def main(args):
 
     rows = []
     for path in args:
-        words, spread, hits = measure(path)
-        per = max(words, 1) / 100.0
-        score = sum(len(v) for v in hits.values()) / per + (0.5 - spread) * 10
-        rows.append((score, path, words, spread, hits))
+        for key, page in pages(path):
+            words, spread, hits = measure(page)
+            per = max(words, 1) / 100.0
+            score = sum(len(v) for v in hits.values()) / per + (0.5 - spread) * 10
+            rows.append((score, key, words, spread, hits))
     rows.sort(reverse=True)
-    print("%-28s %6s %6s %6s %6s %6s %6s %6s %6s" % ("page", "words", "rhythm", "opener", "suchas", "triads", "signp", "filler", "formal"))
-    for score, path, words, spread, hits in rows:
-        name = path.replace("\\", "/").split("/")[-1]
-        print("%-28s %6d %6.2f %6d %6d %6d %6d %6d %6d" % (
+    print("%-40s %6s %6s %6s %6s %6s %6s %6s %6s" % ("page", "words", "rhythm", "opener", "suchas", "triads", "signp", "filler", "formal"))
+    for score, key, words, spread, hits in rows:
+        name = key
+        print("%-40s %6d %6.2f %6d %6d %6d %6d %6d %6d" % (
             name, words, spread, len(hits["opener"]), len(hits["such-as"]), len(hits["triads"]),
             len(hits["signpost"]), len(hits["filler"]), len(hits["formal"])))
 

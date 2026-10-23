@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Children.Add(new Label { Style = Styles.ListWord, Trims = true, Placement = Flex.Grow }.As(out _start));
 
             Children.Add(new Button { Style = Styles.Button, Text = texts.WritingOpen, Focusable = true }.As(out _open));
-            _open.Tip = Tip.For(_open.Tip, texts.WritingOpenAbout);
+            _open.Tip = Tip.For(_open.Tip, texts.Codex.WritingOpenAbout);
             _open.Command = new Relay(delegate
             {
                 var opened = Opened;

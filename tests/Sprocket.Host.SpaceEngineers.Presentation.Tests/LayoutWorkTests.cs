@@ -18,7 +18,7 @@ public class LayoutWorkTests
     public void AnIdleSecondMeasuresNoText()
     {
         var screen = Screen.Fresh("60", "130", "type", "Airlock", "enter");
-        screen.Run(5);
+        screen.Run(EditorView.TipDelay + 5);
 
         var settled = screen.Measured;
         screen.Run(60);

@@ -27,7 +27,7 @@ public class ParseBenchmarks
         _linksUnclosed = Repeat("[a](b ", 30000);
         _bracketsOnly = Repeat("[a] ", 30000);
         _unclosedClosers = Repeat("a* ", 30000);
-        _page = File.ReadAllText(Path.Combine(Root(), "src", "Sprocket.Host.SpaceEngineers", "Content", "Data", "Codex", "en", "sequence.md"));
+        _page = File.ReadAllText(Path.Combine(Root(), "tests", "Sprocket.Benchmarks", "sequence.md"));
     }
 
     /// <summary>Thirty thousand images opened and never closed.</summary>
@@ -50,7 +50,7 @@ public class ParseBenchmarks
     [Benchmark]
     public Document UnclosedClosers() => Markdown.Parse(_unclosedClosers);
 
-    /// <summary>The codex's sequence page, as written.</summary>
+    /// <summary>A long page of markdown-lite, with headings, links, marks and boxes.</summary>
     [Benchmark]
     public Document CodexPage() => Markdown.Parse(_page);
 

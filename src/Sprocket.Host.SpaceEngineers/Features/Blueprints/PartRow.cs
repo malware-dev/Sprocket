@@ -210,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _blocks.Command = value;
                 _signals.Command = value;
-                var about = value != null ? _texts.PartFillsAbout : FillsLocked;
+                var about = value != null ? _texts.Codex.PartFillsAbout : FillsLocked;
                 _blocks.Tip = Tip.For(_blocks.Tip, about);
                 _signals.Tip = Tip.For(_signals.Tip, about);
             }

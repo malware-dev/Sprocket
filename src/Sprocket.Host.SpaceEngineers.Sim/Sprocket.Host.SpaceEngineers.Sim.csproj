@@ -66,17 +66,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
-    <!-- The codex's pages and tooltips, one folder per language, and the index beside them. -->
-    <ItemGroup>
-        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\Codex\**\*.md">
-            <Link>Content\Codex\%(RecursiveDir)%(Filename)%(Extension)</Link>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\Codex\index">
-            <Link>Content\Codex\index</Link>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
 
     <ItemGroup>
         <!-- Impersonates the game's interfaces at runtime, so the harness answers the dozen members

@@ -17,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         int _revision;
         string _subtitle = "";
         ICommand _library;
-        ICommand _help;
         ICommand _flip;
         bool _switchIsOn;
         string _switchAbout;
@@ -84,13 +83,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _library; }
             set { Set(ref _library, value); }
-        }
-
-        /// <summary>Opens the codex at this screen's entry, or null on a screen that has none.</summary>
-        public ICommand Help
-        {
-            get { return _help; }
-            set { Set(ref _help, value); }
         }
 
         /// <summary>Switches this screen's subject the other way, or null when it has no such switch.</summary>

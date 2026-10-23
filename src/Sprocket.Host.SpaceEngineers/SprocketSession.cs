@@ -105,8 +105,6 @@ namespace Sprocket.Host.SpaceEngineers
 
         GameTexts _gameTexts;
 
-        GameCodex _codex;
-
         /// <summary>The settings the world runs by, read on first use on the server and as the server last sent them on a client.</summary>
         /// <remarks>Not to be asked from <see cref="LoadData" />, where mod storage is not reliably there yet.</remarks>
         Settings Asked => _settings ?? (_settings = IsServer ? Settings.Read() : new Settings(false));
@@ -323,8 +321,6 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
 
             _gameTexts = new GameTexts(Path.Combine(ModContext.ModPath, "Data", "Localization"));
-            _codex = new GameCodex(ModContext.ModItem);
-            _texts.Book.Pages = _codex;
             Relanguage();
             MyAPIGateway.Gui.GuiControlRemoved += Closed;
         }
@@ -342,8 +338,7 @@ namespace Sprocket.Host.SpaceEngineers
         void Relanguage()
         {
             _gameTexts.Load(MyAPIGateway.Session.Config.Language);
-            _codex.Load(MyAPIGateway.Session.Config.Language);
-            _texts.Book.Load(_gameTexts);
+            _texts.Load(_gameTexts);
 
             foreach (SprocketUnit unit in _roster.All)
                 unit.Reword();

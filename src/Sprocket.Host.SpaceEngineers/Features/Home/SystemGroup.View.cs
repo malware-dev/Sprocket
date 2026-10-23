@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new RichText { Style = Styles.SubHeadingTerm }.As(out _installations),
+                            new RichText { Style = Styles.SubHeadingTerm, Align = Align.Left }.As(out _installations),
                             new VStack { Spacing = 8f }.As(out _list),
                             new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _another) } }
                         }

@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override string PrimaryText => Editor.Texts.ChromeDone;
 
         /// <inheritdoc />
-        public override string PrimaryAbout => Editor.Texts.PickDoneAbout;
+        public override string PrimaryAbout => Editor.Texts.Codex.PickDoneAbout;
 
         /// <inheritdoc />
         public override bool ScrollsItself => true;

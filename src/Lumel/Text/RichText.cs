@@ -19,8 +19,8 @@ namespace Lumel.Text
         /// <summary>How far down a line a link's underline lies unless a style says otherwise, as a fraction of the line's height: just under the words of the game's own faces.</summary>
         public const float UnderlineDrop = 0.85f;
 
-        /// <summary>How thick the line under a link's words is unless a style says otherwise: a hairline, the same under every link.</summary>
-        public const float Hairline = 1f;
+        /// <summary>How thick the line under a link's words is unless a style says otherwise: none, so a link stands out by its color alone.</summary>
+        public const float UnderlineThickness = 0f;
 
         /// <summary>How far the box behind code reaches past its words on either side unless a style says otherwise, in UI units.</summary>
         public const float CodeRoom = 4f;
@@ -80,7 +80,7 @@ namespace Lumel.Text
         public RichText()
         {
             UnderlineAt = UnderlineDrop;
-            LinkUnderline = Hairline;
+            LinkUnderline = UnderlineThickness;
             CodeFill = CodeWash;
             Color = Color.White;
             StrongColor = Color.White;

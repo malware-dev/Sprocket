@@ -42,13 +42,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (part.Slots.Count > 0)
             {
                 var slots = Markdown.Escape(string.Join(", ", part.Slots));
-                Paragraph(said, Template.Fill(part.Slots.Count == 1 ? texts.PartFromSlot : texts.PartFromSlots, "slots", "**" + slots + "**"));
+                Paragraph(said, Template.Fill(part.Slots.Count == 1 ? texts.Codex.PartFromSlot : texts.Codex.PartFromSlots, "slots", "**" + slots + "**"));
             }
 
             // A slot the installation shown leaves empty is still named, so the line says which slot is waiting.
             if (part.Entities.Count == 0)
             {
-                Paragraph(said, texts.PartSlotEmpty);
+                Paragraph(said, texts.Codex.PartSlotEmpty);
                 Paragraph(said, press);
                 return said.ToString();
             }

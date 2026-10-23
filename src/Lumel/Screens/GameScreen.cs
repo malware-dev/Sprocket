@@ -65,6 +65,8 @@ namespace Lumel.Screens
             // The game draws the cursor, so the view does not.
             DrawMouseCursor = true;
 
+            view.IsKeepKeyHeld = KeepKeyHeld;
+
             // Nothing drawn here is multiplied by the transition's alpha, so a fade would draw the screen fully opaque part way
             // through one.
             SkipTransition = true;
@@ -140,6 +142,14 @@ namespace Lumel.Screens
             _graphics.Begin();
             _view.Update();
             _view.Draw(_graphics, Bounds());
+        }
+
+        /// <summary>Whether either Alt key, the key that keeps a tip open, is held.</summary>
+        /// <remarks>Asked by the view only while a tip it shows can be kept, so the key is read only while it matters.</remarks>
+        static bool KeepKeyHeld()
+        {
+            var input = MyAPIGateway.Input;
+            return input != null && input.IsAnyAltKeyPressed();
         }
 
         /// <summary>The game's frame count, which is the clock a double press and the caret's blink are measured by.</summary>

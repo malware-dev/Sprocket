@@ -29,6 +29,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How tall one of the game's own screens is, as a share of the safe area; see <see cref="ScreenWidth" />.</summary>
         public const float ScreenHeight = 0.9172f;
 
+        /// <summary>How many ticks the pointer rests on something before its tip opens.</summary>
+        public const int TipDelay = 30;
+
+        /// <summary>How many ticks a tip stays open while the pointer crosses from what it explains onto it.</summary>
+        public const int TipGrace = 15;
+
         /// <summary>Lifts a symbol in the heading so its middle is level with the middle of the heading's capitals.</summary>
         /// <remarks>Measured in the game.</remarks>
         public static readonly Thickness LevelWithCapitals = new Thickness(0f, -2.5f, 0f, 2.5f);
@@ -45,7 +51,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Button _done;
         readonly HazardButton _admin;
         readonly Glyph _close;
-        readonly Glyph _help;
         readonly Button _library;
         readonly Glyph _run;
         readonly Glyph _delete;
@@ -59,7 +64,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly Relay _undoes;
         readonly Relay _redoes;
-        readonly Relay _helps;
         readonly Relay _libraries;
         readonly Relay _flips;
         readonly Relay _dones;
@@ -72,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly WindowLayer _windows = new WindowLayer();
         readonly MessageBox _dialog;
         readonly ConfirmPopup _confirm = new ConfirmPopup();
-        readonly RichText _tip = new RichText { Style = Styles.Tip };
+        readonly CodexTip _codexTip;
         readonly InputRoot _input;
         readonly List<ChoiceEntry> _actionsShown = new List<ChoiceEntry>();
 
@@ -84,8 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         Element _raisedBy;
         Element _lit;
-        Document _saying;
-        Arguments _sayingArguments;
+        string _keepHint;
 
         readonly Relay _commits;
         readonly Relay _ends;
@@ -110,7 +113,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _undoes = new Relay(() => Run(_editor.Screen.Undo));
             _redoes = new Relay(() => Run(_editor.Screen.Redo));
-            _helps = new Relay(() => Run(_editor.Screen.Help));
             _libraries = new Relay(() => Run(_editor.Screen.Library));
             _flips = new Relay(() => Run(_editor.Screen.Flip));
             _dones = new Relay(() => Run(_editor.Screen.Primary));
@@ -141,7 +143,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                     // Quietest first, Done or the close cross last: the row stands against the right edge, so a
                                     // control's place depends only on what stands to its right.
                                     new HazardButton { Style = Styles.Button, Command = new Relay(OpenAdmin) }.As(out _admin),
-                                    new Glyph { Symbol = "?", Style = Styles.Help, Placement = FixedSize.Size(32f, 32f), Command = _helps }.As(out _help),
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _undoes }.As(out _undo),
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _redoes }.As(out _redo),
@@ -188,7 +189,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 ShowsCancel = false
             };
 
+            _codexTip = new CodexTip
+            {
+                Style = Styles.CodexTip,
+                Placement = FixedSize.Wide(Sizes.Popup),
+                MaxHeight = Sizes.TipHigh,
+                Spacing = 8f,
+                Delay = TipDelay,
+                Grace = TipGrace,
+                TitleStyle = Styles.Tip,
+                BodyStyle = Styles.Tip,
+                StepStyle = Styles.Icon,
+                BackSymbol = Symbols.Left,
+                ForwardSymbol = Symbols.Right,
+                Pages = _editor.Codex.Find
+            };
+
             _windows.Covers(_root);
+            _codexTip.GiveWayTo(_windows);
             _input = new InputRoot(_root);
             _input.FocusChanged += Refocused;
 
@@ -199,6 +217,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Where the pointer is, in UI units. Somewhere outside the screen means there is not one.</summary>
         public Vector2 Pointer { get; set; }
+
+        /// <inheritdoc />
+        public System.Func<bool> IsKeepKeyHeld
+        {
+            set { _codexTip.KeepKey = value; }
+        }
 
         /// <summary>Where the pointer and the keyboard enter the screen.</summary>
         public InputRoot Input => _input;
@@ -285,17 +309,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _root.Draw(g);
             _windows.Draw(g, bounds);
-            DrawTip(g, bounds);
+            _codexTip.Draw(g, bounds);
         }
 
         /// <summary>A press beginning at <paramref name="point" />, the <paramref name="presses" />th in quick succession, with shift or ctrl held.</summary>
         public void PointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
-            if (_windows.Dismiss(point))
-                return;
+            // A press on the tip is the tip's alone: it reaches no window beneath it, so none is dismissed by it.
+            var onTip = _codexTip.Covers(point);
+            if (!onTip)
+            {
+                _codexTip.Dismiss(point);
 
-            if (Blocked.Length > 0 && !_plate.Reaches(point))
-                return;
+                if (_windows.Dismiss(point))
+                    return;
+
+                if (Blocked.Length > 0 && !_plate.Reaches(point))
+                    return;
+            }
 
             var target = Under(point);
             if (target == null && _windows.Modal != null)
@@ -321,7 +352,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Scrolls whatever is under <paramref name="point" /> by <paramref name="amount" />, if anything there can scroll.</summary>
         public void ScrollBy(Vector2 point, float amount)
         {
-            if (_plate != null)
+            if (_plate != null || _codexTip.Covers(point))
                 return;
 
             if (_windows.Count > 0)
@@ -424,6 +455,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What a press or a hover at <paramref name="point" /> reaches, or null for nothing at all.</summary>
         public Element Under(Vector2 point)
         {
+            if (_codexTip.Covers(point))
+                return _codexTip.Under(point);
+
             bool stopped;
             var windowed = _windows.Under(point, out stopped);
             if (stopped)
@@ -438,6 +472,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What the pointer at <paramref name="point" /> rests on that has something to say, or null.</summary>
         Element SayingAt(Vector2 point)
         {
+            if (_codexTip.Covers(point))
+                return null;
+
             bool stopped;
             var windowed = _windows.SayingAt(point, out stopped);
             if (stopped)
@@ -449,16 +486,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return _root.SayingAt(point);
         }
 
-        /// <summary>Lights the one thing the pointer is resting on, puts out whatever was lit before, and takes up what it says.</summary>
+        /// <summary>Opens, keeps or closes the tip by what the pointer is resting on, then lights the one thing it rests on and puts out whatever was lit before.</summary>
         void Light()
         {
-            var wanted = Under(Pointer);
-
             var speaker = SayingAt(Pointer);
             var tip = speaker?.TipAt(speaker.FromScreen(Pointer));
-            _saying = tip?.Document;
-            _sayingArguments = tip?.Arguments;
+            _codexTip.Hover(speaker, tip, Pointer, _editor.CurrentTick);
 
+            var wanted = Under(Pointer);
             if (wanted == _lit)
                 return;
 
@@ -469,36 +504,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (_lit != null)
                 _lit.IsHot = true;
-        }
-
-        /// <summary>Puts a note beside the pointer, if what it is resting on had anything to say.</summary>
-        void DrawTip(IGraphics g, RectangleF bounds)
-        {
-            if (_saying == null)
-                return;
-
-            _tip.Document = _saying;
-            _tip.Arguments = _sayingArguments;
-            _tip.Measure(g, new Vector2(Sizes.Popup, bounds.Height));
-
-            var size = _tip.DesiredSize;
-            var x = Pointer.X + Spacing.Item;
-            var y = Pointer.Y + Spacing.Region;
-
-            if (x + size.X > bounds.X + bounds.Width)
-                x = Pointer.X - size.X - Spacing.Item;
-
-            if (y + size.Y > bounds.Y + bounds.Height)
-                y = Pointer.Y - size.Y - Spacing.Row;
-
-            if (x < bounds.X)
-                x = bounds.X;
-
-            if (y < bounds.Y)
-                y = bounds.Y;
-
-            _tip.Arrange(new RectangleF(x, y, size.X, size.Y));
-            _tip.Draw(g);
         }
 
         /// <summary>Opens the question the screen raised, or puts away the one it no longer asks.</summary>
@@ -597,18 +602,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var texts = _editor.Texts;
 
+            _codexTip.KeptByKey = _editor.TipKeeping == World.TipKeeping.Alt;
+            if (_keepHint != texts.Codex.TipKeepHint)
+            {
+                _keepHint = texts.Codex.TipKeepHint;
+                _codexTip.KeepHint = Markdown.Parse(_keepHint);
+            }
+
             var closes = !screen.CanGoBack;
             _back.IsVisible = screen.CanGoBack;
-            _back.Tip = Tip.For(_back.Tip, _back.IsVisible ? texts.ChromeBack : null);
+            _back.Tip = Tip.For(_back.Tip, _back.IsVisible ? texts.Codex.ChromeBack : null);
             _close.IsVisible = closes;
-            _close.Tip = Tip.For(_close.Tip, !closes ? null : texts.ChromeClose);
+            _close.Tip = Tip.For(_close.Tip, !closes ? null : texts.Codex.ChromeClose);
 
             // Asked as the screen is dressed, which is enough: creative tools are switched on and off with the editor put away.
             _admin.IsVisible = !screen.CanGoBack && _editor.MayAdminister;
             _admin.Text = texts.AdminButton;
-            _help.IsVisible = screen.Help != null;
-            _helps.CanExecute = screen.Help != null;
-            _help.Tip = Tip.For(_help.Tip, screen.Help == null ? null : _editor.CodexOpen ? texts.CodexClose : texts.CodexHelp);
 
             _undone.Set("action", screen.UndoText);
             _redone.Set("action", screen.RedoText);
@@ -616,14 +625,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _undo.IsVisible = screen.HasHistory;
             _redo.IsVisible = screen.HasHistory;
             _undoes.CanExecute = screen.Undo != null;
-            _undo.Tip = Tip.For(_undo.Tip, screen.Undo != null ? texts.ChromeUndo : null, _undone);
+            _undo.Tip = Tip.For(_undo.Tip, screen.Undo != null ? texts.Codex.ChromeUndo : null, _undone);
             _redoes.CanExecute = screen.Redo != null;
-            _redo.Tip = Tip.For(_redo.Tip, screen.Redo != null ? texts.ChromeRedo : null, _redone);
+            _redo.Tip = Tip.For(_redo.Tip, screen.Redo != null ? texts.Codex.ChromeRedo : null, _redone);
 
             _library.IsVisible = screen.Library != null;
             _library.Text = texts.SystemsLoad;
             _libraries.CanExecute = screen.Library != null;
-            _library.Tip = Tip.For(_library.Tip, screen.Library != null ? texts.SystemsLoadAbout : null);
+            _library.Tip = Tip.For(_library.Tip, screen.Library != null ? texts.Codex.SystemsLoadAbout : null);
 
             var doing = screen.Running ? screen.Stops : screen.Runs;
             _run.IsVisible = doing != null;

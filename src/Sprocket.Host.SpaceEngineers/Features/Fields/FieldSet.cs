@@ -387,7 +387,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             var label = Label(at);
             var about = _wanted[at].About;
-            if (!string.IsNullOrEmpty(about))
+            // A field of words fills its room so it can fold into a list; its tip goes on the words it shows.
+            var words = field as WordsField;
+            if (words != null && !string.IsNullOrEmpty(about))
+                words.Explain(about);
+            else if (!string.IsNullOrEmpty(about))
                 element.Tip = Tip.For(element.Tip, about);
 
             if (field is SliderField)

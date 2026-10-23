@@ -164,8 +164,8 @@ public class RunStepTests
         var tips = rig.Editor.StepRows()
             .SelectMany(row => row.Slots.OfType<SequenceSlot>().Select(part => row.ChipOf(part)!.Tip?.Text))
             .ToArray();
-        Assert.Contains(rig.Editor.Texts.PartRunsAbout, tips);
-        Assert.Contains(rig.Editor.Texts.PartStopsAbout, tips);
+        Assert.Contains(rig.Editor.Texts.Codex.PartRunsAbout, tips);
+        Assert.Contains(rig.Editor.Texts.Codex.PartStopsAbout, tips);
     }
 
     static Simulation Two(out Sequence first, out Sequence second)

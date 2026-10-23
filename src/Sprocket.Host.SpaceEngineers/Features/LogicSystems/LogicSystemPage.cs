@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
@@ -69,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             base.Heading(parts);
             parts[0].Mark = Symbols.LogicSystem;
-            parts[0].MarkAbout = Editor.Texts.HeadingLogicSystem;
+            parts[0].MarkAbout = Editor.Texts.Codex.HeadingLogicSystem;
         }
 
         /// <inheritdoc />
@@ -88,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public override bool CanRename => true;
 
         /// <inheritdoc />
-        public override string NameAbout => Editor.Texts.SystemNameAbout;
+        public override string NameAbout => Editor.Texts.Codex.SystemNameAbout;
 
         /// <summary>Always true: a logic system must have a name.</summary>
         public override bool NameRequired => true;
@@ -102,9 +101,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override string SwitchAbout => Editor.SwitchAbout(_system);
 
-        /// <inheritdoc />
-        public override string Help => Terms.LogicSystem;
-
         /// <summary>Whether the logic system just made is unchanged since it was made.</summary>
         public override bool Untouched => _system.Name == _madeName && _system.Annotation == _madeAbout
             && _system.Enabled == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
@@ -113,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public override ICommand Deletes => Editor.Act(CommandKind.DeleteSystem, () => Editor.DeleteSystem(_system));
 
         /// <inheritdoc />
-        public override string DeleteAbout => Editor.Texts.SystemDelete;
+        public override string DeleteAbout => Editor.Texts.Codex.SystemDelete;
 
         /// <summary>Always true: changes to the system's triggers can be walked back.</summary>
         public override bool HasHistory => true;
@@ -384,11 +380,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _stateTab.Header = texts.SystemState;
             _panelTab.Header = texts.SystemInstallationPanel;
             _stateWork.Arrange(texts);
-            _addTrigger.Show(new AddOption(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
+            _addTrigger.Show(new AddOption(texts.SystemTrigger, texts.Codex.SystemTriggerAbout, new[]
             {
-                new AddOption(SentenceText.WhenWord, texts.SystemWhenAbout,
+                new AddOption(SentenceText.WhenWord, texts.Codex.SystemWhenAbout,
                     Changes(CommandKind.StartWhen, () => Editor.Starts.StartSequence(_system, new WhenTrigger("")))),
-                new AddOption(SentenceText.EveryWord, texts.SystemEveryAbout,
+                new AddOption(SentenceText.EveryWord, texts.Codex.SystemEveryAbout,
                     Changes(CommandKind.StartEvery, () => Editor.Starts.StartSequence(_system, new EveryTrigger(Editor.NewLength))))
             }));
 
@@ -408,7 +404,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
             _newSequence.Command = Changes(CommandKind.NewSequence, () => Editor.NewSequence(_system));
-            _newSequence.Tip = Tip.For(_newSequence.Tip, _newSequence.Command != null ? texts.SystemNewSequenceAbout : Locked());
+            _newSequence.Tip = Tip.For(_newSequence.Tip, _newSequence.Command != null ? texts.Codex.SystemNewSequenceAbout : Locked());
 
             _sequenceRows.Show(_sequences);
             _noSequences.IsVisible = _sequences.Count == 0 && !Editable;
@@ -417,13 +413,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             foreach (var sequence in _sequences)
             {
                 var row = _sequenceRows[sequence];
-                row.DuplicateText = sequence.Trigger != null ? texts.SystemCopy : texts.SystemCopyUnstarted;
-                row.About = texts.SystemOpenSequence;
+                row.DuplicateText = sequence.Trigger != null ? texts.Codex.SystemCopy : texts.Codex.SystemCopyUnstarted;
+                row.About = texts.Codex.SystemOpenSequence;
                 row.AboutArguments.Set("name", SequenceText.Called(texts, sequence));
 
                 row.Copies = Changes(CommandKind.DuplicateSequence, () => Editor.Duplicate(sequence));
                 row.Deletes = Changes(CommandKind.DeleteSequence, () => Editor.DeleteSequence(sequence));
-                row.DeleteText = texts.SequenceDelete;
+                row.DeleteText = texts.Codex.SequenceDelete;
                 row.Locked = Locked();
             }
 
@@ -461,12 +457,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _descriptionHeading.Text = texts.BlueprintDescription.ToUpperInvariant();
             _composer.IsVisible = editable;
             _composer.Show(texts);
-            _composer.Guides = Editor.Act(CommandKind.OpenCodex, delegate
-            {
-                var term = Editor.Codex.Find(Terms.Writing);
-                if (term != null)
-                    Editor.OpenCodex(term);
-            });
+            _composer.Guides = Editor.Guides;
             _composer.Hint = texts.BlueprintDescriptionHint;
             if (!_composer.Box.IsFocused)
                 _composer.Text = said;
@@ -492,7 +483,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _addCategory.IsVisible = _parts.Count > 0 && Editable;
             _newCategory.Text = StatusRow.Plus + texts.CategoryAdd;
             _newCategory.Command = Changes(CommandKind.AddCategory, () => _arranger.Add(Editor.Texts));
-            _newCategory.Tip = Tip.For(_newCategory.Tip, texts.CategoryAddAbout);
+            _newCategory.Tip = Tip.For(_newCategory.Tip, texts.Codex.CategoryAddAbout);
             _slotRows.Show(_slotKeys);
             if (shown == null)
                 return;
@@ -509,14 +500,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var row = (PartRow)_slotRows[part];
                 row.Arranged = true;
                 row.Indented = _system.Categories.Contains(part.Category);
-                row.Grips(Editable, Editable ? texts.SlotDrag : Locked());
+                row.Grips(Editable, Editable ? texts.Codex.SlotDrag : Locked());
 
                 row.Name = part.Id;
                 row.Short = part.IsSignal ? part.Short : "";
                 row.Mark = MarkText.OfSlot(part);
                 row.Described = part.Annotation;
                 row.Opens = Changes(CommandKind.OpenSlot, () => Editor.Push(new SlotPage(Editor, _system, part)));
-                row.OpensAbout = Editable ? texts.SlotOpenAbout : Locked();
+                row.OpensAbout = Editable ? texts.Codex.SlotOpenAbout : Locked();
                 row.FillsLocked = Locked();
                 row.Fills = Changes(CommandKind.FillPart, () => _fill.Ask(part, shown));
                 row.Marks = Marked(texts, part, shown);
@@ -546,7 +537,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.Name = name;
             row.Carries = carries;
             row.Arranged = true;
-            row.Grips(editable, editable ? texts.CategoryDrag : Locked());
+            row.Grips(editable, editable ? texts.Codex.CategoryDrag : Locked());
             row.Renames = Changes(CommandKind.RenameCategory, () => Editor.Rename(row.Plate, new Naming
             {
                 Name = name,
@@ -554,9 +545,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Accepts = wanted => _arranger.Accepts(name, wanted),
                 Renames = wanted => _arranger.Rename(name, wanted)
             }));
-            row.RenamesAbout = editable ? texts.CategoryRenameAbout : Locked();
+            row.RenamesAbout = editable ? texts.Codex.CategoryRenameAbout : Locked();
             row.Removes = Changes(CommandKind.RemoveCategory, () => _arranger.Remove(name));
-            row.RemovesAbout = editable ? texts.CategoryRemove : Locked();
+            row.RemovesAbout = editable ? texts.Codex.CategoryRemove : Locked();
         }
 
         /// <summary>What the installations other than <paramref name="shown" /> still have to do about <paramref name="part" />, or null where nothing.</summary>
@@ -643,7 +634,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 ? ""
                 : Editor.Holder != null
                     ? Template.Fill(Editor.Texts.SequenceHeld, "holder", Editor.Holder)
-                    : Editor.Texts.SystemTurnOffToEdit;
+                    : Editor.Texts.Codex.SystemTurnOffToEdit;
         }
 
         /// <summary>A command made only while the system may be changed, and null while it may not.</summary>
@@ -665,7 +656,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             Blocksets(texts);
             _blocksets.Text = SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, shown);
-            _blocksets.Tip = Tip.For(_blocksets.Tip, texts.SystemUsingAbout);
+            _blocksets.Tip = Tip.For(_blocksets.Tip, texts.Codex.SystemUsingAbout);
         }
 
         /// <summary>The list of the blocksets made from the blueprint, made again only where what they are called has changed.</summary>

@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             for (var i = 0; i < Starts.Count; i++)
             {
                 var press = Starts[i].Opens == null ? Why() : Starting(texts, Starts[i]);
-                _starts[i].Tip = Tip.For(_starts[i].Tip, PartTips.Of(texts, world, Starts[i], texts.PartTriggerBlocks, press));
+                _starts[i].Tip = Tip.For(_starts[i].Tip, PartTips.Of(texts, world, Starts[i], texts.Codex.PartTriggerBlocks, press));
 
                 if (!ReferenceEquals(_shown[i], Starts[i]))
                 {
@@ -105,7 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 _does[i].Texts = texts;
                 var press = Does[i].Opens == null ? Why() : Doing(texts, Does[i]);
-                _does[i].Tip = Tip.For(_does[i].Tip, PartTips.Of(texts, world, Does[i], texts.PartTriggerTargets, press));
+                _does[i].Tip = Tip.For(_does[i].Tip, PartTips.Of(texts, world, Does[i], texts.Codex.PartTriggerTargets, press));
 
                 // Before Part, which records the part as shown.
                 if (!ReferenceEquals(_shown[Starts.Count + i], Does[i]))
@@ -130,44 +130,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _duplicate.Command = Copies;
             _duplicate.IsVisible = Copies != null || Locked.Length != 0;
             _duplicate.IsEnabled = Copies != null;
-            _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.TriggerCopy : Why());
+            _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.Codex.TriggerCopy : Why());
 
             _delete.Command = Deletes;
             _delete.IsVisible = Deletes != null || Locked.Length != 0;
             _delete.IsEnabled = Deletes != null;
-            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.TriggerDelete : Why());
+            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.Codex.TriggerDelete : Why());
         }
 
         /// <summary>What pressing a part of what starts it does, or null where it goes without saying.</summary>
         static string Starting(Texts texts, SentenceSlot part)
         {
             if (part is EntitiesSlot)
-                return texts.TriggerBlocksAbout;
+                return texts.Codex.TriggerBlocksAbout;
 
             if (part is DurationSlot)
-                return texts.TriggerRateAbout;
+                return texts.Codex.TriggerRateAbout;
 
             if (part is ActionSlot)
-                return texts.PartWatchedAbout;
+                return texts.Codex.PartWatchedAbout;
 
             if (part is SystemStateSlot)
-                return texts.TriggerStateAbout;
+                return texts.Codex.TriggerStateAbout;
 
             var given = part as ArgumentsSlot;
             if (given != null)
                 return given.About(texts);
 
-            return part is EventSlot ? texts.TriggerWhatAbout : null;
+            return part is EventSlot ? texts.Codex.TriggerWhatAbout : null;
         }
 
         /// <summary>What pressing a part of what it does does, or null where it goes without saying.</summary>
         static string Doing(Texts texts, SentenceSlot part)
         {
             if (part is SequenceSlot || part is ActionSlot)
-                return texts.TriggerDoesAbout;
+                return texts.Codex.TriggerDoesAbout;
 
             if (part is EntitiesSlot)
-                return texts.TriggerTargetsAbout;
+                return texts.Codex.TriggerTargetsAbout;
 
             var given = part as ArgumentsSlot;
             return given?.About(texts);

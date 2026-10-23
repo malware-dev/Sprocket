@@ -54,8 +54,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Spacing = Gap;
 
             // Pressed anywhere down its length: it is the whole of what that page was, and going back to it is the one thing it does.
-            _fold = Folded(Symbols.Left, texts.PickBack);
-            _next = Folded(Symbols.Right, texts.PickNext);
+            _fold = Folded(Symbols.Left, texts.Codex.PickBack);
+            _next = Folded(Symbols.Right, texts.Codex.PickNext);
         }
 
         /// <summary>Every stage of the pick in order, across every page, each narrowing the next.</summary>

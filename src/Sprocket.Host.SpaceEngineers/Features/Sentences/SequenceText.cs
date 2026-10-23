@@ -115,13 +115,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </summary>
         public static string Starts(Texts texts)
         {
-            return texts.SequenceRunNow;
+            return texts.Codex.SequenceRunNow;
         }
 
         /// <summary>What the one button that starts and stops a sequence promises while the sequence is running, facing the way that stops it.</summary>
         public static string Stops(Texts texts)
         {
-            return texts.SequenceStopNow;
+            return texts.Codex.SequenceStopNow;
         }
 
         /// <summary>The row that opens the field, which says what pressing it is for.</summary>

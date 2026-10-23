@@ -48,7 +48,7 @@ public class VersionChoiceTests
         Assert.Empty(sim.Unit.Memory.Conflicts);
         Assert.NotEqual(sim.Texts.SystemsChooseVersion, sim.Editor.RootHeadings()[0].ButtonText);
 
-        Assert.Equal(sim.Texts.ChangeChooseVersion, sim.Editor.Screen.UndoText);
+        Assert.Equal(sim.Texts.Codex.ChangeChooseVersion, sim.Editor.Screen.UndoText);
         sim.Editor.Screen.Undo!.Execute();
         sim.Tick();
 

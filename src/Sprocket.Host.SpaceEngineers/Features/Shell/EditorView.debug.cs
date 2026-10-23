@@ -14,6 +14,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How many times the chrome has written what the screen says onto its controls.</summary>
         public int Wires => _wires;
 
+        /// <summary>The tip the screen shows for whatever the pointer rests on.</summary>
+        public CodexTip CodexTip => _codexTip;
+
         /// <summary>Where a press reaches the first thing on the screen named or saying <paramref name="text" />, with or without an adder's plus.</summary>
         /// <remarks>Words hidden under a window or scrolled out of sight are passed over.</remarks>
         public bool Find(string text, out Vector2 at)

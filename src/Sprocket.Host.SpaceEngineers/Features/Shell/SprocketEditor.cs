@@ -21,6 +21,7 @@ using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Writing;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
@@ -36,6 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _author = "";
         string _holder;
         EditorHabits _habits = new EditorHabits();
+        TipKeeping _tipKeeping;
         PlayerMemory _viewer = new PlayerMemory();
         readonly List<EditorPage> _stack = new List<EditorPage>();
 
@@ -67,7 +69,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _runner = runner;
             Texts = texts;
             Ago = new AgoText(texts);
-            Codex = new Terms(texts);
+            Codex = new CodexPages(texts);
+            Guides = new Relay(() => Act(CommandKind.OpenGuide, OpenGuide)?.Execute());
 
             _dates = new ChangeDates(_program);
             _claims = new SlotClaims(this);
@@ -111,11 +114,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What the editor says, in the player's language.</summary>
         public Texts Texts { get; }
 
-        /// <summary>The codex, in <see cref="Texts" />.</summary>
-        public Terms Codex { get; }
+        /// <summary>The codex's pages, in <see cref="Texts" />, found by the names links give them.</summary>
+        public CodexPages Codex { get; }
 
-        /// <summary>The codex's window, made the first time the codex is opened, or null before then.</summary>
-        public CodexWindow CodexWindow { get; private set; }
+        /// <summary>The guide to rich text's window, made the first time it is opened, or null before then.</summary>
+        public GuideWindow Guide { get; private set; }
+
+        /// <summary>What every button for the guide to rich text does: opens it, as a press the editor may refuse.</summary>
+        public ICommand Guides { get; }
 
         /// <summary>How long ago something happened, in <see cref="Texts" />.</summary>
         public AgoText Ago { get; }
@@ -208,6 +214,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     return;
 
                 _developerMode = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>How the screen's tips stay open, the trial's variant the world uses.</summary>
+        /// <remarks>A change rebuilds the screen.</remarks>
+        public TipKeeping TipKeeping
+        {
+            get { return _tipKeeping; }
+            set
+            {
+                if (_tipKeeping == value)
+                    return;
+
+                _tipKeeping = value;
                 Invalidate();
             }
         }
@@ -968,7 +989,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(CommandKind.Back, Leave) : null;
             _screen.Library = page.Library;
-            _screen.Help = page.Help != null ? Act(CommandKind.OpenCodex, () => Helped(page)) : null;
             _screen.Flip = page.CanSwitch ? Act(CommandKind.Switch, () => page.Switch(!page.SwitchIsOn)) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 
@@ -1043,58 +1063,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }.Open();
         }
 
-        /// <summary>Whether the codex's window is open beside the screen.</summary>
-        public bool CodexOpen => CodexWindow != null && Windows != null && Windows.IsOpen(CodexWindow);
-
-        /// <summary>What the question mark in a screen's heading does: opens the codex at the screen's page, or closes it where it is open.</summary>
-        void Helped(EditorPage page)
-        {
-            if (CodexOpen)
-            {
-                Windows.Close(CodexWindow);
-                Invalidate();
-                return;
-            }
-
-            page.ShowHelp();
-            Invalidate();
-        }
-
-        /// <summary>Opens the codex's window at <paramref name="term" />, beside whatever screen is showing.</summary>
-        public void OpenCodex(Term term)
-        {
-            var open = Act(CommandKind.OpenCodex, delegate
-            {
-                if (CodexWindow == null)
-                    CodexWindow = new CodexWindow(this);
-
-                CodexWindow.Go(term);
-                if (Windows != null)
-                    Windows.Open(CodexWindow);
-            });
-
-            if (open != null)
-                open.Execute();
-        }
-
         /// <summary>Has every word the editor shows read again in the language now spoken, the codex's included.</summary>
         public void Reword()
         {
             Codex.Reword();
-
-            var codex = CodexWindow;
-            if (codex != null)
-            {
-                CodexWindow = null;
-                if (Windows != null && Windows.IsOpen(codex))
-                {
-                    Windows.Close(codex);
-                    if (codex.Term != null)
-                        OpenCodex(codex.Term);
-                }
-            }
-
+            Guide?.Show(Texts);
             Invalidate();
+        }
+
+        /// <summary>Opens the guide to rich text beside whatever screen is showing.</summary>
+        public void OpenGuide()
+        {
+            if (Guide == null)
+                Guide = new GuideWindow(this);
+
+            Windows?.Open(Guide);
         }
 
         /// <summary>
@@ -1406,7 +1389,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (!system.IsBlueprint)
                 return StatusRow.Switching(Texts, true, system.Enabled);
 
-            return system.Enabled ? Texts.RowSwitchBlueprintOff : Texts.RowSwitchBlueprintOn;
+            return system.Enabled ? Texts.Codex.RowSwitchBlueprintOff : Texts.Codex.RowSwitchBlueprintOn;
         }
 
         /// <summary>Takes back the last change to <paramref name="sequence" /> as though it was never made, where it is the last change to its system.</summary>

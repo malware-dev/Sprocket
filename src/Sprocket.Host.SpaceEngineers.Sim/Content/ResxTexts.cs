@@ -8,9 +8,9 @@ namespace Sprocket.Sim.Content
 {
     /// <summary>The mod's texts read straight out of its .resx files, layered the way the game's <c>MyTexts.LoadTexts</c> layers them.</summary>
     /// <remarks>
-    /// <c>MyTexts.resx</c> first, then <c>MyTexts.&lt;culture&gt;.resx</c> over it, then
-    /// <c>MyTexts.&lt;culture&gt;-&lt;subculture&gt;.resx</c>, each replacing what it repeats. The files are the ones
-    /// the mod ships, copied beside the harness.
+    /// Every file with no culture first, such as <c>MyTexts.resx</c> and <c>Codex.resx</c>, then each one's
+    /// <c>&lt;culture&gt;</c> file over it, then its <c>&lt;culture&gt;-&lt;subculture&gt;</c> file, each replacing what it
+    /// repeats. The files are the ones the mod ships, copied beside the harness.
     /// </remarks>
     public sealed class ResxTexts : ITextSource
     {
@@ -20,16 +20,29 @@ namespace Sprocket.Sim.Content
         public ResxTexts(string folder, string culture)
         {
             culture = culture ?? "";
-            Read(Path.Combine(folder, "MyTexts.resx"));
+            var stems = new List<string>();
+            foreach (var path in Directory.GetFiles(folder, "*.resx"))
+            {
+                var name = Path.GetFileNameWithoutExtension(path);
+                if (name.IndexOf('.') < 0)
+                    stems.Add(name);
+            }
+
+            stems.Sort(StringComparer.Ordinal);
+            foreach (var stem in stems)
+                Read(Path.Combine(folder, stem + ".resx"));
 
             if (culture.Length == 0)
                 return;
 
             var dash = culture.IndexOf('-');
-            if (dash > 0)
-                Read(Path.Combine(folder, "MyTexts." + culture.Substring(0, dash) + ".resx"));
+            foreach (var stem in stems)
+            {
+                if (dash > 0)
+                    Read(Path.Combine(folder, stem + "." + culture.Substring(0, dash) + ".resx"));
 
-            Read(Path.Combine(folder, "MyTexts." + culture + ".resx"));
+                Read(Path.Combine(folder, stem + "." + culture + ".resx"));
+            }
         }
 
         /// <summary>The folder the mod's texts are copied to beside the harness.</summary>

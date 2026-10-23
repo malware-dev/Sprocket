@@ -10,11 +10,13 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Sprocket.Localization.Generator
 {
-    /// <summary>Reports each text that no code reads and no definition of the mod's names.</summary>
+    /// <summary>Reports each text that no code reads, no definition of the mod's names and no link leads to, and each link that leads to no text.</summary>
     /// <remarks>
     ///     A text is read through the property the generator writes for it, so every property of the class never
     ///     referenced is a text nobody sees, unless the game reads its key itself: a definition in the mod's
-    ///     <c>.sbc</c> files that names it as a <c>LocalizationId</c>, such as an LCD image's name.
+    ///     <c>.sbc</c> files that names it as a <c>LocalizationId</c>, such as an LCD image's name. A link in a text,
+    ///     <c>[words](Term.Slot)</c>, names another text by its key without the prefix, which reads it as well, and
+    ///     must name one there is.
     ///     <para>
     ///         Only a reference counts. A text read only by code nothing calls counts as used; finding that is the
     ///         dead code check's job.
@@ -25,8 +27,11 @@ namespace Sprocket.Localization.Generator
     {
         static readonly Regex Named = new Regex(@"<LocalizationId>\s*([^<\s]+)\s*</LocalizationId>", RegexOptions.CultureInvariant);
 
+        // A markdown-lite link whose target is a key without its prefix: words and dots, no scheme or path.
+        static readonly Regex Linked = new Regex(@"(?<!!)\[[^\]]*\]\(([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\)", RegexOptions.CultureInvariant);
+
         /// <inheritdoc />
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Problems.Unused);
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Problems.Unused, Problems.Nowhere);
 
         /// <inheritdoc />
         public override void Initialize(AnalysisContext context)
@@ -49,8 +54,13 @@ namespace Sprocket.Localization.Generator
             // Each file of texts, by the class it becomes, with its keys and where each is written.
             var files = new List<KeyValuePair<INamedTypeSymbol, AdditionalText>>();
             var named = new HashSet<string>();
+            var keys = new HashSet<string>();
+            var links = new List<Link>();
             foreach (var file in context.Options.AdditionalFiles)
             {
+                if (file.Path.EndsWith(".resx", StringComparison.OrdinalIgnoreCase))
+                    Gather(file, prefix, context.CancellationToken, keys, named, links);
+
                 if (file.Path.EndsWith(".sbc", StringComparison.OrdinalIgnoreCase))
                 {
                     var text = file.GetText(context.CancellationToken);
@@ -73,6 +83,19 @@ namespace Sprocket.Localization.Generator
                     files.Add(new KeyValuePair<INamedTypeSymbol, AdditionalText>(type, file));
             }
 
+            context.RegisterCompilationEndAction(end =>
+            {
+                foreach (var link in links)
+                {
+                    if (keys.Contains(link.Key))
+                        continue;
+
+                    var at = new LinePosition(link.Line, 0);
+                    end.ReportDiagnostic(Diagnostic.Create(Problems.Nowhere,
+                        Location.Create(link.Path, new TextSpan(0, 0), new LinePositionSpan(at, at)), link.From, link.Key.Substring(prefix.Length)));
+                }
+            });
+
             if (files.Count == 0)
                 return;
 
@@ -88,6 +111,36 @@ namespace Sprocket.Localization.Generator
                 foreach (var pair in files)
                     Report(end, pair.Key, pair.Value, prefix, named, read);
             });
+        }
+
+        /// <summary>
+        ///     Adds the keys <paramref name="file" /> defines, where it is no translation, to <paramref name="keys" />, and the key
+        ///     each of its links names, as read, to <paramref name="named" /> and <paramref name="links" />.
+        /// </summary>
+        static void Gather(AdditionalText file, string prefix, System.Threading.CancellationToken cancel, HashSet<string> keys,
+            HashSet<string> named, List<Link> links)
+        {
+            var text = file.GetText(cancel);
+            if (text == null)
+                return;
+
+            var entries = Resx.Read(text.ToString(), out _);
+            if (entries == null)
+                return;
+
+            var original = Resx.Culture(file.Path) == null;
+            foreach (var entry in entries)
+            {
+                if (original)
+                    keys.Add(entry.Key);
+
+                foreach (Match match in Linked.Matches(entry.Value ?? ""))
+                {
+                    var key = prefix + match.Groups[1].Value;
+                    named.Add(key);
+                    links.Add(new Link(file.Path, entry.Line, entry.Key, key));
+                }
+            }
         }
 
         /// <summary>Reports each text of <paramref name="file" /> whose property in <paramref name="type" /> nothing read.</summary>
@@ -116,6 +169,26 @@ namespace Sprocket.Localization.Generator
                 context.ReportDiagnostic(Diagnostic.Create(Problems.Unused,
                     Location.Create(file.Path, new TextSpan(0, 0), new LinePositionSpan(at, at)), entry.Key, member));
             }
+        }
+
+        /// <summary>A link in a text: the file and line it is written on, the text it is in, and the key it names.</summary>
+        sealed class Link
+        {
+            public Link(string path, int line, string from, string key)
+            {
+                Path = path;
+                Line = line;
+                From = from;
+                Key = key;
+            }
+
+            public string Path { get; }
+
+            public int Line { get; }
+
+            public string From { get; }
+
+            public string Key { get; }
         }
     }
 }

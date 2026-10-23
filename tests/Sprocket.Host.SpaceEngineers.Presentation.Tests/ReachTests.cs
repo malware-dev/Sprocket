@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Lumel.Text;
 using Lumel;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -199,7 +198,7 @@ public class ReachTests
         // press and could not be lit for as long as it existed.
         AssertEverythingLights("the construct", _ => { });
 
-        AssertEverythingLights("the codex", screen => screen.Editor.OpenCodex(screen.Editor.Codex.Find(Terms.Home)!));
+        AssertEverythingLights("the guide to rich text", screen => screen.Editor.OpenGuide());
 
         AssertEverythingLights("a system", screen => screen.Editor.NewSystem("Airlock"));
 

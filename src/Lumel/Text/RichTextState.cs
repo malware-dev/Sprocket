@@ -146,7 +146,7 @@ namespace Lumel.Text
                 text.CodeInset = RichText.CodeRoom;
 
             if (LinkUnderline.HasValue)
-                text.LinkUnderline = RichText.Hairline;
+                text.LinkUnderline = RichText.UnderlineThickness;
 
             if (UnderlineAt.HasValue)
                 text.UnderlineAt = RichText.UnderlineDrop;

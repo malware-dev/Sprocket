@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -58,9 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override bool Edits => true;
 
-        /// <inheritdoc />
-        public override string Help => Terms.Sequence;
-
         /// <summary>Whether the screen has a switch, which is its logic system's.</summary>
         public override bool CanSwitch => _sequence.System != null;
 
@@ -93,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public override string DeleteLocked => Editable ? null : LockedText;
 
         /// <inheritdoc />
-        public override string DeleteAbout => Editor.Texts.SequenceDelete;
+        public override string DeleteAbout => Editor.Texts.Codex.SequenceDelete;
 
         /// <summary>Always true: the screen walks back the changes to the sequence's logic system.</summary>
         public override bool HasHistory => true;
@@ -120,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public override bool CanRename => true;
 
         /// <inheritdoc />
-        public override string NameAbout => Editor.Texts.SequenceNameAbout;
+        public override string NameAbout => Editor.Texts.Codex.SequenceNameAbout;
 
         /// <summary>Always true: a sequence must have a name.</summary>
         public override bool NameRequired => true;
@@ -194,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var does = new HeadingPart("");
             does.Mark = Symbols.Sequence;
-            does.MarkAbout = Editor.Texts.HeadingSequence;
+            does.MarkAbout = Editor.Texts.Codex.HeadingSequence;
             does.About = NameAbout;
             does.NameRequired = NameRequired;
             does.Renames = Editor.Renaming(Rename, null);
@@ -314,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _account.Forget();
 
             var editable = Editable;
-            _add.Show(new AddOption(texts.SequenceStep, texts.SequenceStepAbout, Kinds(texts, _sequence.Steps.Count)));
+            _add.Show(new AddOption(texts.SequenceStep, texts.Codex.SequenceStepAbout, Kinds(texts, _sequence.Steps.Count)));
             _locked.IsVisible = !editable;
             _locked.Text = LockedText;
 
@@ -322,7 +318,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 ? ""
                 : Editor.Holder != null
                     ? Template.Fill(texts.SequenceHeld, "holder", Editor.Holder)
-                    : texts.SystemTurnOffToEdit;
+                    : texts.Codex.SystemTurnOffToEdit;
 
             var ends = new Dictionary<Step, object>();
             _keys.Clear();
@@ -409,7 +405,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Grip.CanCarry = false;
             row.Locked = locked;
             row.Adds.Clear();
-            row.Adds.Add(new AddOption(texts.SequenceStep, texts.SequenceStepAbout, Kinds(texts, at)));
+            row.Adds.Add(new AddOption(texts.SequenceStep, texts.Codex.SequenceStepAbout, Kinds(texts, at)));
         }
 
         /// <summary>Every kind of step there is, each added at the line <paramref name="at" />, in the order a menu offers them.</summary>
@@ -417,17 +413,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var kinds = new List<AddOption>
             {
-                new AddOption(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(CommandKind.AddAction, () => _stepwork.AddAction(at))),
-                new AddOption(SentenceText.WaitWord, texts.SequenceWaitAbout, Changes(CommandKind.AddWait, () => AddWait(at)))
+                new AddOption(texts.SequenceDoSomething, texts.Codex.SequenceDoSomethingAbout, Changes(CommandKind.AddAction, () => _stepwork.AddAction(at))),
+                new AddOption(SentenceText.WaitWord, texts.Codex.SequenceWaitAbout, Changes(CommandKind.AddWait, () => AddWait(at)))
             };
 
-            kinds.Add(new AddOption(SentenceText.AwaitWords, texts.SequenceAwaitAbout,
+            kinds.Add(new AddOption(SentenceText.AwaitWords, texts.Codex.SequenceAwaitAbout,
                 Changes(CommandKind.AddAwait, () => Editor.Do(_sequence, new AddStep(ChangeKind.AddStep, at, new Await())))));
 
-            kinds.Add(new AddOption(SentenceText.RunWord, texts.SequenceRunAbout, Changes(CommandKind.AddRun, () => _stepwork.AddRun(false, at))));
-            kinds.Add(new AddOption(SentenceText.StopWord, texts.SequenceStopAbout, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
-            kinds.Add(new AddOption(SentenceText.SetStateWords, texts.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
-            kinds.Add(new AddOption(SentenceText.IfWord, texts.SequenceIfAbout, Changes(CommandKind.AddIf, () => _stepwork.AddIf(at))));
+            kinds.Add(new AddOption(SentenceText.RunWord, texts.Codex.SequenceRunAbout, Changes(CommandKind.AddRun, () => _stepwork.AddRun(false, at))));
+            kinds.Add(new AddOption(SentenceText.StopWord, texts.Codex.SequenceStopAbout, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
+            kinds.Add(new AddOption(SentenceText.SetStateWords, texts.Codex.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
+            kinds.Add(new AddOption(SentenceText.IfWord, texts.Codex.SequenceIfAbout, Changes(CommandKind.AddIf, () => _stepwork.AddIf(at))));
             return kinds;
         }
 
@@ -438,18 +434,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (step is EndIf)
             {
                 var ends = _sequence.Otherwise(_sequence.OpenOf(index)) < 0;
-                row.Adds.Add(new AddOption(texts.SequenceBranch, texts.SequenceBranchAbout, new[]
+                row.Adds.Add(new AddOption(texts.SequenceBranch, texts.Codex.SequenceBranchAbout, new[]
                 {
-                    new AddOption(SentenceText.OtherwiseIfWords, texts.SequenceOtherwiseIfAbout, Changes(CommandKind.AddBranch, () => _stepwork.AddBranch(index))),
-                    new AddOption(SentenceText.OtherwiseWord, texts.SequenceOtherwiseAbout,
+                    new AddOption(SentenceText.OtherwiseIfWords, texts.Codex.SequenceOtherwiseIfAbout, Changes(CommandKind.AddBranch, () => _stepwork.AddBranch(index))),
+                    new AddOption(SentenceText.OtherwiseWord, texts.Codex.SequenceOtherwiseAbout,
                         ends ? Changes(CommandKind.AddBranch, () => _stepwork.AddLast(index)) : null)
                 }));
             }
             else if (Kind(step) == StepKind.Otherwise)
             {
-                row.Adds.Add(new AddOption(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, new[]
+                row.Adds.Add(new AddOption(SentenceText.IfWord, texts.Codex.SequenceOtherwiseTestAbout, new[]
                 {
-                    new AddOption(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, Changes(CommandKind.AddBranch, () => _stepwork.GiveTest(step)))
+                    new AddOption(SentenceText.IfWord, texts.Codex.SequenceOtherwiseTestAbout, Changes(CommandKind.AddBranch, () => _stepwork.GiveTest(step)))
                 }));
             }
         }

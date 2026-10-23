@@ -10,7 +10,7 @@ The guide's other pages:
 - [The runtime](Runtime.md): how what a player built runs, from the game's update to triggers firing.
 - [Saves and storage](Saves.md): where everything is kept, its formats, and what must never change.
 - [Language](Language.md): the script language Sprocket stores its programs in.
-- [Codex](Codex.md): the in-game codex, and the wiki written from it.
+- [Codex](Codex.md): the codex every tip shows.
 
 ## The mod
 
@@ -29,7 +29,7 @@ loads. Its folders each hold one capability whole:
 | `Localization` | Where words come from: the mod's texts in each language, and the codex's pages |
 | `LcdApps` | The status panel, an app an LCD can run to show every logic system's state |
 | `Features` | Every screen of the editor, one folder a screen or a piece shared between screens |
-| `Content` | What the game reads as data: definitions, textures, the texts in `Data/Localization` and the codex in `Data/Codex` |
+| `Content` | What the game reads as data: definitions, textures, and the texts and the codex in `Data/Localization` |
 
 The model and the runtime hold ids and never words. Every word a player reads is looked up in the texts by the screen
 that shows it.
@@ -45,12 +45,11 @@ that shows it.
 | `src/Sprocket.MultiRename` | A mod of its own, Multi-Rename: the game's own Name box renames several selected blocks at once |
 | `src/Sprocket.GravityFit` | A mod of its own, Gravity Field Fit: the buttons on a box gravity generator that size its field to its grid or to its pressurized rooms |
 | `src/Sprocket.Host.SpaceEngineers.Sim` | The simulator: runs the real mod outside the game, over blocks it makes up, and draws its screens to pictures. The tests and every check of what a screen looks like go through it |
-| `src/Sprocket.Localization.Generator` | A source generator that writes the mod's `Texts` class from `MyTexts.resx` at build time, and reports every text that cannot be said and every fault in the codex |
+| `src/Sprocket.Localization.Generator` | A source generator that writes a class from each of the mod's text files at build time, `Texts` from `MyTexts.resx` and `Codex` from `Codex.resx`, and reports every text that cannot be said |
 | `src/Sprocket.Standards` | Analyzers holding the mod to two of its rules: nothing is `internal` (STD001), and nothing goes unused (STD002) |
 | `src/Maltek.Sans`, `src/Maltek.Mono`, `src/Maltek.Symbols` | Font mods: the editor's lettering, its code face, and the symbols its buttons and marks are drawn in. Each is a mod of its own that Sprocket requires |
 | `src/SpaceEngineers.FontStyles` | A font mod with bold, italic and bold italic cuts of the game's own face, for any display mod to require |
 | `src/RichTextPanels` | A mod of its own: a Rich Text app for LCD panels, showing a panel's text as markdown-lite, built on Lumel |
-| `tools/Sprocket.Wiki` | Writes the project's GitHub wiki from the codex |
 | `tools/rename-world.py` | Points a saved world at the mod under a new name |
 
 `art` holds the sources the fonts, the symbols and the logo are drawn from, each with the script that draws it.
@@ -66,7 +65,6 @@ that shows it.
 | `tests/Sprocket.DoorAutoClose.Tests` | Door Auto-Close, over the simulator's doors |
 | `tests/Sprocket.Localization.Generator.Tests` | The generator, run as the compiler runs it |
 | `tests/Sprocket.Standards.Tests` | The analyzers |
-| `tests/Sprocket.Wiki.Tests` | The wiki tool |
 | `tests/Sprocket.Benchmarks` | How long laying out a screen and reading a program take |
 
 ## Building and testing

@@ -32,9 +32,9 @@ public class PartTipsTests
         Assert.Contains($"- Lamp {HeldBlocks.Most - 1:00}\n", tip);
         Assert.DoesNotContain($"Lamp {HeldBlocks.Most:00}", tip);
         Assert.StartsWith("From the slot **", tip);
-        Assert.Contains("\n" + screen.Editor.Texts.PartStepBlocks + "\n- Lamp 01\n", tip);
+        Assert.Contains("\n" + screen.Editor.Texts.Codex.PartStepBlocks + "\n- Lamp 01\n", tip);
         Assert.EndsWith("- and 3 more\n", tip);
-        Assert.DoesNotContain(screen.Editor.Texts.SequenceBlocksAbout, tip);
+        Assert.DoesNotContain(screen.Editor.Texts.Codex.SequenceBlocksAbout, tip);
     }
 
     /// <summary>A slot's blocks on the installation panel say that pressing them chooses what fills the slot.</summary>
@@ -52,7 +52,7 @@ public class PartTipsTests
         var row = screen.Editor.Current!.View.Within().OfType<Features.Blueprints.PartRow>().First();
         var chips = row.Within().OfType<SlotChip>().Where(chip => chip.IsVisible).ToArray();
         Assert.NotEmpty(chips);
-        Assert.All(chips, chip => Assert.Equal(screen.Editor.Texts.PartFillsAbout, chip.Tip?.Text));
+        Assert.All(chips, chip => Assert.Equal(screen.Editor.Texts.Codex.PartFillsAbout, chip.Tip?.Text));
     }
 
     /// <summary>A delay's tooltip gives its length in the unit it is not written in.</summary>

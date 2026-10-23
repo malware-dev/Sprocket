@@ -44,8 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Opening a logic system.</summary>
         OpenSystem,
 
-        /// <summary>Opening the codex, or moving within it.</summary>
-        OpenCodex,
+        /// <summary>Opening the guide to rich text.</summary>
+        OpenGuide,
 
         /// <summary>Adding an installation to a logic system.</summary>
         AddInstance,

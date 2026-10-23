@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Lumel.Drawing;
 using Lumel.Layout;
@@ -56,6 +57,9 @@ namespace Lumel.Windows
             ((ILayered)screen).Layer = this;
         }
 
+        /// <summary>Raised when a window is put on top of the layer, with that window.</summary>
+        public event Action<Window> Opened;
+
         /// <summary>Puts <paramref name="window" /> on top; one already open is left where it is.</summary>
         public void Open(Window window)
         {
@@ -64,6 +68,7 @@ namespace Lumel.Windows
 
             _open.Add(window);
             ((ILayered)window).Layer = this;
+            Opened?.Invoke(window);
         }
 
         /// <summary>Takes <paramref name="window" /> away, if it is open.</summary>

@@ -124,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (asks)
             {
                 _runs.IsOn = !Stops;
-                _runs.Tip = Tip.For(null, Stops ? texts.PickStopAbout : texts.PickRunAbout);
+                _runs.Tip = Tip.For(null, Stops ? texts.Codex.PickStopAbout : texts.Codex.PickRunAbout);
             }
 
             var offersOne = !Stops && (_editor.DeveloperMode || Outcome == Outcome.One);
@@ -147,13 +147,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (offersOne)
             {
                 _rows[One].Mark = Symbols.Action;
-                Show(_rows[One], texts.PickSingleAction, texts.PickSingleActionAbout, Outcome == Outcome.One, false);
+                Show(_rows[One], texts.PickSingleAction, texts.Codex.PickSingleActionAbout, Outcome == Outcome.One, false);
             }
 
             if (!Stops)
             {
                 _rows[New].Mark = Symbols.Sequence;
-                Show(_rows[New], texts.PickNewSequence, texts.PickNewSequenceAbout, Outcome == Outcome.New, false);
+                Show(_rows[New], texts.PickNewSequence, texts.Codex.PickNewSequenceAbout, Outcome == Outcome.New, false);
             }
 
             if (!Stops && _offered.Count > 0)

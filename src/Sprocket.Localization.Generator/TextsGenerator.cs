@@ -67,9 +67,9 @@ namespace Sprocket.Localization.Generator
                 var texts = Texts(output, file.Key, entries, settings.Prefix);
 
                 var stem = Resx.Stem(file.Key);
-                var type = stem.StartsWith("My", StringComparison.Ordinal) && stem.Length > 2 ? stem.Substring(2) : stem;
+                var type = Type(stem);
                 output.AddSource(type + ".g.cs", Writer.Write(settings.Namespace, type, settings.Runtime,
-                    System.IO.Path.GetFileName(file.Key), texts));
+                    System.IO.Path.GetFileName(file.Key), texts, Beside(files, stem)));
 
                 foreach (var translation in files)
                 {
@@ -77,6 +77,33 @@ namespace Sprocket.Localization.Generator
                         Check(output, translation.Key, translation.Value, texts);
                 }
             }
+        }
+
+        /// <summary>The class a file of texts named <paramref name="stem" /> becomes: its name without the game's <c>My</c>.</summary>
+        static string Type(string stem)
+        {
+            return stem.StartsWith("My", StringComparison.Ordinal) && stem.Length > 2 ? stem.Substring(2) : stem;
+        }
+
+        /// <summary>
+        ///     The classes the file named <paramref name="stem" /> holds and loads with its own: every other file of texts where it is
+        ///     the game's own, named with <c>My</c>, and none otherwise.
+        /// </summary>
+        static List<string> Beside(ImmutableArray<KeyValuePair<string, string>> files, string stem)
+        {
+            var beside = new List<string>();
+            if (!stem.StartsWith("My", StringComparison.Ordinal))
+                return beside;
+
+            foreach (var file in files)
+            {
+                var other = Resx.Stem(file.Key);
+                if (Resx.Culture(file.Key) == null && other != stem && !beside.Contains(Type(other)))
+                    beside.Add(Type(other));
+            }
+
+            beside.Sort(StringComparer.Ordinal);
+            return beside;
         }
 
         /// <summary>The texts <paramref name="entries" /> define, reporting every one that cannot be said.</summary>

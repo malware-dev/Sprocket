@@ -116,10 +116,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override bool CanPrimary => Chosen != null && Why.Length == 0 && (Word.Length != 0 || Copy.Length != 0) && (_aim == null || _aim.Finishes);
 
         /// <inheritdoc />
-        public override string PrimaryAbout => Editor.Texts.PickDoneAbout;
+        public override string PrimaryAbout => Editor.Texts.Codex.PickDoneAbout;
 
         /// <inheritdoc />
-        public override string PrimaryWaits => Editor.Texts.PickDoneFirst;
+        public override string PrimaryWaits => Editor.Texts.Codex.PickDoneFirst;
 
         /// <inheritdoc />
         public override bool ScrollsItself => true;
@@ -213,7 +213,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _states = new StageColumn(_strip.Width, false, null, texts);
                 _states.Title = Source == null ? texts.PickStates : texts.PickSource;
-                _states.TitleAbout = texts.StateStatesAbout;
+                _states.TitleAbout = texts.Codex.StateStatesAbout;
                 if (Source != null)
                     _states.Heads(Source.Box(PickSource.States));
 
@@ -221,10 +221,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _define = new StageColumn(_strip.Width, false, null, texts);
                 _define.Title = texts.PickNewState;
-                _define.TitleAbout = texts.PickNewStateAbout;
+                _define.TitleAbout = texts.Codex.PickNewStateAbout;
                 _value = new StageColumn(_strip.Width, false, null, texts);
                 _value.Title = _sets ? texts.PickStateSetTo : _aim == null ? texts.PickStateCheck : texts.PickStateWatch;
-                _value.TitleAbout = _sets ? texts.PickStateSetToAbout : _aim == null ? texts.PickStateCheckAbout : texts.PickStateWatchAbout;
+                _value.TitleAbout = _sets ? texts.Codex.PickStateSetToAbout : _aim == null ? texts.Codex.PickStateCheckAbout : texts.Codex.PickStateWatchAbout;
                 _newState = new NewStateForm(Editor, _system, () => Editor.Current == this);
                 _newState.TypeChanged += type =>
                 {
@@ -250,7 +250,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 // shows a state.
                 _othersList = new VStack { IsVisible = false };
                 _others = new KeyedChildren<string, PickRow>(_othersList.Children, Other);
-                _othersHeading = new Label { Style = Styles.ValueLabel, Text = texts.PickStateValueOf, Tip = Tip.For(null, texts.PickStateValueOfAbout) };
+                _othersHeading = new Label { Style = Styles.ValueLabel, Text = texts.PickStateValueOf, Tip = Tip.For(null, texts.Codex.PickStateValueOfAbout) };
                 _value.Options.Add(_form);
 
                 if (_aim != null)
@@ -386,7 +386,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var made = _rows[NewRow];
             made.Text = Editor.Texts.PickNewState;
-            made.About = Editor.Texts.PickNewStateAbout;
+            made.About = Editor.Texts.Codex.PickNewStateAbout;
             made.IsChosen = _making;
             made.Show();
 
@@ -462,7 +462,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>A row for the other state <paramref name="name" />, whose value is taken when it is pressed, letting go of a value.</summary>
         PickRow Other(string name)
         {
-            var row = new PickRow { Mark = Symbols.State, About = Editor.Texts.PickStateValueOfAbout };
+            var row = new PickRow { Mark = Symbols.State, About = Editor.Texts.Codex.PickStateValueOfAbout };
             row.Picked += delegate(HeldModifier held, int presses)
             {
                 var take = Editor.Act(CommandKind.PickChoice, delegate

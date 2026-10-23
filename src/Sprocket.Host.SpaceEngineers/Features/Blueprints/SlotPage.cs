@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -6,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.Features.Writing;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Lumel;
-using Lumel.Input;
 using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
@@ -16,7 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     {
         readonly AutomationSystem _system;
         readonly Part _part;
-        readonly ICommand _guide;
 
         Element _focused;
 
@@ -28,12 +25,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             _system = system;
             _part = part;
-            _guide = new Relay(delegate
-            {
-                var term = Editor.Codex.Find(Terms.Writing);
-                if (term != null)
-                    Editor.OpenCodex(term);
-            });
         }
 
         /// <inheritdoc />
@@ -45,14 +36,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <inheritdoc />
         public override bool Edits => true;
 
-        /// <inheritdoc />
-        public override string Help => Terms.Slot;
-
         /// <summary>A slot is renamed on its heading while its logic system may be changed.</summary>
         public override bool CanRename => Editable;
 
         /// <inheritdoc />
-        public override string NameAbout => Editor.Texts.BlueprintNameBoxAbout;
+        public override string NameAbout => Editor.Texts.Codex.BlueprintNameBoxAbout;
 
         /// <summary>A slot has to be called something, since its name is how a sentence names it.</summary>
         public override bool NameRequired => true;
@@ -182,7 +170,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _purposeHeading.Text = texts.SlotPurpose.ToUpperInvariant();
             _composer.IsVisible = editable;
             _composer.Show(texts);
-            _composer.Guides = _guide;
+            _composer.Guides = Editor.Guides;
             _composer.Hint = texts.BlueprintAboutHint;
             if (!_composer.Box.IsFocused)
                 _composer.Text = _part.Annotation;
@@ -195,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _shortHeading.Text = texts.SlotShort.ToUpperInvariant();
             _short.IsVisible = _part.IsSignal && editable;
             _short.Hint = texts.SlotShortHint;
-            _short.Tip = Tip.For(_short.Tip, texts.SlotShortAbout);
+            _short.Tip = Tip.For(_short.Tip, texts.Codex.SlotShortAbout);
             if (!_short.IsFocused)
                 _short.Text = _part.Short;
 
@@ -210,14 +198,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _expects.Text = Expected(texts);
             _expectsPart.IsVisible = typed;
             _expectsPart.Say(Expected(texts));
-            _expectsPart.Tip = Tip.For(_expectsPart.Tip, editable ? texts.SlotExpectsAbout : _locked.Text);
+            _expectsPart.Tip = Tip.For(_expectsPart.Tip, editable ? texts.Codex.SlotExpectsAbout : _locked.Text);
             _expectsPart.Command = typed && editable
                 ? Editor.Act(CommandKind.SlotType, () => Editor.Push(new SlotTypePage(Editor, _system, _part)))
                 : null;
 
             _required.Says(texts.BlueprintRequired, texts.BlueprintOptional);
             _required.IsOn = !_part.Optional;
-            _required.Tip = Tip.For(_required.Tip, texts.BlueprintRequiredAbout);
+            _required.Tip = Tip.For(_required.Tip, texts.Codex.BlueprintRequiredAbout);
             _required.Command = editable
                 ? Editor.Act(CommandKind.MakeOptional, () => Make(new SetOptional(_part, !_part.Optional)))
                 : null;

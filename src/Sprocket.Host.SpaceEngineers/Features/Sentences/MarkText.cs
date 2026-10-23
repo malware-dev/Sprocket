@@ -43,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What a member under <paramref name="mark" /> says as part of the whole it is shown in, or null where it says nothing.</summary>
         public static string About(Texts texts, string mark)
         {
-            return mark == Symbols.Lasting ? texts.MemberWaits : null;
+            return mark == Symbols.Lasting ? texts.Codex.MemberWaits : null;
         }
     }
 }

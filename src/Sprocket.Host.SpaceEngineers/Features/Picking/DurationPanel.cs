@@ -58,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Style = Styles.Icon,
                 Placement = FixedSize.Size(32f, 32f),
                 Command = new Relay(() => Step(-1)),
-                Tip = Tip.For(null, texts.WaitShorter)
+                Tip = Tip.For(null, texts.Codex.WaitShorter)
             });
             number.Children.Add(new NumberBox
             {
@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Least = 0,
                 Widest = Widest,
                 Submit = new Relay(() => Raise(Submitted)),
-                Tip = Tip.For(null, texts.SequenceWaitTypedAbout)
+                Tip = Tip.For(null, texts.Codex.SequenceWaitTypedAbout)
             }.As(out _box));
             number.Children.Add(new Glyph
             {
@@ -75,14 +75,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Style = Styles.Icon,
                 Placement = FixedSize.Size(32f, 32f),
                 Command = new Relay(() => Step(1)),
-                Tip = Tip.For(null, texts.WaitLonger)
+                Tip = Tip.For(null, texts.Codex.WaitLonger)
             });
             // At the right end, across from the number it is the unit of.
             number.Children.Add(new HStack { Placement = Flex.Spare });
             number.Children.Add(new Switch
             {
                 Style = Styles.Switch,
-                Tip = Tip.For(null, texts.WaitTickAbout),
+                Tip = Tip.For(null, texts.Codex.WaitTickAbout),
                 Command = new Relay(() => Unit(!_inSeconds))
             }.As(out _unit));
             _unit.Says(texts.WaitInSeconds, texts.WaitInTicks);

@@ -43,7 +43,7 @@ public class WhatItHoldsTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal(screen.Editor.Texts.SequenceOptionsAbout, Tip(screen.Editor.StepRows()[0]));
+        Assert.Equal(screen.Editor.Texts.Codex.SequenceOptionsAbout, Tip(screen.Editor.StepRows()[0]));
     }
 
     /// <summary>A step setting a value holds the new value, and its part says so.</summary>
@@ -59,7 +59,7 @@ public class WhatItHoldsTests
         screen.Editor.Typed("2");
         screen.Run(2);
 
-        Assert.Equal(screen.Editor.Texts.SequenceNewValueAbout, Tip(screen.Editor.StepRows()[0]));
+        Assert.Equal(screen.Editor.Texts.Codex.SequenceNewValueAbout, Tip(screen.Editor.StepRows()[0]));
     }
 
     /// <summary>An if comparing a value holds the value it checks for, and its part says so.</summary>
@@ -85,7 +85,7 @@ public class WhatItHoldsTests
         rig.Editor.Typed("50");
         rig.Tick();
 
-        Assert.Equal(rig.Editor.Texts.SequenceCheckedAbout, Tip(rig.Editor.StepRows()[0]));
+        Assert.Equal(rig.Editor.Texts.Codex.SequenceCheckedAbout, Tip(rig.Editor.StepRows()[0]));
     }
 
     /// <summary>A trigger setting a value holds the new value, and its part on the logic system's screen says so.</summary>
@@ -110,7 +110,7 @@ public class WhatItHoldsTests
             sim.Tick();
 
         var row = sim.Editor.Triggers()[0];
-        Assert.Equal(sim.Texts.SequenceNewValueAbout, row.Within().OfType<SlotChip>().Last().Tip?.Text);
+        Assert.Equal(sim.Texts.Codex.SequenceNewValueAbout, row.Within().OfType<SlotChip>().Last().Tip?.Text);
     }
 
     static string Named(Simulation sim, Fitting fitting) =>

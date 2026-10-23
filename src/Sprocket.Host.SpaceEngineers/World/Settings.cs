@@ -57,6 +57,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether every run writes what it does to the game's log, for finding out why one went wrong; off unless somebody asked for it.</summary>
         public bool DebugLog => World.DebugLog ?? DefaultDebugLog;
 
+        /// <summary>How a tip stays open, the trial's variant this world uses.</summary>
+        public TipKeeping TipKeeping => World.TipKeeping ?? DefaultTipKeeping;
+
+        /// <summary>How a tip stays open in a world that leaves it: as every world says, or staying while the pointer is on it.</summary>
+        public TipKeeping DefaultTipKeeping => Global.TipKeeping ?? TipKeeping.Stay;
+
         /// <summary>Whether developer mode is on in a world that leaves it: what every world says, or off.</summary>
         public bool DefaultDeveloperMode => Global.DeveloperMode ?? false;
 

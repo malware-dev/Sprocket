@@ -13,6 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The width of a dialog hanging over the screen.</summary>
         public const float Popup = 512f;
 
+        /// <summary>How tall a codex tip grows at most.</summary>
+        public const float TipHigh = 384f;
+
         /// <summary>The box at the head of a row in a list of several things to choose between.</summary>
         public const float Mark = 17f;
 

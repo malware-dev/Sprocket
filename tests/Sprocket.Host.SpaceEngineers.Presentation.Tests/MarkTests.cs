@@ -65,7 +65,7 @@ public class MarkTests
         screen.Run(2);
 
         var open = screen.Editor.Pick().Stages.Last().Entries().First(row => row.Mark == Symbols.Lasting);
-        Assert.Equal(screen.Editor.Texts.MemberWaits, open.Tip!.Text);
+        Assert.Equal(screen.Editor.Texts.Codex.MemberWaits, open.Tip!.Text);
 
         var marks = screen.Editor.Pick().Stages.Last().Entries().SelectMany(row => row.Within().OfType<Glyph>()).ToList();
         Assert.NotEmpty(marks);
