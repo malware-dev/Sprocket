@@ -132,6 +132,10 @@
     <value>Close the editor</value>
     <comment>Tooltip on the close cross at the far right of the editor's heading bar, shown only on the home screen, where there is no screen to go back to. Pressing it closes the editor.</comment>
   </data>
+  <data name="Sprocket.Chrome.Tips" xml:space="preserve">
+    <value>Turn tips off. Press again to turn them back on.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the question mark in the editor's heading bar, shown only while tips are on (with them off no tip shows at all). Pressing it turns every tip off, and the look of terms with them, in every world this player plays; pressing it again turns them back on.</comment>
+  </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
     <value>![](mark:undo)&amp;nbsp;[Undo](Term.Undo) {action}</value>
     <comment>Tooltip on the undo arrow in the editor's heading bar, shown while there is a change to undo. {action} is filled with what undoing takes back, such as "rename".</comment>

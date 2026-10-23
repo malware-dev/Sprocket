@@ -47,6 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly HeadingRow _title;
         readonly Glyph _undo;
         readonly Glyph _redo;
+        readonly Glyph _tips;
         readonly Switch _switch;
         readonly Button _done;
         readonly HazardButton _admin;
@@ -143,6 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                     // Quietest first, Done or the close cross last: the row stands against the right edge, so a
                                     // control's place depends only on what stands to its right.
                                     new HazardButton { Style = Styles.Button, Command = new Relay(OpenAdmin) }.As(out _admin),
+                                    new Glyph { Symbol = "?", Style = Styles.Tips, Placement = FixedSize.Size(32f, 32f), Command = new Relay(ToggleTips) }.As(out _tips),
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _undoes }.As(out _undo),
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _redoes }.As(out _redo),
@@ -490,7 +492,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Opens, keeps or closes the tip by what the pointer is resting on, then lights the one thing it rests on and puts out whatever was lit before.</summary>
         void Light()
         {
-            var speaker = SayingAt(Pointer);
+            // With tips off nothing says anything, so no tip opens and one still open closes as the pointer leaves it.
+            var speaker = _editor.TipsShown ? SayingAt(Pointer) : null;
             var tip = speaker?.TipAt(speaker.FromScreen(Pointer));
             _codexTip.Hover(speaker, tip, Pointer, _editor.CurrentTick);
 
@@ -619,6 +622,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // Asked as the screen is dressed, which is enough: creative tools are switched on and off with the editor put away.
             _admin.IsVisible = !screen.CanGoBack && _editor.MayAdminister;
             _admin.Text = texts.AdminButton;
+
+            _tips.Style = _editor.TipsShown ? Styles.Tips : Styles.TipsOff;
+            _tips.Tip = Tip.For(_tips.Tip, texts.Codex.ChromeTips);
 
             _undone.Set("action", screen.UndoText);
             _redone.Set("action", screen.RedoText);
@@ -831,6 +837,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (_plate != null)
                 _input.Focus(box);
+        }
+
+        /// <summary>Turns tips off where they are shown and on where they are not, closing a tip that is open.</summary>
+        void ToggleTips()
+        {
+            _codexTip.Close();
+            _editor.ToggleTips();
         }
 
         /// <summary>Opens the world's settings over the screen, for an admin.</summary>

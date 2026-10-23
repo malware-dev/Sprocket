@@ -149,6 +149,41 @@ public class LinkTests
         Assert.Same(own, text.TipAt(new Vector2(text.ContentBounds.X + text.ContentBounds.Width - 2f, text.ContentBounds.Y + 10f)));
     }
 
+    /// <summary>Links made plain are words like any other: in the text's color with no fill, saying the text's own tip, and following nothing.</summary>
+    [Fact]
+    public void PlainLinksAreWordsLikeAnyOther()
+    {
+        var plain = true;
+        var (text, easel) = Laid("[codex](codex) and more words");
+        var own = new Tip("The text");
+        Link followed = null!;
+        text.LinkColor = Color.Orange;
+        text.LinkFill = Color.Purple;
+        text.Tip = own;
+        text.LinkTip = _ => new Tip("The codex");
+        text.Follow = l => followed = l;
+        // ReSharper disable once AccessToModifiedClosure - the test turns the links plain and back by changing it.
+        text.LinksPlain = () => plain;
+        easel.Draw(Wide, High);
+
+        Assert.Equal(Body, Word(easel, "codex").Color);
+        Assert.DoesNotContain(easel.Sprites, s => s.Color == Color.Purple);
+        var onLink = new Vector2(text.ContentBounds.X + 4f, text.ContentBounds.Y + 10f);
+        Assert.Same(own, text.TipAt(onLink));
+
+        plain = false;
+        easel.Draw(Wide, High);
+        Assert.Equal(Color.Orange, Word(easel, "codex").Color);
+        Assert.NotSame(own, text.TipAt(onLink));
+
+        var pressed = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Follow = l => followed = l, LinksPlain = () => true };
+        var input = Input(new VStack { Children = { pressed } });
+        var on = new Vector2(pressed.ContentBounds.X + 4f, pressed.ContentBounds.Y + 10f);
+        input.PointerDown(on, 1, false, false);
+        input.PointerUp(on);
+        Assert.Null(followed);
+    }
+
     static (RichText, Easel) Laid(string markdown)
     {
         var text = new RichText

@@ -144,13 +144,35 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             var write = Parse(Text(everywhere), Where(everywhere)) ?? new MyIni();
             layer.Write(write, Section);
+            Write(write, everywhere);
+        }
+
+        /// <summary>The global file as it stands, read, or null where there is none or it will not read.</summary>
+        /// <remarks>On the machine it is asked on, a client's own included: the file holds the player's own section as well as every world's settings.</remarks>
+        public static MyIni GlobalFile()
+        {
+            return Parse(Text(true), Where(true));
+        }
+
+        /// <summary>Writes <paramref name="ini" /> as the global file, on the machine it is asked on.</summary>
+        public static void KeepGlobal(MyIni ini)
+        {
+            Write(ini, true);
+        }
+
+        /// <summary>Writes <paramref name="ini" /> into the global file where <paramref name="everywhere" /> says, and the world's otherwise.</summary>
+        static void Write(MyIni ini, bool everywhere)
+        {
+            IMyUtilities files = MyAPIGateway.Utilities;
+            if (files == null)
+                return;
 
             try
             {
                 using (TextWriter writer = everywhere
                            ? files.WriteFileInGlobalStorage(File)
                            : files.WriteFileInWorldStorage(File, typeof(Settings)))
-                    writer.Write(write.ToString());
+                    writer.Write(ini.ToString());
             }
             catch (Exception trouble)
             {

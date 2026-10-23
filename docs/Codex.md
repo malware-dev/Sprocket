@@ -5,6 +5,10 @@ pointer rests on, and the pointer can move onto it. Resting on a link in it open
 beside it, up to three side by side; moving back onto an earlier tip closes those opened after it, and leaving them all
 closes all.
 
+The question mark in the heading bar turns every tip off, and the look of terms with them, and turns them back on. The
+choice is the player's own, kept in the `[Player]` section of the global `sprocket.ini` on their machine for every world
+they play, and never sent to a server.
+
 An admin trial, `tipKeeping`, sets whether a tip always lets the pointer onto it (`stay`) or only while Alt is held
 (`alt`).
 

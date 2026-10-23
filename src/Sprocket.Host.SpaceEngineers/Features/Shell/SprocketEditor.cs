@@ -218,6 +218,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
+        /// <summary>Whether the screens show tips, and terms look like terms, as the player at the screen chose; on unless told otherwise.</summary>
+        /// <remarks>A change rebuilds the screen.</remarks>
+        public bool TipsShown
+        {
+            get { return Codex.Shown; }
+            set
+            {
+                if (Codex.Shown == value)
+                    return;
+
+                Codex.Shown = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>Keeps the player's choice of whether tips are shown where the host keeps it, or null for a host that keeps none.</summary>
+        public Action<bool> KeepTips { get; set; }
+
+        /// <summary>Turns tips off where they are shown and on where they are not, and keeps the choice.</summary>
+        public void ToggleTips()
+        {
+            TipsShown = !TipsShown;
+            KeepTips?.Invoke(TipsShown);
+        }
+
         /// <summary>How the screen's tips stay open, the trial's variant the world uses.</summary>
         /// <remarks>A change rebuilds the screen.</remarks>
         public TipKeeping TipKeeping

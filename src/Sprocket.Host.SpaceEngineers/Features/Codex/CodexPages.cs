@@ -96,10 +96,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             return Markdown.Escape(before) + Link(term.ToUpperInvariant(), id) + Markdown.Escape(after);
         }
 
-        /// <summary>Makes the links in <paramref name="text" /> explain what they are on: resting on one shows the page it names.</summary>
+        /// <summary>Whether the terms on the screens look like terms and explain themselves; while not, they are words like any other.</summary>
+        public bool Shown { get; set; } = true;
+
+        /// <summary>Makes the links in <paramref name="text" /> explain what they are on: resting on one shows the page it names, while the terms are <see cref="Shown" />.</summary>
         public void Explain(RichText text)
         {
             text.LinkTip = link => Find(link.Target);
+            text.LinksPlain = () => !Shown;
         }
 
         /// <summary>Lets go of every page read in the language that was spoken, so the next reading is in the one spoken now.</summary>

@@ -109,6 +109,11 @@ namespace Sprocket.Host.SpaceEngineers
         /// <remarks>Not to be asked from <see cref="LoadData" />, where mod storage is not reliably there yet.</remarks>
         Settings Asked => _settings ?? (_settings = IsServer ? Settings.Read() : new Settings(false));
 
+        PlayerSettings _choices;
+
+        /// <summary>What the player at this machine chose for themselves, read from its own global file on first use, a client's included.</summary>
+        PlayerSettings Choices => _choices ?? (_choices = PlayerSettings.Read());
+
         /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
         public static Texts Texts => _current?._texts;
 
@@ -653,6 +658,12 @@ namespace Sprocket.Host.SpaceEngineers
             unit.Editor.PlayerName = Named;
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);
+            unit.Editor.TipsShown = Choices.Tips;
+            unit.Editor.KeepTips = on =>
+            {
+                _choices = Choices.WithTips(on);
+                _choices.Keep();
+            };
             unit.Editor.Preferred = IsServer ? null : (Action)(() => _handover.Prefer(_mine));
             unit.Administers = Administers;
             unit.WorldSettings = () => Asked;

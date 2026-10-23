@@ -667,6 +667,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Tint = Palette.Dim }
         };
 
+        /// <summary>The question mark in the heading bar while tips are shown, in the ink terms are drawn in.</summary>
+        public static readonly GlyphStyle Tips = new GlyphStyle(Icon)
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 28f, Tint = Palette.Link }
+        };
+
+        /// <summary>The question mark in the heading bar while tips are off, as quiet as an icon that cannot be pressed.</summary>
+        public static readonly GlyphStyle TipsOff = new GlyphStyle(Tips)
+        {
+            Base = { Tint = Palette.Dim }
+        };
+
         /// <summary>The mark a drop-down line ends with, smaller than a symbol pressed on its own.</summary>
         public static readonly GlyphStyle ListMark = new GlyphStyle
         {

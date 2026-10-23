@@ -354,6 +354,13 @@ namespace Lumel.Text
         /// <remarks>Asked while the pointer rests on a link, so a tip it hands back is one made once and kept.</remarks>
         public Func<Link, Tip> LinkTip { get; set; }
 
+        /// <summary>
+        /// Asks whether the links are words like any other: drawn in the text's own color with no fill or line, resting on one
+        /// saying what the text says, and a press on one doing nothing; null keeps links as links.
+        /// </summary>
+        /// <remarks>Asked as the text is drawn, pointed at and pressed, so a host turns every text's links off and on at once.</remarks>
+        public Func<bool> LinksPlain { get; set; }
+
         /// <summary>What the attributes a box names ask for, or null for boxes to change nothing.</summary>
         public BoxStyles Boxes
         {
@@ -409,7 +416,7 @@ namespace Lumel.Text
         /// <inheritdoc />
         public override Tip TipAt(Vector2 point)
         {
-            var link = LinkTip == null ? null : LinkAt(point);
+            var link = LinkTip == null || Plain() ? null : LinkAt(point);
             return link == null ? Tip : LinkTip(link) ?? Tip;
         }
 
@@ -425,7 +432,7 @@ namespace Lumel.Text
             var pressed = _pressed;
             _pressed = null;
 
-            if (pressed != null && _follow != null && LinkAt(point) == pressed)
+            if (pressed != null && _follow != null && !Plain() && LinkAt(point) == pressed)
                 _follow(pressed);
         }
 
@@ -463,7 +470,8 @@ namespace Lumel.Text
                 g.Fill(new RectangleF(room.X + where.X, room.Y + where.Y, where.Width, where.Height), _marks[i].Color ?? RuleColor);
             }
 
-            if (LinkFill.HasValue)
+            var plain = Plain();
+            if (LinkFill.HasValue && !plain)
             {
                 for (var i = 0; i < _spots.Count; i++)
                 {
@@ -472,7 +480,7 @@ namespace Lumel.Text
                 }
             }
 
-            if (LinkUnderline > 0f)
+            if (LinkUnderline > 0f && !plain)
             {
                 var ink = ColorOf(Tone.Link);
                 var thick = LinkUnderline;
@@ -494,8 +502,14 @@ namespace Lumel.Text
                         room.Y + piece.At.Y + (piece.Box.Y - piece.Drawn.Y) * 0.5f, piece.Drawn.X, piece.Drawn.Y), Color.White, piece.Turn);
                 else
                     g.DrawText(piece.Font, piece.Text, new Vector2(room.X + piece.At.X, room.Y + piece.At.Y), piece.Size,
-                        piece.Tone == Tone.Plain && piece.Ink.HasValue ? piece.Ink.Value : ColorOf(piece.Tone));
+                        piece.Tone == Tone.Plain && piece.Ink.HasValue ? piece.Ink.Value : plain && piece.Tone == Tone.Link ? Color : ColorOf(piece.Tone));
             }
+        }
+
+        /// <summary>Whether the links are words like any other, as <see cref="LinksPlain" /> says.</summary>
+        bool Plain()
+        {
+            return LinksPlain != null && LinksPlain();
         }
 
         Color ColorOf(Tone tone)

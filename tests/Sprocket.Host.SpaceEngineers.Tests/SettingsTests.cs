@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.World;
+using VRage.Game.ModAPI.Ingame.Utilities;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Tests;
@@ -41,6 +42,28 @@ public class SettingsTests
 
         var written = new Settings(SettingsLayer.Empty, SettingsLayer.Empty.WithTipKeeping(TipKeeping.Alt));
         Assert.Equal(TipKeeping.Alt, Settings.Of(written.Written()).TipKeeping);
+    }
+
+    /// <summary>A player's tips are on unless their own section of the global file turns them off, and writing it leaves every world's settings as they were.</summary>
+    [Fact]
+    public void APlayersTipsAreOnUnlessTheyTurnedThemOff()
+    {
+        Assert.True(PlayerSettings.From(null).Tips);
+        Assert.True(PlayerSettings.From(Ini("[Sprocket]\ndeveloperMode=true\n")).Tips);
+        Assert.False(PlayerSettings.From(Ini("[Player]\ntips=false\n")).Tips);
+
+        var file = Ini("[Sprocket]\ndeveloperMode=true\n");
+        new PlayerSettings(true).WithTips(false).Write(file);
+
+        Assert.False(PlayerSettings.From(file).Tips);
+        Assert.True(Settings.From(file.ToString(), null).DeveloperMode);
+    }
+
+    static MyIni Ini(string text)
+    {
+        var ini = new MyIni();
+        Assert.True(ini.TryParse(text));
+        return ini;
     }
 
     /// <summary>The debug log is off unless a file says otherwise, the world's file winning, and it is handed to a client as it is.</summary>

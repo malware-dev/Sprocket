@@ -43,6 +43,35 @@ public class CodexTests
         Assert.Same(Styles.ShortShadow, tip.Shadow);
     }
 
+    /// <summary>
+    /// The question mark turns every tip off, and the look of terms with them, keeping the choice; pressed again it turns
+    /// them back on.
+    /// </summary>
+    [Fact]
+    public void TheQuestionMarkTurnsTipsOffAndOn()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Editor;
+        var kept = new List<bool>();
+        editor.KeepTips = kept.Add;
+        var at = screen.Scene.Find(editor.Texts.SystemsNew);
+        var heading = FirstLink(screen, out var term, CodexPages.LogicSystem);
+
+        var mark = screen.Scene.Find("?");
+        screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
+        Assert.False(editor.TipsShown);
+        Assert.Equal(new[] { false }, kept);
+        Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
+
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", (EditorView.TipDelay * 2).ToString());
+        Assert.False(screen.Scene.CodexTip.IsOpen, "a tip opened with tips off");
+
+        screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
+        Assert.True(editor.TipsShown);
+        Assert.Equal(new[] { false, true }, kept);
+        Assert.NotNull(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
+    }
+
     /// <summary>A press beside an open tip closes it and still reaches what it lands on.</summary>
     [Fact]
     public void APressBesideTheTipClosesItAndGoesOn()
