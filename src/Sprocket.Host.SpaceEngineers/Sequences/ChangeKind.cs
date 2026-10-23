@@ -49,6 +49,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Making a slot required.</summary>
         Required,
 
+        /// <summary>Changing the type of block a slot takes.</summary>
+        SlotType,
+
         /// <summary>Changing a wait.</summary>
         Wait,
 

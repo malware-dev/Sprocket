@@ -21,6 +21,12 @@ public class ArgumentsColumnTests
     const string RadiusBox = "1348 232";
     const string Done = "1394 72";
 
+    // The values part of the step's line, after the slot it names.
+    const string Values = "420 192";
+
+    // The slot the step makes, after the button trigger's, which the picker's heading names.
+    const string Slot = "slot 2";
+
     /// <summary>Presses twice on the words <paramref name="text" /> where they are drawn.</summary>
     static void DoubleOn(Screen screen, string text)
     {
@@ -73,7 +79,7 @@ public class ArgumentsColumnTests
     {
         var screen = Open(SetRadius + " " + RadiusBox + " clear " + Done);
 
-        Assert.Equal("Radius on Airlock Light", screen.Ended);
+        Assert.Equal(Slot, screen.Ended);
         Assert.True(screen.Shows("Radius is missing."), "nothing said why it did not finish");
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
@@ -84,7 +90,7 @@ public class ArgumentsColumnTests
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 50 " + Done);
 
-        Assert.Equal("Radius on Airlock Light", screen.Ended);
+        Assert.Equal(Slot, screen.Ended);
         Assert.True(screen.Shows("radius must be between 0.1 and 20."), "nothing said why");
     }
 
@@ -126,7 +132,7 @@ public class ArgumentsColumnTests
         var screen = Screen.Fresh(ALight.Split(' '));
         DoubleOn(screen, "radius");
 
-        Assert.Equal("Radius on Airlock Light", screen.Ended);
+        Assert.Equal(Slot, screen.Ended);
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
 
@@ -158,9 +164,9 @@ public class ArgumentsColumnTests
     [Fact]
     public void PressingAStepsValuesOpensItsPickerOnThem()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 508 192");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " " + Values);
 
-        Assert.Equal("Radius on Airlock Light", screen.Ended);
+        Assert.Equal(Slot, screen.Ended);
         Assert.False(screen.Scene.IsQuestioning, "a dialog was raised");
         Assert.True(screen.Scene.IsFilling, "the caret is not in the values");
         Assert.Equal("5.0", screen.Scene.Filling!.Text);
@@ -170,7 +176,7 @@ public class ArgumentsColumnTests
     /// Leaving asks about any change: a value, or what is done, as well as the blocks.
     /// </summary>
     [Theory]
-    [InlineData("508 192 type 7 escape")]
+    [InlineData("420 192 type 7 escape")]
     [InlineData("208 182 press color")]
     public void LeavingAsksAboutAnyChange(string change)
     {
@@ -184,7 +190,7 @@ public class ArgumentsColumnTests
     [Fact]
     public void LeavingAsksNothingWhereNothingChanged()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 508 192 escape");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + Values + " escape");
 
         Assert.False(screen.Scene.IsQuestioning, "leaving asked about 5 shown as 5.0");
         Assert.Equal("Sequence 1", screen.Ended);
@@ -198,7 +204,7 @@ public class ArgumentsColumnTests
 
         Assert.False(screen.Scene.IsFilling, "the field kept the keyboard");
         Assert.True(screen.Scene.IsQuestioning, "leaving a changed pick did not ask first");
-        Assert.Equal("Radius on Airlock Light", screen.Ended);
+        Assert.Equal(Slot, screen.Ended);
         Assert.True(screen.Shows("7"), "what was typed was thrown away");
     }
 }

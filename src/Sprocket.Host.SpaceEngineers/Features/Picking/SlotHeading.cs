@@ -1,0 +1,183 @@
+using System;
+using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Sequences;
+
+namespace Sprocket.Host.SpaceEngineers.Features.Picking
+{
+    /// <summary>
+    /// A picker's heading where the pick names slots of a blueprint: the slots the picks fill already in italics, the slot they
+    /// change by its name, or the new slot they make, named in place; worked out again only when the picks change.
+    /// </summary>
+    public sealed class SlotHeading
+    {
+        readonly SprocketEditor _editor;
+        readonly AutomationSystem _system;
+        readonly string _title;
+        readonly bool _forEvents;
+        readonly string _keeps;
+        readonly IList<string> _replacing;
+        readonly List<long> _stated = new List<long>();
+        readonly List<string> _statedSlots = new List<string>();
+        string _statedChosen;
+        string _statedFacet;
+        SlotForecast _forecast;
+        List<string> _fills;
+        string _fillsText;
+        string _slotName = "";
+        string _newName;
+        bool _named;
+        bool _arriving;
+        HeadingPart _part;
+        Func<string, bool> _accepts;
+        Action<string> _renames;
+
+        /// <summary>
+        /// The heading of a pick in <paramref name="editor" /> naming slots of <paramref name="system" />, called
+        /// <paramref name="title" /> where it names none yet; of what starts something where <paramref name="forEvents" />, in place
+        /// of the list <paramref name="replacing" /> or null for a new one, and of the trigger's signal slot <paramref name="keeps" />.
+        /// </summary>
+        public SlotHeading(SprocketEditor editor, AutomationSystem system, string title, bool forEvents, string keeps, IList<string> replacing)
+        {
+            _editor = editor;
+            _system = system;
+            _title = title;
+            _forEvents = forEvents;
+            _keeps = keeps ?? "";
+            _replacing = replacing;
+        }
+
+        /// <summary>What the heading says.</summary>
+        public string Text => _part != null ? _part.Text : _title;
+
+        /// <summary>What a slot the picks make is called: what was given in the heading, or the numbered name it shows.</summary>
+        public string NewName => _slotName.Length > 0 ? _slotName : _newName ?? "";
+
+        /// <summary>Adds the heading's one part to <paramref name="parts" />, as the screen is built.</summary>
+        public void Head(List<HeadingPart> parts)
+        {
+            _part = new HeadingPart("");
+            parts.Add(_part);
+            Reword();
+        }
+
+        /// <summary>
+        /// Works out again which slots the picks name, where they have changed since: the blocks <paramref name="selection" />
+        /// picked for <paramref name="chosen" /> on the facet <paramref name="facet" />, at the toolbar slot <paramref name="at" />
+        /// where a toolbar sends it, or the slots <paramref name="picked" /> by name where <paramref name="byName" />; whether
+        /// the heading changes with it.
+        /// </summary>
+        /// <remarks>Asked as the page is built, which every change to the picks brings about.</remarks>
+        public bool Restate(IList<long> selection, string chosen, string facet, ToolbarSlot at, IList<string> picked, bool byName)
+        {
+            if (_statedChosen != null && _statedChosen == chosen && _statedFacet == facet && ListComparison.Same(_stated, selection)
+                && ListComparison.Same(_statedSlots, picked))
+                return false;
+
+            _statedChosen = chosen;
+            _statedFacet = facet;
+            _stated.Clear();
+            _stated.AddRange(selection);
+            _statedSlots.Clear();
+            _statedSlots.AddRange(picked);
+
+            var signal = _forEvents && Signals(selection, chosen);
+            var forecast = _editor.Picks.Forecast(_system, selection, chosen, facet, _forEvents, at, signal, _replacing, _keeps);
+            var matched = byName ? new List<string>(picked) : forecast.Matched;
+            if (forecast.Makes && _newName == null)
+                _newName = _editor.Picks.NewSlotName(_system);
+
+            // The name is in hand to be given the first time the picks come to make a slot of their own.
+            if (!byName && forecast.Makes && selection.Count > 0 && !_named)
+            {
+                _named = true;
+                _arriving = true;
+            }
+
+            var changed = _arriving || _forecast == null || forecast.Signal != _forecast.Signal || forecast.Changes != _forecast.Changes
+                || !ListComparison.Same(matched, _fills);
+            _forecast = forecast;
+            _fills = matched;
+            _fillsText = matched == null ? null : SentenceText.Slots(matched);
+            return changed;
+        }
+
+        /// <summary>Puts the slot the picks name into the heading: the slots already made in italics, the slot they change, or the new slot's name to be given.</summary>
+        public void Reword()
+        {
+            if (_part == null)
+                return;
+
+            var texts = _editor.Texts;
+
+            // Slots picked by name leave the heading the picker's own name until one is.
+            if (_fills != null && _fills.Count == 0)
+            {
+                Fixed(_title, false, null);
+                _part.Mark = null;
+                return;
+            }
+
+            _part.Mark = _forecast != null && _forecast.Signal ? Symbols.Signal : Symbols.Block;
+
+            if (_fills != null)
+            {
+                Fixed(_fillsText, true, texts.PickSlotMatched);
+                return;
+            }
+
+            // The slot the picks change keeps its name, so the heading names it as it is.
+            if (_forecast?.Changes != null)
+            {
+                Fixed(_forecast.Changes.Id, false, texts.PickSlotChanges);
+                return;
+            }
+
+            // Made once, so the heading read again on its cadence finds nothing changed.
+            if (_accepts == null)
+            {
+                _accepts = name => NameRules.Clean(name).Length == 0 || _editor.Picks.Frees(_system, name);
+                _renames = _editor.Renaming(name =>
+                {
+                    _slotName = NameRules.Clean(name);
+                    Reword();
+                }, _accepts);
+            }
+
+            _part.Text = NewName;
+            _part.Name = _slotName;
+            _part.Emphasized = false;
+            _part.About = texts.PickSlotNameAbout;
+            _part.Accepts = _accepts;
+            _part.Renames = _renames;
+
+            // Set once and left, as the editor takes it up once for the part it is set on.
+            if (!_arriving)
+                return;
+
+            _part.NamedOnArrival = true;
+            _arriving = false;
+        }
+
+        /// <summary>Has the heading say <paramref name="text" />, in italics where <paramref name="emphasized" />, with nothing to rename and <paramref name="about" /> as its note.</summary>
+        void Fixed(string text, bool emphasized, string about)
+        {
+            _part.Renames = null;
+            _part.Accepts = null;
+            _part.Name = "";
+            _part.Text = text;
+            _part.Emphasized = emphasized;
+            _part.About = about;
+        }
+
+        /// <summary>Whether <paramref name="chosen" /> is a signal a toolbar sends on the blocks <paramref name="selection" />, which a signal slot carries rather than the blocks.</summary>
+        bool Signals(IList<long> selection, string chosen)
+        {
+            var picked = chosen.Length == 0 ? null : Vocabulary.Find(Vocabulary.EventsOf(_editor.World, selection), chosen);
+            return picked != null && picked.Answered;
+        }
+    }
+}

@@ -7,8 +7,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
 /// The list of kinds is a tree to the eye: kinds of block that are one thing to a player stand under a family, such as a
-/// sliding door under Door, and choosing the family takes every block in it. A family with one kind on the construct is
-/// that kind alone.
+/// sliding door under Door, and choosing the family takes every block in it. A family with one kind on the construct still
+/// heads that kind.
 /// </summary>
 public class KindTreeTests
 {
@@ -52,15 +52,16 @@ public class KindTreeTests
         Assert.Equal(new[] { ("Door", false), ("Sliding Door", true) }, kinds);
     }
 
-    /// <summary>A family with a single kind on the construct is not listed; the kind stands on its own.</summary>
+    /// <summary>A family with a single kind on the construct is listed all the same, with its kind under it.</summary>
     [Fact]
-    public void AFamilyWithOneKindStandsAsThatKind()
+    public void AFamilyWithOneKindStillHeadsIt()
     {
         var screen = OnATask();
 
         var kinds = Blocks(screen).Kinds();
-        Assert.DoesNotContain(kinds, k => k.Text == "Hangar door");
-        Assert.Contains(kinds, k => k.Text == "Hangar Door" && !k.IsNested);
+        var family = kinds.FindIndex(k => k.Text == "Hangar door" && !k.IsNested);
+        Assert.True(family >= 0, "no Hangar door family");
+        Assert.Equal(new[] { "Hangar Door" }, kinds.Skip(family + 1).TakeWhile(k => k.IsNested).Select(k => k.Text));
     }
 
     /// <summary>Opening the list of kinds gives the keyboard to the box that narrows it.</summary>

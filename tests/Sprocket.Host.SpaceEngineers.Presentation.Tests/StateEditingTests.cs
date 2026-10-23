@@ -630,6 +630,27 @@ public class StateEditingTests
         Assert.Equal("place", system.FindState("where")!.Type);
     }
 
+    /// <summary>A state is refused a name a type has in another case, and takes its own name in another case.</summary>
+    [Theory]
+    [InlineData("SIDE", "where")]
+    [InlineData("Where", "Where")]
+    public void AStatesNameIsCheckedInAnyCase(string typed, string after)
+    {
+        var screen = OnSystem(Program, out var system);
+        var editor = screen.Editor;
+        var view = editor.PressTab(editor.Texts.SystemState);
+        screen.Run(1);
+
+        var name = Target.Within(view).OfType<StateRow>().First().Name;
+        name.Command!.Execute();
+        screen.Run(1);
+        name.Box.Text = typed;
+        name.Box.Submit!.Execute();
+        screen.Run(1);
+
+        Assert.Equal(after, system.States[0].Name);
+    }
+
     /// <summary>A type's two choices can only be renamed, so a press renames one; once it has three, a press offers renaming and removing.</summary>
     [Fact]
     public void ATypesChoicesAreRenamedAtAPressUntilThereAreThree()

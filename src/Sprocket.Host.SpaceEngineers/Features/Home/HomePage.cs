@@ -211,7 +211,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         string FillAgain(Texts texts, AutomationSystem system, SystemInstance instance)
         {
             system.Acted(_used);
-            var again = SlotMarks.Changed(system, instance, _used);
+            var again = SlotMarks.Changed(Editor.Runner.Bindings, system, instance, _used);
             if (again == 0)
                 return "";
 

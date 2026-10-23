@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -10,9 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>The tooltips of the parts of a sentence: what a part holds, which its chip shortens, above what pressing it does.</summary>
     public static class PartTips
     {
-        /// <summary>How many blocks a tooltip names at most, the last line saying how many more there are where they do not fit.</summary>
-        public const int MostNamed = 8;
-
         /// <summary>
         /// The tooltip of <paramref name="part" />: what it holds where its chip shortens it, a part holding blocks said as
         /// <paramref name="held" />; and <paramref name="press" />, what pressing it does or why it cannot be pressed, or nothing
@@ -31,12 +27,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// The tooltip of <paramref name="part" />. Holding blocks, it says the slots they come from, then <paramref name="held" />
         /// over each block on a line of its own as <paramref name="world" /> calls it, with why it cannot be pressed last where it
-        /// cannot; holding none, it says <paramref name="press" />, what pressing it does or why it cannot be pressed.
+        /// cannot; naming slots the installation shown leaves empty, it says the slots and that they are empty, then
+        /// <paramref name="press" />, what pressing it does or why it cannot be pressed; holding nothing else, it says only that.
         /// </summary>
         public static string Blocks(Texts texts, GridWorld world, EntitiesSlot part, string held, string press)
         {
             var said = new StringBuilder();
-            if (part.Entities.Count == 0)
+            if (part.Entities.Count == 0 && !part.SaysSlots)
             {
                 Paragraph(said, press);
                 return said.ToString();
@@ -48,17 +45,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 Paragraph(said, Template.Fill(part.Slots.Count == 1 ? texts.PartFromSlot : texts.PartFromSlots, "slots", "**" + slots + "**"));
             }
 
+            // A slot the installation shown leaves empty is still named, so the line says which slot is waiting.
+            if (part.Entities.Count == 0)
+            {
+                Paragraph(said, texts.PartSlotEmpty);
+                Paragraph(said, press);
+                return said.ToString();
+            }
+
             Paragraph(said, held);
             var named = new List<Mention>();
-            var more = SentenceText.Listed(world, part.Entities, MostNamed, named);
+            HeldBlocks.List(texts, world, part.Entities, part.RequiresAll, named);
             foreach (var block in named)
                 said.Append("- ").Append(Markdown.Escape(block.Text)).Append('\n');
-
-            if (more > 0)
-            {
-                var words = part.RequiresAll ? texts.SlotAndMore : texts.SlotOrMore;
-                said.Append("- ").Append(Markdown.Escape(Template.Fill(words, "count", more.ToString(CultureInfo.InvariantCulture)))).Append('\n');
-            }
 
             if (part.Opens == null)
                 Paragraph(said, press);

@@ -280,6 +280,49 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return FindPart(name) != null || FindType(name) != null || FindState(name) != null;
         }
 
+        /// <summary>Whether one of its slots, types or states is called <paramref name="name" /> in any case: the names the editor refuses for another.</summary>
+        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
+        public bool TakesInAnyCase(string name)
+        {
+            return FindPartInAnyCase(name) != null || TypeInAnyCase(name) || StateInAnyCase(name);
+        }
+
+        /// <summary>The slot called <paramref name="name" /> in any case, or null where it has none.</summary>
+        public Part FindPartInAnyCase(string name)
+        {
+            foreach (var part in _parts)
+            {
+                if (SameInAnyCase(part.Id, name))
+                    return part;
+            }
+
+            return null;
+        }
+
+        bool TypeInAnyCase(string name)
+        {
+            foreach (var type in _types)
+            {
+                if (SameInAnyCase(type.Name, name))
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool StateInAnyCase(string name)
+        {
+            foreach (var state in _states)
+            {
+                if (SameInAnyCase(state.Name, name))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool SameInAnyCase(string one, string other) => string.Equals(one, other, StringComparison.OrdinalIgnoreCase);
+
         /// <summary>Puts its slots in the order of <paramref name="order" />, which holds every one of them.</summary>
         public void Arrange(IList<Part> order)
         {

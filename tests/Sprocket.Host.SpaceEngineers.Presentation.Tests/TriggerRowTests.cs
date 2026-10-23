@@ -18,7 +18,7 @@ public class TriggerRowTests
     {
         var sim = Built();
 
-        Assert.Equal(new[] { "When", "Airlock Button", "button 1 is pressed", "then run", "Sequence 1" }, Said(sim.Editor.Triggers()[0]));
+        Assert.Equal(new[] { "When", "slot 1", "button 1 is pressed", "then run", "Sequence 1" }, Said(sim.Editor.Triggers()[0]));
     }
 
     /// <summary>Each part is pressed by its own command, the one that opens the question it was answered with.</summary>
@@ -77,7 +77,7 @@ public class TriggerRowTests
         row.Show(sim.World, sim.Texts);
 
         Assert.Same(first, row.Within().OfType<SlotChip>().First());
-        Assert.Equal(new[] { "When", "Airlock Button", "then run", "Sequence 1" }, Said(row));
+        Assert.Equal(new[] { "When", "slot 1", "then run", "Sequence 1" }, Said(row));
     }
 
     /// <summary>A trigger nobody may delete from here has no bin.</summary>

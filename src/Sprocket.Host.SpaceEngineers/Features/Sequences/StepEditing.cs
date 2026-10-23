@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (act == null || act.Sets)
                 return false;
 
-            var chosen = act.Names(Vocabulary.ActionsFor(_editor.Runner.Bindings, _editor.Seen(_sequence.System, act.Targets)));
+            var chosen = act.Names(_editor.SlotBlocks.Actions(_sequence.System, act.Targets));
             return chosen != null && chosen.Lasts;
         }
 
@@ -67,24 +67,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>
         /// Offers the ways <paramref name="test" /> can read its blocks in a menu under the part pressed, in the sentence's own
-        /// words, the one it reads them by marked, and changes it to the one chosen as one edit; a sum and an average only of
-        /// what is <paramref name="numeric" />.
+        /// words, those of a line naming slots where <paramref name="slotted" />, the one it reads them by marked, and changes it
+        /// to the one chosen as one edit; a sum and an average only of what is <paramref name="numeric" />.
         /// </summary>
-        public void Quantify(Step step, Comparison test, bool numeric)
+        public void Quantify(Step step, Comparison test, bool numeric, bool slotted)
         {
             _editor.AskHere("");
             for (var i = 0; i < SentenceText.Readings.Count; i++)
             {
                 var reading = SentenceText.Readings[i];
                 if (numeric || reading == Quantifier.Any || reading == Quantifier.All)
-                    Quantifying(step, test, reading);
+                    Quantifying(step, test, reading, slotted);
             }
         }
 
-        /// <summary>Offers reading the blocks of <paramref name="test" /> by <paramref name="quantifier" /> as an answer to the standing menu, marked where the test reads them so, and changes the test to it as one edit.</summary>
-        void Quantifying(Step step, Comparison test, Quantifier quantifier)
+        /// <summary>
+        /// Offers reading the blocks of <paramref name="test" /> by <paramref name="quantifier" /> as an answer to the standing
+        /// menu, in the words of a line naming slots where <paramref name="slotted" />, marked where the test reads them so, and
+        /// changes the test to it as one edit.
+        /// </summary>
+        void Quantifying(Step step, Comparison test, Quantifier quantifier, bool slotted)
         {
-            _editor.Answer(SentenceText.Quantified(quantifier), () =>
+            _editor.Answer(SentenceText.Reading(quantifier, slotted), () =>
             {
                 if (quantifier == test.Quantifier)
                     return;
@@ -100,30 +104,50 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var index = _sequence.Steps.IndexOf(step);
 
-            _editor.Push(new PickPage(_editor, "Do something", false,
-                _editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
-                answer =>
+            Open(slots => new PickPage(_editor, "Do something", false,
+                slots ? new List<long>() : _editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
+                answer => Named(answer, step.Targets, named =>
                 {
-                    var named = Named(answer, step.Targets);
                     var lasts = Vocabulary.Lasts(_editor.World, answer.Targets, answer.Chosen, answer.Form);
                     _editor.Do(_sequence,
                         new ChangeStep(index, step, named, answer.Chosen,
                             answer.Form, Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, answer.Form),
                             answer.Arguments, Awaited(index, step, lasts)));
                     _editor.Pop();
-                }, arguments: step.Arguments, opens: opens, facet: _editor.Picks.Facet(_sequence.System, step.Targets)));
+                }), arguments: step.Arguments, opens: opens, facet: _editor.Picks.Facet(_sequence.System, step.Targets)), step.Targets);
         }
 
         /// <summary>
-        /// The names the step answered by <paramref name="answer" /> acts on, in place of <paramref name="replacing" /> where it
-        /// replaces a list: a slot of the facet chosen, where what it does is a member of a type the host provides.
+        /// Opens the selector <paramref name="make" /> makes, of blocks, its first column's heading switching to the slots the
+        /// logic system already has; <paramref name="make" /> is told which of the two to list. The pick goes in place of the
+        /// list <paramref name="replacing" />, or null for a new one.
         /// </summary>
-        List<string> Named(PickAnswer answer, IList<string> replacing)
+        void Open(Func<bool, PickPage> make, IList<string> replacing)
         {
-            var type = answer.Facet.Length == 0 ? null : Vocabulary.TypeOf(_editor.World, answer.Targets, answer.Chosen);
-            return type == null
-                ? _editor.Picks.Named(_sequence.System, answer.Targets, replacing)
-                : _editor.Picks.Named(_sequence.System, type, answer.Facet, answer.Targets, replacing);
+            var source = new SourceSwitch(_editor, (choice, slots) => Sourced(make(slots), choice, slots, replacing), null);
+            _editor.Push(source.Open(PickSource.Blocks));
+        }
+
+        /// <summary>
+        /// <paramref name="page" />, headed by <paramref name="choice" />, naming the slots of the sequence's logic system, which it
+        /// lists where <paramref name="slots" /> says so, in place of the list <paramref name="replacing" /> or null for a new one.
+        /// </summary>
+        PickPage Sourced(PickPage page, SourceSwitch choice, bool slots, IList<string> replacing)
+        {
+            page.Source = choice;
+            page.Slotted = _sequence.System;
+            page.ListsSlots = slots;
+            page.Replacing = replacing;
+            return page;
+        }
+
+        /// <summary>
+        /// Hands <paramref name="named" /> the names the step answered by <paramref name="answer" /> acts on, in place of
+        /// <paramref name="replacing" /> or null for a new step.
+        /// </summary>
+        void Named(PickAnswer answer, IList<string> replacing, Action<List<string>> named)
+        {
+            _editor.Picks.Name(_sequence.System, answer, false, replacing, named);
         }
 
         /// <summary>
@@ -140,14 +164,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var origin = _editor.Depth;
 
-            _editor.Push(new PickPage(_editor, "Do something", false,
+            Open(slots => new PickPage(_editor, "Do something", false,
                 new List<long>(), "", ReachKind.Native,
-                answer =>
+                answer => Named(answer, null, named =>
                 {
                     var step = new Act(answer.Chosen);
                     step.Form = answer.Form;
                     step.Provider = Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, answer.Form);
-                    var named = Named(answer, null);
                     foreach (var target in named)
                         step.Targets.Add(target);
 
@@ -158,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         ? new AddStep(ChangeKind.AddStep, at, step, new Await())
                         : new AddStep(ChangeKind.AddStep, at, step));
                     _editor.UnwindTo(origin);
-                }));
+                })), null);
         }
 
         /// <summary>Asks what to check, and adds an if that checks it, with nothing in it yet, at the line <paramref name="at" />.</summary>
@@ -287,12 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void Ask(string lead, BranchTest was, OpeningColumn opens, Action<BranchTest, NewState> chosen)
         {
             var source = new SourceSwitch(_editor,
-                choice =>
-                {
-                    var page = TestPage(was as Comparison, opens, test => chosen(test, null));
-                    page.Source = choice;
-                    return page;
-                },
+                (choice, slots) => Sourced(TestPage(was as Comparison, opens, test => chosen(test, null), slots), choice, slots, (was as Comparison)?.Targets),
                 choice =>
                 {
                     var page = StateTestPage(lead, was as StateTest, (test, made) => chosen(test, made));
@@ -300,30 +318,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     return page;
                 });
 
-            _editor.Push(source.Open(was is StateTest));
+            _editor.Push(source.Open(was is StateTest ? PickSource.States : PickSource.Blocks));
         }
 
-        /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>
-        PickPage TestPage(Comparison test, OpeningColumn opens, Action<Comparison> chosen)
+        /// <summary>
+        /// The picker a test is made and changed with, opened on <paramref name="test" /> where there is one, listing the slots
+        /// already made where <paramref name="slots" /> says so; <paramref name="chosen" /> is given the test made.
+        /// </summary>
+        PickPage TestPage(Comparison test, OpeningColumn opens, Action<Comparison> chosen, bool slots)
         {
-            var value = test?.Names(Vocabulary.ActionsFor(_editor.Runner.Bindings, _editor.Seen(_sequence.System, test.Targets)));
+            var value = test?.Names(_editor.SlotBlocks.Actions(_sequence.System, test.Targets));
             var stated = value != null && value.IsStatus && (test.Relation == Relation.Is || test.Relation == Relation.IsNot);
             return new PickPage(_editor, "Check something", false,
-                test == null ? new List<long>() : _editor.Blocks(_sequence.System, test.Targets),
+                test == null || slots ? new List<long>() : _editor.Blocks(_sequence.System, test.Targets),
                 test == null ? "" : stated ? ComparisonQuestion.Id(test.MemberId, test.Value.Said) : test.MemberId,
                 stated ? ReachKind.Native : ReachKind.Value,
-                answer => chosen(Test(answer, test)),
+                answer => Named(answer, test?.Targets, named => chosen(Test(answer, named, test))),
                 true, test?.Quantifier ?? Quantifier.Any,
                 test == null ? null : stated ? new[] { ComparisonQuestion.Of(test.Relation) } : new[] { ComparisonQuestion.Of(test.Relation), test.Value },
                 opens, forTests: true, facet: test == null ? "" : _editor.Picks.Facet(_sequence.System, test.Targets));
         }
 
-        /// <summary>The test a pick for one comes to, changing <paramref name="was" /> where there was one.</summary>
-        Comparison Test(PickAnswer answer, Comparison was)
+        /// <summary>The test a pick for one comes to, reading the slots <paramref name="named" />, changing <paramref name="was" /> where there was one.</summary>
+        Comparison Test(PickAnswer answer, List<string> named, Comparison was)
         {
             var test = new Comparison();
             test.Quantifier = answer.Quantifier;
-            var named = Named(answer, was?.Targets);
             foreach (var target in named)
                 test.Targets.Add(target);
 

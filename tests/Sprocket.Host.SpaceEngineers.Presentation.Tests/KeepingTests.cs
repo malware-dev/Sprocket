@@ -96,7 +96,7 @@ public class KeepingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Run(2);
 
-        Assert.Equal("\u2026 Airlock Inner Door", screen.Editor.Screen.Title());
+        Assert.Equal("", Chosen(screen));
         Assert.False(screen.Editor.Current.CanPrimary, "the picker would finish with nothing chosen");
         Assert.False(screen.Shows("radius"), "the values column still asks for the radius");
     }
@@ -112,7 +112,7 @@ public class KeepingTests
         screen.Editor.PressBlock("Cockpit Light");
         screen.Run(2);
 
-        Assert.Equal("Radius on Cockpit Light", screen.Editor.Screen.Title());
+        Assert.Equal("radius", Chosen(screen));
         Assert.True(screen.Shows("5.0"), "the value did not come back with the action");
 
         screen.Editor.DoublePressBlock("Cockpit Light");
@@ -136,10 +136,14 @@ public class KeepingTests
         screen.Editor.DoublePressChoice("falloff");
         screen.Run(2);
 
-        Assert.Equal("Falloff on Cockpit Light", screen.Editor.Screen.Title());
+        Assert.Equal("falloff", Chosen(screen));
         Assert.Equal(1, screen.Editor.Pick().Arguments!.Form.Count);
         Assert.False(screen.Shows("5.0"), "the radius's value was given to the falloff");
     }
+
+    /// <summary>What the open picker has chosen to do, as its row says it, or empty where it has chosen nothing.</summary>
+    static string Chosen(Screen screen) =>
+        screen.Editor.Pick().Stages[1].Entries().FirstOrDefault(entry => entry.IsChosen && !entry.IsHeading)?.Text ?? "";
 
     /// <summary>The radius step, with the picker opened on its blocks.</summary>
     static Screen OnTheBlocks()

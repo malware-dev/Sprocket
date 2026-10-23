@@ -10,6 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _mark;
         string _markAbout;
         string _text;
+        bool _emphasized;
         ICommand _opens;
         string _about;
         EditorScreen _on;
@@ -54,6 +55,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _text; }
             set { Set(ref _text, value ?? ""); }
+        }
+
+        /// <summary>Whether the words are in italics: names this part shows of things it does not stand for, which it cannot rename.</summary>
+        public bool Emphasized
+        {
+            get { return _emphasized; }
+            set { Set(ref _emphasized, value); }
         }
 
         /// <summary>What pressing this part does where it cannot be renamed, such as opening what it names, or null for nothing.</summary>

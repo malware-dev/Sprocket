@@ -1,5 +1,7 @@
 ﻿using Sprocket.Host.SpaceEngineers.Features.Look;
+using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
@@ -20,6 +22,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static string Of(EntityEvent moment)
         {
             return Symbols.Signal;
+        }
+
+        /// <summary>The mark a slot is shown with wherever it is named: a signal's, or a block's.</summary>
+        public static string OfSlot(Part part) => part != null && part.IsSignal ? Symbols.Signal : Symbols.Block;
+
+        /// <summary>The mark of each slot of the blueprint <paramref name="system" /> these names are, for a line naming them; null where the system names blocks.</summary>
+        public static List<string> OfSlots(AutomationSystem system, IList<string> names)
+        {
+            if (system == null || !system.IsBlueprint)
+                return null;
+
+            var marks = new List<string>(names.Count);
+            foreach (var name in names)
+                marks.Add(OfSlot(system.FindPart(name)));
+
+            return marks;
         }
 
         /// <summary>What a member under <paramref name="mark" /> says as part of the whole it is shown in, or null where it says nothing.</summary>

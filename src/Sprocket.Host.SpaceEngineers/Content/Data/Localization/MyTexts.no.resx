@@ -160,7 +160,28 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Logikksystem {number}</value>
   </data>
   <data name="Sprocket.Slot.Numbered" xml:space="preserve">
-    <value>Plass {number}</value>
+    <value>plass {number}</value>
+  </data>
+  <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
+    <value>Typen blokk denne plassen tar. Trykk for å velge en annen.</value>
+  </data>
+  <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
+    <value>En smalere type kan etterlate installasjoner andre steder, på andre konstruksjoner eller i biblioteket, med blokker som ikke lenger passer. Gjøre den smalere?</value>
+  </data>
+  <data name="Sprocket.Slot.NarrowYes" xml:space="preserve">
+    <value>Gjør den smalere</value>
+  </data>
+  <data name="Sprocket.Slot.NarrowCancel" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="Sprocket.Slot.SharedQuestion" xml:space="preserve">
+    <value>Andre steg eller utløsere bruker {slot} også. Endre den for alle, eller gi denne en egen plass?</value>
+  </data>
+  <data name="Sprocket.Slot.SharedEveryone" xml:space="preserve">
+    <value>Endre den for alle</value>
+  </data>
+  <data name="Sprocket.Slot.SharedOwn" xml:space="preserve">
+    <value>En egen plass</value>
   </data>
   <data name="Sprocket.System.InstallationPanel" xml:space="preserve">
     <value>Installasjonspanel</value>
@@ -493,6 +514,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Part.FromSlot" xml:space="preserve">
     <value>Fra plassen {slots}.</value>
   </data>
+  <data name="Sprocket.Part.SlotEmpty" xml:space="preserve">
+    <value>Ingenting fyller den i denne installasjonen.</value>
+  </data>
   <data name="Sprocket.Part.FromSlots" xml:space="preserve">
     <value>Fra plassene {slots}.</value>
   </data>
@@ -678,6 +702,30 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
     <value>Tilstander</value>
+  </data>
+  <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
+    <value>Eksisterende plass</value>
+  </data>
+  <data name="Sprocket.Pick.Slots" xml:space="preserve">
+    <value>Plasser</value>
+  </data>
+  <data name="Sprocket.Pick.NoSlots" xml:space="preserve">
+    <value>Dette logikksystemet har ingen plasser for blokker ennå.</value>
+  </data>
+  <data name="Sprocket.Pick.SlotFillsOne" xml:space="preserve">
+    <value>1 blokk i denne installasjonen</value>
+  </data>
+  <data name="Sprocket.Pick.SlotFills" xml:space="preserve">
+    <value>{count} blokker i denne installasjonen</value>
+  </data>
+  <data name="Sprocket.Pick.SlotMatched" xml:space="preserve">
+    <value>Disse plassene finnes allerede, så dette navngir dem slik de er.</value>
+  </data>
+  <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
+    <value>Plassen blokkene som er valgt endrer. Den beholder navnet sitt.</value>
+  </data>
+  <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
+    <value>Navnet på den nye plassen blokkene som er valgt lager. Trykk for å gi den nytt navn.</value>
   </data>
   <data name="Sprocket.Pick.NewState" xml:space="preserve">
     <value>En ny tilstand</value>
@@ -1571,6 +1619,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Change.Cadence" xml:space="preserve">
     <value>endring av hvor ofte den kjører</value>
+  </data>
+  <data name="Sprocket.Change.SlotType" xml:space="preserve">
+    <value>endre typen til en plass</value>
   </data>
   <data name="Sprocket.Change.Optional" xml:space="preserve">
     <value>endre en plass til valgfri</value>

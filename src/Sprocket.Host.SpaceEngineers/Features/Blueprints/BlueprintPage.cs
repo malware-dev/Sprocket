@@ -330,7 +330,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void Needs(SystemInstance chosen, int unfilled)
         {
             var texts = Editor.Texts;
-            var again = chosen == null ? 0 : SlotMarks.Changed(_system, chosen, _used);
+            var again = chosen == null ? 0 : SlotMarks.Changed(Editor.Runner.Bindings, _system, chosen, _used);
             var count = again > 0 ? again : unfilled;
 
             _needs.IsVisible = chosen != null && count > 0;
@@ -366,7 +366,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             row.Name = part.Id;
             row.Short = part.IsSignal ? part.Short : "";
-            row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
+            row.Mark = MarkText.OfSlot(part);
             row.Described = part.Annotation;
 
             var gone = row.Take(Editor.Runner.Bindings, chosen?.FilledWith(part.Id),

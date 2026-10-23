@@ -141,16 +141,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// Whether <paramref name="when" /> compares a value on the blocks <paramref name="sources" /> stand for, rather than
-        /// watching for one of the moments they say: anything but Sprocket's own state coming to be.
+        /// Whether <paramref name="when" /> compares a value on blocks raising <paramref name="events" />, rather than watching
+        /// for one of those moments: anything but Sprocket's own state coming to be.
         /// </summary>
-        public static bool Compares(Bindings bindings, WhenTrigger when, IList<string> sources)
+        public static bool Compares(WhenTrigger when, IList<EntityEvent> events)
         {
-            if (when.Provider != BlockKinds.Own || bindings == null)
+            if (when.Provider != BlockKinds.Own)
                 return true;
 
             bool inState;
-            return Change(EventsFor(bindings, sources), when.EventId, when.Relation, when.Value, out inState) == null || !inState;
+            return Change(events, when.EventId, when.Relation, when.Value, out inState) == null || !inState;
         }
 
         /// <summary>

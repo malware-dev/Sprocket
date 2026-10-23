@@ -55,14 +55,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public KeptAttributes Attributes { get; set; }
 
         /// <summary>Whether a block whose kind stands in <paramref name="lineage" />, nearest first as a kind's lineage has it, may fill this part.</summary>
-        public bool Fits(IList<string> lineage)
+        public bool Fits(IList<string> lineage) => Takes(Expects, lineage);
+
+        /// <summary>Whether a slot expecting <paramref name="expects" />, empty for any block, takes a block whose kind stands in <paramref name="lineage" />, nearest first.</summary>
+        public static bool Takes(string expects, IList<string> lineage)
         {
-            if (Expects.Length == 0)
+            if (expects.Length == 0)
                 return true;
 
-            for (var i = 0; i < lineage.Count; i++)
+            foreach (var type in lineage)
             {
-                if (string.Equals(lineage[i], Expects, System.StringComparison.Ordinal))
+                if (string.Equals(type, expects, System.StringComparison.Ordinal))
                     return true;
             }
 

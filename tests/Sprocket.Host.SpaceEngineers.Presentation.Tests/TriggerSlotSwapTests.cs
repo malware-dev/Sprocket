@@ -7,8 +7,8 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// Trading the one block a trigger watches for another of the same kind keeps the slot, as a step's trade does: its name,
-/// its description and what the other installations filled it with.
+/// Trading the blocks a trigger watches, where nothing else uses its slot, changes the slot, as a step's trade does: it keeps
+/// its name, its description and what the other installations filled it with, and its type follows the blocks.
 /// </summary>
 public class TriggerSlotSwapTests
 {
@@ -46,15 +46,60 @@ public class TriggerSlotSwapTests
         Assert.Equal(new[] { "Airlock Inner Door" }, sim.Editor.Seen(system, trigger.Sources).Select(Shown(sim)));
     }
 
-    /// <summary>A block of another kind than the slot expects is a slot of its own.</summary>
+    /// <summary>A block of another kind changes the slot's type to follow it once asked, and the slot keeps its name.</summary>
     [Fact]
-    public void ABlockOfAnotherKindMakesASlotOfItsOwn()
+    public void ABlockOfAnotherKindChangesTheSlotsType()
     {
         var sim = OnTheInnerDoor(out var system, out var slot);
+        var was = slot.Expects;
 
         Repick(sim, system, "Hangar Door");
+        Assert.True(sim.Editor.Screen.HasQuestion, "a type that takes less was not asked about");
+        sim.Editor.PressAnswer(sim.Editor.Texts.SlotNarrowYes);
+        sim.Tick();
+        sim.Tick();
 
-        Assert.NotEqual(slot.Id, Assert.Single(((MomentTrigger)system.Triggers[0]).Sources));
+        Assert.Equal(slot.Id, Assert.Single(((MomentTrigger)system.Triggers[0]).Sources));
+        Assert.NotEqual(was, slot.Expects);
+        Assert.Equal(new[] { "Hangar Door" }, sim.Editor.Seen(system, new[] { slot.Id }).Select(Shown(sim)));
+    }
+
+    /// <summary>
+    /// A button trigger whose signal slot another trigger uses too asks before it changes the slot; given a slot of its own,
+    /// it is answered by the button picked, and the other trigger keeps the slot and its button.
+    /// </summary>
+    [Fact]
+    public void ASharedSignalSlotAsks()
+    {
+        var sim = Simulation.Fresh();
+        sim.Machine.Panel(30, "Port Button");
+        sim.Tick();
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Editor.Back();
+        sim.Tick();
+        var system = sim.Editor.Program.Systems[0];
+        var part = ((SignalTrigger)system.Triggers[0]).Part;
+        system.AddTrigger(Automation.Copied(system.Triggers[0], part));
+        sim.Editor.Program.Edited();
+        sim.Tick();
+
+        sim.Editor.Starts.ChangeTrigger(system, system.Triggers[0], OpeningColumn.Blocks, false);
+        sim.Tick();
+        sim.Tick();
+        sim.Editor.PressBlock("Port Button");
+        sim.Editor.PressChoice("button 1 is pressed");
+        sim.Editor.PressPrimary();
+        sim.Tick();
+        Assert.True(sim.Editor.Screen.HasQuestion, "nothing asked about a signal slot another trigger uses");
+        sim.Editor.PressAnswer(sim.Editor.Texts.SlotSharedOwn);
+        sim.Tick();
+        sim.Tick();
+
+        var own = ((SignalTrigger)system.Triggers[0]).Part;
+        Assert.NotEqual(part, own);
+        Assert.Equal(new[] { "Port Button" }, sim.Editor.Seen(system, new[] { own }).Select(Shown(sim)));
+        Assert.Equal(part, ((SignalTrigger)system.Triggers[1]).Part);
+        Assert.Equal(new[] { "Airlock Button" }, sim.Editor.Seen(system, new[] { part }).Select(Shown(sim)));
     }
 
     /// <summary>A logic system run when the inner door finishes closing, with that trigger's slot.</summary>

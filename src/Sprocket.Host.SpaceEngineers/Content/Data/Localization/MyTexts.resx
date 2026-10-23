@@ -209,8 +209,36 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Name shown for a logic system that has no name of its own and whose blocks' names share no leading words, such as in the editor's heading bar on its screen. {number} is filled with the logic system's number.</comment>
   </data>
   <data name="Sprocket.Slot.Numbered" xml:space="preserve">
-    <value>Slot {number}</value>
-    <comment>Name given to a slot Sprocket makes by itself: a slot for a set of several blocks the steps and triggers name, or the signal slot of a copied button trigger. Shown as the slot's name on a logic system's screen and the installation panel. {number} is the first number not already used, counting on from how many slots the logic system has.</comment>
+    <value>slot {number}</value>
+    <comment>Name given to every new slot: the slot the blocks or buttons picked for a step or a trigger make, the signal slot of a copied button trigger. Shown in the picker's heading to be renamed there, on the lines of a sequence and a logic system, and on the installation panel. {number} is the first number not already used, counting on from how many slots the logic system has. Written as the game names its blocks, in the player's language.</comment>
+  </data>
+  <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
+    <value>The type of block this slot takes. Press to choose another.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the type of block a block slot takes, under the Expects heading on the slot's page. Pressing it opens a picker listing the types the slot can take, wider or narrower, down to one kind of block; only those offering everything the slot's steps and triggers do with it.</comment>
+  </data>
+  <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
+    <value>A narrower type may leave installations elsewhere, on other constructs or in the library, with blocks that no longer fit. Narrow it?</value>
+    <comment>PLACEHOLDER, to be written. Question asked on Done in the picker of a slot's type, where the type chosen takes fewer kinds of block than the slot takes now. Installations on this construct whose blocks no longer fit are marked to fill the slot again; those elsewhere cannot be checked.</comment>
+  </data>
+  <data name="Sprocket.Slot.NarrowYes" xml:space="preserve">
+    <value>Narrow it</value>
+    <comment>PLACEHOLDER, to be written. Answer to the question about narrowing a slot's type: the slot takes the narrower type.</comment>
+  </data>
+  <data name="Sprocket.Slot.NarrowCancel" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>PLACEHOLDER, to be written. Answer to the question about narrowing a slot's type, the one Enter takes: the slot keeps its type, and the picker stays open.</comment>
+  </data>
+  <data name="Sprocket.Slot.SharedQuestion" xml:space="preserve">
+    <value>Other steps or triggers use {slot} too. Change it for all of them, or give this one a slot of its own?</value>
+    <comment>PLACEHOLDER, to be written. Question asked on Done in the picker, where the blocks or buttons picked for a step or a trigger fill no slot the logic system has, and the slot the step or trigger named is used by other steps or triggers as well. {slot} is that slot's name.</comment>
+  </data>
+  <data name="Sprocket.Slot.SharedEveryone" xml:space="preserve">
+    <value>Change it for all</value>
+    <comment>PLACEHOLDER, to be written. Answer to the question about a slot other steps or triggers use too: the slot takes the blocks picked, for every step and trigger that names it.</comment>
+  </data>
+  <data name="Sprocket.Slot.SharedOwn" xml:space="preserve">
+    <value>A slot of its own</value>
+    <comment>PLACEHOLDER, to be written. Answer to the question about a slot other steps or triggers use too, the one Enter takes: the step or trigger being changed gets a new slot holding the blocks picked, and the others keep the slot as it was.</comment>
   </data>
   <data name="Sprocket.System.InstallationPanel" xml:space="preserve">
     <value>Installation panel</value>
@@ -646,6 +674,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>From the slot {slots}.</value>
     <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks: the slot of the logic system the blocks fill. {slots} is the slot's name, in bold.</comment>
   </data>
+  <data name="Sprocket.Part.SlotEmpty" xml:space="preserve">
+    <value>Nothing fills it in this installation.</value>
+    <comment>PLACEHOLDER, to be written. In the tooltip on the slot a step or a trigger names, under the line naming the slot, where the installation shown has no block in it.</comment>
+  </data>
   <data name="Sprocket.Part.FromSlots" xml:space="preserve">
     <value>From the slots {slots}.</value>
     <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks, where they come from more than one slot. {slots} is the slots' names, in bold, separated by commas.</comment>
@@ -884,7 +916,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Pick.Source" xml:space="preserve">
     <value>Source</value>
-    <comment>Heading of the first column of the selector an if, an otherwise if or a when is made with, before the box choosing what it is about: blocks, or one of the logic system's states. Shown in capitals.</comment>
+    <comment>Heading of the first column of the selector a step, an if, an otherwise if or a when is made with, before the box choosing what it is about: blocks, a slot already made, or one of the logic system's states. Shown in capitals.</comment>
   </data>
   <data name="Sprocket.Pick.SourceBlocks" xml:space="preserve">
     <value>Blocks</value>
@@ -893,6 +925,38 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
     <value>States</value>
     <comment>Choice in the Source box heading the first column of the selector an if, an otherwise if or a when is made with: it checks or watches one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
+    <value>Existing slot</value>
+    <comment>PLACEHOLDER, to be written. Choice in the Source box heading the first column of the selector a step, an if, an otherwise if or a when is made with: it acts on, checks or watches a slot the logic system already has, picked by its name, instead of blocks.</comment>
+  </data>
+  <data name="Sprocket.Pick.Slots" xml:space="preserve">
+    <value>Slots</value>
+    <comment>PLACEHOLDER, to be written. Heading of the first column of a selector while it lists the logic system's slots, the Existing slot source chosen. Shown in capitals.</comment>
+  </data>
+  <data name="Sprocket.Pick.NoSlots" xml:space="preserve">
+    <value>This logic system has no slots of blocks yet.</value>
+    <comment>PLACEHOLDER, to be written. Said in the first column of a selector, the Existing slot source chosen, where the logic system has no slot holding blocks to list.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotFillsOne" xml:space="preserve">
+    <value>1 block in this installation</value>
+    <comment>PLACEHOLDER, to be written. Under a slot's name in the first column of a selector, the Existing slot source chosen, where one block fills the slot in the installation shown.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotFills" xml:space="preserve">
+    <value>{count} blocks in this installation</value>
+    <comment>PLACEHOLDER, to be written. Under a slot's name in the first column of a selector, the Existing slot source chosen: how many blocks fill the slot in the installation shown, where that is not one. {count} is that number, which may be 0.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotMatched" xml:space="preserve">
+    <value>These slots are already made, so this names them as they are.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the picker's heading while it shows, in italics, the names of slots the logic system already has: either the blocks picked fill them exactly, or they were picked by name with the Existing slot source. These names cannot be changed here.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
+    <value>The slot the blocks picked change. It keeps its name.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the picker's heading while it shows the name of the slot a step or a trigger names, which the blocks picked will change because no slot holds them already. Where other steps or triggers use the slot too, Done asks whether to change it for all of them.</comment>
+  </data>
+  <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
+    <value>The name of the new slot the blocks picked make. Press to rename it.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the picker's heading while it shows the name of the slot the blocks picked will make, which no slot the logic system has fills exactly. Pressing it renames the slot before it is made; the name starts as the next numbered slot name.</comment>
   </data>
   <data name="Sprocket.Pick.NewState" xml:space="preserve">
     <value>A new state</value>
@@ -2073,6 +2137,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Change.Cadence" xml:space="preserve">
     <value>changing how often it runs</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how often a repeating trigger comes round.</comment>
+  </data>
+  <data name="Sprocket.Change.SlotType" xml:space="preserve">
+    <value>changing a slot's type</value>
+    <comment>PLACEHOLDER, to be written. On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is changing the type of block a slot takes, on its slot's screen.</comment>
   </data>
   <data name="Sprocket.Change.Optional" xml:space="preserve">
     <value>making a slot optional</value>

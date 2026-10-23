@@ -92,7 +92,7 @@ public class KeepOrDiscardTests
     {
         var screen = Panel();
         var editor = screen.Editor;
-        editor.OpenSlot("Airlock Outer Door");
+        editor.OpenSlot(editor.SlotOf("Airlock Outer Door"));
         screen.Run(5);
         editor.Screen.Heading[0].Renames!("Aft Door");
         screen.Run(5);

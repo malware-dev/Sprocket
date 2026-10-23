@@ -24,7 +24,7 @@ public class SlotCategoryTests
         AddCategory(screen);
         AddCategory(screen);
 
-        Assert.Equal(new[] { "Airlock Button", "Airlock Outer Door", "Airlock Inner Door", "# Category 1", "# Category 2" }, Rows(screen));
+        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3", "# Category 1", "# Category 2" }, Rows(screen));
         Assert.Equal(new[] { "Category 1", "Category 2" }, editor.Program.Systems[0].Categories);
 
         editor.Screen.Undo!.Execute();
@@ -40,15 +40,15 @@ public class SlotCategoryTests
         var editor = screen.Editor;
         AddCategory(screen);
 
-        Carry(screen, Row(screen, "Airlock Button"), Row(screen, "# Category 1"), below: true);
+        Carry(screen, Row(screen, "slot 1"), Row(screen, "# Category 1"), below: true);
 
-        Assert.Equal(new[] { "Airlock Outer Door", "Airlock Inner Door", "# Category 1", "Airlock Button" }, Rows(screen));
-        Assert.Equal("Category 1", editor.Program.Systems[0].FindPart("Airlock Button")!.Category);
+        Assert.Equal(new[] { "slot 2", "slot 3", "# Category 1", "slot 1" }, Rows(screen));
+        Assert.Equal("Category 1", editor.Program.Systems[0].FindPart("slot 1")!.Category);
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
-        Assert.Equal(new[] { "Airlock Button", "Airlock Outer Door", "Airlock Inner Door", "# Category 1" }, Rows(screen));
-        Assert.Equal("", editor.Program.Systems[0].FindPart("Airlock Button")!.Category);
+        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3", "# Category 1" }, Rows(screen));
+        Assert.Equal("", editor.Program.Systems[0].FindPart("slot 1")!.Category);
     }
 
     /// <summary>A slot dropped among the slots under no category changes its place among them.</summary>
@@ -57,9 +57,9 @@ public class SlotCategoryTests
     {
         var screen = Slots();
 
-        Carry(screen, Row(screen, "Airlock Inner Door"), Row(screen, "Airlock Button"), below: false);
+        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 1"), below: false);
 
-        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Button", "Airlock Outer Door" }, Rows(screen));
+        Assert.Equal(new[] { "slot 3", "slot 1", "slot 2" }, Rows(screen));
     }
 
     /// <summary>A category carried takes its slots with it, and lands only where it stands whole: never among the slots under none.</summary>
@@ -70,17 +70,17 @@ public class SlotCategoryTests
         var system = screen.Editor.Program.Systems[0];
         system.Categories.Add("Doors");
         system.Categories.Add("Calls");
-        system.FindPart("Airlock Outer Door")!.Category = "Doors";
-        system.FindPart("Airlock Button")!.Category = "Calls";
+        system.FindPart("slot 2")!.Category = "Doors";
+        system.FindPart("slot 1")!.Category = "Calls";
         screen.Editor.Program.Edited();
         screen.Editor.Invalidate();
         screen.Run(5);
 
-        Assert.Equal(new[] { "Airlock Inner Door", "# Doors", "Airlock Outer Door", "# Calls", "Airlock Button" }, Rows(screen));
+        Assert.Equal(new[] { "slot 3", "# Doors", "slot 2", "# Calls", "slot 1" }, Rows(screen));
 
-        Carry(screen, Row(screen, "# Calls"), Row(screen, "Airlock Inner Door"), below: false);
+        Carry(screen, Row(screen, "# Calls"), Row(screen, "slot 3"), below: false);
 
-        Assert.Equal(new[] { "Airlock Inner Door", "# Calls", "Airlock Button", "# Doors", "Airlock Outer Door" }, Rows(screen));
+        Assert.Equal(new[] { "slot 3", "# Calls", "slot 1", "# Doors", "slot 2" }, Rows(screen));
         Assert.Equal(new[] { "Calls", "Doors" }, system.Categories);
     }
 
@@ -91,17 +91,17 @@ public class SlotCategoryTests
         var screen = Slots();
         var editor = screen.Editor;
         AddCategory(screen);
-        Carry(screen, Row(screen, "Airlock Button"), Row(screen, "# Category 1"), below: true);
+        Carry(screen, Row(screen, "slot 1"), Row(screen, "# Category 1"), below: true);
 
         Category(screen, "Category 1").Removes!.Execute();
         screen.Run(5);
 
-        Assert.Equal(new[] { "Airlock Outer Door", "Airlock Inner Door", "Airlock Button" }, Rows(screen));
+        Assert.Equal(new[] { "slot 2", "slot 3", "slot 1" }, Rows(screen));
         Assert.Empty(editor.Program.Systems[0].Categories);
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
-        Assert.Equal(new[] { "Airlock Outer Door", "Airlock Inner Door", "# Category 1", "Airlock Button" }, Rows(screen));
+        Assert.Equal(new[] { "slot 2", "slot 3", "# Category 1", "slot 1" }, Rows(screen));
     }
 
     /// <summary>Pressing a category's name lets it be typed; Enter renames it, and its slots stay under it.</summary>
@@ -111,12 +111,12 @@ public class SlotCategoryTests
         var screen = Slots();
         var editor = screen.Editor;
         AddCategory(screen);
-        Carry(screen, Row(screen, "Airlock Button"), Row(screen, "# Category 1"), below: true);
+        Carry(screen, Row(screen, "slot 1"), Row(screen, "# Category 1"), below: true);
 
         Type(screen, "Category 1", "Calls", MyKeys.Enter);
 
-        Assert.Equal(new[] { "Airlock Outer Door", "Airlock Inner Door", "# Calls", "Airlock Button" }, Rows(screen));
-        Assert.Equal("Calls", editor.Program.Systems[0].FindPart("Airlock Button")!.Category);
+        Assert.Equal(new[] { "slot 2", "slot 3", "# Calls", "slot 1" }, Rows(screen));
+        Assert.Equal("Calls", editor.Program.Systems[0].FindPart("slot 1")!.Category);
     }
 
     /// <summary>An empty name or another category's is refused as a heading's is: Enter keeps the box, Escape lets it go, and the category keeps its name.</summary>
@@ -185,7 +185,7 @@ public class SlotCategoryTests
         var system = screen.Editor.Program.Systems[0];
         system.Categories.Add("Doors");
         system.Categories.Add("Empty");
-        system.FindPart("Airlock Outer Door")!.Category = "Doors";
+        system.FindPart("slot 2")!.Category = "Doors";
         screen.Editor.Program.Edited();
         screen.Editor.Invalidate();
         screen.Editor.GoToRoot();
@@ -194,7 +194,7 @@ public class SlotCategoryTests
         screen.Run(5);
 
         var rows = screen.Editor.Blueprint().Parts.Select(Said).ToArray();
-        Assert.Equal(new[] { "Airlock Button", "Airlock Inner Door", "# Doors", "Airlock Outer Door" }, rows);
+        Assert.Equal(new[] { "slot 1", "slot 3", "# Doors", "slot 2" }, rows);
         Assert.All(screen.Editor.Blueprint().Parts.OfType<ICarried>(), row => Assert.False(row.Grip.IsVisible));
     }
 

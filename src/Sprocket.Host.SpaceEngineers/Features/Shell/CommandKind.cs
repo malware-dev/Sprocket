@@ -68,6 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Making a slot optional, or required again.</summary>
         MakeOptional,
 
+        /// <summary>Opening the choice of the type of block a slot takes.</summary>
+        SlotType,
+
         /// <summary>Starting a sequence that something happening runs.</summary>
         StartWhen,
 

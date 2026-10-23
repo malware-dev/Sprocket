@@ -81,11 +81,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             get
             {
                 var name = Name.Trim();
-                if (name.Length == 0 || _system.Takes(name))
+                if (name.Length == 0 || _system.TakesInAnyCase(name))
                     return _editor.Texts.PickStateNameTaken;
 
                 var made = TypeMade;
-                return made != null && (made.Name.Length == 0 || _system.Takes(made.Name) || made.Name == name) ? _editor.Texts.PickTypeNameTaken : "";
+                return made != null && (made.Name.Length == 0 || _system.TakesInAnyCase(made.Name) || string.Equals(made.Name, name, StringComparison.OrdinalIgnoreCase)) ? _editor.Texts.PickTypeNameTaken : "";
             }
         }
 
@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Starts a state afresh: a numbered name, on or off, starting off; a type made before is kept to come back to.</summary>
         public void Begin()
         {
-            _name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.Takes);
+            _name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.TakesInAnyCase);
             _start = StateValueQuestion.Off;
         }
 
@@ -263,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (typeWord == NewTypeWord && _made == null)
             {
                 var name = Name.Trim();
-                _made = TypeEditing.New(texts, _system.Types.Count, taken => _system.Takes(taken) || taken == name);
+                _made = TypeEditing.New(texts, _system.Types.Count, taken => _system.TakesInAnyCase(taken) || string.Equals(taken, name, StringComparison.OrdinalIgnoreCase));
             }
 
             var type = typeWord == texts.StateFlag ? "" : typeWord == NewTypeWord ? _made.Name : typeWord;

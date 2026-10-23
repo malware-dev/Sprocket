@@ -57,13 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             var changed = false;
 
-            // A family left with one kind of block on the construct stands as that kind alone, and so does the narrowing to it.
-            if (_family != Family.None && KindsOf(_family) == 1)
-            {
-                Set(OnlyKindOf(_family).Id);
-                changed = true;
-            }
-
             // A kind whose last block has gone from the construct would hide every block with nothing on screen to say why.
             if (_kind.Length > 0 && !HasKind(_kind))
             {
@@ -82,7 +75,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < _present.Count; i++)
             {
                 var family = _present[i].Family;
-                if (family == Family.None || KindsOf(family) < 2)
+                // A family always heads its kinds, one kind of block on the construct included.
+                if (family == Family.None)
                 {
                     if (Offered(_present[i]))
                         Shows(_present[i], Family.None);
@@ -163,30 +157,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             return false;
-        }
-
-        /// <summary>How many kinds of block on offer are of <paramref name="family" />.</summary>
-        int KindsOf(Family family)
-        {
-            var count = 0;
-            foreach (var kind in _present)
-            {
-                if (kind.Family == family)
-                    count++;
-            }
-
-            return count;
-        }
-
-        EntityKind OnlyKindOf(Family family)
-        {
-            foreach (var kind in _present)
-            {
-                if (kind.Family == family)
-                    return kind;
-            }
-
-            return null;
         }
 
         /// <summary>The key the row of <paramref name="family" /> is kept under, made once for the pick.</summary>

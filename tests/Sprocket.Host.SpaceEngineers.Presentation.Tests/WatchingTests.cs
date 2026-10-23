@@ -54,7 +54,7 @@ public class WatchingTests
     /// <remarks>A grip is six small squares, and nothing else on the screen is.</remarks>
     static List<string> Places(Screen screen)
     {
-        var places = new List<string> { "Airlock Light " + screen.Text("Airlock Light").At };
+        var places = new List<string> { "slot " + screen.Text(Slot(screen)).At };
 
         places.AddRange(screen.Drawings
             .Where(d => !d.IsText && d.Where.Width == 3 && d.Where.Height == 3)
@@ -105,16 +105,16 @@ public class WatchingTests
         editor.PressPrimary();
         screen.Run(5);
 
-        var parked = screen.Text("Airlock Light").Ink;
+        var parked = screen.Text(Slot(screen)).Ink;
 
         editor.SwitchOn();
         screen.Run(5);
 
-        Assert.True(screen.Shows("Airlock Light"), "the sentence stopped being drawn while running");
+        Assert.True(screen.Shows(Slot(screen)), "the sentence stopped being drawn while running");
 
         // Not dimmed - the same ink as when it was editable. It is simply not pressable, because
         // there is nothing there to press.
-        Assert.Equal(parked, screen.Text("Airlock Light").Ink);
+        Assert.Equal(parked, screen.Text(Slot(screen)).Ink);
     }
 
     /// <summary>
@@ -186,4 +186,8 @@ public class WatchingTests
     {
         editor.NewButtonSystem("Airlock");
     }
+
+    /// <summary>The slot the first task names, which its line says.</summary>
+    static string Slot(Screen screen) =>
+        screen.Editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First().Targets[0];
 }

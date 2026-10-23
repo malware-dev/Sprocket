@@ -5,6 +5,7 @@ using VRageMath;
 using Xunit;
 using Lumel.Images;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -60,17 +61,16 @@ public class BlockNameTests
         Assert.Single(easel.Written, text => text.Text == "Airlock Door");
     }
 
-    /// <summary>The part of a sentence naming a block shows the block with its icon.</summary>
+    /// <summary>The part of a logic system's sentence names its slot, and leaves the blocks filling it to its tooltip.</summary>
     [Fact]
-    public void APartNamingABlockShowsItWithItsIcon()
+    public void APartNamesItsSlotRatherThanItsBlocks()
     {
         var sim = Built();
+        var trigger = (MomentTrigger)sim.Editor.Program.Systems[0].Triggers[0];
         var chip = sim.Editor.Triggers()[0].Within().OfType<SlotChip>().First();
 
-        var block = chip.Within().OfType<BlockName>().Single();
-        Assert.Equal("Airlock Button", block.Name);
-        Assert.False(string.IsNullOrEmpty(block.Icon));
-        Assert.Equal("Airlock Button", chip.Text);
+        Assert.Empty(chip.Within().OfType<BlockName>());
+        Assert.Equal(Assert.Single(trigger.Sources), chip.Text);
     }
 
     /// <summary>

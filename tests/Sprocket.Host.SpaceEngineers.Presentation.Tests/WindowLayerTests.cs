@@ -131,7 +131,38 @@ public class WindowLayerTests
         Assert.True(scroll.CanScroll);
     }
 
-    static (WindowLayer, Popup, ScrollView, List<Button>) Hanging(int count, float at)
+    /// <summary>A long list under a box of its own at its head, as a list of kinds with its search is, stays hung from what opened it, on the area, its rows scrolling.</summary>
+    [Fact]
+    public void ALongListUnderAHeadStaysOnItsAnchor()
+    {
+        var (_, popup, scroll, _) = Hanging(73, 100f, headed: true);
+
+        Assert.True(popup.Bounds.Y >= 140f, "the list left what it hangs from");
+        Assert.True(popup.Bounds.Y + popup.Bounds.Height <= Area.Y + Area.Height, "the list runs off the area");
+        Assert.True(scroll.CanScroll, "a list longer than its room does not scroll");
+    }
+
+    /// <summary>A list that fits under what opened it opens there, though there is more room above.</summary>
+    [Fact]
+    public void AListThatFitsBelowOpensBelow()
+    {
+        var (_, popup, scroll, _) = Hanging(3, 600f);
+
+        Assert.True(popup.Bounds.Y >= 640f, "the list opened above though it fits below");
+        Assert.False(scroll.CanScroll);
+    }
+
+    /// <summary>A list too tall for the room under what opened it, but not for the room above, opens above whole.</summary>
+    [Fact]
+    public void AListThatFitsOnlyAboveOpensAboveWhole()
+    {
+        var (_, popup, scroll, _) = Hanging(8, 700f);
+
+        Assert.True(popup.Bounds.Y + popup.Bounds.Height <= 700f, "the list is not over what it hangs from");
+        Assert.False(scroll.CanScroll, "a list with room for all of it above was cut");
+    }
+
+    static (WindowLayer, Popup, ScrollView, List<Button>) Hanging(int count, float at, bool headed = false)
     {
         var anchor = new Button { Text = "Anchor" };
         anchor.Measure(new Recording(Area), new Vector2(200f, 40f));
@@ -147,7 +178,14 @@ public class WindowLayerTests
         }
 
         var scroll = new ScrollView { BarWidth = 12f, Thumb = Color.White, FitsContent = true, Content = stack };
-        var popup = new Popup { Anchor = anchor, Content = scroll };
+        Element content = scroll;
+        if (headed)
+        {
+            scroll.Placement = Flex.Grow;
+            content = new VStack { Children = { new Button { Text = "Head" }, scroll } };
+        }
+
+        var popup = new Popup { Anchor = anchor, Content = content };
         var layer = new WindowLayer();
         layer.Open(popup);
         layer.Draw(new Recording(Area), Area);

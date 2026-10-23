@@ -74,7 +74,7 @@ public class CheckViewTests
         rig.Tick();
 
         var opens = sequence.Steps.OfType<If>().Single();
-        Assert.Equal("if Airlock Outer Door is not open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, null));
+        Assert.Equal("if Airlock Outer Door is not open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
     }
 
     /// <summary>A check on several blocks reads their state as any one of them has it, and in the plural where all of them must.</summary>
@@ -119,7 +119,7 @@ public class CheckViewTests
         rig.Tick();
 
         var opens = sequence.Steps.OfType<If>().Single();
-        Assert.Equal("if power on Airlock Outer Door is on", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, null));
+        Assert.Equal("if power on Airlock Outer Door is on", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
     }
 
     /// <summary>What can start a trigger has the two views every list of members has: the organized one lists what Sprocket vouches for, and the terminal view leaves it out.</summary>

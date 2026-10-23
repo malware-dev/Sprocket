@@ -55,13 +55,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         const string OnWord = "on";
         const string ToWord = "to";
-        const string IsWord = "is";
 
         const int Said = 2;
 
         const string SumWords = "the sum of";
 
         const string AverageWords = "the average of";
+
+        const string AnyInWords = "any in";
+
+        const string AllInWords = "all in";
 
         /// <summary>Every way a test can read its blocks, in the order they are offered.</summary>
         public static readonly IReadOnlyList<Quantifier> Readings = new[] { Quantifier.Any, Quantifier.All, Quantifier.Sum, Quantifier.Average };
@@ -189,7 +192,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return slot == at + 2 && !tests ? ToWord : "";
         }
 
-        /// <summary>How a test reads its blocks, as its sentence says it and the list choosing it offers it: any, all, the sum of, the average of.</summary>
+        /// <summary>
+        /// How a line reads the blocks it names, as the part saying so has it: for a line naming slots, any in, all in, the sum
+        /// of and the average of; for one naming blocks, as <see cref="Quantified" /> says it.
+        /// </summary>
+        public static string Reading(Quantifier quantifier, bool slotted)
+        {
+            if (!slotted)
+                return Quantified(quantifier);
+
+            switch (quantifier)
+            {
+                case Quantifier.All: return AllInWords;
+                case Quantifier.Sum: return SumWords;
+                case Quantifier.Average: return AverageWords;
+            }
+
+            return AnyInWords;
+        }
+
+        /// <summary>
+        /// Whether the part saying how a line reads its blocks by <paramref name="quantifier" /> stands at the front of the line:
+        /// a total does, and so does every reading of a line naming blocks; on a line naming slots, where
+        /// <paramref name="slotted" />, any in and all in stand just before the slots.
+        /// </summary>
+        public static bool Leads(Quantifier quantifier, bool slotted) => !slotted || Totals(quantifier);
+
+        /// <summary>Whether <paramref name="quantifier" /> reads a total of a number on the blocks, a sum or an average.</summary>
+        public static bool Totals(Quantifier quantifier) => quantifier == Quantifier.Sum || quantifier == Quantifier.Average;
+
+        /// <summary>How a test reads its blocks, as the list choosing it offers it: any, all, the sum of, the average of.</summary>
         public static string Quantified(Quantifier quantifier)
         {
             switch (quantifier)
@@ -327,42 +359,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>A test being picked, as far as it has got: "If Inner Door is open", "If power on Airlock Light is …".</summary>
-        /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
-        /// <param name="chosen">The state or the value chosen, in the words its list shows it in, or empty.</param>
-        /// <param name="state">Whether what is chosen is a state of the blocks' status.</param>
-        /// <param name="reads">How the blocks are read, as <see cref="Quantified" /> says it, or empty for one block.</param>
-        /// <param name="opens">What the line opens with: "If" for a check, "When" for what starts something.</param>
-        public static string Testing(string blocks, string chosen, bool state, string reads, string opens = "If")
-        {
-            var lead = reads.Length == 0 ? $"{opens} " : $"{opens} {reads} ";
-            if (chosen.Length == 0)
-                return $"{lead}{blocks} {Empty}";
-
-            return state
-                ? $"{lead}{blocks} {IsWord} {chosen}"
-                : $"{lead}{chosen} {OnWord} {blocks} {IsWord} {Empty}";
-        }
-
-        /// <summary>
-        /// A trigger or a step being picked, as far as it has got: "When Airlock Button …".
-        /// </summary>
-        /// <param name="forEvents">Whether it is what starts something rather than what is done.</param>
-        /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
-        /// <param name="chosen">What is chosen, in the words its list shows it in, or empty.</param>
-        /// <param name="sets">Whether what is chosen sets a value.</param>
-        public static string Picking(bool forEvents, string blocks, string chosen, bool sets)
-        {
-            if (chosen.Length == 0)
-                chosen = Empty;
-
-            if (forEvents)
-                return $"When {blocks} {chosen}";
-
-            chosen = char.ToUpperInvariant(chosen[0]) + chosen.Substring(1);
-            return sets ? $"{chosen} {OnWord} {blocks}" : $"{chosen} {blocks}";
-        }
-
         /// <summary>What a slot of a step reads as.</summary>
         public static string InStep(GridWorld world, SentenceSlot slot)
         {
@@ -408,6 +404,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             if (entityIds.Count > 2)
                 into.Add(new Mention($"{joiner}{(entityIds.Count - 2)} more", null));
+        }
+
+        /// <summary>
+        /// Names slots by their names as pieces added to <paramref name="into" />, each under its mark of <paramref name="marks" />
+        /// where there are marks, joined the way <see cref="Slots(IList{string})" /> joins them.
+        /// </summary>
+        public static void Slots(IList<string> names, IList<string> marks, List<Mention> into)
+        {
+            if (names.Count == 0)
+            {
+                into.Add(new Mention(Empty, null));
+                return;
+            }
+
+            var named = names.Count > Said ? Said : names.Count;
+            for (var i = 0; i < named; i++)
+            {
+                if (i > 0)
+                    into.Add(new Mention(names.Count == 2 ? " and " : ", ", null));
+
+                into.Add(marks == null ? new Mention(names[i], null) : Mention.Member(names[i], marks[i]));
+            }
+
+            if (names.Count > Said)
+                into.Add(new Mention($" and {names.Count - Said} more", null));
+        }
+
+        /// <summary>Names slots by their names, the first two of them and how many more there are: "slot 1 and slot 2", "slot 1, slot 2 and 3 more".</summary>
+        public static string Slots(IList<string> names)
+        {
+            var pieces = new List<Mention>();
+            Slots(names, null, pieces);
+
+            var said = new StringBuilder();
+            foreach (var piece in pieces)
+                said.Append(piece.Text);
+
+            return said.ToString();
         }
 
         /// <summary>
@@ -559,7 +593,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (entities == null)
                 return false;
 
-            Entities(world, entities.Entities, entities.RequiresAll, into);
+            if (entities.SaysSlots)
+                Slots(entities.Slots, entities.Marks, into);
+            else
+                Entities(world, entities.Entities, entities.RequiresAll, into);
+
             return true;
         }
 
@@ -607,7 +645,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             var entities = slot as EntitiesSlot;
             if (entities != null)
-                return Entities(world, entities.Entities, entities.RequiresAll);
+                return entities.SaysSlots ? Slots(entities.Slots) : Entities(world, entities.Entities, entities.RequiresAll);
 
             var happening = slot as EventSlot;
             if (happening != null)

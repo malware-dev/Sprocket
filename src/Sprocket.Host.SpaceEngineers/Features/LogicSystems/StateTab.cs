@@ -214,13 +214,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         void AddType()
         {
-            var type = TypeEditing.New(_editor.Texts, _system.Types.Count, _system.Takes);
+            var type = TypeEditing.New(_editor.Texts, _system.Types.Count, _system.TakesInAnyCase);
             _editor.Do(_system, new AddType(type, _system.Types.Count));
         }
 
         void AddState()
         {
-            var name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.Takes);
+            var name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.TakesInAnyCase);
             _editor.Do(_system, new AddState(new State(name, "", Literal.Of(false)), _system.States.Count));
         }
 
@@ -281,11 +281,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             };
         }
 
-        /// <summary>Whether <paramref name="wanted" />, trimmed, can stand in place of <paramref name="was" />: unchanged, or a name nothing in the system has.</summary>
+        /// <summary>Whether <paramref name="wanted" />, trimmed, can stand in place of <paramref name="was" />: the same in any case, or a name no slot, state or type has in any case.</summary>
         bool Free(string wanted, string was)
         {
             var name = wanted.Trim();
-            return name == was || !_system.Takes(name);
+            return string.Equals(name, was, StringComparison.OrdinalIgnoreCase) || !_system.TakesInAnyCase(name);
         }
     }
 }

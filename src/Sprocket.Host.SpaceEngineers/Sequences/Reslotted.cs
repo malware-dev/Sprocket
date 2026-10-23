@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -7,18 +6,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class Reslotted<T> : Edit<T>
     {
         readonly Edit<T> _edit;
-        readonly Func<Reslot> _settle;
         readonly List<Reslot> _reslots = new List<Reslot>();
-        bool _made;
 
-        /// <summary>
-        /// <paramref name="edit" />, bringing about <paramref name="picked" /> where picks worked them out, and what
-        /// <paramref name="settle" /> works out after it where none did.
-        /// </summary>
-        public Reslotted(Edit<T> edit, IList<Reslot> picked, Func<Reslot> settle)
+        /// <summary><paramref name="edit" />, bringing about <paramref name="picked" />, the slot changes the picks for it worked out.</summary>
+        public Reslotted(Edit<T> edit, IList<Reslot> picked)
         {
             _edit = edit;
-            _settle = settle;
             for (var i = 0; i < picked.Count; i++)
                 _reslots.Add(picked[i]);
         }
@@ -68,10 +61,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override void Apply(T subject)
         {
             _edit.Apply(subject);
-            if (!_made && _reslots.Count == 0)
-                _reslots.Add(_settle());
-
-            _made = true;
             foreach (var reslot in _reslots)
                 reslot.Apply();
         }

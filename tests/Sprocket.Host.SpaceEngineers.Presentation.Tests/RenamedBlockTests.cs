@@ -1,11 +1,12 @@
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>A block renamed in the game's terminal is named by its new name wherever a screen names it.</summary>
+/// <summary>A block renamed in the game's terminal is named by its new name wherever a screen names it: a line's tooltip, which lists what fills its slot.</summary>
 public class RenamedBlockTests
 {
-    /// <summary>A step's sentence on the sequence's screen names the block by its new name.</summary>
+    /// <summary>A step's sentence on the sequence's screen lists the block by its new name.</summary>
     [Fact]
     public void AStepNamesTheBlockByItsNewName()
     {
@@ -68,5 +69,8 @@ public class RenamedBlockTests
     static void Rename(Screen screen, string from, string to) =>
         screen.Scene.Ship.Machine.Fitted.First(fitting => fitting.Name == from).Name = to;
 
-    static string Said(Screen screen) => string.Join(" ", screen.Legible);
+    /// <summary>What the parts of the sentences on the screen say, and their tooltips, which list the blocks filling their slots.</summary>
+    static string Said(Screen screen) =>
+        string.Join(" ", screen.Legible) + " "
+        + string.Join(" ", screen.Editor.Current.View!.Within().OfType<SlotChip>().Select(chip => chip.Tip?.Text ?? ""));
 }

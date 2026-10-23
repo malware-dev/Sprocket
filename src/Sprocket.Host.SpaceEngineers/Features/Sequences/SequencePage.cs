@@ -554,7 +554,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (act == null)
                 return;
 
-            var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
+            var chosen = act.Names(Editor.SlotBlocks.Actions(_sequence.System, act.Targets));
 
             var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
             if (verb.Length != 0)
@@ -564,7 +564,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             row.Slots.Add(new ActionSlot(chosen, Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.What))));
-            row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), act.Targets, true,
+            row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), act.Targets, true, MarkText.OfSlots(_sequence.System, act.Targets),
                 Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Blocks))));
             if (verb.Length != 0)
                 return;
@@ -584,29 +584,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void Tested(StepRow row, Step step, Comparison test)
         {
             var blocks = Editor.Blocks(_sequence.System, test.Targets);
-            var seen = Editor.Seen(_sequence.System, test.Targets);
-            var bindings = Editor.Runner.Bindings;
-            var value = test.Names(Vocabulary.ActionsFor(bindings, seen));
+            var value = test.Names(Editor.SlotBlocks.Actions(_sequence.System, test.Targets));
 
-            if (blocks.Count > 1)
-            {
-                var said = SentenceText.Quantified(test.Quantifier);
-                var numeric = value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
-                row.Slots.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                    Changes(CommandKind.StepSlot, () => _stepwork.Quantify(step, test, numeric)), ArgumentRole.Read));
-            }
+            // A line naming slots says how it reads them whatever they hold; one naming blocks, only where it names several.
+            var slotted = _sequence.System.IsBlueprint;
+            var many = slotted || blocks.Count > 1;
+            var said = SentenceText.Reading(test.Quantifier, slotted);
+            var numeric = value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
+            var reading = many
+                ? new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
+                    Changes(CommandKind.StepSlot, () => _stepwork.Quantify(step, test, numeric, slotted)), ArgumentRole.Read)
+                : null;
+            var front = SentenceText.Leads(test.Quantifier, slotted);
+            if (reading != null && front)
+                row.Slots.Add(reading);
 
             if (value == null || !value.IsStatus)
                 row.Slots.Add(new ActionSlot(value, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.What))));
 
-            row.Slots.Add(new EntitiesSlot(blocks, test.Targets, test.Quantifier != Quantifier.Any,
+            if (reading != null && !front)
+                row.Slots.Add(reading);
+
+            row.Slots.Add(new EntitiesSlot(blocks, test.Targets, test.Quantifier != Quantifier.Any, MarkText.OfSlots(_sequence.System, test.Targets),
                 Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Blocks))));
 
             if (value == null)
                 return;
 
-            var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, seen));
-            var plural = test.Quantifier == Quantifier.All && blocks.Count > 1;
+            var fields = ComparisonQuestion.Fields(value, Editor.SlotBlocks.Events(_sequence.System, test.Targets));
+            var plural = test.Quantifier == Quantifier.All && many;
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, fields.GetRange(0, 1),
                 Changes(CommandKind.StepSlot, () => _stepwork.Relate(step, test, fields[0], plural)), ArgumentRole.Compared, plural));
             row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields.GetRange(1, fields.Count - 1),

@@ -197,6 +197,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Padding = new Thickness(8f, 4f) }
         };
 
+        /// <summary>Names in a heading that are not the heading's own to give, in italics.</summary>
+        public static readonly TextStyle TitleNameEmphasized = new TextStyle(TitleName)
+        {
+            Base = { Font = TextSizes.Italic }
+        };
+
         /// <summary>The box a heading's name is typed in, a well on the chrome.</summary>
         public static readonly TextBoxStyle TitleBox = new TextBoxStyle
         {
@@ -240,6 +246,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly TextStyle PlateName = new TextStyle(Name)
         {
             Base = { Padding = new Thickness(8f, 4f) }
+        };
+
+        /// <summary>Names in a row that are not the row's own to give, in italics.</summary>
+        public static readonly TextStyle PlateNameEmphasized = new TextStyle(PlateName)
+        {
+            Base = { Font = TextSizes.Italic }
         };
 
         /// <summary>The box a name in a row is typed in, a well on the page in the name's size.</summary>

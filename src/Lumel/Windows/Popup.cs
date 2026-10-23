@@ -34,71 +34,86 @@ namespace Lumel.Windows
                 Open();
         }
 
-        /// <summary>As much of the area as there is on the side of the anchor with more of it, so what hangs open never runs off the area.</summary>
+        /// <summary>
+        /// Beside its anchor, as much of the area as there is on the side of it with more; above or below it, the whole height
+        /// of the area, so it is measured as tall as it would be and <see cref="Place" /> decides where that fits.
+        /// </summary>
         public override Vector2 Room(RectangleF area)
         {
             if (Anchor == null)
                 return base.Room(area);
 
+            if (Side != PopupSide.Beside)
+                return new Vector2(area.Width, area.Height);
+
             var from = Anchor.Bounds;
-            if (Side == PopupSide.Beside)
-            {
-                var right = area.X + area.Width - (from.X + from.Width + Gap);
-                var left = from.X - Gap - area.X;
-                var wide = right > left ? right : left;
+            var right = area.X + area.Width - (from.X + from.Width + Gap);
+            var left = from.X - Gap - area.X;
+            var wide = right > left ? right : left;
 
-                return new Vector2(wide > 0f ? wide : 0f, area.Height);
-            }
-
-            var below = area.Y + area.Height - (from.Y + from.Height + Gap);
-            var above = from.Y - Gap - area.Y;
-            var tall = below > above ? below : above;
-
-            return new Vector2(area.Width, tall > 0f ? tall : 0f);
+            return new Vector2(wide > 0f ? wide : 0f, area.Height);
         }
 
-        /// <summary>On its side of the anchor, or the opposite side where the area has no room for it there, and kept inside the area either way; below a line, as wide as the line where it is <see cref="Flush" />.</summary>
+        /// <summary>
+        /// Below its anchor where all of it fits there, otherwise above it where all of it fits there, otherwise on the side with
+        /// more room and no taller than that room; never over the anchor itself. Beside its anchor, on its right where it fits
+        /// and its left otherwise, kept inside the area. Below a line, as wide as the line where it is <see cref="Flush" />.
+        /// </summary>
+        /// <remarks>Where it is cut shorter than it asks, what it holds scrolls only if that is a scroll view.</remarks>
         public override RectangleF Place(RectangleF area, Vector2 size)
         {
             if (Anchor == null)
                 return base.Place(area, size);
 
             var from = Anchor.Bounds;
-            float x;
-            float y;
-
             if (Side == PopupSide.Beside)
-            {
-                x = from.X + from.Width + Gap;
-                if (x + size.X > area.X + area.Width)
-                    x = from.X - Gap - size.X;
+                return Beside(area, from, size);
 
-                y = from.Y + from.Height * 0.5f - Lead();
-            }
+            if (Flush && size.X < from.Width)
+                size.X = from.Width;
+
+            var below = area.Y + area.Height - (from.Y + from.Height + Gap);
+            var above = from.Y - Gap - area.Y;
+            bool over;
+            if (size.Y <= below)
+                over = false;
+            else if (size.Y <= above)
+                over = true;
             else
             {
-                if (Flush && size.X < from.Width)
-                    size.X = from.Width;
-
-                x = from.X;
-                y = from.Y + from.Height + Gap;
-                if (y + size.Y > area.Y + area.Height)
-                    y = from.Y - Gap - size.Y;
+                over = above > below;
+                var room = over ? above : below;
+                size.Y = room > 0f ? room : 0f;
             }
 
+            var y = over ? from.Y - Gap - size.Y : from.Y + from.Height + Gap;
+            return new RectangleF(Across(area, from.X, size.X), y, size.X, size.Y);
+        }
+
+        /// <summary>Where it stands at <paramref name="size" /> beside <paramref name="from" />, kept inside <paramref name="area" />.</summary>
+        RectangleF Beside(RectangleF area, RectangleF from, Vector2 size)
+        {
+            var x = from.X + from.Width + Gap;
+            if (x + size.X > area.X + area.Width)
+                x = from.X - Gap - size.X;
+
+            var y = from.Y + from.Height * 0.5f - Lead();
             if (y + size.Y > area.Y + area.Height)
                 y = area.Y + area.Height - size.Y;
 
             if (y < area.Y)
                 y = area.Y;
 
-            if (x + size.X > area.X + area.Width)
-                x = area.X + area.Width - size.X;
+            return new RectangleF(Across(area, x, size.X), y, size.X, size.Y);
+        }
 
-            if (x < area.X)
-                x = area.X;
+        /// <summary><paramref name="x" />, moved in where something <paramref name="wide" /> standing there would run off <paramref name="area" />.</summary>
+        static float Across(RectangleF area, float x, float wide)
+        {
+            if (x + wide > area.X + area.Width)
+                x = area.X + area.Width - wide;
 
-            return new RectangleF(x, y, size.X, size.Y);
+            return x < area.X ? area.X : x;
         }
 
         /// <summary>How far down from its top the middle of its first entry stands, which is what is set level with the middle of the anchor.</summary>

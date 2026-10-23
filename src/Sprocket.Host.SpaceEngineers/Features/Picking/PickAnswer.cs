@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     {
         readonly List<long> _targets = new List<long>();
         readonly List<Literal> _arguments = new List<Literal>();
+        readonly List<string> _slots = new List<string>();
 
         /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, read from them as <paramref name="quantifier" /> says, with no arguments.</summary>
         public PickAnswer(IList<long> targets, string chosen, Quantifier quantifier)
@@ -46,6 +47,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>The entities what was chosen acts on.</summary>
         public IList<long> Targets => _targets;
+
+        /// <summary>The slots already made that were picked by name, which the answer names in place of its blocks; empty where blocks were picked.</summary>
+        public IList<string> Slots => _slots;
+
+        /// <summary>What a slot the blocks make is called, as the picker's heading names it; empty for the next numbered name.</summary>
+        public string SlotName { get; set; } = "";
 
         /// <summary>
         /// What was given for the action, where it takes options or sets a value, and empty otherwise.

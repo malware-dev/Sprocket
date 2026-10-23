@@ -71,9 +71,10 @@ public class UndoTests
         editor.BackKeeping();
         screen.Run(2);
         system.Enabled = false;
-        editor.OpenSlot("Airlock Light");
+        var slot = editor.SlotOf("Airlock Light");
+        editor.OpenSlot(slot);
         screen.Run(2);
-        var part = system.FindPart("Airlock Light")!;
+        var part = system.FindPart(slot)!;
         editor.Do(system, new AnnotatePart(part, "Over the inner door.", ChangeKind.DescribeSlot));
         screen.Run(2);
 

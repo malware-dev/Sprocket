@@ -9,15 +9,15 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>Writing a blueprint's slots and description: what is typed reaches the blueprint once the keyboard leaves the box, as one step back.</summary>
 public class BlueprintWritingTests
 {
-    /// <summary>A slot is called what its block is called when the blueprint is made, and listed so on its logic system's screen.</summary>
+    /// <summary>A slot made by a pick takes the next numbered slot name, and is listed so on its logic system's screen.</summary>
     [Fact]
-    public void ASlotTakesItsBlocksName()
+    public void ASlotTakesTheNextNumberedName()
     {
         var screen = OnTheSystem();
         var part = Assert.Single(screen.Editor.Program.Systems[0].Parts);
 
-        Assert.Equal("Airlock Button", part.Id);
-        Assert.Equal("Airlock Button", Assert.Single(screen.Editor.SystemSlots()).Name);
+        Assert.Equal("slot 1", part.Id);
+        Assert.Equal("slot 1", Assert.Single(screen.Editor.SystemSlots()).Name);
     }
 
     /// <summary>Pressing a slot's name opens its page, named for it.</summary>
@@ -26,7 +26,7 @@ public class BlueprintWritingTests
     {
         var screen = OnTheSlot();
 
-        Assert.Equal("Airlock Button", screen.Editor.Slot().Title);
+        Assert.Equal("slot 1", screen.Editor.Slot().Title);
     }
 
     /// <summary>A slot renamed on its heading is renamed wherever its system names it, and one step back takes it back.</summary>
@@ -91,22 +91,23 @@ public class BlueprintWritingTests
         Assert.Equal("", editor.Slot().Short.Text);
     }
 
-    /// <summary>A slot may take the name of one nothing uses and no installation holds blocks in, which is not saved and goes.</summary>
+    /// <summary>A slot's name is refused where a slot nothing uses has it, in any case, and both slots stay as they were.</summary>
     [Fact]
-    public void ANameHeldByASlotNothingUsesIsFree()
+    public void ANameASlotNothingUsesHasIsRefused()
     {
         var screen = OnTheSlot();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         var part = Assert.Single(system.Parts);
-        system.PartFor("Spare");
+        var spare = system.PartFor("Spare");
 
+        Assert.False(editor.Slot().AcceptsName("spare"));
         editor.Screen.Heading[0].Renames!("Spare");
         screen.Run(5);
 
-        Assert.Equal("Spare", part.Id);
-        Assert.Same(part, Assert.Single(system.Parts));
-        Assert.NotNull(system.First!.FilledWith("Spare"));
+        Assert.Equal("slot 1", part.Id);
+        Assert.Equal(new[] { part, spare }, system.Parts);
+        Assert.Equal("Spare", spare.Id);
     }
 
     /// <summary>A slot's name is refused where another slot in use has it, and the slot keeps the name it had.</summary>
@@ -127,10 +128,26 @@ public class BlueprintWritingTests
         editor.OpenSlot(part.Id);
         screen.Run(5);
         Assert.False(editor.Slot().AcceptsName("Other"));
+        Assert.False(editor.Slot().AcceptsName("OTHER"));
 
         editor.Screen.Heading[0].Renames!("Other");
         screen.Run(5);
-        Assert.Equal("Airlock Button", part.Id);
+        Assert.Equal("slot 1", part.Id);
+    }
+
+    /// <summary>A slot's name is refused where a state or a type has it in any case, and the slot's own name in another case is not.</summary>
+    [Fact]
+    public void ANameAStateOrATypeHasIsRefused()
+    {
+        var screen = OnTheSlot();
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        system.States.Add(new Sequences.State("Cycling", "", World.Literal.Of(false)));
+        system.Types.Add(new Sequences.DeclaredType("Side"));
+
+        Assert.False(editor.Slot().AcceptsName("cycling"));
+        Assert.False(editor.Slot().AcceptsName("SIDE"));
+        Assert.True(editor.Slot().AcceptsName("Slot 1"));
     }
 
     /// <summary>A slot's name left empty is refused, and the slot keeps the name it had.</summary>
@@ -145,7 +162,7 @@ public class BlueprintWritingTests
         editor.Screen.Heading[0].Renames!("");
         screen.Run(5);
 
-        Assert.Equal("Airlock Button", part.Id);
+        Assert.Equal("slot 1", part.Id);
     }
 
     /// <summary>A signal slot being filled in names the trigger on its block that answers it, not only the block.</summary>
@@ -242,7 +259,7 @@ public class BlueprintWritingTests
         var editor = screen.Editor;
         Guides(screen, editor.PressTab(editor.Texts.SystemInstallationPanel));
 
-        editor.OpenSlot("Airlock Button");
+        editor.OpenSlot("slot 1");
         screen.Run(5);
         Guides(screen, editor.Slot().View);
     }
@@ -320,7 +337,7 @@ public class BlueprintWritingTests
     static Screen OnTheSlot()
     {
         var screen = OnTheSystem();
-        screen.Editor.OpenSlot("Airlock Button");
+        screen.Editor.OpenSlot("slot 1");
         screen.Run(5);
         return screen;
     }

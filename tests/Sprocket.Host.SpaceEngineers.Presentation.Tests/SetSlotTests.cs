@@ -8,8 +8,9 @@ using Xunit;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// The blocks a step picks are a set, and a set is a slot: the same set is the same slot, a set made exactly of smaller sets
-/// names their slots, and the slots follow the sets as the logic system is built and taken apart again.
+/// The blocks a step picks either name the slots they fill already, the same set the same slot and a set made exactly of
+/// smaller sets their slots, or make one new slot; a pick never changes a slot. Arranged on request, the slots are worked out
+/// again from the sets, and a slot another installation still holds blocks in is set aside.
 /// </summary>
 public class SetSlotTests
 {
@@ -18,7 +19,7 @@ public class SetSlotTests
     const string Light = "Airlock Light";
     const string Cockpit = "Cockpit Light";
 
-    /// <summary>Several blocks picked for one step are one slot holding all of them, numbered as a slot of several blocks is.</summary>
+    /// <summary>Several blocks picked for one step are one slot holding all of them, numbered on from the slots there are.</summary>
     [Fact]
     public void APickOfSeveralBlocksIsOneSlot()
     {
@@ -27,17 +28,29 @@ public class SetSlotTests
 
         var slot = Assert.Single(Targets(screen, 0));
         Assert.Equal(4, system.First!.FilledWith(slot)!.Count);
-        Assert.Equal("Slot 1", slot);
+        Assert.Equal("slot 2", slot);
     }
 
-    /// <summary>A slot of one block takes the block's name.</summary>
+    /// <summary>A slot of one block is numbered as any other slot is.</summary>
     [Fact]
-    public void ASlotOfOneBlockTakesItsName()
+    public void ASlotOfOneBlockIsNumberedToo()
     {
         var screen = Built(out _);
         Off(screen, Light);
 
-        Assert.Equal(Light, Assert.Single(Targets(screen, 0)));
+        Assert.Equal("slot 2", Assert.Single(Targets(screen, 0)));
+    }
+
+    /// <summary>The number skips a name taken in any case, by a slot, a state or a type.</summary>
+    [Fact]
+    public void TheNumberSkipsANameTakenInAnyCase()
+    {
+        var screen = Built(out var system);
+        system.States.Add(new State("Slot 2", "", World.Literal.Of(false)));
+
+        Off(screen, Light);
+
+        Assert.Equal("slot 3", Assert.Single(Targets(screen, 0)));
     }
 
     /// <summary>The same set picked again, in any order, is the same slot.</summary>
@@ -66,9 +79,24 @@ public class SetSlotTests
         Assert.Equal(new[] { Declared(screen, Light) }, system.First!.FilledWith(one));
     }
 
-    /// <summary>A set made exactly of smaller sets has no slot of its own: its step names theirs, and its slot goes.</summary>
+    /// <summary>A set made exactly of smaller sets picked before it names their slots, and makes none of its own.</summary>
     [Fact]
     public void ASetMadeOfSmallerSetsNamesTheirSlots()
+    {
+        var screen = Built(out var system);
+        Off(screen, Inner, Outer);
+        Off(screen, Light, Cockpit);
+        var parts = system.Parts.Count;
+
+        Off(screen, Inner, Outer, Light, Cockpit);
+
+        Assert.Equal(Targets(screen, 0).Concat(Targets(screen, 1)).OrderBy(n => n), Targets(screen, 2).OrderBy(n => n));
+        Assert.Equal(parts, system.Parts.Count);
+    }
+
+    /// <summary>Smaller sets picked after a larger one make slots of their own, and the larger set's slot and step are left as they were.</summary>
+    [Fact]
+    public void APickNeverChangesASlot()
     {
         var screen = Built(out var system);
         Off(screen, Inner, Outer, Light, Cockpit);
@@ -76,50 +104,60 @@ public class SetSlotTests
 
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
+
+        Assert.Equal(whole, Assert.Single(Targets(screen, 0)));
+        Assert.Equal(4, system.First!.FilledWith(whole)!.Count);
+        Assert.DoesNotContain(whole, Targets(screen, 1));
+        Assert.DoesNotContain(whole, Targets(screen, 2));
+    }
+
+    /// <summary>Taking a step away leaves the slot it named, holding its blocks.</summary>
+    [Fact]
+    public void TakingAStepAwayLeavesItsSlot()
+    {
+        var screen = Built(out var system);
+        Off(screen, Inner, Outer);
+        var slot = Assert.Single(Targets(screen, 0));
+
+        Remove(screen, 0);
+
+        Assert.NotNull(system.FindPart(slot));
+        Assert.Equal(2, system.First!.FilledWith(slot)!.Count);
+    }
+
+    /// <summary>Taking back a pick that made a slot takes the slot away with it.</summary>
+    [Fact]
+    public void UndoingAPickTakesItsSlotAway()
+    {
+        var screen = Built(out var system);
+        Off(screen, Inner, Outer);
+        var slot = Assert.Single(Targets(screen, 0));
+        var parts = system.Parts.Count;
+
+        screen.Editor.Screen.Undo!.Execute();
+        screen.Run(2);
+
+        Assert.Null(system.FindPart(slot));
+        Assert.Equal(parts - 1, system.Parts.Count);
+    }
+
+    /// <summary>Arranged, a set made exactly of smaller sets names their slots, and its own slot goes.</summary>
+    [Fact]
+    public void ArrangedASetMadeOfSmallerSetsNamesTheirSlots()
+    {
+        var screen = Built(out var system);
+        Off(screen, Inner, Outer, Light, Cockpit);
+        var whole = Assert.Single(Targets(screen, 0));
+        Off(screen, Inner, Outer);
+        Off(screen, Light, Cockpit);
+
+        Arrange(screen, system);
 
         Assert.Equal(Targets(screen, 1).Concat(Targets(screen, 2)).OrderBy(n => n), Targets(screen, 0).OrderBy(n => n));
         Assert.Null(system.FindPart(whole));
     }
 
-    /// <summary>Taking the smaller sets away again makes the whole set a slot of its own once more.</summary>
-    [Fact]
-    public void TakingTheSmallerSetsAwayMakesTheWholeASlotAgain()
-    {
-        var screen = Built(out var system);
-        Off(screen, Inner, Outer, Light, Cockpit);
-        Off(screen, Inner, Outer);
-        Off(screen, Light, Cockpit);
-
-        Remove(screen, 2);
-        Remove(screen, 1);
-
-        var slot = Assert.Single(Targets(screen, 0));
-        Assert.Equal(4, system.First!.FilledWith(slot)!.Count);
-    }
-
-    /// <summary>Taking back the pick that split a slot puts back the slot, its name and description, and every step's names.</summary>
-    [Fact]
-    public void UndoingASplitPutsTheSlotBack()
-    {
-        var screen = Built(out var system);
-        Off(screen, Inner, Outer, Light, Cockpit);
-        Off(screen, Inner, Outer);
-        var whole = Assert.Single(Targets(screen, 0));
-        system.FindPart(whole)!.Annotation = "Everything switched off while cycling.";
-        var parts = system.Parts.Count;
-
-        Off(screen, Light, Cockpit);
-        Assert.Null(system.FindPart(whole));
-
-        screen.Editor.Screen.Undo!.Execute();
-        screen.Run(2);
-
-        Assert.Equal(whole, Assert.Single(Targets(screen, 0)));
-        Assert.Equal("Everything switched off while cycling.", system.FindPart(whole)!.Annotation);
-        Assert.Equal(parts, system.Parts.Count);
-    }
-
-    /// <summary>A slot split while another installation holds blocks in it is kept, hidden, holding that installation's blocks.</summary>
+    /// <summary>A slot arranged away while another installation holds blocks in it is kept, hidden, holding that installation's blocks.</summary>
     [Fact]
     public void AnotherInstallationsBlocksAreSetAside()
     {
@@ -131,6 +169,7 @@ public class SetSlotTests
 
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
+        Arrange(screen, system);
 
         Assert.DoesNotContain(whole, Targets(screen, 0));
         Assert.NotNull(system.FindPart(whole));
@@ -147,6 +186,7 @@ public class SetSlotTests
         system.AddInstance().Fill(whole, new[] { Declared(screen, "Hangar Door") });
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
+        Arrange(screen, system);
 
         var values = screen.Editor.World.Values;
         var after = new Automation();
@@ -239,9 +279,9 @@ public class SetSlotTests
         Assert.Equal("2 slots to fill again", screen.Editor.RootRows()[1].Problem);
     }
 
-    /// <summary>Taking the smaller sets away brings back the slot set aside, its name and the other installation's blocks with it.</summary>
+    /// <summary>Taking the smaller sets away and arranging again brings back the slot set aside, its name and the other installation's blocks with it.</summary>
     [Fact]
-    public void UndoingASplitByHandBringsTheSlotSetAsideBack()
+    public void ArrangingAgainBringsTheSlotSetAsideBack()
     {
         var screen = Built(out var system);
         Off(screen, Inner, Outer, Light, Cockpit);
@@ -250,17 +290,19 @@ public class SetSlotTests
         port.Fill(whole, new[] { Declared(screen, Inner) });
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
+        Arrange(screen, system);
 
         Remove(screen, 2);
         Remove(screen, 1);
+        Arrange(screen, system);
 
         Assert.Equal(whole, Assert.Single(Targets(screen, 0)));
         Assert.Equal(new[] { Declared(screen, Inner) }, port.FilledWith(whole));
     }
 
-    /// <summary>The blocks set aside are let go once every slot is filled again.</summary>
+    /// <summary>The blocks set aside stay as every slot is filled again, and are let go when the slots are next arranged.</summary>
     [Fact]
-    public void TheBlocksSetAsideGoOnceEverySlotIsFilled()
+    public void TheBlocksSetAsideGoWhenArrangedOnceEverySlotIsFilled()
     {
         var screen = Split(out var system, out var port);
         var whole = Hidden(system);
@@ -276,14 +318,16 @@ public class SetSlotTests
         screen.Editor.PressBlock(Light);
         screen.Editor.PressPrimary();
         screen.Run(2);
+        Assert.NotNull(system.FindPart(whole));
 
-        // Nothing holds it any more, so the slot goes with its blocks.
+        // Nothing names it, and the installation shown is the only one holding blocks in it, so arranging lets it go.
+        Arrange(screen, system);
         Assert.Null(system.FindPart(whole));
         Assert.Null(port.FilledWith(whole));
         Assert.DoesNotContain("'" + whole + "'", ProgramWriter.Save(screen.Editor.Program, screen.Editor.World.Values));
     }
 
-    /// <summary>A slot that four blocks filled, split in two while a second installation held a door in it; on the logic system's screen.</summary>
+    /// <summary>A slot that four blocks filled, arranged in two while a second installation held a door in it; on the logic system's screen.</summary>
     static Screen Split(out AutomationSystem system, out SystemInstance port)
     {
         var screen = Built(out system);
@@ -294,6 +338,7 @@ public class SetSlotTests
 
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
+        Arrange(screen, system);
         screen.Editor.BackKeeping();
         screen.Run(2);
         return screen;
@@ -329,6 +374,15 @@ public class SetSlotTests
         screen.Editor.PressChoice("power");
         screen.Editor.Pick().Arguments!.Form.Fields[0].Text = "off";
         screen.Editor.PressPrimary();
+        screen.Run(2);
+    }
+
+    /// <summary>Gives <paramref name="system" /> the fewest slots its steps can name, as a person asking for it would.</summary>
+    static void Arrange(Screen screen, AutomationSystem system)
+    {
+        screen.Editor.Picks.Arranged(system)!.Apply();
+        screen.Editor.Program.Edited();
+        screen.Editor.Invalidate();
         screen.Run(2);
     }
 

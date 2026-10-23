@@ -191,7 +191,7 @@ public class SettingTests
         screen.Editor.Typed("1");
         screen.Run(2);
 
-        Assert.Equal("then set Charge Mode on Standby Battery to Recharge", screen.Editor.Doing(0));
+        Assert.Equal("then set Charge Mode on slot 2 to Recharge", screen.Editor.Doing(0));
     }
 
     /// <summary>A trigger that sets a value of Sprocket's own does it in Sprocket's namespace, and says all of it.</summary>
@@ -224,7 +224,7 @@ public class SettingTests
         var set = Assert.IsType<Act>(screen.Editor.Program.Systems[0].Triggers[0].Does);
         Assert.Equal(BlockKinds.Own, set.Provider);
         Assert.Equal(Literal.Name("high"), Assert.Single(set.Arguments));
-        Assert.Equal("then set speed on Airlock Inner Door to high", screen.Editor.Doing(0));
+        Assert.Equal("then set speed on slot 2 to high", screen.Editor.Doing(0));
     }
 
     /// <summary>Choosing something else for a step keeps what was given for the new choice.</summary>

@@ -51,8 +51,8 @@ public class RigTests
         // own arrangement is, through the signal slot the installation fills with the button. A "when" here
         // would be Sprocket claiming it watches the button.
         var program = store.GetValue(BlockStorage.ProgramKey);
-        Assert.Contains("whenever 'Airlock Button' then run 1", program);
-        Assert.Contains("'Airlock Button' = [ ext.toolbar(1, 1, 1) on [ 'Airlock Button' ] ]", program);
+        Assert.Contains("whenever 'slot 1' then run 1", program);
+        Assert.Contains("'slot 1' = [ ext.toolbar(1, 1, 1) on [ 'Airlock Button' ] ]", program);
         Assert.DoesNotContain("when ", program);
 
 

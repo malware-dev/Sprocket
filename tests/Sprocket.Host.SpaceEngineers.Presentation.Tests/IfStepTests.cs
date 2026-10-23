@@ -159,7 +159,8 @@ public class IfStepTests
         rig.Editor.Program.Edited();
         rig.Tick();
 
-        var relation = rig.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().First();
+        // After the part saying how the slot is read.
+        var relation = rig.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().ElementAt(1);
         Assert.Equal(new[] { "is" }, relation.Filled);
         relation.Opens!.Execute();
         rig.Tick();
@@ -194,14 +195,14 @@ public class IfStepTests
         editor.Push(new SequencePage(editor, system.Sequences[0]));
         screen.Run(5);
 
-        var at = screen.Text("is").At;
+        var at = screen.Text("are").At;
         var point = Screen.Ui(at.X + 4f, at.Y + 8f);
         screen.Scene.MoveTo(point);
         screen.Scene.Press(point, 1);
         screen.Run(1);
 
         Assert.True(editor.Screen.HasQuestion, "the menu put itself away");
-        Assert.Equal(new[] { "is", "is not" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "are", "are not" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
     }
 
     /// <summary>Deleting an if asks first, and can keep the steps in it where they stand.</summary>

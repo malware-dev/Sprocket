@@ -13,6 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public const int NameLongest = 512;
 
         readonly bool _title;
+        bool _emphasized;
         bool _renaming;
         bool _canRename;
         string _about;
@@ -32,6 +33,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 _name.Text = value;
                 AutomationId = value;
+            }
+        }
+
+        /// <summary>Whether the words are in italics, for names shown that are not the plate's own.</summary>
+        public bool Emphasized
+        {
+            get { return _emphasized; }
+            set
+            {
+                if (_emphasized == value)
+                    return;
+
+                _emphasized = value;
+                _name.Style = _title ? value ? Styles.TitleNameEmphasized : Styles.TitleName : value ? Styles.PlateNameEmphasized : Styles.PlateName;
             }
         }
 

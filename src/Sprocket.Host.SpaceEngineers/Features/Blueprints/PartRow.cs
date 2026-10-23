@@ -1,11 +1,9 @@
 using System.Collections.Generic;
-using System.Globalization;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Layout;
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -20,9 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     /// <summary>One slot of a blueprint: its name, what it says about itself, the blocks one installation fills it with, and what is still to do about it.</summary>
     public partial class PartRow : HStack, ICarried
     {
-        /// <summary>How many lines a slot's blocks take at most, the last saying how many more there are where they do not fit.</summary>
-        public const int MostListed = 8;
-
         readonly List<Mention> _pieces = new List<Mention>();
         readonly List<Mention> _signalPieces = new List<Mention>();
         readonly HashSet<string> _said = new HashSet<string>();
@@ -280,12 +275,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public void Show(GridWorld world)
         {
             _pieces.Clear();
-            var more = SentenceText.Listed(world, Blocks, MostListed, _pieces);
-            if (more > 0)
-            {
-                var words = Signals.Count == 0 ? _texts.SlotAndMore : _texts.SlotOrMore;
-                _pieces.Add(new Mention(Template.Fill(words, "count", more.ToString(CultureInfo.InvariantCulture)), null));
-            }
+            HeldBlocks.List(_texts, world, Blocks, Signals.Count == 0, _pieces);
 
             _blocks.Say(_pieces);
             _blocks.IsEmpty = Blocks.Count == 0;

@@ -32,6 +32,6 @@ public class CommonMembersTests
 
         var trigger = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
         Assert.Equal("stops-working", trigger.EventId);
-        Assert.Equal("When Airlock Inner Door stops working", screen.Editor.Says(0));
+        Assert.Equal("When slot 2 stops working", screen.Editor.Says(0));
     }
 }

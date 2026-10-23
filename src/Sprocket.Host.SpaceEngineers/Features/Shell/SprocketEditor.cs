@@ -45,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly ChangeDates _dates;
         readonly SlotClaims _claims;
         readonly SlotsFromPicks _picks;
+        readonly SlotBlocks _slotBlocks;
         readonly VersionChoice _versions;
         readonly TriggerQuestions _starts;
         readonly LibraryTransfers _holdings;
@@ -71,6 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _dates = new ChangeDates(_program);
             _claims = new SlotClaims(this);
             _picks = new SlotsFromPicks(this);
+            _slotBlocks = new SlotBlocks(this);
             _versions = new VersionChoice(this, _dates);
             _starts = new TriggerQuestions(this);
             _holdings = new LibraryTransfers(this, _dates);
@@ -87,6 +89,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>How picked blocks become the slots of a blueprint.</summary>
         public SlotsFromPicks Picks => _picks;
+
+        /// <summary>The blocks that stand for the slots a logic system names, as the editor shows it, and what they offer.</summary>
+        public SlotBlocks SlotBlocks => _slotBlocks;
 
         /// <summary>The choice between two versions of a logic system.</summary>
         public VersionChoice Versions => _versions;

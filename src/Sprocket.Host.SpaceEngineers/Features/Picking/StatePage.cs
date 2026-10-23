@@ -215,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _states.Title = Source == null ? texts.PickStates : texts.PickSource;
                 _states.TitleAbout = texts.StateStatesAbout;
                 if (Source != null)
-                    _states.Heads(Source.Box(true));
+                    _states.Heads(Source.Box(PickSource.States));
 
                 _rows = new KeyedChildren<string, PickRow>(_states.Rows, Row);
 

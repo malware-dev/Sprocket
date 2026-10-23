@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -343,6 +344,65 @@ public class ScreenChoiceTests
         screen.Editor.PressChoice("show text");
         screen.Run(2);
         return (screen, board);
+    }
+
+    /// <summary>A slot of screens picked by name asks for no screen: what is done is that type's alone, on the screen the slot holds.</summary>
+    [Fact]
+    public void AScreenSlotPickedByNameAsksNoScreen()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+        var system = screen.Editor.Program.Systems[0];
+        var slot = ((Act)system.Sequences[0].Steps[0]).Targets[0];
+
+        screen.Editor.PressAdd("task");
+        screen.Run(2);
+        screen.Editor.ChooseSource(screen.Editor.Texts.PickSourceSlots);
+        screen.Run(1);
+        screen.Editor.PressBlock(slot);
+        screen.Run(2);
+
+        Assert.Null(screen.Editor.Facets());
+        Assert.False(screen.Editor.HasChoice("power"), "a member of the blocks was offered for a slot of screens");
+        var held = Assert.Single(Target.Within(screen.Editor.Pick().Stages[0]).OfType<SlotHeldRow>());
+        var says = Target.Within(held).OfType<SlotChip>().Select(chip => chip.Text).ToList();
+        Assert.Contains("Status Board", says);
+        Assert.Contains("Back", says);
+        screen.Editor.PressChoice("show text");
+        screen.Run(2);
+        Finish(screen, "Undocked");
+
+        var made = system.Sequences[0].Steps.OfType<Act>().Last();
+        Assert.Equal(slot, Assert.Single(made.Targets));
+        Assert.Equal(new[] { 2 }, system.First.Facets(slot));
+    }
+
+    /// <summary>
+    /// A trigger's own action on a screen, named as a trigger names it, takes the slot of screens the picker's heading shows for
+    /// the same pick, rather than making a slot of the blocks.
+    /// </summary>
+    [Fact]
+    public void ATriggersScreenActionNamesTheSlotItsHeadingShows()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        var act = (Act)system.Sequences[0].Steps[0];
+        var slot = act.Targets[0];
+        var board = editor.World.Entities.First(e => e.Name == "Status Board").Id;
+
+        var forecast = editor.Picks.Forecast(system, new[] { board }, act.ActionId, "Back", false, null, false, null, "");
+        List<string>? named = null;
+        editor.Picks.Name(system, new PickAnswer(new[] { board }, act.ActionId, Quantifier.Any, null, act.Form, "Back"), false, null,
+            names => named = names);
+
+        Assert.Equal(new[] { slot }, forecast.Matched);
+        Assert.Equal(new[] { slot }, named);
     }
 
     /// <summary>Writes <paramref name="text" /> as the text to show and finishes the pick.</summary>

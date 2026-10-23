@@ -12,7 +12,7 @@ public class PartTipsTests
     public void ABlockPartNamesItsBlocksAndItsSlot()
     {
         var rig = Rig.Demo();
-        for (var i = 1; i <= PartTips.MostNamed + 2; i++)
+        for (var i = 1; i <= HeldBlocks.Most + 2; i++)
             rig.Light(40 + i, $"Lamp {i:00}");
 
         var screen = Screen.On(rig);
@@ -20,7 +20,7 @@ public class PartTipsTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Lamp 01");
-        screen.Editor.ThroughBlock($"Lamp {PartTips.MostNamed + 2:00}");
+        screen.Editor.ThroughBlock($"Lamp {HeldBlocks.Most + 2:00}");
         screen.Editor.PressChoice("power");
         screen.Editor.PressPrimary();
         screen.Run(2);
@@ -29,8 +29,8 @@ public class PartTipsTests
         var blocks = row.Slots.OfType<EntitiesSlot>().Single();
         var tip = row.ChipOf(blocks)!.Tip!.Text;
         Assert.Contains("- Lamp 01\n", tip);
-        Assert.Contains($"- Lamp {PartTips.MostNamed - 1:00}\n", tip);
-        Assert.DoesNotContain($"Lamp {PartTips.MostNamed:00}", tip);
+        Assert.Contains($"- Lamp {HeldBlocks.Most - 1:00}\n", tip);
+        Assert.DoesNotContain($"Lamp {HeldBlocks.Most:00}", tip);
         Assert.StartsWith("From the slot **", tip);
         Assert.Contains("\n" + screen.Editor.Texts.PartStepBlocks + "\n- Lamp 01\n", tip);
         Assert.EndsWith("- and 3 more\n", tip);

@@ -87,10 +87,12 @@ public sealed class SplitTwin : Scenario
         sim.Tick();
         foreach (var row in editor.Parts())
         {
+            // The fore installation's block in the slot, whose aft twin fills it here.
+            var fore = system.First!.FilledWith(row.Name)![0];
             row.Fills!.Execute();
             sim.Tick();
-            editor.PressBlock(row.Name.Replace("Fore", "Aft"));
-            if (row.Name.EndsWith("Button"))
+            editor.PressBlock(fore.Replace("Fore", "Aft"));
+            if (fore.EndsWith("Button"))
                 editor.PressChoice("button 1 is pressed");
 
             editor.PressPrimary();

@@ -151,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                             }
                         },
                         // As tall as its kinds until they run past the room on the screen, and scrolled from there.
-                        new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = new VStack().As(out _kindRows) }
+                        new ScrollView { Style = Styles.ScrollView, FitsContent = true, Placement = Flex.Grow, Content = new VStack().As(out _kindRows) }
                     }
                 }
             };

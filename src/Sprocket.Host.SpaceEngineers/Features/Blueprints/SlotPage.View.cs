@@ -3,6 +3,7 @@ using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
@@ -18,6 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Label _shownShort;
         Label _expectsHeading;
         Label _expects;
+        SlotChip _expectsPart;
         Switch _required;
 
         /// <summary>What the slot is for, in its box or as it reads, then the kinds of block it expects.</summary>
@@ -40,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
                     new Label { Style = Styles.NextHeading }.As(out _expectsHeading),
                     new Label { Style = Styles.Phrase, Wraps = true }.As(out _expects),
+                    new SlotChip { IsVisible = false, Align = Align.Left }.As(out _expectsPart),
 
                     new Switch { Style = Styles.Switch, IsVisible = false }.As(out _required)
                 }

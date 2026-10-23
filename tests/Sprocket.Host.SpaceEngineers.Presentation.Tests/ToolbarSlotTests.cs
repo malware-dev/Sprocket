@@ -34,7 +34,6 @@ public class ToolbarSlotTests
 
         var slots = sim.Editor.Slots()!;
         Assert.Equal("Page 1, slot 3: free", slots.Line);
-        Assert.Equal("When Cockpit hotbar page 1, slot 3 is pressed", sim.Editor.Screen.Title());
     }
 
     /// <summary>A slot holding the game's own action says which block and action, and carries that block's picture.</summary>
@@ -68,14 +67,13 @@ public class ToolbarSlotTests
 
         Assert.Equal(2, sim.Editor.Slots()!.Page);
         Assert.Equal("Page 2, slot 4: free", sim.Editor.Slots()!.Line);
-        Assert.Equal("When Cockpit hotbar page 2, slot 4 is pressed", sim.Editor.Screen.Title());
 
         sim.Editor.PressPrimary();
         Settle(sim);
         sim.Editor.Back();
         Settle(sim);
 
-        Assert.Equal("When Cockpit hotbar page 2, slot 4 is pressed", sim.Editor.Says(0));
+        Assert.Equal("When slot 1 hotbar page 2, slot 4 is pressed", sim.Editor.Says(0));
     }
 
     /// <summary>Opened again, the trigger's picker opens on its toolbar's line with the slot it was given.</summary>
@@ -93,7 +91,6 @@ public class ToolbarSlotTests
         sim.Editor.PressDoes(0);
         sim.Tick();
 
-        Assert.Equal("When Cockpit hotbar page 3, slot 7 is pressed", sim.Editor.Screen.Title());
         Assert.Equal(3, sim.Editor.Slots()!.Page);
         Assert.StartsWith("Page 3, slot 7: ", sim.Editor.Slots()!.Line);
     }
@@ -213,7 +210,6 @@ public class ToolbarSlotTests
         sim.Tick();
 
         Assert.Equal("Slot 1: free", sim.Editor.Slots()!.Line);
-        Assert.Equal("When Airlock Button button 1 is pressed", sim.Editor.Screen.Title());
     }
 
     /// <summary>A toolbar whose slots are things that happen keeps a line of its own words for them, with no slots under it.</summary>

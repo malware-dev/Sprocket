@@ -80,7 +80,7 @@ public class OpeningTests
         screen.Run(2);
         screen.Do("type", "pre");
 
-        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Screen.Title());
+        Assert.Equal("slot 1", screen.Editor.Screen.Title());
         Assert.Equal("pre", Stage(screen, 1).NarrowText);
     }
 
@@ -108,7 +108,7 @@ public class OpeningTests
         screen.Run(2);
 
         var pick = screen.Editor.Pick();
-        Assert.Equal("Close Airlock Outer Door", screen.Editor.Screen.Title());
+        Assert.Equal("slot 3", screen.Editor.Screen.Title());
         Assert.True(pick.Page > 0, "the picker opened on the trigger's own page");
         Assert.Contains(Stage(screen, 0).Entries(), e => e.Text == "Airlock Outer Door" && e.IsChosen);
 
@@ -146,15 +146,15 @@ public class OpeningTests
 
         screen.Editor.Pick().Returns!.Execute();
         screen.Run(2);
-        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
+        Assert.Equal("slot 2", screen.Editor.Screen.Title());
 
         screen.Editor.Pick().Onward!.Execute();
         screen.Run(2);
-        Assert.Equal("Close Airlock Outer Door", screen.Editor.Screen.Title());
+        Assert.Equal("slot 3", screen.Editor.Screen.Title());
 
         screen.Editor.Back();
         screen.Run(2);
-        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
+        Assert.Equal("slot 2", screen.Editor.Screen.Title());
     }
 
     /// <summary>And a repeat's single action opens the repeat's own picker, on the action's page.</summary>
@@ -172,13 +172,13 @@ public class OpeningTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("close Airlock Outer Door", screen.Editor.Doing(1));
+        Assert.Equal("close slot 2", screen.Editor.Doing(1));
 
         screen.Editor.Triggers()[1].Does[1].Opens!.Execute();
         screen.Run(2);
         screen.Do("type", "Air");
 
-        Assert.Equal("Close Airlock Outer Door", screen.Editor.Screen.Title());
+        Assert.Equal("slot 2", screen.Editor.Screen.Title());
         Assert.Equal(2, screen.Editor.Pick().Page);
         Assert.Equal("Air", Stage(screen, 0).NarrowText);
 
@@ -201,24 +201,10 @@ public class OpeningTests
         var screen = Screen.Fresh((anOpenStep + " 270 187 tick 2 double 138 545 tick 2").Split(' '));
 
         Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
-        Assert.True(screen.Shows("Airlock Outer Door"), "the block pressed twice is not the step's");
-        Assert.False(screen.Shows("Airlock Inner Door"), "the block it had is still there");
-    }
-
-    /// <summary>The picker's title says the line it is making, as far as it has got.</summary>
-    [Fact]
-    public void ThePickersTitleFollowsTheAnswer()
-    {
-        var screen = WithOne();
-
-        screen.Editor.PressStart("when");
-        Assert.Equal("When something happens", screen.Editor.Screen.Title());
-
-        screen.Editor.PressBlock("Airlock Inner Door");
-        Assert.Equal("When Airlock Inner Door …", screen.Editor.Screen.Title());
-
-        screen.Editor.PressChoice("finishes closing");
-        Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
+        var system = screen.Editor.Program.Systems[0];
+        var step = screen.Editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First();
+        var filled = screen.Editor.Seen(system, step.Targets).Select(name => screen.Editor.Runner.Bindings.Entity(name)!.Name);
+        Assert.Equal(new[] { "Airlock Outer Door" }, filled);
     }
 
     /// <summary>A picker opens narrowed the way the last one of its sort was left, searches included.</summary>
@@ -237,20 +223,5 @@ public class OpeningTests
         screen.Run(2);
 
         Assert.Equal("Air", Stage(screen, 0).NarrowText);
-    }
-
-    /// <summary>A step acts on every block it names, so its title joins them with "and".</summary>
-    [Fact]
-    public void AStepsTitleJoinsItsBlocksWithAnd()
-    {
-        var screen = WithOne();
-        screen.Editor.Rows()[0].Opens!.Execute();
-        screen.Run(2);
-
-        screen.Editor.PressAdd("task");
-        screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.TickBlock("Airlock Outer Door");
-
-        Assert.Equal("… Airlock Inner Door and Airlock Outer Door", screen.Editor.Screen.Title());
     }
 }

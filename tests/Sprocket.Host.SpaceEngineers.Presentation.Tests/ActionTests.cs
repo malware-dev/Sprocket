@@ -232,8 +232,9 @@ public class ActionTests
         screen.Run(2);
 
         var rows = screen.Editor.StepRows();
-        var opens = rows[0].Within().OfType<MemberName>().Single();
-        var switches = rows[2].Within().OfType<MemberName>().Single();
+        // The first marked name is the member; the slot after it carries its own mark.
+        var opens = rows[0].Within().OfType<MemberName>().First();
+        var switches = rows[2].Within().OfType<MemberName>().First();
 
         Assert.Equal(Symbols.Lasting, opens.Mark);
         Assert.Equal(Symbols.Action, switches.Mark);

@@ -312,7 +312,7 @@ public class EditorTests
 
         var pressed = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(1, Assert.Single(Pressed.Where(ship.Automation, ship.Automation.Systems[0], pressed.Part)!).Slot);
-        Assert.Equal("When Airlock Button button 1 is pressed", editor.Says(0));
+        Assert.Equal("When slot 2 button 1 is pressed", editor.Says(0));
 
         // One trigger for the sequence, not the old one left beside the new.
         Assert.Single(ship.Automation.Systems[0].Triggers);
@@ -342,7 +342,7 @@ public class EditorTests
         var trigger = Assert.IsType<SignalTrigger>(Assert.Single(system.Triggers));
 
         Assert.False(system.FindPart(step.Targets[0])!.IsSignal);
-        Assert.Equal("Airlock Light", step.Targets[0]);
+        Assert.Equal("slot 2", step.Targets[0]);
         Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(installation.FilledWith(step.Targets[0])![0])!.Name);
 
         Assert.True(system.FindPart(trigger.Part)!.IsSignal);
@@ -1644,7 +1644,7 @@ public class EditorTests
 
         editor.NewSystem("Airlock");
         editor.PressStart("when");
-        Assert.Equal("When something happens", editor.Screen.Title());
+        Assert.Equal("slot 1", editor.Screen.Title());
 
         editor.PressBlock("Airlock Button");
         editor.PressChoice("button 1 is pressed");
@@ -1699,7 +1699,7 @@ public class EditorTests
 
         Assert.Equal("Airlock", editor.Screen.Title());
         Assert.Equal("Let me out", editor.Rows()[0].Summary);
-        Assert.Equal("When Airlock Button button 1 is pressed", editor.Says(0));
+        Assert.Equal("When slot 1 button 1 is pressed", editor.Says(0));
         Assert.Equal("then run Let me out", editor.Doing(0));
     }
 
@@ -1730,7 +1730,7 @@ public class EditorTests
         StartOnTheButton(editor);
 
         editor.PressAdd("task");
-        Assert.Equal("Do something", editor.Screen.Title());
+        Assert.Equal("slot 2", editor.Screen.Title());
         Assert.Single(editor.Pick().Stages);
 
         editor.PressBlock("Inner Door");

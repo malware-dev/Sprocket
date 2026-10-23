@@ -43,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var shown = _parts[i];
 
                 shown.Plate.Text = part.Text;
+                shown.Plate.Emphasized = part.Emphasized;
                 shown.Plate.CanRename = part.CanRename;
                 shown.Renames.CanExecute = part.CanRename && i != renaming;
                 shown.Plate.Command = part.CanRename || part.Opens == null ? shown.Renames : part.Opens;

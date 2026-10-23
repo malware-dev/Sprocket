@@ -125,11 +125,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Lets go of the blocks set aside, in every installation of <paramref name="system" /> with every slot filled again.</summary>
-        static void Settle(AutomationSystem system)
+        void Settle(AutomationSystem system)
         {
             var used = new List<string>();
             system.Acted(used);
-            SlotMarks.Settle(system, used);
+            SlotMarks.Settle(_editor.Runner.Bindings, system, used);
         }
 
         /// <summary>Goes back to the screen the picker was opened from.</summary>

@@ -20,15 +20,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     return SlotMark.Lost;
             }
 
-            return SlotMark.None;
+            return Misfits(bindings, instance, part) ? SlotMark.Changed : SlotMark.None;
         }
 
-        /// <summary>How many of the slots <paramref name="used" /> <paramref name="instance" /> has to fill again after they were split or merged.</summary>
-        public static int Changed(AutomationSystem system, SystemInstance instance, IList<string> used)
+        /// <summary>
+        /// How many of the slots <paramref name="used" /> <paramref name="instance" /> has to fill again: after they were split or
+        /// merged, or where their type changed and a block in them no longer fits it.
+        /// </summary>
+        public static int Changed(Bindings bindings, AutomationSystem system, SystemInstance instance, IList<string> used)
         {
-            if (!HasSetAside(system, instance, used))
-                return 0;
-
+            var setAside = HasSetAside(system, instance, used);
             var count = 0;
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
@@ -37,11 +38,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     continue;
 
                 var filled = instance.FilledWith(parts[i].Id);
-                if (filled == null || filled.Count == 0)
+                if (setAside && (filled == null || filled.Count == 0) || Misfits(bindings, instance, parts[i]))
                     count++;
             }
 
             return count;
+        }
+
+        /// <summary>Whether a block <paramref name="instance" /> fills the block slot <paramref name="part" /> with is of a kind the slot's type no longer takes.</summary>
+        static bool Misfits(Bindings bindings, SystemInstance instance, Part part)
+        {
+            if (part.IsSignal || part.Holds.Length != 0)
+                return false;
+
+            var filled = instance.FilledWith(part.Id);
+            for (var i = 0; filled != null && i < filled.Count; i++)
+            {
+                var entity = bindings.Entity(filled[i]);
+                if (entity != null && !part.Fits(entity.Kind.Lineage))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Puts into <paramref name="into" /> the blocks <paramref name="instance" /> holds in slots nothing of <paramref name="used" /> names, each once.</summary>
@@ -65,12 +83,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Empties the slots nothing of <paramref name="used" /> names for every installation of <paramref name="system" /> that has no slot left to fill again.</summary>
-        public static void Settle(AutomationSystem system, IList<string> used)
+        public static void Settle(Bindings bindings, AutomationSystem system, IList<string> used)
         {
             var instances = system.Instances;
             for (var n = 0; n < instances.Count; n++)
             {
-                if (Changed(system, instances[n], used) > 0)
+                if (Changed(bindings, system, instances[n], used) > 0)
                     continue;
 
                 var parts = system.Parts;

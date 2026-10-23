@@ -91,6 +91,29 @@ namespace Sprocket.Sim.Driving
             (SystemSlots(editor).Single(row => row.Name == name).Opens
              ?? throw new InvalidOperationException($"The slot '{name}' cannot be opened.")).Execute();
 
+        /// <summary>The first slot of the first logic system that the installation the editor shows fills with the block called <paramref name="block" /> alone.</summary>
+        public static string SlotOf(this SprocketEditor editor, string block)
+        {
+            var system = editor.Program.Systems[0];
+            var shown = editor.StandIn(system);
+            foreach (var part in system.Parts)
+            {
+                var filled = shown?.FilledWith(part.Id);
+                if (filled != null && filled.Count == 1 && editor.Runner.Bindings.Entity(filled[0])?.Name == block)
+                    return part.Id;
+            }
+
+            throw new InvalidOperationException($"No slot holds '{block}' alone.");
+        }
+
+        /// <summary>Has the pick on the screen list <paramref name="source" /> in its first column, as its Source box offers it, by typing into the box as a person would.</summary>
+        public static void ChooseSource(this SprocketEditor editor, string source)
+        {
+            var box = Within(editor.Pick().Stages[0]).OfType<ListField>().First(field => field.Text == editor.Texts.PickSourceBlocks);
+            for (var i = 0; i < 4 && box.Text != source; i++)
+                ((IInputTarget)box).Text(source[0]);
+        }
+
         /// <summary>The parts of the blueprint the editor is on, one row each.</summary>
         public static List<PartRow> Parts(this SprocketEditor editor) =>
             editor.Blueprint().Parts.OfType<PartRow>().ToList();

@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
@@ -17,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly AutomationSystem _system;
         readonly Part _part;
         readonly ICommand _guide;
-        readonly List<string> _used = new List<string>();
 
         Element _focused;
 
@@ -79,6 +78,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The box a signal slot's short name is written in.</summary>
         public TextBox Short => _short;
 
+        /// <summary>The part saying the type of block a block slot takes, pressed to choose another.</summary>
+        public SlotChip Expects => _expectsPart;
+
         /// <summary>The switch that says whether the slot may be left without a block, on for required.</summary>
         public Switch Required => _required;
 
@@ -98,23 +100,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (wanted.Length == 0 || !AcceptsName(wanted) || wanted == _part.Id)
                 return;
 
-            // A slot that nothing uses and no installation holds blocks in is not saved, so dropping it frees the name.
-            var other = _system.FindPart(wanted);
-            if (other != null && other != _part)
-                _system.DropPart(other);
-
             Make(new RenamePart(_part, wanted));
         }
 
-        /// <summary>Whether no other slot that is used, or that an installation holds blocks in, has <paramref name="name" />.</summary>
+        /// <summary>Whether no other slot, no state and no type has <paramref name="name" />, in any case.</summary>
         public override bool AcceptsName(string name)
         {
-            var other = _system.FindPart(NameRules.Clean(name));
-            if (other == null || other == _part)
-                return true;
-
-            _system.Acted(_used);
-            return !_used.Contains(other.Id) && !Held(other);
+            var wanted = NameRules.Clean(name);
+            return _system.FindPartInAnyCase(wanted) == _part || !_system.TakesInAnyCase(wanted);
         }
 
         /// <summary>Writes what is still being typed into the slot, and where anything was changed here asks whether to keep it.</summary>
@@ -210,7 +203,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _shownShort.Text = _part.Short.Length > 0 ? _part.Short : _part.Id;
 
             _expectsHeading.Text = texts.SlotExpects.ToUpperInvariant();
+
+            // A block slot's type is chosen in a picker of its own; a signal or a screen has no type of block to choose.
+            var typed = !_part.IsSignal && _part.Holds.Length == 0;
+            _expects.IsVisible = !typed;
             _expects.Text = Expected(texts);
+            _expectsPart.IsVisible = typed;
+            _expectsPart.Say(Expected(texts));
+            _expectsPart.Tip = Tip.For(_expectsPart.Tip, editable ? texts.SlotExpectsAbout : _locked.Text);
+            _expectsPart.Command = typed && editable
+                ? Editor.Act(CommandKind.SlotType, () => Editor.Push(new SlotTypePage(Editor, _system, _part)))
+                : null;
 
             _required.Says(texts.BlueprintRequired, texts.BlueprintOptional);
             _required.IsOn = !_part.Optional;
@@ -242,20 +245,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }
 
             return expects;
-        }
-
-        /// <summary>Whether an installation holds blocks in <paramref name="part" />.</summary>
-        bool Held(Part part)
-        {
-            var instances = _system.Instances;
-            for (var i = 0; i < instances.Count; i++)
-            {
-                var filled = instances[i].FilledWith(part.Id);
-                if (filled != null && filled.Count > 0)
-                    return true;
-            }
-
-            return false;
         }
 
         /// <summary>Writes the box into the slot once the keyboard has left it, read every tick because it is one comparison.</summary>

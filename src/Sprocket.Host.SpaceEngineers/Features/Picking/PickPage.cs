@@ -56,7 +56,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly bool _memberOnly;
         readonly MemberOffers _offers;
         readonly SlotOccupancy _occupancy;
-        readonly PickTitle _wording;
         readonly BlockListing _listing;
         readonly KindFilter _kinds = new KindFilter();
 
@@ -77,6 +76,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _shown;
         bool _openedArguments;
         long _anchor;
+
+        // What a pick of blocks has picked by name.
+        static readonly IList<string> NoSlots = new string[0];
+
+        // Where the pick names slots of a blueprint: its heading, and the slots listed to be picked by name.
+        SlotHeading _slotHeading;
+        SlotListing _slotListing;
+        bool _retitled;
 
         PickStrip _strip;
         StageColumn _blocks;
@@ -175,7 +182,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _offers = new MemberOffers(editor, forEvents, forTests, signalsOnly);
             _occupancy = new SlotOccupancy(editor);
-            _wording = new PickTitle(editor, _offers, title, forEvents, forTests);
             _listing = new BlockListing(editor, admits, forEvents, forTests);
         }
 
@@ -200,8 +206,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _memberOnly = true;
         }
 
-        /// <summary>The title as the answer stands, or the picker's own name where nothing is chosen.</summary>
-        public override string Title => _wording.Said ?? _title;
+        /// <summary>The slot the pick names where it names one, and otherwise the picker's own name.</summary>
+        public override string Title => _slotHeading != null ? _slotHeading.Text : _title;
+
+        /// <summary>
+        /// The logic system whose slots the pick names, or null where it names none. For a blueprint the heading shows them: the
+        /// slots already made that the picks fill, or the new slot they make, named in place; for any other system, and where
+        /// this is null, the heading is the picker's own name. Set before the page is shown.
+        /// </summary>
+        public AutomationSystem Slotted { get; set; }
+
+        /// <summary>
+        /// The signal slot of the trigger being changed, which a pick of what a toolbar sends changes where it matches no signal
+        /// slot; empty for a new trigger. Set before the page is shown.
+        /// </summary>
+        public string Keeps { get; set; } = "";
+
+        /// <summary>Whether the first column lists the slots <see cref="Slotted" /> already has, to be picked by name, rather than blocks. Set before the page is shown.</summary>
+        public bool ListsSlots { get; set; }
+
+        /// <summary>The list of slots the pick goes in place of, a step's or a trigger's, or null for a new one. Set before the page is shown.</summary>
+        public IList<string> Replacing { get; set; }
 
         /// <inheritdoc />
         public override string Help => Terms.Picking;
@@ -364,9 +389,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
-        bool IsComplete => _selection.Count > 0 && (_fits != null || !string.IsNullOrEmpty(_chosen)
+        bool IsComplete => _selection.Count > 0 && (_fits != null || PicksSignal && (_aim == null || _aim.Chosen)
+            || !string.IsNullOrEmpty(_chosen)
             && _offers.ReadinessOf(_chosen, _chosenForm) == Readiness.Ready
             && (_aim == null || _aim.Chosen));
+
+        /// <summary>Whether a signal slot is picked by name, which is all a trigger needs to know of what starts it.</summary>
+        bool PicksSignal => _slotListing != null && _slotListing.PicksSignal;
+
+        /// <summary>The type the host provides that a slot picked by name holds, whose members alone are offered; null for any other.</summary>
+        HostType SlotType => _slotListing?.Type;
+
+        /// <summary>The slots picked by name, none where blocks are picked.</summary>
+        IList<string> PickedSlots => _slotListing != null ? _slotListing.Picked : NoSlots;
 
         /// <summary>The stages this page asks, which are the last in the pick while it is on top.</summary>
         int Own => (_blocks == null ? 0 : 1) + (_what == null ? 0 : 1) + (_does == null ? 0 : 1);
@@ -377,11 +412,47 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override bool TakeRetitle()
         {
-            // A slot's pick keeps the slot's name: the blocks chosen for it are the whole answer, and they are marked in its column.
-            if (_fits == null)
-                _wording.Reword(_chosen, _chosenForm, _slot, _quantifier, Totals, _selection);
+            var retitled = _retitled;
+            _retitled = false;
+            return retitled;
+        }
 
-            return _wording.Take();
+        /// <summary>The heading: the slot the pick names, where it names the slots of a blueprint, and otherwise the picker's own name.</summary>
+        public override void Heading(List<HeadingPart> parts)
+        {
+            if (Slotted == null || !Slotted.IsBlueprint)
+            {
+                base.Heading(parts);
+                return;
+            }
+
+            if (_slotHeading == null)
+                _slotHeading = new SlotHeading(Editor, Slotted, _title, _forEvents, Keeps, Replacing);
+
+            Restate();
+            _slotHeading.Head(parts);
+        }
+
+        /// <inheritdoc />
+        public override void RefreshHeading(List<HeadingPart> parts)
+        {
+            if (_slotHeading == null)
+                base.RefreshHeading(parts);
+            else
+                _slotHeading.Reword();
+        }
+
+        /// <summary>Works out again which slots the picks name; whether the heading changes with it.</summary>
+        bool Restate() => _slotHeading.Restate(_selection, _chosen, Facet, _slot ?? ToolbarSlot.Of(_chosen), PickedSlots, ListsSlots);
+
+        /// <summary>Hands <paramref name="answer" /> back, with the name of the slot the heading says the picks make.</summary>
+        void Finish(PickAnswer answer)
+        {
+            answer.SlotName = _slotHeading?.NewName ?? "";
+            foreach (var slot in PickedSlots)
+                answer.Slots.Add(slot);
+
+            _done(answer);
         }
 
         /// <summary>Asks before throwing away what was picked here, where there is something to lose and something to do with it.</summary>
@@ -411,7 +482,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var arguments = _strip.Arguments;
             if (_forEvents && _chosenForm != ReachKind.Value || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
-                _done(new PickAnswer(_selection, AnswerId, _quantifier, null, _chosenForm, Facet));
+                Finish(new PickAnswer(_selection, AnswerId, _quantifier, null, _chosenForm, Facet));
                 return;
             }
 
@@ -439,11 +510,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 && arguments[0].Text == EntityAction.Toggle)
             {
                 var toggle = Vocabulary.Toggle(Editor.World, _selection, _chosen) ?? _chosen;
-                _done(new PickAnswer(_selection, toggle, _quantifier, new List<Literal>(), ReachKind.Action, Facet));
+                Finish(new PickAnswer(_selection, toggle, _quantifier, new List<Literal>(), ReachKind.Action, Facet));
                 return;
             }
 
-            _done(new PickAnswer(_selection, _chosen, _quantifier, arguments, _chosenForm, Facet));
+            Finish(new PickAnswer(_selection, _chosen, _quantifier, arguments, _chosenForm, Facet));
         }
 
         /// <summary>Gives the argument of each field for one of a list of names as that name.</summary>
@@ -464,6 +535,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override void Build()
         {
+            // A slot of a type the host provides, picked by name, is acted on at the facet it holds.
+            if (SlotType != null)
+                _facet = _slotListing.Facet;
+
             _listing.Collect(_selection, _screen.Search, _kinds.Kind, _kinds.Family, ShowsHidden, _fits, _kinds.Present);
 
             if (_aim != null)
@@ -496,9 +571,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
 
             // The second stage exists only once there is something for it to be about, and never where only blocks are asked.
-            var wanted = _selection.Count > 0 && _fits == null;
+            var wanted = _selection.Count > 0 && _fits == null && !PicksSignal;
             if (wanted && _what == null)
             {
+                // The stages stand in order, so the column of what the trigger does is taken off and made again after this one.
+                if (_does != null)
+                {
+                    _strip.RemoveLast();
+                    _does = null;
+                }
+
                 MakeWhat();
             }
             else if (!wanted && _what != null)
@@ -516,8 +598,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_what != null)
                 FillWhat();
 
-            // What the trigger does, beside what happens, once what happens is chosen.
-            var does = _what != null && _aim != null && !string.IsNullOrEmpty(_chosen);
+            // What the trigger does, beside what happens, once what happens is chosen or a signal slot is picked.
+            var does = _aim != null && (PicksSignal || _what != null && !string.IsNullOrEmpty(_chosen));
             if (does && _does == null)
             {
                 _does = new StageColumn(_strip.Width, false, null, Editor.Texts);
@@ -534,6 +616,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             if (_does != null && _aim != null)
                 _aim.Fill(_does);
+
+            if (_slotHeading != null && Restate())
+                _retitled = true;
 
             _strip.Show();
             _strip.Arrive(Opens, Editor.Input);
@@ -581,21 +666,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void MakeBlocks()
         {
             _blocks = new StageColumn(_strip.Width, true, null, Editor.Texts);
-            _blocks.Title = Source == null ? Editor.Texts.PickBlocks : Editor.Texts.PickSource;
+            _blocks.Title = Source != null ? Editor.Texts.PickSource : ListsSlots ? Editor.Texts.PickSlots : Editor.Texts.PickBlocks;
             if (Source != null)
-                _blocks.Heads(Source.Box(false));
+                _blocks.Heads(Source.Box(ListsSlots ? PickSource.Slots : PickSource.Blocks));
 
-            _blocks.EmptyText = _fits != null
+            _blocks.EmptyText = ListsSlots
+                ? Editor.Texts.PickNoSlots
+                : _fits != null
                 ? Editor.Texts.BlueprintNoneFits
                 : _forTests ? Editor.Texts.PickNoBlocksChecked
                 : _forEvents ? Editor.Texts.PickNoBlocksHappen : Editor.Texts.PickNoBlocksDone;
 
             // For the whole life of the column, so the line does not come and go as the list of kinds is narrowed.
-            _blocks.HasKinds = _kinds.Present.Count > 0;
+            _blocks.HasKinds = !ListsSlots && _kinds.Present.Count > 0;
             _blocks.Narrowed += OnBlockSearch;
             _blocks.KindsNarrowed += NarrowKinds;
 
-            _blockRows = new KeyedChildren<long, PickRow>(_blocks.Rows, BlockRow);
+            if (ListsSlots)
+                _slotListing = new SlotListing(Editor, Slotted, _forEvents, _selection, MoveOn);
+            else
+                _blockRows = new KeyedChildren<long, PickRow>(_blocks.Rows, BlockRow);
+
             _kindRows = new KeyedChildren<string, KindRow>(_blocks.Kinds, KindRow);
             _blocks.KindsOpened += delegate
             {
@@ -608,7 +699,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 ShowsHidden = !ShowsHidden;
                 Editor.Invalidate();
             });
-            _blocks.ShowHidden = _toggleHidden;
+            _blocks.ShowHidden = ListsSlots ? null : _toggleHidden;
 
             _strip.Add(_blocks);
         }
@@ -895,6 +986,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void FillBlocks()
         {
+            if (ListsSlots)
+            {
+                _slotListing.Show(_blocks, _screen.Search);
+                FillOptions();
+                _blocks.ShowEmpty();
+                return;
+            }
+
             var texts = Editor.Texts;
             _blocks.Subtitle = _selection.Count == 0
                 ? texts.PickNonePicked
@@ -1113,6 +1212,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _matched.Clear();
             for (var i = 0; i < _offers.Names.Count; i++)
             {
+                // A slot of a type the host provides offers that type's members alone, on the facet the slot holds.
+                if (SlotType != null && _offers.Types[i] != SlotType)
+                    continue;
+
                 // What is chosen stays listed whatever the search, as a chosen block does, so a search never hides the
                 // answer this picker opened with.
                 if (EntityQuery.MatchesText(_offers.Names[i], _whatSearch) || _offers.Ids[i] == _chosen)
@@ -1153,7 +1256,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // first: a drop box heads them where the blocks share more than one, and each stands in under it.
             var first = _forEvents ? -1 : FirstTyped();
             var type = first < 0 ? null : _offers.Types[_rows[first]];
-            var shared = type == null ? null : Facets.Shared(Editor.World, _selection, type);
+            var shared = type == null || SlotType != null ? null : Facets.Shared(Editor.World, _selection, type);
             if (shared != null)
                 Keep(shared);
 

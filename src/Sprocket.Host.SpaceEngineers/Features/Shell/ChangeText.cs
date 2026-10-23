@@ -25,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case ChangeKind.Cadence: return texts.ChangeCadence;
                 case ChangeKind.Optional: return texts.ChangeOptional;
                 case ChangeKind.Required: return texts.ChangeRequired;
+                case ChangeKind.SlotType: return texts.ChangeSlotType;
                 case ChangeKind.Wait: return texts.ChangeWait;
                 case ChangeKind.PauseStep: return texts.ChangePauseStep;
                 case ChangeKind.ResumeStep: return texts.ChangeResumeStep;

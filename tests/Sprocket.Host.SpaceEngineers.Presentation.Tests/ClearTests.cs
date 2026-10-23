@@ -24,7 +24,7 @@ public class ClearTests
 
         Assert.True(picker.Shows("door"), "the menu was not narrowed to begin with");
 
-        picker.Do("155", "297");
+        picker.Do("181", "297");
 
         Assert.False(picker.Shows("door"), "the cross did not empty the box");
         Assert.True(picker.Shows("Button Panel"), "the kinds did not come back");

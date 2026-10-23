@@ -513,7 +513,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
                 row.Name = part.Id;
                 row.Short = part.IsSignal ? part.Short : "";
-                row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
+                row.Mark = MarkText.OfSlot(part);
                 row.Described = part.Annotation;
                 row.Opens = Changes(CommandKind.OpenSlot, () => Editor.Push(new SlotPage(Editor, _system, part)));
                 row.OpensAbout = Editable ? texts.SlotOpenAbout : Locked();
@@ -759,17 +759,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var moment = trigger as MomentTrigger;
             var watching = moment as WhenTrigger;
-            var seen = moment == null ? null : Editor.Seen(_system, moment.Sources);
-            if (watching != null && Vocabulary.Compares(Editor.Runner.Bindings, watching, seen))
+            if (watching != null && Vocabulary.Compares(watching, Editor.SlotBlocks.Events(_system, watching.Sources)))
             {
-                Compared(row, watching, seen);
+                Compared(row, watching);
             }
             else if (moment != null)
             {
                 var all = watching != null && watching.Quantifier != Quantifier.Any;
                 var blocks = Editor.Blocks(_system, moment.Sources);
-                row.Starts.Add(new EntitiesSlot(blocks, moment.Sources, all, Starts(trigger, OpeningColumn.Blocks)));
-                row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, OpeningColumn.What), all && blocks.Count > 1));
+                var slotted = _system.IsBlueprint;
+                if (watching != null && slotted)
+                    row.Starts.Add(Reading(watching, false));
+
+                row.Starts.Add(new EntitiesSlot(blocks, moment.Sources, all, MarkText.OfSlots(_system, moment.Sources), Starts(trigger, OpeningColumn.Blocks)));
+                row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, OpeningColumn.What), all && (slotted || blocks.Count > 1)));
             }
 
             var every = trigger as EveryTrigger;
@@ -827,25 +830,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         }
 
         /// <summary>Gives <paramref name="row" /> the parts of a when on a number.</summary>
-        void Compared(TriggerRow row, WhenTrigger when, IList<string> seen)
+        void Compared(TriggerRow row, WhenTrigger when)
         {
-            var bindings = Editor.Runner.Bindings;
             var blocks = Editor.Blocks(_system, when.Sources);
-            var value = when.Names(Vocabulary.ActionsFor(bindings, seen));
-            if (blocks.Count > 1)
-            {
-                var said = SentenceText.Quantified(when.Quantifier);
-                row.Starts.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                    Changes(CommandKind.OpenTrigger, () => Quantify(when)), ArgumentRole.Read));
-            }
+            var value = when.Names(Editor.SlotBlocks.Actions(_system, when.Sources));
+
+            // A line naming slots says how it reads them whatever they hold; one naming blocks, only where it names several.
+            var slotted = _system.IsBlueprint;
+            var many = slotted || blocks.Count > 1;
+            var reading = many ? Reading(when, true) : null;
+            var front = SentenceText.Leads(when.Quantifier, slotted);
+            if (reading != null && front)
+                row.Starts.Add(reading);
 
             row.Starts.Add(new ActionSlot(value, Starts(when, OpeningColumn.What)));
-            row.Starts.Add(new EntitiesSlot(blocks, when.Sources, when.Quantifier != Quantifier.Any, Starts(when, OpeningColumn.Blocks)));
+            if (reading != null && !front)
+                row.Starts.Add(reading);
+
+            row.Starts.Add(new EntitiesSlot(blocks, when.Sources, when.Quantifier != Quantifier.Any, MarkText.OfSlots(_system, when.Sources),
+                Starts(when, OpeningColumn.Blocks)));
             if (value == null)
                 return;
 
-            var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, seen));
-            var plural = when.Quantifier == Quantifier.All && blocks.Count > 1;
+            var fields = ComparisonQuestion.Fields(value, Editor.SlotBlocks.Events(_system, when.Sources));
+            var plural = when.Quantifier == Quantifier.All && many;
             row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(when.Relation) }, fields.GetRange(0, 1),
                 Changes(CommandKind.OpenTrigger, () => Relate(when, fields[0], plural)), ArgumentRole.Compared, plural));
             row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, fields.GetRange(1, fields.Count - 1), Starts(when, OpeningColumn.Arguments), ArgumentRole.Checked));
@@ -871,14 +879,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
-        /// <summary>Offers the ways <paramref name="when" /> can read its blocks in a menu under the part pressed, and changes it to the one chosen.</summary>
-        void Quantify(WhenTrigger when)
+        /// <summary>The part saying how <paramref name="when" /> reads the blocks in its slots, pressed to choose another way, a total among them where it <paramref name="compares" /> a number.</summary>
+        SentenceSlot Reading(WhenTrigger when, bool compares)
+        {
+            var slotted = _system.IsBlueprint;
+            var said = SentenceText.Reading(when.Quantifier, slotted);
+            return new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
+                Changes(CommandKind.OpenTrigger, () => Quantify(when, compares, slotted)), ArgumentRole.Read);
+        }
+
+        /// <summary>
+        /// Offers the ways <paramref name="when" /> can read its blocks in a menu under the part pressed, in the words of a line
+        /// naming slots where <paramref name="slotted" />, a total among them where it <paramref name="compares" /> a number, and
+        /// changes it to the one chosen.
+        /// </summary>
+        void Quantify(WhenTrigger when, bool compares, bool slotted)
         {
             Editor.AskHere("");
             for (var i = 0; i < SentenceText.Readings.Count; i++)
             {
                 var reading = SentenceText.Readings[i];
-                Editor.Answer(SentenceText.Quantified(reading), delegate
+                if (!compares && SentenceText.Totals(reading))
+                    continue;
+
+                Editor.Answer(SentenceText.Reading(reading, slotted), delegate
                 {
                     if (reading == when.Quantifier)
                         return;
@@ -892,7 +916,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         EntityEvent Happening(MomentTrigger moment)
         {
-            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, Editor.Seen(_system, moment.Sources));
+            var events = Editor.SlotBlocks.Events(_system, moment.Sources);
             var eventId = Vocabulary.EventOf(Editor.Program, Editor.Runner.Bindings, _system, moment, Editor.StandIn(_system));
             return Vocabulary.Find(events, eventId);
         }
@@ -920,7 +944,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return;
             }
 
-            var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_system, act.Targets)));
+            var chosen = act.Names(Editor.SlotBlocks.Actions(_system, act.Targets));
 
             var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
             row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, false, act.Sets && verb.Length == 0);
@@ -928,7 +952,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.Does.Add(ArgumentsSlot.Switching(verb, Does(trigger, OpeningColumn.Arguments)));
 
             row.Does.Add(new ActionSlot(chosen, Does(trigger, OpeningColumn.What)));
-            row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), act.Targets, true, Does(trigger, OpeningColumn.Blocks)));
+            row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), act.Targets, true, MarkText.OfSlots(_system, act.Targets),
+                Does(trigger, OpeningColumn.Blocks)));
             if (verb.Length != 0)
                 return;
 

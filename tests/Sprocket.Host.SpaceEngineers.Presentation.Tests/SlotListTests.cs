@@ -59,22 +59,22 @@ public class SlotListTests
     [Fact]
     public void AsManyAsTheLimitAllShow()
     {
-        var screen = WithLamps(PartRow.MostListed);
+        var screen = WithLamps(HeldBlocks.Most);
 
         var lines = Lines(screen);
-        Assert.Equal(PartRow.MostListed, lines.Length);
-        Assert.Equal($"Lamp {PartRow.MostListed:00}", lines[lines.Length - 1]);
+        Assert.Equal(HeldBlocks.Most, lines.Length);
+        Assert.Equal($"Lamp {HeldBlocks.Most:00}", lines[lines.Length - 1]);
     }
 
     /// <summary>More than the limit fill all but its last line, and the last says how many more there are.</summary>
     [Fact]
     public void MoreThanTheLimitSayHowManyMore()
     {
-        var screen = WithLamps(PartRow.MostListed + 4);
+        var screen = WithLamps(HeldBlocks.Most + 4);
 
         var lines = Lines(screen);
-        Assert.Equal(PartRow.MostListed, lines.Length);
-        Assert.Equal($"Lamp {PartRow.MostListed - 1:00}", lines[lines.Length - 2]);
+        Assert.Equal(HeldBlocks.Most, lines.Length);
+        Assert.Equal($"Lamp {HeldBlocks.Most - 1:00}", lines[lines.Length - 2]);
         Assert.Equal("and 5 more", lines[lines.Length - 1]);
 
         // Its words stand at the right of the list.
@@ -190,7 +190,7 @@ public class SlotListTests
     [Fact]
     public void HowManyMoreIsSaidInThePlayersLanguage()
     {
-        var screen = WithLamps(PartRow.MostListed + 4);
+        var screen = WithLamps(HeldBlocks.Most + 4);
         screen.Scene.Speak("no");
         screen.Run(2);
 
