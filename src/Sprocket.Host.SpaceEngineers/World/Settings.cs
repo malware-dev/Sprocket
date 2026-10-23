@@ -63,12 +63,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>How a tip stays open in a world that leaves it: as every world says, or staying while the pointer is on it.</summary>
         public TipKeeping DefaultTipKeeping => Global.TipKeeping ?? TipKeeping.Stay;
 
-        /// <summary>Where a link inside a tip shows its page, the trial's variant this world uses.</summary>
-        public TipLinks TipLinks => World.TipLinks ?? DefaultTipLinks;
-
-        /// <summary>Where a link inside a tip shows its page in a world that leaves it: as every world says, or in the same tip.</summary>
-        public TipLinks DefaultTipLinks => Global.TipLinks ?? TipLinks.Replace;
-
         /// <summary>Whether developer mode is on in a world that leaves it: what every world says, or off.</summary>
         public bool DefaultDeveloperMode => Global.DeveloperMode ?? false;
 

@@ -113,6 +113,9 @@ namespace Lumel
         /// <summary>Whether the tip holds the pointer: open, and either always kept or kept now by the host's keep key.</summary>
         public bool IsKept => _anchor != null && (!_keptByKey || KeepKey != null && KeepKey());
 
+        /// <summary>What the tip casts on what lies beneath it, or null for nothing.</summary>
+        public Shadow Shadow { get; set; }
+
         /// <summary>How tall the tip grows at most, in UI units; a page taller than this is cut off at it.</summary>
         public float MaxHeight { get; set; } = float.PositiveInfinity;
 
@@ -334,6 +337,9 @@ namespace Lumel
             var size = new Vector2(wide, Math.Min(DesiredSize.Y, high));
 
             Arrange(Place(area, size));
+            if (Shadow != null)
+                Shadow.Draw(g, Bounds);
+
             Draw(g);
 
             if (_next != null)
@@ -453,6 +459,7 @@ namespace Lumel
             _next = new CodexTip
             {
                 Style = Style,
+                Shadow = Shadow,
                 Placement = Placement,
                 Spacing = Spacing,
                 MaxHeight = MaxHeight,

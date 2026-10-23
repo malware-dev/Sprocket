@@ -99,19 +99,6 @@ public class AdminTests
         Assert.Equal(TipKeeping.Alt, screen.Editor.TipKeeping);
     }
 
-    /// <summary>The trial of where a tip's links open is chosen for this world, and the editor follows it.</summary>
-    [Fact]
-    public void TheLinkTrialIsChosenForThisWorld()
-    {
-        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
-
-        Choose(screen, "In the same tip", "In a tip beside it");
-
-        Assert.Equal(TipLinks.Beside, screen.Scene.Ship.Settings.World.TipLinks);
-        Assert.Null(screen.Scene.Ship.Settings.Global.TipLinks);
-        Assert.Equal(TipLinks.Beside, screen.Editor.TipLinks);
-    }
-
     /// <summary>The default under this world gives the setting back to every world.</summary>
     [Fact]
     public void TheDefaultLeavesItToEveryWorld()

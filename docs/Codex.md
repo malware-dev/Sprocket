@@ -1,13 +1,12 @@
 # Codex
 
 The codex is every tip Sprocket shows. A tip is a codex tip (`Lumel/CodexTip.cs`): it opens beside the element the
-pointer rests on, the pointer can move onto it, and the links in it lead to other pages inside it, with back and
-forward in a small row at its top once there is somewhere to go.
+pointer rests on, and the pointer can move onto it. Resting on a link in it opens the link's page in a tip of its own
+beside it, up to three side by side; moving back onto an earlier tip closes those opened after it, and leaving them all
+closes all.
 
-Two admin trials set how a tip behaves. `tipKeeping` is whether a tip always lets the pointer onto it (`stay`) or only
-while Alt is held (`alt`). `tipLinks` is whether a pressed link shows its page in the same tip (`replace`), or resting on
-a link opens its page in a tip of its own beside the first (`beside`), up to three side by side; moving back onto an
-earlier tip closes those opened after it.
+An admin trial, `tipKeeping`, sets whether a tip always lets the pointer onto it (`stay`) or only while Alt is held
+(`alt`).
 
 ## Pages
 

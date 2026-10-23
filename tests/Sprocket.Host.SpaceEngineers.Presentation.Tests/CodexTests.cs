@@ -33,6 +33,16 @@ public class CodexTests
         Assert.Equal(screen.Editor.Texts.Codex.SystemsNewAbout, tip.Page!.Text);
     }
 
+    /// <summary>The editor's tips open a link's page in a tip beside them, casting the short shadow every hanging thing casts.</summary>
+    [Fact]
+    public void TheEditorsTipsNestAndCastAShadow()
+    {
+        var tip = Screen.Fresh("tick", "3").Scene.CodexTip;
+
+        Assert.True(tip.Nests);
+        Assert.Same(Styles.ShortShadow, tip.Shadow);
+    }
+
     /// <summary>A press beside an open tip closes it and still reaches what it lands on.</summary>
     [Fact]
     public void APressBesideTheTipClosesItAndGoesOn()

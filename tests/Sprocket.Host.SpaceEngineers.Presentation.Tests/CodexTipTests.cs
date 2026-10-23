@@ -1,4 +1,5 @@
 using Lumel;
+using Lumel.Drawing;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Windows;
@@ -334,6 +335,22 @@ public class CodexTipTests
         Assert.Same(other, tip.Anchor);
         Assert.Same(page, tip.Page);
         Assert.False(tip.CanGoBack);
+    }
+
+    /// <summary>A tip given a shadow draws it before itself, reaching out past its edge.</summary>
+    [Fact]
+    public void ATipCastsItsShadow()
+    {
+        var (_, anchor, tip) = Stage(100f, 100f);
+        tip.Shadow = new Shadow(new NineSlice(VRage.Utils.MyStringId.GetOrCompute("Shade"), 64, 24), 8f, new Vector2(2f, 4f), Color.Black);
+        tip.Open(anchor, new Tip("A few words about it."));
+        var graphics = new Recording(Area);
+
+        tip.Draw(graphics, Area);
+
+        var shadow = graphics.Pieces.Where(piece => piece.Material.String == "Shade").Select(piece => piece.Destination).ToList();
+        Assert.NotEmpty(shadow);
+        Assert.Equal(tip.Bounds.X + 2f - 8f, shadow.Min(r => r.X), 1);
     }
 
     /// <summary>A tip whose element is taken off the screen closes.</summary>

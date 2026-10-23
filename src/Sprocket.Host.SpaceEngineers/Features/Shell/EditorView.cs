@@ -192,6 +192,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _codexTip = new CodexTip
             {
                 Style = Styles.CodexTip,
+                Shadow = Styles.ShortShadow,
+                Nests = true,
                 Placement = FixedSize.Wide(Sizes.Popup),
                 MaxHeight = Sizes.TipHigh,
                 Spacing = 8f,
@@ -602,7 +604,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var texts = _editor.Texts;
 
             _codexTip.KeptByKey = _editor.TipKeeping == World.TipKeeping.Alt;
-            _codexTip.Nests = _editor.TipLinks == World.TipLinks.Beside;
             if (_keepHint != texts.Codex.TipKeepHint)
             {
                 _keepHint = texts.Codex.TipKeepHint;

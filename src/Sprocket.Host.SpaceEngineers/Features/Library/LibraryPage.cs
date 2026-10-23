@@ -368,6 +368,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _reset.Text = texts.LibraryReset;
             _reset.Tip = Tip.For(_reset.Tip, texts.Codex.LibraryResetAbout);
 
+            // A blueprint in storage is copied by putting it on a construct, so it offers no copy of itself.
+            _copy.IsVisible = entry.Section != Kept;
             _copy.Text = texts.LibraryCopy;
             _copies.CanExecute = free && system != null;
             _copy.Tip = Tip.For(_copy.Tip, texts.Codex.LibraryCopyAbout);

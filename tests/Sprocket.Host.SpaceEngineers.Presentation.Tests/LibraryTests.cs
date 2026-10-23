@@ -425,9 +425,9 @@ public class LibraryTests
         Assert.Equal("Airlock 2", Assert.Single(rig.Editor.Program.Systems, s => s != here).Name);
     }
 
-    /// <summary>Make a copy on a blueprint in the library copies the library's, even while a logic system made from it is on this construct, changed.</summary>
+    /// <summary>A blueprint in the library offers no copy of itself, even while a logic system made from it is on this construct.</summary>
     [Fact]
-    public void MakeACopyOfAStoredBlueprintCopiesTheStoredOne()
+    public void AStoredBlueprintOffersNoCopy()
     {
         var rig = Blueprinted();
         var here = rig.Editor.Program.Systems[0];
@@ -441,12 +441,7 @@ public class LibraryTests
         Assert.DoesNotContain(page.View!.Within().OfType<Button>(), b => b.IsVisible
             && (b.Text == rig.Texts.SystemsUpdateFromLibrary || b.Text == rig.Texts.SystemsUpdateBlueprint
                 || b.Text == rig.Texts.SystemsMakeBlueprint || b.Text == rig.Texts.LibraryReset));
-
-        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryCopy).Command!.Execute();
-        rig.Tick();
-
-        Assert.Equal(2, rig.Editor.Program.Systems.Count);
-        Assert.Equal("Airlock 2", Assert.Single(rig.Editor.Program.Systems, s => s != here).Name);
+        Assert.DoesNotContain(page.View!.Within().OfType<Button>(), b => b.IsVisible && b.Text == rig.Texts.LibraryCopy);
     }
 
     /// <summary>

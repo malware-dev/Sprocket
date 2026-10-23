@@ -842,7 +842,7 @@
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
     <value>Add a copy of this blueprint to this construct as a separate logic system.</value>
-    <comment>In the library, the tooltip on the button in the chosen blueprint's details that puts a copy of it on the construct as a separate logic system.</comment>
+    <comment>PLACEHOLDER, to be written. In the library, the tooltip on the Make a copy button in the details of the chosen logic system on this construct, or of a backup: it puts a copy of it on the construct as a separate logic system. Never shown for a blueprint in storage.</comment>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
     <value>Delete this logic system, with its installations. It has no blueprint in the library, so this is its only copy.</value>

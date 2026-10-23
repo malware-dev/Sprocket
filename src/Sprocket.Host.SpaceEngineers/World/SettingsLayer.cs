@@ -15,8 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         const string Tips = "tipKeeping";
 
-        const string Links = "tipLinks";
-
         /// <summary>A level saying nothing.</summary>
         public static readonly SettingsLayer Empty = new SettingsLayer(null, null);
 
@@ -24,13 +22,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static readonly int[] Updates = { 1, 10, 100 };
 
         /// <summary>A level giving the values that are not null, and leaving the rest to the level below.</summary>
-        public SettingsLayer(bool? developerMode, int? fastestUpdate, bool? debugLog = null, TipKeeping? tipKeeping = null, TipLinks? tipLinks = null)
+        public SettingsLayer(bool? developerMode, int? fastestUpdate, bool? debugLog = null, TipKeeping? tipKeeping = null)
         {
             DeveloperMode = developerMode;
             FastestUpdate = fastestUpdate.HasValue ? Nearest(fastestUpdate.Value) : (int?)null;
             DebugLog = debugLog;
             TipKeeping = tipKeeping;
-            TipLinks = tipLinks;
         }
 
         /// <summary>Whether the developer tools are on, or null where this level leaves it.</summary>
@@ -45,44 +42,35 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>How a tip stays open, the trial's variant, or null where this level leaves it.</summary>
         public TipKeeping? TipKeeping { get; }
 
-        /// <summary>Where a link inside a tip shows its page, the trial's variant, or null where this level leaves it.</summary>
-        public TipLinks? TipLinks { get; }
-
         /// <summary>This level with developer mode given as <paramref name="on" />, or left where it is null.</summary>
         public SettingsLayer WithDeveloperMode(bool? on)
         {
-            return new SettingsLayer(on, FastestUpdate, DebugLog, TipKeeping, TipLinks);
+            return new SettingsLayer(on, FastestUpdate, DebugLog, TipKeeping);
         }
 
         /// <summary>This level with the fastest update given as <paramref name="ticks" />, or left where it is null.</summary>
         public SettingsLayer WithFastestUpdate(int? ticks)
         {
-            return new SettingsLayer(DeveloperMode, ticks, DebugLog, TipKeeping, TipLinks);
+            return new SettingsLayer(DeveloperMode, ticks, DebugLog, TipKeeping);
         }
 
         /// <summary>This level with the debug log given as <paramref name="on" />, or left where it is null.</summary>
         public SettingsLayer WithDebugLog(bool? on)
         {
-            return new SettingsLayer(DeveloperMode, FastestUpdate, on, TipKeeping, TipLinks);
+            return new SettingsLayer(DeveloperMode, FastestUpdate, on, TipKeeping);
         }
 
         /// <summary>This level with how a tip stays open given as <paramref name="keeping" />, or left where it is null.</summary>
         public SettingsLayer WithTipKeeping(TipKeeping? keeping)
         {
-            return new SettingsLayer(DeveloperMode, FastestUpdate, DebugLog, keeping, TipLinks);
-        }
-
-        /// <summary>This level with where a link inside a tip shows its page given as <paramref name="links" />, or left where it is null.</summary>
-        public SettingsLayer WithTipLinks(TipLinks? links)
-        {
-            return new SettingsLayer(DeveloperMode, FastestUpdate, DebugLog, TipKeeping, links);
+            return new SettingsLayer(DeveloperMode, FastestUpdate, DebugLog, keeping);
         }
 
         /// <summary>Whether this level says the same as <paramref name="other" /> about every setting.</summary>
         public bool Same(SettingsLayer other)
         {
             return other != null && DeveloperMode == other.DeveloperMode && FastestUpdate == other.FastestUpdate && DebugLog == other.DebugLog
-                   && TipKeeping == other.TipKeeping && TipLinks == other.TipLinks;
+                   && TipKeeping == other.TipKeeping;
         }
 
         /// <summary>The one of 1, 10 and 100 nearest <paramref name="ticks" />, the smaller where two are as near.</summary>
@@ -134,34 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     GameLog.Say($"{where} gives {Tips} as {tips}, which is not {Keeping(World.TipKeeping.Stay)} or {Keeping(World.TipKeeping.Alt)}; it is left to the level below");
             }
 
-            return new SettingsLayer(developerMode, fastestUpdate, debugLog, tipKeeping, ReadLinks(ini, section, where));
-        }
-
-        /// <summary>
-        /// Where a link inside a tip shows its page, as <paramref name="section" /> of <paramref name="ini" /> says, or null where it
-        /// says nothing; a value that is not one of the choices is said in the log, naming <paramref name="where" />, and left.
-        /// </summary>
-        static TipLinks? ReadLinks(MyIni ini, string section, string where)
-        {
-            string links;
-            if (!ini.Get(section, Links).TryGetString(out links))
-                return null;
-
-            if (links == Linking(World.TipLinks.Replace))
-                return World.TipLinks.Replace;
-
-            if (links == Linking(World.TipLinks.Beside))
-                return World.TipLinks.Beside;
-
-            GameLog.Say($"{where} gives {Links} as {links}, which is not {Linking(World.TipLinks.Replace)} or {Linking(World.TipLinks.Beside)}; it is left to the level below");
-            return null;
-        }
-
-        /// <summary>How <paramref name="links" /> is written in a settings file.</summary>
-        /// <remarks>Persisted.</remarks>
-        static string Linking(TipLinks links)
-        {
-            return links == World.TipLinks.Beside ? "beside" : "replace";
+            return new SettingsLayer(developerMode, fastestUpdate, debugLog, tipKeeping);
         }
 
         /// <summary>How <paramref name="keeping" /> is written in a settings file.</summary>
@@ -193,11 +154,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 ini.Set(section, Tips, Keeping(TipKeeping.Value));
             else
                 ini.Delete(section, Tips);
-
-            if (TipLinks.HasValue)
-                ini.Set(section, Links, Linking(TipLinks.Value));
-            else
-                ini.Delete(section, Links);
         }
     }
 }

@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 empty = fault.Problem == Runtime.SequenceProblem.EmptySlot;
             }
 
-            // Switched off with nothing wrong, as a new installation is made to be filled in, it is offered its switch here.
+            // Switched off with nothing wrong, as a new installation is made to be filled in, it says so; the heading's switch turns it on.
             var filled = chosen != null && !chosen.Enabled && chosen.Halt == null && _system.Enabled && said.Length == 0;
             if (filled)
             {
@@ -297,15 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _trouble.Style = mended ? Styles.Caution : Styles.Problem;
 
             // An empty slot is filled on this page, so it opens no sequence.
-            if (restored || filled)
-            {
-                _openTrouble.IsVisible = true;
-                _openTrouble.Text = Editor.Texts.BlueprintSwitchOn;
-                _openTrouble.Command = Editor.Act(CommandKind.EnableInstance, delegate { Editor.SwitchInstance(_system, chosen, true); });
-                return;
-            }
-
-            var opens = sequence != null && !empty;
+            var opens = sequence != null && !empty && !restored && !filled;
             _openTrouble.IsVisible = opens;
             _openTrouble.Text = opens ? Template.Fill(Editor.Texts.BlueprintOpenSequence, "name", sequence.Name) : "";
             _openTrouble.Command = opens

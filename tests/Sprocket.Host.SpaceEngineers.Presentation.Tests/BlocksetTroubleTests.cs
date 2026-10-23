@@ -41,7 +41,7 @@ public class BlocksetTroubleTests
         const string restored = "Stopped at step 1 of Sequence 1: Airlock Inner Door was lost but is now restored.";
         Assert.Contains(sim.Editor.Current.View!.Within().OfType<Label>(), label => label.Text == restored && label.IsVisible);
 
-        sim.Editor.PressStart("Switch on");
+        sim.Editor.Screen.Flip!.Execute();
         Run(sim, 501, 520);
 
         Assert.True(installation.Enabled);

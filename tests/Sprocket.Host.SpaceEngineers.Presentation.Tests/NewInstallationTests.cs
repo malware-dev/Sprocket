@@ -50,7 +50,7 @@ public class NewInstallationTests
         Assert.Null(SystemSummary.Failing(sim.Editor.Runner, system, port, out _));
         Assert.Contains(Labels(sim), label => label.Text == "Every slot is filled.");
 
-        sim.Editor.PressStart("Switch on");
+        sim.Editor.Screen.Flip!.Execute();
         Run(sim);
 
         Assert.True(port.Enabled);

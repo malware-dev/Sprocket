@@ -796,13 +796,9 @@
     <value>optional</value>
     <comment>On a slot's page, the half of the required/optional switch for a slot that may be left without a block. Short: it shares the switch with the word for required.</comment>
   </data>
-  <data name="Sprocket.Blueprint.SwitchOn" xml:space="preserve">
-    <value>Switch on</value>
-    <comment>Button on the installation panel beside why Sprocket switched the installation off, once the block it lost is back, or beside the line saying every slot is filled; it switches the installation on again.</comment>
-  </data>
   <data name="Sprocket.Blueprint.Filled" xml:space="preserve">
     <value>Every slot is filled.</value>
-    <comment>Line at the top of the installation panel when the installation is switched off, nothing is wrong with it, and every slot it needs has its block, as a new installation is once it is filled in. The Switch on button stands beside it.</comment>
+    <comment>Line at the top of the installation panel when the installation is switched off, nothing is wrong with it, and every slot it needs has its block, as a new installation is once it is filled in; the switch in the heading turns it on.</comment>
   </data>
   <data name="Sprocket.Blueprint.OpenSequence" xml:space="preserve">
     <value>Open {name}</value>
@@ -1722,7 +1718,7 @@
   </data>
   <data name="Sprocket.Library.Copy" xml:space="preserve">
     <value>Make a copy</value>
-    <comment>In the library, the button in the details of the chosen blueprint that puts a copy of it on the construct the editor was opened on, as a separate logic system, and opens it.</comment>
+    <comment>In the library, the button in the details of the chosen logic system on this construct, or of a backup, that puts a copy of it on the construct the editor was opened on, as a separate logic system, and opens it. Never shown for a blueprint in storage.</comment>
   </data>
   <data name="Sprocket.Library.CopyName" xml:space="preserve">
     <value>{name} {number}</value>
@@ -2763,22 +2759,6 @@
   <data name="Sprocket.Admin.TipsAlt" xml:space="preserve">
     <value>Hold Alt to keep open</value>
     <comment>In the admin settings, the choice of the tip trial where a tip stays for the pointer to move onto it only while Alt is held. Placeholder until the texts are written.</comment>
-  </data>
-  <data name="Sprocket.Admin.Links" xml:space="preserve">
-    <value>Where a tip's links open</value>
-    <comment>PLACEHOLDER, to be written. In the admin settings, under the trials heading, the name of the trial of where the page of a link inside a tip is shown.</comment>
-  </data>
-  <data name="Sprocket.Admin.LinksAbout" xml:space="preserve">
-    <value>Whether pressing a link in a tip shows its page in the same tip, or resting on it opens the page in a tip beside it.</value>
-    <comment>PLACEHOLDER, to be written. In the admin settings, the line under the name of the trial of where a link inside a tip shows its page.</comment>
-  </data>
-  <data name="Sprocket.Admin.LinksReplace" xml:space="preserve">
-    <value>In the same tip</value>
-    <comment>PLACEHOLDER, to be written. In the admin settings, the choice of the link trial where pressing a link in a tip shows its page in that tip, with steps back and forward.</comment>
-  </data>
-  <data name="Sprocket.Admin.LinksBeside" xml:space="preserve">
-    <value>In a tip beside it</value>
-    <comment>PLACEHOLDER, to be written. In the admin settings, the choice of the link trial where resting the pointer on a link in a tip opens its page in a second tip beside the first, up to three side by side.</comment>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} must be turned off in order to be edited safely.</value>

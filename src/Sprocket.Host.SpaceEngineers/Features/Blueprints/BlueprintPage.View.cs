@@ -49,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         {
                             new RichText { Style = Styles.HeadingTerm }.As(out _partsHeading),
                             new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs),
+                            new HStack { Placement = Flex.Spare },
                             new Button { Style = Styles.Button, IsVisible = false, Align = Align.Center }.As(out _optimize)
                         }
                     },

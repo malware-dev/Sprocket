@@ -608,9 +608,6 @@
   <data name="Sprocket.Blueprint.Optional" xml:space="preserve">
     <value>valgfri</value>
   </data>
-  <data name="Sprocket.Blueprint.SwitchOn" xml:space="preserve">
-    <value>Slå på</value>
-  </data>
   <data name="Sprocket.Blueprint.Filled" xml:space="preserve">
     <value>Alle plassene er fylt.</value>
   </data>
@@ -2088,18 +2085,6 @@
   </data>
   <data name="Sprocket.Admin.TipsAlt" xml:space="preserve">
     <value>Hold Alt for å holde åpen</value>
-  </data>
-  <data name="Sprocket.Admin.Links" xml:space="preserve">
-    <value>Hvor lenkene i et tips åpnes</value>
-  </data>
-  <data name="Sprocket.Admin.LinksAbout" xml:space="preserve">
-    <value>Om et trykk på en lenke i et tips viser siden i samme tips, eller om det å hvile pekeren på den åpner siden i et tips ved siden av.</value>
-  </data>
-  <data name="Sprocket.Admin.LinksReplace" xml:space="preserve">
-    <value>I samme tips</value>
-  </data>
-  <data name="Sprocket.Admin.LinksBeside" xml:space="preserve">
-    <value>I et tips ved siden av</value>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} må slås av før det kan redigeres trygt.</value>
