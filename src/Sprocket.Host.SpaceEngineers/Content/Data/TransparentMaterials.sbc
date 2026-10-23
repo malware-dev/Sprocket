@@ -194,5 +194,31 @@
             </UVSize>
         </TransparentMaterial>
 
+        <!-- The hazard stripes a warning or an error lies on, laid edge to edge across a row. -->
+        <TransparentMaterial>
+            <Id>
+                <TypeId>TransparentMaterialDefinition</TypeId>
+                <SubtypeId>Sprocket_Stripes</SubtypeId>
+            </Id>
+            <AlphaMistingEnable>false</AlphaMistingEnable>
+            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
+            <AlphaSaturation>1</AlphaSaturation>
+            <Emissivity>0</Emissivity>
+            <IgnoreDepth>false</IgnoreDepth>
+            <NeedSort>false</NeedSort>
+            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
+            <Texture>Textures\Sprites\Sprocket_Stripes.dds</Texture>
+            <Reflectivity>0</Reflectivity>
+            <UseAtlas>false</UseAtlas>
+            <UVOffset>
+                <X>0</X>
+                <Y>0</Y>
+            </UVOffset>
+            <UVSize>
+                <X>1</X>
+                <Y>1</Y>
+            </UVSize>
+        </TransparentMaterial>
+
     </TransparentMaterials>
 </Definitions>

@@ -16,6 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     {
         static readonly NineSlice Shade = new NineSlice(Materials.Shadow, 64, 24);
 
+        /// <summary>The hazard stripes a warning lies on, over its amber wash.</summary>
+        public static readonly Pattern NoticeStripes = new Pattern(Materials.Stripes, 64, 64f, Palette.NoticeStripe);
+
+        /// <summary>The hazard stripes something wrong lies on, over its red wash.</summary>
+        public static readonly Pattern ProblemStripes = new Pattern(Materials.Stripes, 64, 64f, Palette.ProblemStripe);
+
         /// <summary>The shadow a floating window casts, lying well away from the page as if lit from the top left.</summary>
         public static readonly Shadow Shadow = new Shadow(Shade, 24f, new VRageMath.Vector2(6f, 10f), Palette.Shadow);
 
@@ -375,7 +381,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A word on an amber wash, saying something asked for did not happen.</summary>
         public static readonly TextStyle Skipped = new TextStyle(Status)
         {
-            Base = { Color = Palette.Notice, Background = Palette.NoticeWash, Padding = new Thickness(16f, 8f) }
+            Base = { Color = Palette.Notice, Background = Palette.NoticeWash, Pattern = NoticeStripes, Padding = new Thickness(16f, 8f) }
         };
 
         /// <summary>What is wrong with a thing, on its own line under it.</summary>
@@ -485,7 +491,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A row with something wrong in it.</summary>
         public static readonly ElementStyle Broken = new ElementStyle(Row)
         {
-            Base = { Background = Palette.ProblemWash }
+            Base = { Background = Palette.ProblemWash, Pattern = ProblemStripes }
         };
 
         /// <summary>The row chosen from a list, whose details stand beside it.</summary>
@@ -503,7 +509,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A row that has stopped where it is waiting to be let on, or is switched off: a warning, washed amber.</summary>
         public static readonly ElementStyle Parked = new ElementStyle(Row)
         {
-            Base = { Background = Palette.NoticeWash }
+            Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes }
         };
 
         /// <summary>A row with nothing to open.</summary>

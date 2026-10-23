@@ -8,6 +8,9 @@ namespace Lumel.Styling
         /// <summary>What is painted behind the element, or null to leave it to the layers beneath.</summary>
         public Color? Background { get; set; }
 
+        /// <summary>What is laid over the element's background, or null to leave it to the layers beneath.</summary>
+        public Drawing.Pattern Pattern { get; set; }
+
         /// <summary>The hairline round the element, or null to leave it to the layers beneath.</summary>
         public Color? Edge { get; set; }
 
@@ -19,6 +22,9 @@ namespace Lumel.Styling
         {
             if (Background.HasValue)
                 element.Background = Color.Transparent;
+
+            if (Pattern != null)
+                element.Pattern = null;
 
             if (Edge.HasValue)
                 element.Edge = Color.Transparent;
@@ -32,6 +38,7 @@ namespace Lumel.Styling
         public virtual void Clear()
         {
             Background = null;
+            Pattern = null;
             Edge = null;
             Padding = null;
         }
@@ -41,6 +48,9 @@ namespace Lumel.Styling
         {
             if (!Background.HasValue)
                 Background = layer.Background;
+
+            if (Pattern == null)
+                Pattern = layer.Pattern;
 
             if (!Edge.HasValue)
                 Edge = layer.Edge;
@@ -54,6 +64,9 @@ namespace Lumel.Styling
         {
             if (Background.HasValue)
                 element.Background = Background.Value;
+
+            if (Pattern != null)
+                element.Pattern = Pattern;
 
             if (Edge.HasValue)
                 element.Edge = Edge.Value;

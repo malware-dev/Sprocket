@@ -95,6 +95,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The ground of a row or notice that carries a warning.</summary>
         public static readonly Color NoticeWash = new Color(40, 30, 9);
 
+        /// <summary>The hazard stripes laid over a warning's wash, a step brighter than it so they show without crowding the words.</summary>
+        public static readonly Color NoticeStripe = new Color(58, 43, 13);
+
+        /// <summary>The hazard stripes laid over a problem's wash, a step brighter than it so they show without crowding the words.</summary>
+        public static readonly Color ProblemStripe = new Color(54, 18, 15);
+
         /// <summary>A scrollbar's thumb.</summary>
         public static readonly Color Thumb = Dim;
 

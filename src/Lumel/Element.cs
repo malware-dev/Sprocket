@@ -111,6 +111,9 @@ namespace Lumel
         /// <summary>Painted across <see cref="Bounds" /> before anything else.</summary>
         public Color Background { get; set; }
 
+        /// <summary>Laid across <see cref="Bounds" /> over the <see cref="Background" />, before everything else, or null for none.</summary>
+        public Pattern Pattern { get; set; }
+
         /// <summary>A hairline drawn around <see cref="Bounds" />, inside it.</summary>
         public Color Edge { get; set; }
 
@@ -396,6 +399,9 @@ namespace Lumel
         {
             if (Background.A > 0)
                 g.Fill(Bounds, Background);
+
+            if (Pattern != null)
+                Pattern.Draw(g, Bounds);
 
             var edge = IsHot && HighlightEdge.A > 0 ? HighlightEdge : Edge;
             if (edge.A > 0)
