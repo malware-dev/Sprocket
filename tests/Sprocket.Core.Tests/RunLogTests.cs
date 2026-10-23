@@ -78,6 +78,25 @@ public class RunLogTests
         string Name(Fitting fitting) => Program.Declare(Rig.World, Rig.Entity(fitting.Id)).Name;
     }
 
+    /// <summary>A Sprocket's own log names the programmable block running the automation on every line.</summary>
+    [Fact]
+    public void TheLogNamesTheProgrammableBlock()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Tick();
+        var sequence = sim.Editor.Program.Systems[0].Sequences[0];
+        sim.Unit.Apply(Settings.From("[Sprocket]\ndebugLog=true\n", null));
+        var said = GameLog.Lines.Count;
+
+        sim.Runner.Call(sequence, sequence.System.First!);
+        sim.Tick();
+
+        var lines = GameLog.Lines.Skip(said).Where(line => line.StartsWith("tick ", StringComparison.Ordinal)).ToList();
+        Assert.NotEmpty(lines);
+        Assert.All(lines, line => Assert.Contains(", \"Automation\"", line));
+    }
+
     /// <summary>A run is told from its start to its end: each step as it is written, what each block was asked, which way the if went, and the wait.</summary>
     [Fact]
     public void ARunIsToldStepByStep()

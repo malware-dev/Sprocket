@@ -201,6 +201,41 @@ public class StatusPictureTests
         Assert.Contains(texts.StrandedBanner, drawn);
     }
 
+    /// <summary>On a construct with no automation, a screen with room says so and what to do about it, and names no construct.</summary>
+    [Fact]
+    public void NoAutomationIsSaidWithWhatToDo()
+    {
+        var status = StatusScenes.Make("no-automation", out var texts);
+        var face = Face(ScreenShape.Reference.First(shape => shape.Name == "lcd-panel"));
+
+        Draw(new StatusPicture(), face, status, texts, 0);
+        var drawn = Drawn(face);
+
+        Assert.Contains(texts.PanelNothing, drawn);
+        Assert.Contains(texts.PanelNothingFix, drawn);
+        Assert.DoesNotContain(StatusScenes.Construct, drawn);
+    }
+
+    /// <summary>On a construct with no automation, a corner screen says so alone.</summary>
+    [Fact]
+    public void NoAutomationOnACornerScreenIsSaidAlone()
+    {
+        var status = StatusScenes.Make("no-automation", out var texts);
+        var face = Face(ScreenShape.Reference.First(shape => shape.Name == "corner-lcd"));
+
+        Draw(new StatusPicture(), face, status, texts, 0);
+        var drawn = Drawn(face);
+
+        Assert.Contains(texts.PanelNothing, drawn);
+        Assert.DoesNotContain(texts.PanelNothingFix.Split(' ')[0], drawn);
+    }
+
+    /// <summary>Every line of text drawn on <paramref name="face" />, joined by spaces.</summary>
+    static string Drawn(Face face)
+    {
+        return string.Join(" ", face.Sprites.Where(sprite => sprite.Type == SpriteType.TEXT && sprite.Data != null).Select(sprite => sprite.Data));
+    }
+
     /// <summary>A newly arrived installation's mark is lit toward the text color as it pulses.</summary>
     [Fact]
     public void AFreshMarkIsLitAsItPulses()

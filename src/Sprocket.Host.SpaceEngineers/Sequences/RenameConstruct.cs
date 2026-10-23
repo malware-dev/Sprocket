@@ -2,7 +2,7 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>Gives the construct another name, which is the game's own name for its grid.</summary>
+    /// <summary>Gives the construct another name, which is the game's own name for its largest grid.</summary>
     public sealed class RenameConstruct : ProgramEdit
     {
         readonly GridWorld _world;

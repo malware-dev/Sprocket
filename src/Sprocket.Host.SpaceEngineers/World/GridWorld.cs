@@ -28,6 +28,15 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
         readonly List<IMyCubeGrid> _watched = new List<IMyCubeGrid>();
+
+        // How many blocks each grid of the construct holds, by the grid's entity id: counted at a rebuild, kept by the grids'
+        // own events after it.
+        readonly Dictionary<long, int> _sizes = new Dictionary<long, int>();
+
+        // The grid the construct is named for, worked out again on the read after a grid's size changes.
+        IMyCubeGrid _largest;
+        bool _resized = true;
+
         IMyGridGroupData _group;
         readonly List<IMySlimBlock> _slim = new List<IMySlimBlock>();
         // Every terminal block on the construct, shared with the big owners or not, each with its id, read once.
@@ -155,15 +164,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 HandsChanged();
         }
 
-        /// <summary>
-        /// The construct's name, which in this game is the block's own grid's.
-        /// </summary>
+        /// <summary>The construct's name, which is the name of its largest grid.</summary>
         public string Name
         {
             get
             {
-                IMyCubeGrid grid = _anchor?.CubeGrid;
-                return grid == null ? "" : grid.CustomName;
+                IMyCubeGrid grid = Largest();
+                return grid == null ? "" : grid.CustomName ?? "";
             }
         }
 
@@ -177,14 +184,28 @@ namespace Sprocket.Host.SpaceEngineers.World
         public UnstartableSequences Unstartable { get; } = new UnstartableSequences();
 
         /// <summary>Whether there is a grid to rename.</summary>
-        public bool CanRename => _anchor != null && _anchor.CubeGrid != null;
+        public bool CanRename => Largest() != null;
 
-        /// <summary>Calls the grid the program runs on <paramref name="name" />.</summary>
+        /// <summary>Calls the construct's largest grid <paramref name="name" />, which names the construct.</summary>
         public void Rename(string name)
         {
-            IMyCubeGrid grid = _anchor?.CubeGrid;
+            IMyCubeGrid grid = Largest();
             if (grid != null)
                 grid.CustomName = name;
+        }
+
+        /// <summary>The construct's largest grid, the one holding the most blocks, which it is named for; or null where it has none.</summary>
+        /// <remarks>Worked out again only on the read after a grid joins or leaves the construct or a block is welded on or taken off.</remarks>
+        IMyCubeGrid Largest()
+        {
+            Current();
+            if (_resized)
+            {
+                _resized = false;
+                _largest = Constructs.Largest(_grids, _sizes);
+            }
+
+            return _largest;
         }
 
         /// <summary>
@@ -346,6 +367,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             _byId = kept;
             _byId.Clear();
             _entities.Clear();
+            _grids.Clear();
+            _sizes.Clear();
+            _resized = true;
 
             IMyCubeGrid home = Home();
             if (home == null || MyAPIGateway.GridGroups == null)
@@ -354,7 +378,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            _grids.Clear();
             MyAPIGateway.GridGroups.GetGroup(home, GridLinkTypeEnum.Mechanical, _grids);
             _grids.RemoveAll(Closing);
             Watch(_grids);
@@ -368,6 +391,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 _slim.Clear();
                 grid.GetBlocks(_slim);
+                _sizes[grid.EntityId] = _slim.Count;
 
                 foreach (var slim in _slim)
                 {
@@ -800,11 +824,14 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         void OnBlocksChanged(IMySlimBlock block)
         {
+            Resize(block, 1);
             Changed(block, true);
         }
 
         void OnBlockRemoved(IMySlimBlock block)
         {
+            Resize(block, -1);
+
             // The construct is found from the anchor's grid, so losing it reads the construct again whole.
             if (block.FatBlock != null && block.FatBlock == _anchor)
             {
@@ -828,6 +855,19 @@ namespace Sprocket.Host.SpaceEngineers.World
             var block = slim.FatBlock as IMyTerminalBlock;
             if (block != null)
                 _changes.Add(new Change { Block = block, Added = added });
+        }
+
+        /// <summary>Changes the count of blocks on the grid of <paramref name="slim" /> by <paramref name="by" />, as the grid says the block was welded on or taken off.</summary>
+        /// <remarks>From the grid's own event for every block, armor included: one dictionary read and write each.</remarks>
+        void Resize(IMySlimBlock slim, int by)
+        {
+            var grid = slim.CubeGrid;
+            int size;
+            if (grid == null || !_sizes.TryGetValue(grid.EntityId, out size))
+                return;
+
+            _sizes[grid.EntityId] = size + by;
+            _resized = true;
         }
 
         /// <summary>A block welded on or taken off, waiting for the next read.</summary>

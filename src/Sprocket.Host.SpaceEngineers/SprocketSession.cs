@@ -144,12 +144,6 @@ namespace Sprocket.Host.SpaceEngineers
             return grid == null ? 0 : grid.EntityId;
         }
 
-        /// <summary>What the construct <paramref name="block" /> is on is called: the name of the grid that stands for it.</summary>
-        public static string ConstructName(IMyCubeBlock block)
-        {
-            return _current?._constructs.Founding(block?.CubeGrid)?.CustomName ?? "";
-        }
-
         /// <summary>How the server last said the automation of <paramref name="construct" /> stands, for a panel that redraws itself with <paramref name="panel" /> when it says more.</summary>
         /// <remarks>On a client, every time the panel is drawn.</remarks>
         public static ConstructStatus Watch(long construct, Action panel)
@@ -556,7 +550,7 @@ namespace Sprocket.Host.SpaceEngineers
         void Foreign(long id)
         {
             var block = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock;
-            var construct = block == null || block.CubeGrid == null ? "" : block.CubeGrid.CustomName;
+            var construct = block == null ? "" : _constructs.Name(block.CubeGrid);
             var arguments = new Arguments();
             arguments.Set("construct", construct);
             TerminalNotice.Show(_texts.TerminalForeign, arguments, _texts.TerminalOk);

@@ -13,8 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         Label _says;
         VStack _underSays;
         Label _count;
+        Label _fix;
 
-        /// <summary>Makes the check, the words under it and the count under them.</summary>
+        /// <summary>Makes the check, the words under it, and the count or what to do under them.</summary>
         void CreateView()
         {
             Children.Add(new Glyph { Symbol = Symbols.Check, Align = Align.Center }.As(out _check));
@@ -22,6 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             Children.Add(new Label { Wraps = true, Centres = true }.As(out _says));
             Children.Add(new VStack().As(out _underSays));
             Children.Add(new Label { Wraps = true, Centres = true }.As(out _count));
+            Children.Add(new Label { Wraps = true, Centres = true }.As(out _fix));
         }
     }
 }

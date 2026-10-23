@@ -9,6 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     {
         readonly Roster _roster;
         readonly List<IMyCubeGrid> _group = new List<IMyCubeGrid>();
+        readonly List<SprocketUnit> _members = new List<SprocketUnit>();
 
         /// <summary>The constructs of a world whose Sprockets <paramref name="roster" /> holds.</summary>
         public Constructs(Roster roster)
@@ -69,7 +70,47 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return null;
 
             Members(grid, into);
-            return grid.CustomName ?? "";
+            return Name(into);
+        }
+
+        /// <summary>What the construct <paramref name="grid" /> is part of is called: the name of its largest grid, or empty for a construct with no automation.</summary>
+        public string Name(IMyCubeGrid grid)
+        {
+            Members(grid, _members);
+            return Name(_members);
+        }
+
+        /// <summary>What the construct with the Sprockets <paramref name="members" /> on it is called: the name of its largest grid, or empty for a construct with no automation.</summary>
+        public static string Name(List<SprocketUnit> members)
+        {
+            return members.Count == 0 ? "" : members[0].World.Name;
+        }
+
+        /// <summary>
+        /// Which of <paramref name="grids" />, their block counts in <paramref name="sizes" /> by entity id, is the largest: the
+        /// one holding the most blocks, and of several holding as many, the first in the order the group gives them; or null
+        /// where there are none.
+        /// </summary>
+        /// <remarks>
+        /// The game's own rule, from its list of entities, which shows a mechanical group as its grid with the most blocks and,
+        /// of several holding as many, the first it comes to.
+        /// </remarks>
+        public static IMyCubeGrid Largest(List<IMyCubeGrid> grids, Dictionary<long, int> sizes)
+        {
+            IMyCubeGrid largest = null;
+            var most = 0;
+            foreach (var grid in grids)
+            {
+                int size;
+                sizes.TryGetValue(grid.EntityId, out size);
+                if (largest != null && size <= most)
+                    continue;
+
+                largest = grid;
+                most = size;
+            }
+
+            return largest;
         }
     }
 }

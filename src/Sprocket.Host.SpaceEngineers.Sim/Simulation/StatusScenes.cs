@@ -16,7 +16,8 @@ namespace Sprocket.Sim.Simulation;
 /// In the troubled one, the airlock blueprint lost a door both
 /// its installations close, the hangar has a sequence nothing starts, and the cargo lift was switched off when it could not
 /// work. In the switched-off one, nothing is wrong and a player switched off the hangar and the airlock's starboard
-/// installation. In the unheard one, nothing has been heard yet.
+/// installation. In the unheard one, nothing has been heard yet. In the one with no automation, the construct has none, and
+/// so no name either.
 /// </remarks>
 public static class StatusScenes
 {
@@ -24,7 +25,7 @@ public static class StatusScenes
     public const string Construct = "Mining Barge";
 
     /// <summary>The scenes, by the name each is shot under.</summary>
-    public static readonly IReadOnlyList<string> Names = ["trouble", "all-normal", "switched-off", "unheard"];
+    public static readonly IReadOnlyList<string> Names = ["trouble", "all-normal", "switched-off", "unheard", "no-automation"];
 
     /// <summary>The scene called <paramref name="name" />, and the texts it is worded in.</summary>
     public static ConstructStatus Make(string name, out Texts texts)
@@ -43,6 +44,13 @@ public static class StatusScenes
         if (name == "unheard")
         {
             status.Unheard(Construct);
+            return status;
+        }
+
+        if (name == "no-automation")
+        {
+            status.Begin(sim.Now);
+            status.End("");
             return status;
         }
 

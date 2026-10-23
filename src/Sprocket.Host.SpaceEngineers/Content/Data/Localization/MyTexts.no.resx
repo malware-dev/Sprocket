@@ -2017,6 +2017,9 @@
   <data name="Sprocket.Panel.Nothing" xml:space="preserve">
     <value>Denne konstruksjonen har ingen automasjon.</value>
   </data>
+  <data name="Sprocket.Panel.NothingFix" xml:space="preserve">
+    <value>Åpne Automasjon i kontrollpanelet til en programmerbar blokk på denne konstruksjonen, og lag et logikksystem eller legg til et fra biblioteket.</value>
+  </data>
   <data name="Sprocket.Panel.Systems" xml:space="preserve">
     <value>{count} logikksystemer</value>
   </data>

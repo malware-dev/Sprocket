@@ -307,7 +307,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             if (SprocketSession.Runs)
             {
                 SprocketSession.OnConstruct(Block, _found);
-                _source.Look(_found, SprocketSession.ConstructName(Block), _ran);
+                _source.Look(_found, Constructs.Name(_found), _ran);
                 _status = _source.Status;
                 return;
             }

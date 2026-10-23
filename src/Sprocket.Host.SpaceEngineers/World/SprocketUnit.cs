@@ -283,7 +283,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!on)
                 _runner.Log = null;
             else if (_runner.Log == null)
-                _runner.Log = new RunLog(GameLog.Say, () => _block.CubeGrid?.CustomName ?? "");
+                _runner.Log = new RunLog(GameLog.Say, () => Logged(_block));
         }
 
         /// <summary>The settings in this world of the player at the screen, which the editor is given.</summary>

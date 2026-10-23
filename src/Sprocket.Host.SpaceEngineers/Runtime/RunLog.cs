@@ -17,14 +17,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     public sealed class RunLog
     {
         readonly Action<string> _write;
-        readonly Func<string> _construct;
+        readonly Func<string> _host;
         readonly StringBuilder _line = new StringBuilder();
 
-        /// <summary>A log handing each line to <paramref name="write" />, naming the construct as <paramref name="construct" /> calls it when the line is written.</summary>
-        public RunLog(Action<string> write, Func<string> construct)
+        /// <summary>A log handing each line to <paramref name="write" />, naming the programmable block running the automation as <paramref name="host" /> calls it when the line is written.</summary>
+        public RunLog(Action<string> write, Func<string> host)
         {
             _write = write;
-            _construct = construct;
+            _host = host;
         }
 
         /// <summary>A trigger of <paramref name="system" /> fired on <paramref name="instance" />.</summary>
@@ -224,14 +224,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             End();
         }
 
-        /// <summary>The start of a line: the tick and the construct.</summary>
+        /// <summary>The start of a line: the tick and the programmable block running the automation.</summary>
         StringBuilder Begin(int tick)
         {
-            _line.Clear().Append("tick ").Append(tick.ToString(CultureInfo.InvariantCulture)).Append(", \"").Append(_construct()).Append('"');
+            _line.Clear().Append("tick ").Append(tick.ToString(CultureInfo.InvariantCulture)).Append(", \"").Append(_host()).Append('"');
             return _line;
         }
 
-        /// <summary>The start of a line about <paramref name="run" />: the tick, the construct, the logic system and its installation, and the sequence.</summary>
+        /// <summary>The start of a line about <paramref name="run" />: the tick, the programmable block running the automation, the logic system and its installation, and the sequence.</summary>
         StringBuilder Of(SequenceRunner run, int tick)
         {
             Begin(tick).Append(", ");

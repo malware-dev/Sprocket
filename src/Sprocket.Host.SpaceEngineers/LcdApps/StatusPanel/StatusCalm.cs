@@ -5,7 +5,10 @@ using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 {
-    /// <summary>The status panel of a construct with nothing wanting looking at: a check, that all systems are nominal, and how many logic systems there are.</summary>
+    /// <summary>
+    /// The status panel of a construct with nothing wanting looking at: a check, that all systems are nominal, and how many
+    /// logic systems there are; or, where it has no automation, that it has none and what to do about it.
+    /// </summary>
     public partial class StatusCalm : VStack
     {
         /// <summary>A calm screen showing nothing yet.</summary>
@@ -16,8 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
         /// <summary>
         /// Shows <paramref name="status" /> in <paramref name="look" />, leaving out, until it is no taller than
-        /// <paramref name="high" /> laid <paramref name="wide" /> across, the count, then the check, then the words' size;
-        /// answers whether it fits.
+        /// <paramref name="high" /> laid <paramref name="wide" /> across, the count or what to do, then the check, then the
+        /// words' size; answers whether it fits.
         /// </summary>
         public bool Show(IGraphics graphics, StatusLook look, ConstructStatus status, float high, float wide)
         {
@@ -34,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _says.Color = any ? look.Ink : look.Quiet;
             _says.Text = any ? look.Texts.PanelAllNormal : look.Texts.PanelNothing;
             _underSays.Placement = FixedSize.High(size.UnderLabel);
-            _underSays.IsVisible = any;
+            _underSays.IsVisible = true;
 
             _count.Style = size.Label;
             _count.Color = look.Quiet;
@@ -43,8 +46,13 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 : Template.Fill(look.Texts.PanelSystems, "count", status.Systems.ToString(CultureInfo.InvariantCulture));
             _count.IsVisible = any;
 
+            _fix.Style = size.Label;
+            _fix.Color = look.Quiet;
+            _fix.Text = look.Texts.PanelNothingFix;
+            _fix.IsVisible = !any;
+
             if (StatusLook.Tall(graphics, this, wide) > high)
-                _count.IsVisible = _underSays.IsVisible = false;
+                _count.IsVisible = _fix.IsVisible = _underSays.IsVisible = false;
             if (StatusLook.Tall(graphics, this, wide) > high)
                 _check.IsVisible = _underCheck.IsVisible = false;
             if (StatusLook.Tall(graphics, this, wide) > high)

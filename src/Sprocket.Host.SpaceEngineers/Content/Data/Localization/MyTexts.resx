@@ -2668,6 +2668,10 @@
     <value>This construct has no automation.</value>
     <comment>Line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown when the construct it is on holds no logic system.</comment>
   </data>
+  <data name="Sprocket.Panel.NothingFix" xml:space="preserve">
+    <value>Open Automation in the control panel of a programmable block on this construct, and make a logic system or add one from the library.</value>
+    <comment>PLACEHOLDER, to be written. Small line under "This construct has no automation." in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown only where the screen has room for it: on a corner screen the panel shows the error alone. Says how to give the construct automation: press the "Automation" button in the terminal of a programmable block on the construct, which opens the automation editor (the block must be owned by one of the players owning most of the construct's blocks, or shared with the player), then make a logic system there or add one from the library.</comment>
+  </data>
   <data name="Sprocket.Panel.Systems" xml:space="preserve">
     <value>{count} logic systems</value>
     <comment>Small line under the large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation" when nothing wants looking at, saying how many logic systems the construct holds; {count} is the number, from 2.</comment>
