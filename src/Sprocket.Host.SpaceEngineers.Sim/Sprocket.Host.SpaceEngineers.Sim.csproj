@@ -43,7 +43,7 @@
         of the harness showing symbols the game does not have.
     -->
     <ItemGroup>
-        <None Include="..\Maltek.Symbols\Content\Fonts\Maltek\**\*;..\Maltek.Mono\Content\Fonts\Maltek\**\*;..\Maltek.Sans\Content\Fonts\Maltek\**\*;..\SpaceEngineers.FontStyles\Content\Fonts\SpaceEngineers\**\*">
+        <None Include="..\Maltek.Symbols\Content\Fonts\Maltek\**\*;..\Maltek.Mono\Content\Fonts\Maltek\**\*;..\SpaceEngineers.FontStyles\Content\Fonts\SpaceEngineers\**\*">
             <Link>Content\Fonts\Mod\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

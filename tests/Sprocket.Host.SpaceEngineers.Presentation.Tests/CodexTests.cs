@@ -33,6 +33,18 @@ public class CodexTests
         Assert.Equal(screen.Editor.Texts.Codex.SystemsNewAbout, tip.Page!.Text);
     }
 
+    /// <summary>A page read on its own, the guide to rich text and the paused screen, is set in the game's own face, as every other page is.</summary>
+    [Fact]
+    public void APageReadOnItsOwnIsInTheGamesFace()
+    {
+        var page = new RichText { Style = Styles.Reading };
+        var description = new RichText { Style = Styles.Description };
+
+        Assert.Equal(description.Font, page.Font);
+        Assert.Equal(description.StrongFont, page.StrongFont);
+        Assert.Equal(description.EmphasisFont, page.EmphasisFont);
+    }
+
     /// <summary>The editor's tips open a link's page in a tip beside them, casting the short shadow every hanging thing casts.</summary>
     [Fact]
     public void TheEditorsTipsNestAndCastAShadow()

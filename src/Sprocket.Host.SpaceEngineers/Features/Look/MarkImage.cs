@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     /// <summary>One symbol, drawn in the color the screens draw marks in, three quarters the height of its line and centered in its room.</summary>
     public sealed class MarkImage : IImageSource
     {
-        // Chosen by eye against Maltek Sans in the codex.
+        // Chosen by eye against the words of a page.
         const float Height = 0.75f;
 
         readonly string _symbol;

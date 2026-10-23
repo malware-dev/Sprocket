@@ -116,17 +116,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
         };
 
-        /// <summary>A page of the codex, set in the reading face.</summary>
-        public static readonly RichTextStyle Codex = new RichTextStyle(Description)
+        /// <summary>A page of words read on its own, as the guide to rich text and the paused screen are: a description given room round it.</summary>
+        public static readonly RichTextStyle Reading = new RichTextStyle(Description)
         {
-            Base =
-            {
-                Font = TextSizes.Sans,
-                StrongFont = TextSizes.SansBold,
-                EmphasisFont = TextSizes.SansItalic,
-                StrongEmphasisFont = TextSizes.SansBoldItalic,
-                Padding = new Thickness(20f, 24f)
-            }
+            Base = { Padding = new Thickness(20f, 24f) }
         };
 
         /// <summary>What the author of a blueprint wrote about it, in the library under its name.</summary>

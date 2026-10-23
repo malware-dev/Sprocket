@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
                         Spacing = 16f,
                         Children =
                         {
-                            new RichText { Style = Styles.Codex }.As(out _body),
+                            new RichText { Style = Styles.Reading }.As(out _body),
                             new HStack
                             {
                                 Align = Align.Center,

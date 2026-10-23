@@ -206,7 +206,7 @@ namespace Sprocket.Sim
             }
 
             // A markdown file drawn by the rich text element, in the game's font, for looking at what it can do:
-            // --rich <file.md> <picture.png> <width> [tip|description|codex] [strong=RRGGBB] [emphasis=RRGGBB] [link=RRGGBB] [align=left|center|right] [fit=<height>]
+            // --rich <file.md> <picture.png> <width> [tip|description|reading] [strong=RRGGBB] [emphasis=RRGGBB] [link=RRGGBB] [align=left|center|right] [fit=<height>]
             // A text panel's screen as the rich text app shows an empty panel, the full text or the brief one:
             // --panel <full.md> <brief.md> <picture.png> <width> <height> [ink=RRGGBB] [screen=RRGGBB] [fit] [code=<font>]
             if (args.Length > 5 && args[0] == "--panel")
@@ -222,7 +222,7 @@ namespace Sprocket.Sim
             {
                 var wide = float.Parse(args[3], CultureInfo.InvariantCulture);
                 var style = Array.IndexOf(args, "tip") > 3 ? Styles.Tip
-                    : Array.IndexOf(args, "codex") > 3 ? Styles.Codex
+                    : Array.IndexOf(args, "reading") > 3 ? Styles.Reading
                     : Array.IndexOf(args, "description") > 3 ? Styles.Description
                     : null;
                 var size = RichShot.Save(args[2], File.ReadAllText(args[1]), wide, style, Hex(args, "strong="), Hex(args, "emphasis="),

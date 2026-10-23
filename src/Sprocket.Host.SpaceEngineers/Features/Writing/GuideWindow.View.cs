@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                     {
                         Style = Styles.ScrollView,
                         Placement = Flex.Grow,
-                        Content = new RichText { Style = Styles.Codex }.As(out _body)
+                        Content = new RichText { Style = Styles.Reading }.As(out _body)
                     }
                 }
             };
