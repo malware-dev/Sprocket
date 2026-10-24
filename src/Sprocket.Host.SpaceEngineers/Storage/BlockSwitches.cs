@@ -67,6 +67,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return "";
         }
 
+        /// <summary>
+        /// Switches <paramref name="program" /> to exactly what <paramref name="text" /> says: everything on, and then off what it
+        /// says is off; what is wrong with it, or empty.
+        /// </summary>
+        /// <remarks>For a program already read, whose switches may have changed elsewhere since.</remarks>
+        public static string Reload(string text, Automation program, IBinary binary)
+        {
+            foreach (var system in program.Systems)
+            {
+                foreach (var instance in system.Instances)
+                    instance.Enabled = true;
+
+                system.Enabled = true;
+            }
+
+            return Load(text, program, binary);
+        }
+
         /// <summary>Switches off in <paramref name="program" /> what <paramref name="state" /> says is off, where it is still there.</summary>
         public static void Put(BlockState state, Automation program)
         {

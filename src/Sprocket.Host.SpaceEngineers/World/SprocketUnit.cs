@@ -620,10 +620,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Takes up <paramref name="switches" />, what the block holds switched off now, and <paramref name="memory" />, what its
         /// construct remembers now, over what this copy last knew.
         /// </summary>
-        /// <remarks>For a copy lent again unchanged: its program is the block's, and only what is switched on and running may have moved since.</remarks>
+        /// <remarks>For a copy lent again unchanged: its program is the block's, and only what is switched on or off and running may have moved since.</remarks>
         public void Restate(string switches, string memory)
         {
-            BlockSwitches.Load(switches, _program, _binary);
+            BlockSwitches.Reload(switches, _program, _binary);
 
             var fresh = Unpacked(_binary, memory, _block.EntityId);
             _runner.Forget();

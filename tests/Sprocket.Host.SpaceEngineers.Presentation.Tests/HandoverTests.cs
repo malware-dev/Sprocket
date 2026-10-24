@@ -817,6 +817,37 @@ public class HandoverTests : IDisposable
         Assert.True(copy.Runner.Get(theirs, theirs.System.First).IsRunning);
     }
 
+    /// <summary>A copy taken up again shows what the server switched back on since it was lent, and what it switched off.</summary>
+    [Fact]
+    public void ACopyRestatedShowsWhatWasSwitchedOnSince()
+    {
+        var sequence = Waiting();
+        var system = sequence.System;
+        system.Enabled = false;
+        _sim.Tick();
+        var (anna, _, copy) = Lent();
+        var theirs = copy.Editor.Program.Systems[0];
+        Assert.False(theirs.Enabled);
+
+        system.Enabled = true;
+        _sim.Tick();
+        _wire.As(anna, () => copy.Restate(Switches(), _sim.Unit.Remembered()));
+        Assert.True(theirs.Enabled);
+
+        system.Enabled = false;
+        _sim.Tick();
+        _wire.As(anna, () => copy.Restate(Switches(), _sim.Unit.Remembered()));
+        Assert.False(theirs.Enabled);
+    }
+
+    /// <summary>What the server's block holds switched off now.</summary>
+    string Switches()
+    {
+        string switches;
+        _sim.Unit.Written(out _, out switches);
+        return switches;
+    }
+
     [Fact]
     public void AnOrderFromSomebodyWithoutItIsNotTaken()
     {
