@@ -28,6 +28,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _edit.Reassert(Sequence);
         }
 
+        /// <summary>What the change to the sequence was made to, in the sequence where it names no other place.</summary>
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            _edit.Name(Sequence, done, name);
+            if (name.Place == null)
+                name.Place = Sequence;
+        }
+
         /// <inheritdoc />
         public override ChangeKind Change => _edit.Change;
 

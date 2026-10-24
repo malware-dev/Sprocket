@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 now.Placed.Add(now.Categories.Contains(parts[i].Category) ? parts[i].Category : "");
             }
 
-            Make(moved[0] is string ? ChangeKind.MoveCategory : ChangeKind.MoveSlot, now);
+            Make(moved[0] is string ? ChangeKind.MoveCategory : ChangeKind.MoveSlot, now, moved[0], null);
         }
 
         /// <summary>Adds a category after the others, named as <paramref name="texts" /> names a new one, counting on from how many there are.</summary>
@@ -121,7 +121,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 name = Named(texts, ++number);
 
             now.Categories.Add(name);
-            Make(ChangeKind.AddCategory, now);
+            Make(ChangeKind.AddCategory, now, name, null);
         }
 
         /// <summary>Whether a category may be called <paramref name="name" /> in place of <paramref name="was" />: something, and no other category's name.</summary>
@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     now.Placed[i] = wanted;
             }
 
-            Make(ChangeKind.RenameCategory, now);
+            Make(ChangeKind.RenameCategory, now, wanted, was);
         }
 
         /// <summary>Removes the category <paramref name="name" />, leaving its slots under none.</summary>
@@ -166,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     now.Placed[i] = "";
             }
 
-            Make(ChangeKind.RemoveCategory, now);
+            Make(ChangeKind.RemoveCategory, now, name, null);
         }
 
         static string Named(Texts texts, int number)
@@ -174,9 +174,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return Template.Fill(texts.CategoryDefault, "number", number.ToString(CultureInfo.InvariantCulture));
         }
 
-        void Make(ChangeKind change, SlotArrangement now)
+        void Make(ChangeKind change, SlotArrangement now, object moved, string renamed)
         {
-            _editor.Do(_system, new ArrangeSlots(change, SlotArrangement.Of(_system), now));
+            _editor.Do(_system, new ArrangeSlots(change, SlotArrangement.Of(_system), now, moved, renamed));
         }
     }
 }

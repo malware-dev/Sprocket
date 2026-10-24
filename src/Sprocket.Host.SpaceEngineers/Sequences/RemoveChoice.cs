@@ -22,6 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.RemoveChoice;
 
+        /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _option;
+            name.Place = _type;
+        }
+
         /// <summary>Changes nothing where the choice is mentioned, or the type has only two: a type needs two choices.</summary>
         public override bool Changes => !_held;
 

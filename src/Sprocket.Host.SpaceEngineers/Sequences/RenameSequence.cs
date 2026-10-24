@@ -18,6 +18,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.Rename;
 
         /// <inheritdoc />
+        public override void Name(Sequence sequence, bool done, ChangeName name)
+        {
+            name.Thing = sequence;
+            name.Was = _was;
+            name.Now = _now;
+        }
+
+        /// <inheritdoc />
         public override bool ChangesShape => false;
 
         /// <inheritdoc />

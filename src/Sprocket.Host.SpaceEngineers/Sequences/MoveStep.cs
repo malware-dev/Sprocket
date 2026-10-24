@@ -27,6 +27,35 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.MoveStep;
 
+        /// <summary>The lines moved, with the numbers the first is shown with before and after the move.</summary>
+        public override void Name(Sequence sequence, bool done, ChangeName name)
+        {
+            var at = done ? _to : _from;
+            name.Thing = sequence.Steps[at];
+            name.Was = NumberAt(sequence, at, _from);
+            name.Now = NumberAt(sequence, at, _to);
+            name.Number = (int)name.Was;
+            name.Count = _count;
+        }
+
+        /// <summary>The number the first moved line is shown with when the lines are at <paramref name="to" />, as they stand at <paramref name="at" /> now.</summary>
+        int NumberAt(Sequence sequence, int at, int to)
+        {
+            var number = 1;
+            var placed = 0;
+            for (var i = 0; i < sequence.Steps.Count && placed < to; i++)
+            {
+                if (i >= at && i < at + _count)
+                    continue;
+
+                placed++;
+                if (!(sequence.Steps[i] is EndIf))
+                    number++;
+            }
+
+            return number;
+        }
+
         /// <inheritdoc />
         public override bool Changes => _from != _to;
 

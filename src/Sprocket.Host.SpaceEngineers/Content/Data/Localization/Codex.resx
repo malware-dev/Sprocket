@@ -133,16 +133,20 @@
     <comment>Tooltip on the close cross at the far right of the editor's heading bar, shown only on the home screen, where there is no screen to go back to. Pressing it closes the editor.</comment>
   </data>
   <data name="Sprocket.Chrome.Tips" xml:space="preserve">
-    <value>Turn tips off. Press again to turn them back on.</value>
-    <comment>PLACEHOLDER, to be written. Tooltip on the question mark in the editor's heading bar, shown only while tips are on (with them off no tip shows at all). Pressing it turns every tip off, and the look of terms with them, in every world this player plays; pressing it again turns them back on.</comment>
+    <value>Turn every tip off. Press again to turn them back on.</value>
+    <comment>Tooltip on the question mark in the editor's heading bar, shown only while tips are on (with them off no tip shows at all). Pressing it turns every tip off, and the look of terms with them, in every world this player plays; pressing it again turns them back on.</comment>
   </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
-    <value>![](mark:undo)&amp;nbsp;[Undo](Term.Undo) {action}</value>
-    <comment>Tooltip on the undo arrow in the editor's heading bar, shown while there is a change to undo. {action} is filled with what undoing takes back, such as "rename".</comment>
+    <value>![](mark:undo)&amp;nbsp;[Undo](Term.Undo)
+
+{action}</value>
+    <comment>Tooltip on the undo arrow in the editor's heading bar, shown while there is a change to undo. {action} is one of the Sprocket.Change texts, filled in, such as Deleted step 3 in Cycle, &quot;open Outer Door&quot;, and stands on its own line after the word Undo, or by Sprocket.Undo.Also holding that text where the undo takes changes on other screens along.</comment>
   </data>
   <data name="Sprocket.Chrome.Redo" xml:space="preserve">
-    <value>![](mark:redo)&amp;nbsp;[Redo](Term.Undo) {action}</value>
-    <comment>Tooltip on the redo arrow in the editor's heading bar, shown while there is an undone change to make again. {action} is filled with what redoing does again, such as "rename".</comment>
+    <value>![](mark:redo)&amp;nbsp;[Redo](Term.Undo)
+
+{action}</value>
+    <comment>Tooltip on the redo arrow in the editor's heading bar, shown while there is an undone change to make again. {action} is one of the Sprocket.Change texts, filled in, such as Deleted step 3 in Cycle, &quot;open Outer Door&quot;, and stands on its own line after the word Redo, or by Sprocket.Undo.Also holding that text where the redo makes changes on other screens again with it.</comment>
   </data>
   <data name="Sprocket.Row.Broken" xml:space="preserve">
     <value>Something in it needs fixing. Open it to see what.</value>
@@ -402,7 +406,7 @@
   </data>
   <data name="Sprocket.Part.ScreenOf" xml:space="preserve">
     <value>{block}: {screen}</value>
-    <comment>PLACEHOLDER, to be written. One line of the list in the tooltip on a slot of screens a step or a trigger names, on a sequence's screen and a logic system's screen: a block the installation shown fills the slot with, and the screen of it the slot holds. {block} is the block's name, {screen} the screen's name as the block calls it, such as Front.</comment>
+    <comment>One line of the list in the tooltip on a slot of screens a step or a trigger names, on a sequence's screen and a logic system's screen: a block the installation shown fills the slot with, and the screen of it the slot holds. {block} is the block's name, {screen} the screen's name as the block calls it, such as Front.</comment>
   </data>
   <data name="Sprocket.Chrome.DoneAbout" xml:space="preserve">
     <value>Keep any changes and return.</value>
@@ -533,8 +537,8 @@
     <comment>Tooltip on the picker's heading while it shows the name of the slot the blocks picked will make, which no slot the logic system has fills exactly. Pressing it renames the slot before it is made; the name starts as the next numbered slot name.</comment>
   </data>
   <data name="Sprocket.Pick.LimitAbout" xml:space="preserve">
-    <value>This slot takes only {kind}, so only those blocks are listed.</value>
-    <comment>PLACEHOLDER, to be written. Tooltip on the top entry of the list of kinds of block in the picker's column of blocks, while the picker fills a slot of one kind on the installation panel; the entry stands where Anything stands otherwise. {kind} is the name of the kind the slot takes, such as Piston.</comment>
+    <value>This slot takes {kind} blocks.</value>
+    <comment>Tooltip on the top entry of the list of kinds of block in the picker's column of blocks, while the picker fills a slot of one kind on the installation panel; the entry stands where Anything stands otherwise. {kind} is the name of the kind the slot takes, such as Piston.</comment>
   </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
     <value>A step, if or trigger uses this state, so its type cannot be changed.</value>
@@ -624,205 +628,9 @@
     <value>Longer</value>
     <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the tooltip on the plus button right of the number, which makes the length longer.</comment>
   </data>
-  <data name="Sprocket.Change.Describe" xml:space="preserve">
-    <value>changing the description</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to the logic system's description, written on its screen.</comment>
-  </data>
-  <data name="Sprocket.Change.PickButton" xml:space="preserve">
-    <value>selecting a button</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is picking the toolbar button a trigger answers to.</comment>
-  </data>
-  <data name="Sprocket.Change.Step" xml:space="preserve">
-    <value>changing a step</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a step on a sequence's screen: what it points at and does, which sequence it runs or stops, or what an if tests.</comment>
-  </data>
-  <data name="Sprocket.Change.When" xml:space="preserve">
-    <value>changing when it runs</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to what starts a trigger: its blocks and the moment it starts on, picked in the picker.</comment>
-  </data>
-  <data name="Sprocket.Change.ForgetTrigger" xml:space="preserve">
-    <value>deleting a trigger</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a trigger.</comment>
-  </data>
-  <data name="Sprocket.Change.MoveStep" xml:space="preserve">
-    <value>moving a step</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is moving a step to another place in a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.Target" xml:space="preserve">
-    <value>changing what it does</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to what a trigger does: the sequence it runs or stops, or an action of its own.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveStep" xml:space="preserve">
-    <value>deleting a step</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a step from a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.Rename" xml:space="preserve">
-    <value>renaming</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameSlot" xml:space="preserve">
-    <value>renaming a slot</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a slot on its slot's screen.</comment>
-  </data>
-  <data name="Sprocket.Change.Trigger" xml:space="preserve">
-    <value>changing the trigger</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to both what starts a trigger and what it does, made with one pick.</comment>
-  </data>
-  <data name="Sprocket.Change.Cadence" xml:space="preserve">
-    <value>changing how often it runs</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how often a repeating trigger comes round.</comment>
-  </data>
-  <data name="Sprocket.Change.SlotType" xml:space="preserve">
-    <value>changing a slot's kind of block</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is changing the type of block a slot takes, on its slot's screen.</comment>
-  </data>
-  <data name="Sprocket.Change.Optional" xml:space="preserve">
-    <value>making a slot optional</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a slot optional on its slot's screen, so an installation may leave it empty.</comment>
-  </data>
-  <data name="Sprocket.Change.Required" xml:space="preserve">
-    <value>making a slot required</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a slot required on its slot's screen, so every installation has to fill it.</comment>
-  </data>
-  <data name="Sprocket.Change.Wait" xml:space="preserve">
-    <value>changing a delay</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how long a wait step on a sequence's screen waits.</comment>
-  </data>
-  <data name="Sprocket.Change.PauseStep" xml:space="preserve">
-    <value>switching a step off</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is switching a step off on a sequence's screen.</comment>
-  </data>
-  <data name="Sprocket.Change.ResumeStep" xml:space="preserve">
-    <value>switching a step on</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is switching a step back on on a sequence's screen.</comment>
-  </data>
-  <data name="Sprocket.Change.TakeOver" xml:space="preserve">
-    <value>taking a button over</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is picking a toolbar button that another trigger or installation already used, which takes the button from it.</comment>
-  </data>
-  <data name="Sprocket.Change.AddStep" xml:space="preserve">
-    <value>adding a step</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a step to a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.AddWait" xml:space="preserve">
-    <value>adding a delay</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a wait step to a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.ShortenSlot" xml:space="preserve">
-    <value>changing a slot's short name</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a signal slot's short name, written on its slot's screen.</comment>
-  </data>
   <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
     <value>The label shown on each button and toolbar slot that sends this signal. Left empty, they show the slot's name.</value>
     <comment>Tooltip on the short name box on a signal slot's screen, under the Short name heading.</comment>
-  </data>
-  <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
-    <value>describing a slot</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a slot's description, written on its slot's screen.</comment>
-  </data>
-  <data name="Sprocket.Change.AddIf" xml:space="preserve">
-    <value>adding an if</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding an if to a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.AddBranch" xml:space="preserve">
-    <value>adding a branch</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding an otherwise if or an otherwise to an if in a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveIf" xml:space="preserve">
-    <value>deleting an if</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a whole if from a sequence, with the steps in it.</comment>
-  </data>
-  <data name="Sprocket.Change.Unwrap" xml:space="preserve">
-    <value>taking an if away</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is taking an if out of a sequence while keeping the steps that were in it.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveBranch" xml:space="preserve">
-    <value>deleting a branch</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting an otherwise if or an otherwise branch from an if in a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.MoveBranch" xml:space="preserve">
-    <value>moving a branch</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is moving a branch of an if to another place in its chain.</comment>
-  </data>
-  <data name="Sprocket.Change.DeleteSequence" xml:space="preserve">
-    <value>deleting a sequence</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a sequence, with the triggers that run it.</comment>
-  </data>
-  <data name="Sprocket.Change.NewSequence" xml:space="preserve">
-    <value>making a sequence</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a new sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.CopySequence" xml:space="preserve">
-    <value>copying a sequence</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameSystem" xml:space="preserve">
-    <value>renaming the logic system</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming the logic system.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameInstallation" xml:space="preserve">
-    <value>renaming an installation</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming an installation on its installation panel.</comment>
-  </data>
-  <data name="Sprocket.Change.FillSlot" xml:space="preserve">
-    <value>filling a slot</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is filling a slot of an installation with blocks.</comment>
-  </data>
-  <data name="Sprocket.Change.AddTrigger" xml:space="preserve">
-    <value>adding a trigger</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a trigger.</comment>
-  </data>
-  <data name="Sprocket.Change.PutOnSystem" xml:space="preserve">
-    <value>adding a logic system from the library</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is putting a blueprint or a backup from the library on the construct as a logic system.</comment>
-  </data>
-  <data name="Sprocket.Change.CopyBlueprint" xml:space="preserve">
-    <value>copying a blueprint</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is putting a copy of a blueprint on the construct from the library, as a separate logic system.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameConstruct" xml:space="preserve">
-    <value>renaming the construct</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is renaming the construct.</comment>
-  </data>
-  <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
-    <value>deleting a logic system</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is deleting a logic system that has no blueprint in the library.</comment>
-  </data>
-  <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
-    <value>updating a logic system from the library</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is replacing a logic system with its newer blueprint from the library.</comment>
-  </data>
-  <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
-    <value>choosing a version of a logic system</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is keeping one of two versions of a logic system that met when two constructs joined.</comment>
-  </data>
-  <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
-    <value>resetting a logic system to its blueprint</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is resetting a logic system to its blueprint in the library, dropping its changes since.</comment>
-  </data>
-  <data name="Sprocket.Change.CopyStep" xml:space="preserve">
-    <value>duplicating a step</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a step in a sequence.</comment>
-  </data>
-  <data name="Sprocket.Change.CopyTrigger" xml:space="preserve">
-    <value>duplicating a trigger</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a trigger.</comment>
-  </data>
-  <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
-    <value>taking a logic system off</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is taking a logic system whose blueprint is in the library off the construct.</comment>
-  </data>
-  <data name="Sprocket.Change.DeleteInstallation" xml:space="preserve">
-    <value>deleting an installation</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is deleting an installation of a logic system.</comment>
-  </data>
-  <data name="Sprocket.Change.AddSystem" xml:space="preserve">
-    <value>adding a logic system</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is making a new logic system.</comment>
-  </data>
-  <data name="Sprocket.Change.AddInstallation" xml:space="preserve">
-    <value>adding an installation</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is adding another installation to a logic system.</comment>
   </data>
   <data name="Sprocket.Library.ForgetBackup" xml:space="preserve">
     <value>Forget this backup</value>
@@ -849,8 +657,8 @@
     <comment>Tooltip on the dimmed bin of an installation's row on the home screen, shown when it is the logic system's only installation and so cannot be deleted.</comment>
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
-    <value>Add a copy of this blueprint to this construct as a separate logic system.</value>
-    <comment>PLACEHOLDER, to be written. In the library, the tooltip on the Make a copy button in the details of the chosen logic system on this construct, or of a backup: it puts a copy of it on the construct as a separate logic system. Never shown for a blueprint in storage.</comment>
+    <value>Add a copy to this construct as a separate logic system.</value>
+    <comment>In the library, the tooltip on the Make a copy button in the details of the chosen logic system on this construct, or of a backup: it puts a copy of it on the construct as a separate logic system. Make a copy is shown for those two only; a blueprint in storage has none.</comment>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
     <value>Delete this logic system, with its installations. It has no blueprint in the library, so this is its only copy.</value>
@@ -904,82 +712,6 @@
     <value>The ![](mark:awaited)&amp;nbsp;[awaitables](Term.Awaitable) started since the last `wait for pending tasks` run together, and the sequence waits here until all of them have finished.</value>
     <comment>Tooltip on the words of a row waiting for every awaitable action started before it, on a sequence's screen. The row reads "wait for pending tasks", which stays English; ![](mark:awaited) draws the clock mark an awaitable action carries.</comment>
   </data>
-  <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
-    <value>moving a slot</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a slot to another place on the logic system's Installation panel tab.</comment>
-  </data>
-  <data name="Sprocket.Change.MoveCategory" xml:space="preserve">
-    <value>moving a category</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a category of slots, with its slots, to another place on the logic system's Installation panel tab.</comment>
-  </data>
-  <data name="Sprocket.Change.AddCategory" xml:space="preserve">
-    <value>adding a category</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a category of slots on the logic system's Installation panel tab.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameCategory" xml:space="preserve">
-    <value>renaming a category</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a category of slots on the logic system's Installation panel tab.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
-    <value>removing a category</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a category of slots on the logic system's Installation panel tab, which leaves its slots under no category.</comment>
-  </data>
-  <data name="Sprocket.Change.OptimizeSlots" xml:space="preserve">
-    <value>optimizing the slots</value>
-    <comment>PLACEHOLDER, to be written. On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is the one Optimize slots made on the installation panel: slots made, steps and triggers naming them, and slots nothing uses removed.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveSlot" xml:space="preserve">
-    <value>removing a slot</value>
-    <comment>PLACEHOLDER, to be written. On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is removing a slot nothing used, with its bin on the installation panel or the Installation panel tab.</comment>
-  </data>
-  <data name="Sprocket.Change.AddType" xml:space="preserve">
-    <value>adding a type</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a type, a named set of choices, to the logic system.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameType" xml:space="preserve">
-    <value>renaming a type</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming one of the logic system's types.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveType" xml:space="preserve">
-    <value>removing a type</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing one of the logic system's types.</comment>
-  </data>
-  <data name="Sprocket.Change.AddChoice" xml:space="preserve">
-    <value>adding a choice</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a choice to one of the logic system's types.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameChoice" xml:space="preserve">
-    <value>renaming a choice</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a choice of one of the logic system's types.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveChoice" xml:space="preserve">
-    <value>removing a choice</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a choice from one of the logic system's types.</comment>
-  </data>
-  <data name="Sprocket.Change.AddState" xml:space="preserve">
-    <value>adding a state</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a state, a value each installation keeps, to the logic system.</comment>
-  </data>
-  <data name="Sprocket.Change.RenameState" xml:space="preserve">
-    <value>renaming a state</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming one of the logic system's states.</comment>
-  </data>
-  <data name="Sprocket.Change.RemoveState" xml:space="preserve">
-    <value>removing a state</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing one of the logic system's states.</comment>
-  </data>
-  <data name="Sprocket.Change.MoveType" xml:space="preserve">
-    <value>moving a type</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a type to another place on the logic system's State tab.</comment>
-  </data>
-  <data name="Sprocket.Change.MoveState" xml:space="preserve">
-    <value>moving a state</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a state to another place on the logic system's State tab.</comment>
-  </data>
-  <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
-    <value>changing a starting value</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is changing the value one of the logic system's states starts at.</comment>
-  </data>
   <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
     <value>Rename this category</value>
     <comment>Tooltip on a category's name, with its pencil, a heading among the slots on a logic system's Installation panel tab. Pressing it lets the name be typed.</comment>
@@ -989,12 +721,12 @@
     <comment>Tooltip on the bin beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
-    <value>Make the slots as few as the steps and triggers need, and remove the slots nothing uses. The changes are listed to approve first.</value>
-    <comment>PLACEHOLDER, to be written. Tooltip on the Optimize slots button on the installation panel, beside the SLOTS heading, while the logic system is switched off and the slots can be changed.</comment>
+    <value>Reduce the slots to as few as the steps and triggers need.</value>
+    <comment>Tooltip on the Optimize slots button on the installation panel, beside the SLOTS heading, while the logic system is switched off and the slots can be changed.</comment>
   </data>
   <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
-    <value>Remove this slot. Nothing uses it.</value>
-    <comment>PLACEHOLDER, to be written. Tooltip on the bin beside a slot no step, if or trigger names, on the installation panel and on the Installation panel tab of a logic system's screen, while the logic system is switched off. Pressing it removes the slot, with every installation's blocks in it.</comment>
+    <value>Remove this unused slot.</value>
+    <comment>Tooltip on the bin beside a slot no step, if or trigger names, on the installation panel and on the Installation panel tab of a logic system's screen, while the logic system is switched off. Pressing it removes the slot, with every installation's blocks in it.</comment>
   </data>
   <data name="Sprocket.Category.Drag" xml:space="preserve">
     <value>Drag to move the category with its slots.</value>

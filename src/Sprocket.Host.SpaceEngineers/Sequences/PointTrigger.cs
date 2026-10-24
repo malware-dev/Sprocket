@@ -35,6 +35,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.Target;
 
+        /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _trigger;
+        }
+
         /// <summary>Whether it does something else: a sequence run the same way again is no change.</summary>
         public override bool Changes
         {

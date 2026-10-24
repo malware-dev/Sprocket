@@ -23,6 +23,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.DeleteSequence;
 
         /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _going;
+        }
+
+        /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)
         {
             Touch(screens, system);

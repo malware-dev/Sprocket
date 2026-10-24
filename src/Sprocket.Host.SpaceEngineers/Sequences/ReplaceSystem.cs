@@ -21,6 +21,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => _change;
 
+        /// <inheritdoc />
+        public override void Name(Automation program, bool done, ChangeName name)
+        {
+            name.Thing = done ? _now : _was;
+        }
+
         /// <summary>The identity the two share.</summary>
         public System.Guid Identity => _now.Identity;
 

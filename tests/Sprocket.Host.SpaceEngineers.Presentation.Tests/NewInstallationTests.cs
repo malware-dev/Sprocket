@@ -48,7 +48,7 @@ public class NewInstallationTests
         Run(sim);
 
         Assert.Null(SystemSummary.Failing(sim.Editor.Runner, system, port, out _));
-        Assert.Contains(Labels(sim), label => label.Text == "Every slot is filled.");
+        Assert.Contains(Labels(sim), label => label.Text == sim.Texts.BlueprintFilled);
 
         sim.Editor.Screen.Flip!.Execute();
         Run(sim);

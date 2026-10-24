@@ -53,6 +53,23 @@ public class DragTests
         Assert.Equal("close, depressurize, open", Order(editor));
     }
 
+    /// <summary>The way back names a moved step by its words and the numbers it moved between, and the way forward says the same.</summary>
+    [Fact]
+    public void AMovedStepIsNamedByWhereItWasAndWhereItWent()
+    {
+        var screen = Build(out var editor);
+        var close = editor.Reads(0);
+
+        DragAfter(screen, from: 0, row: 2);
+        var moved = Filled.With(editor.Texts.ChangeMoveStep, "number", "1", "now", "3", "place",
+            SequenceText.Called(editor.Texts, editor.Program.Sequences[0]), "thing", SentenceText.Short(close));
+        Assert.Equal(moved, editor.Screen.UndoText);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(5);
+        Assert.Equal(moved, editor.Screen.RedoText);
+    }
+
     /// <summary>The step being carried is highlighted while it is held, and the highlight goes as it is dropped.</summary>
     [Fact]
     public void TheStepBeingCarriedIsHighlighted()
@@ -135,7 +152,7 @@ public class DragTests
         Assert.Equal("close, depressurize, open", Order(editor));
 
         // Three steps were added, so there is history - but the drag added nothing to it.
-        Assert.Equal("adding a step", editor.Screen.UndoText);
+        Assert.Contains(editor.Reads(2), editor.Screen.UndoText);
     }
 
     /// <summary>

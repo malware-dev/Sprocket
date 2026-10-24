@@ -20,6 +20,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => _off ? ChangeKind.PauseStep : ChangeKind.ResumeStep;
 
         /// <inheritdoc />
+        public override void Name(Sequence sequence, bool done, ChangeName name)
+        {
+            name.Thing = sequence.Steps[_index];
+            name.Number = sequence.NumberOf(_index);
+            name.Count = _count;
+        }
+
+        /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
             Put(sequence, _off);

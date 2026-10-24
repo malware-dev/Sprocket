@@ -116,47 +116,47 @@
   </data>
   <data name="Sprocket.Slot.Optimize" xml:space="preserve">
     <value>Optimize slots</value>
-    <comment>PLACEHOLDER, to be written. The button on the installation panel, beside the SLOTS heading, shown while an installation is shown and the logic system has slots. Pressing it lists the changes that give the logic system as few slots as its steps and triggers can name, and makes them only once they are approved.</comment>
+    <comment>The button on the installation panel, beside the SLOTS heading, shown while an installation is shown and the logic system has slots. Pressing it lists the changes that give the logic system as few slots as its steps and triggers can name, and makes them only once they are approved.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeQuestion" xml:space="preserve">
-    <value>Optimize slots makes these changes:</value>
-    <comment>PLACEHOLDER, to be written. First line of the question Optimize slots asks, under the button on the installation panel, beside the SLOTS heading; a list of the changes follows, one each.</comment>
+    <value>Optimizing the slots makes these changes:</value>
+    <comment>First line of the question Optimize slots asks, under the button on the installation panel, beside the SLOTS heading; a list of the changes follows, one each.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeMakes" xml:space="preserve">
-    <value>A new slot {slot} holds {blocks}.</value>
-    <comment>PLACEHOLDER, to be written. One item of the list in the question Optimize slots asks, under the button pressed on the installation panel: a slot the change makes. {slot} is the new slot's name, "slot N" by the default numbering, in bold; {blocks} is the blocks the installation shown fills it with, as the construct calls them, separated by commas.</comment>
+    <value>{slot} is added, holding {blocks}.</value>
+    <comment>One item of the list in the question Optimize slots asks, under the button pressed on the installation panel: a slot the change makes. {slot} is the new slot's name, "slot N" by the default numbering, in bold; {blocks} is the blocks the installation shown fills it with, as the construct calls them, separated by commas.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeRenames" xml:space="preserve">
     <value>Steps and triggers naming {from} name {to} instead.</value>
-    <comment>PLACEHOLDER, to be written. One item of the list in the question Optimize slots asks, under the button pressed on the installation panel: the steps and triggers that name one set of slots now and will name another. {from} is the slots they name now and {to} the slots they will name, each name in bold, separated by commas.</comment>
+    <comment>One item of the list in the question Optimize slots asks, under the button pressed on the installation panel: the steps and triggers that name one set of slots now and will name another. {from} is the slots they name now and {to} the slots they will name, each name in bold, separated by commas.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeRemoves" xml:space="preserve">
-    <value>{slot} is removed: nothing uses it.</value>
-    <comment>PLACEHOLDER, to be written. One item of the list in the question Optimize slots asks, under the button pressed on the installation panel: a slot no step or trigger names once the change is made, which it removes with every installation's blocks in it. {slot} is the slot's name, in bold.</comment>
+    <value>{slot} is removed.</value>
+    <comment>One item of the list in the question Optimize slots asks, under the button pressed on the installation panel: a slot no step or trigger names once the change is made, which it removes with every installation's blocks in it. {slot} is the slot's name, in bold.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeLoses" xml:space="preserve">
-    <value>{installations} will have to fill this again.</value>
-    <comment>PLACEHOLDER, to be written. Said at the end of an item of the list in the question Optimize slots asks, under the button pressed on the installation panel, where the item loses blocks other installations of the logic system have filled in, so those installations have to be filled again. {installations} is their names, in bold, separated by commas.</comment>
+    <value>{installations} must fill it again.</value>
+    <comment>Said at the end of an item of the list in the question Optimize slots asks, under the button pressed on the installation panel, where the item loses blocks other installations of the logic system have filled in, so those installations have to be filled again. {installations} is their names, in bold, separated by commas.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeApply" xml:space="preserve">
     <value>Optimize</value>
-    <comment>PLACEHOLDER, to be written. Answer to the question Optimize slots asks, under the button on the installation panel, beside the SLOTS heading: makes every change listed, as one step that Undo takes back.</comment>
+    <comment>Answer to the question Optimize slots asks, under the button on the installation panel, beside the SLOTS heading: makes every change listed, as one step that Undo takes back.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeCancel" xml:space="preserve">
     <value>Cancel</value>
-    <comment>PLACEHOLDER, to be written. Answer to the question Optimize slots asks, under the button on the installation panel, beside the SLOTS heading, the one Enter takes: changes nothing.</comment>
+    <comment>Answer to the question Optimize slots asks, under the button on the installation panel, beside the SLOTS heading, the one Enter takes: changes nothing.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeNothing" xml:space="preserve">
     <value>The slots are already as few as they can be.</value>
-    <comment>PLACEHOLDER, to be written. Said in place of the list of changes, under the Optimize slots button on the installation panel, beside the SLOTS heading, where optimizing would change nothing.</comment>
+    <comment>Said in place of the list of changes, under the Optimize slots button on the installation panel, beside the SLOTS heading, where optimizing would change nothing.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeOk" xml:space="preserve">
     <value>OK</value>
-    <comment>PLACEHOLDER, to be written. The one answer to what Optimize slots says where it has nothing to change, under the button on the installation panel, beside the SLOTS heading: closes it.</comment>
+    <comment>The one answer to what Optimize slots says where it has nothing to change, under the button on the installation panel, beside the SLOTS heading: closes it.</comment>
   </data>
   <data name="Sprocket.Slot.Unused" xml:space="preserve">
-    <value>Nothing uses this slot</value>
-    <comment>PLACEHOLDER, to be written. Warning beside the blocks of a slot no step, if or trigger names, on the installation panel and on the Installation panel tab of a logic system's screen, before the bin that removes the slot.</comment>
+    <value>Unused</value>
+    <comment>Warning beside the blocks of a slot no step, if or trigger names, on the installation panel and on the Installation panel tab of a logic system's screen, before the bin that removes the slot.</comment>
   </data>
   <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
     <value>Installations on other constructs or in the library may have blocks that no longer fit. Narrow it?</value>
@@ -797,8 +797,8 @@
     <comment>On a slot's page, the half of the required/optional switch for a slot that may be left without a block. Short: it shares the switch with the word for required.</comment>
   </data>
   <data name="Sprocket.Blueprint.Filled" xml:space="preserve">
-    <value>Every slot is filled.</value>
-    <comment>Line at the top of the installation panel when the installation is switched off, nothing is wrong with it, and every slot it needs has its block, as a new installation is once it is filled in; the switch in the heading turns it on.</comment>
+    <value>Every slot is filled. Switch it on in the heading.</value>
+    <comment>Line at the top of the installation panel when the installation is switched off, nothing is wrong with it, and every slot it needs has its block, as a new installation is once it is filled in. The switch in the screen's heading switches the installation on.</comment>
   </data>
   <data name="Sprocket.Blueprint.OpenSequence" xml:space="preserve">
     <value>Open {name}</value>
@@ -2657,8 +2657,8 @@
     <comment>On a slot's page, the type of block the slot expects: the game's WindTurbine blocks, and every type the game builds on it.</comment>
   </data>
   <data name="Sprocket.Undo.Also" xml:space="preserve">
-    <value>Also takes back what changed since on {screens}.</value>
-    <comment>After what an undo or redo arrow takes back, where it takes changes on other screens along with it; {screens} is their names, joined by commas: sequences, slots, installations or the logic system.</comment>
+    <value>{change}. Includes the changes on {screens}.</value>
+    <comment>Shown in place of the text of a change in the tooltip of the undo or redo arrow in the editor's heading bar, where taking the change back or making it again also takes changes on other screens along; true under both arrows. {change} is the text of the change, a past-tense line such as Deleted step 3 in Cycle, &quot;open Outer Door&quot;, with no full stop of its own. {screens} is those screens' names, joined by commas: sequences, slots, installations or the logic system.</comment>
   </data>
   <data name="Sprocket.Slot.Page" xml:space="preserve">
     <value>page</value>
@@ -2701,8 +2701,8 @@
     <comment>Line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown when the construct it is on holds no logic system.</comment>
   </data>
   <data name="Sprocket.Panel.NothingFix" xml:space="preserve">
-    <value>Open Automation in the control panel of a programmable block on this construct, and make a logic system or add one from the library.</value>
-    <comment>PLACEHOLDER, to be written. Small line under "This construct has no automation." in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown only where the screen has room for it: on a corner screen the panel shows the error alone. Says how to give the construct automation: press the "Automation" button in the terminal of a programmable block on the construct, which opens the automation editor (the block must be owned by one of the players owning most of the construct's blocks, or shared with the player), then make a logic system there or add one from the library.</comment>
+    <value>Press Automation in the control panel of a programmable block on this construct, and make a logic system or add one from the library.</value>
+    <comment>Small line under "This construct has no automation." in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown only where the screen has room for it: on a corner screen the panel shows the error alone. Says how to give the construct automation: press the "Automation" button in the terminal of a programmable block on the construct, which opens the automation editor (the block must be owned by one of the players owning most of the construct's blocks, or shared with the player), then make a logic system there or add one from the library.</comment>
   </data>
   <data name="Sprocket.Panel.Systems" xml:space="preserve">
     <value>{count} logic systems</value>
@@ -2908,5 +2908,277 @@ A backslash before a mark shows the mark as it is typed.
 
 `&amp;amp;`, `&amp;lt;`, `&amp;gt;`, `&amp;quot;` and `&amp;apos;` write &amp;amp;, &amp;lt;, &amp;gt;, &amp;quot; and &amp;apos;. Any character can be written by its number, as `&amp;#169;` or `&amp;#xA9;` for &amp;#169;. An `&amp;` that starts none of these is written as it is typed.</value>
     <comment>The guide to formatting text, shown in its own window opened by the Markup button by a description box on a logic system's screen and on a slot's screen. Its first line, starting "# ", is the window's title; the rest shows each mark of rich text and what it gives, so the marks in the examples are kept as they are.</comment>
+  </data>
+  <data name="Sprocket.Change.Describe" xml:space="preserve">
+    <value>Changed the description of the logic system &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to the logic system's description, written on its screen. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.PickButton" xml:space="preserve">
+    <value>Selected {now} for the slot &quot;{thing}&quot; in {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is picking the toolbar button a trigger answers to. {thing} is the signal slot's name, {place} the installation's name, {now} the buttons picked. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Step" xml:space="preserve">
+    <value>Changed step {number} in {place}, &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a step on a sequence's screen: what it points at and does, which sequence it runs or stops, or what an if tests. {number} is the step's number, {place} the sequence's name, {thing} the step's sentence, cut short where it is long. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.When" xml:space="preserve">
+    <value>Changed when the trigger &quot;{thing}&quot; fires</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to what starts a trigger: its blocks and the moment it starts on, picked in the picker. {thing} is the trigger's sentence, such as "When Button is pressed". The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ForgetTrigger" xml:space="preserve">
+    <value>Deleted the trigger &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a trigger. {thing} is the trigger's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveStep" xml:space="preserve">
+    <value>Moved step {number} in {place}, &quot;{thing}&quot;, to step {now}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is moving a step to another place in a sequence. {number} is the step's number before the move, {now} after it, {place} the sequence's name, {thing} the step's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Target" xml:space="preserve">
+    <value>Changed what the trigger &quot;{thing}&quot; does</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to what a trigger does: the sequence it runs or stops, or an action of its own. {thing} is the trigger's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveStep" xml:space="preserve">
+    <value>Deleted step {number} in {place}, &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a step from a sequence. {number} is the step's number, {place} the sequence's name, {thing} the step's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Rename" xml:space="preserve">
+    <value>Renamed the sequence &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a sequence. {was} is the sequence's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameSlot" xml:space="preserve">
+    <value>Renamed the slot &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a slot on its slot's screen. {was} is the slot's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Trigger" xml:space="preserve">
+    <value>Changed when the trigger &quot;{thing}&quot; fires and what it does</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to both what starts a trigger and what it does, made with one pick. {thing} is the trigger's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Cadence" xml:space="preserve">
+    <value>Changed the trigger &quot;{thing}&quot; from every {was} to every {now}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how often a repeating trigger comes round. {thing} is the trigger's sentence, {was} and {now} the time between runs before and after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Optional" xml:space="preserve">
+    <value>Made the slot &quot;{thing}&quot; optional</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a slot optional on its slot's screen, so an installation may leave it empty. {thing} is the slot's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Required" xml:space="preserve">
+    <value>Made the slot &quot;{thing}&quot; required</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a slot required on its slot's screen, so every installation has to fill it. {thing} is the slot's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.SlotType" xml:space="preserve">
+    <value>Changed the kind of the slot &quot;{thing}&quot; from {was} to {now}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is changing the kind of block a slot takes, on its slot's screen. {thing} is the slot's name, {was} and {now} the kinds of block it takes before and after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Wait" xml:space="preserve">
+    <value>Changed the delay at step {number} in {place} from {was} to {now}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how long a wait step on a sequence's screen waits. {number} is the step's number, {place} the sequence's name, {was} and {now} the lengths of time before and after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.PauseStep" xml:space="preserve">
+    <value>Switched off step {number} in {place}, &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is switching a step off on a sequence's screen. {number} is the step's number, {place} the sequence's name, {thing} the step's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ResumeStep" xml:space="preserve">
+    <value>Switched on step {number} in {place}, &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is switching a step back on on a sequence's screen. {number} is the step's number, {place} the sequence's name, {thing} the step's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.TakeOver" xml:space="preserve">
+    <value>Took a toolbar button from {place} for &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is picking a toolbar button that another trigger or installation already used, which takes the button from it. {thing} is the slot or the trigger's sentence, {place} the installation or logic system it was taken from. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddStep" xml:space="preserve">
+    <value>Added step {number} to {place}, &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a step to a sequence. {number} is the step's number, {place} the sequence's name, {thing} the step's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddWait" xml:space="preserve">
+    <value>Added a delay as step {number} in {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a wait step to a sequence. {number} is the step's number, {place} the sequence's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
+    <value>Changed the description of the slot &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a slot's description, written on its slot's screen. {thing} is the slot's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ShortenSlot" xml:space="preserve">
+    <value>Changed the short name of the slot &quot;{thing}&quot; from &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a signal slot's short name, written on its slot's screen. {thing} is the slot's name, {was} and {now} its short name before and after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddIf" xml:space="preserve">
+    <value>Added an if as step {number} in {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding an if to a sequence. {number} is the step's number, {place} the sequence's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddBranch" xml:space="preserve">
+    <value>Added &quot;{thing}&quot; as step {number} in {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding an otherwise if or an otherwise to an if in a sequence. {thing} is the branch's sentence, such as "otherwise", {number} its step number, {place} the sequence's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveIf" xml:space="preserve">
+    <value>Deleted step {number} in {place}, &quot;{thing}&quot;, with the steps in it</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a whole if from a sequence, with the steps in it. {number} is the step's number, {place} the sequence's name, {thing} the if's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.Unwrap" xml:space="preserve">
+    <value>Removed step {number} in {place}, &quot;{thing}&quot;, and kept the steps in it</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is taking an if out of a sequence while keeping the steps that were in it. {number} is the step's number, {place} the sequence's name, {thing} the if's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveBranch" xml:space="preserve">
+    <value>Deleted step {number} in {place}, &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting an otherwise if or an otherwise branch from an if in a sequence. {thing} is the branch's sentence, {number} its step number, {place} the sequence's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveBranch" xml:space="preserve">
+    <value>Moved step {number} in {place}, &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is moving a branch of an if to another place in its chain. {thing} is the branch's sentence, {number} its step number, {place} the sequence's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.DeleteSequence" xml:space="preserve">
+    <value>Deleted the sequence &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is deleting a sequence, with the triggers that run it. {thing} is the sequence's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.NewSequence" xml:space="preserve">
+    <value>Made the sequence &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a new sequence. {thing} is the sequence's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopySequence" xml:space="preserve">
+    <value>Copied a sequence as &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a sequence. {thing} is the copy's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameSystem" xml:space="preserve">
+    <value>Renamed the logic system &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming the logic system. {was} is the logic system's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameInstallation" xml:space="preserve">
+    <value>Renamed the installation &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming an installation on its installation panel. {was} is the installation's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.FillSlot" xml:space="preserve">
+    <value>Filled the slot &quot;{thing}&quot; in {place} with {now}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is filling a slot of an installation with blocks. {thing} is the slot's name, {place} the installation's name, {now} the blocks put in it. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddTrigger" xml:space="preserve">
+    <value>Added the trigger &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a trigger. {thing} is the trigger's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.PutOnSystem" xml:space="preserve">
+    <value>Added the logic system &quot;{thing}&quot; from the library</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is putting a blueprint or a backup from the library on the construct as a logic system. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyBlueprint" xml:space="preserve">
+    <value>Made the copy &quot;{thing}&quot; from the library</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is putting a copy of a blueprint on the construct from the library, as a separate logic system. {thing} is the new logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameConstruct" xml:space="preserve">
+    <value>Renamed the construct &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is renaming the construct. {was} is the construct's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
+    <value>Deleted the logic system &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is deleting a logic system that has no blueprint in the library. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
+    <value>Took the logic system &quot;{thing}&quot; off this construct</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is taking a logic system whose blueprint is in the library off the construct. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.DeleteInstallation" xml:space="preserve">
+    <value>Deleted the installation &quot;{thing}&quot; of {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is deleting an installation of a logic system. {thing} is the installation's name, {place} the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddSystem" xml:space="preserve">
+    <value>Made the logic system &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is making a new logic system. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddInstallation" xml:space="preserve">
+    <value>Added the installation &quot;{thing}&quot; to {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is adding another installation to a logic system. {thing} is the installation's name, {place} the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
+    <value>Updated the logic system &quot;{thing}&quot; from the library</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is replacing a logic system with its newer blueprint from the library. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
+    <value>Reset the logic system &quot;{thing}&quot; to its blueprint</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is resetting a logic system to its blueprint in the library, dropping its changes since. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyStep" xml:space="preserve">
+    <value>Duplicated &quot;{thing}&quot; as step {number} in {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a step in a sequence. {number} is the copy's step number, {place} the sequence's name, {thing} the step's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyTrigger" xml:space="preserve">
+    <value>Duplicated the trigger &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a trigger. {thing} is the trigger's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
+    <value>Kept one version of the logic system &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is keeping one of two versions of a logic system that met when two constructs joined. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
+    <value>Moved the slot &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a slot to another place on the logic system's Installation panel tab. {thing} is the slot's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveCategory" xml:space="preserve">
+    <value>Moved the category &quot;{thing}&quot; with its slots</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a category of slots, with its slots, to another place on the logic system's Installation panel tab. {thing} is the category's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddCategory" xml:space="preserve">
+    <value>Added the category &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a category of slots on the logic system's Installation panel tab. {thing} is the category's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameCategory" xml:space="preserve">
+    <value>Renamed the category &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a category of slots on the logic system's Installation panel tab. {was} is the category's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
+    <value>Removed the category &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a category of slots on the logic system's Installation panel tab, which leaves its slots under no category. {thing} is the category's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddType" xml:space="preserve">
+    <value>Added the type &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a type, a named set of choices, to the logic system. {thing} is the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameType" xml:space="preserve">
+    <value>Renamed the type &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming one of the logic system's types. {was} is the type's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveType" xml:space="preserve">
+    <value>Removed the type &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing one of the logic system's types. {thing} is the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveType" xml:space="preserve">
+    <value>Moved the type &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a type to another place on the logic system's State tab. {thing} is the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddChoice" xml:space="preserve">
+    <value>Added the choice &quot;{thing}&quot; to {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a choice to one of the logic system's types. {thing} is the choice, {place} the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameChoice" xml:space="preserve">
+    <value>Renamed the choice &quot;{was}&quot; in {place} to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a choice of one of the logic system's types. {was} is the choice before, {now} after, {place} the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveChoice" xml:space="preserve">
+    <value>Removed the choice &quot;{thing}&quot; from {place}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a choice from one of the logic system's types. {thing} is the choice, {place} the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddState" xml:space="preserve">
+    <value>Added the state &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a state, a value each installation keeps, to the logic system. {thing} is the state's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameState" xml:space="preserve">
+    <value>Renamed the state &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming one of the logic system's states. {was} is the state's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveState" xml:space="preserve">
+    <value>Removed the state &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing one of the logic system's states. {thing} is the state's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveState" xml:space="preserve">
+    <value>Moved the state &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a state to another place on the logic system's State tab. {thing} is the state's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
+    <value>Changed what the state &quot;{thing}&quot; starts as, from {was} to {now}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is changing the value one of the logic system's states starts at. {thing} is the state's name, {was} the value it started at before the change and {now} the value it starts at after it. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.OptimizeSlots" xml:space="preserve">
+    <value>Optimized the slots</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is the one Optimize slots made on the installation panel: slots made, steps and triggers naming them, and slots nothing uses removed. No placeholders. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveSlot" xml:space="preserve">
+    <value>Removed the slot &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is removing a slot nothing used, with its bin on the installation panel or the Installation panel tab. {thing} is the slot's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
 </root>

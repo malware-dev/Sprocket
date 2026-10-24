@@ -29,6 +29,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => _change;
 
+        /// <inheritdoc />
+        public override void Name(Automation program, bool done, ChangeName name)
+        {
+            name.Thing = _system;
+        }
+
         /// <summary>Taking it away waits while it runs; putting it back, switched off, waits for nothing.</summary>
         public override bool Held(Automation program, bool back)
         {

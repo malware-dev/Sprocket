@@ -450,6 +450,24 @@ namespace Sprocket.Sim.Driving
             return line;
         }
 
+        /// <summary>What the row of step <paramref name="step" /> reads as, from the same parts and words the row draws.</summary>
+        public static string Reads(this SprocketEditor editor, int step)
+        {
+            var row = editor.StepRows()[step];
+            var line = SentenceText.Lead(row.Kind);
+
+            for (var i = 0; i < row.Slots.Count; i++)
+            {
+                var join = SentenceText.Joining(row.Slots, i);
+                if (join.Length > 0)
+                    line += (line.Length > 0 ? " " : "") + join;
+
+                line += (line.Length > 0 ? " " : "") + SentenceText.InStep(editor.World, row.Slots[i]);
+            }
+
+            return line;
+        }
+
         /// <summary>And what the second half of it reads as, with the words that join its parts.</summary>
         public static string Doing(this SprocketEditor editor, int which)
         {

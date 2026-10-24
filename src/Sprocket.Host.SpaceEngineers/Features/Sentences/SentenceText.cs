@@ -566,6 +566,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return said;
         }
 
+        /// <summary><paramref name="words" />, cut short with an ellipsis where they run longer than a sentence quotes.</summary>
+        public static string Short(string words)
+        {
+            return words != null && words.Length > Quoted ? words.Substring(0, Quoted).TrimEnd() + Cut : words;
+        }
+
         /// <summary>One value as a sentence says it, with the words its field puts around it.</summary>
         /// <remarks>
         /// A line break reads as a slash, and long text is cut short: a screen's text can run to a hundred thousand
@@ -573,8 +579,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </remarks>
         static string Around(IList<Field> fields, int at, string filled)
         {
-            if (filled != null && filled.Length > Quoted)
-                filled = filled.Substring(0, Quoted).TrimEnd() + Cut;
+            filled = Short(filled);
 
             if (filled != null && filled.IndexOf('\n') >= 0)
                 filled = filled.Replace("\r", "").Replace("\n", " / ");

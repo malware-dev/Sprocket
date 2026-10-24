@@ -29,6 +29,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.ChangeStart;
 
+        /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _state;
+            name.Was = _was;
+            name.Now = _now;
+        }
+
         /// <summary>Changes nothing where the value is the same, or a type would change under what mentions the state.</summary>
         public override bool Changes => !_held && (!StateMentions.Same(_was, _now) || _wasType != _nowType);
 

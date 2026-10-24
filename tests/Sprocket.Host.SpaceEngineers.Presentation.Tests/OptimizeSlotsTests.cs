@@ -48,7 +48,7 @@ public class OptimizeSlotsTests
         var question = screen.Editor.Question();
         Assert.StartsWith(screen.Editor.Texts.SlotOptimizeQuestion, question);
         Assert.Contains("- Steps and triggers naming " + whole + " name ", question);
-        Assert.Contains("- " + whole + " is removed: nothing uses it.", question);
+        Assert.Contains("- " + Filled.With(screen.Editor.Texts.SlotOptimizeRemoves, "slot", whole), question);
         Assert.Equal(before, Targets(system, 0));
         Assert.NotNull(system.FindPart(whole));
 
@@ -72,7 +72,7 @@ public class OptimizeSlotsTests
 
         Assert.Equal(halves, Targets(system, 0).OrderBy(name => name));
         Assert.Null(system.FindPart(whole));
-        Assert.EndsWith(screen.Editor.Texts.Codex.ChangeOptimizeSlots, screen.Editor.Screen.UndoText);
+        Assert.EndsWith(screen.Editor.Texts.ChangeOptimizeSlots, screen.Editor.Screen.UndoText);
 
         screen.Editor.Screen.Undo!.Execute();
         screen.Run(2);
@@ -96,7 +96,8 @@ public class OptimizeSlotsTests
         Panel(screen, system);
 
         Press(screen);
-        Assert.Contains("- A new slot slot " + number + " holds ", screen.Editor.Question());
+        var makes = Filled.With(screen.Editor.Texts.SlotOptimizeMakes, "slot", "slot " + number);
+        Assert.Contains("- " + makes.Substring(0, makes.IndexOf("{blocks}", StringComparison.Ordinal)), screen.Editor.Question());
         screen.Editor.PressAnswer(screen.Editor.Texts.SlotOptimizeApply);
         screen.Run(2);
 
@@ -122,8 +123,9 @@ public class OptimizeSlotsTests
 
         var lines = screen.Editor.Question().Split('\n');
         var renamed = lines.Single(line => line.StartsWith("- Steps and triggers naming " + whole + " name ", StringComparison.Ordinal));
-        Assert.EndsWith(" instead. Installation 2 will have to fill this again.", renamed);
-        Assert.Contains("- " + whole + " is removed: nothing uses it. Installation 2 will have to fill this again.", lines);
+        var loses = Filled.With(screen.Editor.Texts.SlotOptimizeLoses, "installations", "Installation 2");
+        Assert.EndsWith(" " + loses, renamed);
+        Assert.Contains("- " + Filled.With(screen.Editor.Texts.SlotOptimizeRemoves, "slot", whole) + " " + loses, lines);
         Assert.True(screen.Editor.HasAnswer(screen.Editor.Texts.SlotOptimizeApply));
     }
 

@@ -21,6 +21,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.MoveType;
 
         /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _moved;
+        }
+
+        /// <inheritdoc />
         public override bool Changes => _from != _to;
 
         /// <inheritdoc />

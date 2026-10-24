@@ -26,6 +26,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => _change;
 
+        /// <summary>The one slot taken out, where that is all the change does, and how many slots were made, renamed or taken out.</summary>
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _reslot.Dropped.Count == 1 && _reslot.Made.Count == 0 ? _reslot.Dropped[0] : null;
+            name.Count = _reslot.Made.Count + _reslot.Renames + _reslot.Dropped.Count;
+        }
+
         /// <inheritdoc />
         public override bool Changes => !_reslot.IsEmpty;
 

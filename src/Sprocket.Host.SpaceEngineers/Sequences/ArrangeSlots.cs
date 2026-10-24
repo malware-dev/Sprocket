@@ -6,10 +6,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly ChangeKind _change;
         readonly SlotArrangement _was;
         readonly SlotArrangement _now;
+        readonly object _thing;
+        readonly string _renamed;
 
-        /// <summary>Stands the slots as <paramref name="now" /> says where they stood as <paramref name="was" />, offered back as <paramref name="change" />.</summary>
-        public ArrangeSlots(ChangeKind change, SlotArrangement was, SlotArrangement now)
+        /// <summary>
+        /// Stands the slots as <paramref name="now" /> says where they stood as <paramref name="was" />, offered back as
+        /// <paramref name="change" /> to <paramref name="thing" />, the slot or the name of the category moved, added, renamed or
+        /// removed, and called <paramref name="renamed" /> before a rename.
+        /// </summary>
+        public ArrangeSlots(ChangeKind change, SlotArrangement was, SlotArrangement now, object thing, string renamed)
         {
+            _thing = thing;
+            _renamed = renamed;
             _change = change;
             _was = was;
             _now = now;
@@ -17,6 +25,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override ChangeKind Change => _change;
+
+        /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _thing;
+            if (_renamed == null)
+                return;
+
+            name.Was = _renamed;
+            name.Now = _thing;
+        }
 
         /// <inheritdoc />
         public override bool Changes => !_was.Same(_now);

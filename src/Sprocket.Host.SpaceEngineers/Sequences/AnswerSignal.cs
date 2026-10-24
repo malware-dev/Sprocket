@@ -43,6 +43,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.PickButton;
 
         /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _name;
+            name.Place = _instance;
+            name.Now = _now;
+            name.Count = _now.Count;
+        }
+
+        /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)
         {
             Touch(screens, _instance);

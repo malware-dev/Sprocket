@@ -22,6 +22,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.RenameInstallation;
 
         /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = Instance;
+            name.Was = _was;
+            name.Now = _now;
+        }
+
+        /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)
         {
             Touch(screens, Instance);

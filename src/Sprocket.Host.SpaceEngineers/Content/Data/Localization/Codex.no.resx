@@ -101,13 +101,17 @@
     <value>Lukk editoren</value>
   </data>
   <data name="Sprocket.Chrome.Tips" xml:space="preserve">
-    <value>Slå av tipsene. Trykk igjen for å slå dem på.</value>
+    <value>Slå av alle tips. Trykk igjen for å slå dem på igjen.</value>
   </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
-    <value>![](mark:undo)&amp;nbsp;[Angre](Term.Undo) {action}</value>
+    <value>![](mark:undo)&amp;nbsp;[Angre](Term.Undo)
+
+{action}</value>
   </data>
   <data name="Sprocket.Chrome.Redo" xml:space="preserve">
-    <value>![](mark:redo)&amp;nbsp;[Gjør om](Term.Undo) {action}</value>
+    <value>![](mark:redo)&amp;nbsp;[Gjør om](Term.Undo)
+
+{action}</value>
   </data>
   <data name="Sprocket.Row.Broken" xml:space="preserve">
     <value>Noe i den må fikses. Åpne den for å se hva.</value>
@@ -401,7 +405,7 @@
     <value>Blokkene som er valgt, lager en ny [plass](Term.Slot) med dette navnet. Trykk på navnet for å endre det.</value>
   </data>
   <data name="Sprocket.Pick.LimitAbout" xml:space="preserve">
-    <value>Denne plassen tar bare {kind}, så bare de blokkene står på listen.</value>
+    <value>Denne plassen tar blokker av sorten {kind}.</value>
   </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
     <value>Et steg, et hvis eller en utløser bruker denne tilstanden, så typen kan ikke byttes.</value>
@@ -469,155 +473,8 @@
   <data name="Sprocket.Wait.Longer" xml:space="preserve">
     <value>Lengre</value>
   </data>
-  <data name="Sprocket.Change.Describe" xml:space="preserve">
-    <value>endring av beskrivelsen</value>
-  </data>
-  <data name="Sprocket.Change.PickButton" xml:space="preserve">
-    <value>valg av en knapp</value>
-  </data>
-  <data name="Sprocket.Change.Step" xml:space="preserve">
-    <value>endring av et steg</value>
-  </data>
-  <data name="Sprocket.Change.When" xml:space="preserve">
-    <value>endring av når den kjører</value>
-  </data>
-  <data name="Sprocket.Change.ForgetTrigger" xml:space="preserve">
-    <value>sletting av en utløser</value>
-  </data>
-  <data name="Sprocket.Change.MoveStep" xml:space="preserve">
-    <value>flytting av et steg</value>
-  </data>
-  <data name="Sprocket.Change.Target" xml:space="preserve">
-    <value>endring av hva den gjør</value>
-  </data>
-  <data name="Sprocket.Change.RemoveStep" xml:space="preserve">
-    <value>sletting av et steg</value>
-  </data>
-  <data name="Sprocket.Change.Rename" xml:space="preserve">
-    <value>omdøping</value>
-  </data>
-  <data name="Sprocket.Change.RenameSlot" xml:space="preserve">
-    <value>omdøping av en plass</value>
-  </data>
-  <data name="Sprocket.Change.Trigger" xml:space="preserve">
-    <value>endring av utløseren</value>
-  </data>
-  <data name="Sprocket.Change.Cadence" xml:space="preserve">
-    <value>endring av hvor ofte den kjører</value>
-  </data>
-  <data name="Sprocket.Change.SlotType" xml:space="preserve">
-    <value>endring av blokksorten til en plass</value>
-  </data>
-  <data name="Sprocket.Change.Optional" xml:space="preserve">
-    <value>endre en plass til valgfri</value>
-  </data>
-  <data name="Sprocket.Change.Required" xml:space="preserve">
-    <value>endre en plass til påkrevd</value>
-  </data>
-  <data name="Sprocket.Change.Wait" xml:space="preserve">
-    <value>endring av en forsinkelse</value>
-  </data>
-  <data name="Sprocket.Change.PauseStep" xml:space="preserve">
-    <value>pause på et steg</value>
-  </data>
-  <data name="Sprocket.Change.ResumeStep" xml:space="preserve">
-    <value>gjenopptaking av et steg</value>
-  </data>
-  <data name="Sprocket.Change.TakeOver" xml:space="preserve">
-    <value>overtakelse av en knapp</value>
-  </data>
-  <data name="Sprocket.Change.AddStep" xml:space="preserve">
-    <value>innsetting av et steg</value>
-  </data>
-  <data name="Sprocket.Change.AddWait" xml:space="preserve">
-    <value>innsetting av en forsinkelse</value>
-  </data>
-  <data name="Sprocket.Change.ShortenSlot" xml:space="preserve">
-    <value>endring av kortnavnet til en plass</value>
-  </data>
   <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
     <value>Etiketten som vises på hver knapp og verktøylinjeplass som sender dette signalet. Står den tom, viser de plassens navn.</value>
-  </data>
-  <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
-    <value>beskrivelse av en plass</value>
-  </data>
-  <data name="Sprocket.Change.AddIf" xml:space="preserve">
-    <value>innsetting av et hvis-steg</value>
-  </data>
-  <data name="Sprocket.Change.AddBranch" xml:space="preserve">
-    <value>innsetting av en gren</value>
-  </data>
-  <data name="Sprocket.Change.RemoveIf" xml:space="preserve">
-    <value>sletting av et hvis-steg</value>
-  </data>
-  <data name="Sprocket.Change.Unwrap" xml:space="preserve">
-    <value>fjerning av et hvis-steg</value>
-  </data>
-  <data name="Sprocket.Change.RemoveBranch" xml:space="preserve">
-    <value>sletting av en gren</value>
-  </data>
-  <data name="Sprocket.Change.MoveBranch" xml:space="preserve">
-    <value>flytting av en gren</value>
-  </data>
-  <data name="Sprocket.Change.DeleteSequence" xml:space="preserve">
-    <value>sletting av en sekvens</value>
-  </data>
-  <data name="Sprocket.Change.NewSequence" xml:space="preserve">
-    <value>oppretting av en sekvens</value>
-  </data>
-  <data name="Sprocket.Change.CopySequence" xml:space="preserve">
-    <value>kopiering av en sekvens</value>
-  </data>
-  <data name="Sprocket.Change.RenameSystem" xml:space="preserve">
-    <value>omdøping av logikksystemet</value>
-  </data>
-  <data name="Sprocket.Change.RenameInstallation" xml:space="preserve">
-    <value>omdøping av en installasjon</value>
-  </data>
-  <data name="Sprocket.Change.FillSlot" xml:space="preserve">
-    <value>fylling av en plass</value>
-  </data>
-  <data name="Sprocket.Change.AddTrigger" xml:space="preserve">
-    <value>oppretting av en utløser</value>
-  </data>
-  <data name="Sprocket.Change.PutOnSystem" xml:space="preserve">
-    <value>henting av et logikksystem fra biblioteket</value>
-  </data>
-  <data name="Sprocket.Change.CopyBlueprint" xml:space="preserve">
-    <value>kopiering av en plantegning</value>
-  </data>
-  <data name="Sprocket.Change.RenameConstruct" xml:space="preserve">
-    <value>omdøping av konstruksjonen</value>
-  </data>
-  <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
-    <value>sletting av et logikksystem</value>
-  </data>
-  <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
-    <value>oppdatering av et logikksystem fra biblioteket</value>
-  </data>
-  <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
-    <value>valg av versjon for et logikksystem</value>
-  </data>
-  <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
-    <value>tilbakestilling av et logikksystem til plantegningen</value>
-  </data>
-  <data name="Sprocket.Change.CopyStep" xml:space="preserve">
-    <value>duplisering av et steg</value>
-  </data>
-  <data name="Sprocket.Change.CopyTrigger" xml:space="preserve">
-    <value>duplisering av en utløser</value>
-  </data>
-  <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
-    <value>fjerning av et logikksystem</value>
-  </data>
-  <data name="Sprocket.Change.DeleteInstallation" xml:space="preserve">
-    <value>sletting av en installasjon</value>
-  </data>
-  <data name="Sprocket.Change.AddSystem" xml:space="preserve">
-    <value>oppretting av et logikksystem</value>
-  </data>
-  <data name="Sprocket.Change.AddInstallation" xml:space="preserve">
-    <value>oppretting av en installasjon</value>
   </data>
   <data name="Sprocket.Library.ForgetBackup" xml:space="preserve">
     <value>Glem denne sikkerhetskopien</value>
@@ -638,7 +495,7 @@
     <value>Et logikksystem trenger minst én installasjon.</value>
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
-    <value>Legg til en kopi av denne plantegningen på denne konstruksjonen som et eget logikksystem.</value>
+    <value>Legg til en kopi på denne konstruksjonen som et eget logikksystem.</value>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
     <value>Slett dette logikksystemet, med installasjonene. Det har ingen plantegning i biblioteket, så dette er den eneste kopien.</value>
@@ -679,63 +536,6 @@
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
     <value>De ![](mark:awaited)&amp;nbsp;[avventbare handlingene](Term.Awaitable) som er startet siden forrige `wait for pending tasks`, kjører samtidig, og sekvensen venter her til alle er ferdige.</value>
   </data>
-  <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
-    <value>flytting av en plass</value>
-  </data>
-  <data name="Sprocket.Change.MoveCategory" xml:space="preserve">
-    <value>flytting av en kategori</value>
-  </data>
-  <data name="Sprocket.Change.AddCategory" xml:space="preserve">
-    <value>oppretting av en kategori</value>
-  </data>
-  <data name="Sprocket.Change.RenameCategory" xml:space="preserve">
-    <value>omdøping av en kategori</value>
-  </data>
-  <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
-    <value>fjerning av en kategori</value>
-  </data>
-  <data name="Sprocket.Change.OptimizeSlots" xml:space="preserve">
-    <value>optimalisering av plassene</value>
-  </data>
-  <data name="Sprocket.Change.RemoveSlot" xml:space="preserve">
-    <value>fjerning av en plass</value>
-  </data>
-  <data name="Sprocket.Change.AddType" xml:space="preserve">
-    <value>oppretting av en type</value>
-  </data>
-  <data name="Sprocket.Change.RenameType" xml:space="preserve">
-    <value>omdøping av en type</value>
-  </data>
-  <data name="Sprocket.Change.RemoveType" xml:space="preserve">
-    <value>fjerning av en type</value>
-  </data>
-  <data name="Sprocket.Change.AddChoice" xml:space="preserve">
-    <value>oppretting av et alternativ</value>
-  </data>
-  <data name="Sprocket.Change.RenameChoice" xml:space="preserve">
-    <value>omdøping av et alternativ</value>
-  </data>
-  <data name="Sprocket.Change.RemoveChoice" xml:space="preserve">
-    <value>fjerning av et alternativ</value>
-  </data>
-  <data name="Sprocket.Change.AddState" xml:space="preserve">
-    <value>oppretting av en tilstand</value>
-  </data>
-  <data name="Sprocket.Change.RenameState" xml:space="preserve">
-    <value>omdøping av en tilstand</value>
-  </data>
-  <data name="Sprocket.Change.RemoveState" xml:space="preserve">
-    <value>fjerning av en tilstand</value>
-  </data>
-  <data name="Sprocket.Change.MoveType" xml:space="preserve">
-    <value>flytting av en type</value>
-  </data>
-  <data name="Sprocket.Change.MoveState" xml:space="preserve">
-    <value>flytting av en tilstand</value>
-  </data>
-  <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
-    <value>endring av en startverdi</value>
-  </data>
   <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
     <value>Gi kategorien nytt navn</value>
   </data>
@@ -743,10 +543,10 @@
     <value>Fjern kategorien. Plassene blir, uten kategori.</value>
   </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
-    <value>Gjør plassene så få som stegene og utløserne trenger, og fjern plassene ingenting bruker. Endringene listes opp så du kan godta dem først.</value>
+    <value>Reduser plassene til så få som stegene og utløserne trenger.</value>
   </data>
   <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
-    <value>Fjern denne plassen. Ingenting bruker den.</value>
+    <value>Fjern denne ubrukte plassen.</value>
   </data>
   <data name="Sprocket.Category.Drag" xml:space="preserve">
     <value>Dra for å flytte kategorien med plassene sine.</value>

@@ -17,6 +17,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.Describe;
 
         /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = system;
+        }
+
+        /// <inheritdoc />
         public override bool Changes => _was != _now;
 
         /// <inheritdoc />

@@ -183,6 +183,24 @@ public class ScreenChoiceTests
         Assert.Equal("Back", screen.Editor.Facets()!.Name);
     }
 
+    /// <summary>Opening the step again names its own slot of screens in the heading, as it is, with nothing to name anew.</summary>
+    [Fact]
+    public void ReopeningAScreenStepNamesItsOwnSlot()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+        var slot = Assert.Single(Assert.IsType<Act>(screen.Editor.Program.Systems[0].Sequences[0].Steps[0]).Targets);
+
+        screen.Editor.PressStepSlot(0, 0);
+        screen.Run(2);
+
+        var heading = screen.Editor.Screen.Heading[0];
+        Assert.Equal(slot, heading.Text);
+        Assert.False(heading.CanRename);
+    }
+
     /// <summary>Setting a screen up asks for its content first, and then only for what that content takes, every color headed.</summary>
     [Fact]
     public void SettingUpAsksForWhatItsContentTakes()

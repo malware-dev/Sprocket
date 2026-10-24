@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
@@ -464,7 +465,7 @@ public class ChangingTests
         Assert.Equal("then close slot 2", screen.Editor.Doing(1));
 
         // And it walks back from here, because the act it changed has nowhere else to offer it.
-        Assert.Equal("changing what it does", screen.Editor.Steps().UndoText);
+        Assert.Equal(Filled.With(screen.Editor.Texts.ChangeTarget, "thing", SentenceText.Short(screen.Editor.Says(1))), screen.Editor.Steps().UndoText);
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
@@ -486,7 +487,7 @@ public class ChangingTests
         var screen = WithOne();
 
         // Only the trigger it was made with so far, and nothing to walk forward.
-        Assert.Equal("adding a trigger", screen.Editor.Steps().UndoText);
+        Assert.Equal(Filled.With(screen.Editor.Texts.ChangeAddTrigger, "thing", SentenceText.Short(screen.Editor.Says(0))), screen.Editor.Steps().UndoText);
         Assert.Null(screen.Editor.Steps().Redo);
 
         screen.Editor.PressWhen(0);
@@ -496,7 +497,8 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("changing when it runs", screen.Editor.Steps().UndoText);
+        var changed = Filled.With(screen.Editor.Texts.ChangeWhen, "thing", SentenceText.Short(screen.Editor.Says(0)));
+        Assert.Equal(changed, screen.Editor.Steps().UndoText);
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
@@ -506,7 +508,7 @@ public class ChangingTests
         Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
 
         // And forward again, into the same change rather than a rebuilt one that reads the same.
-        Assert.Equal("changing when it runs", screen.Editor.Steps().RedoText);
+        Assert.Equal(changed, screen.Editor.Steps().RedoText);
         screen.Editor.Steps().Redo!.Execute();
         screen.Run(2);
 
@@ -537,11 +539,12 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
+        var deleted = Filled.With(screen.Editor.Texts.ChangeForgetTrigger, "thing", SentenceText.Short(screen.Editor.Says(1)));
         screen.Editor.Triggers()[1].Deletes!.Execute();
         screen.Run(2);
 
         Assert.Single(screen.Editor.Triggers());
-        Assert.Equal("deleting a trigger", screen.Editor.Steps().UndoText);
+        Assert.Equal(deleted, screen.Editor.Steps().UndoText);
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
@@ -581,7 +584,7 @@ public class ChangingTests
         screen.Run(2);
 
         // The way back goes on from the step before it.
-        Assert.Equal("renaming the logic system", screen.Editor.Steps().UndoText);
+        Assert.Equal(Filled.With(screen.Editor.Texts.ChangeRenameSystem, "was", "Logic system 1", "now", "Airlock"), screen.Editor.Steps().UndoText);
 
         // And the trigger is left as the game left it.
         Assert.Same(trigger, System(screen).Triggers[0]);
@@ -742,7 +745,8 @@ public class ChangingTests
 
         Assert.Single(System(screen).Triggers);
         Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
-        Assert.Equal("taking a button over", screen.Editor.Steps().UndoText);
+        Assert.Equal(Filled.With(screen.Editor.Texts.ChangeTakeOver, "thing", SentenceText.Short(screen.Editor.Says(0)), "place", "Airlock"),
+            screen.Editor.Steps().UndoText);
 
 
         screen.Editor.Steps().Undo!.Execute();

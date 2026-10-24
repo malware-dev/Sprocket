@@ -24,6 +24,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.MoveBranch;
 
+        /// <summary>The branch moved, by the line it opens on as the steps stand.</summary>
+        public override void Name(Sequence sequence, bool done, ChangeName name)
+        {
+            var lines = sequence.Branches(_open);
+            var line = lines[done ? _to : _from];
+            name.Thing = sequence.Steps[line];
+            name.Number = sequence.NumberOf(line);
+        }
+
         /// <inheritdoc />
         public override bool Changes => _from != _to;
 

@@ -100,6 +100,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return at;
         }
 
+        /// <summary>The number the line at <paramref name="at" /> is shown with: lines are counted from one, and the line closing an if is not counted.</summary>
+        public int NumberOf(int at)
+        {
+            var number = 0;
+            for (var i = 0; i <= at && i < _steps.Count; i++)
+            {
+                if (!(_steps[i] is EndIf))
+                    number++;
+            }
+
+            return number;
+        }
+
         /// <summary>The lines opening each branch of the <see cref="If" /> at <paramref name="open" />, in order, its own first.</summary>
         /// <remarks>Walks the if's lines, so it is asked when the if is changed or moved, never on a tick.</remarks>
         public List<int> Branches(int open)

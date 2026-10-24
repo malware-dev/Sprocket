@@ -20,6 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.RemoveType;
 
+        /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _type;
+        }
+
         /// <summary>Changes nothing where a state holds the type: the editor takes those away first.</summary>
         public override bool Changes => !_held;
 

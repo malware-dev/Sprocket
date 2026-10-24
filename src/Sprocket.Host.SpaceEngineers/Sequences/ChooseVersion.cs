@@ -26,6 +26,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.ChooseVersion;
 
         /// <inheritdoc />
+        public override void Name(Automation program, bool done, ChangeName name)
+        {
+            name.Thing = _here;
+        }
+
+        /// <inheritdoc />
         public override void Apply(Automation program)
         {
             // Taken in this order, so undo puts each back where it stood.

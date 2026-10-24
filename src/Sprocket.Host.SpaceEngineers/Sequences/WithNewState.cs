@@ -23,6 +23,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => _then.Change;
 
+        /// <summary>What the change made with the new state was made to.</summary>
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            _then.Name(system, done, name);
+        }
+
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {

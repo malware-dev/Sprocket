@@ -19,6 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.AddType;
 
         /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _type;
+        }
+
+        /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
             return system.Types.Contains(_type) && !StateMentions.Holds(system, _type.Name);

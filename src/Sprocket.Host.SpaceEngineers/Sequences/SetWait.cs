@@ -20,6 +20,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => ChangeKind.Wait;
 
         /// <inheritdoc />
+        public override void Name(Sequence sequence, bool done, ChangeName name)
+        {
+            name.Thing = sequence.Steps[_index];
+            name.Number = sequence.NumberOf(_index);
+            name.Was = _was;
+            name.Now = _now;
+        }
+
+        /// <inheritdoc />
         public override bool Changes => _was != _now;
 
         /// <inheritdoc />

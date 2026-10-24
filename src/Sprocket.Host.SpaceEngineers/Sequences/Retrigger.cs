@@ -19,6 +19,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.Trigger;
 
+        /// <summary>What the trigger changed is: its start's change names it, or what it does where that names nothing.</summary>
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            _start.Name(system, done, name);
+            if (name.Thing == null)
+                _does.Name(system, done, name);
+        }
+
         /// <inheritdoc />
         public override bool Changes => _start.Changes || _does.Changes;
 

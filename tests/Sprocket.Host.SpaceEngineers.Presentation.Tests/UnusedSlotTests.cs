@@ -41,7 +41,7 @@ public class UnusedSlotTests
         Assert.Null(system.FindPart(slot));
         Assert.Null(port.FilledWith(slot));
         Assert.DoesNotContain(screen.Editor.Parts(), r => r.Name == slot);
-        Assert.EndsWith(screen.Editor.Texts.Codex.ChangeRemoveSlot, screen.Editor.Screen.UndoText);
+        Assert.EndsWith(Filled.With(screen.Editor.Texts.ChangeRemoveSlot, "thing", slot), screen.Editor.Screen.UndoText);
 
         screen.Editor.Screen.Undo!.Execute();
         screen.Run(2);

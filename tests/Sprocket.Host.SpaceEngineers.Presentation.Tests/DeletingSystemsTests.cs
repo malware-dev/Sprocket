@@ -100,7 +100,7 @@ public class DeletingSystemsTests
         sim.Tick();
 
         Assert.Empty(sim.Editor.Program.Systems);
-        Assert.Equal(sim.Texts.Codex.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
+        Assert.Equal(Filled.With(sim.Texts.ChangeDeleteSystem, "thing", "Airlock"), sim.Editor.Screen.UndoText);
 
         sim.Editor.Screen.Undo!.Execute();
         sim.Tick();
@@ -146,7 +146,7 @@ public class DeletingSystemsTests
         sim.Tick();
         Assert.Equal(2, sim.Editor.Program.Systems.Count);
 
-        Assert.Equal(sim.Texts.Codex.ChangeAddSystem, sim.Editor.Screen.UndoText);
+        Assert.Equal(Filled.With(sim.Texts.ChangeAddSystem, "thing", "Hangar"), sim.Editor.Screen.UndoText);
         sim.Editor.Screen.Undo!.Execute();
         sim.Tick();
         Assert.Single(sim.Editor.Program.Systems);
@@ -169,7 +169,7 @@ public class DeletingSystemsTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        Assert.NotEqual(sim.Texts.Codex.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
+        Assert.NotEqual(Filled.With(sim.Texts.ChangeDeleteSystem, "thing", "Airlock"), sim.Editor.Screen.UndoText);
     }
 
     /// <summary>A lent editor, which may only look, offers no bin.</summary>

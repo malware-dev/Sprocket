@@ -18,6 +18,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => _now ? ChangeKind.Optional : ChangeKind.Required;
 
         /// <inheritdoc />
+        public override void Name(AutomationSystem system, bool done, ChangeName name)
+        {
+            name.Thing = _part;
+        }
+
+        /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)
         {
             Touch(screens, _part);

@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Xunit;
@@ -21,13 +20,57 @@ public class UndoTests
         var editor = screen.Editor;
         Light(screen);
 
-        Assert.Equal("adding a step", editor.Screen.UndoText);
+        Assert.Equal(Filled.With(editor.Texts.ChangeAddStep, "number", "1", "place", SequenceText.Called(editor.Texts, editor.Program.Sequences[0]),
+            "thing", SentenceText.Short(editor.Reads(0))), editor.Screen.UndoText);
         editor.Screen.Undo!.Execute();
         screen.Run(2);
 
         Assert.Empty(editor.Program.Sequences[0].Steps);
         Assert.Single(editor.Program.Systems[0].Triggers);
         Assert.IsType<SequencePage>(editor.Current);
+    }
+
+    /// <summary>
+    /// The arrows' words are put together once for a change, then once a second while nothing changes: ten times in ten
+    /// seconds, where they are asked for 600 times.
+    /// </summary>
+    [Fact]
+    public void TheArrowsWordsAreNotPutTogetherEveryTick()
+    {
+        var screen = Built();
+        var editor = screen.Editor;
+        Light(screen);
+        screen.Run(2);
+
+        var before = editor.Worded;
+        screen.Run(30);
+        Assert.Equal(0, editor.Worded - before);
+
+        before = editor.Worded;
+        screen.Run(600);
+        Assert.Equal(10, editor.Worded - before);
+    }
+
+    /// <summary>A deleted step is named on the way back by its number, its sequence and its words, and the way forward says the same.</summary>
+    [Fact]
+    public void ADeletedStepIsNamedByItsNumberAndWords()
+    {
+        var screen = Built();
+        var editor = screen.Editor;
+        Light(screen);
+        Light(screen);
+        var second = editor.Reads(1);
+
+        editor.StepRows()[1].Deletes!.Execute();
+        screen.Run(2);
+        var deleted = Filled.With(editor.Texts.ChangeRemoveStep, "number", "2", "place",
+            SequenceText.Called(editor.Texts, editor.Program.Sequences[0]), "thing", SentenceText.Short(second));
+        Assert.Equal(deleted, editor.Screen.UndoText);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(2);
+        Assert.Equal(second, editor.Reads(1));
+        Assert.Equal(deleted, editor.Screen.RedoText);
     }
 
     /// <summary>
@@ -44,9 +87,8 @@ public class UndoTests
         screen.Run(2);
         Assert.IsType<LogicSystemPage>(editor.Current);
 
-        var also = Template.Fill(editor.Texts.UndoAlso, "screens", SequenceText.Called(editor.Texts, editor.Program.Sequences[0]));
-        Assert.StartsWith("adding a trigger " + also.Substring(0, also.IndexOf('{') < 0 ? also.Length - 1 : also.IndexOf('{')),
-            editor.Screen.UndoText);
+        var also = Filled.With(editor.Texts.UndoAlso, "change", Filled.With(editor.Texts.ChangeAddTrigger, "thing", SentenceText.Short(editor.Says(0))));
+        Assert.StartsWith(also.Substring(0, also.IndexOf("{screens}", StringComparison.Ordinal)), editor.Screen.UndoText);
         Assert.Contains(SequenceText.Called(editor.Texts, editor.Program.Sequences[0]), editor.Screen.UndoText);
         editor.Screen.Undo!.Execute();
         screen.Run(2);
@@ -93,7 +135,8 @@ public class UndoTests
         var editor = screen.Editor;
         Assert.IsType<SequencePage>(editor.Current);
 
-        Assert.Equal("adding a trigger", editor.Screen.UndoText);
+        var adding = editor.Texts.ChangeAddTrigger;
+        Assert.StartsWith(adding.Substring(0, adding.IndexOf("{thing}", StringComparison.Ordinal)), editor.Screen.UndoText);
         editor.Screen.Undo!.Execute();
         screen.Run(2);
 
@@ -118,7 +161,7 @@ public class UndoTests
         screen.Run(2);
         Assert.Equal("Front airlock", system.Name);
 
-        Assert.Equal("renaming the logic system", editor.Screen.UndoText);
+        Assert.Equal(Filled.With(editor.Texts.ChangeRenameSystem, "was", "Airlock", "now", "Front airlock"), editor.Screen.UndoText);
         editor.Screen.Undo!.Execute();
         screen.Run(2);
         Assert.Equal("Airlock", system.Name);
@@ -184,7 +227,8 @@ public class UndoTests
         editor.Rows()[0].Copies!.Execute();
         screen.Run(2);
         Assert.Equal(2, editor.Program.Sequences.Count);
-        Assert.Equal("copying a sequence", editor.Screen.UndoText);
+        Assert.Equal(Filled.With(editor.Texts.ChangeCopySequence, "thing", SequenceText.Called(editor.Texts, editor.Program.Sequences[1])),
+            editor.Screen.UndoText);
 
         editor.Screen.Undo!.Execute();
         screen.Run(2);
@@ -204,7 +248,7 @@ public class UndoTests
         var system = editor.Program.Systems[0];
         editor.GoToRoot();
         screen.Run(2);
-        Assert.Equal("adding a logic system", editor.Screen.UndoText);
+        Assert.Equal(Filled.With(editor.Texts.ChangeAddSystem, "thing", "Hangar"), editor.Screen.UndoText);
 
         system.Enabled = true;
         screen.Run(2);
@@ -229,7 +273,7 @@ public class UndoTests
         screen.Run(2);
         Assert.Equal("Ferry", editor.World.Name);
 
-        Assert.Equal("renaming the construct", editor.Screen.UndoText);
+        Assert.Equal(Filled.With(editor.Texts.ChangeRenameConstruct, "was", was, "now", "Ferry"), editor.Screen.UndoText);
         editor.Screen.Undo!.Execute();
         screen.Run(2);
         Assert.Equal(was, editor.World.Name);
@@ -256,7 +300,7 @@ public class UndoTests
         Assert.False(system.Enabled);
         editor.OpenBlueprintSystem(0);
         screen.Run(2);
-        Assert.StartsWith("adding a trigger", editor.Screen.UndoText);
+        Assert.StartsWith(Filled.With(editor.Texts.ChangeAddTrigger, "thing", SentenceText.Short(editor.Says(0))), editor.Screen.UndoText);
     }
 
     /// <summary>Another program read in place of the one there starts every way back again.</summary>

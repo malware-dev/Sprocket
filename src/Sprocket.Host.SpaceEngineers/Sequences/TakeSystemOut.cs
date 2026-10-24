@@ -19,6 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => _change;
 
         /// <inheritdoc />
+        public override void Name(Automation program, bool done, ChangeName name)
+        {
+            name.Thing = _system;
+        }
+
+        /// <inheritdoc />
         public override void Apply(Automation program)
         {
             _at = IndexOf(program, _system);

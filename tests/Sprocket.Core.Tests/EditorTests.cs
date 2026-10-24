@@ -792,12 +792,14 @@ public class EditorTests
         // Nothing has been walked back, so there is nothing to put back.
         Assert.NotNull(editor.Screen.Undo);
         Assert.Null(editor.Screen.Redo);
-        Assert.Equal("adding a step", editor.Screen.UndoText);
+        var added = Filled.With(editor.Texts.ChangeAddStep, "number", "1", "place", SequenceText.Called(editor.Texts, sequence), "thing",
+            editor.Reads(0));
+        Assert.Equal(added, editor.Screen.UndoText);
 
         editor.Screen.Undo!.Execute();
         ship.Tick();
         Assert.Empty(sequence.Steps);
-        Assert.Equal("adding a step", editor.Screen.RedoText);
+        Assert.Equal(added, editor.Screen.RedoText);
 
         editor.Screen.Redo!.Execute();
         ship.Tick();
@@ -814,7 +816,8 @@ public class EditorTests
         ship.Tick();
 
         Assert.Null(editor.Screen.Redo);
-        Assert.Equal("renaming", editor.Screen.UndoText);
+        Assert.Equal(Filled.With(editor.Texts.ChangeRename, "was", SequenceText.DefaultName(editor.Texts, sequence.Number), "now", "Let me out"),
+            editor.Screen.UndoText);
     }
 
     /// <summary>
@@ -1072,7 +1075,8 @@ public class EditorTests
         Assert.Empty(system.Triggers);
 
         // One step back, on the system, brings it back where it was, still run by its trigger.
-        Assert.Equal("deleting a sequence", ship.Editor.Screen.UndoText);
+        Assert.Equal(Filled.With(ship.Editor.Texts.ChangeDeleteSequence, "thing", SequenceText.DefaultName(ship.Editor.Texts, 1)),
+            ship.Editor.Screen.UndoText);
         ship.Editor.Screen.Undo!.Execute();
         ship.Tick();
 

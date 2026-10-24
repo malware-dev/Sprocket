@@ -75,6 +75,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
         }
 
+        /// <summary>
+        /// Puts into <paramref name="name" /> the things this change was made to, as <paramref name="subject" /> stands now, with
+        /// the change made where <paramref name="done" /> and taken back where not.
+        /// </summary>
+        public virtual void Name(T subject, bool done, ChangeName name)
+        {
+        }
+
         /// <summary>Adds <paramref name="screen" /> to <paramref name="screens" />, once.</summary>
         protected static void Touch(IList<object> screens, object screen)
         {

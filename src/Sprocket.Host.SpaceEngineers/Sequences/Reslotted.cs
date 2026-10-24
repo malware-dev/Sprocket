@@ -23,6 +23,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override ChangeKind Change => _edit.Change;
 
         /// <inheritdoc />
+        public override void Name(T subject, bool done, ChangeName name)
+        {
+            _edit.Name(subject, done, name);
+        }
+
+        /// <inheritdoc />
         public override bool Changes => _edit.Changes || Reslots;
 
         /// <inheritdoc />

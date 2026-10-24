@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             var act = trigger.Acts;
             if (act != null)
-                return Action(bindings, act, through);
+                return Action(bindings, act, through, false);
 
             Sequence sequence = system?.FindSequence(trigger.Runs);
             if (sequence == null)
@@ -43,22 +43,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// The whole first line: "When the hangar door finishes opening".
         /// </summary>
         /// <remarks>
-        /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
+        /// Its blocks are found through <paramref name="bindings" /> as <paramref name="through" /> fills the slots, or as written
+        /// where that is null, and named by those blocks, or by the slots' own names where <paramref name="slotted" />, as a row
+        /// names them.
         /// </remarks>
         public static string Trigger(Automation program, Bindings bindings, AutomationSystem system, Trigger trigger,
-            SystemInstance through)
+            SystemInstance through, bool slotted = false)
         {
             var moment = trigger as MomentTrigger;
             if (moment != null && moment.Sources.Count > 0)
             {
                 var when = moment as WhenTrigger;
                 var sources = SystemInstance.Through(through, moment.Sources);
+                var named = slotted ? moment.Sources : null;
                 if (when != null && !Watched(bindings, when, sources))
-                    return $"When {Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources)}";
+                    return $"When {Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources, named)}";
 
                 var all = when != null && when.Quantifier == Quantifier.All;
                 var happening = Happening(bindings, Vocabulary.EventOf(program, bindings, system, moment, through), sources);
-                return $"When {SentenceText.Named(bindings, sources, all)} {(all && sources.Count > 1 ? SentenceText.Plural(happening) : happening)}";
+                return $"When {Named(bindings, sources, all, named)} {(all && sources.Count > 1 ? SentenceText.Plural(happening) : happening)}";
             }
 
             var every = trigger as EveryTrigger;
@@ -383,11 +386,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>One numbered line of the sequence, in the words its row reads in; the line closing an if says nothing.</summary>
-        public static string Step(Bindings bindings, Sequence sequence, Step step, SystemInstance through)
+        /// <remarks>
+        /// Its blocks are found through <paramref name="bindings" /> as <paramref name="through" /> fills the slots, or as written
+        /// where that is null, and named by those blocks, or by the slots' own names where <paramref name="slotted" />, as a row
+        /// names them.
+        /// </remarks>
+        public static string Step(Bindings bindings, Sequence sequence, Step step, SystemInstance through, bool slotted = false)
         {
             var wait = step as Wait;
             if (wait != null)
-                return $"wait {TimeText.Duration(wait.Length)}";
+                return $"{SentenceText.WaitWord} {TimeText.Duration(wait.Length)}";
 
             var run = step as SpaceEngineers.Sequences.Run;
             if (run != null)
@@ -406,7 +414,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     return "otherwise";
 
                 var compared = branch.Test as Comparison;
-                var tested = compared != null ? Tested(bindings, compared, through) : Tested((StateTest)branch.Test);
+                var tested = compared != null ? Tested(bindings, compared, through, slotted) : Tested((StateTest)branch.Test);
                 return (step is If ? "if " : "otherwise if ") + tested;
             }
 
@@ -418,7 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return $"{SentenceText.SetWord} {set.State} to {(set.From.Length > 0 ? set.From : set.Value.Said)}";
 
             var act = step as Act;
-            return act == null ? "wait for it to finish" : Action(bindings, act, through);
+            return act == null ? "wait for it to finish" : Action(bindings, act, through, slotted);
         }
 
         /// <summary>A test of a state as its row reads: the state, how it is compared, and with what: "where is inside".</summary>
@@ -429,10 +437,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>A test as its row reads: the blocks, the value unless it is their status, and how it is compared with what.</summary>
-        static string Tested(Bindings bindings, Comparison test, SystemInstance through)
+        static string Tested(Bindings bindings, Comparison test, SystemInstance through, bool slotted)
         {
             var targets = SystemInstance.Through(through, test.Targets);
-            var blocks = SentenceText.Named(bindings, targets, test.Quantifier != Quantifier.Any);
+            var blocks = Named(bindings, targets, test.Quantifier != Quantifier.Any, slotted ? test.Targets : null);
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Provider, test.MemberId);
             if (value == null)
                 return $"{SentenceText.Empty} on {blocks}";
@@ -449,9 +457,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// Sprocket's own, or the value on the blocks and what it is compared with.
         /// </summary>
         static string Compared(Bindings bindings, string provider, string id, Quantifier quantifier, Relation relation,
-            Literal compared, IList<string> targets)
+            Literal compared, IList<string> targets, IList<string> slots)
         {
-            var blocks = SentenceText.Named(bindings, targets, quantifier != Quantifier.Any);
+            var blocks = Named(bindings, targets, quantifier != Quantifier.Any, slots);
             if (provider == BlockKinds.Own)
             {
                 bool inState;
@@ -472,6 +480,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             value.Fields(fields);
             var read = $"{SentenceText.Value(value)} on {blocks}";
             return $"{(quantifier == Quantifier.Sum || quantifier == Quantifier.Average ? $"{SentenceText.Quantified(quantifier)} {read}" : read)} {Compared(relation)} {SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null))}";
+        }
+
+        /// <summary>The blocks <paramref name="targets" />, or the slots <paramref name="slots" /> by their names where there are slots.</summary>
+        static string Named(Bindings bindings, IList<string> targets, bool requiresAll, IList<string> slots)
+        {
+            return slots != null ? SentenceText.Slots(slots) : SentenceText.Named(bindings, targets, requiresAll);
         }
 
         /// <summary>Whether <paramref name="when" /> is a value of Sprocket's own coming to be what one of its signals says it becomes, which reads as that signal.</summary>
@@ -499,14 +513,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        static string Action(Bindings bindings, Act step, SystemInstance through)
+        static string Action(Bindings bindings, Act step, SystemInstance through, bool slotted)
         {
             if (step.Targets.Count == 0)
                 return SentenceText.Empty;
 
             var targets = SystemInstance.Through(through, step.Targets);
             EntityAction named = step.Names(Vocabulary.ActionsFor(bindings, targets));
-            var blocks = SentenceText.Named(bindings, targets, true);
+            var blocks = Named(bindings, targets, true, slotted ? step.Targets : null);
             if (named == null)
                 return $"{SentenceText.Empty} {blocks}";
 
