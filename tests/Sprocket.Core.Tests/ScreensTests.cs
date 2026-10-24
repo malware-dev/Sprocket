@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
@@ -185,6 +186,37 @@ public class ScreensTests
         Run(ship, runner, sequence, installation);
         Assert.Equal("", board.Faces[0].Text);
         Assert.Equal("", board.Faces[1].Text);
+    }
+
+    /// <summary>A step using a screen through a block slot is warned of, naming the slot, and still runs.</summary>
+    [Fact]
+    public void AScreenOnABlockSlotIsWarnedOfAndStillRuns()
+    {
+        var (ship, board) = Built();
+        var (program, runner, sequence, installation) = Slotted(ship, board, 1, ScreenType.ShowText, Literal.Of("Closed"));
+        program.Systems[0].FindPart("status")!.Holds = "";
+        ship.Tick();
+        runner.Tick(1);
+
+        var fault = SequenceSummary.Checked(ship.World, runner.Bindings, sequence, installation);
+        Assert.Equal(SequenceProblem.ScreenOnBlockSlot, fault.Problem);
+        Assert.Equal("status", fault.Which);
+        Assert.True(fault.IsWarning);
+        Assert.False(fault.Parks);
+        Assert.Equal("This step is outdated and now needs a screen slot. Press status to make one.",
+            SequenceText.Problem(new Texts(), fault, sequence));
+    }
+
+    /// <summary>A step using a screen through a screen slot is not warned of.</summary>
+    [Fact]
+    public void AScreenOnAScreenSlotIsNotWarnedOf()
+    {
+        var (ship, board) = Built();
+        var (_, runner, sequence, installation) = Slotted(ship, board, 1, ScreenType.ShowText, Literal.Of("Closed"));
+        ship.Tick();
+        runner.Tick(1);
+
+        Assert.NotEqual(SequenceProblem.ScreenOnBlockSlot, SequenceSummary.Checked(ship.World, runner.Bindings, sequence, installation).Problem);
     }
 
     /// <summary>Setting up a screen to run an app sets which app, on the screen its slot holds.</summary>

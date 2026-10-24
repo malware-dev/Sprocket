@@ -120,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _level = value;
-                _problem.Style = value == NoticeLevel.Problem ? Styles.Problem : value == NoticeLevel.Warning ? Styles.Caution : Styles.Detail;
+                _problem.Style = RemarkLook.Line(value, Styles.Detail);
             }
         }
 

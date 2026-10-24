@@ -87,15 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
                         layer => layer.DebugLog.HasValue ? Switch(layer.DebugLog.Value) : -1,
                         settings => Switch(settings.DefaultDebugLog),
-                        (layer, at) => layer.WithDebugLog(at < 0 ? (bool?)null : at == 0))),
-                    new Label { Style = Styles.Heading, Text = texts.AdminTrials },
-                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminTrialsAbout },
-                    Setting(texts.AdminTips, texts.AdminTipsAbout, Choose(texts, world,
-                        new[] { texts.AdminTipsStay, texts.AdminTipsAlt },
-                        null,
-                        layer => layer.TipKeeping.HasValue ? Keeping(layer.TipKeeping.Value) : -1,
-                        settings => Keeping(settings.DefaultTipKeeping),
-                        (layer, at) => layer.WithTipKeeping(at < 0 ? (TipKeeping?)null : at == 0 ? TipKeeping.Stay : TipKeeping.Alt)))
+                        (layer, at) => layer.WithDebugLog(at < 0 ? (bool?)null : at == 0)))
                 }
             };
         }
@@ -153,12 +145,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                 choice.Field.Respell(0, choice.Defaults[standing]);
                 choice.Field.Text = given < 0 ? choice.Defaults[standing] : choice.Words[given];
             }
-        }
-
-        /// <summary>Where <paramref name="keeping" /> stands among its words: staying, then kept by Alt.</summary>
-        static int Keeping(TipKeeping keeping)
-        {
-            return keeping == TipKeeping.Stay ? 0 : 1;
         }
 
         /// <summary>Where a switch being <paramref name="on" /> stands among its words: on, then off.</summary>

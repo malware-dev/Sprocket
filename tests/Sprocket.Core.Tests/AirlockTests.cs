@@ -756,6 +756,32 @@ public class AirlockTests
         Assert.False(system.Enabled);
     }
 
+    /// <summary>A blueprint's sequence that would start itself is wrong in the logic system itself, so the logic system is switched off and its installations are left on.</summary>
+    [Fact]
+    public void ABlueprintThatWouldStartItselfIsSwitchedOffWhole()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+        system.IsBlueprint = true;
+        var one = system.AddInstance();
+        var two = system.AddInstance();
+
+        var alone = a.Automation.AddSequence(system);
+        alone.Steps.Add(new Run(alone.Number));
+
+        system.Enabled = true;
+        one.Enabled = true;
+        two.Enabled = true;
+        a.Automation.Edited();
+        a.Tick(3);
+
+        Assert.False(system.Enabled);
+        Assert.Equal(SequenceProblem.Circular, system.Halt!.Problem);
+        Assert.True(one.Enabled);
+        Assert.True(two.Enabled);
+        Assert.Null(one.Halt);
+    }
+
     /// <summary>A <c>when</c> on a block that never reaches its moment is at fault, naming the block, rather than waiting forever.</summary>
     [Fact]
     public void AMomentTheBlockHasNotGotIsAtFault()

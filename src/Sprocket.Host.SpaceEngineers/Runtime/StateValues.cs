@@ -161,6 +161,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return kept;
         }
 
+        /// <summary>Lets go of every record it found, so each is found again in the construct's memory as it stands.</summary>
+        /// <remarks>For a copy whose memory was put back in place from the one that lent it.</remarks>
+        public void Forget()
+        {
+            _held.Clear();
+        }
+
         /// <summary>Forgets what <paramref name="instance" /> held in <paramref name="state" />, in the saved record as well.</summary>
         void Drop(SystemInstance instance, State state, StateMemory kept)
         {

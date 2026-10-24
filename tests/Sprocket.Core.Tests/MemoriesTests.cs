@@ -21,6 +21,6 @@ public class MemoriesTests
 
         var written = memories.Write(100, new List<ConstructMemory>());
         Assert.NotEqual("this is no state", written);
-        Assert.Equal(100, new ProtoBinary().Unpack(written).Clock);
+        Assert.Equal(100, new ProtoBinary().Unpack<WorldMemory>(written).Clock);
     }
 }

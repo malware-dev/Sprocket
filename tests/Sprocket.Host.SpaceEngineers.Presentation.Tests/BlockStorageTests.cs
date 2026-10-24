@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -22,7 +23,7 @@ public class BlockStorageTests
         sim.Tick();
 
         Assert.Equal(written + 1, store.Writes(BlockStorage.StateKey));
-        Assert.Contains("off", BlockStorage.Stored(sim.Machine.Sprocket.Block, BlockStorage.StateKey));
+        AssertSwitchedOff(sim);
     }
 
     /// <summary>A program that does not change is not written, however many times the world saves.</summary>
@@ -51,7 +52,7 @@ public class BlockStorageTests
         sim.Editor.Program.Systems[0].Enabled = false;
         sim.Save();
 
-        Assert.Contains("off", BlockStorage.Stored(sim.Machine.Sprocket.Block, BlockStorage.StateKey));
+        AssertSwitchedOff(sim);
     }
 
     /// <summary>An airlock logic system, switched on and settled, with what it wrote into its block.</summary>
@@ -65,6 +66,15 @@ public class BlockStorageTests
             sim.Tick();
 
         return sim;
+    }
+
+    /// <summary>Asserts that the block keeps the airlock logic system switched off.</summary>
+    static void AssertSwitchedOff(Simulation sim)
+    {
+        var kept = new ProtoBinary().Unpack<BlockState>(BlockStorage.Stored(sim.Machine.Sprocket.Block, BlockStorage.StateKey));
+        var off = Assert.Single(kept.Switches);
+        Assert.Equal(sim.Editor.Program.Systems[0].Identity, off.System);
+        Assert.Equal(0, off.Instance);
     }
 
     static Store Store(Simulation sim)

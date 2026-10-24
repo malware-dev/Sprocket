@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 conflicts.Add(new ConflictMemory { System = here.Identity, Waiting = identity });
             }
 
-            switches = StateText.Save(program, null, false);
+            switches = BlockSwitches.Save(program, kept.Binary);
             return ProgramWriter.Save(program, values);
         }
 
@@ -78,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             Rekey(program, unit.World);
-            switches = StateText.Save(program, null, false);
+            switches = BlockSwitches.Save(program, unit.Binary);
             return ProgramWriter.Save(program, unit.World.Values);
         }
 
@@ -156,7 +156,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             var program = new Automation();
             ProgramReader.Load(text, program, unit.World.Values);
-            StateText.Load(StateText.Save(unit.Program, null, false), program, null);
+            BlockSwitches.Put(BlockSwitches.Of(unit.Program), program);
             return program;
         }
 

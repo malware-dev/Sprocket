@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _unit.Says(texts.WaitInSeconds, texts.WaitInTicks);
             Children.Add(number);
 
-            Children.Add(new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution));
+            Children.Add(new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _caution));
 
             _secondsPicks = new HStack { Spacing = 6f };
             foreach (var seconds in SecondsPicks)

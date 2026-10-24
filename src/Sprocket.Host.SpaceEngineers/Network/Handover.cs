@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Network;
 
@@ -20,8 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
     public sealed class Handover
     {
         readonly Func<long, SprocketUnit> _find;
-        readonly Action<long, string, string> _given;
-        readonly Action<long, string, string, string> _refused;
+        readonly Action<long, string, string, string> _given;
+        readonly Action<long, string, string, string, string> _refused;
         readonly Action<long> _foreign;
         readonly Action<long, string, string> _changed;
         readonly Action<long, string, string> _stored;
@@ -71,8 +70,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <param name="settings">On the server, the settings the world runs by, written as one text.</param>
         /// <param name="settled">On a client, the server's settings arriving, which it takes as its own.</param>
         /// <param name="ruled">On the server, settings an admin's client proposed, which it takes and keeps before telling every client.</param>
-        public Handover(Func<long, SprocketUnit> find, Action<long, string, string> given,
-            Action<long, string, string, string> refused, Action<long> foreign, Action<long, string, string> changed,
+        public Handover(Func<long, SprocketUnit> find, Action<long, string, string, string> given,
+            Action<long, string, string, string, string> refused, Action<long> foreign, Action<long, string, string> changed,
             Action<long, string, string> stored, Func<long, PlayerMemory> player, Func<string> settings, Action<string> settled,
             Action<string> ruled)
         {
@@ -169,7 +168,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             string state;
             copy.Written(out program, out state);
 
-            var switches = StateText.Save(copy.Program, null);
+            var switches = state;
 
             Sent sent;
             if (_sent.TryGetValue(block, out sent) && sent.Program == program && sent.Switches == switches)
@@ -206,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             string program;
             string state;
             copy.Written(out program, out state);
-            _sent[block] = new Sent { Program = program, Switches = StateText.Save(copy.Program, null) };
+            _sent[block] = new Sent { Program = program, Switches = state };
         }
 
         /// <summary>
@@ -308,13 +307,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
             {
                 grant.Given = true;
                 unit.Written(out grant.Program, out grant.State);
+                grant.Memory = unit.Remembered();
                 GameLog.Say($"{Who(claim.Name, sender)} asked for block {claim.Block}, and was lent it");
             }
             else
             {
                 grant.Holder = unit == null ? "" : holder;
                 if (unit != null)
+                {
                     unit.Written(out grant.Program, out grant.State);
+                    grant.Memory = unit.Remembered();
+                }
 
                 GameLog.Say($"{Who(claim.Name, sender)} asked for block {claim.Block}, and was refused: {(unit == null ? "it carries no Sprocket here" : $"{holder} holds it")}");
             }
@@ -341,12 +344,12 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (grant.Given)
             {
                 GameLog.Say($"the server lent block {grant.Block}, {grant.Program.Length} characters of program");
-                _given(grant.Block, grant.Program, grant.State);
+                _given(grant.Block, grant.Program, grant.State, grant.Memory);
             }
             else
             {
                 GameLog.Say($"the server refused block {grant.Block}{(grant.Holder.Length > 0 ? $": {grant.Holder} holds it" : ": nobody can have it")}");
-                _refused(grant.Block, grant.Holder, grant.Program, grant.State);
+                _refused(grant.Block, grant.Holder, grant.Program, grant.State, grant.Memory);
             }
         }
 
@@ -593,9 +596,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             SprocketUnit unit = _find(change.Block);
             if (unit != null)
             {
-                string state;
-                unit.Written(out program, out state);
-                switches = StateText.Save(unit.Program, null);
+                unit.Written(out program, out switches);
             }
 
             GameLog.Say($"{Who(sender)} sent a change to block {change.Block}: {Compared(program, change.Program, switches, change.Switches)}");

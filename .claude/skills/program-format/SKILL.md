@@ -36,26 +36,34 @@ developer decides, and gets the maintainer's go-ahead before the change is made.
    the developer approved; the agent never edits the spec without the developer's yes to that exact text.
 7. **Nothing stored changes quietly.** What Sprocket writes to disk or a save is in the program format, or its format is
    shown to the developer and agreed before it is built.
+8. **A construct's own state is kept to the least.** Beside the program, a construct's block stores only what strictly
+   belongs to the construct and matters for its blueprints, such as what is switched on. Nothing is added to it without
+   the developer's yes to that exact addition.
 
 ## What the editor owes
 
-8. **The editor opens and edits every form the format allows.** A form it no longer writes is edited correctly, upgraded,
+9. **The editor opens and edits every form the format allows.** A form it no longer writes is edited correctly, upgraded,
    or flagged by the check with a repair the player can carry out. It is never misread silently.
-9. **What no upgrade can carry over safely becomes a repair.** Where the check can see it in any program, it is a warning
+10. **What no upgrade can carry over safely becomes a repair.** Where the check can see it in any program, it is a warning
    on what needs repair, leading to the fix. Where no check can see it, an upgrade would have to mark what it cannot fix;
-   that upgrade is not designed yet.
+   that upgrade is not designed yet. An upgrade carries over what it safely can first, and the repair is left the rest.
+11. **A repair is a unit, as an upgrade is.** One `Repair` in `Repairs/`, put last in `ProgramRepairs`, never removed while
+   a stored program can hold its form. It holds its problem, whether that is in the logic system or an installation, its
+   check, its words, the question asked before the picker opens to mend it, and what the picker does differently while
+   mending it. The check, the words and the picker ask `ProgramRepairs` and name no repair.
 
 ## Proving it
 
-10. **Every upgrade has a test.** `UpgradeTests` reads the old text, checks what it became and that it is written in the
-    current format.
+12. **Every upgrade and every repair has a test.** `UpgradeTests` reads the old text, checks what it became and that it is
+    written in the current format; a repair's test holds the old form, its warning, its question, its fix.
 
 ## The world's memory
 
-11. **A member's number is the memory's format.** A `ProtoMember` number, once used, is never used again or given
-    another type; a dropped member leaves its number unused.
+13. **A member's number is the memory's format.** A `ProtoMember` number, once used, is never used again or given
+    another type; a dropped member leaves its number unused. A stored enum sets a number on every value, and a number is
+    never changed or given to another value; a new value takes the next one.
 
 ## This file
 
-12. **`docs/Upgrades.md` says what this file says.** A change here changes that page in the same commit, in plain words
+14. **`docs/Upgrades.md` says what this file says.** A change here changes that page in the same commit, in plain words
     for a person, as short as it can be.

@@ -46,18 +46,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly UnreachableSequences _reach;
 
         readonly Texts _texts;
+        readonly IBinary _binary;
         readonly ConstructMemory _memory;
         readonly string _author;
         bool _developerMode;
-        TipKeeping _tipKeeping;
 
         SprocketEditor _editor;
 
         /// <summary>The Sprocket a block carries, reading its program out of the block and what it is doing out of <paramref name="memory" />.</summary>
         /// <remarks><paramref name="rota" /> and <paramref name="kinds" /> are the world's, shared by every Sprocket in it.</remarks>
-        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, BlockKinds kinds, Texts texts, ConstructMemory memory,
-            Backups backups = null)
-            : this(block, settings, rota, kinds, texts, false, BlockStorage.Stored(block, BlockStorage.ProgramKey),
+        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, BlockKinds kinds, Texts texts, IBinary binary,
+            ConstructMemory memory, Backups backups = null)
+            : this(block, settings, rota, kinds, texts, binary, false, BlockStorage.Stored(block, BlockStorage.ProgramKey),
                 BlockStorage.Stored(block, BlockStorage.StateKey), memory)
         {
             _backups = backups;
@@ -65,14 +65,32 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>
         /// A copy of the Sprocket another machine keeps on <paramref name="block" />, made from what that
-        /// machine wrote out, to be edited here, its blocks of the world's <paramref name="kinds" />.
+        /// machine wrote out, to be edited here, its blocks of the world's <paramref name="kinds" />: its program, what is
+        /// switched off, and what its construct's memory holds, packed by <paramref name="binary" />.
         /// </summary>
         /// <remarks>On a rota of its own that nothing turns, so none of its sequences acts.</remarks>
-        public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, BlockKinds kinds, Texts texts, string program,
-            string state)
+        public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, BlockKinds kinds, Texts texts, IBinary binary,
+            string program, string switches, string memory)
         {
-            return new SprocketUnit(block, settings, new Rota(), kinds, texts, true, program, state,
-                new ConstructMemory { Keeper = block.EntityId });
+            return new SprocketUnit(block, settings, new Rota(), kinds, texts, binary, true, program, switches,
+                Unpacked(binary, memory, block.EntityId));
+        }
+
+        /// <summary>The construct's memory <paramref name="packed" /> holds, or a fresh one kept by <paramref name="keeper" /> where it holds none.</summary>
+        static ConstructMemory Unpacked(IBinary binary, string packed, long keeper)
+        {
+            if (string.IsNullOrEmpty(packed))
+                return new ConstructMemory { Keeper = keeper };
+
+            try
+            {
+                return binary.Unpack<ConstructMemory>(packed);
+            }
+            catch (Exception exception)
+            {
+                GameLog.Say($"block {keeper} came with a memory that would not read, so its copy starts from none: {exception.Message}");
+                return new ConstructMemory { Keeper = keeper };
+            }
         }
 
         /// <summary>
@@ -82,7 +100,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>Called on the server for a client's edit. The caller puts the new one in this one's place and disposes of this.</remarks>
         public SprocketUnit Rebuilt(string program, string switches, Settings settings, Rota rota)
         {
-            var rebuilt = new SprocketUnit(_block, settings, rota, _kinds, _texts, false, program, switches, _memory);
+            var rebuilt = new SprocketUnit(_block, settings, rota, _kinds, _texts, _binary, false, program, switches, _memory);
             rebuilt._backups = _backups;
             rebuilt._shelf = _shelf;
             rebuilt._viewer = _viewer;
@@ -95,10 +113,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             return rebuilt;
         }
 
-        SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, BlockKinds kinds, Texts texts, bool copy, string program,
-            string state, ConstructMemory memory)
+        SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, BlockKinds kinds, Texts texts, IBinary binary, bool copy,
+            string program, string state, ConstructMemory memory)
         {
             _block = block;
+            _binary = binary;
             _memory = memory;
             _program.Memory = memory;
             _copy = copy;
@@ -113,7 +132,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
-            _tipKeeping = settings?.TipKeeping ?? TipKeeping.Stay;
 
             _author = MyAPIGateway.Multiplayer == null ? null : Player.Plain(MyAPIGateway.Multiplayer.MyName);
 
@@ -269,12 +287,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             _runner.FastestUpdate = settings.FastestUpdate;
             Logged(settings.DebugLog);
             _developerMode = settings.DeveloperMode;
-            _tipKeeping = settings.TipKeeping;
             if (_editor == null)
                 return;
 
             _editor.DeveloperMode = _developerMode;
-            _editor.TipKeeping = _tipKeeping;
         }
 
         /// <summary>Gives the runner a log of what its runs do where <paramref name="on" />, keeping the one it has, and takes it away otherwise.</summary>
@@ -326,7 +342,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                     _editor.Author = _author;
 
                 _editor.DeveloperMode = _developerMode;
-                _editor.TipKeeping = _tipKeeping;
                 return _editor;
             }
         }
@@ -462,7 +477,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // from it, for show.
             if (!string.IsNullOrEmpty(state))
             {
-                var wrong = StateText.Load(state, _program, _copy ? _runner : null);
+                var wrong = BlockSwitches.Load(state, _program, _binary);
                 if (wrong.Length > 0)
                     GameLog.Say($"{Logged(_block)} has switches that would not read: {wrong}");
             }
@@ -515,7 +530,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor.Stamp(true);
 
             var program = ProgramWriter.Save(_program, _world.Values);
-            var state = StateText.Save(_program, null, false);
+            var state = BlockSwitches.Save(_program, _binary);
             storage.SetValue(BlockStorage.ProgramKey, program);
             // Under a key of its own, apart from the program somebody shares; the key is claimed in EntityComponents.sbc.
             storage.SetValue(BlockStorage.StateKey, state);
@@ -589,14 +604,35 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor.Stamp(true);
 
             program = ProgramWriter.Save(_program, _world.Values);
-            state = StateText.Save(_program, _runner);
+            state = BlockSwitches.Save(_program, _binary);
         }
 
-        /// <summary>Takes up <paramref name="state" />, the switches and runs the block holds now, over what this copy last knew.</summary>
-        /// <remarks>For a copy lent again unchanged: its program is the block's, and only what is switched on may have moved since.</remarks>
-        public void Restate(string state)
+        /// <summary>The construct's memory, packed: what a copy on another machine shows of its runs, triggers, owners and versions.</summary>
+        public string Remembered()
         {
-            StateText.Load(state, _program, _runner);
+            return _binary.Pack(_memory);
+        }
+
+        /// <summary>The codec this Sprocket packs what it keeps with.</summary>
+        public IBinary Binary => _binary;
+
+        /// <summary>
+        /// Takes up <paramref name="switches" />, what the block holds switched off now, and <paramref name="memory" />, what its
+        /// construct remembers now, over what this copy last knew.
+        /// </summary>
+        /// <remarks>For a copy lent again unchanged: its program is the block's, and only what is switched on and running may have moved since.</remarks>
+        public void Restate(string switches, string memory)
+        {
+            BlockSwitches.Load(switches, _program, _binary);
+
+            var fresh = Unpacked(_binary, memory, _block.EntityId);
+            _runner.Forget();
+            _memory.Runs = fresh.Runs;
+            _memory.Watches = fresh.Watches;
+            _memory.Conflicts = fresh.Conflicts;
+            _memory.Owners = fresh.Owners;
+            _memory.PausedFrom = fresh.PausedFrom;
+            _memory.States = fresh.States;
             _program.Rewire();
         }
 

@@ -107,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (unit != null && (unit.Block == block || !BlockStorage.HasProgram(block)))
                 return unit;
 
-            SprocketUnit arrived = new SprocketUnit(block, _settings(), _rota, _kinds, _texts, _memories.Claim(block.EntityId), _backups);
+            SprocketUnit arrived = new SprocketUnit(block, _settings(), _rota, _kinds, _texts, _memories.Binary, _memories.Claim(block.EntityId), _backups);
             arrived.Begin(_frame());
             if (unit != null)
                 return Join(unit, arrived) ?? unit;
@@ -251,7 +251,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             string program;
             string state;
             unit.Written(out program, out state);
-            BlockStorage.Store(block, program, StateText.Save(unit.Program, null, false));
+            BlockStorage.Store(block, program, BlockSwitches.Save(unit.Program, unit.Binary));
 
             SprocketUnit half = Adopt(block);
             if (half == null)

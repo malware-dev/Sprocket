@@ -5,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Content;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using VRageMath;
 using Xunit;
@@ -209,28 +208,6 @@ public class CodexTests
         var at = FirstLink(screen, out var heading, CodexPages.Construct);
 
         Assert.Same(editor.Codex.Find(CodexPages.Construct), heading.TipAt(at));
-    }
-
-    /// <summary>The tip trial asking for Alt puts the line saying so under every tip, and holding Alt lets the pointer onto the tip.</summary>
-    [Fact]
-    public void TheAltTrialKeepsTipsByAlt()
-    {
-        var screen = Screen.Fresh("tick", "3");
-        var tip = screen.Scene.CodexTip;
-        Assert.False(tip.KeptByKey);
-
-        screen.Scene.Ship.Settle(new Settings(SettingsLayer.Empty, SettingsLayer.Empty.WithTipKeeping(TipKeeping.Alt)));
-        screen.Run(2);
-        Assert.Equal(TipKeeping.Alt, screen.Editor.TipKeeping);
-        Assert.True(tip.KeptByKey);
-
-        var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
-        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", EditorView.TipDelay.ToString());
-        Assert.True(screen.Shows(screen.Editor.Texts.Codex.TipKeepHint), "the tip does not say how to keep it");
-
-        screen.Scene.IsKeepKeyHeld = true;
-        screen.Run(1);
-        Assert.True(tip.IsKept);
     }
 
     /// <summary>

@@ -2,6 +2,8 @@ using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -199,6 +201,181 @@ public class ScreenChoiceTests
         var heading = screen.Editor.Screen.Heading[0];
         Assert.Equal(slot, heading.Text);
         Assert.False(heading.CanRename);
+    }
+
+    /// <summary>
+    /// A screen step on a block slot, as an older program has it, that only this step uses, opens on that slot and makes it a
+    /// screen slot in place, keeping its name; undo makes it a block slot again.
+    /// </summary>
+    [Fact]
+    public void AScreenStepsOwnBlockSlotBecomesAScreenSlot()
+    {
+        var (screen, system, old) = OnABlockSlot(Second.None);
+
+        screen.Editor.PressStepSlot(0, 0);
+        screen.Run(2);
+        Assert.Equal($"{old} holds blocks, but this step uses its screen. Picking the screen makes {old} a screen slot, for every step that uses it.",
+            screen.Editor.Question());
+        screen.Editor.PressAnswer("Pick the screen");
+        screen.Run(2);
+
+        var heading = screen.Editor.Screen.Heading[0];
+        Assert.Equal(old, heading.Text);
+        Assert.Equal("", heading.After);
+
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+        Assert.Equal(old, Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[0]).Targets));
+        Assert.NotEqual("", system.FindPart(old)!.Holds);
+        Assert.Equal(2, system.First.Facets(old)!.Single());
+
+        screen.Editor.Screen.Undo!.Execute();
+        screen.Run(2);
+        Assert.Equal("", system.FindPart(old)!.Holds);
+    }
+
+    /// <summary>
+    /// A block slot every step uses the screen of is one slot: picking for one step makes it a screen slot in place, asking
+    /// nothing, and mends the other step with it.
+    /// </summary>
+    [Fact]
+    public void ABlockSlotOnlyScreenStepsUseBecomesOneScreenSlot()
+    {
+        var (screen, system, old) = OnABlockSlot(Second.Screen);
+
+        screen.Editor.PressStepSlot(0, 0);
+        screen.Run(2);
+        screen.Editor.PressAnswer("Pick the screen");
+        screen.Run(2);
+        Assert.Equal(old, screen.Editor.Screen.Heading[0].Text);
+
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+
+        Assert.Equal(old, Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[0]).Targets));
+        Assert.Equal(old, Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[1]).Targets));
+        Assert.NotEqual("", system.FindPart(old)!.Holds);
+        Assert.NotEqual(SequenceProblem.ScreenOnBlockSlot,
+            SequenceSummary.Fault(screen.Editor.Runner.Get(system.Sequences[0], system.First)).Problem);
+    }
+
+    /// <summary>
+    /// A screen step on a block slot a step uses for the block itself opens on a new screen slot, saying which slot it is
+    /// instead of; every step using the screen moves onto it, and the block slot is left to the block's step.
+    /// </summary>
+    [Fact]
+    public void AScreenStepOnABlockSlotABlockStepUsesIsGivenANewScreenSlot()
+    {
+        var (screen, system, old) = OnABlockSlot(Second.Both);
+
+        screen.Editor.PressStepSlot(0, 0);
+        screen.Run(2);
+        Assert.Equal($"{old} holds blocks, but this step uses its screen. Other steps use {old} for the block itself, so picking the screen gives every step that uses the screen a new screen slot, and {old} stays for the block.",
+            screen.Editor.Question());
+        screen.Editor.PressAnswer("Pick the screen");
+        screen.Run(2);
+
+        var heading = screen.Editor.Screen.Heading[0];
+        Assert.NotEqual(old, heading.Text);
+        Assert.Equal($"instead of {old}", heading.After);
+
+        Finish(screen, "Docked");
+        var made = Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[0]).Targets);
+        Assert.NotEqual(old, made);
+        Assert.NotEqual("", system.FindPart(made)!.Holds);
+        Assert.Equal("", system.FindPart(old)!.Holds);
+        Assert.Equal(1, system.Mentions(old));
+        Assert.Equal(made, Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[1]).Targets));
+        Assert.Equal(old, Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[2]).Targets));
+
+        screen.Editor.Screen.Undo!.Execute();
+        screen.Run(2);
+        Assert.Equal(old, Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[1]).Targets));
+    }
+
+    /// <summary>Cancelling the question asked before mending a screen step on a block slot leaves the step and its slot as they were.</summary>
+    [Fact]
+    public void CancellingTheRepairLeavesTheStep()
+    {
+        var (screen, system, old) = OnABlockSlot(Second.None);
+
+        screen.Editor.PressStepSlot(0, 0);
+        screen.Run(2);
+        screen.Editor.PressAnswer("Cancel");
+        screen.Run(2);
+
+        Assert.Equal(old, Assert.Single(Assert.IsType<Act>(system.Sequences[0].Steps[0]).Targets));
+        Assert.Equal("", system.FindPart(old)!.Holds);
+        Assert.IsNotType<PickPage>(screen.Editor.Current);
+    }
+
+    /// <summary>The warning on a screen step whose slot holds blocks is said on the home screen too, once, by its logic system, and not by its installations.</summary>
+    [Fact]
+    public void AScreenStepOnABlockSlotIsWarnedOfFromHome()
+    {
+        var (screen, _, _) = OnABlockSlot(Second.None);
+        screen.Editor.GoToRoot();
+        screen.Run(2);
+
+        var heading = screen.Editor.RootHeadings()[0];
+        Assert.Contains("This step is outdated and now needs a screen slot.", heading.Problem);
+        Assert.Equal(NoticeLevel.Warning, heading.Level);
+        Assert.Equal(1, heading.Remarks);
+        Assert.Equal(0, heading.Problems);
+
+        var row = screen.Editor.RootRows()[0];
+        Assert.Equal("", row.Problem);
+        Assert.Equal(0, row.Remarks);
+    }
+
+    /// <summary>What else uses the block slot of <see cref="OnABlockSlot" />.</summary>
+    enum Second
+    {
+        /// <summary>Nothing else.</summary>
+        None,
+
+        /// <summary>A second show text step.</summary>
+        Screen,
+
+        /// <summary>A step switching the block itself on and off.</summary>
+        Block,
+
+        /// <summary>A second show text step, and then a step switching the block itself on and off.</summary>
+        Both
+    }
+
+    /// <summary>A show text step whose slot holds blocks, as an older program has it, with <paramref name="second" /> on that slot after it.</summary>
+    static (Screen Screen, AutomationSystem System, string Slot) OnABlockSlot(Second second)
+    {
+        var (screen, _) = Picking();
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+        var system = screen.Editor.Program.Systems[0];
+        var first = Assert.IsType<Act>(system.Sequences[0].Steps[0]);
+        var old = Assert.Single(first.Targets);
+        system.FindPart(old)!.Holds = "";
+        if (second == Second.Screen || second == Second.Both)
+        {
+            var other = new Act(first.ActionId) { Form = first.Form, Provider = first.Provider };
+            other.Targets.Add(old);
+            foreach (var argument in first.Arguments)
+                other.Arguments.Add(argument);
+            system.Sequences[0].Steps.Add(other);
+        }
+
+        if (second == Second.Block || second == Second.Both)
+        {
+            var toggle = new Act("OnOff");
+            toggle.Targets.Add(old);
+            system.Sequences[0].Steps.Add(toggle);
+        }
+
+        screen.Editor.Program.Edited();
+        screen.Run(2);
+        return (screen, system, old);
     }
 
     /// <summary>Setting a screen up asks for its content first, and then only for what that content takes, every color headed.</summary>

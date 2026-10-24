@@ -744,8 +744,4 @@
     <value>Show the guide to writing rich text.</value>
     <comment>The tooltip on the button by the description box on a logic system's screen and on a slot's screen that opens the guide to formatting text.</comment>
   </data>
-  <data name="Sprocket.Tip.KeepHint" xml:space="preserve">
-    <value>Hold Alt to keep open</value>
-    <comment>The last line of every tip while the admin's tip trial asks for Alt to keep a tip open. Placeholder until the texts are written.</comment>
-  </data>
 </root>

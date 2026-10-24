@@ -358,7 +358,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>The server lending this client a Sprocket, which opens the editor on a copy of it.</summary>
-        void Given(long id, string program, string state)
+        void Given(long id, string program, string state, string memory)
         {
             var block = MyAPIGateway.Entities == null
                 ? null
@@ -376,7 +376,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             // A copy's undo history holds only while nobody else has changed the program since it was handed back.
             var again = _rested != null && _restedOf == id && _restedProgram == program;
-            var copy = again ? _rested : SprocketUnit.Copy(block, Asked, _kinds, _texts, program, state);
+            var copy = again ? _rested : SprocketUnit.Copy(block, Asked, _kinds, _texts, _memories.Binary, program, state, memory);
             if (!again && _rested != null)
                 _rested.Dispose();
 
@@ -388,7 +388,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             if (again)
             {
-                copy.Restate(state);
+                copy.Restate(state, memory);
                 Lent(block, id, copy);
                 return;
             }
@@ -521,7 +521,7 @@ namespace Sprocket.Host.SpaceEngineers
             string program;
             string state;
             unit.Written(out program, out state);
-            _handover.Tell(unit.Block.EntityId, program, StateText.Save(unit.Program, null, false));
+            _handover.Tell(unit.Block.EntityId, program, BlockSwitches.Save(unit.Program, unit.Binary));
         }
 
         /// <summary>What the server wrote into a block, arriving at this client for its copy of the block.</summary>
@@ -536,7 +536,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>The server turning this client down, which says so or, where somebody else is editing it, opens it to look at.</summary>
-        void Refused(long id, string holder, string program, string state)
+        void Refused(long id, string holder, string program, string state, string memory)
         {
             var block = MyAPIGateway.Entities == null
                 ? null
@@ -548,7 +548,7 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
             }
 
-            Look(block, holder, program, state);
+            Look(block, holder, program, state, memory);
         }
 
         /// <summary>Tells the player that the automation on <paramref name="id" />'s construct belongs to its owners.</summary>
@@ -562,13 +562,13 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Opens the editor on a copy to look at while <paramref name="holder" /> edits the real one.</summary>
-        void Look(IMyTerminalBlock block, string holder, string program, string state)
+        void Look(IMyTerminalBlock block, string holder, string program, string state, string memory)
         {
             if (_copy != null)
                 _copy.Dispose();
 
             long id = block.EntityId;
-            var copy = SprocketUnit.Copy(block, Asked, _kinds, _texts, program, state);
+            var copy = SprocketUnit.Copy(block, Asked, _kinds, _texts, _memories.Binary, program, state, memory);
             copy.Editor.Habits = HabitsFor(id);
             copy.Editor.Holder = holder;
             _copy = copy;
@@ -641,7 +641,7 @@ namespace Sprocket.Host.SpaceEngineers
                 string program;
                 string state;
                 unit.Written(out program, out state);
-                _current.Look(block, holder, program, state);
+                _current.Look(block, holder, program, state, unit.Remembered());
                 return;
             }
 

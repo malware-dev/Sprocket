@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         }
                     }.As(out _using),
 
-                    new Label { Style = Styles.Caution, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _halted),
+                    new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _halted),
 
                     new HStack
                     {

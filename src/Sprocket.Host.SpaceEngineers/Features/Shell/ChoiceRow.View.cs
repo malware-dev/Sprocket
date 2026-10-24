@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 {
                     new Label { Style = Styles.Name }.As(out _words),
 
-                    new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution)
+                    new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _caution)
                 }
             });
             Children.Add(new Glyph { Symbol = Symbols.Check, Style = Styles.Icon, Placement = FixedSize.Size(24f, 24f), IsVisible = false }.As(out _given));

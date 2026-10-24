@@ -44,12 +44,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool _announced;
         bool _possible;
 
-        int _since = -1;
         int _tick;
         Bindings _bindings;
 
         /// <summary>A watch on <paramref name="trigger" /> of <paramref name="system" />, on <paramref name="instance" />, remembering in <paramref name="memory" />.</summary>
-        /// <remarks>A watch the world remembers takes up where it was, on the rota as well; a new one looks at once.</remarks>
+        /// <remarks>Looks on the first tick, which is where it starts to listen, and a watch the world remembers compares with what it read.</remarks>
         public Poller(AutomationSystem system, Trigger trigger, SystemInstance instance, AutomationRunner owner, WatchMemory memory)
         {
             _system = system;
@@ -65,10 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 memory.Shift = new ShiftMemory { Place = _rota.Join() };
 
             _shift = new Shift(memory.Shift, Look);
-            if (kept)
-                _rota.Restore(_shift);
-            else
-                _rota.At(_shift, int.MinValue);
+
+            // A block's announcements while the world was away were heard by nobody, so a remembered watch looks at once too.
+            _rota.At(_shift, int.MinValue);
         }
 
         /// <summary>What it remembers, which the world's save writes.</summary>
@@ -121,43 +119,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>Whether the comparison held on each block at its last look, by the name the program gives the block; for a save.</summary>
-        public IEnumerable<KeyValuePair<string, bool>> Signals
-        {
-            get
-            {
-                var reads = _memory.Readings;
-                foreach (var reading in reads)
-                {
-                    if (reading.Known)
-                        yield return new KeyValuePair<string, bool>(reading.Block, reading.Held);
-                }
-            }
-        }
-
-        /// <summary>Whether the comparison held on every block, or on their sum, at the last look of a <c>when all</c> or a <c>when sum</c>: 1 or 0, or -1 before its first look.</summary>
-        public int All => _memory.All;
-
-        /// <summary>Ticks since an <c>every</c> last fell due, or -1 before its first look.</summary>
-        public int Since => _memory.Due < 0 ? -1 : _owner.CurrentTick - _memory.Due;
-
-        /// <summary>Takes back what a copy was sent of what it read of <paramref name="block" /> at its last look.</summary>
-        public void Recall(string block, bool was)
-        {
-            var read = Reading(block);
-            if (!_memory.Readings.Contains(read))
-                _memory.Readings.Add(read);
-
-            read.Held = was;
-            read.Known = true;
-        }
-
-        /// <summary>Takes back whether every block was there at the last look a copy was sent.</summary>
-        public void RecallAll(bool all)
-        {
-            _memory.All = all ? 1 : 0;
-        }
-
         /// <summary>What it remembers of <paramref name="block" />, by the name the program gives it; a fresh memory where it remembers nothing.</summary>
         ReadingMemory Reading(string block)
         {
@@ -169,13 +130,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             return new ReadingMemory { Block = block };
-        }
-
-        /// <summary>Takes back how long it had been since an <c>every</c> last fell due when the world was written.</summary>
-        /// <remarks>Counted on from the first look, since the world's clock begins again at a load.</remarks>
-        public void RecallSince(int ticks)
-        {
-            _since = ticks;
         }
 
         /// <summary>Takes it off the rota for good, when its trigger, its instance or its Sprocket no longer exists, leaving what it remembers as it was.</summary>
@@ -478,12 +432,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool SampleEvery(EveryTrigger every)
         {
             var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
-            if (_memory.Due < 0 && _since >= 0)
-            {
-                _memory.Due = _tick - _since;
-                _since = -1;
-            }
-
             if (_memory.Due < 0 || _tick < _memory.Due)
             {
                 _memory.Due = _tick;

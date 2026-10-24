@@ -283,8 +283,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             else if (chosen != null)
             {
                 Runtime.SequenceFault fault;
-                sequence = SystemSummary.Failing(Editor.Runner, _system, chosen, out fault);
+                sequence = SystemSummary.Failing(Editor.Runner, _system, chosen, out fault)
+                    ?? SystemSummary.Warned(Editor.Runner, _system, chosen, out fault);
                 said = sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence);
+                mended = fault.IsWarning;
                 empty = fault.Problem == Runtime.SequenceProblem.EmptySlot;
             }
 
@@ -298,7 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             _troubled.IsVisible = said.Length > 0;
             _trouble.Text = said;
-            _trouble.Style = mended ? Styles.Caution : Styles.Problem;
+            _trouble.Style = mended ? Styles.WarningLine : Styles.ProblemLine;
             // As the installation's row on the home screen stands: wrong while anything counts against it, warned while it says something else.
             _standing = chosen != null && SystemSummary.Problems(Editor.Runner, _system, chosen) > 0 ? NoticeLevel.Problem
                 : said.Length > 0 ? NoticeLevel.Warning : NoticeLevel.Info;

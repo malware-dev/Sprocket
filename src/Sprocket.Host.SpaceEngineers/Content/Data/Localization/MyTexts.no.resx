@@ -1699,6 +1699,24 @@
   <data name="Sprocket.Admin.DefaultOff" xml:space="preserve">
     <value>Standard (av)</value>
   </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Warning" xml:space="preserve">
+    <value>Dette steget er utdatert og trenger nå en skjermplass. Trykk på {slot} for å lage en.</value>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Instead" xml:space="preserve">
+    <value>i stedet for {slot}</value>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.AheadInPlace" xml:space="preserve">
+    <value>{slot} holder blokker, men dette steget bruker skjermen. Når du velger skjermen, blir {slot} en skjermplass for alle stegene som bruker den.</value>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.AheadSplit" xml:space="preserve">
+    <value>{slot} holder blokker, men dette steget bruker skjermen. Andre steg bruker {slot} til selve blokken, så når du velger skjermen, får alle stegene som bruker skjermen en ny skjermplass, og {slot} blir værende for blokken.</value>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Proceed" xml:space="preserve">
+    <value>Velg skjermen</value>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Cancel" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
     <value>Her er det ingen ventende oppgaver å vente på, fordi ingen steg over tar tid.</value>
   </data>
@@ -2067,24 +2085,6 @@
   </data>
   <data name="Sprocket.Category.Default" xml:space="preserve">
     <value>Kategori {number}</value>
-  </data>
-  <data name="Sprocket.Admin.Trials" xml:space="preserve">
-    <value>Utprøvinger</value>
-  </data>
-  <data name="Sprocket.Admin.TrialsAbout" xml:space="preserve">
-    <value>Design som fortsatt sammenlignes. En utprøving fjernes når designet er valgt.</value>
-  </data>
-  <data name="Sprocket.Admin.Tips" xml:space="preserve">
-    <value>Hvordan tips holdes åpne</value>
-  </data>
-  <data name="Sprocket.Admin.TipsAbout" xml:space="preserve">
-    <value>Om et tips alltid lar pekeren flytte seg over på det, eller bare mens Alt holdes inne.</value>
-  </data>
-  <data name="Sprocket.Admin.TipsStay" xml:space="preserve">
-    <value>Alltid åpne</value>
-  </data>
-  <data name="Sprocket.Admin.TipsAlt" xml:space="preserve">
-    <value>Hold Alt for å holde åpen</value>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} må slås av før det kan redigeres trygt.</value>

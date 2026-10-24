@@ -21,6 +21,9 @@ namespace Sprocket.Host.SpaceEngineers.Memory
 
         int _offset;
 
+        /// <summary>The codec the world's memory is packed with, which a construct's block and a copy's memory are packed with too.</summary>
+        public IBinary Binary => _binary;
+
         /// <summary>Memories turned to and from text by <paramref name="binary" />.</summary>
         public Memories(IBinary binary)
         {
@@ -49,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
             WorldMemory memory;
             try
             {
-                memory = _binary.Unpack(packed);
+                memory = _binary.Unpack<WorldMemory>(packed);
             }
             catch (Exception e)
             {

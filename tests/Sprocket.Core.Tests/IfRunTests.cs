@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
@@ -281,11 +282,11 @@ public class IfRunTests
         Assert.Contains("Airlock Vent:depressurize", a.Log);
         Assert.DoesNotContain("Outer Door:open", a.Log);
 
-        var state = StateText.Save(a.Program, a.Runner);
-        var program = new Automation();
+        var binary = new ProtoBinary();
+        var memory = binary.Pack(a.Program.Memory);
+        var program = new Automation { Memory = binary.Unpack<ConstructMemory>(memory) };
         Assert.Equal("", ProgramReader.Load(ProgramWriter.Save(a.Program, a.Rig.Values), program, a.Rig.Values));
         a.Runner = new AutomationRunner(program, a.Rig.World);
-        Assert.Equal("", StateText.Load(state, program, a.Runner));
         a.Log.Clear();
         a.Tick(600);
 

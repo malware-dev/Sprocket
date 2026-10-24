@@ -140,7 +140,7 @@ public class ConstructStatusTests
         Assert.Contains(status.Items, item => item.Logic == airlock.Name);
     }
 
-    /// <summary>An installation of a blueprint is named on its own, and one switched off comes after it.</summary>
+    /// <summary>A warning about a blueprint's logic system itself is named once, for the logic system, and an installation switched off on its own after it.</summary>
     [Fact]
     public void AnInstallationIsNamedOnItsOwn()
     {
@@ -158,9 +158,11 @@ public class ConstructStatusTests
         var status = Look(ship);
 
         Assert.Equal(2, status.Items.Count);
-        Assert.True(status.Items[0].Blueprint);
-        Assert.Equal(1, status.Items[0].Position);
+        Assert.False(status.Items[0].Blueprint);
+        Assert.Equal(0, status.Items[0].Position);
         Assert.Equal(StatusLevel.Warning, status.Items[0].Level);
+        Assert.Equal(SequenceProblem.NothingStarts, status.Items[0].Fault.Problem);
+        Assert.True(status.Items[1].Blueprint);
         Assert.Equal(2, status.Items[1].Position);
         Assert.Equal(StatusLevel.Off, status.Items[1].Level);
     }

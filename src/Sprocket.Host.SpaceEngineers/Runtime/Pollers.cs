@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -12,7 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Automation _automation;
         readonly Dictionary<Trigger, List<Poller>> _pollers = new Dictionary<Trigger, List<Poller>>();
         readonly HashSet<Poller> _keptPollers = new HashSet<Poller>();
-        readonly List<Recalling> _recalling = new List<Recalling>();
         readonly List<Trigger> _goneTriggers = new List<Trigger>();
 
         int _missingStamp;
@@ -109,6 +107,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _pollers.Remove(gone);
         }
 
+        /// <summary>Takes every poller off the rota and lets go of them all, so each is made again from the construct's memory as it stands.</summary>
+        /// <remarks>For a copy whose memory was put back in place from the one that lent it; the next match of the program makes them.</remarks>
+        public void Forget()
+        {
+            Retire();
+            _pollers.Clear();
+            _keptPollers.Clear();
+            _goneTriggers.Clear();
+        }
+
         /// <summary>Takes every poller off the rota.</summary>
         public void Retire()
         {
@@ -143,41 +151,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             poller = new Poller(system, trigger, instance, _owner, Watched(system, instance.Number, place + 1));
             pollers.Add(poller);
 
-            for (var i = _recalling.Count - 1; i >= 0; i--)
-            {
-                if (_recalling[i].Trigger != trigger || _recalling[i].Instance != instance)
-                    continue;
-
-                _recalling[i].Recall(poller);
-                _recalling.RemoveAt(i);
-            }
 
             return poller;
-        }
-
-        /// <summary>
-        /// Gives the poller for <paramref name="trigger" /> on <paramref name="instance" /> what a save remembered of it, now or
-        /// as it is made.
-        /// </summary>
-        /// <remarks>Held where the poller is not made yet, as it is not while a world loads.</remarks>
-        public void Recall(Trigger trigger, SystemInstance instance, Action<Poller> recall)
-        {
-            var poller = Poller(trigger, instance);
-            if (poller != null)
-            {
-                recall(poller);
-                return;
-            }
-
-            _recalling.Add(new Recalling { Trigger = trigger, Instance = instance, Recall = recall });
-        }
-
-        /// <summary>What a save remembered of a poller, waiting for it to be made.</summary>
-        struct Recalling
-        {
-            public Trigger Trigger;
-            public SystemInstance Instance;
-            public Action<Poller> Recall;
         }
 
         /// <summary>

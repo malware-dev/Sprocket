@@ -1,9 +1,11 @@
+using Sprocket.Host.SpaceEngineers.Repairs;
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
@@ -148,7 +150,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _part.Text = NewName;
-            _part.Name = _slotName;
+            _part.Name = NewName;
+            _part.After = ForScreens(texts);
             _part.Emphasized = false;
             _part.About = texts.Codex.PickSlotNameAbout;
             _part.Accepts = _accepts;
@@ -167,10 +170,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _part.Renames = null;
             _part.Accepts = null;
+            _part.After = "";
             _part.Name = "";
             _part.Text = text;
             _part.Emphasized = emphasized;
             _part.About = about;
+        }
+
+        /// <summary>What a repair says about the new slot being made in place of the one the step names, or empty.</summary>
+        string ForScreens(Texts texts)
+        {
+            Repair by;
+            return _forecast?.Type == null ? "" : ProgramRepairs.Instead(texts, _system, _replacing, _forecast.Type, out by);
         }
 
         /// <summary>Whether <paramref name="chosen" /> is a signal a toolbar sends on the blocks <paramref name="selection" />, which a signal slot carries rather than the blocks.</summary>

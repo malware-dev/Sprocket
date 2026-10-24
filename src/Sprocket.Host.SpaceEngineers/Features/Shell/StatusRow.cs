@@ -244,14 +244,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // A row is off where its own switch is, or where the logic system above it holds its switch.
             var off = Flips != null && (!SwitchIsOn || !string.IsNullOrEmpty(SwitchLocked));
 
+            var warned = Remarks > 0 || !string.IsNullOrEmpty(Problem) && Level == NoticeLevel.Warning || Parked || off;
             Style = wrong
                 ? Chosen ? Styles.BrokenChosen : Styles.Broken
-                : Chosen
-                    ? Styles.Chosen
-                    : Running
-                        ? Styles.Running
-                        : Parked || off
-                            ? Styles.Parked
+                : warned
+                    ? Chosen ? Styles.ParkedChosen : Styles.Parked
+                    : Chosen
+                        ? Styles.Chosen
+                        : Running
+                            ? Styles.Running
                             : !pressable
                                 ? Styles.Still
                                 : Styles.Row;
@@ -292,7 +293,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _problem.Text = Problem;
             _problem.IsVisible = saying;
-            _problem.Color = RemarkColors.Of(Level, Palette.Faint);
+            _problem.Color = RemarkLook.Of(Level, Palette.Faint);
 
             var marked = saying && Level != NoticeLevel.Info || Problems > 0 || Remarks > 0;
             var quietly = saying && Level != NoticeLevel.Info ? Level == NoticeLevel.Warning : Problems == 0;

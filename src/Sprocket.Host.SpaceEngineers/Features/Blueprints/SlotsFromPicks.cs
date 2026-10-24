@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Repairs;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -158,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var numbers = type == null ? null : Numbers(blocks, type, answer.Facet);
             Func<List<string>> make = () => With(system, () => Made(system, shown,
                 new Part(Free(system, answer.SlotName)) { Expects = type == null ? Nearest(blocks) : "", Holds = type == null ? "" : type.Id },
-                declared, numbers));
+                declared, numbers, replacing, ProgramRepairs.Carried(_editor.Runner.Bindings, system, shown, replacing, type)));
             var own = forecast.Changes;
             if (own == null)
             {
@@ -166,8 +167,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 return;
             }
 
-            var expects = type == null ? Nearest(blocks) : own.Expects;
-            Action change = () => Narrowing(own, expects, () => named(With(system, () => Changed(system, shown, own, declared, expects, numbers))));
+            var holds = type != null && own.Holds != type.Id ? type.Id : null;
+            var expects = type == null ? Nearest(blocks) : holds != null ? "" : own.Expects;
+            Action change = () => Narrowing(own, expects,
+                () => named(With(system, () => Changed(system, shown, own, declared, expects, numbers, holds))));
             if (forecast.Shared)
                 Ask(own.Id, change, () => named(make()));
             else
@@ -216,9 +219,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 : type != null ? Holding(system, shown, type, blocks, facet)
                 : Match(system, shown, blocks));
 
-            var own = signal ? Signal(system, keeps) : Own(system, replacing, type == null ? "" : type.Id);
+            var kept = signal ? Signal(system, keeps) : Own(system, replacing, type == null ? "" : type.Id);
+            Repair mending;
+            var holding = kept == null && !signal ? ProgramRepairs.Reslots(_editor.Runner.Bindings, system, shown, replacing, type, out mending) : null;
+            var own = kept ?? holding;
             var changes = matched == null ? own : null;
-            var shared = changes != null && Shared(system, changes.Id, signal ? new[] { changes.Id } : replacing);
+            var shared = changes != null && holding == null && Shared(system, changes.Id, signal ? new[] { changes.Id } : replacing);
             return new SlotForecast(matched, changes, shared, signal, type);
         }
 
@@ -291,11 +297,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return system.Mentions(slot) > AutomationSystem.Count(replacing, slot);
         }
 
-        /// <summary>Fills <paramref name="part" /> in <paramref name="shown" /> with <paramref name="declared" /> on the facets <paramref name="numbers" />, expecting <paramref name="expects" />, for the edit made next to carry; its name.</summary>
-        List<string> Changed(AutomationSystem system, SystemInstance shown, Part part, List<string> declared, string expects, List<int> numbers)
+        /// <summary>
+        /// Fills <paramref name="part" /> in <paramref name="shown" /> with <paramref name="declared" /> on the facets
+        /// <paramref name="numbers" />, expecting <paramref name="expects" /> and holding <paramref name="holds" /> where that is not
+        /// null, for the edit made next to carry; its name.
+        /// </summary>
+        List<string> Changed(AutomationSystem system, SystemInstance shown, Part part, List<string> declared, string expects, List<int> numbers,
+            string holds)
         {
             var reslot = new Reslot(system, shown);
-            reslot.Refill(part, declared, expects, numbers);
+            reslot.Refill(part, declared, expects, numbers, holds);
             reslot.Apply();
             _picked.Add(reslot);
             return new List<string> { part.Id };
@@ -454,10 +465,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Makes <paramref name="part" />, filled in <paramref name="shown" /> with <paramref name="declared" /> on the facets <paramref name="numbers" /> where it holds a type, for the edit made next to carry; its name.</summary>
-        List<string> Made(AutomationSystem system, SystemInstance shown, Part part, List<string> declared, List<int> numbers)
+        List<string> Made(AutomationSystem system, SystemInstance shown, Part part, List<string> declared, List<int> numbers,
+            IList<string> replacing, List<IList<string>> carried)
         {
             var reslot = new Reslot(system, shown);
             reslot.Make(part, declared, numbers);
+
+            // A repair's other uses of the slot the pick stands in for go onto the new slot with it.
+            var old = replacing == null || replacing.Count == 0 ? null : replacing[0];
+            foreach (var names in carried)
+            {
+                var now = new List<string>(names);
+                for (var i = 0; i < now.Count; i++)
+                {
+                    if (now[i] == old)
+                        now[i] = part.Id;
+                }
+
+                reslot.Rename(names, now);
+            }
+
             reslot.Apply();
             _picked.Add(reslot);
             return new List<string> { part.Id };

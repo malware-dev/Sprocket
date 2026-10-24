@@ -293,11 +293,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (recount)
                 {
                     var fault = _runs[i] == null ? SequenceFault.None : Fault(_runs[i], through);
-                    var own = _triggers[i].Acts != null && fault.Exists && !fault.IsWarning;
+                    var own = _triggers[i].Acts != null && fault.Exists;
                     row.Problem = own || IsStarting(fault) && Concerns(_triggers[i], fault)
                         ? SequenceText.Problem(texts, fault, _runs[i])
                         : "";
-                    row.Level = NoticeLevel.Problem;
+                    row.Level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
 
                     if (Editor.Starts.Copied(_triggers[i]))
                     {

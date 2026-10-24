@@ -55,6 +55,7 @@ public class HandoverTests : IDisposable
         public string Program = "";
         public string State = "";
         public string Switches = "";
+        public string Memory = "";
 
         /// <summary>The settings this end runs the world by, written as one text, where it is the server.</summary>
         public string Served = new Settings(false).Written();
@@ -88,17 +89,19 @@ public class HandoverTests : IDisposable
         _wire.As(peer, () =>
         {
             made = new Handover(find,
-                (block, program, state) =>
+                (block, program, state, memory) =>
                 {
                     heard.Given.Add(block.ToString());
                     heard.Program = program;
                     heard.State = state;
+                    heard.Memory = memory;
                 },
-                (_, holder, program, state) =>
+                (_, holder, program, state, memory) =>
                 {
                     heard.Refused.Add(holder);
                     heard.Program = program;
                     heard.State = state;
+                    heard.Memory = memory;
                 },
                 block => heard.Foreign.Add(block.ToString()),
                 (_, program, switches) =>
@@ -563,7 +566,7 @@ public class HandoverTests : IDisposable
         SprocketUnit copy = null!;
         _wire.As(anna, () =>
         {
-            copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, heard.Program, heard.State);
+            copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, new ProtoBinary(), heard.Program, heard.State, heard.Memory);
             hers.Kept(_block, copy);
         });
 
@@ -686,7 +689,7 @@ public class HandoverTests : IDisposable
         var his = Client(bert, new Heard());
         _wire.As(bert, () =>
         {
-            var copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, "", "");
+            var copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, new ProtoBinary(), "", "", "");
             copy.Editor.NewSystem("Mine");
             his.Keep(_block, copy);
         });
@@ -719,7 +722,7 @@ public class HandoverTests : IDisposable
 
         string program;
         _sim.Unit.Written(out program, out _);
-        var switches = Storage.StateText.Save(_sim.Editor.Program, null);
+        var switches = Storage.BlockSwitches.Save(_sim.Editor.Program, _sim.Unit.Binary);
 
         SprocketUnit rebuilt = null!;
         _wire.As(_server, () =>
@@ -769,6 +772,49 @@ public class HandoverTests : IDisposable
         _sim.Tick();
 
         Assert.False(run.IsRunning, "the sequence did not stop on the server");
+    }
+
+    /// <summary>A copy lent while a sequence runs on the server shows it running, from the construct's memory it is lent with.</summary>
+    [Fact]
+    public void ACopyShowsWhatTheServerIsRunning()
+    {
+        var sequence = Waiting();
+        sequence.System.Enabled = true;
+        _sim.Tick();
+        _sim.Runner.Call(sequence, sequence.System.First);
+        _sim.Tick();
+        Assert.True(_sim.Runner.Get(sequence, sequence.System.First).IsRunning);
+
+        var (_, _, copy) = Lent();
+        var theirs = copy.Editor.Program.Sequences[0];
+
+        Assert.True(copy.Runner.Get(theirs, theirs.System.First).IsRunning);
+    }
+
+    /// <summary>A copy taken up again over what the server remembers now shows a run started since it was lent.</summary>
+    [Fact]
+    public void ACopyRestatedShowsARunStartedSince()
+    {
+        var sequence = Waiting();
+        sequence.System.Enabled = true;
+        _sim.Tick();
+        var (anna, _, copy) = Lent();
+        var theirs = copy.Editor.Program.Sequences[0];
+        Assert.False(copy.Runner.Get(theirs, theirs.System.First).IsRunning);
+
+        _sim.Runner.Call(sequence, sequence.System.First);
+        _sim.Tick();
+        Assert.True(_sim.Runner.Get(sequence, sequence.System.First).IsRunning);
+
+        string switches;
+        _sim.Unit.Written(out _, out switches);
+        _wire.As(anna, () =>
+        {
+            copy.Restate(switches, _sim.Unit.Remembered());
+            copy.Tick(_sim.Now);
+        });
+
+        Assert.True(copy.Runner.Get(theirs, theirs.System.First).IsRunning);
     }
 
     [Fact]
@@ -942,7 +988,7 @@ public class HandoverTests : IDisposable
         _sim.Unit.Written(out program, out state);
         var anna = _wire.Client("Anna");
         SprocketUnit copy = null!;
-        _wire.As(anna, () => copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, program, state));
+        _wire.As(anna, () => copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, new ProtoBinary(), program, state, _sim.Unit.Remembered()));
 
         Assert.Single(copy.Editor.Program.Systems);
         Assert.Equal("Anna", copy.Editor.Author);

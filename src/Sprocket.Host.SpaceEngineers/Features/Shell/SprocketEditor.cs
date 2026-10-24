@@ -37,7 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _author = "";
         string _holder;
         EditorHabits _habits = new EditorHabits();
-        TipKeeping _tipKeeping;
         PlayerMemory _viewer = new PlayerMemory();
         readonly List<EditorPage> _stack = new List<EditorPage>();
 
@@ -241,21 +240,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             TipsShown = !TipsShown;
             KeepTips?.Invoke(TipsShown);
-        }
-
-        /// <summary>How the screen's tips stay open, the trial's variant the world uses.</summary>
-        /// <remarks>A change rebuilds the screen.</remarks>
-        public TipKeeping TipKeeping
-        {
-            get { return _tipKeeping; }
-            set
-            {
-                if (_tipKeeping == value)
-                    return;
-
-                _tipKeeping = value;
-                Invalidate();
-            }
         }
 
         /// <summary>The ticks the runner has counted.</summary>
@@ -1001,7 +985,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (trouble.Length > 0)
                 return trouble;
 
-            var switches = StateText.Save(_program, _runner);
+            var switches = BlockSwitches.Of(_program);
 
             var systems = _program.Systems;
             for (var i = systems.Count - 1; i >= 0; i--)
@@ -1013,7 +997,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _program.Discard();
             string warning;
             ProgramReader.Load(text, _program, _world.Values, out warning, _world);
-            StateText.Load(switches, _program, _runner);
+            BlockSwitches.Put(switches, _program);
 
             _gate.Told = true;
             _program.Kept();

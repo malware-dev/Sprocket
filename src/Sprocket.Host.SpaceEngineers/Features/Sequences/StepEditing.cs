@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Repairs;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -101,6 +102,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>Opens a step's picker on the column <paramref name="opens" /> says, the part that was pressed.</summary>
         public void EditStep(Act step, OpeningColumn opens)
+        {
+            Repair repair;
+            var system = _sequence.System;
+            var ahead = ProgramRepairs.Ahead(_editor.Texts, _editor.Runner.Bindings, system, system == null ? null : _editor.StandIn(system),
+                step, out repair);
+            if (ahead.Length == 0)
+            {
+                Edit(step, opens);
+                return;
+            }
+
+            _editor.Ask(ahead);
+            _editor.Answer(repair.Proceed(_editor.Texts), () => Edit(step, opens), true);
+            _editor.Answer(repair.Cancel(_editor.Texts), delegate { });
+        }
+
+        /// <summary>Opens the picker on <paramref name="step" />, on the column <paramref name="opens" />, to change what it does and to what.</summary>
+        void Edit(Act step, OpeningColumn opens)
         {
             var index = _sequence.Steps.IndexOf(step);
 

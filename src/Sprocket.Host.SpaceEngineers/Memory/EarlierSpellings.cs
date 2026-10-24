@@ -4,9 +4,9 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Memory
 {
-    /// <summary>How what went wrong is kept: each problem and each block's trouble by a spelling that outlives the enums that hold them.</summary>
-    /// <remarks>Persisted: a spelling here cannot change without every kept reason being forgotten.</remarks>
-    public static class KeptSpellings
+    /// <summary>The words earlier builds kept problems and block troubles by, read so that what they kept carries over; nothing writes them.</summary>
+    /// <remarks>Persisted: these are the words in saves and blocks those builds wrote.</remarks>
+    public static class EarlierSpellings
     {
         static readonly string[] Reasons =
         {
@@ -48,66 +48,18 @@ namespace Sprocket.Host.SpaceEngineers.Memory
             Cause.DoorToldToOpen, Cause.DoorToldToClose
         };
 
-        /// <summary>How <paramref name="problem" /> is kept, or "unknown" where it has no spelling.</summary>
-        public static string Of(SequenceProblem problem)
-        {
-            var at = Array.IndexOf(Problems, problem);
-            return at < 0 ? "unknown" : Reasons[at];
-        }
-
-        /// <summary>The problem kept as <paramref name="spelled" />, or none.</summary>
+        /// <summary>The problem an earlier build kept as <paramref name="spelled" />, or none.</summary>
         public static SequenceProblem ProblemOf(string spelled)
         {
             var at = Array.IndexOf(Reasons, spelled);
             return at < 0 ? SequenceProblem.None : Problems[at];
         }
 
-        /// <summary>How <paramref name="cause" /> is kept, or empty where it has no spelling.</summary>
-        public static string Of(Cause cause)
-        {
-            var at = Array.IndexOf(Troubles, cause);
-            return at < 0 ? "" : Causes[at];
-        }
-
-        /// <summary>The cause kept as <paramref name="spelled" />, or none.</summary>
+        /// <summary>The cause an earlier build kept as <paramref name="spelled" />, or none.</summary>
         public static Cause CauseOf(string spelled)
         {
             var at = Array.IndexOf(Causes, spelled);
             return at < 0 ? Cause.None : Troubles[at];
-        }
-
-        /// <summary><paramref name="trouble" /> as it is kept, or null for none.</summary>
-        public static TroubleMemory Kept(BlockTrouble trouble)
-        {
-            return trouble.Exists ? new TroubleMemory { Cause = Of(trouble.Cause), About = trouble.About ?? "", Ends = trouble.Ends } : null;
-        }
-
-        /// <summary>The trouble <paramref name="kept" /> holds, or none.</summary>
-        public static BlockTrouble Trouble(TroubleMemory kept)
-        {
-            if (kept == null)
-                return BlockTrouble.None;
-
-            var cause = CauseOf(kept.Cause);
-            var about = kept.About.Length == 0 ? null : kept.About;
-            return kept.Ends ? BlockTrouble.Kept(cause, about) : BlockTrouble.Waiting(cause, about);
-        }
-
-        /// <summary><paramref name="fault" /> as it is kept, or null for none.</summary>
-        public static FaultMemory Kept(SequenceFault fault)
-        {
-            return fault.Exists
-                ? new FaultMemory { Problem = Of(fault.Problem), Step = fault.Step, Which = fault.Which ?? "", Because = Kept(fault.Because) }
-                : null;
-        }
-
-        /// <summary>The fault <paramref name="kept" /> holds, or none.</summary>
-        public static SequenceFault Fault(FaultMemory kept)
-        {
-            if (kept == null)
-                return SequenceFault.None;
-
-            return new SequenceFault(ProblemOf(kept.Problem), kept.Step, Trouble(kept.Because), kept.Which.Length == 0 ? null : kept.Which);
         }
     }
 }

@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Sim.Machine;
 using Xunit;
 
 namespace Sprocket.Tests;
@@ -41,7 +42,7 @@ public class ProgramTextTests
     static void LoadAll(Automation before, Automation after)
     {
         Load(Save(before), after);
-        Assert.Equal("", StateText.Load(StateText.Save(before, null), after, null));
+        Assert.Equal("", BlockSwitches.Load(BlockSwitches.Save(before, new ProtoBinary()), after, new ProtoBinary()));
     }
 
     /// <summary>A declaration with the keys a world would have minted for it.</summary>

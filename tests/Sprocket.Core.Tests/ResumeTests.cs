@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
@@ -16,8 +17,8 @@ namespace Sprocket.Tests;
 /// with both doors shut and nothing left to open either of them - the machine having done the
 /// dangerous half of its job and dropped the rest.
 ///
-/// So what is running is written beside what is switched off, in the same document, and the runner
-/// is asked to take it back up. What is restored is the step and the clock; whether the doors have
+/// So what is running is kept in the construct's memory, which the world saves, and a runner made over
+/// that memory carries on from it. What is kept is the step and the clock; whether the doors have
 /// arrived is asked of the doors.
 /// </remarks>
 public class ResumeTests
@@ -66,17 +67,39 @@ public class ResumeTests
         /// The world loading again: the blocks are where they were, and nothing else is.
         /// </summary>
         /// <remarks>
-        /// A fresh program and a fresh runner read from the two documents, which is exactly what a
+        /// A fresh program and a fresh runner read from the block's switches and the world's memory, which is what a
         /// reload does - the rig stands in for the grid, which the game brings back itself.
         /// </remarks>
-        public string Reload(string program, string state)
+        public string Reload(string program, Saved state)
         {
-            Program = new Automation();
+            Program = new Automation { Memory = Binary.Unpack<ConstructMemory>(state.Memory) };
             Trouble = ProgramReader.Load(program, Program, World.Values);
             Runner = new AutomationRunner(Program, World);
-            return StateText.Load(state, Program, Runner);
+            return BlockSwitches.Load(state.Switches, Program, Binary);
+        }
+
+        /// <summary>What a save writes: the switches the block keeps, and the construct's memory the world keeps.</summary>
+        public Saved Save() => new(BlockSwitches.Save(Program, Binary), Binary.Pack(Program.Memory));
+    }
+
+    /// <summary>The switches a block keeps and the memory a world keeps, packed.</summary>
+    sealed class Saved
+    {
+        /// <summary>The switches the block keeps, packed.</summary>
+        public readonly string Switches;
+
+        /// <summary>The construct's memory, packed.</summary>
+        public readonly string Memory;
+
+        /// <summary>A save of <paramref name="switches" /> and <paramref name="memory" />.</summary>
+        public Saved(string switches, string memory)
+        {
+            Switches = switches;
+            Memory = memory;
         }
     }
+
+    static readonly ProtoBinary Binary = new();
 
     static Airlock Build()
     {
@@ -121,9 +144,8 @@ public class ResumeTests
 
         Assert.True(a.State.IsRunning);
 
-        var written = StateText.Save(a.Program, a.Runner);
-        Assert.Contains("running", written);
-        Assert.Contains("step", written);
+        var run = Assert.Single(a.Program.Memory.Runs, kept => kept.Running);
+        Assert.True(run.Step >= 0);
     }
 
     [Fact]
@@ -132,7 +154,7 @@ public class ResumeTests
         var a = Build();
         a.Tick(3);
 
-        Assert.DoesNotContain("running", StateText.Save(a.Program, a.Runner));
+        Assert.DoesNotContain(a.Program.Memory.Runs, kept => kept.Running);
     }
 
     /// <summary>
@@ -156,7 +178,7 @@ public class ResumeTests
         Assert.DoesNotContain("Outer Door:open", a.Log);
 
         var program = ProgramWriter.Save(a.Program, a.World.Values);
-        var state = StateText.Save(a.Program, a.Runner);
+        var state = a.Save();
 
         Assert.Equal("", a.Reload(program, state));
         Assert.Equal("", a.Trouble);
@@ -182,8 +204,8 @@ public class ResumeTests
         Assert.True(a.State.IsRunning);
         Assert.True(a.State.ByHand);
 
-        var state = StateText.Save(a.Program, a.Runner);
-        Assert.Contains("\"by hand\"", state);
+        var state = a.Save();
+        Assert.Contains(a.Program.Memory.Runs, kept => kept.Running && kept.ByHand);
         Assert.Equal("", a.Reload(ProgramWriter.Save(a.Program, a.World.Values), state));
         a.Log.Clear();
 
@@ -217,7 +239,7 @@ public class ResumeTests
         Assert.Contains("Airlock Vent:depressurize", a.Log);
         Assert.DoesNotContain("Outer Door:open", a.Log);
 
-        var state = StateText.Save(a.Program, a.Runner);
+        var state = a.Save();
         Assert.Equal("", a.Reload(ProgramWriter.Save(a.Program, a.World.Values), state));
         a.Log.Clear();
         a.Tick(600);
@@ -240,8 +262,8 @@ public class ResumeTests
         a.Program.Edited();
         a.Tick(30);
 
-        var state = StateText.Save(a.Program, a.Runner);
-        Assert.Contains("when", state);
+        var state = a.Save();
+        Assert.NotEmpty(a.Program.Memory.Watches);
 
         a.Outer.ForceOpen();
         Assert.Equal("", a.Reload(ProgramWriter.Save(a.Program, a.World.Values), state));
@@ -267,8 +289,8 @@ public class ResumeTests
         a.Outer.ForceOpen();
         a.Tick(30);
 
-        var state = StateText.Save(a.Program, a.Runner);
-        Assert.Contains("'Outer Door' on 'Inner Door' off", state);
+        var state = a.Save();
+        Assert.Contains(a.Program.Memory.Watches, kept => kept.Readings.Count == 2);
         Assert.Equal("", a.Reload(ProgramWriter.Save(a.Program, a.World.Values), state));
     }
 
@@ -285,8 +307,8 @@ public class ResumeTests
         a.Program.Edited();
         a.Tick(400);
 
-        var state = StateText.Save(a.Program, a.Runner);
-        Assert.Contains("every", state);
+        var state = a.Save();
+        Assert.Contains(a.Program.Memory.Watches, kept => kept.Due >= 0);
 
         Assert.Equal("", a.Reload(ProgramWriter.Save(a.Program, a.World.Values), state));
         a.Log.Clear();
@@ -315,7 +337,7 @@ public class ResumeTests
         var left = a.State.WaitTicks;
         Assert.InRange(left, 450, 599);
 
-        var state = StateText.Save(a.Program, a.Runner);
+        var state = a.Save();
         Assert.Equal("", a.Reload(ProgramWriter.Save(a.Program, a.World.Values), state));
         a.Tick();
 
@@ -338,7 +360,7 @@ public class ResumeTests
         a.Press();
         a.Tick(20);
 
-        var state = StateText.Save(a.Program, a.Runner);
+        var state = a.Save();
 
         // The same program with its steps taken out, which is what a save from before an edit meets.
         var trimmed = a.Program.Sequences[0];

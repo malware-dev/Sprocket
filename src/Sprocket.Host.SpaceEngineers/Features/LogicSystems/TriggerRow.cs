@@ -123,9 +123,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _problem.Text = Problem;
             _problem.IsVisible = Problem.Length != 0;
-            _problem.Color = RemarkColors.Of(Level, Palette.Faint);
+            _problem.Color = RemarkLook.Of(Level, Palette.Faint);
 
-            Background = Problem.Length != 0 ? RemarkColors.Wash(Level) : Palette.None;
+            RemarkLook.Ground(this, Problem.Length != 0 ? Level : NoticeLevel.Info, Palette.None);
 
             _duplicate.Command = Copies;
             _duplicate.IsVisible = Copies != null || Locked.Length != 0;

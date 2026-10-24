@@ -137,6 +137,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Checking();
         }
 
+        /// <summary>Lets go of every run, watch and state value it holds, so each is made again on the next tick from the construct's memory as it stands.</summary>
+        /// <remarks>For a copy whose memory was put back in place from the one that lent it, before the program is wired again.</remarks>
+        public void Forget()
+        {
+            _runs.Forget();
+            _watches.Forget();
+            _states.Forget();
+            _reshaped = true;
+        }
+
         /// <summary>Takes everything this program put on the rota off it, when its Sprocket goes away.</summary>
         public void Retire()
         {
@@ -549,7 +559,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 : _automation.Called(fault.Which, _world.Values);
             var halt = new Halt(fault.Problem, sequence.Number, fault.Step, fault.Because, block);
 
-            if (system.IsBlueprint && instance != null)
+            if (system.IsBlueprint && instance != null && !fault.IsAboutSystem)
             {
                 if (!instance.Enabled)
                     return;

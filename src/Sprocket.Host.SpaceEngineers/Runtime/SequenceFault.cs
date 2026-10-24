@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Repairs;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Runtime
@@ -68,6 +69,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>A warning is not counted as wrong and never has the sequence parked.</remarks>
         public bool IsWarning => Problem == SequenceProblem.NothingStarts
             || Problem == SequenceProblem.Conflicted
+            || Problem == SequenceProblem.NothingToAwait
+            || ProgramRepairs.Of(Problem) != null;
+
+        /// <summary>Whether it is wrong in the logic system itself, the same in every installation, rather than in what one installation holds.</summary>
+        public bool IsAboutSystem => (ProgramRepairs.Of(Problem)?.IsAboutSystem ?? false)
+            || Problem == SequenceProblem.Circular
+            || Problem == SequenceProblem.NothingStarts
             || Problem == SequenceProblem.NothingToAwait;
 
         /// <summary>

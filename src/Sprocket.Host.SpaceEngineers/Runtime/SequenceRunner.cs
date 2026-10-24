@@ -54,6 +54,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _rota.Restore(_busy);
 
+            // What the world remembered can be of the program before an edit; a run at a step it no longer has is ended.
+            if (IsRunning && !Fits())
+            {
+                Finish();
+                return;
+            }
+
             // A run held for blocks that say when they get there listens to them from the first tick after the world loads,
             // whenever its own next look falls.
             if (IsRunning && _memory.Holding)
@@ -68,6 +75,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // Nothing in a session leaves a run going with nothing to move it; only what was written down can.
             GameLog.Say($"A run of \"{_sequence.Name}\" had nothing on the rota to move it, and was put back.");
             _rota.At(_busy, int.MinValue);
+        }
+
+        /// <summary>Whether every step the remembered run is at, or waits on, is a step of the sequence, and each it waits on an act.</summary>
+        bool Fits()
+        {
+            var steps = _sequence.Steps;
+            if (_memory.Step >= steps.Count)
+                return false;
+
+            foreach (var step in _memory.Outstanding)
+            {
+                if (step < 0 || step >= steps.Count || !(steps[step] is Act))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>Works out the acts the run is held for, which listens to every block among them that says when it gets there.</summary>
@@ -479,62 +502,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _memory.ByHand = false;
             Start(tick, RunStart.Trigger);
-        }
-
-        /// <summary>
-        /// Puts a run back where a reload interrupted it.
-        /// </summary>
-        /// <remarks>
-        /// The step and the clock are restored, and the acts since the previous await are waited on again. Nothing is
-        /// restored where the sequence cannot run or the step is no longer there.
-        /// </remarks>
-        public void Resume(int step, bool waiting, int waitTicks, bool byHand)
-        {
-            if ((!CanRun && !byHand) || step < 0 || step >= _sequence.Steps.Count)
-                return;
-
-            _memory.ByHand = byHand;
-            IsRunning = true;
-            IsWaiting = waiting;
-            _memory.Step = step;
-            // One less than was left at the save, since the first tick after loading is the one after it.
-            _memory.WaitTicks = waitTicks > 1 ? waitTicks - 1 : 0;
-            _memory.WaitUntil = -1;
-            _memory.Holding = false;
-
-            Release();
-            _memory.Started.Clear();
-
-            // Backwards to the await before this step, the span an await covers. Which branch of an if ran is not
-            // written down, so a whole if before this step is passed over, and from inside a branch the branches
-            // before it are.
-            for (var i = step - 1; i >= 0; i--)
-            {
-                var earlier = _sequence.Steps[i];
-                if (earlier is EndIf || earlier is Else)
-                {
-                    i = _sequence.OpenOf(i);
-                    continue;
-                }
-
-                if (earlier.IsOff)
-                    continue;
-
-                if (earlier is Await)
-                    break;
-
-                if (earlier is Act)
-                    _memory.Outstanding.Add(i);
-
-                var run = earlier as Run;
-                if (run != null && !run.Stops)
-                    _memory.Started.Add(run.Number);
-            }
-
-            // Looked at on the first tick the rota runs: the world has only just loaded, and what the
-            // run is waiting for is answered by the blocks as they are then.
-            _rota.At(_busy, int.MinValue);
-            _owner.Log?.Resumed(this, _owner.CurrentTick, step);
         }
 
         /// <summary>

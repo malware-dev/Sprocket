@@ -89,7 +89,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         Element _raisedBy;
         Element _lit;
-        string _keepHint;
 
         readonly Relay _commits;
         readonly Relay _ends;
@@ -606,13 +605,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var texts = _editor.Texts;
 
-            _codexTip.KeptByKey = _editor.TipKeeping == World.TipKeeping.Alt;
-            if (_keepHint != texts.Codex.TipKeepHint)
-            {
-                _keepHint = texts.Codex.TipKeepHint;
-                _codexTip.KeepHint = Markdown.Parse(_keepHint);
-            }
-
             var closes = !screen.CanGoBack;
             _back.IsVisible = screen.CanGoBack;
             _back.Tip = Tip.For(_back.Tip, _back.IsVisible ? texts.Codex.ChromeBack : null);
@@ -659,8 +651,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // carries a warning or is switched off.
             var broken = screen.Standing == NoticeLevel.Problem;
             var warned = !broken && (screen.Standing == NoticeLevel.Warning || screen.HasSwitch && !screen.SwitchIsOn);
-            _head.Background = broken ? Palette.ProblemWash : warned ? Palette.NoticeWash : Palette.Chrome;
-            _head.Pattern = broken ? Styles.ProblemStripes : warned ? Styles.NoticeStripes : null;
+            RemarkLook.Ground(_head, broken ? NoticeLevel.Problem : warned ? NoticeLevel.Warning : NoticeLevel.Info, Palette.Chrome);
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _flips.CanExecute = screen.HasSwitch && !screen.SwitchLocked;
             _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);

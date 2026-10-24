@@ -73,11 +73,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         {
                             new SlotChip(false) { Spacing = 4f }.As(out _blocks),
                             new SlotChip { IsVisible = false, Align = Align.Top }.As(out _signals),
-                            new Label { Style = Styles.Problem, IsVisible = false }.As(out _problem),
+                            new Label { Style = Styles.ProblemLine, IsVisible = false }.As(out _problem),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)
                         }
                     },
-                    new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _marks)
+                    new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _marks)
                 }
             });
         }

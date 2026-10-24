@@ -377,8 +377,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Faint }
         };
 
-        /// <summary>A word on an amber wash, saying something asked for did not happen.</summary>
-        public static readonly TextStyle Skipped = new TextStyle(Status)
+        /// <summary>What is wrong, said as a status: in red, on its red ground.</summary>
+        public static readonly TextStyle ProblemStatus = new TextStyle(Status)
+        {
+            Base = { Color = Palette.Problem, Background = Palette.ProblemWash, Pattern = ProblemStripes, Padding = new Thickness(16f, 8f) }
+        };
+
+        /// <summary>A warning said as a status, such as something asked for that did not happen: in amber, on its amber ground.</summary>
+        public static readonly TextStyle WarningStatus = new TextStyle(Status)
         {
             Base = { Color = Palette.Notice, Background = Palette.NoticeWash, Pattern = NoticeStripes, Padding = new Thickness(16f, 8f) }
         };
@@ -393,6 +399,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly TextStyle Caution = new TextStyle(Detail)
         {
             Base = { Color = Palette.Notice }
+        };
+
+        /// <summary>What is wrong, on a line of its own: in red, on its red ground.</summary>
+        public static readonly TextStyle ProblemLine = new TextStyle(Problem)
+        {
+            Base = { Background = Palette.ProblemWash, Pattern = ProblemStripes, Padding = new Thickness(8f, 4f) }
+        };
+
+        /// <summary>A warning, on a line of its own: in amber, on its amber ground.</summary>
+        public static readonly TextStyle WarningLine = new TextStyle(Caution)
+        {
+            Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes, Padding = new Thickness(8f, 4f) }
         };
 
         /// <summary>One answer in a list of them, pressed to give it.</summary>
@@ -506,11 +524,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Edge = Palette.Accent }
         };
 
-        /// <summary>A row that has stopped where it is waiting to be let on, or is switched off: a warning, washed amber.</summary>
+        /// <summary>A row with a warning, or stopped where it is waiting to be let on, or switched off: washed amber.</summary>
         public static readonly ElementStyle Parked = new ElementStyle(Row)
         {
             Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
             Hot = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot }
+        };
+
+        /// <summary>The chosen row, with a warning, stopped or switched off.</summary>
+        public static readonly ElementStyle ParkedChosen = new ElementStyle(Parked)
+        {
+            Base = { Edge = Palette.Accent }
         };
 
         /// <summary>A row with nothing to open.</summary>

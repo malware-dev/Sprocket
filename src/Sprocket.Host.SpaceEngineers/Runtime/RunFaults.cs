@@ -34,9 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _instance = instance;
             _owner = owner;
             _memory = memory;
-            _quit = KeptSpellings.Fault(memory.Quit);
-            _met = KeptSpellings.Fault(memory.Met);
-            _found = KeptSpellings.Fault(memory.Found);
+            _quit = KeptReasons.Fault(memory.Quit);
+            _met = KeptReasons.Fault(memory.Met);
+            _found = KeptReasons.Fault(memory.Found);
             _restored = restored;
         }
 
@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _owner.Revise();
 
                 _quit = value;
-                _memory.Quit = KeptSpellings.Kept(value);
+                _memory.Quit = KeptReasons.Kept(value);
             }
         }
 
@@ -68,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _owner.Revise();
 
                 _found = value;
-                _memory.Found = KeptSpellings.Kept(value);
+                _memory.Found = KeptReasons.Kept(value);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _owner.Revise();
 
             _met = fault;
-            _memory.Met = KeptSpellings.Kept(fault);
+            _memory.Met = KeptReasons.Kept(fault);
         }
     }
 }

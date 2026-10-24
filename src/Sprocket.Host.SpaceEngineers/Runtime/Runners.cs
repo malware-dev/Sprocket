@@ -17,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly List<Trigger> _goneTriggers = new List<Trigger>();
         readonly List<long> _stale = new List<long>();
         readonly List<long> _live = new List<long>();
-        readonly List<Held> _resuming = new List<Held>();
         int _aloneIds;
 
         /// <summary>The runners of <paramref name="automation" />, each owned by <paramref name="owner" />.</summary>
@@ -72,61 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Puts a saved run back, as soon as there is a runner to put it in.
-        /// </summary>
-        /// <remarks>
-        /// Held where the runner does not exist yet, as it does not while a world loads; the runners are made on the first
-        /// tick after.
-        /// </remarks>
-        public void Resume(Sequence sequence, SystemInstance instance, int step, bool waiting, int waitTicks, bool byHand)
-        {
-            if (sequence == null)
-                return;
-
-            var key = Key(sequence.Id, instance?.Number ?? 0);
-
-            SequenceRunner runner;
-            if (_runners.TryGetValue(key, out runner))
-            {
-                runner.Resume(step, waiting, waitTicks, byHand);
-                return;
-            }
-
-            var held = new Held();
-            held.Which = key;
-            held.Step = step;
-            held.Waiting = waiting;
-            held.WaitTicks = waitTicks;
-            held.ByHand = byHand;
-            _resuming.Add(held);
-        }
-
-        /// <summary>One run read out of storage, waiting for its runner to be made.</summary>
-        struct Held
-        {
-            public long Which;
-            public int Step;
-            public bool Waiting;
-            public int WaitTicks;
-            public bool ByHand;
-        }
-
-        /// <summary>Gives a freshly made runner whatever was read for it, if anything.</summary>
-        void Resumed(long key, SequenceRunner runner)
-        {
-            for (var i = 0; i < _resuming.Count; i++)
-            {
-                if (_resuming[i].Which != key)
-                    continue;
-
-                var held = _resuming[i];
-                _resuming.RemoveAt(i);
-                runner.Resume(held.Step, held.Waiting, held.WaitTicks, held.ByHand);
-                return;
-            }
-        }
-
-        /// <summary>
         /// Keeps the set of runners matching the sequences and the ones of each system.
         /// </summary>
         /// <remarks>Done on the tick after the program says it gained or lost something, and on no other.</remarks>
@@ -171,7 +115,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         };
 
                         _runners.Add(key, runner);
-                        Resumed(key, runner);
                     }
                 }
             }
@@ -267,6 +210,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             foreach (var runner in _acting.Values)
                 runner.Switched();
+        }
+
+        /// <summary>Takes every runner off the rota and lets go of them all, so each is made again from the construct's memory as it stands.</summary>
+        /// <remarks>For a copy whose memory was put back in place from the one that lent it; the next match of the program makes them.</remarks>
+        public void Forget()
+        {
+            Retire();
+            _runners.Clear();
+            _acting.Clear();
+            _alone.Clear();
+            _keptActing.Clear();
+            _keptTriggers.Clear();
+            _goneTriggers.Clear();
+            _stale.Clear();
+            _live.Clear();
         }
 
         /// <summary>Takes every runner off the rota, the sequences' first.</summary>

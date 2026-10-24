@@ -8,8 +8,10 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Runtime;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
@@ -35,6 +37,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly ICommand _chooses;
 
         bool _waiting;
+        int _ownProblems;
+        int _ownRemarks;
+        string _ownSaid = "";
         string _installationsWord = "";
         bool _linksTerm = true;
 
@@ -177,18 +182,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             for (var n = 0; n < instances.Count; n++)
                 _page.Live(_rows[instances[n]], _system, instances[n], recount, shown, texts);
 
-            Loudest(shown, texts);
+            Loudest(recount, shown, texts);
         }
 
         /// <summary>
-        /// Marks the heading as the installations of the logic system are: broken where any is, warned where any is, running where
-        /// any is; and its switch as the logic system's.
+        /// Marks the heading as the logic system and its installations are: broken where it or any of them is, warned where any is,
+        /// running where any is, saying what is wrong in the logic system itself, worked out again where <paramref name="recount" />;
+        /// and its switch as the logic system's.
         /// </summary>
         /// <remarks>The rows must have just been brought up to date.</remarks>
-        void Loudest(bool shown, Texts texts)
+        void Loudest(bool recount, bool shown, Texts texts)
         {
-            var problems = 0;
-            var remarks = 0;
+            if (recount)
+                Own(texts);
+
+            var problems = _ownProblems;
+            var remarks = _ownRemarks;
             var parked = false;
             var running = false;
 
@@ -207,8 +216,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             var on = _system.Enabled;
             if (!shown && _heading.Problems == problems && _heading.Remarks == remarks && _heading.Parked == parked
-                && _heading.Running == running && _heading.SwitchIsOn == on)
+                && _heading.Running == running && _heading.SwitchIsOn == on && _heading.Problem == _ownSaid)
                 return;
+
+            _heading.Problem = _ownSaid;
+            _heading.Level = _ownProblems > 0 || _system.Halt != null ? NoticeLevel.Problem : NoticeLevel.Warning;
 
             _heading.SwitchIsOn = on;
             _heading.SwitchAbout = _editor.SwitchAbout(_system);
@@ -218,6 +230,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Running = running;
             _heading.Status = SystemSummary.RunningText(texts, running);
             _heading.Show(texts);
+        }
+
+        /// <summary>Works out what is wrong in the logic system itself, the same in every installation: why it was switched off, or its first problem or warning.</summary>
+        void Own(Texts texts)
+        {
+            var runner = _editor.Runner;
+            _ownProblems = SystemSummary.SystemProblems(runner, _system);
+            _ownRemarks = SystemSummary.SystemRemarks(runner, _system);
+
+            if (!_system.Enabled && _system.Halt != null)
+            {
+                _ownSaid = SequenceText.Stopped(texts, _system.Halt, _system, _ownProblems == 0);
+                return;
+            }
+
+            SequenceFault fault;
+            var sequence = SystemSummary.SystemFailing(runner, _system, out fault) ?? SystemSummary.SystemWarned(runner, _system, out fault);
+            _ownSaid = sequence == null ? "" : SequenceText.Failing(texts, fault, sequence);
         }
 
         /// <summary>The row of <paramref name="instance" />, one of the installations of the logic system.</summary>

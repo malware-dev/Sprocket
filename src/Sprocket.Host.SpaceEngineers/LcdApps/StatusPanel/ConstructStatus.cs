@@ -149,6 +149,17 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
 
             var any = false;
+            if (system.IsBlueprint)
+            {
+                SequenceFault own;
+                var wrong = SystemSummary.SystemFailing(runner, system, out own) ?? SystemSummary.SystemWarned(runner, system, out own);
+                if (wrong != null)
+                {
+                    Found(Faulted(Item(own.IsWarning ? StatusLevel.Warning : StatusLevel.Problem, system, named, null), own, wrong));
+                    any = true;
+                }
+            }
+
             foreach (SystemInstance use in system.Uses)
             {
                 var instance = system.IsBlueprint ? use : null;
@@ -167,19 +178,11 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 }
 
                 SequenceFault fault;
-                var failing = SystemSummary.Failing(runner, system, use, out fault);
-                if (failing == null)
-                    failing = Warned(runner, system, use, out fault);
-
+                var failing = SystemSummary.Failing(runner, system, use, out fault) ?? SystemSummary.Warned(runner, system, use, out fault);
                 if (failing == null)
                     continue;
 
-                var item = Item(fault.IsWarning ? StatusLevel.Warning : StatusLevel.Problem, system, named, instance);
-                item.Fault = fault;
-                item.Sequence = failing.HasName ? failing.Name : "";
-                item.Alone = failing.IsAlone;
-                item.Row = SequenceText.Row(failing, fault.Step);
-                Found(item);
+                Found(Faulted(Item(fault.IsWarning ? StatusLevel.Warning : StatusLevel.Problem, system, named, instance), fault, failing));
                 any = true;
             }
 
@@ -219,26 +222,14 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return item;
         }
 
-        /// <summary>The first of a system's sequences, or of its triggers' own acts, with a warning on <paramref name="use" />, and what, or null.</summary>
-        static Sequence Warned(AutomationRunner runner, AutomationSystem system, SystemInstance use, out SequenceFault fault)
+        /// <summary><paramref name="item" />, saying <paramref name="fault" /> of <paramref name="sequence" />.</summary>
+        static StatusItem Faulted(StatusItem item, SequenceFault fault, Sequence sequence)
         {
-            foreach (Sequence sequence in system.Sequences)
-            {
-                fault = SequenceSummary.Fault(runner.Get(sequence, use));
-                if (fault.Exists)
-                    return sequence;
-            }
-
-            foreach (Trigger trigger in system.Triggers)
-            {
-                var alone = runner.Alone(system, trigger);
-                fault = alone == null ? SequenceFault.None : SequenceSummary.Fault(runner.Get(alone, use));
-                if (fault.Exists)
-                    return alone;
-            }
-
-            fault = SequenceFault.None;
-            return null;
+            item.Fault = fault;
+            item.Sequence = sequence.HasName ? sequence.Name : "";
+            item.Alone = sequence.IsAlone;
+            item.Row = SequenceText.Row(sequence, fault.Step);
+            return item;
         }
 
         /// <summary>Puts <paramref name="item" /> in its place among those found, keeping the tick it was first seen.</summary>

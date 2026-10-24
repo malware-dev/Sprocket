@@ -97,13 +97,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         void Say(Notice notice)
         {
-            var ink = RemarkColors.Of(notice.Level, Palette.Ink);
+            var ink = RemarkLook.Of(notice.Level, Palette.Ink);
 
-            _column.Background = notice.Level == NoticeLevel.Problem
-                ? Palette.ProblemWash
-                : notice.Level == NoticeLevel.Warning
-                    ? Palette.NoticeWash
-                    : Palette.Panel;
+            RemarkLook.Ground(_column, notice.Level, Palette.Panel);
             _heading.Style = notice.Level == NoticeLevel.Problem
                 ? Styles.ProblemStrip
                 : notice.Level == NoticeLevel.Warning

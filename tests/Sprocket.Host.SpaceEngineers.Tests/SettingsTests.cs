@@ -31,17 +31,14 @@ public class SettingsTests
         Assert.False(Settings.Of(new Settings(false).Written()).DeveloperMode);
     }
 
-    /// <summary>Tips stay open unless a file asks for Alt, the world's file winning; the choice is written and read back, and a word that is neither is left.</summary>
+    /// <summary>A settings file still holding how tips were kept open reads as though it held nothing of it, and is written without it.</summary>
     [Fact]
-    public void TipsStayUnlessAltIsAsked()
+    public void ARetiredTipSettingIsLeftOut()
     {
-        Assert.Equal(TipKeeping.Stay, Settings.From(null, null).TipKeeping);
-        Assert.Equal(TipKeeping.Alt, Settings.From("[Sprocket]\ntipKeeping=alt\n", null).TipKeeping);
-        Assert.Equal(TipKeeping.Stay, Settings.From("[Sprocket]\ntipKeeping=alt\n", "[Sprocket]\ntipKeeping=stay\n").TipKeeping);
-        Assert.Null(Settings.From(null, "[Sprocket]\ntipKeeping=sometimes\n").World.TipKeeping);
+        var read = Settings.From(null, "[Sprocket]\ntipKeeping=alt\ndebugLog=true\n");
 
-        var written = new Settings(SettingsLayer.Empty, SettingsLayer.Empty.WithTipKeeping(TipKeeping.Alt));
-        Assert.Equal(TipKeeping.Alt, Settings.Of(written.Written()).TipKeeping);
+        Assert.True(read.DebugLog);
+        Assert.DoesNotContain("tipKeeping", read.Written());
     }
 
     /// <summary>A player's tips are on unless their own section of the global file turns them off, and writing it leaves every world's settings as they were.</summary>

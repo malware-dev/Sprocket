@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Repairs;
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -192,6 +193,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             if (fault.Problem == SequenceProblem.MissingFacet)
                 return Template.Fill(texts.ProblemMissingScreen, "block", fault.Which);
+
+            var repair = ProgramRepairs.Of(fault.Problem);
+            if (repair != null)
+                return repair.Warning(texts, fault);
 
             if (fault.Problem == SequenceProblem.MissingSource && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(texts.ProblemSourceLost, "block", fault.Which);

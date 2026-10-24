@@ -2244,6 +2244,30 @@
     <value>Default (off)</value>
     <comment>In the admin settings, on the tab for this world, the first choice in the list of the developer mode setting: it follows the value on the tab for every world, which has developer mode off.</comment>
   </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Warning" xml:space="preserve">
+    <value>This step is outdated and now needs a screen slot. Press {slot} to make one.</value>
+    <comment>Warning on a step that does something to a screen (shows text, for example) through a slot made to hold blocks rather than screens, as programs written before screen slots existed do; the step still runs. {slot} is the slot's name. Pressing the slot in the step opens the picker, which makes a screen slot of it. Shown under the step's line on a sequence's screen, on the sequence's row on a logic system's screen, and on the logic system's heading on the home screen.</comment>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Instead" xml:space="preserve">
+    <value>instead of {slot}</value>
+    <comment>Quieter words after the proposed name of a new screen slot in the picker's heading, where the step's slot holds blocks and another step or trigger uses it for the blocks themselves, so the picker makes a new screen slot for this step and leaves the old one to the others. {slot} is the name of the step's slot.</comment>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.AheadInPlace" xml:space="preserve">
+    <value>{slot} holds blocks, but this step uses its screen. Picking the screen makes {slot} a screen slot, for every step that uses it.</value>
+    <comment>Question asked as a step is pressed that shows on a screen (shows text, for example) through a slot made to hold blocks, where every step using the slot uses its screen, before the picker opens. {slot} is the slot's name. The slot keeps its name.</comment>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.AheadSplit" xml:space="preserve">
+    <value>{slot} holds blocks, but this step uses its screen. Other steps use {slot} for the block itself, so picking the screen gives every step that uses the screen a new screen slot, and {slot} stays for the block.</value>
+    <comment>Question asked as a step is pressed that shows on a screen through a slot made to hold blocks, where other steps or triggers use the slot for the block itself (switching it on or off, for example), before the picker opens. {slot} is the slot's name.</comment>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Proceed" xml:space="preserve">
+    <value>Pick the screen</value>
+    <comment>Answer to the question asked before the picker opens on a step that shows on a screen through a slot holding blocks, the one Enter takes: opens the picker.</comment>
+  </data>
+  <data name="Sprocket.Repair.ScreenOnBlockSlot.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Answer to the question asked before the picker opens on a step that shows on a screen through a slot holding blocks: leaves the step as it is.</comment>
+  </data>
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
     <value>There are no pending tasks to wait for here, because no step above it takes time.</value>
     <comment>Warning on an await (a wait for what is running) when no step since the previous await takes time to finish. Shown under the await's line on a sequence's screen and on the sequence's row on a logic system's screen.</comment>
@@ -2735,30 +2759,6 @@
   <data name="Sprocket.Category.Default" xml:space="preserve">
     <value>Category {number}</value>
     <comment>The name a new category of slots is given on a logic system's Installation panel tab. {number} is filled with the first number no category is using, counting on from the categories there are.</comment>
-  </data>
-  <data name="Sprocket.Admin.Trials" xml:space="preserve">
-    <value>Trials</value>
-    <comment>In the admin settings, the heading over the trials: designs still being compared, which an admin chooses between. On both tabs.</comment>
-  </data>
-  <data name="Sprocket.Admin.TrialsAbout" xml:space="preserve">
-    <value>Designs still being compared. A trial is removed once its design is chosen.</value>
-    <comment>In the admin settings, the line under the heading over the trials.</comment>
-  </data>
-  <data name="Sprocket.Admin.Tips" xml:space="preserve">
-    <value>How tips stay open</value>
-    <comment>In the admin settings, the name of the trial of how a tip stays open while the pointer moves onto it. Placeholder until the texts are written.</comment>
-  </data>
-  <data name="Sprocket.Admin.TipsAbout" xml:space="preserve">
-    <value>Whether a tip always lets the pointer move onto it, or only while Alt is held.</value>
-    <comment>In the admin settings, the line under the name of the trial of how a tip stays open. Placeholder until the texts are written.</comment>
-  </data>
-  <data name="Sprocket.Admin.TipsStay" xml:space="preserve">
-    <value>Always stay</value>
-    <comment>In the admin settings, the choice of the tip trial where the pointer can always move from an element onto its tip. Placeholder until the texts are written.</comment>
-  </data>
-  <data name="Sprocket.Admin.TipsAlt" xml:space="preserve">
-    <value>Hold Alt to keep open</value>
-    <comment>In the admin settings, the choice of the tip trial where a tip stays for the pointer to move onto it only while Alt is held. Placeholder until the texts are written.</comment>
   </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} must be turned off in order to be edited safely.</value>

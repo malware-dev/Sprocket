@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
                         Spacing = 12f,
                         Children =
                         {
-                            new Label { Style = Styles.Problem, Wraps = true, IsVisible = false, Placement = Flex.Grow }.As(out _problem),
+                            new Label { Style = Styles.ProblemLine, Wraps = true, IsVisible = false, Placement = Flex.Grow }.As(out _problem),
                             new HStack { Placement = Flex.Grow }.As(out _spacer),
                             new Button { Style = Styles.Primary }.As(out _apply)
                         }

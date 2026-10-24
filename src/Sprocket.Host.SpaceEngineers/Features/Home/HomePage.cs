@@ -178,7 +178,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     var remarks = SystemSummary.Remarks(Editor.Runner, system, instance);
                     var stopped = on || halt == null ? "" : SequenceText.Stopped(texts, halt, system, problems == 0);
                     var again = system.IsBlueprint ? FillAgain(texts, system, instance) : "";
-                    var said = again.Length > 0 ? again : stopped.Length > 0 || problems == 0 ? stopped : Failing(system, instance);
+                    var said = again.Length > 0 ? again : stopped.Length > 0 ? stopped : Failing(system, instance, problems > 0);
                     changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != said;
                     row.Problems = problems;
                     row.Remarks = remarks;
@@ -217,11 +217,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 : Template.Fill(texts.SlotFillAgainMany, "count", again.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
-        /// <summary>What is wrong with <paramref name="system" /> on <paramref name="instance" />, said in place of what it is doing.</summary>
-        string Failing(AutomationSystem system, SystemInstance instance)
+        /// <summary>What is wrong with <paramref name="system" /> on <paramref name="instance" /> where <paramref name="broken" />, or its first warning where not, said in place of what it is doing.</summary>
+        string Failing(AutomationSystem system, SystemInstance instance, bool broken)
         {
             SequenceFault fault;
-            var sequence = SystemSummary.Failing(Editor.Runner, system, instance, out fault);
+            var sequence = broken
+                ? SystemSummary.Failing(Editor.Runner, system, instance, out fault)
+                : SystemSummary.Warned(Editor.Runner, system, instance, out fault);
             return sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence);
         }
 

@@ -157,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _problem.Padding = _sentence.Padding;
             _problem.Text = HasProblem ? Problem : "";
             _problem.IsVisible = HasProblem && Problem.Length != 0;
-            _problem.Color = RemarkColors.Of(Level, Palette.Faint);
+            _problem.Color = RemarkLook.Of(Level, Palette.Faint);
 
             if (_led != Kind || _ledTerm != LeadTerm)
             {
@@ -222,13 +222,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _pause.IsEnabled = Pauses != null;
             _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.Codex.SequenceUnpauseStep : texts.Codex.SequencePauseStep);
 
-            Background = IsCarried
-                ? Palette.SlotFill
-                : HasProblem && Level != NoticeLevel.Info
-                    ? Level == NoticeLevel.Warning ? Palette.NoticeWash : Palette.ProblemWash
-                    : IsCurrent
-                        ? Palette.LiveWash
-                        : Palette.None;
+            RemarkLook.Ground(this, IsCarried || !HasProblem ? NoticeLevel.Info : Level,
+                IsCarried ? Palette.SlotFill : IsCurrent ? Palette.LiveWash : Palette.None);
         }
 
         /// <summary>Makes the words its line opens with, where they are a term, show the page <paramref name="codex" /> has on it.</summary>

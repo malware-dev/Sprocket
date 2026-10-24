@@ -50,7 +50,7 @@ public static class SavedState
         if (!files.Has(Memories.File))
             return said.Append("The carrier holds no state.\n").ToString();
 
-        var memory = new ProtoBinary().Unpack(files.Read(Memories.File));
+        var memory = new ProtoBinary().Unpack<WorldMemory>(files.Read(Memories.File));
         Write(said, memory, 0);
         return said.ToString();
     }

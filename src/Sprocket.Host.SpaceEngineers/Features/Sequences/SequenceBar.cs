@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _status.Text = Status;
             _problem.IsVisible = wrong;
             _problem.Text = Problem;
-            _problem.Color = RemarkColors.Of(Level, Palette.Muted);
+            _problem.Style = Level == NoticeLevel.Warning ? Styles.WarningStatus : Level == NoticeLevel.Problem ? Styles.ProblemStatus : Styles.Status;
             _lastRun.Text = LastRun;
             _light.Tint = JustRan ? Palette.Live : Palette.Dim;
 

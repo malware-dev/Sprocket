@@ -1,93 +1,94 @@
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>What a block says is stopping it.</summary>
+    /// <remarks>Persisted: each value's number is kept in saves, so a number is never changed or given to another value.</remarks>
     public enum Cause
     {
         /// <summary>Nothing.</summary>
-        None,
+        None = 0,
 
         /// <summary>An air vent cannot empty the room: nowhere to put the air.</summary>
-        VentNowhere,
+        VentNowhere = 1,
 
         /// <summary>An air vent cannot fill the room: it is not airtight.</summary>
-        VentNotAirtight,
+        VentNotAirtight = 2,
 
         /// <summary>An air vent cannot fill the room: no oxygen to fill it with.</summary>
-        VentNoOxygen,
+        VentNoOxygen = 3,
 
         /// <summary>Something else told the vent to fill the room.</summary>
-        VentToldToFill,
+        VentToldToFill = 4,
 
         /// <summary>Something else told the vent to empty the room.</summary>
-        VentToldToEmpty,
+        VentToldToEmpty = 5,
 
         /// <summary>Something else set the battery to discharge.</summary>
-        BatteryToldToDischarge,
+        BatteryToldToDischarge = 6,
 
         /// <summary>Something else set the battery to auto.</summary>
-        BatteryToldToAuto,
+        BatteryToldToAuto = 7,
 
         /// <summary>The battery cannot charge: it is switched off.</summary>
-        BatteryOff,
+        BatteryOff = 8,
 
         /// <summary>The battery cannot charge: it is damaged.</summary>
-        BatteryDamaged,
+        BatteryDamaged = 9,
 
         /// <summary>The battery cannot charge: no power coming in.</summary>
-        BatteryNoPower,
+        BatteryNoPower = 10,
 
         /// <summary>The piston cannot move: switched off or no power.</summary>
-        PistonNoPower,
+        PistonNoPower = 11,
 
         /// <summary>The piston cannot move: it has no head.</summary>
-        PistonNoHead,
+        PistonNoHead = 12,
 
         /// <summary>The piston stopped: its speed was set to nought.</summary>
-        PistonStopped,
+        PistonStopped = 13,
 
         /// <summary>The piston stopped extending: it was sent the other way.</summary>
-        PistonReversedExtending,
+        PistonReversedExtending = 14,
 
         /// <summary>The piston stopped retracting: it was sent the other way.</summary>
-        PistonReversedRetracting,
+        PistonReversedRetracting = 15,
 
         /// <summary>The rotor or hinge cannot turn: switched off or no power.</summary>
-        RotorNoPower,
+        RotorNoPower = 16,
 
         /// <summary>The rotor or hinge cannot turn: it has no head.</summary>
-        RotorNoHead,
+        RotorNoHead = 17,
 
         /// <summary>The rotor or hinge cannot turn: it is locked.</summary>
-        RotorLocked,
+        RotorLocked = 18,
 
         /// <summary>The rotor or hinge cannot turn: its torque is nought.</summary>
-        RotorNoTorque,
+        RotorNoTorque = 19,
 
         /// <summary>The rotor or hinge stopped: its speed was set to nought.</summary>
-        RotorStopped,
+        RotorStopped = 20,
 
         /// <summary>The rotor or hinge cannot turn: something is holding it.</summary>
-        RotorHeld,
+        RotorHeld = 21,
 
         /// <summary>Something else switched the tank's stockpile off.</summary>
-        TankStockpileOff,
+        TankStockpileOff = 22,
 
         /// <summary>The tank cannot fill: switched off or no power.</summary>
-        TankNoPower,
+        TankNoPower = 23,
 
         /// <summary>The tank cannot fill: none of its gas is coming in.</summary>
-        TankNoGas,
+        TankNoGas = 24,
 
         /// <summary>Something else switched the jump drive's recharging off.</summary>
-        JumpDriveRechargeOff,
+        JumpDriveRechargeOff = 25,
 
         /// <summary>The programmable block did not run its script: it has none, it would not compile, or it is already running.</summary>
-        ScriptNotRun,
+        ScriptNotRun = 26,
 
         /// <summary>Something else told the door to open while a step waited for it to close.</summary>
-        DoorToldToOpen,
+        DoorToldToOpen = 27,
 
         /// <summary>Something else told the door to close while a step waited for it to open.</summary>
-        DoorToldToClose
+        DoorToldToClose = 28
     }
 }

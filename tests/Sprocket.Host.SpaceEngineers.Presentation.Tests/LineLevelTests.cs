@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>Every line says a remark at one of three levels: a problem in red on a red wash, a warning in amber, a note in its own ink.</summary>
+/// <summary>Every line says a remark at one of three levels: a problem in red on a red ground, a warning in amber on an amber one, a note in its own ink.</summary>
 public class LineLevelTests
 {
     const string Said = "Worth a word.";
@@ -32,7 +32,7 @@ public class LineLevelTests
         Assert.Equal(level != NoticeLevel.Info, flag.IsVisible);
     }
 
-    /// <summary>A trigger's line writes each level in its ink, and only a problem washes the line.</summary>
+    /// <summary>A trigger's line writes each level in its ink, on the ground of its level: a problem red and a warning amber, each striped.</summary>
     [Theory]
     [InlineData(NoticeLevel.Problem)]
     [InlineData(NoticeLevel.Warning)]
@@ -43,7 +43,8 @@ public class LineLevelTests
         row.Show(null!, Simulation.Fresh().Texts);
 
         Assert.Equal(Ink(level, Palette.Faint), Words(row).Color);
-        Assert.Equal(level == NoticeLevel.Problem ? Palette.ProblemWash : Palette.None, row.Background);
+        Assert.Equal(RemarkLook.Wash(level, Palette.None), row.Background);
+        Assert.Same(RemarkLook.Stripes(level), row.Pattern);
     }
 
     /// <summary>A slot's line writes each level in its ink.</summary>

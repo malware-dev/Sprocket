@@ -560,7 +560,4 @@
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
     <value>Vis veiledningen for å skrive formatert tekst.</value>
   </data>
-  <data name="Sprocket.Tip.KeepHint" xml:space="preserve">
-    <value>Hold Alt for å holde åpen</value>
-  </data>
 </root>

@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Children.Add(new HStack
             {
                 Placement = Flex.Grow,
-                Children = { new Label { Style = Styles.Skipped, IsVisible = false }.As(out _skipped) }
+                Children = { new Label { Style = Styles.WarningStatus, IsVisible = false }.As(out _skipped) }
             });
         }
     }

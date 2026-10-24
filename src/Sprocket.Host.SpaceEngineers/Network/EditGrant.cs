@@ -40,12 +40,15 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>The settings the server runs the world by, written as one text, which the client takes as its own.</summary>
         public string Settings;
 
+        /// <summary>The construct's memory, packed: the runs, triggers, owners, pause and versions waiting that the copy shows.</summary>
+        public string Memory;
+
         /// <summary>How many bytes <paramref name="grant" /> takes on the wire.</summary>
         public static int SizeOf(ref EditGrant grant)
         {
             return sizeof(long) + sizeof(int) + ByteCodec.SizeOfString(grant.Holder)
                 + ByteCodec.SizeOfString(grant.Program) + ByteCodec.SizeOfString(grant.State) + ByteCodec.SizeOfString(grant.Settings)
-                + ByteCodec.SizeOfString(grant.RecentColors);
+                + ByteCodec.SizeOfString(grant.RecentColors) + ByteCodec.SizeOfString(grant.Memory);
         }
 
         /// <summary>Writes <paramref name="grant" /> at <paramref name="offset" />, and answers how many bytes it took.</summary>
@@ -59,6 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             ByteCodec.WriteString(grant.State, data, ref offset);
             ByteCodec.WriteString(grant.Settings, data, ref offset);
             ByteCodec.WriteString(grant.RecentColors, data, ref offset);
+            ByteCodec.WriteString(grant.Memory, data, ref offset);
             return offset - start;
         }
 
@@ -82,6 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             ByteCodec.TryReadString(data, ref offset, out grant.State);
             ByteCodec.TryReadString(data, ref offset, out grant.Settings);
             ByteCodec.TryReadString(data, ref offset, out grant.RecentColors);
+            ByteCodec.TryReadString(data, ref offset, out grant.Memory);
             return offset - start;
         }
     }

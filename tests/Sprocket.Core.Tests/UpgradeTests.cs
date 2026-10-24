@@ -60,6 +60,79 @@ public class UpgradeTests
         + "    }\n"
         + "}\n";
 
+    /// <summary>An alpha 18 blueprint showing text through a block slot filled with <paramref name="block" />, with <paramref name="more" /> steps after it.</summary>
+    static string OnABlockSlot(string block, string more = "") => "sprocket 1 alpha 18\n\n"
+        + "let shown = block '" + block + "' [ 1, [ (1 0 0) ], \"Shown\" ]\n\n"
+        + "system blueprint \"5c1d7e2a-9b3f-4a6e-8d20-7f4b1c9e3a55\" as MalTek.Status {\n"
+        + "    required slot status\n\n"
+        + "    sequence 1 as Show {\n"
+        + "        call ext.'show-text'(\"Docked\") on [ status ]\n"
+        + more
+        + "    }\n"
+        + "}\n\n"
+        + "instance 1 of \"5c1d7e2a-9b3f-4a6e-8d20-7f4b1c9e3a55\" as 'Installation 1' {\n"
+        + "    status = [ shown ]\n"
+        + "}\n";
+
+    /// <summary>The slot <c>status</c> of <paramref name="text" /> once read, with the world of <paramref name="ship" /> where it is not null.</summary>
+    static Part Upgraded(string text, Rigged? ship, out AutomationSystem system)
+    {
+        var program = new Automation();
+        Assert.Equal("", ship == null
+            ? ProgramReader.Load(text, program, new Values())
+            : ProgramReader.Load(text, program, ship.World.Values, out _, ship.World));
+        system = program.Systems[0];
+        return system.FindPart("status")!;
+    }
+
+    /// <summary>An alpha 18 block slot whose every step shows on a block with one screen holds that screen, keeping its name.</summary>
+    [Fact]
+    public void AnAlpha18OneScreenBlockSlotHoldsItsScreen()
+    {
+        var ship = new Rigged();
+        ship.Rig.TextPanel(1, "Shown");
+        ship.Tick();
+
+        var part = Upgraded(OnABlockSlot("TextPanel/LargeTextPanel"), ship, out var system);
+
+        Assert.Equal(HostTypes.Returned("screen")!.Id, part.Holds);
+        Assert.Single(system.Instances[0].Facets("status")!);
+        Assert.Equal(new[] { "status" }, ((Act)system.Sequences[0].Steps[0]).Targets);
+    }
+
+    /// <summary>An alpha 18 block slot a step also uses for the block itself is left holding blocks, for the repair.</summary>
+    [Fact]
+    public void AnAlpha18BlockSlotABlockStepUsesIsLeftAlone()
+    {
+        var ship = new Rigged();
+        ship.Rig.TextPanel(1, "Shown");
+        ship.Tick();
+
+        var part = Upgraded(OnABlockSlot("TextPanel/LargeTextPanel", "        set ext.power on [ status ] to on\n"), ship, out _);
+
+        Assert.Equal("", part.Holds);
+    }
+
+    /// <summary>An alpha 18 block slot on a block with more than one screen is left holding blocks, for the repair to ask which.</summary>
+    [Fact]
+    public void AnAlpha18BlockSlotOnABlockWithTwoScreensIsLeftAlone()
+    {
+        var ship = new Rigged();
+        ship.Rig.Weld(new Billboard(1, "Shown"));
+        ship.Tick();
+
+        var part = Upgraded(OnABlockSlot("LCDPanelsBlock/LargeBlockBillboard"), ship, out _);
+
+        Assert.Equal("", part.Holds);
+    }
+
+    /// <summary>An alpha 18 block slot read with no world, where its screens cannot be seen, is left holding blocks.</summary>
+    [Fact]
+    public void AnAlpha18BlockSlotWithNoWorldIsLeftAlone()
+    {
+        Assert.Equal("", Upgraded(OnABlockSlot("TextPanel/LargeTextPanel"), null, out _).Holds);
+    }
+
     /// <summary>A screen named in a step moves onto a slot of screens of its own, which the installation fills with the screen of that name.</summary>
     [Fact]
     public void AnAlpha15ScreenIsHeldByItsSlot()
@@ -197,7 +270,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith("sprocket 1 alpha 18", written);
+        Assert.StartsWith("sprocket 1 alpha 19", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -243,7 +316,7 @@ public class UpgradeTests
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
-    [InlineData("sprocket 1 alpha 19")]
+    [InlineData("sprocket 1 alpha 20")]
     [InlineData("sprocket 2 alpha 14")]
     [InlineData("sprocket 1")]
     public void AnyOtherFormatIsRefused(string header)

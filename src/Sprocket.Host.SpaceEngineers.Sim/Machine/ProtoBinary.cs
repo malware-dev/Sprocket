@@ -16,19 +16,19 @@ public sealed class ProtoBinary : IBinary
     static readonly Lazy<TypeModel> Model = new Lazy<TypeModel>(() => RuntimeTypeModel.Create(true));
 
     /// <inheritdoc />
-    public string Pack(WorldMemory memory)
+    public string Pack<T>(T kept)
     {
         _ = Model.Value;
         using var stream = new MemoryStream();
-        Serializer.Serialize(stream, memory);
+        Serializer.Serialize(stream, kept);
         return Convert.ToBase64String(stream.GetBuffer(), 0, (int)stream.Length);
     }
 
     /// <inheritdoc />
-    public WorldMemory Unpack(string text)
+    public T Unpack<T>(string text)
     {
         _ = Model.Value;
         using var stream = new MemoryStream(Convert.FromBase64String(text));
-        return Serializer.Deserialize<WorldMemory>(stream);
+        return Serializer.Deserialize<T>(stream);
     }
 }

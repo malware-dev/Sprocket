@@ -217,13 +217,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             End();
         }
 
-        /// <summary><paramref name="run" /> was taken up at <paramref name="step" /> from what the world remembered.</summary>
-        public void Resumed(SequenceRunner run, int tick, int step)
-        {
-            Numbered(Of(run, tick).Append("taken up again at "), step);
-            End();
-        }
-
         /// <summary>The start of a line: the tick and the programmable block running the automation.</summary>
         StringBuilder Begin(int tick)
         {

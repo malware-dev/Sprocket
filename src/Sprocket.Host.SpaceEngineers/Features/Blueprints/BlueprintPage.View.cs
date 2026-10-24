@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         IsVisible = false,
                         Children =
                         {
-                            new Label { Style = Styles.Problem, Wraps = true, Placement = Flex.Grow }.As(out _trouble),
+                            new Label { Style = Styles.ProblemLine, Wraps = true, Placement = Flex.Grow }.As(out _trouble),
                             new Button { Style = Styles.Button }.As(out _openTrouble)
                         }
                     }.As(out _troubled),

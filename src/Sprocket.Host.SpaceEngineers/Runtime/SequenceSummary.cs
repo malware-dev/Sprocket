@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Repairs;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -208,7 +209,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return start;
 
             SequenceFault idle = Idle(bindings, sequence, through);
-            return idle.Exists ? idle : start;
+            if (idle.Exists)
+                return idle;
+
+            SequenceFault repair = ProgramRepairs.Find(bindings, sequence, through);
+            return repair.Exists ? repair : start;
         }
 
         /// <summary>The first await with nothing to wait for, no step since the await before it taking time, or none.</summary>
