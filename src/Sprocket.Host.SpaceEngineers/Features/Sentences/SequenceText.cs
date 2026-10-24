@@ -7,6 +7,7 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -87,6 +88,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return Template.Fill(texts.SequenceNumbered, "number", number.ToString(CultureInfo.InvariantCulture));
         }
 
+
+        /// <summary>The name a new sequence of <paramref name="system" /> is given: "Sequence 4", the first number free, counting on from the sequences there are.</summary>
+        public static string NewName(Texts texts, AutomationSystem system)
+        {
+            var sequences = system.Sequences;
+            return NumberedName.Free(texts.SequenceNumbered, sequences.Count, wanted =>
+            {
+                foreach (var sequence in sequences)
+                {
+                    if (sequence.Name == wanted)
+                        return true;
+                }
+
+                return false;
+            });
+        }
 
         /// <summary>What a sequence is called: its name, or its number where it has none.</summary>
         public static string Called(Texts texts, Sequence sequence)

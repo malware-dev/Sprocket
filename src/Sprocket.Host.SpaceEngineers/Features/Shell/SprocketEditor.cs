@@ -691,6 +691,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Has the program edited and rewired after <paramref name="edit" />, and the screen built again where it changes its shape.</summary>
         void Settled<T>(Edit<T> edit)
         {
+            // Whatever the change brought in, a sequence made, a blueprint put on, a program merged, is named as it arrives.
+            GivenNames.Give(_program, Texts);
             _program.Edited();
             _program.Rewire();
 

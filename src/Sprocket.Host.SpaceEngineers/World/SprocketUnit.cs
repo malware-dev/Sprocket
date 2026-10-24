@@ -454,6 +454,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (warning.Length > 0)
                 GameLog.Say($"{Logged(_block)} has a program with a warning: {warning}");
 
+            // An installation or a sequence read without a name is given the one it was shown as, written at the next save.
+            if (GivenNames.Give(_program, _texts))
+                _program.Edited();
+
             // Read after the program, because it names what the program declared. Only a copy being edited takes the runs
             // from it, for show.
             if (!string.IsNullOrEmpty(state))
