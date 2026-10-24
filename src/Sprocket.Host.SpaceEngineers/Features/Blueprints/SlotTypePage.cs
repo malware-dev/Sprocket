@@ -1,29 +1,30 @@
 using System.Collections.Generic;
 using Lumel;
 using Lumel.Input;
-using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>
-    /// The picker a block slot's type is chosen in, from its slot's page: the types the slot can take, wider and narrower than
-    /// it takes now and down to one kind of block, each one only where it offers everything the slot is used for.
+    /// The picker a block slot's type is chosen in, from its slot's page: the kinds selector the block picker narrows with, offering
+    /// any block, each kind of block on the construct, and each family as the type its kinds share, each only where it offers
+    /// everything the slot is used for.
     /// </summary>
     public sealed class SlotTypePage : EditorPage
     {
         readonly AutomationSystem _system;
         readonly Part _part;
         readonly SlotUses _uses;
-        readonly List<string> _types = new List<string>();
-        readonly List<string> _words = new List<string>();
+        readonly KindFilter _kinds = new KindFilter();
+        readonly Dictionary<string, string> _typeOf = new Dictionary<string, string>();
+        readonly List<string> _offered = new List<string>();
         string _chosen;
         PickStrip _strip;
         StageColumn _column;
-        KeyedChildren<string, PickRow> _rows;
-        ICommand _finish;
+        KindRows _rows;
 
         /// <summary>The type of the block slot <paramref name="part" /> of <paramref name="system" />, chosen in <paramref name="editor" />.</summary>
         public SlotTypePage(SprocketEditor editor, AutomationSystem system, Part part) : base(editor)
@@ -49,8 +50,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <inheritdoc />
         public override bool ScrollsItself => true;
 
-        /// <summary>The types offered, as a slot writes them, empty for any block, in the order they are listed.</summary>
-        public IList<string> Offered => _types;
+        /// <summary>The types that can be chosen, as a slot writes them, empty for any block, in the order their rows are listed.</summary>
+        public IList<string> Offered => _offered;
+
+        /// <summary>The key of the row that chooses <paramref name="type" />, or null where no row does.</summary>
+        public string KeyOf(string type)
+        {
+            foreach (var pair in _typeOf)
+            {
+                if (pair.Value == type)
+                    return pair.Key;
+            }
+
+            return null;
+        }
+
+        /// <summary>The kinds selector the types are listed in, once the page is built.</summary>
+        public KindRows Kinds => _rows;
 
         /// <summary>The strip the types are listed in, once the page is built.</summary>
         public PickStrip Strip => _strip;
@@ -83,10 +99,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (_strip == null)
             {
                 _strip = new PickStrip(Editor.Texts);
-                _finish = Editor.Act(CommandKind.Primary, Primary);
                 _column = new StageColumn(_strip.Width, false, null, Editor.Texts);
                 _column.Title = Editor.Texts.SlotExpects;
-                _rows = new KeyedChildren<string, PickRow>(_column.Rows, Row);
+                _column.Narrowed += Narrow;
+                _rows = new KindRows(_kinds, _column.Rows, Press);
                 List();
             }
 
@@ -96,16 +112,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _strip.Returns = null;
             _strip.ShowsArguments = false;
 
-            _rows.Show(_types);
-            for (var i = 0; i < _types.Count; i++)
-            {
-                var row = _rows[_types[i]];
-                row.Text = _words[i];
-                row.Many = false;
-                row.IsChosen = _types[i] == _chosen;
-                row.Show();
-            }
-
+            Choose(_chosen);
+            // Any block is offered only where any block can do what the slot is used for.
+            _rows.Show(Editor.Texts, _typeOf.ContainsKey("") ? Editor.Texts.SlotAnyBlock : null, null);
+            _column.NarrowText = _kinds.Search;
             _column.ShowEmpty();
             _strip.Show();
         }
@@ -122,97 +132,109 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return _strip;
         }
 
-        PickRow Row(string type)
+        /// <summary>What pressing the row kept under <paramref name="key" /> does: chooses its type, or nothing where the type does not offer what the slot is used for.</summary>
+        ICommand Press(string key)
         {
-            var row = new PickRow();
-            row.Picked += (held, presses) =>
+            string type;
+            if (!_typeOf.TryGetValue(key, out type))
+                return null;
+
+            return Editor.Act(CommandKind.PickChoice, delegate
             {
-                var choose = Editor.Act(CommandKind.PickChoice, delegate
-                {
-                    _chosen = type;
-                    Editor.Invalidate();
-                });
-                if (choose == null)
-                    return;
+                _chosen = type;
+                Editor.Invalidate();
+            });
+        }
 
-                choose.Execute();
-                if (presses > 1 && _finish != null)
-                    _finish.Execute();
-            };
+        /// <summary>Narrows the kinds listed to those answering <paramref name="said" />.</summary>
+        void Narrow(string said)
+        {
+            said = said ?? "";
+            if (said == _kinds.Search)
+                return;
 
-            return row;
+            var narrow = Editor.Act(CommandKind.NarrowKinds, delegate
+            {
+                _kinds.Search = said;
+                Editor.Invalidate();
+            });
+
+            if (narrow != null)
+                narrow.Execute();
+        }
+
+        /// <summary>Marks the row that chooses <paramref name="type" /> as the one in force, or none where no row does.</summary>
+        void Choose(string type)
+        {
+            var key = KeyOf(type);
+            var family = key == null ? Family.None : KindFilter.FamilyOf(key);
+            if (family != Family.None)
+                _kinds.SetFamily(family);
+            else
+                _kinds.Set(key ?? "");
         }
 
         /// <summary>
-        /// Lists the types: any block, then every type and kind of block of the construct that the slot's type takes or that
-        /// takes it, widest first, each only where it offers everything the slot is used for; the slot's own always.
+        /// Offers the kinds of block on the construct the slot takes and that offer everything it is used for, each family
+        /// meaning the type its kinds share, and works out which rows choose a type that does too; the slot's own always.
         /// </summary>
         void List()
         {
-            var counts = new Dictionary<string, int>();
-            var words = new Dictionary<string, string>();
-            var texts = Editor.Texts;
-            counts[""] = int.MaxValue;
-            words[""] = texts.SlotAnyBlock;
-
-            var kinds = new List<World.EntityKind>();
             foreach (var entity in Editor.World.Entities)
             {
-                if (!kinds.Contains(entity.Kind))
-                    kinds.Add(entity.Kind);
+                var kind = entity.Kind;
+                if (!_kinds.Present.Contains(kind) && _part.Fits(kind.Lineage) && Takes(kind.Lineage[0]))
+                    _kinds.Present.Add(kind);
             }
 
-            foreach (var kind in kinds)
+            Offer("", "");
+            var families = new Dictionary<Family, List<IList<string>>>();
+            foreach (var kind in _kinds.Present)
             {
-                var lineage = kind.Lineage;
-                if (!_part.Fits(lineage))
+                Offer(kind.Id, kind.Lineage[0]);
+                if (kind.Family == Family.None)
                     continue;
 
-                for (var i = 0; i < lineage.Count; i++)
-                {
-                    var type = lineage[i];
-                    if (words.ContainsKey(type))
-                        continue;
+                List<IList<string>> lineages;
+                if (!families.TryGetValue(kind.Family, out lineages))
+                    families.Add(kind.Family, lineages = new List<IList<string>>());
 
-                    words[type] = i == 0 ? kind.DisplayName : TypeText.Of(texts, type);
-                    counts[type] = Covered(kinds, type);
-                }
+                lineages.Add(kind.Lineage);
             }
 
-            if (!words.ContainsKey(_part.Expects))
-            {
-                words[_part.Expects] = TypeText.Of(texts, _part.Expects);
-                counts[_part.Expects] = 0;
-            }
+            foreach (var pair in families)
+                Offer(_kinds.FamilyKey(pair.Key), Shared(pair.Value));
 
-            var order = new List<string>(words.Keys);
-            order.Sort((one, other) =>
+            _kinds.Fill(Editor.Texts);
+            foreach (var key in _kinds.Keys)
             {
-                var wider = counts[other].CompareTo(counts[one]);
-                return wider != 0 ? wider : string.CompareOrdinal(words[one], words[other]);
-            });
-
-            foreach (var type in order)
-            {
-                if (type != _part.Expects && _uses.Missing(_system, _part, type) != null)
-                    continue;
-
-                _types.Add(type);
-                _words.Add(words[type]);
+                string type;
+                if (_typeOf.TryGetValue(key, out type))
+                    _offered.Add(type);
             }
         }
 
-        /// <summary>How many of <paramref name="kinds" /> a slot of <paramref name="type" /> takes.</summary>
-        static int Covered(List<World.EntityKind> kinds, string type)
+        /// <summary>The type a family of kinds of <paramref name="lineages" /> stands for: the one they all share, above its kind where it has one, or null where there is none.</summary>
+        static string Shared(List<IList<string>> lineages)
         {
-            var count = 0;
-            foreach (var kind in kinds)
-            {
-                if (Part.Takes(type, kind.Lineage))
-                    count++;
-            }
+            if (lineages.Count > 1)
+                return Part.Nearest(lineages);
 
-            return count;
+            var only = lineages[0];
+            return only.Count > 1 ? only[1] : null;
+        }
+
+        /// <summary>Lets the row kept under <paramref name="key" /> choose <paramref name="type" />, where the slot can take it.</summary>
+        void Offer(string key, string type)
+        {
+            if (type != null && Takes(type))
+                _typeOf[key] = type;
+        }
+
+        /// <summary>Whether the slot can take <paramref name="type" />: it is the slot's own, or offers everything the slot is used for.</summary>
+        bool Takes(string type)
+        {
+            return type == _part.Expects || _uses.Missing(_system, _part, type) == null;
         }
 
         /// <summary>Gives the slot <paramref name="type" /> as one step back, and goes back to its page.</summary>

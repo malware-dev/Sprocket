@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         StageColumn _what;
         StageColumn _does;
         KeyedChildren<long, PickRow> _blockRows;
-        KeyedChildren<string, KindRow> _kindRows;
+        KindRows _kindRows;
         KeyedChildren<string, Element> _whatRows;
         SlotStrip _slots;
         FacetChoice _facets;
@@ -687,7 +687,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             else
                 _blockRows = new KeyedChildren<long, PickRow>(_blocks.Rows, BlockRow);
 
-            _kindRows = new KeyedChildren<string, KindRow>(_blocks.Kinds, KindRow);
+            _kindRows = new KindRows(_kinds, _blocks.Kinds, KindPress);
             _blocks.KindsOpened += delegate
             {
                 if (Editor.Input != null)
@@ -732,21 +732,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return row;
         }
 
-        KindRow KindRow(string kind)
+        /// <summary>What pressing the kinds row kept under <paramref name="kind" /> does: narrows the blocks to that kind or family, or to none.</summary>
+        ICommand KindPress(string kind)
         {
             var family = KindFilter.FamilyOf(kind);
-
-            return new KindRow
+            return Editor.Act(kind.Length == 0 ? CommandKind.AnyKind : CommandKind.OneKind, delegate
             {
-                Command = Editor.Act(kind.Length == 0 ? CommandKind.AnyKind : CommandKind.OneKind, delegate
-                {
-                    _blocks.CloseKinds();
-                    if (family != Family.None)
-                        SetFamily(family);
-                    else
-                        SetKind(kind);
-                })
-            };
+                _blocks.CloseKinds();
+                if (family != Family.None)
+                    SetFamily(family);
+                else
+                    SetKind(kind);
+            });
         }
 
         Element WhatRow(string key)
@@ -1052,30 +1049,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_kinds.Settle())
                 Editor.Invalidate();
 
-            _kinds.Fill(texts);
-
-            _kindRows.Show(_kinds.Keys);
-
             // Narrowed to no kind, the blocks on offer are still those of the kind a slot limits them to, and it says so.
             var every = Limit ?? texts.PickAnything;
+            var current = _kindRows.Show(texts, every, _listing);
             var anything = _kindRows[""];
-            anything.Text = every;
-            anything.Count = _listing.Candidates.Count;
-            anything.IsCurrent = _kinds.Kind.Length == 0;
             anything.Tip = Tip.For(anything.Tip, Limit == null ? null : Template.Fill(texts.Codex.PickLimitAbout, "kind", Limit));
-
-            var current = every;
-            for (var i = 0; i < _kinds.Shown.Count; i++)
-            {
-                var row = _kindRows[_kinds.Keys[i + 1]];
-                var kind = _kinds.Shown[i];
-                row.Text = kind == null ? FamilyText.Of(texts, _kinds.Families[i]) : kind.DisplayName;
-                row.Count = kind == null ? _listing.CountOfFamily(_kinds.Families[i]) : _listing.CountOfKind(kind.Id);
-                row.IsNested = kind != null && _kinds.Families[i] != Family.None;
-                row.IsCurrent = _kinds.Kind == _kinds.Keys[i + 1];
-                if (row.IsCurrent)
-                    current = row.Text;
-            }
 
             _blocks.Kind = current;
             _blocks.KindText = _kinds.Search;

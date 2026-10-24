@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Style = Styles.MenuRow;
 
             Children.Add(new Label { Style = Styles.OptionWord, Placement = Flex.Grow }.As(out _name));
-            Children.Add(new Label { Style = Styles.Count }.As(out _count));
+            Children.Add(new Label { Style = Styles.Count, IsVisible = false }.As(out _count));
         }
 
         /// <summary>What the kind is called.</summary>
@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             set { _name.Text = value; }
         }
 
-        /// <summary>How many blocks of the kind there are.</summary>
+        /// <summary>How many blocks of the kind there are, or -1 where nothing is counted, which shows no count.</summary>
         public int Count
         {
             get { return _counted; }
@@ -43,7 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     return;
 
                 _counted = value;
-                _count.Text = value.ToString(CultureInfo.InvariantCulture);
+                _count.IsVisible = value >= 0;
+                _count.Text = value < 0 ? "" : value.ToString(CultureInfo.InvariantCulture);
             }
         }
 

@@ -7,7 +7,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>The blocks a pick lists: every block on offer by name, and those the narrowing leaves.</summary>
-    public sealed class BlockListing
+    public sealed class BlockListing : IKindCounts
     {
         static readonly NameOrder ByName = new NameOrder();
 
@@ -123,6 +123,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             return -1;
         }
+
+        /// <inheritdoc />
+        public int All => _candidates.Count;
 
         /// <summary>How many of the blocks on offer are of <paramref name="family" />.</summary>
         public int CountOfFamily(Family family)
