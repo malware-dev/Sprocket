@@ -68,25 +68,7 @@ that shows it.
 
 ## Building and testing
 
-A checkout needs Windows with Space Engineers installed, and the .NET SDK. [MDK2](https://github.com/malforge/mdk2)
-builds and packs the mods; the build restores it. Each mod project reads an `mdk.local.ini` beside it, kept out of git
-because it belongs to the machine:
-
-```ini
-[mdk]
-; Where the packed mod is written; auto is the game's own Mods folder.
-output=auto
-; The game's Bin64, which the mod is compiled against; auto finds a Steam install.
-binarypath=auto
-```
-
-```
-dotnet build src/Sprocket.Host.SpaceEngineers                                # builds and packs into the Mods folder
-dotnet build src/Sprocket.Host.SpaceEngineers -p:MdkBuildConfiguration=none  # builds without packing
-dotnet test -p:MdkBuildConfiguration=none                                    # every test project
-```
-
-Pack only while no world with the mod is loaded: packing replaces the mod's folder.
+How a machine is set up, built and tested is in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## What shapes the code
 

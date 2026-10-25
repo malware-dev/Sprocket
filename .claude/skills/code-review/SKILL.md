@@ -21,11 +21,17 @@ finding that breaks a rule not listed here is still a finding.
 ## Run the inspection
 
 ```
-jb inspectcode Sprocket.slnx --swea --format=Sarif --output=<file> --severity=WARNING
+jb inspectcode Sprocket.slnx --swea --format=Sarif --output=<file> --severity=WARNING --properties:MdkBuildConfiguration=none
 ```
 
 Sarif, never Xml: the Xml report omits line numbers for some inspections, which hides them from
 anything parsing it.
+
+`MdkBuildConfiguration=none` keeps the inspection's build from packing: without it, every mod in the solution is
+deployed into the game's Mods folder, over whatever is being tested there.
+
+An exit code of 4 with no report means a project in the solution failed to build. A mod project with no
+`mdk.local.ini` is compiled against the Steam install, so a type the Steam build lacks fails that project alone.
 
 Then **filter to the files the change touched** - `git diff --name-only`. The whole-solution count
 is not the subject of the review and reporting it buries what is.
