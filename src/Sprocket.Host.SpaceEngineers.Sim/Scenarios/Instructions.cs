@@ -13,11 +13,15 @@ public static class Instructions
     /// <summary>The longest line, in letters, that fits the sign at <see cref="FontSize" />, as seen in the game.</summary>
     public const int Width = 40;
 
+    /// <summary>What is done first with every pasted scenario, whose blueprint gives its blocks no owner.</summary>
+    public const string First = "First, take ownership of every block.";
+
     /// <summary>The sign's text for <paramref name="checks" />.</summary>
     public static string Of(string name, IReadOnlyList<GameCheck> checks)
     {
         var text = new StringBuilder();
         Wrap(text, name.ToUpperInvariant(), "");
+        Wrap(text, First, "");
         text.Append('\n');
         for (var i = 0; i < checks.Count; i++)
         {

@@ -39,7 +39,7 @@ public static class Export
                 .Append(", \"title\": ").Append(Quoted(check.Title))
                 .Append(", \"where\": ").Append(Quoted("Blueprint " + scenario.Name))
                 .Append(", \"why\": ").Append(Quoted(check.Why))
-                .Append(", \"setup\": ").Append(Quoted(check.Setup))
+                .Append(", \"setup\": ").Append(Quoted(Instructions.First + " " + check.Setup))
                 .Append(", \"steps\": [");
             for (var i = 0; i < check.Steps.Count; i++)
                 json.Append(i > 0 ? ", " : "").Append(Quoted(check.Steps[i]));

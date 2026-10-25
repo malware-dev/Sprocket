@@ -37,7 +37,18 @@ public sealed class SplitTwin : Scenario
             "The split from the check before.",
             new[] { "Weld the joining armor block back.", "Open the editor, and press both buttons." },
             "One Airlock logic system with both installations, no Choose a version, and both buttons cycling their doors.",
-            "Only the game merges grids, and its paste gives every block a new id.")
+            "Only the game merges grids, and its paste gives every block a new id."),
+        new GameCheck("A cycle runs on through a join, and a save",
+            "Sprocket Split Twin pasted, its Airlock logic system switched on, in creative mode.",
+            new[]
+            {
+                "Grind the one armor block joining the two decks.",
+                "Press Fore Button, and while its outer door stands open, place the joining armor block back.",
+                "Wait for the cycle to end.",
+                "Save the world, load it again, and press both buttons."
+            },
+            "The cycle ends as usual: the outer door closes and the inner door opens. After the load, one Airlock logic system with both installations, and both buttons cycling their doors.",
+            "The harness keeps what a run is doing only in memory; only the game writes it into a save and reads it back.")
     };
 
     /// <inheritdoc />
