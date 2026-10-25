@@ -67,6 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _program = program;
             _runner = runner;
             Texts = texts;
+            _history = new EditHistory(program, runner, texts);
             Ago = new AgoText(texts);
             Codex = new CodexPages(texts);
             Guides = new Relay(() => Act(CommandKind.OpenGuide, OpenGuide)?.Execute());
@@ -305,16 +306,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         const int Second = 60;
 
         Interval _worded = new Interval(Second);
-
-        // Counts the blocks renamed in the game, which the arrows' words name.
-        int _renames;
-
-        readonly ChangeWording _undoWords = new ChangeWording();
-        readonly ChangeWording _redoWords = new ChangeWording();
-
-        // What each change taken back was said as when it was taken back: what it named, such as a slot made with it, may be
-        // gone with it. A new change forgets them all, and a change still taken back elsewhere is worded afresh.
-        readonly Dictionary<object, string> _undoneSaid = new Dictionary<object, string>();
 
         /// <summary>
         /// Puts a short question on the screen, to be answered before anything else.
@@ -580,7 +571,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Has the screen built again on the next tick, and the arrows' words put together again, a block having been renamed in the game.</summary>
         public void Renamed()
         {
-            _renames++;
+            _history.Renamed();
             _structureDirty = true;
         }
 
@@ -590,11 +581,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _dates.Stamp(surely);
         }
 
-        readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
-
-        readonly History<Automation> _constructHistory = new History<Automation>();
-
-        readonly List<object> _also = new List<object>();
+        readonly EditHistory _history;
 
         // Counts the pages opened, each one's number telling the changes it made from the others'.
         int _opened;
@@ -617,21 +604,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Makes <paramref name="edit" /> to <paramref name="system" /> as the next step of its history.</summary>
         void Record(AutomationSystem system, Edit<AutomationSystem> edit)
         {
-            if (!_systemHistory.Did(system, edit, Maker()))
-                return;
-
-            _undoneSaid.Clear();
-            Settled(edit);
+            if (_history.Did(system, edit, Maker()))
+                Settled(edit);
         }
 
         /// <summary>Makes a change to the program as a whole, a logic system or an installation made or taken out, and remembers how to take it back.</summary>
         public void Do(ProgramEdit edit)
         {
-            if (!_constructHistory.Did(_program, edit, Maker()))
-                return;
-
-            _undoneSaid.Clear();
-            Settled(edit);
+            if (_history.Did(edit, Maker()))
+                Settled(edit);
         }
 
         /// <summary>The number of the page a change made now is made on: the nearest page with a history, which answers for it on leaving.</summary>
@@ -650,14 +631,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether a change made on <paramref name="page" /> still stands, to keep or discard on leaving it.</summary>
         public bool Changed(EditorPage page)
         {
-            return _systemHistory.MadeBy(page.Opened) || _constructHistory.MadeBy(page.Opened);
+            return _history.MadeBy(page.Opened);
         }
 
         /// <summary>Keeps every change made on <paramref name="page" />, so leaving it asks nothing about them.</summary>
         public void Keep(EditorPage page)
         {
-            _systemHistory.Disown(page.Opened);
-            _constructHistory.Disown(page.Opened);
+            _history.Disown(page.Opened);
         }
 
         /// <summary>Takes back every change made on <paramref name="page" />, leaving those made on the pages opened from it.</summary>
@@ -665,8 +645,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var systems = new List<Edit<AutomationSystem>>();
             var construct = new List<Edit<Automation>>();
-            _systemHistory.Discard(page.Opened, systems);
-            _constructHistory.Discard(page.Opened, construct);
+            _history.Discard(page.Opened, systems, construct);
 
             foreach (var edit in systems)
                 Walked(edit);
@@ -690,96 +669,39 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether there is a change to <paramref name="system" /> on its screen <paramref name="screen" /> to take back now.</summary>
         public bool CanUndo(AutomationSystem system, object screen)
         {
-            return _systemHistory.CanUndo(system, screen);
+            return _history.CanUndo(system, screen);
         }
 
         /// <summary>What taking back the last change on <paramref name="screen" /> would undo, in words, with the other screens it takes back changes on.</summary>
         public string UndoLabel(AutomationSystem system, object screen)
         {
-            return Label(_systemHistory.Undoes(system, screen), system, screen, true);
+            return _history.UndoLabel(system, screen, StandIn(system));
         }
 
         /// <summary>Takes back the last change on <paramref name="screen" />, with every later change it takes along.</summary>
         public void Undo(AutomationSystem system, object screen)
         {
-            var said = ChangeText.Of(Texts, _systemHistory.Undoes(system, screen), system, true, _program, _runner.Bindings, StandIn(system));
-            Walked(Undone(_systemHistory.Undo(system, screen), said));
+            Walked(_history.Undo(system, screen, StandIn(system)));
             Stand(system);
         }
 
         /// <summary>Whether there is a change on <paramref name="screen" /> taken back to make again.</summary>
         public bool CanRedo(AutomationSystem system, object screen)
         {
-            return _systemHistory.CanRedo(system, screen);
+            return _history.CanRedo(system, screen);
         }
 
         /// <summary>What making the last change taken back on <paramref name="screen" /> again would redo, in words, with the other screens it makes changes on.</summary>
         public string RedoLabel(AutomationSystem system, object screen)
         {
-            return Label(_systemHistory.Redoes(system, screen), system, screen, false);
+            return _history.RedoLabel(system, screen, StandIn(system));
         }
 
         /// <summary>Makes the last change taken back on <paramref name="screen" /> again, with whatever taken back it leans on.</summary>
         public void Redo(AutomationSystem system, object screen)
         {
-            Walked(Redone(_systemHistory.Redo(system, screen)));
+            Walked(_history.Redo(system, screen));
             Stand(system);
-        }
-
-        /// <summary>
-        /// <paramref name="change" /> in words, and where walking it takes changes on other screens along, back where
-        /// <paramref name="back" /> or forward, what those screens are called.
-        /// </summary>
-        string Label(Edit<AutomationSystem> change, AutomationSystem system, object screen, bool back)
-        {
-            // Asked every tick, and the words name steps and blocks, so they are put together again only for another change,
-            // an edit, or a block renamed in the game.
-            var wording = back ? _undoWords : _redoWords;
-            if (wording.Says(change, screen, _program.Edits, _runner.Bindings.Revision, _renames))
-                return wording.Text;
-
-            Worded++;
-            wording.Text = Labelled(change, system, screen, back);
-            return wording.Text;
-        }
-
-        /// <summary><paramref name="change" /> in words, with the other screens walking it takes changes on along, back where <paramref name="back" />.</summary>
-        string Labelled(Edit<AutomationSystem> change, AutomationSystem system, object screen, bool back)
-        {
-            var label = Said(change, system, back, StandIn(system));
-            _also.Clear();
-            _systemHistory.Also(system, screen, back, _also);
-            if (_also.Count == 0)
-                return label;
-
-            var names = new List<string>();
-            for (var i = 0; i < _also.Count; i++)
-            {
-                var name = ScreenName(_also[i]);
-                if (name.Length > 0 && !names.Contains(name))
-                    names.Add(name);
-            }
-
-            return names.Count == 0 ? label : Template.Fill(Template.Fill(Texts.UndoAlso, "screens", string.Join(", ", names.ToArray())), "change", label);
-        }
-
-        /// <summary>What the screen of <paramref name="screen" /> is called: the sequence's, slot's, installation's or logic system's name.</summary>
-        string ScreenName(object screen)
-        {
-            var sequence = screen as Sequence;
-            if (sequence != null)
-                return SequenceText.Called(Texts, sequence);
-
-            var part = screen as Part;
-            if (part != null)
-                return part.Id;
-
-            var instance = screen as SystemInstance;
-            if (instance != null)
-                return instance.Name ?? "";
-
-            var system = screen as AutomationSystem;
-            return system != null ? SystemSummary.Describe(Texts, _runner.Bindings, system) : "";
         }
 
         /// <summary>Goes back to the logic system's screen where an undo or redo on a sequence's screen took that sequence away.</summary>
@@ -837,87 +759,43 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = true;
         }
 
+        /// <summary>How many times the undo and redo arrows' words have been put together.</summary>
+        public int Worded => _history.Worded;
+
         /// <summary>Whether there is a change to the program as a whole to walk back.</summary>
         public bool CanUndoConstruct()
         {
-            return _constructHistory.CanUndo(_program, null);
+            return _history.CanUndoConstruct();
         }
-
-        /// <summary>How many times the undo and redo arrows' words have been put together.</summary>
-        public int Worded { get; private set; }
 
         /// <summary>What walking back the last change to the program as a whole undoes, as the undo arrow names it.</summary>
         public string UndoLabelConstruct()
         {
-            var change = _constructHistory.Undoes(_program, null);
-            if (_undoWords.Says(change, null, _program.Edits, _runner.Bindings.Revision, _renames))
-                return _undoWords.Text;
-
-            Worded++;
-            _undoWords.Text = Said(change, _program, true, null);
-            return _undoWords.Text;
+            return _history.UndoLabelConstruct();
         }
 
         /// <summary>Walks back the last change to the program as a whole.</summary>
         public void UndoConstruct()
         {
-            var said = ChangeText.Of(Texts, _constructHistory.Undoes(_program, null), _program, true, _program, _runner.Bindings, null);
-            Walked(Undone(_constructHistory.Undo(_program, null), said));
+            Walked(_history.UndoConstruct());
         }
 
         /// <summary>Whether there is a change to the program as a whole to walk forward again.</summary>
         public bool CanRedoConstruct()
         {
-            return _constructHistory.CanRedo(_program, null);
+            return _history.CanRedoConstruct();
         }
 
         /// <summary>What walking forward again the last change to the program as a whole that was walked back redoes, as the redo arrow names it.</summary>
         public string RedoLabelConstruct()
         {
-            var change = _constructHistory.Redoes(_program, null);
-            if (_redoWords.Says(change, null, _program.Edits, _runner.Bindings.Revision, _renames))
-                return _redoWords.Text;
-
-            Worded++;
-            _redoWords.Text = Said(change, _program, false, null);
-            return _redoWords.Text;
+            return _history.RedoLabelConstruct();
         }
 
         /// <summary>Walks forward again the last change to the program as a whole that was walked back.</summary>
         public void RedoConstruct()
         {
-            Walked(Redone(_constructHistory.Redo(_program, null)));
-        }
-
-        /// <summary>
-        /// <paramref name="change" /> in words as <paramref name="subject" /> stands, made where <paramref name="back" />; a change
-        /// taken back is said as it was when it was taken back.
-        /// </summary>
-        string Said<T>(Edit<T> change, T subject, bool back, SystemInstance through)
-        {
-            string said;
-            if (!back && change != null && _undoneSaid.TryGetValue(change, out said))
-                return said;
-
-            return ChangeText.Of(Texts, change, subject, back, _program, _runner.Bindings, through);
-        }
-
-        /// <summary><paramref name="edit" />, just taken back, remembered as said in <paramref name="said" />.</summary>
-        Edit<T> Undone<T>(Edit<T> edit, string said)
-        {
-            if (edit != null)
-                _undoneSaid[edit] = said;
-
-            return edit;
-        }
-
-        /// <summary><paramref name="edit" />, just made again, with the words it was taken back in forgotten.</summary>
-        Edit<T> Redone<T>(Edit<T> edit)
-        {
-            if (edit != null)
-                _undoneSaid.Remove(edit);
-
-            return edit;
+            Walked(_history.RedoConstruct());
         }
 
         /// <summary>Has the program edited and rewired and the screen built again after a step back or forward made <paramref name="edit" />.</summary>
@@ -994,8 +872,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             for (var i = systems.Count - 1; i >= 0; i--)
                 Drop(systems[i]);
 
-            _systemHistory.Clear();
-            _constructHistory.Clear();
+            _history.Clear();
 
             _program.Discard();
             string warning;
@@ -1014,7 +891,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             _program.RemoveSystem(system);
             Gone(system);
-            _systemHistory.Forget(system);
+            _history.Forget(system);
         }
 
         /// <summary>Lets go of every page and choice the editor kept about <paramref name="system" />, which has just been taken out of the program.</summary>
@@ -1490,8 +1367,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public bool Withdraw(Sequence sequence)
         {
             var system = sequence.System;
-            var last = system == null ? null : _systemHistory.Last(system) as OnSequence;
-            if (last == null || last.Sequence != sequence || !_systemHistory.Withdraw(system, last))
+            var last = system == null ? null : _history.Last(system) as OnSequence;
+            if (last == null || last.Sequence != sequence || !_history.Withdraw(system, last))
                 return false;
 
             Settled(last);
@@ -1503,10 +1380,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void TakeOut(Sequence sequence)
         {
             var system = sequence.System;
-            var last = system == null ? null : _systemHistory.Last(system);
+            var last = system == null ? null : _history.Last(system);
             var slotted = last as Reslotted<AutomationSystem>;
             var made = (slotted != null ? slotted.Edit : last) as MakeSequence;
-            if (made == null || made.Sequence != sequence || !_systemHistory.Withdraw(system, last))
+            if (made == null || made.Sequence != sequence || !_history.Withdraw(system, last))
                 _program.RemoveSequence(sequence);
 
             ForgetSequence(sequence);
@@ -1517,15 +1394,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>For one made a moment ago and left untouched: the step that made it is withdrawn rather than walked back.</remarks>
         public void TakeOut(AutomationSystem system)
         {
-            var made = _constructHistory.Last(_program) as MakeSystem;
-            if (made == null || made.System != system || !_constructHistory.Withdraw(_program, made))
+            var made = _history.LastConstruct() as MakeSystem;
+            if (made == null || made.System != system || !_history.WithdrawConstruct(made))
             {
                 Drop(system);
                 return;
             }
 
             Gone(system);
-            _systemHistory.Forget(system);
+            _history.Forget(system);
             _program.Rewire();
         }
 
@@ -1533,8 +1410,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>For one made a moment ago that was left without anything done to it: the step that made it is withdrawn.</remarks>
         public void TakeOut(AutomationSystem system, SystemInstance instance)
         {
-            var made = _constructHistory.Last(_program) as MakeInstallation;
-            if (made == null || made.Instance != instance || !_constructHistory.Withdraw(_program, made))
+            var made = _history.LastConstruct() as MakeInstallation;
+            if (made == null || made.Instance != instance || !_history.WithdrawConstruct(made))
                 system.RemoveInstance(instance);
 
             _standIns.Remove(system.Id);
