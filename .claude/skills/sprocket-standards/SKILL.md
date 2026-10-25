@@ -14,7 +14,8 @@ The general rules are in **csharp-standards**. These hold only here.
 - The model and the runtime hold ids, never words. Every word a player reads comes from `Texts`, put
   there by the page that shows it.
 - `src/Lumel` is the UI framework, a shared project compiled into the mod's assembly. It names nothing
-  of Sprocket. A control, layout or drawing primitive with nothing of Sprocket in it goes in Lumel, with
+  of Sprocket. It is a submodule of the private `malware-dev/Lumel` repository, which other mods build in too: a change
+  to it is committed and pushed in the submodule, and Sprocket then records the submodule's new commit. A control, layout or drawing primitive with nothing of Sprocket in it goes in Lumel, with
   its colors and sizes as properties. `Features/Look` holds Sprocket's palette, sizes and styles.
 - `src/Sprocket.Gravity` (a gravity field's size) is a shared project too, built into Sprocket and into the small mod
   that needs it.

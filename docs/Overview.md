@@ -38,7 +38,7 @@ that shows it.
 
 | Project | What it is |
 |---|---|
-| `src/Lumel` | The user interface framework: elements, layout, controls, text, drawing. A shared project, compiled into each mod that uses it, and it knows nothing of Sprocket, so any mod can use it as it is |
+| `src/Lumel` | The user interface framework: elements, layout, controls, text, drawing. A shared project, compiled into each mod that uses it, and it knows nothing of Sprocket, so any mod can use it as it is. A submodule of the `malware-dev/Lumel` repository |
 | `src/Sprocket.Gravity` | A shared project: how big a gravity generator's field must be to cover part of its grid. Sprocket and Gravity Field Fit build it in |
 | `src/Sprocket.DoorAutoClose` | A mod of its own, Door Auto-Close: the slider on every door that closes it a set time after it finishes opening |
 | `src/Sprocket.MultiRename` | A mod of its own, Multi-Rename: the game's own Name box renames several selected blocks at once |

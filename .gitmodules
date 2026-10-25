@@ -1,0 +1,3 @@
+[submodule "src/Lumel"]
+	path = src/Lumel
+	url = https://github.com/malware-dev/Lumel.git
