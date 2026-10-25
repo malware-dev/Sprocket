@@ -1,3 +1,4 @@
+using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
@@ -31,24 +32,31 @@ public class UndoTests
     }
 
     /// <summary>
-    /// The arrows' words are put together once for a change, then once a second while nothing changes: ten times in ten
-    /// seconds, where they are asked for 600 times.
+    /// The arrows' words are put together once for a change, never while nothing changes, though they are asked for every
+    /// tick, and once more when a block on the construct is renamed in the game.
     /// </summary>
     [Fact]
-    public void TheArrowsWordsAreNotPutTogetherEveryTick()
+    public void TheArrowsWordsArePutTogetherOnlyForAChange()
     {
-        var screen = Built();
-        var editor = screen.Editor;
-        Light(screen);
-        screen.Run(2);
+        var sim = Simulation.Fresh();
+        var editor = sim.Editor;
+        editor.NewButtonSystem("Airlock");
+        editor.PressAdd("task");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("power");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
+        editor.PressPrimary();
+        for (var i = 0; i < 2; i++)
+            sim.Tick();
 
         var before = editor.Worded;
-        screen.Run(30);
+        for (var i = 0; i < 600; i++)
+            sim.Tick();
         Assert.Equal(0, editor.Worded - before);
 
-        before = editor.Worded;
-        screen.Run(600);
-        Assert.Equal(10, editor.Worded - before);
+        sim.Machine.Fitted.First(fitting => fitting.Name == "Airlock Light").Name = "Lock Light";
+        sim.Tick();
+        Assert.Equal(1, editor.Worded - before);
     }
 
     /// <summary>A deleted step is named on the way back by its number, its sequence and its words, and the way forward says the same.</summary>

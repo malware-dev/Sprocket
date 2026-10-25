@@ -31,8 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Works these out again only if something has changed since last time, and says whether what they came to did.
         /// </summary>
         /// <remarks>
-        /// Called on every tick; two integer comparisons where nothing has changed. Where only the blocks changed, as one is
-        /// welded on that no name reaches, every name finding what it found before leaves <see cref="Revision" /> as it was.
+        /// Called as the program is brought up to date with a change, and on every read of its bindings; two integer
+        /// comparisons where nothing has changed. Where only the blocks changed, as one is welded on that no name reaches, every
+        /// name finding what it found before leaves <see cref="Revision" /> as it was.
         /// </remarks>
         public bool Refresh(GridWorld world, Automation program)
         {

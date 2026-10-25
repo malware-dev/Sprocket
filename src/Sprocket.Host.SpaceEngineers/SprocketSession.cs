@@ -91,7 +91,8 @@ namespace Sprocket.Host.SpaceEngineers
 
         Interval _keeping = new Interval(Keeping);
 
-        Interval _reclaiming = new Interval(Reclaiming);
+        // Due every Reclaiming ticks on the rota, only while the server has lent a Sprocket to somebody.
+        Shift _reclaim;
 
         // While the world's debug log is on, on the machine that runs the world; null otherwise.
         TickTiming _timing;
@@ -298,6 +299,13 @@ namespace Sprocket.Host.SpaceEngineers
             _channel = StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);
             _watch.Listen(_channel);
+
+            _reclaim = new Shift(_rota.Join(), Reclaim);
+            _handover.Lent += () =>
+            {
+                if (!_reclaim.Listed)
+                    _rota.At(_reclaim, _rota.Now + Reclaiming);
+            };
 
             GameLog.Say(IsServer
                 ? "this machine runs the Sprockets"
@@ -713,14 +721,19 @@ namespace Sprocket.Host.SpaceEngineers
                     _handover.Keep(_copyOf, _copy);
             }
 
-            if (IsServer && _reclaiming.Due(frame))
-                _handover.Reclaim(Connected);
-
             // The rota holds a door's coming close as well as the Sprockets' work, so it runs while either is there.
             if (_roster.Count == 0 && _rota.Count == 0)
                 return;
 
             _roster.Tick(frame);
+        }
+
+        /// <summary>Takes back what is lent to players who have gone, and looks again later while anything is still lent.</summary>
+        void Reclaim(int tick)
+        {
+            _handover.Reclaim(Connected);
+            if (_handover.Lending)
+                _rota.At(_reclaim, tick + Reclaiming);
         }
 
         /// <summary>Runs <paramref name="action" /> once the game has finished its current event.</summary>

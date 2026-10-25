@@ -150,6 +150,9 @@ public sealed class Simulation
         }
     }
 
+    /// <summary>The world's rota, which counts everything it has done.</summary>
+    public Rota Rota => _rota;
+
     /// <summary>Gives <paramref name="unit" /> what the session gives one as its screen opens.</summary>
     void Dress(SprocketUnit unit)
     {

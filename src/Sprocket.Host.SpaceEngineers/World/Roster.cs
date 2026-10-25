@@ -16,6 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Dictionary<long, long> _moved = new Dictionary<long, long>();
         readonly List<SprocketUnit> _saving = new List<SprocketUnit>();
 
+        // The Sprockets with a screen open on them, which alone are looked at on every tick.
+        readonly List<SprocketUnit> _showing = new List<SprocketUnit>();
+
         // The Sprockets whose program or switches changed and are not written into their hero yet.
         readonly HashSet<SprocketUnit> _unwritten = new HashSet<SprocketUnit>();
         readonly Func<Settings> _settings;
@@ -142,16 +145,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             return rebuilt;
         }
 
-        /// <summary>Ticks each of them, runs the world's rota, then brings each open screen up to date.</summary>
+        /// <summary>Runs the world's rota, which brings each Sprocket up to date where it changed, then brings each open screen up to date.</summary>
+        /// <remarks>Every tick: the rota is the one thing on it, and visits only what is due.</remarks>
         public void Tick(int frame)
         {
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
-                unit.Value.Tick(frame);
-
             _rota.Run(frame);
 
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
-                unit.Value.Show(frame);
+            for (var i = 0; i < _showing.Count; i++)
+                _showing[i].Show(frame);
         }
 
         /// <summary>Writes into its hero, now, every one whose change is still waiting to be written, as the world saves.</summary>
@@ -193,6 +194,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 unit.Value.Dispose();
 
             _units.Clear();
+            _showing.Clear();
         }
 
         void Listen(SprocketUnit unit)
@@ -200,6 +202,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             unit.HeroRemoved += Removed;
             unit.Gathered += Gathered;
             unit.Changed += Changed;
+            unit.ShowingChanged += Shown;
+            Shown(unit);
+        }
+
+        /// <summary>Keeps <paramref name="unit" /> among those looked at every tick for as long as a screen is open on it.</summary>
+        void Shown(SprocketUnit unit)
+        {
+            var at = _showing.IndexOf(unit);
+            if (unit.Showing && at < 0)
+                _showing.Add(unit);
+            else if (!unit.Showing && at >= 0)
+                _showing.RemoveAt(at);
         }
 
         void Removed(SprocketUnit unit)
@@ -331,6 +345,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Dropped(unit);
 
             _unwritten.Remove(unit);
+            _showing.Remove(unit);
+            unit.ShowingChanged -= Shown;
             unit.Dispose();
         }
 

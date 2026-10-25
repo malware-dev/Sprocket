@@ -87,7 +87,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Wires a button the moment the program asks for one, and never touches it again.
         /// </summary>
-        /// <remarks>Called every tick: a tick with no change of wiring is one integer comparison, and reads no toolbar.</remarks>
+        /// <remarks>
+        /// Called as the Sprocket is brought up to date with a change: with no change of wiring it is one integer comparison,
+        /// and reads no toolbar.
+        /// </remarks>
         public void Reconcile()
         {
             if (_program.Wiring == _reconciled)

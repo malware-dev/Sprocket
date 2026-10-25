@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly bool _runsRota;
 
         bool _reshaped = true;
+        int _told = int.MinValue;
         int _setting;
         int _checkedEdits = -1;
         int _checkedWiring = -1;
@@ -62,13 +63,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// The game's current frame, as last reported.
+        /// The game's current frame: the later of the tick its rota is running and the tick it was last told.
         /// </summary>
         /// <remarks>
-        /// Told rather than counted: Space Engineers wakes a mod every frame, every ten or every hundred, and the slower two
-        /// do not land on exact multiples.
+        /// A runner on the world's rota reads the rota's clock; a copy, whose rota nothing runs, is told the tick by whatever
+        /// ticks it.
         /// </remarks>
-        public int CurrentTick { get; private set; }
+        public int CurrentTick => Math.Max(_told, _rota.Now);
 
         /// <summary>Sprocket's clock as the readers of blocks are given it, which tells them the tick they read on.</summary>
         public Func<int> Clock { get; }
@@ -90,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Whether the machine Sprocket runs on can run anything: its block powered and switched on.
         /// </summary>
-        /// <remarks>Set by whatever owns the block, every tick; true by default.</remarks>
+        /// <remarks>Set by whatever owns the block, as whether it can run changes; true by default.</remarks>
         public bool Live { get; set; }
 
         /// <summary>The fewest ticks between two runs of anything on a repeat, whatever the program asks for: a timer, a <c>when</c>'s look, a run's look at a step it waits on.</summary>
@@ -109,9 +110,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public bool Looking { get; set; }
 
         /// <summary>Advances everything to the given frame.</summary>
+        /// <remarks>For a runner whose rota nothing else runs; one on the world's rota is brought up to date by <see cref="Prepare" />.</remarks>
         public void Tick(int tick)
         {
-            CurrentTick = tick;
+            _told = tick;
 
             // Two integer comparisons on an ordinary tick. See Bindings.Refresh.
             Refreshed();
@@ -127,7 +129,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Starts the clock at <paramref name="tick" />, which is where a world just loaded stands before its first tick.</summary>
         public void Begin(int tick)
         {
-            CurrentTick = tick;
+            _told = tick;
+            _rota.Begin(tick);
         }
 
         /// <summary>Makes the runners and checks the program now, rather than on the next tick, for a press that arrives first.</summary>
@@ -367,7 +370,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Matches the runners to the program where it gained or lost something, checks it where it or its wiring changed, and matches what is watched where a switch was flipped; nothing otherwise.</summary>
         /// <remarks>
-        /// Asked on every tick, and by an editor about to show what is wrong; a flag and five integer comparisons.
+        /// Asked as the program is brought up to date with a change, and by an editor about to show what is wrong; a flag and
+        /// five integer comparisons.
         /// </remarks>
         public void Checking()
         {

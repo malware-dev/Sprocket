@@ -20,6 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Looked at once in a hundred ticks, which is also how many places there are.</summary>
         public const int Hundred = 100;
 
+        readonly List<Shift> _first = new List<Shift>();
         readonly List<Shift> _each = new List<Shift>();
         readonly List<Shift>[] _tens = Lists(Ten);
         readonly List<Shift>[] _hundreds = Lists(Hundred);
@@ -28,8 +29,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         int _next;
         int _last;
+        int _begun;
         bool _started;
         int _count;
+
+        /// <summary>The tick being run, or the last one run; before the first, the tick it was begun at.</summary>
+        public int Now => _started ? _last : _begun;
+
+        /// <summary>Says the world stands at <paramref name="tick" /> before its first tick is run.</summary>
+        /// <remarks>Ignored once a tick has run, since the rota's clock is then its own.</remarks>
+        public void Begin(int tick)
+        {
+            if (!_started)
+                _begun = tick;
+        }
 
         /// <summary>A place in the turn for something new.</summary>
         public int Join()
@@ -87,6 +100,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             kept.Period = 0;
             kept.Once = true;
             kept.At = tick;
+        }
+
+        /// <summary>Looks at a shift once on the next tick, before anything else due on it; a shift already waiting for that stays as it is.</summary>
+        /// <remarks>For bringing something up to date with a change, so whatever runs on that tick runs against it as it now stands.</remarks>
+        public void Next(Shift shift)
+        {
+            var tick = Now + 1;
+            if (shift.List == _first && shift.At == tick)
+                return;
+
+            Leave(shift);
+            shift.Once = true;
+            shift.At = tick;
+            Put(shift, _first);
         }
 
         /// <summary>Puts a shift back where what it keeps says it stood when the world was saved: on its turn, or due once on its tick.</summary>
@@ -149,6 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void Turn(int tick)
         {
             _due.Clear();
+            Gather(_first);
             Gather(_each);
             Gather(_tens[Place(tick, Ten)]);
             Gather(_hundreds[Place(tick, Hundred)]);

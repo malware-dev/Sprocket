@@ -240,8 +240,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             _held[block] = new Holder { Id = id, Name = name ?? "" };
             holder = "";
+            if (Lent != null)
+                Lent();
+
             return true;
         }
+
+        /// <summary>Raised on the server as a Sprocket is lent to somebody.</summary>
+        public event Action Lent;
+
+        /// <summary>Whether anybody holds a Sprocket lent by this server.</summary>
+        public bool Lending => _held.Count > 0;
 
         /// <summary>Takes back every Sprocket held by somebody <paramref name="connected" /> says has gone.</summary>
         /// <remarks>On the server.</remarks>

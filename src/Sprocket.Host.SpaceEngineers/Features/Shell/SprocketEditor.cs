@@ -265,10 +265,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // The game announces no change to the grid's own name, so the heading's words are read again once a second.
             var retitled = Current.TakeRetitle();
             if (_worded.Due(tick) || retitled)
-            {
                 Current.RefreshHeading(_screen.Heading);
-                _rounds++;
-            }
 
             _screen.Subtitle = Current.Subtitle;
             _screen.SwitchIsOn = Current.SwitchIsOn;
@@ -309,8 +306,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         Interval _worded = new Interval(Second);
 
-        // Counts the times the heading's words were read again, which the arrows' words are read again with.
-        int _rounds;
+        // Counts the blocks renamed in the game, which the arrows' words name.
+        int _renames;
 
         readonly ChangeWording _undoWords = new ChangeWording();
         readonly ChangeWording _redoWords = new ChangeWording();
@@ -580,6 +577,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = true;
         }
 
+        /// <summary>Has the screen built again on the next tick, and the arrows' words put together again, a block having been renamed in the game.</summary>
+        public void Renamed()
+        {
+            _renames++;
+            _structureDirty = true;
+        }
 
         /// <summary>Dates each logic system whose words have changed since they were last read with the time now, or reads every one where <paramref name="surely" />.</summary>
         public void Stamp(bool surely = false)
@@ -730,9 +733,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string Label(Edit<AutomationSystem> change, AutomationSystem system, object screen, bool back)
         {
             // Asked every tick, and the words name steps and blocks, so they are put together again only for another change,
-            // an edit, or a second gone by for a block renamed in the game.
+            // an edit, or a block renamed in the game.
             var wording = back ? _undoWords : _redoWords;
-            if (wording.Says(change, screen, _program.Edits, _runner.Bindings.Revision, _rounds))
+            if (wording.Says(change, screen, _program.Edits, _runner.Bindings.Revision, _renames))
                 return wording.Text;
 
             Worded++;
@@ -847,7 +850,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public string UndoLabelConstruct()
         {
             var change = _constructHistory.Undoes(_program, null);
-            if (_undoWords.Says(change, null, _program.Edits, _runner.Bindings.Revision, _rounds))
+            if (_undoWords.Says(change, null, _program.Edits, _runner.Bindings.Revision, _renames))
                 return _undoWords.Text;
 
             Worded++;
@@ -872,7 +875,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public string RedoLabelConstruct()
         {
             var change = _constructHistory.Redoes(_program, null);
-            if (_redoWords.Says(change, null, _program.Edits, _runner.Bindings.Revision, _rounds))
+            if (_redoWords.Says(change, null, _program.Edits, _runner.Bindings.Revision, _renames))
                 return _redoWords.Text;
 
             Worded++;

@@ -40,6 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Automation _program = new Automation();
         readonly AutomationRunner _runner;
         readonly HostBlocks _holders;
+        readonly Rota _rota;
+        readonly Shift _stirred;
         readonly Ownership _hands;
         readonly SlotKeys _keys;
         readonly WiredButtons _buttons;
@@ -152,6 +154,43 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world.AnchorRemoved += Removed;
             _world.AnchorClosed += Rehoming;
             _world.Renamed += Renamed;
+
+            // Brought up to date on the tick after anything changes, and never on a tick where nothing did.
+            _rota = rota;
+            _stirred = new Shift(rota.Join(), Pass);
+            _world.Stirred += Stir;
+            _program.Changed += Stir;
+            _program.Reshaped += Stir;
+            Stir();
+        }
+
+        /// <summary>Has this brought up to date with its construct and program first thing on the next tick.</summary>
+        /// <remarks>Asked by every change to either, often in the middle of it; however many come in a tick, the next tick does it once.</remarks>
+        public void Stir()
+        {
+            _rota.Next(_stirred);
+        }
+
+        /// <summary>Brings this up to date with its construct and program on <paramref name="tick" />, before anything else due on it.</summary>
+        void Pass(int tick)
+        {
+            Bring();
+            _runner.Prepare();
+
+            // The hero's grid still loading says nothing as it arrives, so it is looked for again on each tick until it is read.
+            if (_hands.Due && !_world.Holds(_block.EntityId))
+                Stir();
+        }
+
+        /// <summary>Brings the toolbars, the holders and whether the automation runs up to date with the construct as it stands.</summary>
+        void Bring()
+        {
+            // A copy leaves the toolbars to the machine that keeps the Sprocket.
+            if (!_copy)
+                Touch();
+
+            _holders.Hold(_block);
+            _runner.Live = Runs;
         }
 
         /// <summary>Raised when what the hero would hold changes: the program or what is switched off, from the program's own event.</summary>
@@ -185,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         void Renamed()
         {
             if (_editor != null)
-                _editor.Invalidate();
+                _editor.Renamed();
         }
 
         /// <summary>The programmable block the automation is kept in: the construct's hero.</summary>
@@ -365,26 +404,27 @@ namespace Sprocket.Host.SpaceEngineers.World
             _keys.Fire(key);
         }
 
-        /// <summary>Runs its program for the game's frame <paramref name="frame" />, and keeps the toolbars it owns as it wants them.</summary>
+        /// <summary>Brings a copy up to the game's frame <paramref name="frame" />, its rota being one nothing runs.</summary>
+        /// <remarks>Every tick, for a copy only: one exists while somebody has its screen open.</remarks>
         public void Tick(int frame)
         {
-            // A copy leaves the toolbars to the machine that keeps the Sprocket.
-            if (!_copy)
-                Touch();
-
-            _holders.Hold(_block);
-
-            // Read on every tick, because a pause is set by an edit or by the construct changing hands, and both land between ticks.
-            _runner.Live = Runs;
+            Bring();
             _runner.Tick(frame);
         }
 
         /// <summary>Brings an open screen up to the frame <paramref name="frame" />, after the rota has run its sequences for it.</summary>
-        /// <remarks>After the runs, so what a run changed on a frame is on the screen drawn for that frame.</remarks>
+        /// <remarks>
+        /// After the runs, so what a run changed on a frame is on the screen drawn for that frame. Asked only while the screen
+        /// is open, and stirs this for the next tick, since what is done on an open screen, such as a resume, changes whether
+        /// the automation runs without saying so.
+        /// </remarks>
         public void Show(int frame)
         {
-            if (Showing && _editor != null)
-                _editor.Tick(frame);
+            if (!Showing || _editor == null)
+                return;
+
+            _editor.Tick(frame);
+            Stir();
         }
 
         /// <summary>
@@ -401,8 +441,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Brings the toolbars into line with the program, and reads them where something asked.</summary>
         void Touch()
         {
-            // Looked at again on every tick only while the hero is not yet on the construct read, as its grid loads; the
-            // game's own events say when it has gone.
+            // Looked at again on each pass, which comes every tick only while the hero is not yet on the construct read, as
+            // its grid loads; the game's own events say when it has gone.
             if (_hands.Due && _world.Holds(_block.EntityId))
             {
                 if (_world.FindMajor(_block.EntityId) == _block)
@@ -427,24 +467,28 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void TakeOver(long from)
         {
             _buttons.TakeOver(from);
+            Stir();
         }
 
         /// <summary>Writes every slot the program wants on <paramref name="panel" /> on the next pass, whatever the slot holds by then.</summary>
         public void Wire(long panel)
         {
             _buttons.Wire(panel);
+            Stir();
         }
 
         /// <summary>Lets go of every panel <see cref="Wire" /> asked for and no pass has written yet, as a pick is backed out of.</summary>
         public void Unwire()
         {
             _buttons.Unwire();
+            Stir();
         }
 
         /// <summary>Brings the toolbars into line with the program on the next tick, as though its wiring had changed.</summary>
         public void Revisit()
         {
             _buttons.Revisit();
+            Stir();
         }
 
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
@@ -452,8 +496,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         public bool Showing
         {
             get { return _runner.Looking; }
-            set { _runner.Looking = value; }
+            set
+            {
+                if (_runner.Looking == value)
+                    return;
+
+                _runner.Looking = value;
+                if (ShowingChanged != null)
+                    ShowingChanged(this);
+            }
         }
+
+        /// <summary>Raised when the screen opens or closes on this Sprocket.</summary>
+        public event Action<SprocketUnit> ShowingChanged;
 
         /// <summary>
         /// Reads the program, and what is switched off, out of the text they were written as.
@@ -692,7 +747,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Strand(stranded);
                 if (!stranded)
+                {
                     _hands.Revisit();
+                    Stir();
+                }
 
                 if (keeper == _block)
                 {
@@ -726,6 +784,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // The construct's buttons still name the block that is gone, so the next pass mends them as it does after a load.
             _buttons.Rehomed(block);
+            Stir();
         }
 
         /// <summary>Stops the automation where <paramref name="stranded" />, as no big owner owns any programmable block on the construct, or lets it carry on.</summary>
@@ -736,6 +795,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Stranded = stranded;
             Strandings++;
+            _runner.Live = Runs;
             GameLog.Say(stranded
                 ? $"{_world.Name} has no programmable block its big owners own, and its automation has stopped"
                 : $"{Logged(_block)} belongs to a big owner of {_world.Name}, and its automation carries on");
@@ -752,6 +812,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Dispose()
         {
             _program.Changed -= Edited;
+            _program.Changed -= Stir;
+            _program.Reshaped -= Stir;
+            _world.Stirred -= Stir;
+            _rota.Leave(_stirred);
             _holders.Release();
 
             _world.AnchorRemoved -= Removed;

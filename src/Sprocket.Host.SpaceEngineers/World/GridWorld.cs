@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// The construct the editor was opened on, as Sprocket sees it.
     /// </summary>
-    public sealed class GridWorld : IDisposable
+    public sealed partial class GridWorld : IDisposable
     {
         IMyTerminalBlock _anchor;
 
@@ -84,6 +84,21 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Raised from a block's own event when one on the construct is renamed, by anybody.</summary>
         public event Action Renamed;
+
+        /// <summary>Raised whenever something has changed that the next read of the construct takes in, often in the middle of the change.</summary>
+        public event Action Stirred;
+
+        /// <summary>Every read of the construct as it is made, for a local build to count.</summary>
+        /// <remarks>Has no body in anything packed for the game, where the call compiles to nothing.</remarks>
+        partial void Read();
+
+        /// <summary>Says something has changed that the next read takes in.</summary>
+        void Stir()
+        {
+            var stirred = Stirred;
+            if (stirred != null)
+                stirred();
+        }
 
         /// <summary>
         /// Makes and reads the values this construct deals in, and the lists behind the wide ones.
@@ -160,6 +175,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Reshare()
         {
             _reshared = true;
+            Stir();
             if (HandsChanged != null)
                 HandsChanged();
         }
@@ -239,10 +255,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void LookAgain()
         {
             _asked = true;
+            Stir();
         }
 
         /// <summary>Whether something has asked to be looked at again since this was last called.</summary>
-        /// <remarks>Read every frame, so it is a flag rather than an event.</remarks>
+        /// <remarks>Asked as the construct is brought up to date, which asking again stirs.</remarks>
         public bool TakeLook()
         {
             var asked = _asked;
@@ -332,6 +349,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>One flag and one count read when nothing changed.</remarks>
         void Current()
         {
+            Read();
             if (_stale)
             {
                 Rebuild();
@@ -738,6 +756,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Follow(anchor);
             _stale = true;
+            Stir();
         }
 
         /// <summary>Makes <paramref name="anchor" /> the anchor, listening for it closing in place of the one before it.</summary>
@@ -805,16 +824,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         void OnGroupChanged(IMyGridGroupData group, IMyCubeGrid grid, IMyGridGroupData other)
         {
             _stale = true;
+            Stir();
         }
 
         void OnGroupReleased(IMyGridGroupData group)
         {
             _stale = true;
+            Stir();
         }
 
         void OnGridsChanged(IMyCubeGrid grid, IMyCubeGrid other)
         {
             _stale = true;
+            Stir();
         }
 
         void OnOwnership(IMyCubeGrid grid)
@@ -836,6 +858,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (block.FatBlock != null && block.FatBlock == _anchor)
             {
                 _stale = true;
+                Stir();
                 if (AnchorRemoved != null)
                     AnchorRemoved();
 
@@ -853,8 +876,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         void Changed(IMySlimBlock slim, bool added)
         {
             var block = slim.FatBlock as IMyTerminalBlock;
-            if (block != null)
-                _changes.Add(new Change { Block = block, Added = added });
+            if (block == null)
+                return;
+
+            _changes.Add(new Change { Block = block, Added = added });
+            Stir();
         }
 
         /// <summary>Changes the count of blocks on the grid of <paramref name="slim" /> by <paramref name="by" />, as the grid says the block was welded on or taken off.</summary>
@@ -887,6 +913,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         void OnAnchorClosed(IMyEntity anchor)
         {
             _stale = true;
+            Stir();
             if (AnchorClosed != null)
                 AnchorClosed();
         }

@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public IReadOnlyList<IMyTerminalBlock> Parted => _parted;
 
         /// <summary>Listens to every programmable block on the construct and <paramref name="hero" /> for their working state, gathering them again only when the construct was read again.</summary>
-        /// <remarks>Called on every tick: one comparison on a tick where nothing on the construct changed.</remarks>
+        /// <remarks>Called as the Sprocket is brought up to date with a change: one comparison where nothing on the construct changed.</remarks>
         public void Hold(IMyTerminalBlock hero)
         {
             var revision = _world.Revision;
