@@ -1,6 +1,6 @@
 using System;
 using Sandbox.ModAPI;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 using VRage.Utils;
 
 namespace Sprocket.DoorAutoClose

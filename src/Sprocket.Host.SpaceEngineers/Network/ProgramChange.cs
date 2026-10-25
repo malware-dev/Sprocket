@@ -1,4 +1,4 @@
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {
@@ -23,16 +23,16 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>How many bytes <paramref name="change" /> takes on the wire.</summary>
         public static int SizeOf(ref ProgramChange change)
         {
-            return sizeof(long) + ByteCodec.SizeOfString(change.Program) + ByteCodec.SizeOfString(change.Switches);
+            return sizeof(long) + ByteData.SizeOfString(change.Program) + ByteData.SizeOfString(change.Switches);
         }
 
         /// <summary>Writes <paramref name="change" /> at <paramref name="offset" />, and answers how many bytes it took.</summary>
         public static int Write(ref ProgramChange change, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write(change.Block, data, ref offset);
-            ByteCodec.WriteString(change.Program, data, ref offset);
-            ByteCodec.WriteString(change.Switches, data, ref offset);
+            ByteData.Write(change.Block, data, ref offset);
+            ByteData.WriteString(change.Program, data, ref offset);
+            ByteData.WriteString(change.Switches, data, ref offset);
             return offset - start;
         }
 
@@ -41,9 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             change = new ProgramChange();
-            ByteCodec.TryReadInt64(data, ref offset, out change.Block);
-            ByteCodec.TryReadString(data, ref offset, out change.Program);
-            ByteCodec.TryReadString(data, ref offset, out change.Switches);
+            ByteData.TryReadInt64(data, ref offset, out change.Block);
+            ByteData.TryReadString(data, ref offset, out change.Program);
+            ByteData.TryReadString(data, ref offset, out change.Switches);
             return offset - start;
         }
     }

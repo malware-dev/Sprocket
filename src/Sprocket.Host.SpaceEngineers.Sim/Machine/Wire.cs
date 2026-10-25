@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 using Sprocket.Sim.Fakes;
 using VRage.Game.ModAPI;
 
@@ -46,10 +46,10 @@ public sealed class Wire : INetworkProxy
     public int Latency { get; set; }
 
     /// <summary>The machine whose code is running, or null between runs.</summary>
-    public Peer Current { get; private set; }
+    public Peer? Current { get; private set; }
 
     /// <summary>The server, where there is one yet.</summary>
-    public Peer Host { get; private set; }
+    public Peer? Host { get; private set; }
 
     /// <summary>How many messages are waiting to arrive.</summary>
     public int Flying => _flying.Count;
@@ -115,7 +115,7 @@ public sealed class Wire : INetworkProxy
     /// <summary>Puts the game's own network back behind the channel, and the gateway that was there before.</summary>
     public void Uninstall()
     {
-        NetworkChannel.Network = new GameNetwork();
+        NetworkChannel.Network = new NetworkChannel.DefaultNetwork();
         MyAPIGateway.Multiplayer = _was;
     }
 
@@ -231,5 +231,11 @@ public sealed class Wire : INetworkProxy
             throw new InvalidOperationException("The wire has no server to send to.");
 
         Send(channelId, data, Host);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>Adds none: the peers on the wire are machines, with no player standing anywhere in a world.</remarks>
+    public void GetPlayers(List<IMyPlayer> players)
+    {
     }
 }

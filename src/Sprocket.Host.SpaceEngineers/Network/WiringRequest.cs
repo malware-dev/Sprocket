@@ -1,4 +1,4 @@
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>A client asking for the buttons of a panel somebody has just picked to be written, whatever their slots hold.</summary>
@@ -20,8 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         public static int Write(ref WiringRequest wiring, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write(wiring.Block, data, ref offset);
-            ByteCodec.Write(wiring.Panel, data, ref offset);
+            ByteData.Write(wiring.Block, data, ref offset);
+            ByteData.Write(wiring.Panel, data, ref offset);
             return offset - start;
         }
 
@@ -30,8 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             wiring = new WiringRequest();
-            ByteCodec.TryReadInt64(data, ref offset, out wiring.Block);
-            ByteCodec.TryReadInt64(data, ref offset, out wiring.Panel);
+            ByteData.TryReadInt64(data, ref offset, out wiring.Block);
+            ByteData.TryReadInt64(data, ref offset, out wiring.Panel);
             return offset - start;
         }
     }

@@ -1,4 +1,4 @@
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {
@@ -21,8 +21,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         public static int Write(ref WatchRequest request, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write(request.Construct, data, ref offset);
-            ByteCodec.Write(request.Watching ? 1 : 0, data, ref offset);
+            ByteData.Write(request.Construct, data, ref offset);
+            ByteData.Write(request.Watching ? 1 : 0, data, ref offset);
             return offset - start;
         }
 
@@ -32,8 +32,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
             var start = offset;
             request = new WatchRequest();
             int watching;
-            ByteCodec.TryReadInt64(data, ref offset, out request.Construct);
-            ByteCodec.TryReadInt32(data, ref offset, out watching);
+            ByteData.TryReadInt64(data, ref offset, out request.Construct);
+            ByteData.TryReadInt32(data, ref offset, out watching);
             request.Watching = watching != 0;
             return offset - start;
         }

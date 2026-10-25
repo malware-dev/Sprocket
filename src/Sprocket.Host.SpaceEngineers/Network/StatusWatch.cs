@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {

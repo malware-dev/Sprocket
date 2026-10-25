@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 using Sprocket.Sim.Machine;
 using Xunit;
 

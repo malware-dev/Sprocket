@@ -1,6 +1,6 @@
 using System;
 using Sandbox.ModAPI;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 using VRage.Game.Components;
 using VRage.ModAPI;
 using VRage.ObjectBuilders;

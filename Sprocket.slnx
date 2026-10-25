@@ -13,7 +13,6 @@
     <Project Path="src/Sprocket.Localization.Generator/Sprocket.Localization.Generator.csproj" />
     <Project Path="src/Sprocket.Standards/Sprocket.Standards.csproj" />
     <Project Path="src/Lumel/Lumel.shproj" />
-    <Project Path="src/Sprocket.Network/Sprocket.Network.shproj" />
     <Project Path="src/Sprocket.Gravity/Sprocket.Gravity.shproj" />
   </Folder>
   <Folder Name="/tests/">

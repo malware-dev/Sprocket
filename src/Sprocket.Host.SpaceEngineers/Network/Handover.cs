@@ -4,7 +4,7 @@ using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {

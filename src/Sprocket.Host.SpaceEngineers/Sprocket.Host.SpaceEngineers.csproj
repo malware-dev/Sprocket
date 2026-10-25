@@ -44,10 +44,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.13">
+    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Mal.MdkModMixin.Network" Version="1.0.0" />
     <PackageReference Include="Mal.Mdk2.References" Version="2.2.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -64,6 +65,5 @@
     <None Remove="thumb.png" />
   </ItemGroup>
   <Import Project="..\Lumel\Lumel.projitems" Label="Shared" />
-  <Import Project="..\Sprocket.Network\Sprocket.Network.projitems" Label="Shared" />
   <Import Project="..\Sprocket.Gravity\Sprocket.Gravity.projitems" Label="Shared" />
 </Project>

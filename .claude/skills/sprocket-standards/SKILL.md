@@ -16,8 +16,11 @@ The general rules are in **csharp-standards**. These hold only here.
 - `src/Lumel` is the UI framework, a shared project compiled into the mod's assembly. It names nothing
   of Sprocket. A control, layout or drawing primitive with nothing of Sprocket in it goes in Lumel, with
   its colors and sizes as properties. `Features/Look` holds Sprocket's palette, sizes and styles.
-- `src/Sprocket.Network` (the network channel and its codec) and `src/Sprocket.Gravity` (a gravity field's size) are
-  shared projects too, built into Sprocket and into the small mods that need them.
+- `src/Sprocket.Gravity` (a gravity field's size) is a shared project too, built into Sprocket and into the small mod
+  that needs it.
+- The network channel and its codec are the `Mal.MdkModMixin.Network` package, a mixin from the malforge feed whose
+  source is built into Sprocket and into the small mods that send messages. It is shared with mods outside this
+  repository, so a change to it is made in the package.
 - `src/Sprocket.DoorAutoClose`, `src/Sprocket.GravityFit` and `src/Sprocket.MultiRename` are small mods of their
   own, split out of Sprocket, whose names do not say Sprocket. Each has its own session, its own texts and storage
   keys where it has any, and calls the game directly where Sprocket has machinery of its own.

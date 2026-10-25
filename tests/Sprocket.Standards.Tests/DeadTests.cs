@@ -52,9 +52,9 @@ public class DeadTests
     {
         const string code = """
             namespace Lumel.Text { public class Unused { public void Alone() { } } }
-            namespace Sprocket.Network { public class Unused { public void Alone() { } } }
+            namespace Mal.MdkModMixin.Network { public class Unused { public void Alone() { } } }
             namespace Sprocket.Gravity { public class Unused { public void Alone() { } } }
-            namespace Sprocket.Networking { public class Unused { public void Alone() { } } }
+            namespace Mal.MdkModMixin.Networking { public class Unused { public void Alone() { } } }
             """;
 
         Assert.Equal(["Unused"], Reported(code));

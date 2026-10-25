@@ -1,4 +1,4 @@
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>A client letting go of the buttons it asked to have written and the server has not written yet, as a pick is backed out of.</summary>
@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         public static int Write(ref UnwiringRequest unwiring, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write(unwiring.Block, data, ref offset);
+            ByteData.Write(unwiring.Block, data, ref offset);
             return offset - start;
         }
 
@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             unwiring = new UnwiringRequest();
-            ByteCodec.TryReadInt64(data, ref offset, out unwiring.Block);
+            ByteData.TryReadInt64(data, ref offset, out unwiring.Block);
             return offset - start;
         }
     }

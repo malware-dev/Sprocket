@@ -1,5 +1,5 @@
 using System;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {
@@ -24,18 +24,18 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>How many bytes <paramref name="order" /> takes on the wire.</summary>
         public static int SizeOf(ref RunOrder order)
         {
-            return sizeof(long) + ByteCodec.SizeOfString(order.System.ToString("N")) + sizeof(int) * 3;
+            return sizeof(long) + ByteData.SizeOfString(order.System.ToString("N")) + sizeof(int) * 3;
         }
 
         /// <summary>Writes <paramref name="order" /> at <paramref name="offset" />, and answers how many bytes it took.</summary>
         public static int Write(ref RunOrder order, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write(order.Block, data, ref offset);
-            ByteCodec.WriteString(order.System.ToString("N"), data, ref offset);
-            ByteCodec.Write(order.Instance, data, ref offset);
-            ByteCodec.Write(order.Sequence, data, ref offset);
-            ByteCodec.Write(order.Stops ? 1 : 0, data, ref offset);
+            ByteData.Write(order.Block, data, ref offset);
+            ByteData.WriteString(order.System.ToString("N"), data, ref offset);
+            ByteData.Write(order.Instance, data, ref offset);
+            ByteData.Write(order.Sequence, data, ref offset);
+            ByteData.Write(order.Stops ? 1 : 0, data, ref offset);
             return offset - start;
         }
 
@@ -44,17 +44,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             order = new RunOrder();
-            ByteCodec.TryReadInt64(data, ref offset, out order.Block);
+            ByteData.TryReadInt64(data, ref offset, out order.Block);
 
             string system;
-            ByteCodec.TryReadString(data, ref offset, out system);
+            ByteData.TryReadString(data, ref offset, out system);
             Guid.TryParseExact(system ?? "", "N", out order.System);
 
-            ByteCodec.TryReadInt32(data, ref offset, out order.Instance);
-            ByteCodec.TryReadInt32(data, ref offset, out order.Sequence);
+            ByteData.TryReadInt32(data, ref offset, out order.Instance);
+            ByteData.TryReadInt32(data, ref offset, out order.Sequence);
 
             int stops;
-            ByteCodec.TryReadInt32(data, ref offset, out stops);
+            ByteData.TryReadInt32(data, ref offset, out stops);
             order.Stops = stops != 0;
             return offset - start;
         }

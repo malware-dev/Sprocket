@@ -1,4 +1,4 @@
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>A client's player changing their own settings in this world, for the server to keep with them.</summary>
@@ -19,15 +19,15 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>How many bytes <paramref name="preference" /> takes on the wire.</summary>
         public static int SizeOf(ref PlayerPreference preference)
         {
-            return sizeof(int) + ByteCodec.SizeOfString(preference.RecentColors);
+            return sizeof(int) + ByteData.SizeOfString(preference.RecentColors);
         }
 
         /// <summary>Writes <paramref name="preference" /> at <paramref name="offset" />, and answers how many bytes it took.</summary>
         public static int Write(ref PlayerPreference preference, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write((preference.Ticks ? 1 : 0) | (preference.ShowsHidden ? 4 : 0) | ((preference.ColorTab & 0xFF) << 8), data, ref offset);
-            ByteCodec.WriteString(preference.RecentColors, data, ref offset);
+            ByteData.Write((preference.Ticks ? 1 : 0) | (preference.ShowsHidden ? 4 : 0) | ((preference.ColorTab & 0xFF) << 8), data, ref offset);
+            ByteData.WriteString(preference.RecentColors, data, ref offset);
             return offset - start;
         }
 
@@ -37,11 +37,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             var start = offset;
             preference = new PlayerPreference();
             int flags;
-            ByteCodec.TryReadInt32(data, ref offset, out flags);
+            ByteData.TryReadInt32(data, ref offset, out flags);
             preference.Ticks = (flags & 1) != 0;
             preference.ColorTab = (flags >> 8) & 0xFF;
             preference.ShowsHidden = (flags & 4) != 0;
-            ByteCodec.TryReadString(data, ref offset, out preference.RecentColors);
+            ByteData.TryReadString(data, ref offset, out preference.RecentColors);
             return offset - start;
         }
     }

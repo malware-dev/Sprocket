@@ -2,8 +2,9 @@ extern alias DoorMod;
 using DoorMod::Sprocket.DoorAutoClose;
 using Sandbox.ModAPI;
 using Sprocket.Sim.Machine;
+using VRage.Game.ModAPI;
 using Xunit;
-using DoorNetwork = DoorMod::Sprocket.Network;
+using DoorNetwork = DoorMod::Mal.MdkModMixin.Network;
 
 namespace Sprocket.DoorAutoClose.Tests;
 
@@ -318,6 +319,10 @@ public class AutoCloseTests : IDisposable
         }
 
         public void SendMessageToServer(ushort channelId, byte[] data, bool reliable)
+        {
+        }
+
+        public void GetPlayers(List<IMyPlayer> players)
         {
         }
     }

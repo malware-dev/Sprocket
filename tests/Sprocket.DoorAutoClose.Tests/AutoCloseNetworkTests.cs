@@ -6,7 +6,7 @@ using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using Xunit;
-using DoorNetwork = DoorMod::Sprocket.Network;
+using DoorNetwork = DoorMod::Mal.MdkModMixin.Network;
 
 namespace Sprocket.DoorAutoClose.Tests;
 
@@ -154,6 +154,10 @@ public class AutoCloseNetworkTests : IDisposable
         public void SendMessageToServer(ushort channelId, byte[] data, bool reliable)
         {
             ToServer.Add((channelId, data));
+        }
+
+        public void GetPlayers(List<IMyPlayer> players)
+        {
         }
 
         /// <summary>Hands <paramref name="message" /> to every listener, as arriving from <paramref name="sender" />.</summary>

@@ -1,4 +1,4 @@
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>A client handing back a Sprocket it was editing, so somebody else may.</summary>
@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         public static int Write(ref EditRelease release, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write(release.Block, data, ref offset);
+            ByteData.Write(release.Block, data, ref offset);
             return offset - start;
         }
 
@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             release = new EditRelease();
-            ByteCodec.TryReadInt64(data, ref offset, out release.Block);
+            ByteData.TryReadInt64(data, ref offset, out release.Block);
             return offset - start;
         }
     }

@@ -8,7 +8,7 @@ using Sprocket.Sim.Fakes;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using Xunit;
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

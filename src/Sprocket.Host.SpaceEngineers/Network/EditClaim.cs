@@ -1,4 +1,4 @@
-using Sprocket.Network;
+using Mal.MdkModMixin.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {
@@ -14,15 +14,15 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>How many bytes <paramref name="claim" /> takes on the wire.</summary>
         public static int SizeOf(ref EditClaim claim)
         {
-            return sizeof(long) + ByteCodec.SizeOfString(claim.Name);
+            return sizeof(long) + ByteData.SizeOfString(claim.Name);
         }
 
         /// <summary>Writes <paramref name="claim" /> at <paramref name="offset" />, and answers how many bytes it took.</summary>
         public static int Write(ref EditClaim claim, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteCodec.Write(claim.Block, data, ref offset);
-            ByteCodec.WriteString(claim.Name, data, ref offset);
+            ByteData.Write(claim.Block, data, ref offset);
+            ByteData.WriteString(claim.Name, data, ref offset);
             return offset - start;
         }
 
@@ -31,8 +31,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             claim = new EditClaim();
-            ByteCodec.TryReadInt64(data, ref offset, out claim.Block);
-            ByteCodec.TryReadString(data, ref offset, out claim.Name);
+            ByteData.TryReadInt64(data, ref offset, out claim.Block);
+            ByteData.TryReadString(data, ref offset, out claim.Name);
             return offset - start;
         }
     }
