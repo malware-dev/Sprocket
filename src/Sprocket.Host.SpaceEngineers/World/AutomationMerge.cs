@@ -9,11 +9,17 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>Joins two automations into one, and divides one between the halves of a construct that parted.</summary>
     public static class AutomationMerge
     {
-        /// <summary>The program <paramref name="kept" /> holds with <paramref name="other" />'s logic systems joined in, adding each pair of differing versions to <paramref name="conflicts" />.</summary>
-        public static string Join(SprocketUnit kept, SprocketUnit other, List<ConflictMemory> conflicts, out string switches)
+        /// <summary>
+        /// A copy of the program <paramref name="kept" /> holds with <paramref name="other" />'s logic systems joined in,
+        /// adding each pair of differing versions to <paramref name="conflicts" /> and each installation brought in to
+        /// <paramref name="moves" />.
+        /// </summary>
+        /// <remarks>The program <paramref name="kept" /> holds is left as it is, and the copy's values are its own.</remarks>
+        public static Automation Join(SprocketUnit kept, SprocketUnit other, List<ConflictMemory> conflicts, List<InstanceMove> moves)
         {
             var values = kept.World.Values;
-            var program = Read(kept);
+            var program = new Automation();
+            ProgramCopy.Into(kept.Program, values, program, values);
 
             // Plain systems become blueprints first, as the editor makes them.
             foreach (var system in new List<AutomationSystem>(other.Program.Systems))
@@ -27,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 var here = program.FindSystem(system.Identity);
                 if (here != null && ProgramWriter.Said(here) == ProgramWriter.Said(system))
                 {
-                    Bring(system, here, other, program, kept.World);
+                    Bring(system, here, other, program, kept.World, moves);
                     continue;
                 }
 
@@ -44,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 arrived.Origin = system.Origin;
                 arrived.OriginChanged = system.OriginChanged;
                 arrived.Enabled = system.Enabled;
-                Bring(system, arrived, other, program, kept.World);
+                Bring(system, arrived, other, program, kept.World, moves);
 
                 if (here == null)
                     continue;
@@ -54,14 +60,17 @@ namespace Sprocket.Host.SpaceEngineers.World
                 conflicts.Add(new ConflictMemory { System = here.Identity, Waiting = identity });
             }
 
-            switches = BlockSwitches.Save(program, kept.Binary);
-            return ProgramWriter.Save(program, values);
+            return program;
         }
 
-        /// <summary>The program <paramref name="unit" /> keeps after its construct parted from <paramref name="away" />.</summary>
-        public static string Part(SprocketUnit unit, GridWorld away, out string switches)
+        /// <summary>
+        /// Brings <paramref name="program" />, which runs on <paramref name="world" />, to what it keeps after its construct
+        /// parted from <paramref name="away" />: an installation whose blocks all went away goes, a blueprint left with none goes
+        /// with it, and every block's place is found again on <paramref name="world" />.
+        /// </summary>
+        /// <remarks>Changes <paramref name="program" /> in place; the caller says it changed.</remarks>
+        public static void Part(Automation program, GridWorld world, GridWorld away)
         {
-            var program = Read(unit);
             foreach (var system in new List<AutomationSystem>(program.Systems))
             {
                 if (!system.IsBlueprint || system.Instances.Count == 0)
@@ -69,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 foreach (var instance in new List<SystemInstance>(system.Instances))
                 {
-                    if (Count(instance, program, unit.World) == 0 && Count(instance, program, away) > 0)
+                    if (Count(instance, program, world) == 0 && Count(instance, program, away) > 0)
                         system.RemoveInstance(instance);
                 }
 
@@ -77,13 +86,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                     program.RemoveSystem(system);
             }
 
-            Rekey(program, unit.World);
-            switches = BlockSwitches.Save(program, unit.Binary);
-            return ProgramWriter.Save(program, unit.World.Values);
+            Rekey(program, world);
         }
 
-        /// <summary>Adds a copy of <paramref name="instance" /> to <paramref name="into" />, unless an identical installation is there already.</summary>
-        public static void Bring(SystemInstance instance, AutomationSystem into, Func<string, string> named)
+        /// <summary>
+        /// Adds a copy of <paramref name="instance" /> to <paramref name="into" />, unless an identical installation is there
+        /// already; answers the installation of <paramref name="into" /> that stands for it.
+        /// </summary>
+        public static SystemInstance Bring(SystemInstance instance, AutomationSystem into, Func<string, string> named)
         {
             var made = into.AddInstance();
             made.Name = instance.Name;
@@ -116,9 +126,56 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (here != made && Same(here, made))
                 {
                     into.RemoveInstance(made);
-                    return;
+                    return here;
                 }
             }
+
+            return made;
+        }
+
+        /// <summary>
+        /// Moves what <paramref name="from" /> remembers of each installation in <paramref name="moves" /> into
+        /// <paramref name="into" />, under the logic system and number it has there: its runs, its watches and its states.
+        /// </summary>
+        /// <remarks>What <paramref name="into" /> remembers already of an installation is kept, and the moved memory of it dropped.</remarks>
+        public static void Carry(ConstructMemory from, ConstructMemory into, List<InstanceMove> moves)
+        {
+            foreach (var run in from.Runs)
+            {
+                var move = Moved(moves, run.System, run.Instance);
+                if (move == null || into.Runs.Exists(here => here.System == move.System && here.Instance == move.Number && here.Sequence == run.Sequence))
+                    continue;
+
+                run.System = move.System;
+                run.Instance = move.Number;
+                into.Runs.Add(run);
+            }
+
+            foreach (var watch in from.Watches)
+            {
+                var move = Moved(moves, watch.System, watch.Instance);
+                if (move == null || into.Watches.Exists(here => here.System == move.System && here.Instance == move.Number && here.Trigger == watch.Trigger))
+                    continue;
+
+                watch.System = move.System;
+                watch.Instance = move.Number;
+                into.Watches.Add(watch);
+            }
+
+            foreach (var state in from.States)
+            {
+                var move = Moved(moves, state.System, state.Instance);
+                if (move == null || into.States.Exists(here => here.System == move.System && here.Instance == move.Number && here.State == state.State))
+                    continue;
+
+                state.System = move.System;
+                state.Instance = move.Number;
+                into.States.Add(state);
+            }
+
+            from.Runs.Clear();
+            from.Watches.Clear();
+            from.States.Clear();
         }
 
         /// <remarks>An old place, walked from this half's grid, can land on a different block of the same kind.</remarks>
@@ -148,22 +205,25 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        static Automation Read(SprocketUnit unit)
-        {
-            string text;
-            string state;
-            unit.Written(out text, out state);
-
-            var program = new Automation();
-            ProgramReader.Load(text, program, unit.World.Values);
-            BlockSwitches.Put(BlockSwitches.Of(unit.Program), program);
-            return program;
-        }
-
-        static void Bring(AutomationSystem from, AutomationSystem into, SprocketUnit other, Automation program, GridWorld world)
+        static void Bring(AutomationSystem from, AutomationSystem into, SprocketUnit other, Automation program, GridWorld world,
+            List<InstanceMove> moves)
         {
             foreach (var instance in from.Instances)
-                Bring(instance, into, name => Declared(name, other, program, world));
+            {
+                var at = Bring(instance, into, name => Declared(name, other, program, world));
+                moves.Add(new InstanceMove { FromSystem = from.Identity, FromNumber = instance.Number, System = into.Identity, Number = at.Number });
+            }
+        }
+
+        static InstanceMove Moved(List<InstanceMove> moves, Guid system, int number)
+        {
+            foreach (var move in moves)
+            {
+                if (move.FromSystem == system && move.FromNumber == number)
+                    return move;
+            }
+
+            return null;
         }
 
         static bool Same(SystemInstance one, SystemInstance other)

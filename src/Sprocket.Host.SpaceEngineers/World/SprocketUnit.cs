@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// One Sprocket, on one construct: its world, its program, the runtime that runs it, and the editor.
     /// </summary>
     /// <remarks>The session ticks it whether or not a screen is open on it.</remarks>
-    public sealed class SprocketUnit : IDisposable
+    public sealed partial class SprocketUnit : IDisposable
     {
         IMyTerminalBlock _block;
 
@@ -96,6 +96,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
+        /// A Sprocket on <paramref name="block" />, a programmable block that parted from the construct of
+        /// <paramref name="from" />, holding a copy of its program and switches and remembering what <paramref name="memory" />
+        /// holds.
+        /// </summary>
+        /// <remarks>The copy is made in memory; nothing is written into <paramref name="block" /> until the program changes.</remarks>
+        public static SprocketUnit PartedFrom(IMyTerminalBlock block, SprocketUnit from, Settings settings, Rota rota, ConstructMemory memory)
+        {
+            var parted = new SprocketUnit(block, settings, rota, from._kinds, from._texts, from._binary, false, null, null, memory, from);
+            parted._backups = from._backups;
+            return parted;
+        }
+
+        /// <summary>
         /// This Sprocket built again from <paramref name="program" /> and <paramref name="switches" />,
         /// carrying on with whatever it was running.
         /// </summary>
@@ -116,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, BlockKinds kinds, Texts texts, IBinary binary, bool copy,
-            string program, string state, ConstructMemory memory)
+            string program, string state, ConstructMemory memory, SprocketUnit copying = null)
         {
             _block = block;
             _binary = binary;
@@ -137,7 +150,10 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             _author = MyAPIGateway.Multiplayer == null ? null : Player.Plain(MyAPIGateway.Multiplayer.MyName);
 
-            Load(program, state);
+            if (copying != null)
+                ProgramCopy.Into(copying._program, copying._world.Values, _program, _world.Values);
+            else
+                Load(program, state);
 
             // After the load, so reading the program is no change to it. A copy writes nothing.
             if (!copy)
@@ -387,6 +403,36 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The program this Sprocket runs and keeps.</summary>
         public Automation Program => _program;
+
+        /// <summary>
+        /// Takes in a change made to <see cref="Program" /> in place, as a construct parting or joining makes: the program is
+        /// checked and rewired, written into the hero once the change is done, and any screen on it is made anew.
+        /// </summary>
+        /// <remarks>A screen open on this is closed by whoever made the change, as for a Sprocket built again.</remarks>
+        public void Reworked()
+        {
+            if (_editor != null)
+            {
+                var habits = _editor.Habits;
+                _editor = null;
+                Editor.Habits = habits;
+            }
+
+            _program.Edited();
+            _program.Rewire();
+        }
+
+        /// <summary>Makes <see cref="Program" /> a copy of <paramref name="program" />, whose values are this one's, in place.</summary>
+        /// <remarks>
+        /// Every run is let go of, and made again on the next tick from the construct's memory. The caller then says it
+        /// changed, with <see cref="Reworked" />.
+        /// </remarks>
+        public void Overwrite(Automation program)
+        {
+            _program.Discard();
+            ProgramCopy.Into(program, _world.Values, _program, _world.Values);
+            _runner.Forget();
+        }
 
         /// <summary>Whether anything has asked for the editor yet, and so made one.</summary>
         public bool HasEditor => _editor != null;
@@ -660,7 +706,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             program = ProgramWriter.Save(_program, _world.Values);
             state = BlockSwitches.Save(_program, _binary);
+            Wrote(program, state);
         }
+
+        /// <summary>The program as just written, <paramref name="program" />, and its switches, <paramref name="state" />, for a local build to check.</summary>
+        /// <remarks>Has no body in anything packed for the game, where the call compiles to nothing.</remarks>
+        partial void Wrote(string program, string state);
 
         /// <summary>The construct's memory, packed: what a copy on another machine shows of its runs, triggers, owners and versions.</summary>
         public string Remembered()

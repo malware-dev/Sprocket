@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Tells the clients a block holds no Sprocket any more.</summary>
         public Action<long> Emptied { get; set; }
 
-        /// <summary>Told of each Sprocket let go of, so a screen open on it closes.</summary>
+        /// <summary>Told of each Sprocket let go of, or changed in place by its construct parting or joining another, so a screen open on it closes.</summary>
         public Action<SprocketUnit> Dropped { get; set; }
 
         /// <summary>The library a lost Sprocket's backup is shelved beside.</summary>
@@ -260,38 +260,51 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>
+        /// Gives <paramref name="block" />, a programmable block that parted from the construct of <paramref name="unit" />, a
+        /// Sprocket of its own with a copy of the automation, and has each half keep what is on it.
+        /// </summary>
+        /// <remarks>Both are changed in memory, and each is written into its block once the change is done.</remarks>
         void Part(SprocketUnit unit, IMyTerminalBlock block)
         {
-            string program;
-            string state;
-            unit.Written(out program, out state);
-            BlockStorage.Store(block, program, BlockSwitches.Save(unit.Program, unit.Binary));
-
-            SprocketUnit half = Adopt(block);
-            if (half == null)
-                return;
+            var half = SprocketUnit.PartedFrom(block, unit, _settings(), _rota, _memories.Claim(block.EntityId));
+            half.Begin(_frame());
+            Listen(half);
+            _units.Add(block.EntityId, half);
 
             GameLog.Say($"{block.CustomName} parted from the construct of {unit.Block.CustomName}, with a copy of its automation");
-            string switches;
-            var away = half.World;
-            program = AutomationMerge.Part(half, unit.World, out switches);
-            var parted = Replace(half, program, switches);
-            if (parted != null)
-                parted.TakeOver(unit.Block.EntityId);
+            AutomationMerge.Part(half.Program, half.World, unit.World);
+            Reworked(half);
+            half.TakeOver(unit.Block.EntityId);
 
-            program = AutomationMerge.Part(unit, away, out switches);
-            Replace(unit, program, switches);
+            AutomationMerge.Part(unit.Program, unit.World, half.World);
+            Reworked(unit);
         }
 
-        /// <summary>Joins <paramref name="other" /> into <paramref name="kept" />, emptying <paramref name="other" />'s block; answers the rebuilt Sprocket, or null.</summary>
+        /// <summary>Has <paramref name="unit" /> take in the change made to its program in place, closing any screen open on it.</summary>
+        void Reworked(SprocketUnit unit)
+        {
+            // A pairing missing either version was settled.
+            unit.Memory.Conflicts.RemoveAll(conflict =>
+                unit.Program.FindSystem(conflict.System) == null || unit.Program.FindSystem(conflict.Waiting) == null);
+
+            if (Dropped != null)
+                Dropped(unit);
+
+            unit.Reworked();
+        }
+
+        /// <summary>Joins <paramref name="other" /> into <paramref name="kept" />, emptying <paramref name="other" />'s block; answers <paramref name="kept" />, or null where the two cannot be joined.</summary>
+        /// <remarks>Changes <paramref name="kept" /> in memory, and it is written into its block once the change is done.</remarks>
         SprocketUnit Join(SprocketUnit kept, SprocketUnit other)
         {
             var conflicts = new List<ConflictMemory>();
-            string switches;
-            var program = AutomationMerge.Join(kept, other, conflicts, out switches);
+            var moves = new List<InstanceMove>();
+            var values = kept.World.Values;
+            var program = AutomationMerge.Join(kept, other, conflicts, moves);
 
-            // Both stay as they are where the joined program will not read.
-            var trouble = ProgramReader.Load(program, new Automation(), kept.World.Values);
+            // Written out and read back as its block will be: both stay as they are where the joined program will not read.
+            var trouble = ProgramReader.Load(ProgramWriter.Save(program, values), new Automation(), values);
             if (trouble.Length > 0)
             {
                 GameLog.Say($"the automation of {other.Block.CustomName} could not join that of {kept.Block.CustomName}: {trouble}");
@@ -307,14 +320,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Emptied(id);
 
             _units.Remove(id);
+            AutomationMerge.Carry(other.Memory, kept.Memory, moves);
             Drop(other);
             kept.Memory.Conflicts.AddRange(conflicts);
             GameLog.Say($"the automation of {other.Block.CustomName} joined that of {kept.Block.CustomName}, {conflicts.Count} logic system(s) waiting for a choice");
-            var joined = Replace(kept, program, switches);
-            if (joined != null)
-                joined.TakeOver(id);
-
-            return joined;
+            kept.Overwrite(program);
+            Reworked(kept);
+            kept.TakeOver(id);
+            return kept;
         }
 
         /// <summary>Files a Sprocket kept under <paramref name="was" /> under the block that holds it now, or lets it go where it is lost.</summary>

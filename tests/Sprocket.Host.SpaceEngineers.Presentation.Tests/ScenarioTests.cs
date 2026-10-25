@@ -78,6 +78,123 @@ public class ScenarioTests
         Cycles(sim, "Aft Button", "Aft Inner Door");
     }
 
+    /// <summary>A construct parting closes a screen open on the automation it kept, which opens again with nothing to take back.</summary>
+    [Fact]
+    public void APartingClosesTheScreenOnWhatStays()
+    {
+        var scenario = new SplitTwin();
+        var built = scenario.Build(BlockDefinitions.FromGame());
+        var sim = built.Sim;
+        var aftHero = built.Deck.Blocks.Single(fitting => fitting.Name == "Aft Automation");
+        var fore = sim.Roster.Kept(sim.Machine.Sprocket.Block)!;
+
+        var screen = fore.Editor;
+        screen.NewSystem("Lights");
+        Assert.True(screen.CanUndoConstruct());
+
+        var closed = new List<SprocketUnit>();
+        sim.Roster.Dropped = unit => closed.Add(unit);
+        sim.Machine.Split(built.Deck.Parts(scenario.Bridge).Single(part => part.Contains(aftHero)));
+        Settle(sim);
+
+        Assert.Contains(fore, closed);
+        Assert.Same(fore, sim.Roster.Kept(sim.Machine.Sprocket.Block));
+        Assert.NotSame(screen, fore.Editor);
+        Assert.False(fore.Editor.CanUndoConstruct());
+    }
+
+    /// <summary>
+    /// A construct joining another closes a screen open on the automation that takes the other in, which opens again with
+    /// nothing to take back, and its block holds both.
+    /// </summary>
+    [Fact]
+    public void AJoiningClosesTheScreenOnWhatTakesItIn()
+    {
+        var scenario = new SplitTwin();
+        var built = scenario.Build(BlockDefinitions.FromGame());
+        var sim = built.Sim;
+        var aftHero = built.Deck.Blocks.Single(fitting => fitting.Name == "Aft Automation");
+        var parted = sim.Machine.Split(built.Deck.Parts(scenario.Bridge).Single(part => part.Contains(aftHero)));
+        Settle(sim);
+        var fore = sim.Roster.Kept(sim.Machine.Sprocket.Block)!;
+
+        var screen = fore.Editor;
+        screen.NewSystem("Lights");
+        Assert.True(screen.CanUndoConstruct());
+
+        var closed = new List<SprocketUnit>();
+        sim.Roster.Dropped = unit => closed.Add(unit);
+        sim.Machine.Merge(parted);
+        Settle(sim);
+
+        Assert.Contains(fore, closed);
+        Assert.Same(fore, Assert.Single(sim.Roster.All));
+        Assert.NotSame(screen, fore.Editor);
+        Assert.False(fore.Editor.CanUndoConstruct());
+
+        var stored = new Automation();
+        Assert.Equal("", ProgramReader.Load(BlockStorage.Stored(fore.Block, BlockStorage.ProgramKey), stored, sim.World.Values));
+        var airlocks = stored.Systems.Single(system => system.Name != "Lights");
+        Assert.Equal(new[] { "Fore", "Aft" }, airlocks.Instances.Select(instance => instance.Name));
+    }
+
+    /// <summary>A cycle running as its construct joins another carries on to its end, on the side that takes the other in and on the side taken in.</summary>
+    [Theory]
+    [InlineData("Fore")]
+    [InlineData("Aft")]
+    public void ACycleRunningThroughAJoinFinishes(string side)
+    {
+        var scenario = new SplitTwin();
+        var built = scenario.Build(BlockDefinitions.FromGame());
+        var sim = built.Sim;
+        var aftHero = built.Deck.Blocks.Single(fitting => fitting.Name == "Aft Automation");
+        var parted = sim.Machine.Split(built.Deck.Parts(scenario.Bridge).Single(part => part.Contains(aftHero)));
+        Settle(sim);
+
+        var log = sim.Machine.Log;
+        var pressed = log.Count;
+        sim.Press(side + " Button");
+        for (var i = 0; i < 600 && !log.Skip(pressed).Contains(side + " Outer Door:open"); i++)
+            sim.Tick();
+        Assert.DoesNotContain(side + " Inner Door:open", log.Skip(pressed));
+
+        sim.Machine.Merge(parted);
+        for (var i = 0; i < 600; i++)
+            sim.Tick();
+
+        Assert.Contains(side + " Inner Door:open", log.Skip(pressed));
+    }
+
+    /// <summary>
+    /// A construct joining another runs the joined program's own sequences, on every installation, once it has ticked, and
+    /// what each run is doing stays in the construct's memory, which a save writes.
+    /// </summary>
+    [Fact]
+    public void AJoinedAutomationRunsItsOwnSequences()
+    {
+        var scenario = new SplitTwin();
+        var built = scenario.Build(BlockDefinitions.FromGame());
+        var sim = built.Sim;
+        var aftHero = built.Deck.Blocks.Single(fitting => fitting.Name == "Aft Automation");
+        var parted = sim.Machine.Split(built.Deck.Parts(scenario.Bridge).Single(part => part.Contains(aftHero)));
+        Settle(sim);
+
+        sim.Machine.Merge(parted);
+        Settle(sim);
+
+        var joined = Assert.Single(sim.Roster.All);
+        var system = joined.Program.Systems.Single();
+        foreach (var instance in system.Instances)
+        {
+            foreach (var sequence in system.Sequences)
+            {
+                var run = joined.Runner.Get(sequence, instance);
+                Assert.Same(sequence, run.Sequence);
+                Assert.Contains(run.Memory, joined.Memory.Runs);
+            }
+        }
+    }
+
     /// <summary>Ticks long enough for the construct's change to be noticed and answered.</summary>
     static void Settle(Simulation sim)
     {

@@ -15,11 +15,45 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>Two automations meeting on one construct become one, and a construct parting leaves each half a copy of its own.</summary>
 /// <remarks>
 /// The harness runs one automation, so the second is made by hand on another programmable block of the same rig, as a merge
-/// or a paste brings one. What the session does with the result - building the kept one again, emptying the other's block -
-/// is the game's to show.
+/// or a paste brings one. What the session does with the result - changing the kept one in place, emptying the other's
+/// block - is the game's to show.
 /// </remarks>
 public class AutomationMergeTests
 {
+    /// <summary>
+    /// What a joining Sprocket remembers of an installation it brings goes with it, under the logic system and number the
+    /// installation has after the join, and what the one that stays remembers of an installation is kept.
+    /// </summary>
+    [Fact]
+    public void WhatAnInstallationRemembersGoesWithItIntoAJoin()
+    {
+        var theirs = Guid.NewGuid();
+        var ours = Guid.NewGuid();
+        var from = new ConstructMemory();
+        from.Runs.Add(new RunMemory { System = theirs, Instance = 1, Sequence = 1, Running = true, Step = 2 });
+        from.Runs.Add(new RunMemory { System = theirs, Instance = 2, Sequence = 1, Running = true, Step = 4 });
+        from.Watches.Add(new WatchMemory { System = theirs, Instance = 1, Trigger = 1, Fired = 3 });
+        from.States.Add(new StateMemory { System = theirs, Instance = 1, State = "where", Choice = "outside" });
+        var into = new ConstructMemory();
+        into.Runs.Add(new RunMemory { System = ours, Instance = 2, Sequence = 1, Step = 0 });
+        var moves = new List<InstanceMove>
+        {
+            new InstanceMove { FromSystem = theirs, FromNumber = 1, System = ours, Number = 3 },
+            new InstanceMove { FromSystem = theirs, FromNumber = 2, System = ours, Number = 2 }
+        };
+
+        AutomationMerge.Carry(from, into, moves);
+
+        var run = Assert.Single(into.Runs, each => each.Instance == 3);
+        Assert.Equal((ours, 1, true, 2), (run.System, run.Sequence, run.Running, run.Step));
+        Assert.Equal(0, Assert.Single(into.Runs, each => each.Instance == 2).Step);
+        var watch = Assert.Single(into.Watches);
+        Assert.Equal((ours, 3, 3), (watch.System, watch.Instance, watch.Fired));
+        var state = Assert.Single(into.States);
+        Assert.Equal((ours, 3, "outside"), (state.System, state.Instance, state.Choice));
+        Assert.Empty(from.Runs);
+    }
+
     /// <summary>Two copies of a logic system that read the same become one, with the installations of both.</summary>
     [Fact]
     public void IdenticalCopiesBecomeOne()
@@ -29,7 +63,7 @@ public class AutomationMergeTests
         Elsewhere(other);
 
         var conflicts = new List<ConflictMemory>();
-        var joined = Read(sim, AutomationMerge.Join(sim.Unit, other, conflicts, out _));
+        var joined = AutomationMerge.Join(sim.Unit, other, conflicts, new List<InstanceMove>());
 
         var system = Assert.Single(joined.Systems);
         Assert.Equal(2, system.Instances.Count);
@@ -43,7 +77,7 @@ public class AutomationMergeTests
         var sim = Airlock(Rig.Demo());
         var other = Another(sim);
 
-        var joined = Read(sim, AutomationMerge.Join(sim.Unit, other, new List<ConflictMemory>(), out _));
+        var joined = AutomationMerge.Join(sim.Unit, other, new List<ConflictMemory>(), new List<InstanceMove>());
 
         Assert.Single(Assert.Single(joined.Systems).Instances);
     }
@@ -60,8 +94,7 @@ public class AutomationMergeTests
         other.Program.Systems[0].Sequences[0].Name = "Cycle";
 
         var conflicts = new List<ConflictMemory>();
-        string switches;
-        var joined = Read(sim, AutomationMerge.Join(sim.Unit, other, conflicts, out switches), switches);
+        var joined = AutomationMerge.Join(sim.Unit, other, conflicts, new List<InstanceMove>());
 
         Assert.Equal(2, joined.Systems.Count);
         var conflict = Assert.Single(conflicts);
@@ -87,7 +120,7 @@ public class AutomationMergeTests
         stranger.Identity = Guid.NewGuid();
 
         var conflicts = new List<ConflictMemory>();
-        var joined = Read(sim, AutomationMerge.Join(sim.Unit, other, conflicts, out _));
+        var joined = AutomationMerge.Join(sim.Unit, other, conflicts, new List<InstanceMove>());
 
         Assert.Equal(2, joined.Systems.Count);
         Assert.NotNull(joined.FindSystem(stranger.Identity));
@@ -102,7 +135,7 @@ public class AutomationMergeTests
         var other = Another(sim);
         var slot = Elsewhere(other);
 
-        var joined = Read(sim, AutomationMerge.Join(sim.Unit, other, new List<ConflictMemory>(), out _));
+        var joined = AutomationMerge.Join(sim.Unit, other, new List<ConflictMemory>(), new List<InstanceMove>());
 
         var arrived = joined.Systems[0].Instances[1];
         Assert.Equal(new[] { "Hangar Door" }, Blocks(arrived.FilledWith(slot)!, joined, sim.World));
@@ -244,8 +277,8 @@ public class AutomationMergeTests
         BlockStorage.Store(spare.Block, written, "");
         var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Kinds, sim.Texts, new ProtoBinary(), new ConstructMemory());
 
-        var onHead = Read(sim, AutomationMerge.Part(half, sim.World, out _));
-        var onBase = Read(sim, AutomationMerge.Part(sim.Unit, half.World, out _));
+        var onHead = Parted(half, sim.World);
+        var onBase = Parted(sim.Unit, half.World);
 
         Assert.Equal(new[] { 2, 3 }, onHead.Systems[0].Instances.Select(instance => instance.Number));
         Assert.Equal(new[] { 1, 3 }, onBase.Systems[0].Instances.Select(instance => instance.Number));
@@ -273,8 +306,8 @@ public class AutomationMergeTests
         BlockStorage.Store(spare.Block, written, "");
         var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Kinds, sim.Texts, new ProtoBinary(), new ConstructMemory());
 
-        Assert.Empty(Read(sim, AutomationMerge.Part(half, sim.World, out _)).Systems);
-        Assert.Single(Read(sim, AutomationMerge.Part(sim.Unit, half.World, out _)).Systems);
+        Assert.Empty(Parted(half, sim.World).Systems);
+        Assert.Single(Parted(sim.Unit, half.World).Systems);
     }
 
     /// <summary>The airlock logic system on <paramref name="rig" />: its button opens the inner door.</summary>
@@ -321,12 +354,11 @@ public class AutomationMergeTests
         return slot;
     }
 
-    static Automation Read(Simulation sim, string program, string switches = "")
+    /// <summary>The program <paramref name="unit" /> keeps once its construct has parted from <paramref name="away" />.</summary>
+    static Automation Parted(SprocketUnit unit, GridWorld away)
     {
-        var read = new Automation();
-        Assert.Equal("", ProgramReader.Load(program, read, sim.World.Values));
-        BlockSwitches.Load(switches, read, new ProtoBinary());
-        return read;
+        AutomationMerge.Part(unit.Program, unit.World, away);
+        return unit.Program;
     }
 
     /// <summary>The slot of <paramref name="instance" /> the inner door fills.</summary>
