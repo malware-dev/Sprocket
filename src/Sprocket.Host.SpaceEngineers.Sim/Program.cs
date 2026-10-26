@@ -238,7 +238,7 @@ namespace Sprocket.Sim
                 var texts = new Texts();
                 var arguments = new Arguments();
                 arguments.Set("construct", "Hailstone Station");
-                Shot.Save(args[1], 1920, 1080, TerminalNotice.Staged(texts.TerminalForeign, arguments, texts.TerminalOk));
+                Shot.Save(args[1], 1920, 1080, TerminalNotice.Hosted(texts.TerminalForeign, arguments, texts.TerminalOk));
                 Console.WriteLine("wrote " + args[1]);
                 return;
             }

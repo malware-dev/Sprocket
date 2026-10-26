@@ -51,10 +51,10 @@ public class TerminalNoticeTests
         Assert.True(stage.TakeClose());
     }
 
-    static Stage Notice()
+    static Workspace Notice()
     {
         var arguments = new Arguments();
         arguments.Set("construct", "Hailstone");
-        return TerminalNotice.Staged("Only the owners of {construct} can open its automation.", arguments, "OK");
+        return TerminalNotice.Hosted("Only the owners of {construct} can open its automation.", arguments, "OK");
     }
 }

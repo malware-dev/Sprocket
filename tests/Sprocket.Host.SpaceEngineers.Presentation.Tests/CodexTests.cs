@@ -22,7 +22,7 @@ public class CodexTests
         var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
         var button = screen.Scene.Under(at)!;
 
-        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", (EditorView.TipDelay - 1).ToString());
+        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", (EditorWorkspace.TipDelay - 1).ToString());
         Assert.False(screen.Scene.CodexTip.IsOpen, "the tip opened before the pointer had rested for the delay");
 
         screen.Do("tick", "1");
@@ -74,7 +74,7 @@ public class CodexTests
         Assert.Equal(new[] { false }, kept);
         Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
 
-        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", (EditorView.TipDelay * 2).ToString());
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", (EditorWorkspace.TipDelay * 2).ToString());
         Assert.False(screen.Scene.CodexTip.IsOpen, "a tip opened with tips off");
 
         screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
@@ -89,7 +89,7 @@ public class CodexTests
     {
         var screen = Screen.Fresh("tick", "3");
         var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
-        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", EditorView.TipDelay.ToString());
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", EditorWorkspace.TipDelay.ToString());
         Assert.True(screen.Scene.CodexTip.IsOpen);
 
         screen.Do(((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", "3");
@@ -116,7 +116,7 @@ public class CodexTests
         var screen = Screen.Fresh("tick", "3");
         var at = FirstLink(screen, out var heading, CodexPages.LogicSystem);
 
-        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", EditorView.TipDelay.ToString());
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", EditorWorkspace.TipDelay.ToString());
 
         var tip = screen.Scene.CodexTip;
         Assert.Same(heading, tip.Anchor);
@@ -228,7 +228,7 @@ public class CodexTests
         var row = Target.Within(menu).OfType<Lumel.Layout.HStack>().First(stack => stack.Tip != null);
 
         var at = Middle(row);
-        screen.Do("move", Say(at.X), Say(at.Y), "tick", EditorView.TipDelay.ToString());
+        screen.Do("move", Say(at.X), Say(at.Y), "tick", EditorWorkspace.TipDelay.ToString());
         var tip = screen.Scene.CodexTip;
         Assert.Same(row, tip.Anchor);
         var first = tip.Page;
@@ -263,7 +263,7 @@ public class CodexTests
         var name = screen.Text("Airlock 0");
         var over = new Vector2(name.At.X, name.At.Y);
         var spot = Screen.Ui(over.X + 4f, over.Y + 6f);
-        screen.Do("move", Say(spot.X), Say(spot.Y), "tick", EditorView.TipDelay.ToString());
+        screen.Do("move", Say(spot.X), Say(spot.Y), "tick", EditorWorkspace.TipDelay.ToString());
         var tip = screen.Scene.CodexTip;
         Assert.True(tip.IsOpen, "no tip opened over the first logic system");
         var onTip = new Vector2(tip.Bounds.X + tip.Bounds.Width / 2f, tip.Bounds.Y + tip.Bounds.Height / 2f);

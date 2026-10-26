@@ -167,7 +167,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Renames = new Relay(() => row.Rename(index));
 
                 Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = FixedSize.Size(32f, 32f) };
-                Mark = new Glyph { Style = Styles.Join, Placement = FixedSize.Size(32f, 32f), Padding = EditorView.LevelWithCapitals };
+                Mark = new Glyph { Style = Styles.Join, Placement = FixedSize.Size(32f, 32f), Padding = EditorWorkspace.LevelWithCapitals };
                 Lead = new Label { Style = Styles.TitleLead };
                 After = new Label { Style = Styles.TitleLead };
 

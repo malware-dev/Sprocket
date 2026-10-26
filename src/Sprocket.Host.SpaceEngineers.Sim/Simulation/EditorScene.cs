@@ -21,13 +21,13 @@ namespace Sprocket.Sim.Simulation
     /// </summary>
     /// <remarks>
     /// Three things meet here and none of them knows about the other two: core decides what is on screen,
-    /// <see cref="EditorView" /> decides how this target draws it, and the simulated ship supplies a world
+    /// <see cref="EditorWorkspace" /> decides how this target draws it, and the simulated ship supplies a world
     /// and a clock. The same three meet in the mod, with the game supplying the third.
     /// </remarks>
     public sealed class EditorScene
     {
         readonly Ship _ship;
-        EditorView _view;
+        EditorWorkspace _view;
 
         Vector2 _at;
 
@@ -67,7 +67,7 @@ namespace Sprocket.Sim.Simulation
         EditorScene(Ship ship)
         {
             _ship = ship;
-            _view = new EditorView(_ship.Editor);
+            _view = new EditorWorkspace(_ship.Editor);
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Sprocket.Sim.Simulation
         /// <summary>The screen closed and opened again, as a player looking again does.</summary>
         public void Reopen()
         {
-            _view = new EditorView(_ship.Editor);
+            _view = new EditorWorkspace(_ship.Editor);
             _ship.Editor.Opened();
         }
 

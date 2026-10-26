@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         SprocketScreen(SprocketUnit unit, IMyTerminalBlock opened, Action closed, IScreenSpace screen)
-            : base("Sprocket", new Vector2(EditorView.ScreenWidth, EditorView.ScreenHeight), new EditorView(unit.Editor), screen,
+            : base("Sprocket", new Vector2(EditorWorkspace.ScreenWidth, EditorWorkspace.ScreenHeight), new EditorWorkspace(unit.Editor), screen,
                 Materials.Fill, new MarkImages(new ScreenSpaceImages(screen)))
         {
             _unit = unit;

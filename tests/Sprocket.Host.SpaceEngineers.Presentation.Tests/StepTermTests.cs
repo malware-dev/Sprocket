@@ -67,7 +67,7 @@ public class StepTermTests
         var at = Links.First(rows.First(row => row.Kind == StepKind.If), CodexPages.If, out _);
 
         // The first point of a link is on its top left corner; a few units in is on its words.
-        screen.Do("move", Say(at.X + 4f), Say(at.Y + 6f), "tick", EditorView.TipDelay.ToString());
+        screen.Do("move", Say(at.X + 4f), Say(at.Y + 6f), "tick", EditorWorkspace.TipDelay.ToString());
 
         Assert.True(screen.Scene.CodexTip.IsOpen, "no tip opened on the if");
         Assert.Same(screen.Editor.Codex.Find(CodexPages.If), screen.Scene.CodexTip.Page);

@@ -48,43 +48,51 @@ on screen     Sequence 1
 041  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
 042  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 043  SetClip    {X:256 Y:118 W:1408 H:902}
-044  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
-045  Text       at {X:280 Y:115.6399} scale 0.694  #F0AC28FF  "This sequence has no trigger, and no sequence runs it."
-046  Sprite     Sprocket_Fill         {X:280 Y:170 W:3 H:3}  #85A1A9FF
-047  Sprite     Sprocket_Fill         {X:280 Y:176 W:3 H:3}  #85A1A9FF
-048  Sprite     Sprocket_Fill         {X:280 Y:182 W:3 H:3}  #85A1A9FF
-049  Sprite     Sprocket_Fill         {X:286 Y:170 W:3 H:3}  #85A1A9FF
-050  Sprite     Sprocket_Fill         {X:286 Y:176 W:3 H:3}  #85A1A9FF
-051  Sprite     Sprocket_Fill         {X:286 Y:182 W:3 H:3}  #85A1A9FF
-052  Text       at {X:300 Y:165.6399} scale 0.694  #85A1A9FF  "1"
-053  Sprite     Sprocket_Fill         {X:348 Y:158 W:101 H:40}  #29363EFF
-054  Sprite     Sprocket_Fill         {X:348 Y:158 W:101 H:1}  #3F474FFF
-055  Sprite     Sprocket_Fill         {X:348 Y:197 W:101 H:1}  #3F474FFF
-056  Sprite     Sprocket_Fill         {X:348 Y:158 W:1 H:40}  #3F474FFF
-057  Sprite     Sprocket_Fill         {X:448 Y:158 W:1 H:40}  #3F474FFF
-058  Text       at {X:364 Y:166.5141} scale 0.401  #A2C3CDFF  "A"
-059  Text       at {X:391.6875 Y:163.2255} scale 0.833  #DCF5FDFF  "open"
-060  Sprite     Sprocket_Fill         {X:457 Y:158 W:103 H:40}  #29363EFF
-061  Sprite     Sprocket_Fill         {X:457 Y:158 W:103 H:1}  #3F474FFF
-062  Sprite     Sprocket_Fill         {X:457 Y:197 W:103 H:1}  #3F474FFF
-063  Sprite     Sprocket_Fill         {X:457 Y:158 W:1 H:40}  #3F474FFF
-064  Sprite     Sprocket_Fill         {X:559 Y:158 W:1 H:40}  #3F474FFF
-065  Text       at {X:472.5142 Y:166.5141} scale 0.401  #A2C3CDFF  "B"
-066  Text       at {X:500.2017 Y:163.2255} scale 0.833  #DCF5FDFF  "slot 1"
-067  Text       at {X:1522.156 Y:166.5141} scale 0.401  #A2C3CDFF  "2"
-068  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
-069  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-070  Sprite     Sprocket_Fill         {X:280 Y:230 W:3 H:3}  #85A1A9FF
-071  Sprite     Sprocket_Fill         {X:280 Y:236 W:3 H:3}  #85A1A9FF
-072  Sprite     Sprocket_Fill         {X:280 Y:242 W:3 H:3}  #85A1A9FF
-073  Sprite     Sprocket_Fill         {X:286 Y:230 W:3 H:3}  #85A1A9FF
-074  Sprite     Sprocket_Fill         {X:286 Y:236 W:3 H:3}  #85A1A9FF
-075  Sprite     Sprocket_Fill         {X:286 Y:242 W:3 H:3}  #85A1A9FF
-076  Text       at {X:300 Y:225.6399} scale 0.694  #85A1A9FF  "2"
-077  Text       at {X:348 Y:226.5141} scale 0.401  #A2C3CDFF  "k"
-078  Text       at {X:375.6875 Y:223.2255} scale 0.833  #A2C3CDFF  "wait for pending tasks"
-079  Text       at {X:1522.156 Y:226.5141} scale 0.401  #A2C3CDFF  "2"
-080  Text       at {X:1570.094 Y:230.9932} scale 0.241  #A2C3CDFF  "e"
-081  Text       at {X:1610.156 Y:226.5141} scale 0.401  #A2C3CDFF  "d"
-082  Text       at {X:272 Y:275.2255} scale 0.833  #A2C3CDFF  "+ step"
-083  ClearClip  
+044  Text       at {X:260.0625 Y:131.2328} scale 0.161  #5F7278FF  "0"
+045  Sprite     Sprocket_Fill         {X:280 Y:118 W:392 H:36}  #281E09FF
+046  Sprite     Sprocket_Stripes      {X:280 Y:118 W:40 H:36}  #2E230AFF
+047  Sprite     Sprocket_Stripes      {X:320 Y:118 W:64 H:36}  #2E230AFF
+048  Sprite     Sprocket_Stripes      {X:384 Y:118 W:64 H:36}  #2E230AFF
+049  Sprite     Sprocket_Stripes      {X:448 Y:118 W:64 H:36}  #2E230AFF
+050  Sprite     Sprocket_Stripes      {X:512 Y:118 W:64 H:36}  #2E230AFF
+051  Sprite     Sprocket_Stripes      {X:576 Y:118 W:64 H:36}  #2E230AFF
+052  Sprite     Sprocket_Stripes      {X:640 Y:118 W:32 H:36}  #2E230AFF
+053  Text       at {X:296 Y:123.6399} scale 0.694  #F0AC28FF  "This sequence has no trigger, and no sequence runs it."
+054  Sprite     Sprocket_Fill         {X:280 Y:186 W:3 H:3}  #85A1A9FF
+055  Sprite     Sprocket_Fill         {X:280 Y:192 W:3 H:3}  #85A1A9FF
+056  Sprite     Sprocket_Fill         {X:280 Y:198 W:3 H:3}  #85A1A9FF
+057  Sprite     Sprocket_Fill         {X:286 Y:186 W:3 H:3}  #85A1A9FF
+058  Sprite     Sprocket_Fill         {X:286 Y:192 W:3 H:3}  #85A1A9FF
+059  Sprite     Sprocket_Fill         {X:286 Y:198 W:3 H:3}  #85A1A9FF
+060  Text       at {X:300 Y:181.6399} scale 0.694  #85A1A9FF  "1"
+061  Sprite     Sprocket_Fill         {X:348 Y:174 W:101 H:40}  #29363EFF
+062  Sprite     Sprocket_Fill         {X:348 Y:174 W:101 H:1}  #3F474FFF
+063  Sprite     Sprocket_Fill         {X:348 Y:213 W:101 H:1}  #3F474FFF
+064  Sprite     Sprocket_Fill         {X:348 Y:174 W:1 H:40}  #3F474FFF
+065  Sprite     Sprocket_Fill         {X:448 Y:174 W:1 H:40}  #3F474FFF
+066  Text       at {X:364 Y:182.5141} scale 0.401  #A2C3CDFF  "A"
+067  Text       at {X:391.6875 Y:179.2255} scale 0.833  #DCF5FDFF  "open"
+068  Sprite     Sprocket_Fill         {X:457 Y:174 W:103 H:40}  #29363EFF
+069  Sprite     Sprocket_Fill         {X:457 Y:174 W:103 H:1}  #3F474FFF
+070  Sprite     Sprocket_Fill         {X:457 Y:213 W:103 H:1}  #3F474FFF
+071  Sprite     Sprocket_Fill         {X:457 Y:174 W:1 H:40}  #3F474FFF
+072  Sprite     Sprocket_Fill         {X:559 Y:174 W:1 H:40}  #3F474FFF
+073  Text       at {X:472.5142 Y:182.5141} scale 0.401  #A2C3CDFF  "B"
+074  Text       at {X:500.2017 Y:179.2255} scale 0.833  #DCF5FDFF  "slot 1"
+075  Text       at {X:1522.156 Y:182.5141} scale 0.401  #A2C3CDFF  "2"
+076  Text       at {X:1570.094 Y:186.9932} scale 0.241  #A2C3CDFF  "e"
+077  Text       at {X:1610.156 Y:182.5141} scale 0.401  #A2C3CDFF  "d"
+078  Sprite     Sprocket_Fill         {X:280 Y:246 W:3 H:3}  #85A1A9FF
+079  Sprite     Sprocket_Fill         {X:280 Y:252 W:3 H:3}  #85A1A9FF
+080  Sprite     Sprocket_Fill         {X:280 Y:258 W:3 H:3}  #85A1A9FF
+081  Sprite     Sprocket_Fill         {X:286 Y:246 W:3 H:3}  #85A1A9FF
+082  Sprite     Sprocket_Fill         {X:286 Y:252 W:3 H:3}  #85A1A9FF
+083  Sprite     Sprocket_Fill         {X:286 Y:258 W:3 H:3}  #85A1A9FF
+084  Text       at {X:300 Y:241.6399} scale 0.694  #85A1A9FF  "2"
+085  Text       at {X:348 Y:242.5141} scale 0.401  #A2C3CDFF  "k"
+086  Text       at {X:375.6875 Y:239.2255} scale 0.833  #A2C3CDFF  "wait for pending tasks"
+087  Text       at {X:1522.156 Y:242.5141} scale 0.401  #A2C3CDFF  "2"
+088  Text       at {X:1570.094 Y:246.9932} scale 0.241  #A2C3CDFF  "e"
+089  Text       at {X:1610.156 Y:242.5141} scale 0.401  #A2C3CDFF  "d"
+090  Text       at {X:272 Y:291.2255} scale 0.833  #A2C3CDFF  "+ step"
+091  ClearClip  

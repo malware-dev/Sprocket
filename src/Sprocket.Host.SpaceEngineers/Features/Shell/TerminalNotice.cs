@@ -26,20 +26,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>The game dims what is behind it, as it does behind the editor.</remarks>
         public static void Show(string message, Arguments arguments, string ok)
         {
-            var stage = Staged(message, arguments, ok);
+            var workspace = Hosted(message, arguments, ok);
             var screen = new GameScreenSpace();
-            new GameScreen("SprocketNotice", new Vector2(EditorView.ScreenWidth, EditorView.ScreenHeight), stage, screen,
+            new GameScreen("SprocketNotice", new Vector2(EditorWorkspace.ScreenWidth, EditorWorkspace.ScreenHeight), workspace, screen,
                 Materials.Fill, new MarkImages(new ScreenSpaceImages(screen))).Open();
         }
 
-        /// <summary>The stage saying <paramref name="message" />, its slots filled from <paramref name="arguments" />, whose one button, <paramref name="ok" />, closes it.</summary>
-        public static Stage Staged(string message, Arguments arguments, string ok)
+        /// <summary>The workspace saying <paramref name="message" />, its slots filled from <paramref name="arguments" />, whose one button, <paramref name="ok" />, closes it.</summary>
+        public static Workspace Hosted(string message, Arguments arguments, string ok)
         {
             var notice = new TerminalNotice(message, arguments, ok);
-            var stage = new Stage(notice);
-            notice._box.YesCommand = new Relay(stage.Close);
-            stage.Accept = new Relay(() => notice._box.TakeAccept());
-            return stage;
+            var workspace = new Workspace(notice);
+            notice._box.YesCommand = new Relay(workspace.Close);
+            workspace.Accept = new Relay(() => notice._box.TakeAccept());
+            return workspace;
         }
     }
 }

@@ -60,11 +60,11 @@ namespace RichTextPanels
                 }
             };
 
-            var stage = new Stage(root);
-            close.Command = new Relay(stage.Close);
+            var workspace = new Workspace(root);
+            close.Command = new Relay(workspace.Close);
 
             var screen = new GameScreenSpace();
-            new GameScreen("RichTextHelp", Size, stage, screen, Fill, new ScreenSpaceImages(screen)).Open();
+            new GameScreen("RichTextHelp", Size, workspace, screen, Fill, new ScreenSpaceImages(screen)).Open();
         }
 
         static RichText Text(string code)

@@ -1,5 +1,6 @@
 using Lumel;
 using Lumel.Controls;
+using Lumel.Drawing;
 using Lumel.Text;
 using VRageMath;
 
@@ -7,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     // A .debug.cs file: compiled into local builds only and not packed for the game, where the call to Wrote
     // compiles to nothing.
-    public sealed partial class EditorView
+    public sealed partial class EditorWorkspace
     {
         int _wires;
 
@@ -21,13 +22,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>Words hidden under a window or scrolled out of sight are passed over.</remarks>
         public bool Find(string text, out Vector2 at)
         {
-            for (var i = _windows.Count - 1; i >= 0; i--)
+            for (var i = Windows.Count - 1; i >= 0; i--)
             {
-                if (Find(_windows[i], text, out at))
+                if (Find(Windows[i], text, out at))
                     return true;
             }
 
-            return Find(_root, text, out at);
+            return Find(Root, text, out at);
+        }
+
+        /// <summary>Draws the editor at the size one of the game's screens is, centered where they are centered.</summary>
+        public void Draw(IGraphics g)
+        {
+            var size = g.Size;
+            var width = size.X * ScreenWidth;
+            var height = size.Y * ScreenHeight;
+
+            Draw(g, new RectangleF((size.X - width) * 0.5f, (size.Y - height) * 0.5f, width, height));
         }
 
         partial void Wrote()
