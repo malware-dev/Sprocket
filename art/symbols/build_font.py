@@ -694,6 +694,23 @@ def monitor():
     return [outer, neck, base], [inner]
 
 
+def power():
+    """
+    Power: a ring open at the top, with a bar running down into the gap.
+
+    The mark every device carries on its power switch, at the lighter line. The ring's ends are cut square to it, and the
+    bar stands clear of them and runs a little past the ring's top, as the standard symbol does.
+    """
+    line = 0.094
+    r = 0.30
+    gap = 35
+    steps = 72
+    angles = [math.radians(-90 + gap + i * (360 - 2 * gap) / float(steps)) for i in range(steps + 1)]
+    outer = [(0.5 + r * math.cos(a), 0.5 + r * math.sin(a)) for a in angles]
+    inner = [(0.5 + (r - line) * math.cos(a), 0.5 + (r - line) * math.sin(a)) for a in reversed(angles)]
+    return [poly(*(outer + inner)), stroke((0.5, 0.48), (0.5, 0.5 - r * 1.235), line)]
+
+
 # The toolbar an eye looks over: where its eye sits and how wide it opens, the bar under it and the gap between.
 EYE_Y, EYE_RISE, EYE_HALF = 0.38, 0.20, 0.38
 BAR_TOP, BAR_BOTTOM, BAR_GAP, BAR_DOT = 0.64, 0.86, 0.06, 0.04
@@ -815,6 +832,8 @@ GLYPHS = [
     ("S", "state", lambda: cell()),
     # Every letter of the word is taken in lower case, and "S" is the state's; "C" is the next.
     ("C", "screen", lambda: monitor()),
+    # Every letter of the word is taken in lower case.
+    ("P", "power", lambda: solid(power())),
 ]
 
 

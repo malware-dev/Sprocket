@@ -49,6 +49,7 @@
 <glyph ch="W" code="0057" bm="0" origin="256,256" size="64x64" aw="63" lsb="0" />
 <glyph ch="S" code="0053" bm="0" origin="320,256" size="64x64" aw="63" lsb="0" />
 <glyph ch="C" code="0043" bm="0" origin="384,256" size="64x64" aw="63" lsb="0" />
+<glyph ch="P" code="0050" bm="0" origin="448,256" size="64x64" aw="63" lsb="0" />
 </glyphs>
 <kernpairs>
 </kernpairs>
