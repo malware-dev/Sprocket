@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\..\build\Sprocket.GameReferences.props" />
 
+    <!-- The MDK project whose ini says where the game is, read by Lumel.Sim's GameContent. -->
+    <ItemGroup>
+        <AssemblyMetadata Include="Lumel.MdkProject" Value="$(MSBuildThisFileDirectory)..\Sprocket.Host.SpaceEngineers\Sprocket.Host.SpaceEngineers.csproj" />
+    </ItemGroup>
+
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
 

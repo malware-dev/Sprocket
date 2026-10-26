@@ -1,7 +1,5 @@
 using Lumel;
 using Lumel.Controls;
-using Lumel.Drawing;
-using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Screens;
@@ -15,12 +13,6 @@ namespace RichTextPanels
     /// <summary>The guide to writing a panel's text, opened over the terminal as a screen of its own, drawn as the rich text it teaches.</summary>
     public static class Help
     {
-        /// <summary>How big the screen is, in the game's normalized GUI units.</summary>
-        static readonly Vector2 Size = new Vector2(0.55f, 0.85f);
-
-        /// <summary>A flat white the screen tints to every fill it draws.</summary>
-        /// <remarks>Declared in <c>Content/Data/TransparentMaterials.sbc</c> over the game's own blank texture.</remarks>
-
         static readonly Color Page = new Color(22, 28, 33);
         static readonly Color Ink = new Color(220, 230, 235);
         static readonly Color Muted = new Color(162, 180, 188);
@@ -40,6 +32,8 @@ namespace RichTextPanels
 
             var root = new VStack
             {
+                Align = Align.Center,
+                Placement = FixedSize.Size(792f, 920f),
                 Background = Page,
                 Padding = new Thickness(24f),
                 Spacing = 16f,
@@ -58,11 +52,9 @@ namespace RichTextPanels
                 }
             };
 
-            var workspace = new Workspace(root);
+            var workspace = new ScreenSpaceWorkspace(root);
             close.Command = new Relay(workspace.Close);
-
-            var screen = new GameScreenSpace();
-            new GameScreen("RichTextHelp", Size, workspace, screen, new ScreenSpaceImages(screen)).Open();
+            workspace.Open("RichTextHelp");
         }
 
         static RichText Text(string code)

@@ -4,7 +4,6 @@ using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
-using Lumel.Screens;
 using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
@@ -15,18 +14,8 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>A <see cref="SprocketEditor" /> on the screen: the chrome around the page, the page's own view, and whatever hangs over them.</summary>
-    public sealed partial class EditorWorkspace : Workspace
+    public partial class EditorWorkspace : SprocketWorkspace
     {
-        /// <summary>How wide one of the game's own screens is, as a share of the safe area.</summary>
-        /// <remarks>
-        /// Transcribed from the game's terminal screen, 1.0157 by 0.9172 of the safe area; the width drops the overhang
-        /// that the game's soft-edged background needs.
-        /// </remarks>
-        public const float ScreenWidth = 1f;
-
-        /// <summary>How tall one of the game's own screens is, as a share of the safe area; see <see cref="ScreenWidth" />.</summary>
-        public const float ScreenHeight = 0.9172f;
-
         /// <summary>How many ticks the pointer rests on something before its tip opens.</summary>
         public const int TipDelay = 30;
 
@@ -97,7 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         bool _checkedTaken;
 
         /// <summary>The chrome for <paramref name="editor" />, which it hands its input root and window layer to.</summary>
-        public EditorWorkspace(SprocketEditor editor) : base(new VStack { Background = Palette.Page })
+        public EditorWorkspace(SprocketEditor editor)
         {
             _editor = editor;
             _title = new HeadingRow(Rename);
@@ -114,7 +103,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
 
-            var root = (VStack)Root;
+            var root = new VStack { Background = Palette.Page };
+            Children.Add(root);
             root.Children.Add(new VStack
             {
                 Background = Palette.Chrome,

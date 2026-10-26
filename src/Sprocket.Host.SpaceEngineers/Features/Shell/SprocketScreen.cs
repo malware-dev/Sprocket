@@ -1,23 +1,18 @@
 using System;
-using Lumel.Drawing;
-using Lumel.Images;
-using Lumel.Screens;
 using Sandbox.Game;
 using Sandbox.ModAPI;
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using VRage.Game.GUI.TextPanel;
 using VRage.Utils;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using IngameSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
 using IngameSurfaces = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>Sprocket's editor, as a screen the game owns.</summary>
-    public sealed class SprocketScreen : GameScreen
+    /// <summary>Sprocket's editor on a screen the game owns, opened from a programmable block.</summary>
+    public sealed class SprocketScreen : EditorWorkspace
     {
         readonly SprocketUnit _unit;
         readonly IMyTerminalBlock _opened;
@@ -25,13 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>The editor on <paramref name="unit" />, opened from <paramref name="opened" />, telling <paramref name="closed" /> each time it closes.</summary>
         public SprocketScreen(SprocketUnit unit, IMyTerminalBlock opened, Action closed)
-            : this(unit, opened, closed, new GameScreenSpace())
-        {
-        }
-
-        SprocketScreen(SprocketUnit unit, IMyTerminalBlock opened, Action closed, IScreenSpace screen)
-            : base("Sprocket", new Vector2(EditorWorkspace.ScreenWidth, EditorWorkspace.ScreenHeight), new EditorWorkspace(unit.Editor), screen,
-                new MarkImages(new ScreenSpaceImages(screen)))
+            : base(unit.Editor)
         {
             _unit = unit;
             _opened = opened;
@@ -42,8 +31,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <inheritdoc />
         protected override void OnOpened()
         {
-            base.OnOpened();
-
             _unit.Showing = true;
             Hud(false);
             _unit.Editor.Opened();

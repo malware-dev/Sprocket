@@ -1,11 +1,7 @@
-using Lumel.Drawing;
-using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Screens;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -26,17 +22,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>The game dims what is behind it, as it does behind the editor.</remarks>
         public static void Show(string message, Arguments arguments, string ok)
         {
-            var workspace = Hosted(message, arguments, ok);
-            var screen = new GameScreenSpace();
-            new GameScreen("SprocketNotice", new Vector2(EditorWorkspace.ScreenWidth, EditorWorkspace.ScreenHeight), workspace, screen,
-                new MarkImages(new ScreenSpaceImages(screen))).Open();
+            Hosted(message, arguments, ok).Open("SprocketNotice");
         }
 
         /// <summary>The workspace saying <paramref name="message" />, its slots filled from <paramref name="arguments" />, whose one button, <paramref name="ok" />, closes it.</summary>
-        public static Workspace Hosted(string message, Arguments arguments, string ok)
+        public static ScreenSpaceWorkspace Hosted(string message, Arguments arguments, string ok)
         {
             var notice = new TerminalNotice(message, arguments, ok);
-            var workspace = new Workspace(notice);
+            var workspace = new SprocketWorkspace(notice);
             notice._box.YesCommand = new Relay(workspace.Close);
             workspace.Accept = new Relay(() => notice._box.TakeAccept());
             return workspace;

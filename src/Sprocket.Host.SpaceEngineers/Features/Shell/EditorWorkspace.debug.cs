@@ -1,6 +1,5 @@
 using Lumel;
 using Lumel.Controls;
-using Lumel.Drawing;
 using Lumel.Text;
 using VRageMath;
 
@@ -8,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     // A .debug.cs file: compiled into local builds only and not packed for the game, where the call to Wrote
     // compiles to nothing.
-    public sealed partial class EditorWorkspace
+    public partial class EditorWorkspace
     {
         int _wires;
 
@@ -29,16 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
 
             return Find(Root, text, out at);
-        }
-
-        /// <summary>Draws the editor at the size one of the game's screens is, centered where they are centered.</summary>
-        public void Draw(IGraphics g)
-        {
-            var size = g.Size;
-            var width = size.X * ScreenWidth;
-            var height = size.Y * ScreenHeight;
-
-            Draw(g, new RectangleF((size.X - width) * 0.5f, (size.Y - height) * 0.5f, width, height));
         }
 
         partial void Wrote()

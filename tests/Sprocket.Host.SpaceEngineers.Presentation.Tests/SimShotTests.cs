@@ -86,6 +86,33 @@ public class SimShotTests
         Assert.True(File.Exists(picture), picture);
     }
 
+    /// <summary>A mod's material whose texture the mod's folder lacks is drawn from the game's own content, as the game draws it.</summary>
+    [Fact]
+    public void AModsMaterialFallsBackToTheGamesTexture()
+    {
+        if (GameContent.ContentFolder == null)
+            return;
+
+        var mod = Path.Combine(Path.GetTempPath(), "SimShotTests-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Combine(mod, "Data"));
+        try
+        {
+            File.WriteAllText(Path.Combine(mod, "Data", "Borrowed_TransparentMaterials.sbc"),
+                "<Definitions><TransparentMaterials><TransparentMaterial><Id><TypeId>TransparentMaterialDefinition</TypeId>" +
+                "<SubtypeId>Borrowed_Blank</SubtypeId></Id><Texture>Textures\\GUI\\Blank.dds</Texture></TransparentMaterial>" +
+                "</TransparentMaterials></Definitions>");
+
+            var picture = new SimContent().Mod(mod).PictureFor("Borrowed_Blank", out _);
+
+            Assert.NotNull(picture);
+            Assert.True(File.Exists(picture), picture);
+        }
+        finally
+        {
+            Directory.Delete(mod, true);
+        }
+    }
+
     static T? Find<T>(Element element) where T : Element
     {
         if (element is T found)

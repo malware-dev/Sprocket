@@ -73,12 +73,12 @@ namespace Sprocket.Sim.Simulation
             return scene.OnScreen;
         }
 
-        /// <summary>Writes <paramref name="workspace" />, a screen of its own such as a notice, across a <paramref name="width" /> by <paramref name="height" /> frame.</summary>
-        public static void Save(string path, int width, int height, Workspace workspace)
+        /// <summary>Writes <paramref name="workspace" />, a screen of its own such as a notice, in its area of a <paramref name="width" /> by <paramref name="height" /> frame.</summary>
+        public static void Save(string path, int width, int height, ScreenSpaceWorkspace workspace)
         {
             var surface = ScreenSession.Surface();
             surface.Target = new PixelSize(width, height);
-            surface.Frame += graphics => workspace.Draw(graphics, new VRageMath.RectangleF(0f, 0f, graphics.Size.X, graphics.Size.Y));
+            surface.Frame += workspace.Draw;
 
             var bitmap = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
             SimShot.Take(bitmap, null, surface, new Size(width, height));
