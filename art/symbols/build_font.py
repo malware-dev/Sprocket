@@ -694,6 +694,31 @@ def monitor():
     return [outer, neck, base], [inner]
 
 
+def helix():
+    """
+    Living thing: a double helix, two strands winding round each other with rungs between them.
+
+    The mark for a creature that is not a person, at the action's line. One full turn, so the strands cross twice and open
+    at both ends, with one rung across the middle where they stand furthest apart: a rung at either end closes the gap
+    between it and the crossing at the sizes the mark is read at.
+
+    Drawn at its finished size, since fitting scales the points and keeps the line: drawn larger, it shrinks until the
+    strands fill the gaps between them.
+    """
+    line = 0.07
+    top, bottom, half = 0.22, 0.78, 0.17
+    steps = 48
+
+    def across(u):
+        return half * math.cos(2 * math.pi * u)
+
+    def strand(sign):
+        return [(0.5 + sign * across(i / float(steps)), top + (bottom - top) * i / float(steps)) for i in range(steps + 1)]
+
+    rung = stroke((0.5 - half, 0.5), (0.5 + half, 0.5), line)
+    return [path(strand(1), line), path(strand(-1), line), rung]
+
+
 def power():
     """
     Power: a ring open at the top, with a bar running down into the gap.
@@ -834,6 +859,8 @@ GLYPHS = [
     ("C", "screen", lambda: monitor()),
     # Every letter of the word is taken in lower case.
     ("P", "power", lambda: solid(power())),
+    # "d" is delete's; "D" for DNA, in upper case as "B" and "I" are.
+    ("D", "living thing", lambda: solid(helix())),
 ]
 
 
