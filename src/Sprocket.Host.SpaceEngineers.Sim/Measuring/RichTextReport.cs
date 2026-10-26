@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Text;
 using Sandbox.ModAPI;
 using Lumel;
@@ -13,6 +12,7 @@ using Sprocket.Sim.Simulation;
 using VRageMath;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Lumel.Sim;
 
 namespace Sprocket.Sim.Measuring;
 
@@ -33,15 +33,15 @@ public static class RichTextReport
     /// <summary>Every timing, as tables to print.</summary>
     public static string Render()
     {
-        var device = new ScreenSpaceDevice();
+        var device = new ScreenSpaceDevice(SprocketContent.Instance);
         var game = SeFontMetrics.Load(device);
         var fonts = new FontSet(game ?? (IFontMetrics)new FallbackFonts(device, "Segoe UI"));
-        foreach (var font in ModFonts.All)
-            fonts = fonts.And(font, SeFontMetrics.LoadFrom(device, Path.Combine(ModFonts.Folder, font + ".xml"), "the mod's own content", true));
+        foreach (var font in SprocketContent.Instance.Fonts)
+            fonts = fonts.And(font.Name, font.Metrics(device));
 
         device.Fonts = fonts;
-        device.Install();
-        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, Materials.Fill, new ScreenSpaceImages(device));
+        ScreenSession.Install(device);
+        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new ScreenSpaceImages(device));
 
         var report = new StringBuilder();
         report.AppendLine("Rich text timing, Release only, " + (game != null ? "with the game's font widths." : "with a stand-in font (the game is not installed)."));

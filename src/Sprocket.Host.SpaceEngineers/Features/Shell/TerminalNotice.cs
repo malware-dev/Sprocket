@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var workspace = Hosted(message, arguments, ok);
             var screen = new GameScreenSpace();
             new GameScreen("SprocketNotice", new Vector2(EditorWorkspace.ScreenWidth, EditorWorkspace.ScreenHeight), workspace, screen,
-                Materials.Fill, new MarkImages(new ScreenSpaceImages(screen))).Open();
+                new MarkImages(new ScreenSpaceImages(screen))).Open();
         }
 
         /// <summary>The workspace saying <paramref name="message" />, its slots filled from <paramref name="arguments" />, whose one button, <paramref name="ok" />, closes it.</summary>

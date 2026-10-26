@@ -97,7 +97,7 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 
 ## Transcribed values
 
-- The palette in `Features/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
+- The palette in `Features/Look/` and the font metrics in `src/Lumel/Sim/SeFontMetrics.cs` are
   transcribed from the game. Each cites its source. They are never adjusted.
 
 ## Drawing

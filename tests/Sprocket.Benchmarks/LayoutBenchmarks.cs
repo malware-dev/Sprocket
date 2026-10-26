@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text;
 using BenchmarkDotNet.Attributes;
 using Lumel;
@@ -10,6 +9,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;
+using Lumel.Sim;
 
 namespace Sprocket.Benchmarks;
 
@@ -33,15 +33,15 @@ public class LayoutBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        var device = new ScreenSpaceDevice();
+        var device = new ScreenSpaceDevice(SprocketContent.Instance);
         var game = SeFontMetrics.Load(device);
         var fonts = new FontSet(game ?? (IFontMetrics)new FallbackFonts(device, "Segoe UI"));
-        foreach (var font in ModFonts.All)
-            fonts = fonts.And(font, SeFontMetrics.LoadFrom(device, Path.Combine(ModFonts.Folder, font + ".xml"), "the mod's own content", true));
+        foreach (var font in SprocketContent.Instance.Fonts)
+            fonts = fonts.And(font.Name, font.Metrics(device));
 
         device.Fonts = fonts;
-        device.Install();
-        _graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, Materials.Fill, new ScreenSpaceImages(device));
+        ScreenSession.Install(device);
+        _graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new ScreenSpaceImages(device));
 
         var source = Source(Shape);
         _first = Markdown.Parse(source);

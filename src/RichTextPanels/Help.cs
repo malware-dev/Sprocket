@@ -7,7 +7,6 @@ using Lumel.Layout;
 using Lumel.Screens;
 using Lumel.Text;
 using Lumel.Viewing;
-using VRage.Utils;
 using VRageMath;
 using IMyTextSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
 
@@ -21,7 +20,6 @@ namespace RichTextPanels
 
         /// <summary>A flat white the screen tints to every fill it draws.</summary>
         /// <remarks>Declared in <c>Content/Data/TransparentMaterials.sbc</c> over the game's own blank texture.</remarks>
-        static readonly MyStringId Fill = MyStringId.GetOrCompute("MalwareRichText_Fill");
 
         static readonly Color Page = new Color(22, 28, 33);
         static readonly Color Ink = new Color(220, 230, 235);
@@ -64,7 +62,7 @@ namespace RichTextPanels
             close.Command = new Relay(workspace.Close);
 
             var screen = new GameScreenSpace();
-            new GameScreen("RichTextHelp", Size, workspace, screen, Fill, new ScreenSpaceImages(screen)).Open();
+            new GameScreen("RichTextHelp", Size, workspace, screen, new ScreenSpaceImages(screen)).Open();
         }
 
         static RichText Text(string code)

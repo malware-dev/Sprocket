@@ -2,6 +2,7 @@ using Lumel.Layout;
 using VRageMath;
 using Xunit;
 using Lumel.Text;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -346,6 +347,6 @@ public class RichTextTests
         return (text, easel);
     }
 
-    static Sim.Simulation.DrawCommand Word(Easel easel, string text) =>
+    static DrawCommand Word(Easel easel, string text) =>
         Assert.Single(easel.Written, command => command.Text.Trim() == text);
 }

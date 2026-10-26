@@ -12,6 +12,7 @@ using Color = VRageMath.Color;
 using Size = System.Windows.Size;
 using Thickness = Lumel.Thickness;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Lumel.Sim;
 
 namespace Sprocket.Sim.Simulation;
 
@@ -75,7 +76,8 @@ public static class PanelShot
         Element shown = fit ? new Viewbox { Content = text, Placement = FixedSize.Size(room.X, room.Y) } : text;
         var page = new VStack { Background = screen ?? Palette.Page, Padding = new Thickness(margin), Placement = FixedSize.Size(wide, high), Children = { shown } };
 
-        var surface = new Surface { Target = new PixelSize(1920, 1080) };
+        var surface = ScreenSession.Surface();
+        surface.Target = new PixelSize(1920, 1080);
         var said = "full";
 
         surface.Frame += g =>

@@ -2,6 +2,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using VRageMath;
 using Xunit;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -216,6 +217,6 @@ public class BoxTests
 
     static string Words(Block block) => string.Concat(block.Runs.Select(r => r.IsBreak ? "\n" : r.Text));
 
-    static Sim.Simulation.DrawCommand Word(Easel easel, string text) =>
+    static DrawCommand Word(Easel easel, string text) =>
         Assert.Single(easel.Written, command => command.Text.Trim() == text);
 }

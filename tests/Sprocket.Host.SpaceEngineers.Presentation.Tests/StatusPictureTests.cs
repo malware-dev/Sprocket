@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text;
 using Lumel.Drawing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -9,6 +8,7 @@ using Sprocket.Sim.Simulation;
 using VRage.Game.GUI.TextPanel;
 using VRageMath;
 using Xunit;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -250,10 +250,10 @@ public class StatusPictureTests
     /// <summary>A screen of <paramref name="shape" /> measuring with the harness's stand-in widths and the mod's own faces.</summary>
     static Face Face(ScreenShape shape)
     {
-        var device = new ScreenSpaceDevice();
+        var device = new ScreenSpaceDevice(SprocketContent.Instance);
         var fonts = new FontSet(new FallbackFonts(device, "Segoe UI"));
-        foreach (var font in ModFonts.All)
-            fonts = fonts.And(font, SeFontMetrics.LoadFrom(device, Path.Combine(ModFonts.Folder, font + ".xml"), "the mod's own content", true));
+        foreach (var font in SprocketContent.Instance.Fonts)
+            fonts = fonts.And(font.Name, font.Metrics(device));
 
         device.Fonts = fonts;
         return new Face(shape.Name) { Shape = shape, Measuring = device };

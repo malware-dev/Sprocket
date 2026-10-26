@@ -4,6 +4,7 @@ using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Lumel.Drawing;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

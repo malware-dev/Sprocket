@@ -1,8 +1,8 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using Sprocket.Sim.Content;
-using Sprocket.Sim.Simulation;
 using Xunit;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -17,7 +17,7 @@ public class GlyphAtlasTests
     public void APagesOwnColorDarkensTheText()
     {
         // The PNG the DDS is encoded from: the DDS decoder does not start in the test runner.
-        var atlas = GlyphAtlas.FromPng(Path.Combine(ModFonts.Folder, "MaltekSymbols-0.png"));
+        var atlas = GlyphAtlas.FromPng(Path.Combine(SprocketContent.FontFolder("MaltekSymbols"), "MaltekSymbols-0.png"));
         Assert.NotNull(atlas);
 
         var page = atlas.Tinted(255, 255, 255);
@@ -35,7 +35,7 @@ public class GlyphAtlasTests
     [Fact]
     public void TheScreensMarkIsDrawn()
     {
-        var atlas = GlyphAtlas.FromPng(Path.Combine(ModFonts.Folder, "MaltekSymbols-0.png"));
+        var atlas = GlyphAtlas.FromPng(Path.Combine(SprocketContent.FontFolder("MaltekSymbols"), "MaltekSymbols-0.png"));
         Assert.NotNull(atlas);
 
         var page = atlas.Tinted(255, 255, 255);
@@ -49,7 +49,7 @@ public class GlyphAtlasTests
     /// <summary>Where the glyph <paramref name="ch" /> sits on the page, from the font's own table.</summary>
     static (int X, int Y) Origin(string ch)
     {
-        var table = File.ReadAllText(Path.Combine(ModFonts.Folder, "MaltekSymbols.xml"));
+        var table = File.ReadAllText(Path.Combine(SprocketContent.FontFolder("MaltekSymbols"), "MaltekSymbols.xml"));
         var match = Regex.Match(table, "<glyph ch=\"" + Regex.Escape(ch) + "\" code=\"[0-9A-F]+\" bm=\"0\" origin=\"(\\d+),(\\d+)\"");
         Assert.True(match.Success, "no glyph " + ch);
         return (int.Parse(match.Groups[1].Value), int.Parse(match.Groups[2].Value));

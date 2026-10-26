@@ -4,6 +4,7 @@ using Lumel.Text;
 using VRage.Utils;
 using VRageMath;
 using Xunit;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -245,7 +246,7 @@ public class ImageTests
         return new Easel(new VStack { Children = { text } }, Wide, High, pictures);
     }
 
-    static Sim.Simulation.DrawCommand Word(Easel easel, string text) =>
+    static DrawCommand Word(Easel easel, string text) =>
         Assert.Single(easel.Written, command => command.Text.Trim() == text);
 
     /// <summary>The two pictures above, by locator, keeping every locator it is asked about.</summary>

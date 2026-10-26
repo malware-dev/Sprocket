@@ -1,8 +1,8 @@
-using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Lumel.Screens;
+using Lumel.Sim;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -39,7 +39,7 @@ namespace Sprocket.Sim.Simulation
         {
             // Drawn at exactly the size asked for, so a shot is the screen at that resolution rather
             // than a picture of it scaled to fit something else.
-            var surface = new Surface();
+            var surface = ScreenSession.Surface();
             surface.Target = new PixelSize(width, height);
             if (culture != null)
                 scene.Speak(culture);
@@ -61,22 +61,14 @@ namespace Sprocket.Sim.Simulation
 
             surface.Frame += scene.Draw;
 
-            // Something behind it, or the bitmap is transparent - which reads as white and makes every
-            // light-on-dark choice look wrong. See Backdrop for what it is and is not claiming.
-            var behind = new Backdrop();
             var size = new Size(width, height);
-
             var bitmap = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
-            Take(bitmap, behind, surface, size);
+            SimShot.Take(bitmap, null, surface, size);
 
             if (script != null)
-                script.Play(scene, () => Take(bitmap, behind, surface, size));
+                script.Play(scene, () => SimShot.Take(bitmap, null, surface, size));
 
-            var png = new PngBitmapEncoder();
-            png.Frames.Add(BitmapFrame.Create(bitmap));
-
-            using (FileStream file = File.Create(path))
-                png.Save(file);
+            SimShot.Write(bitmap, path);
 
             return scene.OnScreen;
         }
@@ -84,40 +76,13 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Writes <paramref name="workspace" />, a screen of its own such as a notice, across a <paramref name="width" /> by <paramref name="height" /> frame.</summary>
         public static void Save(string path, int width, int height, Workspace workspace)
         {
-            var surface = new Surface();
+            var surface = ScreenSession.Surface();
             surface.Target = new PixelSize(width, height);
             surface.Frame += graphics => workspace.Draw(graphics, new VRageMath.RectangleF(0f, 0f, graphics.Size.X, graphics.Size.Y));
 
             var bitmap = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
-            Take(bitmap, new Backdrop(), surface, new Size(width, height));
-
-            var png = new PngBitmapEncoder();
-            png.Frames.Add(BitmapFrame.Create(bitmap));
-
-            using (FileStream file = File.Create(path))
-                png.Save(file);
-        }
-
-        /// <summary>
-        /// Draws the screen as it is now into the bitmap.
-        /// </summary>
-        /// <remarks>
-        /// Painted into a visual of its own rather than by invalidating a control and rendering it. This
-        /// framework repaints a control when its dispatcher next runs, and a shot has no dispatcher to
-        /// run - so that route quietly writes out the frame before the one that was asked for.
-        /// </remarks>
-        static void Take(RenderTargetBitmap bitmap, Backdrop behind, Surface surface, Size size)
-        {
-            var frame = new DrawingVisual();
-            using (DrawingContext context = frame.RenderOpen())
-            {
-                behind.Paint(context, size);
-                surface.Paint(context, size);
-            }
-
-            // Cleared as well, because the bitmap composites onto what is already in it.
-            bitmap.Clear();
-            bitmap.Render(frame);
+            SimShot.Take(bitmap, null, surface, new Size(width, height));
+            SimShot.Write(bitmap, path);
         }
     }
 }

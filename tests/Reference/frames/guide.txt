@@ -4,8 +4,8 @@ UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Airlock
 
-000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #281E09FF
+000  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:56}  #281E09FF
 002  Sprite     Sprocket_Stripes      {X:240 Y:45 W:64 H:56}  #2E230AFF
 003  Sprite     Sprocket_Stripes      {X:304 Y:45 W:64 H:56}  #2E230AFF
 004  Sprite     Sprocket_Stripes      {X:368 Y:45 W:64 H:56}  #2E230AFF
@@ -39,64 +39,64 @@ on screen     Airlock
 032  Text       at {X:1412.76 Y:61.51406} scale 0.401  #A2C3CDFF  "u"
 033  Text       at {X:1452.76 Y:61.51406} scale 0.401  #5F7278FF  "r"
 034  Text       at {X:1492.76 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
-035  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #5B737BFF
-036  Sprite     Sprocket_Fill         {X:1531 Y:61 W:61 H:24}  #20272DFF
-037  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #F0AC28FF
+035  Sprite     Lumel_Fill            {X:1527 Y:57 W:69 H:32}  #5B737BFF
+036  Sprite     Lumel_Fill            {X:1531 Y:61 W:61 H:24}  #20272DFF
+037  Sprite     Lumel_Fill            {X:1531 Y:61 W:24 H:24}  #F0AC28FF
 038  Text       at {X:1562.603 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
-039  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+039  Sprite     Lumel_Fill            {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
 040  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
-041  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+041  Sprite     Lumel_Fill            {X:240 Y:101 W:1440 H:1}  #5B737BFF
 042  SetClip    {X:256 Y:118 W:1408 H:902}
 043  Text       at {X:260 Y:129.2255} scale 0.833  #A2C3CDFF  "Selected installation"
-044  Sprite     Sprocket_Fill         {X:427 Y:126 W:129 H:36}  #20272DFF
-045  Sprite     Sprocket_Fill         {X:427 Y:126 W:129 H:1}  #5B737BFF
-046  Sprite     Sprocket_Fill         {X:427 Y:161 W:129 H:1}  #5B737BFF
-047  Sprite     Sprocket_Fill         {X:427 Y:126 W:1 H:36}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:555 Y:126 W:1 H:36}  #5B737BFF
+044  Sprite     Lumel_Fill            {X:427 Y:126 W:129 H:36}  #20272DFF
+045  Sprite     Lumel_Fill            {X:427 Y:126 W:129 H:1}  #5B737BFF
+046  Sprite     Lumel_Fill            {X:427 Y:161 W:129 H:1}  #5B737BFF
+047  Sprite     Lumel_Fill            {X:427 Y:126 W:1 H:36}  #5B737BFF
+048  Sprite     Lumel_Fill            {X:555 Y:126 W:1 H:36}  #5B737BFF
 049  Text       at {X:439 Y:131.6399} scale 0.694  #DCF5FDFF  "Installation 1"
 050  Text       at {X:531.9537 Y:136.4932} scale 0.241  #A2C3CDFF  "v"
-051  Sprite     Sprocket_Fill         {X:256 Y:178 W:349 H:36}  #29363EFF
-052  Sprite     Sprocket_Fill         {X:256 Y:178 W:349 H:1}  #5B737BFF
-053  Sprite     Sprocket_Fill         {X:256 Y:213 W:349 H:1}  #5B737BFF
-054  Sprite     Sprocket_Fill         {X:256 Y:178 W:1 H:36}  #5B737BFF
-055  Sprite     Sprocket_Fill         {X:604 Y:178 W:1 H:36}  #5B737BFF
+051  Sprite     Lumel_Fill            {X:256 Y:178 W:349 H:36}  #29363EFF
+052  Sprite     Lumel_Fill            {X:256 Y:178 W:349 H:1}  #5B737BFF
+053  Sprite     Lumel_Fill            {X:256 Y:213 W:349 H:1}  #5B737BFF
+054  Sprite     Lumel_Fill            {X:256 Y:178 W:1 H:36}  #5B737BFF
+055  Sprite     Lumel_Fill            {X:604 Y:178 W:1 H:36}  #5B737BFF
 056  Text       at {X:404.1917 Y:183.6399} scale 0.694  #A2C3CDFF  "Triggers"
-057  Sprite     Sprocket_Fill         {X:605 Y:178 W:349 H:36}  #29363EFF
-058  Sprite     Sprocket_Fill         {X:605 Y:178 W:349 H:1}  #5B737BFF
-059  Sprite     Sprocket_Fill         {X:605 Y:213 W:349 H:1}  #5B737BFF
-060  Sprite     Sprocket_Fill         {X:605 Y:178 W:1 H:36}  #5B737BFF
-061  Sprite     Sprocket_Fill         {X:953 Y:178 W:1 H:36}  #5B737BFF
+057  Sprite     Lumel_Fill            {X:605 Y:178 W:349 H:36}  #29363EFF
+058  Sprite     Lumel_Fill            {X:605 Y:178 W:349 H:1}  #5B737BFF
+059  Sprite     Lumel_Fill            {X:605 Y:213 W:349 H:1}  #5B737BFF
+060  Sprite     Lumel_Fill            {X:605 Y:178 W:1 H:36}  #5B737BFF
+061  Sprite     Lumel_Fill            {X:953 Y:178 W:1 H:36}  #5B737BFF
 062  Text       at {X:744.1117 Y:183.6399} scale 0.694  #A2C3CDFF  "Sequences"
-063  Sprite     Sprocket_Fill         {X:954 Y:178 W:349 H:36}  #29363EFF
-064  Sprite     Sprocket_Fill         {X:954 Y:178 W:349 H:1}  #5B737BFF
-065  Sprite     Sprocket_Fill         {X:954 Y:213 W:349 H:1}  #5B737BFF
-066  Sprite     Sprocket_Fill         {X:954 Y:178 W:1 H:36}  #5B737BFF
-067  Sprite     Sprocket_Fill         {X:1302 Y:178 W:1 H:36}  #5B737BFF
+063  Sprite     Lumel_Fill            {X:954 Y:178 W:349 H:36}  #29363EFF
+064  Sprite     Lumel_Fill            {X:954 Y:178 W:349 H:1}  #5B737BFF
+065  Sprite     Lumel_Fill            {X:954 Y:213 W:349 H:1}  #5B737BFF
+066  Sprite     Lumel_Fill            {X:954 Y:178 W:1 H:36}  #5B737BFF
+067  Sprite     Lumel_Fill            {X:1302 Y:178 W:1 H:36}  #5B737BFF
 068  Text       at {X:1111.895 Y:183.6399} scale 0.694  #A2C3CDFF  "State"
-069  Sprite     Sprocket_Fill         {X:1303 Y:178 W:349 H:36}  #5B737BFF
-070  Sprite     Sprocket_Fill         {X:1303 Y:178 W:349 H:1}  #5B737BFF
-071  Sprite     Sprocket_Fill         {X:1303 Y:213 W:349 H:1}  #5B737BFF
-072  Sprite     Sprocket_Fill         {X:1303 Y:178 W:1 H:36}  #5B737BFF
-073  Sprite     Sprocket_Fill         {X:1651 Y:178 W:1 H:36}  #5B737BFF
+069  Sprite     Lumel_Fill            {X:1303 Y:178 W:349 H:36}  #5B737BFF
+070  Sprite     Lumel_Fill            {X:1303 Y:178 W:349 H:1}  #5B737BFF
+071  Sprite     Lumel_Fill            {X:1303 Y:213 W:349 H:1}  #5B737BFF
+072  Sprite     Lumel_Fill            {X:1303 Y:178 W:1 H:36}  #5B737BFF
+073  Sprite     Lumel_Fill            {X:1651 Y:178 W:1 H:36}  #5B737BFF
 074  Text       at {X:1420.87 Y:183.6399} scale 0.694  #DCF5FDFF  "Installation panel"
 075  Text       at {X:260 Y:224.0543} scale 0.556  #85A1A9FF  "DESCRIPTION"
-076  Sprite     Sprocket_Fill         {X:256 Y:246 W:73 H:32}  #3C4C52FF
-077  Sprite     Sprocket_Fill         {X:256 Y:246 W:73 H:1}  #70757AFF
-078  Sprite     Sprocket_Fill         {X:256 Y:277 W:73 H:1}  #70757AFF
-079  Sprite     Sprocket_Fill         {X:256 Y:246 W:1 H:32}  #70757AFF
-080  Sprite     Sprocket_Fill         {X:328 Y:246 W:1 H:32}  #70757AFF
+076  Sprite     Lumel_Fill            {X:256 Y:246 W:73 H:32}  #3C4C52FF
+077  Sprite     Lumel_Fill            {X:256 Y:246 W:73 H:1}  #70757AFF
+078  Sprite     Lumel_Fill            {X:256 Y:277 W:73 H:1}  #70757AFF
+079  Sprite     Lumel_Fill            {X:256 Y:246 W:1 H:32}  #70757AFF
+080  Sprite     Lumel_Fill            {X:328 Y:246 W:1 H:32}  #70757AFF
 081  Text       at {X:272 Y:252.0543} scale 0.556  #DCF5FDFF  "Markup"
-082  Sprite     Sprocket_Fill         {X:337 Y:246 W:73 H:32}  #29363EFF
-083  Sprite     Sprocket_Fill         {X:337 Y:246 W:73 H:1}  #3F474FFF
-084  Sprite     Sprocket_Fill         {X:337 Y:277 W:73 H:1}  #3F474FFF
-085  Sprite     Sprocket_Fill         {X:337 Y:246 W:1 H:32}  #3F474FFF
-086  Sprite     Sprocket_Fill         {X:409 Y:246 W:1 H:32}  #3F474FFF
+082  Sprite     Lumel_Fill            {X:337 Y:246 W:73 H:32}  #29363EFF
+083  Sprite     Lumel_Fill            {X:337 Y:246 W:73 H:1}  #3F474FFF
+084  Sprite     Lumel_Fill            {X:337 Y:277 W:73 H:1}  #3F474FFF
+085  Sprite     Lumel_Fill            {X:337 Y:246 W:1 H:32}  #3F474FFF
+086  Sprite     Lumel_Fill            {X:409 Y:246 W:1 H:32}  #3F474FFF
 087  Text       at {X:352.9667 Y:252.0543} scale 0.556  #DCF5FDFF  "Preview"
-088  Sprite     Sprocket_Fill         {X:256 Y:284 W:1396 H:120}  #141B20FF
-089  Sprite     Sprocket_Fill         {X:256 Y:284 W:1396 H:1}  #5B737BFF
-090  Sprite     Sprocket_Fill         {X:256 Y:403 W:1396 H:1}  #5B737BFF
-091  Sprite     Sprocket_Fill         {X:256 Y:284 W:1 H:120}  #5B737BFF
-092  Sprite     Sprocket_Fill         {X:1651 Y:284 W:1 H:120}  #5B737BFF
+088  Sprite     Lumel_Fill            {X:256 Y:284 W:1396 H:120}  #141B20FF
+089  Sprite     Lumel_Fill            {X:256 Y:284 W:1396 H:1}  #5B737BFF
+090  Sprite     Lumel_Fill            {X:256 Y:403 W:1396 H:1}  #5B737BFF
+091  Sprite     Lumel_Fill            {X:256 Y:284 W:1 H:120}  #5B737BFF
+092  Sprite     Lumel_Fill            {X:1651 Y:284 W:1 H:120}  #5B737BFF
 093  SetClip    {X:256 Y:284 W:1396 H:120}
 094  SetClip    {X:264 Y:290 W:1368 H:96}
 095  Text       at {X:264 Y:287.6399} scale 0.694  #85A1A9FF  "What this logic system does, and what whoever fills it in needs to know."
@@ -112,51 +112,51 @@ on screen     Airlock
 105  Sprite     Sprocket_Shadow       {X:946 Y:120 W:24 H:860}  #000000AA
 106  Sprite     Sprocket_Shadow       {X:1670 Y:120 W:24 H:860}  #000000AA
 107  Sprite     Sprocket_Shadow       {X:970 Y:120 W:700 H:860}  #000000AA
-108  Sprite     Sprocket_Fill         {X:964 Y:110 W:700 H:860}  #141B20FF
-109  Sprite     Sprocket_Fill         {X:964 Y:110 W:700 H:1}  #5B737BFF
-110  Sprite     Sprocket_Fill         {X:964 Y:969 W:700 H:1}  #5B737BFF
-111  Sprite     Sprocket_Fill         {X:964 Y:110 W:1 H:860}  #5B737BFF
-112  Sprite     Sprocket_Fill         {X:1663 Y:110 W:1 H:860}  #5B737BFF
-113  Sprite     Sprocket_Fill         {X:964 Y:110 W:700 H:48}  #1B242AFF
+108  Sprite     Lumel_Fill            {X:964 Y:110 W:700 H:860}  #141B20FF
+109  Sprite     Lumel_Fill            {X:964 Y:110 W:700 H:1}  #5B737BFF
+110  Sprite     Lumel_Fill            {X:964 Y:969 W:700 H:1}  #5B737BFF
+111  Sprite     Lumel_Fill            {X:964 Y:110 W:1 H:860}  #5B737BFF
+112  Sprite     Lumel_Fill            {X:1663 Y:110 W:1 H:860}  #5B737BFF
+113  Sprite     Lumel_Fill            {X:964 Y:110 W:700 H:48}  #1B242AFF
 114  Text       at {X:976 Y:119.5135} scale 0.833  #DCF5FDFF  "Rich text"
 115  Text       at {X:1626.156 Y:122.8021} scale 0.401  #A2C3CDFF  "x"
-116  Sprite     Sprocket_Fill         {X:964 Y:158 W:700 H:1}  #5B737BFF
+116  Sprite     Lumel_Fill            {X:964 Y:158 W:700 H:1}  #5B737BFF
 117  SetClip    {X:964 Y:159 W:700 H:811}
-118  Sprite     Sprocket_Fill         {X:984 Y:275 W:648 H:1}  #5B737BFF
-119  Sprite     Sprocket_Fill         {X:984 Y:384 W:648 H:1}  #5B737BFF
-120  Sprite     Sprocket_Fill         {X:984 Y:513 W:648 H:1}  #5B737BFF
-121  Sprite     Sprocket_Fill         {X:984 Y:566 W:648 H:1}  #5B737BFF
-122  Sprite     Sprocket_Fill         {X:984 Y:659 W:648 H:1}  #5B737BFF
-123  Sprite     Sprocket_Fill         {X:984 Y:740 W:648 H:1}  #5B737BFF
-124  Sprite     Sprocket_Fill         {X:992 Y:845 W:4 H:4}  #5B737BFF
-125  Sprite     Sprocket_Fill         {X:992 Y:873 W:4 H:4}  #5B737BFF
-126  Sprite     Sprocket_Fill         {X:984 Y:993 W:648 H:1}  #5B737BFF
-127  Sprite     Sprocket_Fill         {X:984 Y:1030 W:3 H:20}  #5B737BFF
-128  Sprite     Sprocket_Fill         {X:984 Y:1102 W:648 H:1}  #5B737BFF
-129  Sprite     Sprocket_Fill         {X:984 Y:1149 W:648 H:1}  #5B737BFF
-130  Sprite     Sprocket_Fill         {X:984 Y:1211 W:648 H:1}  #5B737BFF
-131  Sprite     Sprocket_Fill         {X:984 Y:1388 W:648 H:1}  #5B737BFF
-132  Sprite     Sprocket_Fill         {X:984 Y:1510 W:117 H:1}  #5B737BFF
-133  Sprite     Sprocket_Fill         {X:984 Y:1956 W:648 H:1}  #5B737BFF
-134  Sprite     Sprocket_Fill         {X:984 Y:2033 W:648 H:1}  #5B737BFF
-135  Sprite     Sprocket_Fill         {X:984 Y:2170 W:648 H:1}  #5B737BFF
-136  Sprite     Sprocket_Fill         {X:984 Y:2347 W:648 H:1}  #5B737BFF
+118  Sprite     Lumel_Fill            {X:984 Y:275 W:648 H:1}  #5B737BFF
+119  Sprite     Lumel_Fill            {X:984 Y:384 W:648 H:1}  #5B737BFF
+120  Sprite     Lumel_Fill            {X:984 Y:513 W:648 H:1}  #5B737BFF
+121  Sprite     Lumel_Fill            {X:984 Y:566 W:648 H:1}  #5B737BFF
+122  Sprite     Lumel_Fill            {X:984 Y:659 W:648 H:1}  #5B737BFF
+123  Sprite     Lumel_Fill            {X:984 Y:740 W:648 H:1}  #5B737BFF
+124  Sprite     Lumel_Fill            {X:992 Y:845 W:4 H:4}  #5B737BFF
+125  Sprite     Lumel_Fill            {X:992 Y:873 W:4 H:4}  #5B737BFF
+126  Sprite     Lumel_Fill            {X:984 Y:993 W:648 H:1}  #5B737BFF
+127  Sprite     Lumel_Fill            {X:984 Y:1030 W:3 H:20}  #5B737BFF
+128  Sprite     Lumel_Fill            {X:984 Y:1102 W:648 H:1}  #5B737BFF
+129  Sprite     Lumel_Fill            {X:984 Y:1149 W:648 H:1}  #5B737BFF
+130  Sprite     Lumel_Fill            {X:984 Y:1211 W:648 H:1}  #5B737BFF
+131  Sprite     Lumel_Fill            {X:984 Y:1388 W:648 H:1}  #5B737BFF
+132  Sprite     Lumel_Fill            {X:984 Y:1510 W:117 H:1}  #5B737BFF
+133  Sprite     Lumel_Fill            {X:984 Y:1956 W:648 H:1}  #5B737BFF
+134  Sprite     Lumel_Fill            {X:984 Y:2033 W:648 H:1}  #5B737BFF
+135  Sprite     Lumel_Fill            {X:984 Y:2170 W:648 H:1}  #5B737BFF
+136  Sprite     Lumel_Fill            {X:984 Y:2347 W:648 H:1}  #5B737BFF
 137  Text       at {X:984 Y:180.9279} scale 0.694  #A2C3CDFF  "Rich text is plain text with a few marks typed into it, taken from Markdown, that turn it into"
 138  Text       at {X:984 Y:200.9279} scale 0.694  #A2C3CDFF  "headings, lists, tables, and bold or italic words. This page shows each mark, and what it gives."
 139  Text       at {X:984 Y:235.6847} scale 1.111  #DCF5FDFF  "Bold, italic and code"
-140  Sprite     Sprocket_Fill         {X:984 Y:285 W:377 H:18}  #FFFFFF0A
+140  Sprite     Lumel_Fill            {X:984 Y:285 W:377 H:18}  #FFFFFF0A
 141  Text       at {X:988 Y:281.9279} scale 0.694  #A2C3CDFF  "**bold**  *italic*  ***both***  `code`"
 142  Text       at {X:984 Y:309.9279} scale 0.694  #A2C3CDFF  "bold  "
 143  Text       at {X:1030.487 Y:309.9279} scale 0.694  #A2C3CDFF  "italic  "
 144  Text       at {X:1078.595 Y:309.9279} scale 0.694  #A2C3CDFF  "both  "
-145  Sprite     Sprocket_Fill         {X:1126 Y:313 W:46 H:18}  #FFFFFF0A
+145  Sprite     Lumel_Fill            {X:1126 Y:313 W:46 H:18}  #FFFFFF0A
 146  Text       at {X:1129.622 Y:309.9279} scale 0.694  #A2C3CDFF  "code"
 147  Text       at {X:984 Y:344.6847} scale 1.111  #DCF5FDFF  "Headings"
-148  Sprite     Sprocket_Fill         {X:984 Y:394 W:76 H:18}  #FFFFFF0A
+148  Sprite     Lumel_Fill            {X:984 Y:394 W:76 H:18}  #FFFFFF0A
 149  Text       at {X:988 Y:390.9279} scale 0.694  #A2C3CDFF  "# Large"
-150  Sprite     Sprocket_Fill         {X:984 Y:414 W:95 H:18}  #FFFFFF0A
+150  Sprite     Lumel_Fill            {X:984 Y:414 W:95 H:18}  #FFFFFF0A
 151  Text       at {X:988 Y:410.9279} scale 0.694  #A2C3CDFF  "## Middle"
-152  Sprite     Sprocket_Fill         {X:984 Y:434 W:95 H:18}  #FFFFFF0A
+152  Sprite     Lumel_Fill            {X:984 Y:434 W:95 H:18}  #FFFFFF0A
 153  Text       at {X:988 Y:430.9279} scale 0.694  #A2C3CDFF  "### Small"
 154  Text       at {X:984 Y:464.8559} scale 1.389  #DCF5FDFF  "Large"
 155  Text       at {X:984 Y:526.6847} scale 1.111  #DCF5FDFF  "Middle"
@@ -164,13 +164,13 @@ on screen     Airlock
 157  Text       at {X:984 Y:619.6847} scale 1.111  #DCF5FDFF  "Lines and paragraphs"
 158  Text       at {X:984 Y:665.9279} scale 0.694  #A2C3CDFF  "Enter starts a new line, and a blank line between two lines starts a new paragraph."
 159  Text       at {X:984 Y:700.6847} scale 1.111  #DCF5FDFF  "Lists"
-160  Sprite     Sprocket_Fill         {X:984 Y:750 W:124 H:18}  #FFFFFF0A
+160  Sprite     Lumel_Fill            {X:984 Y:750 W:124 H:18}  #FFFFFF0A
 161  Text       at {X:988 Y:746.9279} scale 0.694  #A2C3CDFF  "- Inner door"
-162  Sprite     Sprocket_Fill         {X:984 Y:770 W:124 H:18}  #FFFFFF0A
+162  Sprite     Lumel_Fill            {X:984 Y:770 W:124 H:18}  #FFFFFF0A
 163  Text       at {X:988 Y:766.9279} scale 0.694  #A2C3CDFF  "- Outer door"
-164  Sprite     Sprocket_Fill         {X:984 Y:790 W:231 H:18}  #FFFFFF0A
+164  Sprite     Lumel_Fill            {X:984 Y:790 W:231 H:18}  #FFFFFF0A
 165  Text       at {X:988 Y:786.9279} scale 0.694  #A2C3CDFF  "1. Close the inner door"
-166  Sprite     Sprocket_Fill         {X:984 Y:810 W:270 H:18}  #FFFFFF0A
+166  Sprite     Lumel_Fill            {X:984 Y:810 W:270 H:18}  #FFFFFF0A
 167  Text       at {X:988 Y:806.9279} scale 0.694  #A2C3CDFF  "2. Depressurize the airlock"
 168  Text       at {X:1004 Y:834.9279} scale 0.694  #A2C3CDFF  "Inner door"
 169  Text       at {X:1004 Y:862.9279} scale 0.694  #A2C3CDFF  "Outer door"
@@ -179,31 +179,31 @@ on screen     Airlock
 172  Text       at {X:984 Y:918.9279} scale 0.694  #A2C3CDFF  "2."
 173  Text       at {X:1004 Y:918.9279} scale 0.694  #A2C3CDFF  "Depressurize the airlock"
 174  Text       at {X:984 Y:953.6847} scale 1.111  #DCF5FDFF  "Quotes"
-175  Sprite     Sprocket_Fill         {X:984 Y:1003 W:348 H:18}  #FFFFFF0A
+175  Sprite     Lumel_Fill            {X:984 Y:1003 W:348 H:18}  #FFFFFF0A
 176  Text       at {X:988 Y:999.9279} scale 0.694  #A2C3CDFF  "> Wear a helmet before cycling out."
 177  Text       at {X:1004 Y:1027.928} scale 0.694  #A2C3CDFF  "Wear a helmet before cycling out."
 178  Text       at {X:984 Y:1062.685} scale 1.111  #DCF5FDFF  "Dividing lines"
-179  Sprite     Sprocket_Fill         {X:984 Y:1112 W:37 H:18}  #FFFFFF0A
+179  Sprite     Lumel_Fill            {X:984 Y:1112 W:37 H:18}  #FFFFFF0A
 180  Text       at {X:988 Y:1108.928} scale 0.694  #A2C3CDFF  "---"
 181  Text       at {X:984 Y:1171.685} scale 1.111  #DCF5FDFF  "Centered and right"
-182  Sprite     Sprocket_Fill         {X:984 Y:1221 W:105 H:18}  #FFFFFF0A
+182  Sprite     Lumel_Fill            {X:984 Y:1221 W:105 H:18}  #FFFFFF0A
 183  Text       at {X:988 Y:1217.928} scale 0.694  #A2C3CDFF  "::: center"
-184  Sprite     Sprocket_Fill         {X:984 Y:1241 W:85 H:18}  #FFFFFF0A
+184  Sprite     Lumel_Fill            {X:984 Y:1241 W:85 H:18}  #FFFFFF0A
 185  Text       at {X:988 Y:1237.928} scale 0.694  #A2C3CDFF  "Hangar 2"
-186  Sprite     Sprocket_Fill         {X:984 Y:1261 W:37 H:18}  #FFFFFF0A
+186  Sprite     Lumel_Fill            {X:984 Y:1261 W:37 H:18}  #FFFFFF0A
 187  Text       at {X:988 Y:1257.928} scale 0.694  #A2C3CDFF  ":::"
 188  Text       at {X:1277.603 Y:1285.928} scale 0.694  #A2C3CDFF  "Hangar 2"
-189  Sprite     Sprocket_Fill         {X:984 Y:1317 W:95 H:18}  #FFFFFF0A
+189  Sprite     Lumel_Fill            {X:984 Y:1317 W:95 H:18}  #FFFFFF0A
 190  Text       at {X:988 Y:1313.928} scale 0.694  #A2C3CDFF  "::: right"
 191  Text       at {X:1079.027 Y:1313.928} scale 0.694  #A2C3CDFF  " puts the lines between on the right the same way."
 192  Text       at {X:984 Y:1348.685} scale 1.111  #DCF5FDFF  "Tables"
-193  Sprite     Sprocket_Fill         {X:984 Y:1398 W:163 H:18}  #FFFFFF0A
+193  Sprite     Lumel_Fill            {X:984 Y:1398 W:163 H:18}  #FFFFFF0A
 194  Text       at {X:988 Y:1394.928} scale 0.694  #A2C3CDFF  "| Room | Vents |"
-195  Sprite     Sprocket_Fill         {X:984 Y:1418 W:95 H:18}  #FFFFFF0A
+195  Sprite     Lumel_Fill            {X:984 Y:1418 W:95 H:18}  #FFFFFF0A
 196  Text       at {X:988 Y:1414.928} scale 0.694  #A2C3CDFF  "|:--|--:|"
-197  Sprite     Sprocket_Fill         {X:984 Y:1438 W:153 H:18}  #FFFFFF0A
+197  Sprite     Lumel_Fill            {X:984 Y:1438 W:153 H:18}  #FFFFFF0A
 198  Text       at {X:988 Y:1434.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
-199  Sprite     Sprocket_Fill         {X:984 Y:1458 W:144 H:18}  #FFFFFF0A
+199  Sprite     Lumel_Fill            {X:984 Y:1458 W:144 H:18}  #FFFFFF0A
 200  Text       at {X:988 Y:1454.928} scale 0.694  #A2C3CDFF  "| Hangar | 4 |"
 201  Text       at {X:984 Y:1482.928} scale 0.694  #DCF5FDFF  "Room"
 202  Text       at {X:1052.567 Y:1482.928} scale 0.694  #DCF5FDFF  "Vents"
@@ -212,97 +212,97 @@ on screen     Airlock
 205  Text       at {X:984 Y:1532.928} scale 0.694  #A2C3CDFF  "Hangar"
 206  Text       at {X:1092.568 Y:1532.928} scale 0.694  #A2C3CDFF  "4"
 207  Text       at {X:984 Y:1560.928} scale 0.694  #A2C3CDFF  "The second line says how each column lines up: "
-208  Sprite     Sprocket_Fill         {X:1303 Y:1564 W:37 H:18}  #FFFFFF0A
+208  Sprite     Lumel_Fill            {X:1303 Y:1564 W:37 H:18}  #FFFFFF0A
 209  Text       at {X:1307.217 Y:1560.928} scale 0.694  #A2C3CDFF  ":--"
 210  Text       at {X:1339.865 Y:1560.928} scale 0.694  #A2C3CDFF  " left, "
-211  Sprite     Sprocket_Fill         {X:1373 Y:1564 W:37 H:18}  #FFFFFF0A
+211  Sprite     Lumel_Fill            {X:1373 Y:1564 W:37 H:18}  #FFFFFF0A
 212  Text       at {X:1376.675 Y:1560.928} scale 0.694  #A2C3CDFF  ":-:"
 213  Text       at {X:1409.324 Y:1560.928} scale 0.694  #A2C3CDFF  " centered, "
-214  Sprite     Sprocket_Fill         {X:1479 Y:1564 W:37 H:18}  #FFFFFF0A
+214  Sprite     Lumel_Fill            {X:1479 Y:1564 W:37 H:18}  #FFFFFF0A
 215  Text       at {X:1483.047 Y:1560.928} scale 0.694  #A2C3CDFF  "--:"
 216  Text       at {X:1515.696 Y:1560.928} scale 0.694  #A2C3CDFF  " right."
 217  Text       at {X:984 Y:1588.928} scale 0.694  #A2C3CDFF  "To leave out the heading, start the table with a row of empty cells:"
-218  Sprite     Sprocket_Fill         {X:984 Y:1620 W:56 H:18}  #FFFFFF0A
+218  Sprite     Lumel_Fill            {X:984 Y:1620 W:56 H:18}  #FFFFFF0A
 219  Text       at {X:988 Y:1616.928} scale 0.694  #A2C3CDFF  "| | |"
-220  Sprite     Sprocket_Fill         {X:984 Y:1640 W:95 H:18}  #FFFFFF0A
+220  Sprite     Lumel_Fill            {X:984 Y:1640 W:95 H:18}  #FFFFFF0A
 221  Text       at {X:988 Y:1636.928} scale 0.694  #A2C3CDFF  "|:--|--:|"
-222  Sprite     Sprocket_Fill         {X:984 Y:1660 W:153 H:18}  #FFFFFF0A
+222  Sprite     Lumel_Fill            {X:984 Y:1660 W:153 H:18}  #FFFFFF0A
 223  Text       at {X:988 Y:1656.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
-224  Sprite     Sprocket_Fill         {X:984 Y:1680 W:144 H:18}  #FFFFFF0A
+224  Sprite     Lumel_Fill            {X:984 Y:1680 W:144 H:18}  #FFFFFF0A
 225  Text       at {X:988 Y:1676.928} scale 0.694  #A2C3CDFF  "| Hangar | 4 |"
 226  Text       at {X:984 Y:1704.928} scale 0.694  #A2C3CDFF  "Airlock"
 227  Text       at {X:1052.567 Y:1704.928} scale 0.694  #A2C3CDFF  "1"
 228  Text       at {X:984 Y:1724.928} scale 0.694  #A2C3CDFF  "Hangar"
 229  Text       at {X:1052.567 Y:1724.928} scale 0.694  #A2C3CDFF  "4"
 230  Text       at {X:984 Y:1752.928} scale 0.694  #A2C3CDFF  "A table is as wide as its cells. Add a star into a column's dashes, as in "
-231  Sprite     Sprocket_Fill         {X:1440 Y:1756 W:46 H:18}  #FFFFFF0A
+231  Sprite     Lumel_Fill            {X:1440 Y:1756 W:46 H:18}  #FFFFFF0A
 232  Text       at {X:1444.407 Y:1752.928} scale 0.694  #A2C3CDFF  ":--*"
 233  Text       at {X:1486.785 Y:1752.928} scale 0.694  #A2C3CDFF  ", to stretch the table"
 234  Text       at {X:984 Y:1772.928} scale 0.694  #A2C3CDFF  "across the page, that column taking a share of it. Stars set the shares: "
-235  Sprite     Sprocket_Fill         {X:1445 Y:1776 W:114 H:18}  #FFFFFF0A
+235  Sprite     Lumel_Fill            {X:1445 Y:1776 W:114 H:18}  #FFFFFF0A
 236  Text       at {X:1448.693 Y:1772.928} scale 0.694  #A2C3CDFF  "|:--*|:--*|"
 237  Text       at {X:1559.18 Y:1772.928} scale 0.694  #A2C3CDFF  " gives two"
 238  Text       at {X:984 Y:1792.928} scale 0.694  #A2C3CDFF  "columns half each, while "
-239  Sprite     Sprocket_Fill         {X:1149 Y:1796 W:134 H:18}  #FFFFFF0A
+239  Sprite     Lumel_Fill            {X:1149 Y:1796 W:134 H:18}  #FFFFFF0A
 240  Text       at {X:1153.497 Y:1792.928} scale 0.694  #A2C3CDFF  "|:--*|:--***|"
 241  Text       at {X:1283.443 Y:1792.928} scale 0.694  #A2C3CDFF  " gives one column a quarter and the other three"
 242  Text       at {X:984 Y:1812.928} scale 0.694  #A2C3CDFF  "quarters. A column without a star keeps the width of its cells, and the starred ones share what is"
 243  Text       at {X:984 Y:1832.928} scale 0.694  #A2C3CDFF  "left."
-244  Sprite     Sprocket_Fill         {X:984 Y:1864 W:163 H:18}  #FFFFFF0A
+244  Sprite     Lumel_Fill            {X:984 Y:1864 W:163 H:18}  #FFFFFF0A
 245  Text       at {X:988 Y:1860.928} scale 0.694  #A2C3CDFF  "| Room | Vents |"
-246  Sprite     Sprocket_Fill         {X:984 Y:1884 W:105 H:18}  #FFFFFF0A
+246  Sprite     Lumel_Fill            {X:984 Y:1884 W:105 H:18}  #FFFFFF0A
 247  Text       at {X:988 Y:1880.928} scale 0.694  #A2C3CDFF  "|:--*|--:|"
-248  Sprite     Sprocket_Fill         {X:984 Y:1904 W:153 H:18}  #FFFFFF0A
+248  Sprite     Lumel_Fill            {X:984 Y:1904 W:153 H:18}  #FFFFFF0A
 249  Text       at {X:988 Y:1900.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
 250  Text       at {X:984 Y:1928.928} scale 0.694  #DCF5FDFF  "Room"
 251  Text       at {X:1583.892 Y:1928.928} scale 0.694  #DCF5FDFF  "Vents"
 252  Text       at {X:984 Y:1958.928} scale 0.694  #A2C3CDFF  "Airlock"
 253  Text       at {X:1623.893 Y:1958.928} scale 0.694  #A2C3CDFF  "1"
 254  Text       at {X:984 Y:1993.685} scale 1.111  #DCF5FDFF  "Writing a mark as itself (escape character)"
-255  Sprite     Sprocket_Fill         {X:984 Y:2043 W:144 H:18}  #FFFFFF0A
+255  Sprite     Lumel_Fill            {X:984 Y:2043 W:144 H:18}  #FFFFFF0A
 256  Text       at {X:988 Y:2039.928} scale 0.694  #A2C3CDFF  "\*Inner door\*"
 257  Text       at {X:984 Y:2067.928} scale 0.694  #A2C3CDFF  "*Inner door*"
 258  Text       at {X:984 Y:2095.928} scale 0.694  #A2C3CDFF  "A backslash before a mark shows the mark as it is typed."
 259  Text       at {X:984 Y:2130.685} scale 1.111  #DCF5FDFF  "Keeping words together"
-260  Sprite     Sprocket_Fill         {X:984 Y:2180 W:105 H:18}  #FFFFFF0A
+260  Sprite     Lumel_Fill            {X:984 Y:2180 W:105 H:18}  #FFFFFF0A
 261  Text       at {X:988 Y:2176.928} scale 0.694  #A2C3CDFF  "10&nbsp;SC"
 262  Text       at {X:984 Y:2204.928} scale 0.694  #A2C3CDFF  "10 SC"
-263  Sprite     Sprocket_Fill         {X:984 Y:2236 W:66 H:18}  #FFFFFF0A
+263  Sprite     Lumel_Fill            {X:984 Y:2236 W:66 H:18}  #FFFFFF0A
 264  Text       at {X:988 Y:2232.928} scale 0.694  #A2C3CDFF  "&nbsp;"
 265  Text       at {X:1049.838 Y:2232.928} scale 0.694  #A2C3CDFF  " is a space a line never breaks at, so the words either side of it stay on one line. It keeps"
 266  Text       at {X:984 Y:2252.928} scale 0.694  #A2C3CDFF  "a mark with the link after it too: "
-267  Sprite     Sprocket_Fill         {X:984 Y:2276 W:465 H:18}  #FFFFFF0A
+267  Sprite     Lumel_Fill            {X:984 Y:2276 W:465 H:18}  #FFFFFF0A
 268  Text       at {X:988 Y:2272.928} scale 0.694  #A2C3CDFF  "![](mark:trigger)&nbsp;[triggers](Term.Trigger)"
 269  Text       at {X:1448.757 Y:2272.928} scale 0.694  #A2C3CDFF  "."
 270  Text       at {X:984 Y:2307.685} scale 1.111  #DCF5FDFF  "Writing a character by its name or number"
-271  Sprite     Sprocket_Fill         {X:984 Y:2357 W:309 H:18}  #FFFFFF0A
+271  Sprite     Lumel_Fill            {X:984 Y:2357 W:309 H:18}  #FFFFFF0A
 272  Text       at {X:988 Y:2353.928} scale 0.694  #A2C3CDFF  "&lt;Inner door&gt; &amp; &#169;"
 273  Text       at {X:984 Y:2381.928} scale 0.694  #A2C3CDFF  "<Inner door> & ©"
-274  Sprite     Sprocket_Fill         {X:984 Y:2413 W:56 H:18}  #FFFFFF0A
+274  Sprite     Lumel_Fill            {X:984 Y:2413 W:56 H:18}  #FFFFFF0A
 275  Text       at {X:988 Y:2409.928} scale 0.694  #A2C3CDFF  "&amp;"
 276  Text       at {X:1040.108 Y:2409.928} scale 0.694  #A2C3CDFF  ", "
-277  Sprite     Sprocket_Fill         {X:1047 Y:2413 W:46 H:18}  #FFFFFF0A
+277  Sprite     Lumel_Fill            {X:1047 Y:2413 W:46 H:18}  #FFFFFF0A
 278  Text       at {X:1051.488 Y:2409.928} scale 0.694  #A2C3CDFF  "&lt;"
 279  Text       at {X:1093.866 Y:2409.928} scale 0.694  #A2C3CDFF  ", "
-280  Sprite     Sprocket_Fill         {X:1101 Y:2413 W:46 H:18}  #FFFFFF0A
+280  Sprite     Lumel_Fill            {X:1101 Y:2413 W:46 H:18}  #FFFFFF0A
 281  Text       at {X:1105.246 Y:2409.928} scale 0.694  #A2C3CDFF  "&gt;"
 282  Text       at {X:1147.625 Y:2409.928} scale 0.694  #A2C3CDFF  ", "
-283  Sprite     Sprocket_Fill         {X:1155 Y:2413 W:66 H:18}  #FFFFFF0A
+283  Sprite     Lumel_Fill            {X:1155 Y:2413 W:66 H:18}  #FFFFFF0A
 284  Text       at {X:1159.005 Y:2409.928} scale 0.694  #A2C3CDFF  "&quot;"
 285  Text       at {X:1220.843 Y:2409.928} scale 0.694  #A2C3CDFF  " and "
-286  Sprite     Sprocket_Fill         {X:1254 Y:2413 W:66 H:18}  #FFFFFF0A
+286  Sprite     Lumel_Fill            {X:1254 Y:2413 W:66 H:18}  #FFFFFF0A
 287  Text       at {X:1258.096 Y:2409.928} scale 0.694  #A2C3CDFF  "&apos;"
 288  Text       at {X:1319.934 Y:2409.928} scale 0.694  #A2C3CDFF  " write &, <, >, " and '. Any character can be"
 289  Text       at {X:984 Y:2429.928} scale 0.694  #A2C3CDFF  "written by its number, as "
-290  Sprite     Sprocket_Fill         {X:1151 Y:2433 W:66 H:18}  #FFFFFF0A
+290  Sprite     Lumel_Fill            {X:1151 Y:2433 W:66 H:18}  #FFFFFF0A
 291  Text       at {X:1155.33 Y:2429.928} scale 0.694  #A2C3CDFF  "&#169;"
 292  Text       at {X:1217.168 Y:2429.928} scale 0.694  #A2C3CDFF  " or "
-293  Sprite     Sprocket_Fill         {X:1239 Y:2433 W:66 H:18}  #FFFFFF0A
+293  Sprite     Lumel_Fill            {X:1239 Y:2433 W:66 H:18}  #FFFFFF0A
 294  Text       at {X:1243.445 Y:2429.928} scale 0.694  #A2C3CDFF  "&#xA9;"
 295  Text       at {X:1305.282 Y:2429.928} scale 0.694  #A2C3CDFF  " for ©. An "
-296  Sprite     Sprocket_Fill         {X:1375 Y:2433 W:17 H:18}  #FFFFFF0A
+296  Sprite     Lumel_Fill            {X:1375 Y:2433 W:17 H:18}  #FFFFFF0A
 297  Text       at {X:1379.359 Y:2429.928} scale 0.694  #A2C3CDFF  "&"
 298  Text       at {X:1392.548 Y:2429.928} scale 0.694  #A2C3CDFF  " that starts none of these is written"
 299  Text       at {X:984 Y:2449.928} scale 0.694  #A2C3CDFF  "as it is typed."
-300  Sprite     Sprocket_Fill         {X:1652 Y:159 W:12 H:281}  #5F7278FF
+300  Sprite     Lumel_Fill            {X:1652 Y:159 W:12 H:281}  #5F7278FF
 301  ClearClip  

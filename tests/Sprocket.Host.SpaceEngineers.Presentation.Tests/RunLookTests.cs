@@ -1,9 +1,9 @@
 using Lumel.Layout;
 using Lumel.Text;
-using Sprocket.Sim.Simulation;
 using VRage.Game;
 using VRageMath;
 using Xunit;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

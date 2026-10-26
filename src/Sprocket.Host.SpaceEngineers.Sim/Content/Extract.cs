@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Lumel.Sim;
 
 namespace Sprocket.Sim.Content
 {

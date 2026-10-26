@@ -1,15 +1,13 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
 using Lumel.Drawing;
-using Lumel.Images;
 // Supplies Lettering, which the inspection does not see from every configuration it runs in.
 // ReSharper disable once RedundantUsingDirective
 using Sprocket.Sim.Content;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Machine;
+using Lumel.Sim;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -48,32 +46,25 @@ namespace Sprocket.Sim.Simulation
             _width = windowWidth;
             _height = windowHeight;
 
-            _device = new ScreenSpaceDevice();
+            _device = new ScreenSpaceDevice(SprocketContent.Instance);
 
             // The letters are a stand-in, because the game's own widths need the game. The mod's own
             // faces are not: they are in the build output, so they are measured exactly and a frame
             // reproduces on a machine that has never had Space Engineers.
             var fonts = new FontSet(new FallbackFonts(_device, "Segoe UI"));
-            foreach (var font in ModFonts.All)
-                fonts = fonts.And(font, Ours(font));
+            foreach (var font in SprocketContent.Instance.Fonts)
+                fonts = fonts.And(font.Name, font.Metrics(_device));
 
             _device.Fonts = fonts;
 
-            _device.Install();
+            ScreenSession.Install(_device);
 
             float safeWidth = windowHeight * 4f / 3f;
             _device.SafeArea = new RectangleF((windowWidth - safeWidth) / 2f, 0f, safeWidth, windowHeight);
             _device.ViewportSize = new Vector2(windowWidth, windowHeight);
 
-            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill, new MarkImages(new ScreenSpaceImages(_device)));
+            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, SprocketContent.Instance.ImagesFor(_device));
             _scene = scene();
-        }
-
-        /// <summary>One of the faces this mod requires, or null where the build did not carry it.</summary>
-        IFontMetrics Ours(string name)
-        {
-            return SeFontMetrics.LoadFrom(
-                _device, Path.Combine(ModFonts.Folder, name + ".xml"), "the mod's own content", true);
         }
 
         /// <summary>The editor being drawn.</summary>

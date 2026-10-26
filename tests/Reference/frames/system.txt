@@ -4,8 +4,8 @@ UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Airlock
 
-000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #281E09FF
+000  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:56}  #281E09FF
 002  Sprite     Sprocket_Stripes      {X:240 Y:45 W:64 H:56}  #2E230AFF
 003  Sprite     Sprocket_Stripes      {X:304 Y:45 W:64 H:56}  #2E230AFF
 004  Sprite     Sprocket_Stripes      {X:368 Y:45 W:64 H:56}  #2E230AFF
@@ -39,45 +39,45 @@ on screen     Airlock
 032  Text       at {X:1412.76 Y:61.51406} scale 0.401  #A2C3CDFF  "u"
 033  Text       at {X:1452.76 Y:61.51406} scale 0.401  #5F7278FF  "r"
 034  Text       at {X:1492.76 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
-035  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #5B737BFF
-036  Sprite     Sprocket_Fill         {X:1531 Y:61 W:61 H:24}  #20272DFF
-037  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #F0AC28FF
+035  Sprite     Lumel_Fill            {X:1527 Y:57 W:69 H:32}  #5B737BFF
+036  Sprite     Lumel_Fill            {X:1531 Y:61 W:61 H:24}  #20272DFF
+037  Sprite     Lumel_Fill            {X:1531 Y:61 W:24 H:24}  #F0AC28FF
 038  Text       at {X:1562.603 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
-039  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
+039  Sprite     Lumel_Fill            {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
 040  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
-041  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+041  Sprite     Lumel_Fill            {X:240 Y:101 W:1440 H:1}  #5B737BFF
 042  SetClip    {X:256 Y:118 W:1408 H:902}
 043  Text       at {X:260 Y:129.2255} scale 0.833  #A2C3CDFF  "Selected installation"
-044  Sprite     Sprocket_Fill         {X:427 Y:126 W:129 H:36}  #20272DFF
-045  Sprite     Sprocket_Fill         {X:427 Y:126 W:129 H:1}  #5B737BFF
-046  Sprite     Sprocket_Fill         {X:427 Y:161 W:129 H:1}  #5B737BFF
-047  Sprite     Sprocket_Fill         {X:427 Y:126 W:1 H:36}  #5B737BFF
-048  Sprite     Sprocket_Fill         {X:555 Y:126 W:1 H:36}  #5B737BFF
+044  Sprite     Lumel_Fill            {X:427 Y:126 W:129 H:36}  #20272DFF
+045  Sprite     Lumel_Fill            {X:427 Y:126 W:129 H:1}  #5B737BFF
+046  Sprite     Lumel_Fill            {X:427 Y:161 W:129 H:1}  #5B737BFF
+047  Sprite     Lumel_Fill            {X:427 Y:126 W:1 H:36}  #5B737BFF
+048  Sprite     Lumel_Fill            {X:555 Y:126 W:1 H:36}  #5B737BFF
 049  Text       at {X:439 Y:131.6399} scale 0.694  #DCF5FDFF  "Installation 1"
 050  Text       at {X:531.9537 Y:136.4932} scale 0.241  #A2C3CDFF  "v"
-051  Sprite     Sprocket_Fill         {X:256 Y:178 W:349 H:36}  #5B737BFF
-052  Sprite     Sprocket_Fill         {X:256 Y:178 W:349 H:1}  #5B737BFF
-053  Sprite     Sprocket_Fill         {X:256 Y:213 W:349 H:1}  #5B737BFF
-054  Sprite     Sprocket_Fill         {X:256 Y:178 W:1 H:36}  #5B737BFF
-055  Sprite     Sprocket_Fill         {X:604 Y:178 W:1 H:36}  #5B737BFF
+051  Sprite     Lumel_Fill            {X:256 Y:178 W:349 H:36}  #5B737BFF
+052  Sprite     Lumel_Fill            {X:256 Y:178 W:349 H:1}  #5B737BFF
+053  Sprite     Lumel_Fill            {X:256 Y:213 W:349 H:1}  #5B737BFF
+054  Sprite     Lumel_Fill            {X:256 Y:178 W:1 H:36}  #5B737BFF
+055  Sprite     Lumel_Fill            {X:604 Y:178 W:1 H:36}  #5B737BFF
 056  Text       at {X:404.1917 Y:183.6399} scale 0.694  #DCF5FDFF  "Triggers"
-057  Sprite     Sprocket_Fill         {X:605 Y:178 W:349 H:36}  #29363EFF
-058  Sprite     Sprocket_Fill         {X:605 Y:178 W:349 H:1}  #5B737BFF
-059  Sprite     Sprocket_Fill         {X:605 Y:213 W:349 H:1}  #5B737BFF
-060  Sprite     Sprocket_Fill         {X:605 Y:178 W:1 H:36}  #5B737BFF
-061  Sprite     Sprocket_Fill         {X:953 Y:178 W:1 H:36}  #5B737BFF
+057  Sprite     Lumel_Fill            {X:605 Y:178 W:349 H:36}  #29363EFF
+058  Sprite     Lumel_Fill            {X:605 Y:178 W:349 H:1}  #5B737BFF
+059  Sprite     Lumel_Fill            {X:605 Y:213 W:349 H:1}  #5B737BFF
+060  Sprite     Lumel_Fill            {X:605 Y:178 W:1 H:36}  #5B737BFF
+061  Sprite     Lumel_Fill            {X:953 Y:178 W:1 H:36}  #5B737BFF
 062  Text       at {X:744.1117 Y:183.6399} scale 0.694  #A2C3CDFF  "Sequences"
-063  Sprite     Sprocket_Fill         {X:954 Y:178 W:349 H:36}  #29363EFF
-064  Sprite     Sprocket_Fill         {X:954 Y:178 W:349 H:1}  #5B737BFF
-065  Sprite     Sprocket_Fill         {X:954 Y:213 W:349 H:1}  #5B737BFF
-066  Sprite     Sprocket_Fill         {X:954 Y:178 W:1 H:36}  #5B737BFF
-067  Sprite     Sprocket_Fill         {X:1302 Y:178 W:1 H:36}  #5B737BFF
+063  Sprite     Lumel_Fill            {X:954 Y:178 W:349 H:36}  #29363EFF
+064  Sprite     Lumel_Fill            {X:954 Y:178 W:349 H:1}  #5B737BFF
+065  Sprite     Lumel_Fill            {X:954 Y:213 W:349 H:1}  #5B737BFF
+066  Sprite     Lumel_Fill            {X:954 Y:178 W:1 H:36}  #5B737BFF
+067  Sprite     Lumel_Fill            {X:1302 Y:178 W:1 H:36}  #5B737BFF
 068  Text       at {X:1111.895 Y:183.6399} scale 0.694  #A2C3CDFF  "State"
-069  Sprite     Sprocket_Fill         {X:1303 Y:178 W:349 H:36}  #29363EFF
-070  Sprite     Sprocket_Fill         {X:1303 Y:178 W:349 H:1}  #5B737BFF
-071  Sprite     Sprocket_Fill         {X:1303 Y:213 W:349 H:1}  #5B737BFF
-072  Sprite     Sprocket_Fill         {X:1303 Y:178 W:1 H:36}  #5B737BFF
-073  Sprite     Sprocket_Fill         {X:1651 Y:178 W:1 H:36}  #5B737BFF
+069  Sprite     Lumel_Fill            {X:1303 Y:178 W:349 H:36}  #29363EFF
+070  Sprite     Lumel_Fill            {X:1303 Y:178 W:349 H:1}  #5B737BFF
+071  Sprite     Lumel_Fill            {X:1303 Y:213 W:349 H:1}  #5B737BFF
+072  Sprite     Lumel_Fill            {X:1303 Y:178 W:1 H:36}  #5B737BFF
+073  Sprite     Lumel_Fill            {X:1651 Y:178 W:1 H:36}  #5B737BFF
 074  Text       at {X:1420.87 Y:183.6399} scale 0.694  #A2C3CDFF  "Installation panel"
 075  Text       at {X:272 Y:231.2255} scale 0.833  #A2C3CDFF  "+ trigger"
 076  ClearClip  

@@ -12,6 +12,7 @@ using Thickness = Lumel.Thickness;
 using Lumel.Text;
 using Lumel.Viewing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Lumel.Sim;
 
 namespace Sprocket.Sim.Simulation;
 
@@ -63,7 +64,8 @@ public static class RichShot
         Element shown = fit > 0f ? new Viewbox { Content = text, Grows = false, Placement = FixedSize.Size(wide, fit) } : text;
         var page = new VStack { Background = Palette.Page, Padding = new Thickness(24f), Children = { shown } };
 
-        var surface = new Surface { Target = new PixelSize(1920, 1080) };
+        var surface = ScreenSession.Surface();
+        surface.Target = new PixelSize(1920, 1080);
         var drawn = Vector2.Zero;
 
         surface.Frame += g =>

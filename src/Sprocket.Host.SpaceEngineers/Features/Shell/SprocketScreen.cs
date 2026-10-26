@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         SprocketScreen(SprocketUnit unit, IMyTerminalBlock opened, Action closed, IScreenSpace screen)
             : base("Sprocket", new Vector2(EditorWorkspace.ScreenWidth, EditorWorkspace.ScreenHeight), new EditorWorkspace(unit.Editor), screen,
-                Materials.Fill, new MarkImages(new ScreenSpaceImages(screen)))
+                new MarkImages(new ScreenSpaceImages(screen)))
         {
             _unit = unit;
             _opened = opened;

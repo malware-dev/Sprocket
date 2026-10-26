@@ -38,13 +38,21 @@
     </PropertyGroup>
 
     <!--
-        The fonts the mod requires, copied so the simulator draws the same glyphs the game will.
-        Referenced where they live rather than duplicated: one page, one set of metrics, and no chance
-        of the harness showing symbols the game does not have.
+        The font mods the mod requires, each copied whole into a folder of its own, so the simulator draws the same glyphs
+        the game will. Referenced where they live rather than duplicated: one page, one set of metrics, and no chance of the
+        harness showing symbols the game does not have.
     -->
     <ItemGroup>
-        <None Include="..\Maltek.Symbols\Content\Fonts\Maltek\**\*;..\Maltek.Mono\Content\Fonts\Maltek\**\*;..\SpaceEngineers.FontStyles\Content\Fonts\SpaceEngineers\**\*">
-            <Link>Content\Fonts\Mod\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        <None Include="..\Maltek.Symbols\Content\Data\**\*;..\Maltek.Symbols\Content\Fonts\**\*">
+            <Link>Content\Mods\Maltek.Symbols\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\Maltek.Symbols\Content\', '%(FullPath)'))</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\Maltek.Mono\Content\Data\**\*;..\Maltek.Mono\Content\Fonts\**\*">
+            <Link>Content\Mods\Maltek.Mono\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\Maltek.Mono\Content\', '%(FullPath)'))</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\SpaceEngineers.FontStyles\Content\Data\**\*;..\SpaceEngineers.FontStyles\Content\Fonts\**\*">
+            <Link>Content\Mods\SpaceEngineers.FontStyles\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\SpaceEngineers.FontStyles\Content\', '%(FullPath)'))</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -58,14 +66,17 @@
     <!-- The mod's own LCD images and materials and their pictures, which the harness draws as the game does. -->
     <ItemGroup>
         <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\LCDTextures*.sbc;..\Sprocket.Host.SpaceEngineers\Content\Data\TransparentMaterials*.sbc">
-            <Link>Content\Mod\Data\%(Filename)%(Extension)</Link>
+            <Link>Content\Mods\Sprocket\Data\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Include="..\Sprocket.Host.SpaceEngineers\Content\Textures\**\*.dds">
-            <Link>Content\Mod\Textures\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <Link>Content\Mods\Sprocket\Textures\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+
+    <!-- The game's screen drawn on a desktop, shared through Lumel with every mod's harness. -->
+    <Import Project="..\Lumel\Sim\Lumel.Sim.projitems" Label="Shared" />
 
     <ItemGroup>
         <!-- Impersonates the game's interfaces at runtime, so the harness answers the dozen members

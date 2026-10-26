@@ -2,11 +2,11 @@ using Lumel;
 using Lumel.Layout;
 using Lumel.Styling;
 using Lumel.Text;
-using Sprocket.Sim.Simulation;
 using VRageMath;
 using Xunit;
 using Lumel.Viewing;
 using Lumel.Windows;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

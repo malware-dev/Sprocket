@@ -10,6 +10,7 @@ using Sprocket.Sim.Simulation;
 using VRage.Input;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Lumel.Sim;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
 
@@ -34,7 +35,7 @@ namespace Sprocket.Sim.Shell
 
         const float PerNotch = 120f;
 
-        readonly Surface _surface = new Surface();
+        readonly Surface _surface = ScreenSession.Surface();
         readonly EditorScene _editor = new EditorScene();
         readonly TextBlock _status = new TextBlock();
 
@@ -47,6 +48,7 @@ namespace Sprocket.Sim.Shell
         float _scale = 1f;
         RectangleF _screen;
 
+        /// <summary>The simulator's window, the editor drawn in it on the playground.</summary>
         public MainWindow()
         {
             // Set before the window is shown, so the first appearance is already the quiet one rather

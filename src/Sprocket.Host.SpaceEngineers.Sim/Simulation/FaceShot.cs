@@ -9,6 +9,7 @@ using Sprocket.Sim.Machine;
 using VRage.Game.GUI.TextPanel;
 using VRage.Utils;
 using VRageMath;
+using Lumel.Sim;
 using Color = VRageMath.Color;
 using Size = System.Windows.Size;
 
@@ -32,7 +33,8 @@ public static class FaceShot
         var wide = (int)Math.Ceiling(size.X);
         var high = (int)Math.Ceiling(size.Y);
 
-        var surface = new Surface { Target = new PixelSize(wide, high) };
+        var surface = ScreenSession.Surface();
+        surface.Target = new PixelSize(wide, high);
         face.Measuring = surface.Screen;
         app();
         surface.Frame += _ => Draw(surface.Screen, face);

@@ -7,7 +7,7 @@ using Lumel.Text;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Look;
+using Lumel.Sim;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -55,17 +55,17 @@ sealed class Easel
     {
         _element = element;
 
-        _device = new ScreenSpaceDevice();
+        _device = new ScreenSpaceDevice(SprocketContent.Instance);
 
         SeFontMetrics? game = exact ? SeFontMetrics.Load(_device) : null;
         _exact = game != null;
         _device.Fonts = game ?? (IFontMetrics)new FallbackFonts(_device, "Segoe UI");
 
-        _device.Install();
+        ScreenSession.Install(_device);
         _device.SafeArea = new RectangleF(0f, 0f, width, height);
         _device.ViewportSize = new Vector2(width, height);
 
-        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill, images ?? new ScreenSpaceImages(_device));
+        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, images ?? new ScreenSpaceImages(_device));
 
         Draw(width, height);
     }
