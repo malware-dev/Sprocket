@@ -235,7 +235,7 @@ public class ScenarioTests
         }
     }
 
-    /// <summary>Every scenario stands a sign showing what to do first and its checks, in lines a text panel shows whole, since it never wraps one.</summary>
+    /// <summary>Every scenario stands a sign showing its checks, in lines a text panel shows whole, since it never wraps one.</summary>
     [Theory]
     [MemberData(nameof(All))]
     public void EveryScenarioShowsItsChecksOnASign(string name)
@@ -246,7 +246,7 @@ public class ScenarioTests
 
         var sign = Assert.Single(blueprint.Descendants("MyObjectBuilder_CubeBlock"), block => (string)block.Element("EntityId") == Scenario.SignId.ToString());
         var text = (string)sign.Descendants("Text").Single();
-        Assert.StartsWith(scenario.Name.ToUpperInvariant() + "\n" + Instructions.First + "\n", text);
+        Assert.StartsWith(scenario.Name.ToUpperInvariant(), text);
         Assert.Equal(scenario.Checks.Count, text.Split('\n').Count(line => line.StartsWith("Expect: ")));
         Assert.All(text.Split('\n'), line => Assert.True(line.Length <= Instructions.Width, $"'{line}' is too long for the sign"));
     }

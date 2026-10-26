@@ -47,62 +47,43 @@ public class HeroTests
         Assert.True(rig.Unit.Lost);
     }
 
-    /// <summary>The hero given to somebody the big owners share nothing with is out of their reach, and another programmable block keeps the automation.</summary>
+    /// <summary>The hero given to somebody the big owners share nothing with keeps the automation, which runs on.</summary>
     [Fact]
-    public void TheHeroOutOfReachMovesTheAutomation()
+    public void TheHeroGivenAwayKeepsTheAutomation()
     {
         Simulation rig = Wired();
-        Programmable spare = rig.Machine.Programmable(200, "Spare");
+        rig.Machine.Programmable(200, "Spare");
         Owned(rig, Anna);
 
         rig.Machine.Sprocket.Owner = Pirates;
         rig.Tick();
         rig.Tick();
 
-        Assert.Same(spare.Block, rig.Unit.Block);
+        Assert.Same(rig.Machine.Sprocket.Block, rig.Unit.Block);
         Assert.False(rig.Unit.Lost);
         Assert.False(rig.Editor.Program.Paused);
-    }
-
-    /// <summary>The hero given away with no other programmable block a big owner owns, the automation stops in it, kept.</summary>
-    [Fact]
-    public void TheLastProgrammableBlockGivenAwayStopsTheAutomation()
-    {
-        Simulation rig = Wired();
-        Owned(rig, Anna);
-
-        rig.Machine.Sprocket.Owner = Pirates;
-        rig.Tick();
-        rig.Tick();
-
-        Assert.False(rig.Unit.Lost);
-        Assert.True(rig.Unit.Stranded);
-        Assert.False(rig.Runner.Live);
-        Assert.True(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the stopped automation was not kept");
-    }
-
-    /// <summary>The hero given back to a big owner, a stopped automation carries on.</summary>
-    [Fact]
-    public void TheLastProgrammableBlockGivenBackCarriesOn()
-    {
-        Simulation rig = Wired();
-        Owned(rig, Anna);
-        rig.Machine.Sprocket.Owner = Pirates;
-        rig.Tick();
-        rig.Tick();
-
-        rig.Machine.Sprocket.Owner = Anna;
-        rig.Tick();
-        rig.Tick();
-
-        Assert.False(rig.Unit.Stranded);
         Assert.True(rig.Runner.Live);
-        Assert.False(rig.Editor.Program.Paused);
     }
 
-    /// <summary>The block that kept the automation before it went out of reach holds none of it after a reload.</summary>
+    /// <summary>The construct's only programmable block given away, the automation runs on in it, whoever owns it.</summary>
     [Fact]
-    public void TheHeroOutOfReachKeepsNoAutomation()
+    public void TheLastProgrammableBlockGivenAwayRunsOn()
+    {
+        Simulation rig = Wired();
+        Owned(rig, Anna);
+
+        rig.Machine.Sprocket.Owner = Pirates;
+        rig.Tick();
+        rig.Tick();
+
+        Assert.False(rig.Unit.Lost);
+        Assert.True(rig.Runner.Live);
+        Assert.True(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the automation was not kept");
+    }
+
+    /// <summary>The hero given away still keeps the automation after a reload.</summary>
+    [Fact]
+    public void TheHeroGivenAwayKeepsTheAutomationThroughAReload()
     {
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Editor.NewButtonSystem("Airlock");
@@ -117,7 +98,7 @@ public class HeroTests
         rig.Tick();
 
         Assert.Equal(1, rig.Roster.Count);
-        Assert.False(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the block out of reach still keeps the automation");
+        Assert.True(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the hero given away lost the automation");
     }
 
     /// <summary>The construct's grid deleted whole, the automation goes with it.</summary>

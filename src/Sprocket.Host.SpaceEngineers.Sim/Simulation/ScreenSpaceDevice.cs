@@ -97,6 +97,7 @@ namespace Sprocket.Sim.Simulation
                 .Gives("Player", () => player)
                 .Gives("GameplayFrameCounter", () => Clock.Frame)
                 .Gives("Factions", () => Factions.Installed?.Collection)
+                .Answers("TryGetAdminSettings", Rig.NoAdmin)
                 .Done();
         }
 

@@ -3,10 +3,10 @@ using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
-    /// <summary>Who a construct is shared with, as its big owners last set it on the block that keeps the automation.</summary>
+    /// <summary>Who a construct is shared with, as its big owners last set it on a block they own.</summary>
     /// <remarks>
-    /// Read while the keeper belongs to a big owner and kept through a change of hands, because the game turns the sharing
-    /// of every block given to another player off.
+    /// Read off a block a big owner owns and kept through a change of hands, because the game turns the sharing of every
+    /// block given to another player off.
     /// </remarks>
     public sealed class ConstructSharing
     {
@@ -18,19 +18,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         bool _withFaction;
         bool _withEveryone;
 
-        /// <summary>Whether the sharing has been read, which nothing has until the keeper first belongs to a big owner.</summary>
+        /// <summary>Whether the sharing has been read, which it is as soon as the construct has a big owner.</summary>
         public bool IsKnown { get; private set; }
 
-        /// <summary>Reads the sharing off <paramref name="keeper" />, the block that keeps the automation, owned by one of the big owners.</summary>
+        /// <summary>Reads the sharing off <paramref name="block" />, a block one of the big owners owns.</summary>
         /// <remarks>
         /// Sharing with a faction can only be read where its owner's faction has another member, so a lone member's sharing
         /// is read again as somebody joins.
         /// </remarks>
-        public void Read(IMyTerminalBlock keeper)
+        public void Read(IMyTerminalBlock block)
         {
             IsKnown = true;
-            _owner = keeper.OwnerId;
-            _withEveryone = Access.Shared(keeper, Stranger);
+            _owner = block.OwnerId;
+            _withEveryone = Access.Shared(block, Stranger);
 
             IMyFaction faction = FactionOf(_owner);
             _faction = faction == null ? 0 : faction.FactionId;
@@ -43,12 +43,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (member == _owner)
                     continue;
 
-                _withFaction = Access.Shared(keeper, member);
+                _withFaction = Access.Shared(block, member);
                 return;
             }
         }
 
-        /// <summary>Whether <paramref name="player" /> may use the construct: the keeper's owner, or anyone it is shared with.</summary>
+        /// <summary>Whether <paramref name="player" /> may use the construct: the owner of the block read, or anyone it is shared with.</summary>
         public bool Lets(long player)
         {
             if (player == _owner || _withEveryone)

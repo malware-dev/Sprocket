@@ -10,9 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>One of its sequences has a warning.</summary>
         Warning,
 
-        /// <summary>Its automation has stopped because none of the construct's big owners owns the programmable block keeping it, until one does.</summary>
-        Stranded,
-
         /// <summary>Its automation was paused when the construct changed hands, until someone resumes it.</summary>
         Paused,
 

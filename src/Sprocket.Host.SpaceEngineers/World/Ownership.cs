@@ -27,40 +27,28 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether the construct's owners are to be looked at, which a load and every change of hands asks for.</summary>
         public bool Due => _changed;
 
-        /// <summary>Leaves the owners as they were, until <see cref="Revisit" /> asks again, while no programmable block a big owner owns keeps the automation.</summary>
-        /// <remarks>So the change of hands is judged once, from the owners before it to the owners once a keeper is found.</remarks>
-        public void Defer()
-        {
-            _changed = false;
-        }
-
-        /// <summary>Has the owners looked at on the next tick, as a keeper a big owner owns has been found.</summary>
-        public void Revisit()
-        {
-            _changed = true;
-        }
-
         /// <summary>The blocks the automation could reach again when it paused, which the resume screen names.</summary>
         public List<string> Returned => _returned;
 
         /// <summary>
         /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing, and reads
-        /// who the construct is shared with off <paramref name="hero" />, the block that keeps the automation.
+        /// who the construct is shared with off <paramref name="major" />, a block one of the big owners owns, null where none
+        /// is left.
         /// </summary>
         /// <remarks>Once paused it stays paused until a big owner resumes it, whoever owns it next.</remarks>
-        public void Owned(IMyTerminalBlock hero)
+        public void Owned(IMyTerminalBlock major)
         {
             _changed = false;
             var now = _world.BigOwners;
             var owners = _program.Owners;
             if (Same(owners, now))
             {
-                Reread(hero, now);
+                Reread(major, now);
                 return;
             }
 
             GameLog.Say($"{_world.Name} belongs to {Players(now)}, after {Players(owners)}");
-            if (!_program.Paused && !Shared(hero, owners, now))
+            if (!_program.Paused && !Shared(major, owners, now))
             {
                 GameLog.Say($"{_world.Name} changed hands outside sharing, and its automation is paused");
                 _program.PausedFrom.AddRange(owners);
@@ -73,15 +61,15 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < now.Count; i++)
                 owners.Add(now[i]);
 
-            Reread(hero, now);
+            Reread(major, now);
         }
 
-        /// <summary>Reads who the construct is shared with off <paramref name="hero" />, where it belongs to one of <paramref name="owners" />, the big owners.</summary>
-        /// <remarks>A keeper belonging to anyone else holds somebody else's sharing, so the big owners' is kept as it was.</remarks>
-        void Reread(IMyTerminalBlock hero, IReadOnlyList<long> owners)
+        /// <summary>Reads who the construct is shared with off <paramref name="major" />, where it belongs to one of <paramref name="owners" />, the big owners.</summary>
+        /// <remarks>A block belonging to anyone else holds somebody else's sharing, so the big owners' is kept as it was.</remarks>
+        void Reread(IMyTerminalBlock major, IReadOnlyList<long> owners)
         {
-            if (Among(owners, hero.OwnerId))
-                _sharing.Read(hero);
+            if (major != null && Among(owners, major.OwnerId))
+                _sharing.Read(major);
         }
 
         /// <summary>
@@ -90,9 +78,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         /// <remarks>
         /// Judged by the sharing as it was, since the game turns sharing off on every block it gives away; where that was
-        /// never read, by whether one of <paramref name="before" /> may still use <paramref name="hero" />.
+        /// never read, by whether one of <paramref name="before" /> may still use <paramref name="major" />, a block one of the
+        /// new big owners owns.
         /// </remarks>
-        bool Shared(IMyTerminalBlock hero, List<long> before, IReadOnlyList<long> now)
+        bool Shared(IMyTerminalBlock major, List<long> before, IReadOnlyList<long> now)
         {
             if (before.Count == 0 || now.Count == 0)
                 return true;
@@ -103,18 +92,17 @@ namespace Sprocket.Host.SpaceEngineers.World
                     return true;
             }
 
-            if (_sharing.IsKnown)
+            if (_sharing.IsKnown || major == null)
                 return false;
 
             foreach (var owner in before)
             {
-                if (Access.Shared(hero, owner))
+                if (Access.Shared(major, owner))
                     return true;
             }
 
             return false;
         }
-
 
         /// <summary>The identities of <paramref name="players" />, for the log; "nobody" where there are none.</summary>
         static string Players(IReadOnlyList<long> players)

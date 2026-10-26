@@ -4,7 +4,10 @@ using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.Ownership;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sandbox.ModAPI;
+using Sprocket.Sim.Fakes;
 using Sprocket.Sim.Machine;
+using VRage.Game.ModAPI;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -29,6 +32,27 @@ public class PausingTests
         Owned(sim, Anna, Sharing.Faction);
 
         Owned(sim, Bert, Sharing.Faction);
+
+        Assert.False(sim.Editor.Program.Paused);
+        Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
+    }
+
+    /// <summary>A hand-over within the faction keeps the automation running while its programmable block has belonged to somebody else all along.</summary>
+    [Fact]
+    public void AHandOverWithinTheFactionKeepsItRunningWhoeverOwnsTheProgrammableBlock()
+    {
+        var sim = Airlock(out _);
+        sim.Machine.Factions.Join(Anna, "MAL");
+        sim.Machine.Factions.Join(Bert, "MAL");
+        sim.Machine.Own(Anna, Sharing.Faction);
+        sim.Machine.Sprocket.Owner = Cora;
+        sim.Tick();
+        sim.Tick();
+
+        sim.Machine.Own(Bert, Sharing.Faction);
+        sim.Machine.Sprocket.Owner = Cora;
+        sim.Tick();
+        sim.Tick();
 
         Assert.False(sim.Editor.Program.Paused);
         Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
@@ -273,11 +297,11 @@ public class PausingTests
     }
 
     /// <summary>
-    /// A transfer that reaches the programmable block before the rest of the construct stops the automation until the rest
-    /// arrives, then lets it carry on, judged from the owners before the transfer.
+    /// A transfer that reaches the programmable block before the rest of the construct leaves the automation running
+    /// throughout, judged once whole from the owners before the transfer.
     /// </summary>
     [Fact]
-    public void ATransferReachingTheProgrammableBlockFirstCarriesOnOnceItIsWhole()
+    public void ATransferReachingTheProgrammableBlockFirstRunsThroughout()
     {
         var sim = Airlock(out _);
         sim.Machine.Factions.Join(Anna, "MAL");
@@ -289,20 +313,18 @@ public class PausingTests
         sim.Tick();
         sim.Tick();
 
-        Assert.True(sim.Unit.Stranded);
         Assert.False(sim.Unit.Lost);
-        Assert.False(sim.Runner.Live);
+        Assert.True(sim.Runner.Live);
 
         Owned(sim, Bert, Sharing.Nobody);
 
-        Assert.False(sim.Unit.Stranded);
         Assert.False(sim.Unit.Lost);
         Assert.False(sim.Editor.Program.Paused);
         Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
         Assert.True(sim.Runner.Live);
     }
 
-    /// <summary>A capture that reaches the programmable block first stops the automation, and pauses it once the capture is whole.</summary>
+    /// <summary>A capture that reaches the programmable block first leaves the automation running, and pauses it once the capture is whole.</summary>
     [Fact]
     public void ACaptureReachingTheProgrammableBlockFirstPausesOnceItIsWhole()
     {
@@ -313,11 +335,11 @@ public class PausingTests
         sim.Tick();
         sim.Tick();
 
-        Assert.True(sim.Unit.Stranded);
+        Assert.True(sim.Runner.Live);
+        Assert.False(sim.Editor.Program.Paused);
 
         Owned(sim, Bert, Sharing.Nobody);
 
-        Assert.False(sim.Unit.Stranded);
         Assert.True(sim.Editor.Program.Paused);
         Assert.Equal(new[] { Anna }, sim.Editor.Program.PausedFrom);
     }
@@ -351,9 +373,9 @@ public class PausingTests
         Assert.False(sim.Unit.MayOpen(hero, Bert));
     }
 
-    /// <summary>A programmable block no big owner owns opens the automation for nobody, shared or not.</summary>
+    /// <summary>A programmable block no big owner owns opens the automation for a big owner it is shared with, and for nobody else.</summary>
     [Fact]
-    public void AProgrammableBlockNoBigOwnerOwnsOpensNothing()
+    public void AProgrammableBlockNoBigOwnerOwnsOpensForABigOwnerItIsSharedWith()
     {
         var sim = Airlock(out _);
         Programmable spare = sim.Machine.Programmable(200, "Spare");
@@ -364,9 +386,39 @@ public class PausingTests
         sim.Tick();
         sim.Tick();
 
+        Assert.True(sim.Unit.MayOpen(spare.Block.EntityId, Anna));
+        Assert.False(sim.Unit.MayOpen(spare.Block.EntityId, Bert));
+        Assert.False(sim.Unit.MayOpen(spare.Block.EntityId, Cora));
+        Assert.Same(sim.Unit, sim.Roster.On(spare.Block));
+    }
+
+    /// <summary>A programmable block no big owner owns, shared with nobody, opens the automation for its owner alone, who is no big owner.</summary>
+    [Fact]
+    public void AProgrammableBlockSharedWithNobodyKeepsOutTheBigOwners()
+    {
+        var sim = Airlock(out _);
+        Programmable spare = sim.Machine.Programmable(200, "Spare");
+        Owned(sim, Anna, Sharing.Nobody);
+
+        spare.Owner = Bert;
+        sim.Tick();
+        sim.Tick();
+
         Assert.False(sim.Unit.MayOpen(spare.Block.EntityId, Anna));
         Assert.False(sim.Unit.MayOpen(spare.Block.EntityId, Bert));
-        Assert.Same(sim.Unit, sim.Roster.On(spare.Block));
+    }
+
+    /// <summary>An admin using every terminal may open the automation through any block; an admin without that setting may not.</summary>
+    [Fact]
+    public void AnAdminUsingEveryTerminalOpensAnyAutomation()
+    {
+        var sim = Airlock(out _);
+        Owned(sim, Anna, Sharing.Nobody);
+        var hero = sim.Unit.Block.EntityId;
+
+        Assert.False(sim.Unit.MayOpen(hero, Cora));
+        Assert.True(AsAdmin(Cora, MyAdminSettingsEnum.UseTerminals, () => sim.Unit.MayOpen(hero, Cora)));
+        Assert.False(AsAdmin(Cora, MyAdminSettingsEnum.Invulnerable, () => sim.Unit.MayOpen(hero, Cora)));
     }
 
     static Simulation Airlock(out Sequence sequence)
@@ -391,5 +443,33 @@ public class PausingTests
         sim.Machine.Own(player, share);
         sim.Tick();
         sim.Tick();
+    }
+
+    /// <summary>Asks <paramref name="ask" /> with the game saying <paramref name="player" /> is an admin with <paramref name="settings" /> turned on.</summary>
+    static bool AsAdmin(long player, MyAdminSettingsEnum settings, Func<bool> ask)
+    {
+        const ulong steamId = 76561197960287930;
+        var players = MyAPIGateway.Players;
+        var session = MyAPIGateway.Session;
+        MyAPIGateway.Players = Pretend.To<IMyPlayerCollection>()
+            .Does("TryGetSteamId", arguments => (long)arguments[0] == player ? steamId : 0UL)
+            .Done();
+        MyAPIGateway.Session = Pretend.To<IMySession>()
+            .Answers("TryGetAdminSettings", call =>
+            {
+                var admin = (ulong)call.Arguments[0] == steamId;
+                call.Arguments[1] = admin ? settings : MyAdminSettingsEnum.None;
+                return admin;
+            })
+            .Done();
+        try
+        {
+            return ask();
+        }
+        finally
+        {
+            MyAPIGateway.Players = players;
+            MyAPIGateway.Session = session;
+        }
     }
 }

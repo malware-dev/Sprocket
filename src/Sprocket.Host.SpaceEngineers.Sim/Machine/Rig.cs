@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Castle.DynamicProxy;
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
@@ -341,7 +342,7 @@ public sealed class Rig
     }
 
     static object Listen(ref Action<IMyGridGroupData, IMyCubeGrid, IMyGridGroupData> held,
-        Castle.DynamicProxy.IInvocation invocation, bool adding)
+        IInvocation invocation, bool adding)
     {
         var handler = (Delegate)invocation.Arguments[0];
         held = (Action<IMyGridGroupData, IMyCubeGrid, IMyGridGroupData>)(adding
@@ -756,6 +757,7 @@ public sealed class Rig
                 .Gives("GameplayFrameCounter", () => Clock.Frame)
                 .Gives("Player", () => null)
                 .Gives("Factions", () => Factions.Installed?.Collection)
+                .Answers("TryGetAdminSettings", NoAdmin)
                 .Done();
         }
     }
@@ -770,6 +772,13 @@ public sealed class Rig
         // Every grid in the world moves, whatever construct it is on.
         for (var i = 0; i < _parted.Count; i++)
             _parted[i].Tick();
+    }
+
+    /// <summary>The game's answer for a player who is no admin: no admin settings.</summary>
+    public static object NoAdmin(IInvocation call)
+    {
+        call.Arguments[1] = MyAdminSettingsEnum.None;
+        return false;
     }
 
     static MyObjectBuilderType Type<T>()

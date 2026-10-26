@@ -71,19 +71,16 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _troubled = 0;
         }
 
-        /// <summary>Adds what <paramref name="program" />, run by <paramref name="runner" />, amounts to, <paramref name="stranded" /> where no big owner owns the programmable block keeping it.</summary>
+        /// <summary>Adds what <paramref name="program" />, run by <paramref name="runner" />, amounts to.</summary>
         /// <remarks>Costs a lookup per sequence on each installation, so it is asked only when the automation has changed.</remarks>
-        public void Include(Automation program, AutomationRunner runner, bool stranded)
+        public void Include(Automation program, AutomationRunner runner)
         {
             _systems += program.Systems.Count;
-
-            if (stranded)
-                Found(Stopped(StatusLevel.Stranded));
 
             if (program.Paused)
                 Found(Stopped(StatusLevel.Paused));
 
-            if (stranded || program.Paused)
+            if (program.Paused)
             {
                 _troubled += program.Systems.Count;
                 return;

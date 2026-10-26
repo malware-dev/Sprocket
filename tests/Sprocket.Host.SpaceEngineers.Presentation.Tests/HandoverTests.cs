@@ -363,6 +363,7 @@ public class HandoverTests : IDisposable
         var his = Client(bert, heard);
         MyAPIGateway.Players = Pretend.To<IMyPlayerCollection>()
             .Does("TryGetIdentityId", arguments => (ulong)arguments[0] == bert.Id ? Bert : Anna)
+            .Does("TryGetSteamId", arguments => (long)arguments[0] == Bert ? bert.Id : 0UL)
             .Done();
         try
         {

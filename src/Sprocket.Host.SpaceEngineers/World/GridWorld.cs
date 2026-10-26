@@ -285,20 +285,28 @@ namespace Sprocket.Host.SpaceEngineers.World
             return _named.TryGetValue(entityId, out block) && !Closing(block);
         }
 
+        /// <summary>The block <paramref name="entityId" /> where it is on the construct, whoever owns it; null otherwise.</summary>
+        public IMyTerminalBlock Find(long entityId)
+        {
+            Current();
+
+            IMyTerminalBlock block;
+            return _named.TryGetValue(entityId, out block) && !Closing(block) ? block : null;
+        }
+
         /// <summary>
-        /// The programmable block to keep the automation: the block <paramref name="entityId" /> where it is still on the
-        /// construct, otherwise any other; only one a big owner owns, unless <paramref name="anyOwner" />; null where there is
-        /// none.
+        /// The programmable block to keep the automation, whoever owns it: the block <paramref name="entityId" /> where it is
+        /// still on the construct, otherwise any other; null where there is none.
         /// </summary>
-        /// <remarks>Reads every block on the construct; asked as the keeper is lost or changes hands, never on a tick.</remarks>
-        public IMyTerminalBlock FindKeeper(long entityId, bool anyOwner)
+        /// <remarks>Reads every block on the construct; asked as the keeper is lost, never on a tick.</remarks>
+        public IMyTerminalBlock FindKeeper(long entityId)
         {
             Current();
 
             IMyTerminalBlock other = null;
             foreach (var found in _found)
             {
-                if (!(found.Block is IMyProgrammableBlock) || !anyOwner && !Major(found.Block) || Closing(found.Block))
+                if (!(found.Block is IMyProgrammableBlock) || Closing(found.Block))
                     continue;
 
                 if (found.Id == entityId)
@@ -311,19 +319,45 @@ namespace Sprocket.Host.SpaceEngineers.World
             return other;
         }
 
-        /// <summary>The block <paramref name="entityId" /> where it is on the construct and owned by one of its big owners, or by anybody where nobody owns any of it; null otherwise.</summary>
+        /// <summary>
+        /// A block on the construct one of its big owners owns: the block <paramref name="entityId" /> where it is one,
+        /// otherwise any other; null where there is none.
+        /// </summary>
+        /// <remarks>Reads every block on the construct where <paramref name="entityId" /> is not one; asked as the construct changes hands, never on a tick.</remarks>
         public IMyTerminalBlock FindMajor(long entityId)
         {
             Current();
 
             IMyTerminalBlock block;
-            return _named.TryGetValue(entityId, out block) && Major(block) && !Closing(block) ? block : null;
+            if (_named.TryGetValue(entityId, out block) && Major(block) && !Closing(block))
+                return block;
+
+            foreach (var found in _found)
+            {
+                if (Major(found.Block) && !Closing(found.Block))
+                    return found.Block;
+            }
+
+            return null;
         }
 
         /// <summary>Whether one of the big owners owns <paramref name="block" />, or nobody owns any of the construct.</summary>
+        public bool IsMajor(IMyTerminalBlock block)
+        {
+            Current();
+            return Major(block);
+        }
+
         bool Major(IMyTerminalBlock block)
         {
             return _bigOwners.Count == 0 || _bigOwners.Contains(block.OwnerId);
+        }
+
+        /// <summary>Whether <paramref name="player" /> is one of the construct's big owners.</summary>
+        public bool IsBigOwner(long player)
+        {
+            Current();
+            return _bigOwners.Contains(player);
         }
 
         /// <summary>Tells a block to do something.</summary>

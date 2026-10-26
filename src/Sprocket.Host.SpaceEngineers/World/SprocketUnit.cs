@@ -225,8 +225,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             _runner.Live = Runs;
         }
 
-        /// <summary>Whether the automation runs: a programmable block on the construct works, it is not paused, and a big owner owns its keeper.</summary>
-        bool Runs => _holders.Working && !_program.Paused && !Stranded;
+        /// <summary>Whether the automation runs: a programmable block on the construct works, and it is not paused.</summary>
+        bool Runs => _holders.Working && !_program.Paused;
 
         /// <summary>Programmable blocks left or joined the construct.</summary>
         void Regathered()
@@ -257,15 +257,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Whether the construct has no programmable block left to keep the automation in, which ends it.</summary>
         public bool Lost { get; private set; }
-
-        /// <summary>
-        /// Whether none of the construct's programmable blocks is owned by one of its big owners, which stops the automation
-        /// until one is.
-        /// </summary>
-        public bool Stranded { get; private set; }
-
-        /// <summary>How many times <see cref="Stranded" /> has changed, which only grows.</summary>
-        public int Strandings { get; private set; }
 
         /// <summary>
         /// Whether the hero was last taken off the construct by itself, destroyed or ground down, rather than closed with its
@@ -474,14 +465,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Whether <paramref name="player" /> may open the automation from the programmable block <paramref name="opened" />:
-        /// one of the construct's big owners owns it, and <paramref name="player" /> may use it.
+        /// Whether <paramref name="player" /> may open the automation through the block <paramref name="opened" /> on the
+        /// construct: they may use the block, and they are one of the construct's big owners or one of them owns it; or they
+        /// are an admin using every terminal.
         /// </summary>
         /// <remarks>Where nobody owns any of the construct, anybody may.</remarks>
         public bool MayOpen(long opened, long player)
         {
-            IMyTerminalBlock block = _world.FindMajor(opened);
-            return block != null && Access.Shared(block, player);
+            IMyTerminalBlock block = _world.Find(opened);
+            if (block == null)
+                return false;
+
+            return Access.Shared(block, player) && (_world.IsBigOwner(player) || _world.IsMajor(block)) || Access.UsesEveryTerminal(player);
         }
 
         /// <summary>Brings the toolbars into line with the program, and reads them where something asked.</summary>
@@ -490,20 +485,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Looked at again on each pass, which comes every tick only while the hero is not yet on the construct read, as
             // its grid loads; the game's own events say when it has gone.
             if (_hands.Due && _world.Holds(_block.EntityId))
-            {
-                if (_world.FindMajor(_block.EntityId) == _block)
-                {
-                    Strand(false);
-                    _hands.Owned(_block);
-                }
-                else
-                {
-                    // A keeper none of the big owners owns hands the automation to one they own, or stops it where they own none;
-                    // the change of hands is judged once a keeper they own is found.
-                    _hands.Defer();
-                    Rehoming();
-                }
-            }
+                _hands.Owned(_world.FindMajor(_block.EntityId));
 
             _buttons.Reconcile();
             _reach.Look();
@@ -769,7 +751,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 HeroRemoved(this);
         }
 
-        /// <summary>Has the roster find the automation a keeper, as the hero is closed or no longer owned by a big owner.</summary>
+        /// <summary>Has the roster find the automation a keeper, as the hero is closed.</summary>
         void Rehoming()
         {
             if (HeroRemoved != null)
@@ -777,32 +759,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Moves into another programmable block on the construct where the hero has gone or no big owner owns it, answering
-        /// whether it moved; where no big owner owns any, the automation stops in one that stands until one does.
+        /// Moves into another programmable block on the construct, whoever owns it, where the hero has gone, answering whether
+        /// it moved.
         /// </summary>
         /// <remarks>
-        /// Asked when the hero is removed, closed or changes hands, and as the world saves, never on a tick. A grid splitting
-        /// in the game brings the hero back under its own id as a new object.
+        /// Asked when the hero is removed or closed, and as the world saves, never on a tick. A grid splitting in the game
+        /// brings the hero back under its own id as a new object.
         /// </remarks>
         bool Seek()
         {
             if (Lost)
                 return false;
 
-            IMyTerminalBlock keeper = _world.FindKeeper(_block.EntityId, false);
-            var stranded = keeper == null;
-            if (stranded)
-                keeper = _world.FindKeeper(_block.EntityId, true);
-
+            IMyTerminalBlock keeper = _world.FindKeeper(_block.EntityId);
             if (keeper != null)
             {
-                Strand(stranded);
-                if (!stranded)
-                {
-                    _hands.Revisit();
-                    Stir();
-                }
-
                 if (keeper == _block)
                 {
                     Destroyed = false;
@@ -836,20 +807,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             // The construct's buttons still name the block that is gone, so the next pass mends them as it does after a load.
             _buttons.Rehomed(block);
             Stir();
-        }
-
-        /// <summary>Stops the automation where <paramref name="stranded" />, as no big owner owns any programmable block on the construct, or lets it carry on.</summary>
-        void Strand(bool stranded)
-        {
-            if (stranded == Stranded)
-                return;
-
-            Stranded = stranded;
-            Strandings++;
-            _runner.Live = Runs;
-            GameLog.Say(stranded
-                ? $"{_world.Name} has no programmable block its big owners own, and its automation has stopped"
-                : $"{Logged(_block)} belongs to a big owner of {_world.Name}, and its automation carries on");
         }
 
         /// <summary>Clears the automation out of <paramref name="block" />, the keeper it has left, where the block is still in the world.</summary>

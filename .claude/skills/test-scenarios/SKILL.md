@@ -46,9 +46,8 @@ written into the repository. Writing a blueprint deletes the `bp.sbcB5` beside i
 The checks come out as JSON rows for the `checks` collection of the Testing artifact; add them with `ArtifactData`, then
 give Mal the blueprint's name and the artifact's link. He pastes, follows the rows and marks them.
 
-**Every row that starts from a pasted blueprint begins its setup with `Instructions.First`**, "First, take ownership of
-every block.", since the blueprint gives its blocks no owner. The export writes it; a row written by hand writes it too.
-The sign says it as well, but a blueprint pasted many times has its sign read once, and the row is what is followed.
+**A pasted blueprint gives its blocks no owner.** A check that depends on who owns the blocks, or on who may open the
+automation, says in its own setup who takes ownership of which blocks; every other check starts from the blocks as pasted.
 
 ## What the export knows, and why
 

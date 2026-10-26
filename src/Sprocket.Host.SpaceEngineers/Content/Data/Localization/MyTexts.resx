@@ -1600,14 +1600,6 @@
     <value>Review</value>
     <comment>Button on the banner shown while automation is left paused after its construct changed hands: opens the Paused screen again.</comment>
   </data>
-  <data name="Sprocket.Stranded.Heading" xml:space="preserve">
-    <value>Automation is stopped</value>
-    <comment>Name on the line of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown while a construct's automation has stopped because none of the construct's main owners owns the programmable block keeping it. It stands where a logic system's name stands on the other lines.</comment>
-  </data>
-  <data name="Sprocket.Stranded.Banner" xml:space="preserve">
-    <value>No programmable block available.</value>
-    <comment>Sentence under the name of that line of the automation panel, saying why the automation has stopped: none of the construct's main owners owns the programmable block keeping it, and it carries on once one does.</comment>
-  </data>
   <data name="Sprocket.Terminal.Foreign" xml:space="preserve">
     <value>Only the owners of {construct}, and those they share with, can open its automation.</value>
     <comment>A message box over the terminal when a player presses the button in a programmable block's terminal that opens the automation editor, and the block is not owned by one of the construct's owners (the players owning most of its blocks) or is not shared with that player. {construct} is the construct's name.</comment>

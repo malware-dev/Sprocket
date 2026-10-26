@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
             Status.Begin(now);
             foreach (SprocketUnit unit in units)
-                Status.Include(unit.Program, unit.Runner, unit.Stranded);
+                Status.Include(unit.Program, unit.Runner);
 
             Status.End(name);
         }
@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 var program = unit.Program;
                 var runner = unit.Runner;
                 stamp += program.Revision + program.Wiring + program.Edits + program.Starts + program.Switches + runner.Revision
-                    + runner.Bindings.Revision + program.PausedFrom.Count + unit.Strandings;
+                    + runner.Bindings.Revision + program.PausedFrom.Count;
             }
 
             return stamp;

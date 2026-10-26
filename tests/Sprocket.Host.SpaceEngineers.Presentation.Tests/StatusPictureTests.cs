@@ -184,23 +184,6 @@ public class StatusPictureTests
         return words;
     }
 
-    /// <summary>Automation stopped for want of a big owner's programmable block is drawn with its own heading and the sentence saying why.</summary>
-    [Fact]
-    public void AStopForWantOfAnOwnerIsDrawnWithItsWords()
-    {
-        StatusScenes.Make("all-normal", out var texts);
-        var status = new ConstructStatus();
-        status.Hear(StatusScenes.Construct, 5, 0,
-            [new StatusItem { Level = StatusLevel.Stranded, Logic = "", Installation = "", Sequence = "", Fault = Runtime.SequenceFault.None }]);
-        var face = Face(ScreenShape.Reference.First(shape => shape.Name == "lcd-panel"));
-
-        Draw(new StatusPicture(), face, status, texts, 0);
-        var drawn = string.Join(" ", face.Sprites.Where(sprite => sprite.Type == SpriteType.TEXT && sprite.Data != null).Select(sprite => sprite.Data));
-
-        Assert.Contains(texts.StrandedHeading, drawn);
-        Assert.Contains(texts.StrandedBanner, drawn);
-    }
-
     /// <summary>On a construct with no automation, a screen with room says so and what to do about it, and names no construct.</summary>
     [Fact]
     public void NoAutomationIsSaidWithWhatToDo()
