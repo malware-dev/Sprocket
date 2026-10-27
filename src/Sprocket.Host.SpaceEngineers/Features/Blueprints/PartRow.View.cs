@@ -76,8 +76,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Spacing = 20f,
                         Children =
                         {
-                            new SlotChip(false) { Spacing = 4f, Style = Styles.PanelSlot }.As(out _blocks),
-                            new SlotChip { IsVisible = false, Align = Align.Top, Style = Styles.PanelSlot }.As(out _signals),
+                            new SlotChip(false) { Spacing = 4f }.As(out _blocks),
+                            new SlotChip { IsVisible = false, Align = Align.Top }.As(out _signals),
                             new Label { Style = Styles.ProblemLine, IsVisible = false }.As(out _problem),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)
                         }

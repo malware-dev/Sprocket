@@ -128,7 +128,7 @@ public class WaitRowTests
         Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
 
         var rows = rig.Editor.StepRows();
-        ((IInputTarget)rows[0].Grip).PointerDown(Vector2.Zero, 1, false, false);
+        ((IInputTarget)rows[0].Grip).PointerDown(Vector2.Zero, PointerButton.Left, 1, false, false);
         rows[2].IsHot = true;
         rig.Tick();
         Assert.All(rows, row => Assert.False(row.ClockLit || row.MarksLit));

@@ -1,3 +1,4 @@
+using Lumel.Input;
 using Lumel.Screens;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -34,8 +35,8 @@ public class TerminalNoticeTests
         var at = new Vector2(ok.Position.X, ok.Position.Y) / easel.Pixels + new Vector2(4f, 4f);
 
         Assert.False(stage.TakeClose());
-        stage.PointerDown(at, 1, false, false);
-        stage.PointerUp(at);
+        stage.PointerDown(at, PointerButton.Left, 1, false, false);
+        stage.PointerUp(at, PointerButton.Left);
 
         Assert.True(stage.TakeClose());
     }

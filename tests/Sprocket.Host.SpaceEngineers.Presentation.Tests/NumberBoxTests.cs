@@ -37,8 +37,8 @@ public class NumberBoxTests
 
         var start = box.ContentBounds.X + box.ContentBounds.Width - 2f - easel.WidthOf("4250") / easel.Pixels;
         var at = new Vector2(start + easel.WidthOf("42") / easel.Pixels, box.Bounds.Y + box.Bounds.Height / 2f);
-        input.PointerDown(at, 1, false, false);
-        input.PointerUp(at);
+        input.PointerDown(at, PointerButton.Left, 1, false, false);
+        input.PointerUp(at, PointerButton.Left);
 
         Assert.Equal(2, box.Caret);
     }

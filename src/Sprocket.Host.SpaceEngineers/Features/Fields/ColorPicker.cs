@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -169,7 +170,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             for (var i = 0; i < RecentCount; i++)
             {
                 var filled = i < _recentColors.Count;
-                _recentSwatches[i].Background = filled ? _recentColors[i] : Palette.None;
+                _recentSwatches[i].Color = filled ? _recentColors[i] : Palette.None;
                 _recentSwatches[i].IsEnabled = filled;
             }
         }
@@ -186,9 +187,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             return new Swatch
             {
-                Background = color,
-                Edge = Palette.Chrome,
-                HighlightEdge = Palette.Ink,
+                Style = Styles.ColorChoice,
+                Color = color,
                 Placement = FixedSize.Size(SwatchSize, SwatchSize),
                 Command = new Relay(pressed)
             };
@@ -280,7 +280,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Say(_redBox, rgb.R);
             Say(_greenBox, rgb.G);
             Say(_blueBox, rgb.B);
-            _new.Background = _chose ? _color.Colour : Palette.Page;
+            _new.Color = _chose ? _color.Colour : Palette.Page;
         }
 
         /// <summary>Writes <paramref name="number" />, rounded, in <paramref name="box" />, unless somebody is typing in it.</summary>

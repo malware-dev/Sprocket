@@ -358,6 +358,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (step == null)
                 {
                     BranchEnd(row, texts, index, depth, index <= offTo, locked);
+                    row.IsVisible = editable;
                     continue;
                 }
 
@@ -386,6 +387,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Grip.CanCarry = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
                 Branches(row, texts, step, index);
                 row.Locked = locked;
+
+                // The end of an if holds nothing but its ways to add, which only an editable sequence offers.
+                row.IsVisible = !closes || editable;
 
                 if (step is If || branch)
                     depth++;

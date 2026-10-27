@@ -95,22 +95,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             Command = part.Opens;
         }
 
+        // Lumel's Button lays its default style from its own constructor, before this one makes the pieces; the style set
+        // here at the end of construction gives the pieces their words' look again.
+
         string ITextual.Font
         {
-            get { return _pieces.Font; }
-            set { _pieces.Font = value; }
+            get { return _pieces?.Font; }
+            set
+            {
+                if (_pieces != null)
+                    _pieces.Font = value;
+            }
         }
 
         float ITextual.FontSize
         {
-            get { return _pieces.FontSize; }
-            set { _pieces.FontSize = value; }
+            get { return _pieces?.FontSize ?? 0f; }
+            set
+            {
+                if (_pieces != null)
+                    _pieces.FontSize = value;
+            }
         }
 
         Color ITextual.Color
         {
-            get { return _pieces.Color; }
-            set { _pieces.Color = value; }
+            get { return _pieces?.Color ?? Color.White; }
+            set
+            {
+                if (_pieces != null)
+                    _pieces.Color = value;
+            }
         }
     }
 }

@@ -175,8 +175,8 @@ public class ColorChoiceTests
         other.Command!.Execute();
         var recent = Recent(other.Picker);
         Assert.Equal(ColorPicker.RecentCount, recent.Length);
-        Assert.Equal(new Color(255, 0, 0), recent[0].Background);
-        Assert.Equal(new Color(0, 255, 0), recent[1].Background);
+        Assert.Equal(new Color(255, 0, 0), recent[0].Color);
+        Assert.Equal(new Color(0, 255, 0), recent[1].Color);
         Assert.True(recent[1].IsEnabled);
         Assert.False(recent[2].IsEnabled);
     }
@@ -213,8 +213,8 @@ public class ColorChoiceTests
     /// <summary>Presses <paramref name="element" /> at <paramref name="point" /> and lets go there.</summary>
     static void Press(InputRoot input, Element element, Vector2 point)
     {
-        input.PointerDown(element, point, 1, false, false);
-        input.PointerUp(point);
+        input.PointerDown(element, point, PointerButton.Left, 1, false, false);
+        input.PointerUp(point, PointerButton.Left);
     }
 
     /// <summary>Opens the field's picker, presses the paint color at <paramref name="paint" />, and presses Done.</summary>

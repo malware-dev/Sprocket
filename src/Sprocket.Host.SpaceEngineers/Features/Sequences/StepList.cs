@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>An empty list.</summary>
         public StepList()
         {
-            Spacing = 8f;
+            Spacing = 0f;
         }
 
         /// <summary>Draws the spines of the rows standing in the list, or of the rows being carried.</summary>

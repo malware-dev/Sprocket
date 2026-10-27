@@ -7,6 +7,7 @@ using Ship = Sprocket.Sim.Machine.Simulation;
 using VRageMath;
 using Lumel;
 using Lumel.Drawing;
+using Lumel.Input;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
 using Lumel.Text;
@@ -366,7 +367,7 @@ namespace Sprocket.Sim.Simulation
         public void Down(Vector2 point, int presses = 1)
         {
             _at = point;
-            _view.PointerDown(point, presses, Held == HeldModifier.Through, Held == HeldModifier.Also);
+            _view.PointerDown(point, PointerButton.Left, presses, Held == HeldModifier.Through, Held == HeldModifier.Also);
         }
 
         /// <summary>The pointer moving to <paramref name="point" /> with the button down.</summary>
@@ -384,7 +385,7 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public void Up()
         {
-            _view.PointerUp(_at);
+            _view.PointerUp(_at, PointerButton.Left);
             _view.TakeClose();
         }
 

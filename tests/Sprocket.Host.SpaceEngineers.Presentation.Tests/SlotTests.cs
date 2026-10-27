@@ -33,7 +33,7 @@ public class SlotTests
         Assert.Equal(Palette.Notice, Words(chip).Color);
     }
 
-    /// <summary>A part that cannot be pressed shows its words alone, and does not light under the pointer.</summary>
+    /// <summary>A part that cannot be pressed keeps its box on a quiet ground with no border, and does not light under the pointer.</summary>
     [Fact]
     public void APartThatCannotBePressedStaysStill()
     {
@@ -41,7 +41,7 @@ public class SlotTests
         chip.Say("Airlock");
         chip.IsHot = true;
 
-        Assert.Equal(Palette.None, chip.Background);
+        Assert.Equal(Palette.Well, chip.Background);
         Assert.Equal(Palette.None, chip.Edge);
     }
 
@@ -52,7 +52,8 @@ public class SlotTests
         var chip = Pressable();
         ((Relay)chip.Command!).CanExecute = false;
 
-        Assert.Equal(Palette.None, chip.Background);
+        Assert.Equal(Palette.Well, chip.Background);
+        Assert.Equal(Palette.None, chip.Edge);
     }
 
     static SlotChip Pressable()

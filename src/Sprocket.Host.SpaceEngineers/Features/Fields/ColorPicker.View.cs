@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 Spacing = 8f,
                 Children =
                 {
-                    new Swatch { Edge = Palette.Line, Placement = FixedSize.Size(ShownWide, ShownHigh) }.As(out _new),
+                    new Swatch { Style = Styles.ColorSample, Placement = FixedSize.Size(ShownWide, ShownHigh) }.As(out _new),
                     new TabView
                     {
                         HeaderStyle = Styles.Tab,

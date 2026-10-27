@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             var done = new Relay(Done);
             _picker = new ColorPicker(offer, done, texts) { Placement = FixedSize.Wide(ColorPicker.Wide) };
 
-            Children.Add(new Swatch { Edge = Palette.Line, Placement = FixedSize.Size(SwatchWide, 20f) }.As(out _swatch));
+            Children.Add(new Swatch { Style = Styles.ColorSample, Placement = FixedSize.Size(SwatchWide, 20f) }.As(out _swatch));
             Children.Add(ListField.Fold());
 
             _popup = new Popup
@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             Color color;
             byte alpha;
-            _swatch.Background = ColorChannels.Colour(_text, out color, out alpha) ? color : Palette.None;
+            _swatch.Color = ColorChannels.Colour(_text, out color, out alpha) ? color : Palette.None;
         }
     }
 }

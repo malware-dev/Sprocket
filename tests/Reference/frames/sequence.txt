@@ -82,17 +82,17 @@ on screen     Sequence 1
 075  Text       at {X:1522.156 Y:182.5141} scale 0.401  #A2C3CDFF  "2"
 076  Text       at {X:1570.094 Y:186.9932} scale 0.241  #A2C3CDFF  "e"
 077  Text       at {X:1610.156 Y:182.5141} scale 0.401  #A2C3CDFF  "d"
-078  Sprite     Lumel_Fill            {X:280 Y:246 W:3 H:3}  #85A1A9FF
-079  Sprite     Lumel_Fill            {X:280 Y:252 W:3 H:3}  #85A1A9FF
-080  Sprite     Lumel_Fill            {X:280 Y:258 W:3 H:3}  #85A1A9FF
-081  Sprite     Lumel_Fill            {X:286 Y:246 W:3 H:3}  #85A1A9FF
-082  Sprite     Lumel_Fill            {X:286 Y:252 W:3 H:3}  #85A1A9FF
-083  Sprite     Lumel_Fill            {X:286 Y:258 W:3 H:3}  #85A1A9FF
-084  Text       at {X:300 Y:241.6399} scale 0.694  #85A1A9FF  "2"
-085  Text       at {X:348 Y:242.5141} scale 0.401  #A2C3CDFF  "k"
-086  Text       at {X:375.6875 Y:239.2255} scale 0.833  #A2C3CDFF  "wait for pending tasks"
-087  Text       at {X:1522.156 Y:242.5141} scale 0.401  #A2C3CDFF  "2"
-088  Text       at {X:1570.094 Y:246.9932} scale 0.241  #A2C3CDFF  "e"
-089  Text       at {X:1610.156 Y:242.5141} scale 0.401  #A2C3CDFF  "d"
-090  Text       at {X:272 Y:291.2255} scale 0.833  #A2C3CDFF  "+ step"
+078  Sprite     Lumel_Fill            {X:280 Y:238 W:3 H:3}  #85A1A9FF
+079  Sprite     Lumel_Fill            {X:280 Y:244 W:3 H:3}  #85A1A9FF
+080  Sprite     Lumel_Fill            {X:280 Y:250 W:3 H:3}  #85A1A9FF
+081  Sprite     Lumel_Fill            {X:286 Y:238 W:3 H:3}  #85A1A9FF
+082  Sprite     Lumel_Fill            {X:286 Y:244 W:3 H:3}  #85A1A9FF
+083  Sprite     Lumel_Fill            {X:286 Y:250 W:3 H:3}  #85A1A9FF
+084  Text       at {X:300 Y:233.6399} scale 0.694  #85A1A9FF  "2"
+085  Text       at {X:348 Y:234.5141} scale 0.401  #A2C3CDFF  "k"
+086  Text       at {X:375.6875 Y:231.2255} scale 0.833  #A2C3CDFF  "wait for pending tasks"
+087  Text       at {X:1522.156 Y:234.5141} scale 0.401  #A2C3CDFF  "2"
+088  Text       at {X:1570.094 Y:238.9932} scale 0.241  #A2C3CDFF  "e"
+089  Text       at {X:1610.156 Y:234.5141} scale 0.401  #A2C3CDFF  "d"
+090  Text       at {X:272 Y:283.2255} scale 0.833  #A2C3CDFF  "+ step"
 091  ClearClip  

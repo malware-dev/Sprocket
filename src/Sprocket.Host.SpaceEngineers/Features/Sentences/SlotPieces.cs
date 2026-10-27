@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Styling;
 using Lumel.Text;
@@ -13,6 +14,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>What a part of a sentence says, in pieces: each block it names with its icon, a member with its marks, and the words around them.</summary>
     public class SlotPieces : Stacking, ITextual
     {
+        /// <summary>How wide a color shown in place of the words is: a short word's width.</summary>
+        const float SampleWide = 44f;
+
         readonly List<Mention> _said = new List<Mention>();
         readonly bool _across;
 
@@ -161,12 +165,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             for (var i = 0; i < _said.Count; i++)
             {
                 var piece = _said[i];
+                var sampled = _said.Count == 1 && sample.HasValue && piece.Icon == null && !piece.IsMember;
 
-                if (i < Children.Count && !Says(Children[i], piece))
+                if (i < Children.Count && !Says(Children[i], piece, sampled))
                     Children.Remove(Children[i]);
 
-                if (i >= Children.Count || !Says(Children[i], piece))
-                    Children.Insert(i, piece.Icon != null ? new BlockName() : piece.IsMember ? new MemberName() : (Element)new Label());
+                if (i >= Children.Count || !Says(Children[i], piece, sampled))
+                    Children.Insert(i, piece.Icon != null ? new BlockName() : piece.IsMember ? new MemberName() : sampled ? new Swatch { Style = Styles.ColorSample } : (Element)new Label());
+
+                if (sampled)
+                {
+                    var swatch = (Swatch)Children[i];
+                    swatch.Color = sample.Value;
+                    continue;
+                }
 
                 if (piece.Icon != null)
                 {
@@ -189,8 +201,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var words = (Label)Children[i];
                 words.Text = piece.Text;
                 words.Align = _across ? Align.Default : Align.Right;
-                words.Sample = _said.Count == 1 ? sample : null;
-                words.SampleEdge = Palette.Line;
             }
 
             while (Children.Count > _said.Count)
@@ -205,17 +215,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return _texts == null ? null : MarkText.About(_texts, mark);
         }
 
-        /// <summary>Whether <paramref name="child" /> is the element that says <paramref name="piece" />: a block's, a member's, or words.</summary>
-        static bool Says(Element child, Mention piece)
+        /// <summary>Whether <paramref name="child" /> is the element that says <paramref name="piece" />: a block's, a member's, a color where <paramref name="sampled" />, or words.</summary>
+        static bool Says(Element child, Mention piece, bool sampled)
         {
-            return piece.Icon != null ? child is BlockName : piece.IsMember ? child is MemberName : child is Label;
+            return piece.Icon != null ? child is BlockName : piece.IsMember ? child is MemberName : sampled ? child is Swatch : child is Label;
         }
 
         void Dress()
         {
             foreach (var child in Children)
             {
-                var text = (ITextual)child;
+                // A color stands as tall as a line of the words would.
+                var swatch = child as Swatch;
+                if (swatch != null)
+                    swatch.Placement = FixedSize.Size(SampleWide, _fontSize);
+
+                var text = child as ITextual;
+                if (text == null)
+                    continue;
+
                 text.Font = _font;
                 text.FontSize = _fontSize;
                 text.Color = _color;

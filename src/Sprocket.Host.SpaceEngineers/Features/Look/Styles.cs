@@ -466,14 +466,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Padding = new Thickness(16f, 8f)
             },
             Empty = { Color = Palette.Notice },
-            Still = { Background = Palette.None, Edge = Palette.None },
+            Still = { Background = Palette.Well, Edge = Palette.None },
             Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot }
-        };
-
-        /// <summary>The blocks filling a slot on the installation panel: a slot in a sentence, on a quiet ground where it cannot be pressed.</summary>
-        public static readonly SlotStyle PanelSlot = new SlotStyle(Slot)
-        {
-            Still = { Background = Palette.Well }
         };
 
         /// <summary>A part of a sentence that is paused: there to be read and pressed, and quieter than one that runs.</summary>
@@ -605,20 +599,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 FontSize = 16f,
                 Color = Palette.Ink,
                 Background = Palette.Line,
-                OffTrack = Palette.Well,
-                OnThumb = Palette.Ink,
-                OffThumb = Palette.Ink,
+                Track = Palette.Well,
+                Thumb = Palette.Ink,
                 WordPadding = new Thickness(8f, 4f),
                 Padding = new Thickness(4f)
             },
+            On = { Track = Palette.None },
             Hot = { Edge = Palette.ControlEdgeHot },
-            Disabled = { Color = Palette.Dim, OnThumb = Palette.Dim, OffThumb = Palette.Dim, Background = Palette.Well, OffTrack = Palette.Well }
+            Disabled = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, Track = Palette.Well }
         };
 
         /// <summary>A logic system's or an installation's switch, its thumb amber while off, as the row or heading bar holding it is washed.</summary>
         public static readonly SwitchStyle SystemSwitch = new SwitchStyle(Switch)
         {
-            Base = { OffThumb = Palette.Notice }
+            Base = { Thumb = Palette.Notice },
+            On = { Thumb = Palette.Ink }
+        };
+
+        /// <summary>A color to choose in the color picker: a patch edged in the chrome's color, edged in ink under the pointer.</summary>
+        public static readonly ElementStyle ColorChoice = new ElementStyle
+        {
+            Base = { Edge = Palette.Chrome },
+            Hot = { Edge = Palette.Ink }
+        };
+
+        /// <summary>A color shown on its own, in a sentence where its words would be or beside the box it is typed in: a patch with a hairline round it.</summary>
+        public static readonly ElementStyle ColorSample = new ElementStyle
+        {
+            Base = { Edge = Palette.Line }
         };
 
         /// <summary>The game's button: a panel with a hairline round it, lifted under the pointer, lit while pressed, and its words dimmed while it cannot be used.</summary>

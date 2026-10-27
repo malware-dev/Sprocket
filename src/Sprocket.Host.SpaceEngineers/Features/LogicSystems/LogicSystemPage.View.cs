@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                             IsVisible = false,
                                             Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noTriggers) }
                                         }.As(out _noTriggersLine),
-                                        new VStack { Spacing = 8f }.As(out _triggerList),
+                                        new VStack { Spacing = 0f }.As(out _triggerList),
                                         new VStack
                                         {
                                             Padding = new Thickness(0f, 8f, 0f, 0f),
