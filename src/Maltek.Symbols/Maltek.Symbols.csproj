@@ -16,7 +16,7 @@
     <NoWarn>CS2008</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.14">
+    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
