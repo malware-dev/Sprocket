@@ -69,8 +69,11 @@ public class SystemTabsTests
         var mark = Assert.IsType<Glyph>(tabs[1].Marker);
         var warned = mark.Tint == Palette.Notice;
 
-        Assert.Same(warned ? Styles.TabWarned : Styles.TabBroken, tabs[1].Style);
+        Assert.True(tabs[1].Is(warned ? LookStates.Warned : LookStates.Broken));
+        var current = tabs[1].IsCurrent;
+        Assert.Same(warned ? current ? Styles.NoticeStripesHot : Styles.NoticeStripes : current ? Styles.ProblemStripesHot : Styles.ProblemStripes, tabs[1].Pattern);
         Assert.Same(Styles.Tab, tabs[0].Style);
+        Assert.False(tabs[0].Is(LookStates.Warned) || tabs[0].Is(LookStates.Broken));
         Assert.Equal(warned ? Features.Shell.NoticeLevel.Warning : Features.Shell.NoticeLevel.Problem, screen.Editor.Screen.Standing);
     }
 

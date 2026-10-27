@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
                             new Button
                             {
-                                Style = Styles.SlotNameStill,
+                                Style = Styles.SlotName,
                                 Content = new HStack
                                 {
                                     Spacing = 8f,

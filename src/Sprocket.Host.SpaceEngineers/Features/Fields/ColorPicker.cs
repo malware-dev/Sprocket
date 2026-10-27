@@ -133,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public bool IsWrong
         {
-            set { _written.Style = value ? Styles.ValueWrong : Styles.Value; }
+            set { _written.Set(LookStates.Wrong, value); }
         }
 
         /// <inheritdoc />

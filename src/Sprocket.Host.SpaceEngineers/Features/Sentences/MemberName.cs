@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>Whether its mark is as quiet as the words of a paused step.</summary>
         public bool Paused
         {
-            set { _mark.Style = value ? Styles.WaitsPaused : Styles.Waits; }
+            set { _mark.Set(LookStates.Paused, value); }
         }
 
         /// <summary>What the member says while the pointer rests on it, words and mark alike, or null for nothing.</summary>

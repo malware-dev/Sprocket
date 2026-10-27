@@ -1,4 +1,5 @@
 using Lumel.Styling;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -16,9 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>What changes while nothing fills the part.</summary>
-        public TextLook Empty => this[SlotChip.Empty];
+        public TextLook Empty => this[LookStates.Empty];
 
         /// <summary>What changes while the part cannot be pressed.</summary>
-        public TextLook Still => this[SlotChip.Still];
+        public TextLook Still => this[LookStates.Still];
     }
 }

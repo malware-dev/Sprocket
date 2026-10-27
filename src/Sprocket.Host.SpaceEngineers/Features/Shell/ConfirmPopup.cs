@@ -31,13 +31,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 var answer = answers[i];
                 var enter = answer == taken;
+                Label words;
 
-                _answers.Children.Add(new HStack
+                var row = new HStack
                 {
-                    Style = enter ? Styles.MenuRowTaken : Styles.MenuRow,
+                    Style = Styles.MenuRow,
                     Command = answer.Command,
-                    Children = { new Label { Style = enter ? Styles.ListWordTaken : Styles.ListWord, Text = answer.Text } }
-                });
+                    Children = { new Label { Style = Styles.ListWord, Text = answer.Text }.As(out words) }
+                };
+                row.Set(LookStates.Chosen, enter);
+                words.Set(LookStates.Chosen, enter);
+                _answers.Children.Add(row);
             }
 
             Anchor = anchor;

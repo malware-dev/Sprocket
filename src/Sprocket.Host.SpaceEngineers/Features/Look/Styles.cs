@@ -199,19 +199,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Muted }
         };
 
-        /// <summary>A name in a heading, spaced as its box is so the box takes its place without moving it.</summary>
+        /// <summary>A name in a heading, spaced as its box is so the box takes its place without moving it; in italics where it is set apart.</summary>
         public static readonly IStyle<Label> TitleName = new TextStyle(Title)
         {
-            Base = { Padding = new Thickness(8f, 4f) }
+            Base = { Padding = new Thickness(8f, 4f) },
+            [LookStates.Emphasized] = { Font = TextSizes.Italic }
         };
 
-        /// <summary>Names in a heading that are not the heading's own to give, in italics.</summary>
-        public static readonly IStyle<Label> TitleNameEmphasized = new TextStyle(TitleName)
-        {
-            Base = { Font = TextSizes.Italic }
-        };
-
-        /// <summary>The box a heading's name is typed in, a well on the chrome.</summary>
+        /// <summary>The box a heading's name is typed in, a well on the chrome; washed and edged in red while the name in it cannot be given.</summary>
         public static readonly IStyle<TextBox> TitleBox = new TextBoxStyle
         {
             Base =
@@ -223,7 +218,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 SelectionColor = Palette.Line,
                 Background = Palette.PanelHot,
                 Padding = new Thickness(8f, 4f)
-            }
+            },
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
         /// <summary>A box a value is typed into, in a list of answers.</summary>
@@ -244,34 +240,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Focused = { Edge = Palette.ControlEdgeHot }
         };
 
-        /// <summary>The box a heading's name is typed in, holding a name that cannot be given.</summary>
-        public static readonly IStyle<TextBox> TitleRefused = new TextBoxStyle(TitleBox)
-        {
-            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
-        };
-
-        /// <summary>A name in a row that can be renamed in place, spaced as its box is so the box takes its place without moving it.</summary>
+        /// <summary>A name in a row that can be renamed in place, spaced as its box is so the box takes its place without moving it; in italics where it is set apart.</summary>
         public static readonly IStyle<Label> PlateName = new TextStyle(Name)
         {
-            Base = { Padding = new Thickness(8f, 4f) }
-        };
-
-        /// <summary>Names in a row that are not the row's own to give, in italics.</summary>
-        public static readonly IStyle<Label> PlateNameEmphasized = new TextStyle(PlateName)
-        {
-            Base = { Font = TextSizes.Italic }
+            Base = { Padding = new Thickness(8f, 4f) },
+            [LookStates.Emphasized] = { Font = TextSizes.Italic }
         };
 
         /// <summary>The box a name in a row is typed in, a well on the page in the name's size.</summary>
         public static readonly IStyle<TextBox> PlateBox = new TextBoxStyle(TitleBox)
         {
             Base = { FontSize = 24f }
-        };
-
-        /// <summary>The box a name in a row is typed in, holding a name that cannot be given.</summary>
-        public static readonly IStyle<TextBox> PlateRefused = new TextBoxStyle(PlateBox)
-        {
-            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
         /// <summary>A field holding what cannot be taken, marked as a heading's box is.</summary>
@@ -371,28 +350,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = TextSizes.Italic, FontSize = 16f, Color = Palette.Faint }
         };
 
-        /// <summary>What a thing is doing, said in a line of its own tools rather than under its name.</summary>
+        /// <summary>What a thing is doing, said in a line of its own tools rather than under its name; on its level's wash and stripes for a warning or a problem.</summary>
         public static readonly IStyle<Label> Status = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted }
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted },
+            [LookStates.Warned] = { Color = Palette.Notice, Background = Palette.NoticeWash, Pattern = NoticeStripes, Padding = new Thickness(16f, 8f) },
+            [LookStates.Broken] = { Color = Palette.Problem, Background = Palette.ProblemWash, Pattern = ProblemStripes, Padding = new Thickness(16f, 8f) }
         };
 
         /// <summary>The quieter words beside a status: when it last did anything, a step's number, why nothing can be added.</summary>
         public static readonly IStyle<Label> Aside = new TextStyle(Status)
         {
             Base = { Color = Palette.Faint }
-        };
-
-        /// <summary>What is wrong, said as a status: in red, on its red ground.</summary>
-        public static readonly IStyle<Label> ProblemStatus = new TextStyle(Status)
-        {
-            Base = { Color = Palette.Problem, Background = Palette.ProblemWash, Pattern = ProblemStripes, Padding = new Thickness(16f, 8f) }
-        };
-
-        /// <summary>A warning said as a status, such as something asked for that did not happen: in amber, on its amber ground.</summary>
-        public static readonly IStyle<Label> WarningStatus = new TextStyle(Status)
-        {
-            Base = { Color = Palette.Notice, Background = Palette.NoticeWash, Pattern = NoticeStripes, Padding = new Thickness(16f, 8f) }
         };
 
         /// <summary>What is wrong with a thing, on its own line under it.</summary>
@@ -419,45 +388,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes, Padding = new Thickness(8f, 4f) }
         };
 
-        /// <summary>One answer in a list of them, pressed to give it.</summary>
+        /// <summary>One answer in a list of them, pressed to give it; lit where it is the answer given.</summary>
         public static readonly IStyle<Element> Answer = new ElementStyle
         {
             Base = { Background = Palette.Panel, Padding = new Thickness(20f, 16f) },
-            Hot = { Background = Palette.PanelHot }
+            Hot = { Background = Palette.PanelHot },
+            [LookStates.Chosen] = { Background = Palette.PanelHot },
+            [LookStates.Chosen | State.Hot] = { Background = Palette.Line }
         };
 
-        /// <summary>The answer already given, lit a step at rest, so it goes a step further again under the pointer.</summary>
-        public static readonly IStyle<Element> Given = new ElementStyle(Answer)
-        {
-            Base = { Background = Palette.PanelHot },
-            Hot = { Background = Palette.Line }
-        };
-
-        /// <summary>The words of a sentence around the parts somebody chose.</summary>
+        /// <summary>The words of a sentence around the parts somebody chose; dim on a paused step.</summary>
         public static readonly IStyle<Label> Phrase = new TextStyle(Name)
         {
-            Base = { Color = Palette.Muted }
+            Base = { Color = Palette.Muted },
+            [LookStates.Paused] = { Color = Palette.Dim }
         };
 
-        /// <summary>The words of a sentence that is paused, quieter than those of one that runs.</summary>
-        public static readonly IStyle<Label> PausedPhrase = new TextStyle(Phrase)
-        {
-            Base = { Color = Palette.Dim }
-        };
-
-        /// <summary>The words a sentence opens with, where they may be a term in the codex.</summary>
+        /// <summary>The words a sentence opens with, where they may be a term in the codex; dim on a paused step.</summary>
         public static readonly IStyle<RichText> PhraseTerm = new RichTextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, LinkColor = Palette.Link }
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, LinkColor = Palette.Link },
+            [LookStates.Paused] = { Color = Palette.Dim, LinkColor = Palette.Dim }
         };
 
-        /// <summary>The words a paused sentence opens with, quieter than those of one that runs, a term among them as quiet as the rest.</summary>
-        public static readonly IStyle<RichText> PausedPhraseTerm = new RichTextStyle(PhraseTerm)
-        {
-            Base = { Color = Palette.Dim, LinkColor = Palette.Dim }
-        };
-
-        /// <summary>A part of a sentence: the game's button in a name's size, its words in the warning color while nothing fills it, and the words alone where it cannot be pressed.</summary>
+        /// <summary>A part of a sentence: the game's button in a name's size, its words in the warning color while nothing fills it, a quiet box where it cannot be pressed, and quieter on a paused step.</summary>
         public static readonly IStyle<SlotChip> Slot = new SlotStyle
         {
             Base =
@@ -467,13 +421,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             },
             Empty = { Color = Palette.Notice },
             Still = { Background = Palette.Well, Edge = Palette.None },
-            Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot }
-        };
-
-        /// <summary>A part of a sentence that is paused: there to be read and pressed, and quieter than one that runs.</summary>
-        public static readonly IStyle<SlotChip> PausedSlot = new SlotStyle(Slot)
-        {
-            Base = { Color = Palette.Dim, Background = Palette.Chrome }
+            Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot },
+            [LookStates.Paused] = { Color = Palette.Dim, Background = Palette.Chrome }
         };
 
         /// <summary>A word on a green wash, saying something is true at this instant.</summary>
@@ -668,11 +617,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Color = Palette.Dim }
         };
 
-        /// <summary>A slot's name on the installation panel where pressing it opens the slot to be named and described: the game's button, in a name's size.</summary>
+        /// <summary>A slot's name on the installation panel where pressing it opens the slot to be named and described: the game's button, in a name's size; a quiet box where it cannot be pressed.</summary>
         /// <remarks>Padded as a block chip beside it is, so the name stands level with the first block.</remarks>
         public static readonly IStyle<Button> SlotName = new ButtonStyle(Button)
         {
-            Base = { FontSize = 24f }
+            Base = { FontSize = 24f },
+            [LookStates.Still] = { Color = Palette.Ink, Background = Palette.Well, Edge = Palette.None, Padding = new Thickness(16f, 8f) }
         };
 
         /// <summary>A slot's name on an installation's own page, which is never pressed: the words alone, level with the blocks beside them.</summary>
@@ -681,13 +631,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Padding = new Thickness(0f, 8f, 0f, 0f) }
         };
 
-        /// <summary>A slot's name on the installation panel where pressing it opens nothing: the button's box on a quiet ground, with no border.</summary>
-        public static readonly IStyle<Button> SlotNameStill = new ButtonStyle
-        {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Background = Palette.Well, Padding = new Thickness(16f, 8f) }
-        };
-
-        /// <summary>The header of one page of several, as the game draws the tabs across its terminal, the page showing on the lightest plate.</summary>
+        /// <summary>The header of one page of several, as the game draws the tabs across its terminal, the page showing on the lightest plate; on its level's wash and stripes where something on its page is worth a warning or is wrong.</summary>
         public static readonly IStyle<Tab> Tab = new TabStyle
         {
             Base =
@@ -700,23 +644,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Padding = new Thickness(8f, 8f)
             },
             Hot = { Background = Palette.PanelHot, Color = Palette.Ink },
-            Current = { Background = Palette.Line, Color = Palette.Ink }
-        };
-
-        /// <summary>A tab whose page carries a warning, on the warning's wash and stripes; chosen, it keeps them and takes the accent's edge.</summary>
-        public static readonly IStyle<Tab> TabWarned = new TabStyle(Tab)
-        {
-            Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
-            Hot = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot },
-            Current = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot, Edge = Palette.Accent }
-        };
-
-        /// <summary>A tab whose page has something wrong, on the problem's wash and stripes; chosen, it keeps them and takes the accent's edge.</summary>
-        public static readonly IStyle<Tab> TabBroken = new TabStyle(Tab)
-        {
-            Base = { Background = Palette.ProblemWash, Pattern = ProblemStripes },
-            Hot = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot },
-            Current = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot, Edge = Palette.Accent }
+            Current = { Background = Palette.Line, Color = Palette.Ink },
+            [LookStates.Warned] = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
+            [LookStates.Warned | State.Hot] = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot },
+            [LookStates.Warned | Lumel.Controls.Tab.Current] = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot, Edge = Palette.Accent },
+            [LookStates.Broken] = { Background = Palette.ProblemWash, Pattern = ProblemStripes },
+            [LookStates.Broken | State.Hot] = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot },
+            [LookStates.Broken | Lumel.Controls.Tab.Current] = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot, Edge = Palette.Accent }
         };
 
         /// <summary>The button that finishes a screen or answers a dialog as Enter would, grayed while there is nothing to finish.</summary>
@@ -741,17 +675,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.Panel }
         };
 
-        /// <summary>Words that do something when pressed, with no box round them, and a panel under the pointer.</summary>
+        /// <summary>Words that do something when pressed, with no box round them, and a panel under the pointer; in the ink for the screen showing.</summary>
         public static readonly IStyle<Button> Plain = new ButtonStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
-            Hot = { Background = Palette.Panel }
-        };
-
-        /// <summary>One of a set of plain words that is already in effect.</summary>
-        public static readonly IStyle<Button> Current = new ButtonStyle(Plain)
-        {
-            Base = { Color = Palette.Ink }
+            Hot = { Background = Palette.Panel },
+            [LookStates.Chosen] = { Color = Palette.Ink }
         };
 
         /// <summary>A symbol that does something, lit under the pointer and dimmed while there is nothing for it to do.</summary>
@@ -762,16 +691,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Tint = Palette.Dim }
         };
 
-        /// <summary>The question mark in the heading bar while tips are shown, in the ink terms are drawn in.</summary>
+        /// <summary>The question mark in the heading bar while tips are shown, in the ink terms are drawn in; dim while they are hidden.</summary>
         public static readonly IStyle<Glyph> Tips = new GlyphStyle(Icon)
         {
-            Base = { Font = MyFontEnum.White, FontSize = 28f, Tint = Palette.Link }
-        };
-
-        /// <summary>The question mark in the heading bar while tips are off, as quiet as an icon that cannot be pressed.</summary>
-        public static readonly IStyle<Glyph> TipsOff = new GlyphStyle(Tips)
-        {
-            Base = { Tint = Palette.Dim }
+            Base = { Font = MyFontEnum.White, FontSize = 28f, Tint = Palette.Link },
+            [LookStates.Off] = { Tint = Palette.Dim }
         };
 
         /// <summary>The mark a drop-down line ends with, smaller than a symbol pressed on its own.</summary>
@@ -780,17 +704,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 12f, Tint = Palette.Muted }
         };
 
-        /// <summary>A symbol that pauses something, smaller than the icons round it while nothing is paused.</summary>
+        /// <summary>A symbol that pauses something, smaller than the icons round it while nothing is paused; full size on an amber wash while the step is paused.</summary>
         public static readonly IStyle<Glyph> Holds = new GlyphStyle(Icon)
         {
-            Base = { FontSize = 12f }
-        };
-
-        /// <summary>A symbol that pauses something, lit in the color of something worth noticing while it is paused.</summary>
-        public static readonly IStyle<Glyph> Held = new GlyphStyle(Icon)
-        {
-            Base = { Background = Palette.NoticeWash, Tint = Palette.Notice },
-            Hot = { Background = Palette.NoticeWash, Tint = Palette.Ink }
+            Base = { FontSize = 12f },
+            [LookStates.Paused] = { FontSize = 20f, Background = Palette.NoticeWash, Tint = Palette.Notice },
+            [LookStates.Paused | State.Hot] = { Background = Palette.NoticeWash, Tint = Palette.Ink }
         };
 
         /// <summary>A symbol that throws something away, lit in the color of something wrong under the pointer.</summary>
@@ -818,16 +737,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Edge = Palette.Ink }
         };
 
-        /// <summary>A box a value is typed into, in a form of values.</summary>
+        /// <summary>A box a value is typed into, in a form of values; washed and edged in red while what was typed cannot be used.</summary>
         public static readonly IStyle<TextBox> Value = new TextBoxStyle(Field)
         {
-            Base = { FontSize = 20f, Padding = new Thickness(12f, 8f) }
-        };
-
-        /// <summary>A box a value is typed into, in a form of values, holding something its value will not take.</summary>
-        public static readonly IStyle<TextBox> ValueWrong = new TextBoxStyle(Value)
-        {
-            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
+            Base = { FontSize = 20f, Padding = new Thickness(12f, 8f) },
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
         /// <summary>What a value in a form is, beside where it is given.</summary>
@@ -843,7 +757,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Problem }
         };
 
-        /// <summary>One of a few words a value may be, pressed to give it.</summary>
+        /// <summary>One of a few words a value may be, pressed to give it; on a lighter plate, in the ink, where it is the one chosen.</summary>
         public static readonly IStyle<Button> Word = new ButtonStyle
         {
             Base =
@@ -855,32 +769,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Edge = Palette.Line,
                 Padding = new Thickness(12f, 4f)
             },
-            Hot = { Background = Palette.Panel, Edge = Palette.Muted }
+            Hot = { Background = Palette.Panel, Edge = Palette.Muted },
+            [LookStates.Chosen] = { Color = Palette.Ink, Background = Palette.Line }
         };
 
-        /// <summary>The word a value has been given.</summary>
-        public static readonly IStyle<Button> WordChosen = new ButtonStyle(Word)
-        {
-            Base = { Color = Palette.Ink, Background = Palette.Line }
-        };
-
-        /// <summary>The line a list hangs from, saying what is chosen in it, edged while it holds the keyboard.</summary>
+        /// <summary>The line a list hangs from, saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used.</summary>
         public static readonly IStyle<Element> ListLine = new ElementStyle
         {
             Base = { Background = Palette.Well, Edge = Palette.Line, Padding = new Thickness(12f, 8f) },
-            Hot = { Background = Palette.Panel, Edge = Palette.Muted }
+            Hot = { Background = Palette.Panel, Edge = Palette.Muted },
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
         /// <summary>The line a list hangs from where it stands in a column's heading, as tall as the heading's words so nothing under it moves.</summary>
         public static readonly IStyle<Element> ListLineInHeading = new ElementStyle(ListLine)
         {
             Base = { Padding = new Thickness(12f, 2f) }
-        };
-
-        /// <summary>The line a list hangs from, saying a word its value will not take.</summary>
-        public static readonly IStyle<Element> ListLineWrong = new ElementStyle(ListLine)
-        {
-            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
         /// <summary>Controls hanging from what opened them, on the ground a form's controls stand on, so they look as they do in a form.</summary>
@@ -895,37 +799,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.Panel, Edge = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
         };
 
-        /// <summary>One entry of a menu, lit a step past the menu's own tone under the pointer.</summary>
+        /// <summary>One entry of a menu, lit a step past the menu's own tone under the pointer; set in under its family where nested, and lit in the accent where it is the one chosen.</summary>
         public static readonly IStyle<Element> MenuRow = new ElementStyle
         {
             Base = { Padding = new Thickness(12f, 8f) },
-            Hot = { Background = Palette.Line }
+            Hot = { Background = Palette.Line },
+            [LookStates.Nested] = { Padding = new Thickness(32f, 8f, 12f, 8f) },
+            [LookStates.Chosen] = { Background = Palette.Accent },
+            [LookStates.Chosen | State.Hot] = { Background = Palette.Ink }
         };
 
-        /// <summary>An entry of a menu listed under another, set in from it.</summary>
-        public static readonly IStyle<Element> MenuRowNested = new ElementStyle
-        {
-            Base = { Padding = new Thickness(32f, 8f, 12f, 8f) },
-            Hot = { Background = Palette.Line }
-        };
-
-        /// <summary>The entry of a menu that Enter takes, drawn the way every other thing that carries on is drawn.</summary>
-        public static readonly IStyle<Element> MenuRowTaken = new ElementStyle(MenuRow)
-        {
-            Base = { Background = Palette.Accent },
-            Hot = { Background = Palette.Ink }
-        };
-
-        /// <summary>The words of an entry in a list hanging open.</summary>
+        /// <summary>The words of an entry in a list hanging open; in the chrome's color on the row chosen.</summary>
         public static readonly IStyle<Label> ListWord = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Ink }
-        };
-
-        /// <summary>The words of the entry Enter takes, on its accent.</summary>
-        public static readonly IStyle<Label> ListWordTaken = new TextStyle(ListWord)
-        {
-            Base = { Color = Palette.Chrome }
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Ink },
+            [LookStates.Chosen] = { Color = Palette.Chrome }
         };
 
         /// <summary>One column of a pick: a panel with a hairline round it.</summary>
@@ -989,48 +877,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.PanelHot, Color = Palette.Ink }
         };
 
-        /// <summary>A thing to choose in a column, lit under the pointer.</summary>
+        /// <summary>A thing to choose in a column, lit under the pointer and where it is the one chosen, and never lit where it cannot be picked.</summary>
         public static readonly IStyle<Element> Pick = new ElementStyle
         {
             Base = { Padding = new Thickness(0f, 0f, 12f, 0f) },
-            Hot = { Background = Palette.PanelHot }
+            Hot = { Background = Palette.PanelHot },
+            [LookStates.Chosen] = { Background = Palette.PanelHot },
+            [LookStates.Chosen | State.Hot] = { Background = Palette.Line },
+            [LookStates.Still] = { Background = Palette.None }
         };
 
-        /// <summary>The one thing settled on in a column, on the highlight tone at rest and a step past it under the pointer.</summary>
-        public static readonly IStyle<Element> Settled = new ElementStyle(Pick)
-        {
-            Base = { Background = Palette.PanelHot },
-            Hot = { Background = Palette.Line }
-        };
-
-        /// <summary>A thing listed to be read about and not chosen, or a heading over a group of them.</summary>
-        public static readonly IStyle<Element> Unpicked = new ElementStyle(Pick)
-        {
-            Hot = { Background = Palette.None }
-        };
-
-        /// <summary>A heading over a group of things to choose, against the first of them.</summary>
-        public static readonly IStyle<Element> PickHeading = new ElementStyle(Unpicked)
-        {
-            Base = { Padding = new Thickness(0f, 0f, 12f, 0f) }
-        };
-
-        /// <summary>The name of a thing to choose, at the size the game writes a block list in.</summary>
+        /// <summary>The name of a thing to choose, at the size the game writes a block list in; muted where it is listed only to be read about, faint where it heads a group.</summary>
         public static readonly IStyle<MemberName> PickName = new MemberNameStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
-        };
-
-        /// <summary>The name of a thing listed only to be read about.</summary>
-        public static readonly IStyle<MemberName> PickWithheld = new MemberNameStyle(PickName)
-        {
-            Base = { Color = Palette.Muted }
-        };
-
-        /// <summary>A heading over a group of things to choose.</summary>
-        public static readonly IStyle<MemberName> PickGroup = new MemberNameStyle(PickName)
-        {
-            Base = { Color = Palette.Faint }
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink },
+            [LookStates.Off] = { Color = Palette.Muted },
+            [LookStates.Heading] = { Color = Palette.Faint }
         };
 
         /// <summary>A block's picture beside its name in a column, on a well of its own.</summary>
@@ -1039,25 +901,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.SlotFill }
         };
 
-        /// <summary>A toolbar slot that holds nothing, offered under a toolbar a person presses.</summary>
+        /// <summary>A toolbar slot that holds nothing, offered under a toolbar a person presses; filled where it holds a slot, washed green while it waits for its signal.</summary>
         public static readonly IStyle<Element> SlotFree = new ElementStyle
         {
             Base = { Background = Palette.Well, Edge = Palette.Line },
-            Hot = { Background = Palette.Panel, Edge = Palette.Muted }
-        };
-
-        /// <summary>A toolbar slot holding something of the game's: an action, a group's action or a thing.</summary>
-        public static readonly IStyle<Element> SlotTaken = new ElementStyle
-        {
-            Base = { Background = Palette.SlotFill, Edge = Palette.SlotEdge },
-            Hot = { Background = Palette.PanelHot, Edge = Palette.Ink }
-        };
-
-        /// <summary>A toolbar slot already answering a signal of the automation.</summary>
-        public static readonly IStyle<Element> SlotAnswering = new ElementStyle
-        {
-            Base = { Background = Palette.LiveWash, Edge = Palette.Live },
-            Hot = { Background = Palette.PanelHot, Edge = Palette.Live }
+            Hot = { Background = Palette.Panel, Edge = Palette.Muted },
+            [LookStates.Taken] = { Background = Palette.SlotFill, Edge = Palette.SlotEdge },
+            [LookStates.Taken | State.Hot] = { Background = Palette.PanelHot, Edge = Palette.Ink },
+            [LookStates.Answering] = { Background = Palette.LiveWash, Edge = Palette.Live },
+            [LookStates.Answering | State.Hot] = { Background = Palette.PanelHot, Edge = Palette.Live }
         };
 
         /// <summary>The ring around the toolbar slot chosen, over whatever the slot holds.</summary>
@@ -1072,22 +924,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Ink, Padding = new Thickness(4f, 0f) }
         };
 
-        /// <summary>A page of a toolbar, offered beside its other pages.</summary>
+        /// <summary>A page of a toolbar, offered beside its other pages; in the ink where its page holds a slot, on a lighter plate where it is the page showing.</summary>
         public static readonly IStyle<Button> SlotPage = new ButtonStyle(Word)
         {
-            Base = { FontSize = 16f, Padding = new Thickness(8f, 2f) }
-        };
-
-        /// <summary>A page of a toolbar where something already sits in one of its slots.</summary>
-        public static readonly IStyle<Button> SlotPageTaken = new ButtonStyle(SlotPage)
-        {
-            Base = { Color = Palette.Ink }
-        };
-
-        /// <summary>The page of a toolbar being shown.</summary>
-        public static readonly IStyle<Button> SlotPageChosen = new ButtonStyle(SlotPage)
-        {
-            Base = { Color = Palette.Ink, Background = Palette.Line }
+            Base = { FontSize = 16f, Padding = new Thickness(8f, 2f) },
+            [LookStates.Taken] = { Color = Palette.Ink }
         };
 
         /// <summary>A mark saying something has not been chosen: a ring for one of several, a box for any of them.</summary>
@@ -1114,16 +955,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.PanelHot }
         };
 
-        /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens.</summary>
+        /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens; dim on a paused step.</summary>
         public static readonly IStyle<Glyph> Waits = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted }
-        };
-
-        /// <summary>A mark beside words on a paused step, as quiet as its words.</summary>
-        public static readonly IStyle<Glyph> WaitsPaused = new GlyphStyle(Waits)
-        {
-            Base = { Tint = Palette.Dim }
+            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted },
+            [LookStates.Paused] = { Tint = Palette.Dim }
         };
 
         /// <summary>A choice about the picking itself, lit under the pointer.</summary>
@@ -1133,16 +969,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.PanelHot }
         };
 
-        /// <summary>The words of a choice about the picking itself.</summary>
+        /// <summary>The words of a choice about the picking itself; in the ink where it is chosen.</summary>
         public static readonly IStyle<Label> OptionWord = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted }
-        };
-
-        /// <summary>The words of the choice about the picking that holds.</summary>
-        public static readonly IStyle<Label> OptionChosen = new TextStyle(OptionWord)
-        {
-            Base = { Color = Palette.Ink }
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted },
+            [LookStates.Chosen] = { Color = Palette.Ink }
         };
 
         /// <summary>A count beside what it counts, quieter than it.</summary>

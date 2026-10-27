@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     return;
 
                 _emphasized = value;
-                _name.Style = _title ? value ? Styles.TitleNameEmphasized : Styles.TitleName : value ? Styles.PlateNameEmphasized : Styles.PlateName;
+                _name.Set(LookStates.Emphasized, value);
             }
         }
 
@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Marks the box as holding a name that cannot be given, saying <paramref name="why" /> on the box and the plate, or clears the mark for null.</summary>
         public void Refuse(string why)
         {
-            _box.Style = why == null ? (_title ? Styles.TitleBox : Styles.PlateBox) : _title ? Styles.TitleRefused : Styles.PlateRefused;
+            _box.Set(LookStates.Wrong, why != null);
             _box.Tip = Tip.For(_box.Tip, why);
             Tip = Tip.For(Tip, why);
         }

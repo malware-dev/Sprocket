@@ -252,7 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < picks.Children.Count; i++)
             {
                 var given = length.HasValue && (_inSeconds ? length.Value.Seconds == SecondsPicks[i] : length.Value.Ticks == TicksPicks[i]);
-                ((Button)picks.Children[i]).Style = given ? Styles.WordChosen : Styles.Word;
+                picks.Children[i].Set(LookStates.Chosen, given);
             }
         }
 

@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             set
             {
                 _mark.IsChecked = value;
-                _words.Style = value ? Styles.OptionChosen : Styles.OptionWord;
+                _words.Set(LookStates.Chosen, value);
             }
         }
     }

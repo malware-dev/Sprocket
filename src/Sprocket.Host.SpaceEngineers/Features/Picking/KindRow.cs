@@ -51,15 +51,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Whether it is a kind listed under its family, and set in from it.</summary>
         public bool IsNested
         {
-            get { return Style == Styles.MenuRowNested; }
-            set { Style = value ? Styles.MenuRowNested : Styles.MenuRow; }
+            get { return Is(LookStates.Nested); }
+            set { Set(LookStates.Nested, value); }
         }
 
         /// <summary>Whether it is the kind the column is narrowed to.</summary>
         public bool IsCurrent
         {
-            get { return _name.Style == Styles.OptionChosen; }
-            set { _name.Style = value ? Styles.OptionChosen : Styles.OptionWord; }
+            get { return _name.Is(LookStates.Chosen); }
+            set { _name.Set(LookStates.Chosen, value); }
         }
 
         /// <summary>As wide as its words and its count need, with the count pushed to the far end when it is given more.</summary>

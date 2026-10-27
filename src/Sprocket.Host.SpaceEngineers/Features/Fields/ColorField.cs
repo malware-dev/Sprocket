@@ -87,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             set
             {
-                Style = value ? Styles.ListLineWrong : Styles.ListLine;
+                Set(LookStates.Wrong, value);
                 _picker.IsWrong = value;
             }
         }

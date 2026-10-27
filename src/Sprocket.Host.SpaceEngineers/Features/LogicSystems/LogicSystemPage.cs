@@ -451,7 +451,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// </summary>
         static void Flag(Tab tab, Glyph mark, NoticeLevel level, Texts texts)
         {
-            tab.Style = level == NoticeLevel.Problem ? Styles.TabBroken : level == NoticeLevel.Warning ? Styles.TabWarned : Styles.Tab;
+            tab.Set(LookStates.Broken, level == NoticeLevel.Problem);
+            tab.Set(LookStates.Warned, level == NoticeLevel.Warning);
             mark.IsVisible = level != NoticeLevel.Info;
             mark.Base.Tint = level == NoticeLevel.Warning ? Palette.Notice : Palette.Problem;
             mark.Tip = Tip.For(mark.Tip, texts.Codex.SystemTabFlagged);

@@ -447,7 +447,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _admin.IsVisible = !screen.CanGoBack && _editor.MayAdminister;
             _admin.Text = texts.AdminButton;
 
-            _tips.Style = _editor.TipsShown ? Styles.Tips : Styles.TipsOff;
+            _tips.Set(LookStates.Off, !_editor.TipsShown);
             _tips.Tip = Tip.For(_tips.Tip, texts.Codex.ChromeTips);
 
             _undone.Set("action", screen.UndoText);
@@ -511,12 +511,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 var entry = actions[i];
                 _actionsShown.Add(entry);
-                _actions.Children.Add(new Button
-                {
-                    Style = entry.IsCurrent ? Styles.Current : Styles.Plain,
-                    Text = Caps(entry.Text),
-                    Command = entry.Command
-                });
+                var action = new Button { Style = Styles.Plain, Text = Caps(entry.Text), Command = entry.Command };
+                action.Set(LookStates.Chosen, entry.IsCurrent);
+                _actions.Children.Add(action);
             }
         }
 

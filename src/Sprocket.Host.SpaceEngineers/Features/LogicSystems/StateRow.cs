@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             set
             {
                 _holds.Command = value;
-                _holds.Style = value != null ? Styles.SlotName : Styles.SlotNameStill;
+                _holds.Set(LookStates.Still, value == null);
             }
         }
 

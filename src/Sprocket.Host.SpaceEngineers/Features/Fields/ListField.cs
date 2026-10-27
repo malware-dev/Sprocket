@@ -78,8 +78,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var given = _words.IndexOf(_text);
                 for (var i = 0; i < _rows.Count; i++)
                 {
-                    _rows[i].Style = i == given ? Styles.MenuRowTaken : Styles.MenuRow;
-                    _named[i].Style = i == given ? Styles.ListWordTaken : Styles.ListWord;
+                    _rows[i].Set(LookStates.Chosen, i == given);
+                    _named[i].Set(LookStates.Chosen, i == given);
                 }
 
                 list.Open();
@@ -117,7 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public bool IsWrong
         {
-            set { Style = value ? Styles.ListLineWrong : Styles.ListLine; }
+            set { Set(LookStates.Wrong, value); }
         }
 
         /// <inheritdoc />

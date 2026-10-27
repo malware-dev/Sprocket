@@ -107,14 +107,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _name.Name = IsHeading ? (Text ?? "").ToUpperInvariant() : Text;
-            _name.Style = IsHeading ? Styles.PickGroup : IsWithheld ? Styles.PickWithheld : Styles.PickName;
+            _name.Set(LookStates.Heading, IsHeading);
+            _name.Set(LookStates.Off, IsWithheld);
             _name.Mark = Mark;
 
             var detail = Detail(Secondary, Status);
             _detail.Text = detail;
             _detail.IsVisible = detail.Length != 0;
 
-            Style = IsHeading ? Styles.PickHeading : !pressable ? Styles.Unpicked : IsChosen && !Many ? Styles.Settled : Styles.Pick;
+            Set(LookStates.Still, IsHeading || !pressable);
+            Set(LookStates.Chosen, IsChosen && !Many);
             Tip = Tip.For(Tip, IsWithheld ? Why : About);
         }
 

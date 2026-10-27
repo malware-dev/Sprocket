@@ -37,6 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Blocks = new List<long>();
             Signals = new List<EntityEvent>();
             CreateView();
+            StyleName();
         }
 
         /// <summary>What the slot is called.</summary>
@@ -250,7 +251,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Styles the name as a button where it opens the slot, as words alone where it never does, and as a quiet box otherwise.</summary>
         void StyleName()
         {
-            _name.Style = _name.Command != null ? Styles.SlotName : _plain ? Styles.SlotNamePlain : Styles.SlotNameStill;
+            _name.Style = _plain && _name.Command == null ? Styles.SlotNamePlain : Styles.SlotName;
+            _name.Set(LookStates.Still, _name.Command == null);
         }
 
         /// <summary>Says the slot's name, and its short name after it in brackets where it has one.</summary>

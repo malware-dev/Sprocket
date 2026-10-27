@@ -169,7 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _leadWaits.IsVisible = Kind == StepKind.Run || Kind == StepKind.Await;
             }
 
-            _leadWaits.Style = IsOff ? Styles.WaitsPaused : Styles.Waits;
+            _leadWaits.Set(LookStates.Paused, IsOff);
             _leadWaits.HaloTint = !IsOff && (MarksLit || Kind == StepKind.Await && ClockLit) ? Glow : Palette.None;
             foreach (var chip in _chips)
                 chip.Glow = MarksLit && !IsOff ? Glow : Palette.None;
@@ -197,13 +197,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Part(i, Slots[i], world);
             }
 
-            var words = IsOff ? Styles.PausedPhrase : Styles.Phrase;
-            var parts = IsOff ? Styles.PausedSlot : Styles.Slot;
-            _lead.Style = IsOff ? Styles.PausedPhraseTerm : Styles.PhraseTerm;
+            _lead.Set(LookStates.Paused, IsOff);
             for (var i = 0; i < _chips.Count; i++)
             {
-                _joins[i].Style = words;
-                _chips[i].Style = parts;
+                _joins[i].Set(LookStates.Paused, IsOff);
+                _chips[i].Set(LookStates.Paused, IsOff);
                 _chips[i].Paused = IsOff;
             }
 
@@ -217,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _delete.IsEnabled = Deletes != null;
             _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.Codex.SequenceDeleteStep : Why());
 
-            _pause.Style = IsOff ? Styles.Held : Styles.Holds;
+            _pause.Set(LookStates.Paused, IsOff);
             _pause.Command = Pauses;
             _pause.IsEnabled = Pauses != null;
             _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.Codex.SequenceUnpauseStep : texts.Codex.SequencePauseStep);

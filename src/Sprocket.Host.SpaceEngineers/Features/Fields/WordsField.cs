@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _text = value ?? "";
                 _list.Text = _text;
                 for (var i = 0; i < _buttons.Count; i++)
-                    _buttons[i].Style = _words[i] == _text ? Styles.WordChosen : Styles.Word;
+                    _buttons[i].Set(LookStates.Chosen, _words[i] == _text);
             }
         }
 

@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set
             {
                 _given.IsVisible = value;
-                Style = value ? Styles.Given : Styles.Answer;
+                Set(LookStates.Chosen, value);
             }
         }
     }

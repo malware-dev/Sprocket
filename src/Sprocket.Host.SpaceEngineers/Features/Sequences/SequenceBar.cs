@@ -16,6 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             LastRun = "";
             Skipped = "";
             CreateView();
+            _skipped.Set(LookStates.Warned, true);
         }
 
         /// <summary>What it is doing, in a word or two.</summary>
@@ -45,7 +46,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _status.Text = Status;
             _problem.IsVisible = wrong;
             _problem.Text = Problem;
-            _problem.Style = Level == NoticeLevel.Warning ? Styles.WarningStatus : Level == NoticeLevel.Problem ? Styles.ProblemStatus : Styles.Status;
+            _problem.Set(LookStates.Warned, Level == NoticeLevel.Warning);
+            _problem.Set(LookStates.Broken, Level == NoticeLevel.Problem);
             _lastRun.Text = LastRun;
             _light.Base.Tint = JustRan ? Palette.Live : Palette.Dim;
 
