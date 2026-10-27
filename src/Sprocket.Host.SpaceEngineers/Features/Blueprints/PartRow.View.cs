@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void CreateView()
         {
             Spacing = 20f;
-            Padding = new Thickness(20f, 0f);
+            Base.Padding = new Thickness(20f, 0f);
 
             Children.Add(new VStack
             {

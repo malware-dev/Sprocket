@@ -24,18 +24,14 @@ namespace RichTextPanels
             var close = new Button
             {
                 Text = "Close",
-                FontSize = 20f,
-                Color = Ink,
-                Background = Line,
-                Padding = new Thickness(16f, 4f)
+                Base = { FontSize = 20f, Color = Ink, Background = Line, Padding = new Thickness(16f, 4f) }
             };
 
             var root = new VStack
             {
                 Align = Align.Center,
                 Placement = FixedSize.Size(792f, 920f),
-                Background = Page,
-                Padding = new Thickness(24f),
+                Base = { Background = Page, Padding = new Thickness(24f) },
                 Spacing = 16f,
                 Children =
                 {
@@ -44,7 +40,7 @@ namespace RichTextPanels
                         Spacing = 16f,
                         Children =
                         {
-                            new Label { Text = "Writing rich text", FontSize = 32f, Font = "SpaceEngineersBold", Color = Ink, Placement = Flex.Grow },
+                            new Label { Base = { Color = Ink, Font = "SpaceEngineersBold", FontSize = 32f }, Text = "Writing rich text", Placement = Flex.Grow },
                             close
                         }
                     },
@@ -62,23 +58,29 @@ namespace RichTextPanels
             return new RichText
             {
                 Markdown = Guide.Text,
-                Font = "White",
-                StrongFont = "SpaceEngineersBold",
-                EmphasisFont = "SpaceEngineersItalic",
-                StrongEmphasisFont = "SpaceEngineersBoldItalic",
-                CodeFont = code,
-                FontSize = 20f,
-                Heading1Size = 32f,
-                Heading2Size = 24f,
-                Heading3Size = 20f,
-                BlockSpacing = 12f,
-                Indent = 24f,
-                Color = Muted,
-                StrongColor = Ink,
-                EmphasisColor = Ink,
-                HeadingColor = Ink,
-                RuleColor = Line,
-                Padding = new Thickness(0f, 0f, 16f, 0f)
+                Base =
+                {
+                    Font = "White",
+                    StrongFont = "SpaceEngineersBold",
+                    EmphasisFont = "SpaceEngineersItalic",
+                    StrongEmphasisFont = "SpaceEngineersBoldItalic",
+                    CodeFont = code,
+                    FontSize = 20f,
+                    Heading1Size = 32f,
+                    Heading2Size = 24f,
+                    Heading3Size = 20f,
+                    BlockSpacing = 12f,
+                    Indent = 24f,
+                    Color = Muted,
+                    StrongColor = Ink,
+                    EmphasisColor = Ink,
+                    HeadingColor = Ink,
+                    RuleColor = Line,
+                    Padding = new Thickness(0f,
+                    0f,
+                    16f,
+                    0f)
+                }
             };
         }
     }

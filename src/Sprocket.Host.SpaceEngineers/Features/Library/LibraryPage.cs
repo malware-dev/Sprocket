@@ -13,6 +13,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Lumel.Styling;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
@@ -98,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             {
                 Style = Styles.InnerName,
                 Text = Template.Fill(texts.LibraryThisConstruct, "name", Editor.World.Name),
-                Padding = new Thickness(16f, 8f, 0f, 4f)
+                Base = { Padding = new Thickness(16f, 8f, 0f, 4f) }
             });
 
             var here = 0;
@@ -180,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 {
                     Style = Styles.InnerName,
                     Text = latest.Construct,
-                    Padding = new Thickness(16f, 8f, 0f, 4f)
+                    Base = { Padding = new Thickness(16f, 8f, 0f, 4f) }
                 });
 
                 foreach (var backup in _group)
@@ -263,20 +264,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _list.Children.Add(row);
         }
 
-        void Heading(string text, TextStyle style)
+        void Heading(string text, IStyle<Label> style)
         {
             _list.Children.Add(new Label { Style = style, Text = text.ToUpperInvariant() });
         }
 
         /// <summary>Adds a heading to the list that holds a term, written as <paramref name="markdown" /> with the term a link to its codex page, which resting on it shows.</summary>
-        void TermHeading(string markdown, RichTextStyle style)
+        void TermHeading(string markdown, IStyle<RichText> style)
         {
             var heading = new RichText { Style = style, Align = Align.Left, Markdown = markdown };
             Editor.Codex.Explain(heading);
             _list.Children.Add(heading);
         }
 
-        void Line(string text, TextStyle style)
+        void Line(string text, IStyle<Label> style)
         {
             _list.Children.Add(new Label { Style = style, Text = text, Wraps = true });
         }

@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Style = Styles.Pen,
                 IsVisible = false,
                 Placement = _title ? FixedSize.Size(32f, 32f) : FixedSize.Size(24f, 24f),
-                Padding = _title ? EditorWorkspace.LevelWithCapitals : new Thickness(0f)
+                Base = { Padding = _title ? EditorWorkspace.LevelWithCapitals : new Thickness(0f) }
             }.As(out _pen));
 
             if (_title)

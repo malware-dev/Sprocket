@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         Color _glow;
         Texts _texts;
         string _font = MyFontEnum.White;
-        float _fontSize = TextState.NeutralFontSize;
+        float _fontSize = TextLook.NeutralFontSize;
         Color _color = Color.White;
 
         /// <summary>Nothing said yet, its pieces in a line across where <paramref name="piecesAcross" /> is set and one under the other otherwise, words standing at the right.</summary>
@@ -98,36 +98,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <inheritdoc />
-        public string Font
-        {
-            get { return _font; }
-            set
-            {
-                _font = value;
-                Dress();
-            }
-        }
+        public string Font => _font;
 
         /// <inheritdoc />
-        public float FontSize
-        {
-            get { return _fontSize; }
-            set
-            {
-                _fontSize = value;
-                Dress();
-            }
-        }
+        public float FontSize => _fontSize;
 
         /// <inheritdoc />
-        public Color Color
+        public Color Color => _color;
+
+        /// <summary>Draws every piece's words in <paramref name="font" />, <paramref name="fontSize" /> and <paramref name="color" />.</summary>
+        public void Dress(string font, float fontSize, Color color)
         {
-            get { return _color; }
-            set
-            {
-                _color = value;
-                Dress();
-            }
+            if (_font == font && _fontSize == fontSize && _color == color)
+                return;
+
+            _font = font;
+            _fontSize = fontSize;
+            _color = color;
+            Dress();
         }
 
         /// <summary>Says <paramref name="words" />, and nothing else.</summary>
@@ -230,13 +218,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 if (swatch != null)
                     swatch.Placement = FixedSize.Size(SampleWide, _fontSize);
 
-                var text = child as ITextual;
-                if (text == null)
-                    continue;
+                var named = child as BlockName;
+                if (named != null)
+                    named.Dress(_font, _fontSize, _color);
 
-                text.Font = _font;
-                text.FontSize = _fontSize;
-                text.Color = _color;
+                var member = child as MemberName;
+                if (member != null)
+                    member.Base.Wear(_font, _fontSize, _color);
+
+                var words = child as Label;
+                if (words != null)
+                    words.Base.Wear(_font, _fontSize, _color);
             }
         }
     }

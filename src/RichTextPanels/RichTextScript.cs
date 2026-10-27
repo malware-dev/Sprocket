@@ -40,10 +40,7 @@ namespace RichTextPanels
         readonly SpriteGraphics _graphics;
         readonly RichText _text = new RichText
         {
-            Font = Face,
-            StrongFont = "SpaceEngineersBold",
-            EmphasisFont = "SpaceEngineersItalic",
-            StrongEmphasisFont = "SpaceEngineersBoldItalic"
+            Base = { Font = Face, StrongFont = "SpaceEngineersBold", EmphasisFont = "SpaceEngineersItalic", StrongEmphasisFont = "SpaceEngineersBoldItalic" }
         };
 
         readonly Viewbox _box;
@@ -63,7 +60,7 @@ namespace RichTextPanels
             : base(surface, block, size)
         {
             _graphics = new SpriteGraphics(surface, _sprites, new PanelPictures());
-            _text.CodeFont = CodeFace.Of(surface);
+            _text.Base.CodeFont = CodeFace.Of(surface);
             _box = new Viewbox { Content = _text };
             _page = new Grid
             {
@@ -151,18 +148,18 @@ namespace RichTextPanels
             var room = _graphics.Size;
             var body = _graphics.LineHeight(Face) * _fontSize;
 
-            _text.FontSize = body;
-            _text.Heading1Size = body * 1.5f;
-            _text.Heading2Size = body * 1.25f;
-            _text.Heading3Size = body;
-            _text.BlockSpacing = body * 0.5f;
-            _text.Indent = body;
-            _text.Color = _foreground;
-            _text.StrongColor = _foreground;
-            _text.EmphasisColor = _foreground;
-            _text.HeadingColor = _foreground;
-            _text.RuleColor = Color.Lerp(_background, _foreground, 0.5f);
-            _box.Padding = new Thickness(_padding / 100f * Math.Min(room.X, room.Y));
+            _text.Base.FontSize = body;
+            _text.Base.Heading1Size = body * 1.5f;
+            _text.Base.Heading2Size = body * 1.25f;
+            _text.Base.Heading3Size = body;
+            _text.Base.BlockSpacing = body * 0.5f;
+            _text.Base.Indent = body;
+            _text.Base.Color = _foreground;
+            _text.Base.StrongColor = _foreground;
+            _text.Base.EmphasisColor = _foreground;
+            _text.Base.HeadingColor = _foreground;
+            _text.Base.RuleColor = Color.Lerp(_background, _foreground, 0.5f);
+            _box.Base.Padding = new Thickness(_padding / 100f * Math.Min(room.X, room.Y));
 
             // The instructions are sentences that wrap, so they are never fitted: they are shown at the panel's own size, and
             // in one line where the whole of them does not fit.

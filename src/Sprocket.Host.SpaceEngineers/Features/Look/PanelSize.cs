@@ -3,6 +3,7 @@ using Lumel;
 using Lumel.Images;
 using Lumel.Text;
 using VRage.Game;
+using Lumel.Styling;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Look
 {
@@ -87,34 +88,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public float BannerIcon { get; }
 
         /// <summary>A sentence, from the top of its capitals to its baseline.</summary>
-        public TextStyle Sentence { get; }
+        public IStyle<Label> Sentence { get; }
 
         /// <summary>A name, from the top of its capitals to its baseline.</summary>
-        public TextStyle Name { get; }
+        public IStyle<Label> Name { get; }
 
         /// <summary>A label over a name, from the top of its capitals to its baseline.</summary>
-        public TextStyle Label { get; }
+        public IStyle<Label> Label { get; }
 
         /// <summary>A line of the top line or a count, its whole line.</summary>
-        public TextStyle Plain { get; }
+        public IStyle<Label> Plain { get; }
 
         /// <summary>A word of a bar across a short screen, its whole line.</summary>
-        public TextStyle Banner { get; }
+        public IStyle<Label> Banner { get; }
 
         /// <summary>A mark of a bar across a short screen.</summary>
-        public GlyphStyle BannerMark { get; }
+        public IStyle<Glyph> BannerMark { get; }
 
         /// <summary>The mark of what a card shows.</summary>
-        public GlyphStyle Mark { get; }
+        public IStyle<Glyph> Mark { get; }
 
         /// <summary>The check of a construct with nothing wanting looking at.</summary>
-        public GlyphStyle Check { get; }
+        public IStyle<Glyph> Check { get; }
 
         /// <summary>A mark beside a count.</summary>
-        public GlyphStyle Count { get; }
+        public IStyle<Glyph> Count { get; }
 
         /// <summary>A page dot.</summary>
-        public GlyphStyle Dots { get; }
+        public IStyle<Glyph> Dots { get; }
 
         /// <summary>The largest size whose sentence's line is no taller than <paramref name="body" />, and no smaller than <paramref name="floor" />.</summary>
         public static PanelSize For(float body, float floor)
@@ -130,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         }
 
         /// <summary>A line of <paramref name="size" />, padded in to the top of its capitals and up to its baseline, to the nearest four.</summary>
-        static TextStyle Line(float size)
+        static IStyle<Label> Line(float size)
         {
             var top = Fours(size * TextSizes.CapTop);
             var bottom = Fours(size * (1f - TextSizes.Baseline));

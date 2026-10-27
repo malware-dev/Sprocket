@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     break;
                 }
 
-                if (hot < 0 && row.Hot)
+                if (hot < 0 && row.IsUnderPointer)
                     hot = i;
             }
 

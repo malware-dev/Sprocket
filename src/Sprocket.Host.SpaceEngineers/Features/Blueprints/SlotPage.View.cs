@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Spacing = 8f,
                 Children =
                 {
-                    new Label { Style = Styles.Aside, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _locked),
+                    new Label { Base = { Padding = new Thickness(4f, 0f, 0f, 8f) }, Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _locked),
 
                     new Label { Style = Styles.Heading }.As(out _purposeHeading),
                     new Composer(160f, Styles.SlotDescription).As(out _composer),

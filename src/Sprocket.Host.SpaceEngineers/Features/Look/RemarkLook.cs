@@ -3,6 +3,7 @@ using Lumel.Drawing;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using VRageMath;
+using Lumel.Styling;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Look
 {
@@ -39,12 +40,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Lays the ground of a remark at <paramref name="level" /> under <paramref name="element" />, which carries it, or <paramref name="plain" /> for a note.</summary>
         public static void Ground(Element element, NoticeLevel level, Color plain)
         {
-            element.Background = Wash(level, plain);
-            element.Pattern = Stripes(level);
+            element.Base.Background = Wash(level, plain);
+            element.Base.Pattern = Stripes(level);
         }
 
         /// <summary>The style of a remark at <paramref name="level" /> on a line of its own, on its ground, or <paramref name="plain" /> for a note.</summary>
-        public static TextStyle Line(NoticeLevel level, TextStyle plain)
+        public static IStyle<Label> Line(NoticeLevel level, IStyle<Label> plain)
         {
             if (level == NoticeLevel.Problem)
                 return Styles.ProblemLine;

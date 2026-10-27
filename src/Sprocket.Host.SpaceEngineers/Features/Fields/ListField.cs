@@ -96,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             return new Glyph
             {
-                Symbol = Symbols.Down, Style = Styles.ListMark, Placement = FixedSize.Size(Mark, Mark), Padding = Level
+                Symbol = Symbols.Down, Style = Styles.ListMark, Placement = FixedSize.Size(Mark, Mark), Base = { Padding = Level }
             };
         }
 

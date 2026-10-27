@@ -13,6 +13,7 @@ using Lumel.Text;
 using Lumel.Viewing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Lumel.Sim;
+using Lumel.Styling;
 
 namespace Sprocket.Sim.Simulation;
 
@@ -20,7 +21,7 @@ namespace Sprocket.Sim.Simulation;
 /// <remarks>At 1080 high, where one UI unit is one pixel, and cut to the text so the picture is as big as it is.</remarks>
 public static class RichShot
 {
-    static readonly RichTextStyle Page = new RichTextStyle
+    static readonly IStyle<RichText> Page = new RichTextStyle
     {
         Base =
         {
@@ -47,22 +48,22 @@ public static class RichShot
 
     /// <summary>Writes <paramref name="markdown" />, laid out <paramref name="wide" /> across, to <paramref name="path" />, and answers how big the picture is.</summary>
     /// <remarks>Drawn in <paramref name="style" />, or the style of a page where that is null. A strong, emphasis or link color given here is tried in place of the style's, for comparing one against another; the page is laid out as <paramref name="align" /> says, and shrinks to fit a room <paramref name="fit" /> tall where that is above zero.</remarks>
-    public static Vector2 Save(string path, string markdown, float wide, RichTextStyle style, Color? strong, Color? emphasis, Color? link,
+    public static Vector2 Save(string path, string markdown, float wide, IStyle<RichText> style, Color? strong, Color? emphasis, Color? link,
         Alignment align, float fit)
     {
-        var text = new RichText { Style = style ?? Page, Document = Markdown.Parse(markdown), Alignment = align };
+        var text = new RichText { Base = { Alignment = align }, Style = style ?? Page, Document = Markdown.Parse(markdown) };
 
         if (strong.HasValue)
-            text.StrongColor = strong.Value;
+            text.Base.StrongColor = strong.Value;
 
         if (link.HasValue)
-            text.LinkColor = link.Value;
+            text.Base.LinkColor = link.Value;
 
         if (emphasis.HasValue)
-            text.EmphasisColor = emphasis.Value;
+            text.Base.EmphasisColor = emphasis.Value;
 
         Element shown = fit > 0f ? new Viewbox { Content = text, Grows = false, Placement = FixedSize.Size(wide, fit) } : text;
-        var page = new VStack { Background = Palette.Page, Padding = new Thickness(24f), Children = { shown } };
+        var page = new VStack { Base = { Background = Palette.Page, Padding = new Thickness(24f) }, Children = { shown } };
 
         var surface = ScreenSession.Surface();
         surface.Target = new PixelSize(1920, 1080);

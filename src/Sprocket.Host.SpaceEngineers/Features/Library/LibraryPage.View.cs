@@ -56,14 +56,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                             new VStack
                             {
                                 Spacing = 12f,
-                                Padding = new Thickness(0f, 4f, 16f, 0f),
+                                Base = { Padding = new Thickness(0f, 4f, 16f, 0f) },
                                 Children =
                                 {
                                     new Label { Style = Styles.Name, Trims = true }.As(out _name),
                                     new HStack
                                     {
                                         Spacing = 12f,
-                                        Padding = new Thickness(0f, 0f, 0f, 16f),
+                                        Base = { Padding = new Thickness(0f, 0f, 0f, 16f) },
                                         Children =
                                         {
                                             new Button { Style = Styles.Button }.As(out _add),

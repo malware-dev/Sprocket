@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void CreateView()
         {
             Spacing = 16f;
-            Padding = new Thickness(12f, 0f, 0f, 8f);
+            Base.Padding = new Thickness(12f, 0f, 0f, 8f);
             Children.Add(new Label { Style = Styles.ValueLabel, Align = Align.Left }.As(out _says));
         }
     }

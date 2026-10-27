@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     new HStack
                     {
                         Spacing = 8f,
-                        Padding = new Thickness(4f, 8f, 0f, 8f),
+                        Base = { Padding = new Thickness(4f, 8f, 0f, 8f) },
                         Children =
                         {
                             new Label { Style = Styles.Phrase }.As(out _usingLead),
@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     new HStack
                     {
                         Spacing = 8f,
-                        Padding = new Thickness(4f, 0f, 0f, 8f),
+                        Base = { Padding = new Thickness(4f, 0f, 0f, 8f) },
                         IsVisible = false,
                         Children =
                         {
@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     new TabView
                     {
                         HeaderStyle = Styles.Tab,
-                        Padding = new Thickness(0f, 8f, 0f, 0f),
+                        Base = { Padding = new Thickness(0f, 8f, 0f, 0f) },
                         Spacing = 8f,
                         Tabs =
                         {
@@ -93,14 +93,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                     {
                                         new VStack
                                         {
-                                            Padding = new Thickness(0f, 8f, 0f, 0f),
+                                            Base = { Padding = new Thickness(0f, 8f, 0f, 0f) },
                                             IsVisible = false,
                                             Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noTriggers) }
                                         }.As(out _noTriggersLine),
                                         new VStack { Spacing = 0f }.As(out _triggerList),
                                         new VStack
                                         {
-                                            Padding = new Thickness(0f, 8f, 0f, 0f),
+                                            Base = { Padding = new Thickness(0f, 8f, 0f, 0f) },
                                             Children =
                                             {
                                                 new HStack { Children = { new PlusMenu().As(out _addTrigger) } }
@@ -114,14 +114,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                 Marker = new Glyph { Symbol = Symbols.Warning, Style = Styles.TabMark, IsVisible = false }.As(out _sequencesMark),
                                 Content = new VStack
                                 {
-                                    Padding = new Thickness(0f, 8f, 0f, 0f),
+                                    Base = { Padding = new Thickness(0f, 8f, 0f, 0f) },
                                     Children =
                                     {
                                         new Label { Style = Styles.Empty, Wraps = true }.As(out _noSequences),
                                         new VStack { Spacing = 8f }.As(out _sequenceList),
                                         new VStack
                                         {
-                                            Padding = new Thickness(0f, 8f, 0f, 0f),
+                                            Base = { Padding = new Thickness(0f, 8f, 0f, 0f) },
                                             Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
                                         }.As(out _addSequence)
                                     }
@@ -132,19 +132,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                             {
                                 Content = new VStack
                                 {
-                                    Padding = new Thickness(0f, 4f, 0f, 0f),
+                                    Base = { Padding = new Thickness(0f, 4f, 0f, 0f) },
                                     Children =
                                     {
                                         new VStack
                                         {
-                                            Padding = new Thickness(0f, 4f, 0f, 0f),
+                                            Base = { Padding = new Thickness(0f, 4f, 0f, 0f) },
                                             IsVisible = false,
                                             Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noPanel) }
                                         }.As(out _noPanelLine),
                                         new VStack
                                         {
                                             Spacing = 4f,
-                                            Padding = new Thickness(0f, 0f, 0f, 16f),
+                                            Base = { Padding = new Thickness(0f, 0f, 0f, 16f) },
                                             IsVisible = false,
                                             Children =
                                             {
@@ -156,7 +156,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                         new PartList { Spacing = 16f, IsVisible = false }.As(out _slotList),
                                         new VStack
                                         {
-                                            Padding = new Thickness(12f, 16f, 0f, 0f),
+                                            Base = { Padding = new Thickness(12f, 16f, 0f, 0f) },
                                             IsVisible = false,
                                             Children =
                                             {

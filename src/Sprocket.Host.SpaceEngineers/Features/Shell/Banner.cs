@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 new HStack
                                 {
                                     Spacing = 8f,
-                                    Padding = new Thickness(16f, 0f, 16f, 8f),
+                                    Base = { Padding = new Thickness(16f, 0f, 16f, 8f) },
                                     Children = { new Button { Style = Styles.Button, Command = _offers }.As(out _offer) }
                                 }.As(out _actions)
                             }
@@ -105,14 +105,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 : notice.Level == NoticeLevel.Warning
                     ? Styles.NoticeStrip
                     : Styles.InfoStrip;
-            _text.Color = ink;
+            _text.Base.Color = ink;
             _text.Text = notice.Text;
             _detail.Text = notice.Detail;
             _detail.IsVisible = notice.Detail.Length != 0;
             _diagnostic.Text = notice.Diagnostic;
             _diagnostic.IsVisible = notice.Diagnostic.Length != 0;
             _chevron.Symbol = notice.Expanded ? Symbols.Up : Symbols.Down;
-            _chevron.Tint = ink;
+            _chevron.Base.Tint = ink;
             _chevron.IsVisible = notice.Expands != null;
 
             _expands.CanExecute = notice.Expands != null;

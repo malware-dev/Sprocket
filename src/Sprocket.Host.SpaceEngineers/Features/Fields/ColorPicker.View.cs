@@ -36,8 +36,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 Spacing = 8f,
                 Children =
                 {
-                    new ColorPlane { Edge = Palette.Line, Pale = Materials.Pale, Dark = Materials.Dark, Placement = FixedSize.Size(Wide - StripWide - 8f, PlaneHigh) }.As(out _plane),
-                    new HueStrip { Edge = Palette.Line, Hues = Materials.Hues, Placement = FixedSize.Size(StripWide, PlaneHigh) }.As(out _strip)
+                    new ColorPlane { Base = { Edge = Palette.Line }, Pale = Materials.Pale, Dark = Materials.Dark, Placement = FixedSize.Size(Wide - StripWide - 8f, PlaneHigh) }.As(out _plane),
+                    new HueStrip { Base = { Edge = Palette.Line }, Hues = Materials.Hues, Placement = FixedSize.Size(StripWide, PlaneHigh) }.As(out _strip)
                 }
             });
             Children.Add(new HStack
@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Children.Add(Swatches().As(out _palette));
             // Set further off than the paint colors are from each other, so the row that fills itself reads as a row apart.
             Children.Add(Swatches().As(out _recent));
-            _recent.Padding = new Thickness(0f, 8f, 0f, 0f);
+            _recent.Base.Padding = new Thickness(0f, 8f, 0f, 0f);
         }
 
         /// <summary>Three channels in a line, each a letter before the box it is typed in.</summary>
@@ -81,9 +81,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 {
                     new Label { Style = Styles.ValueLabel, Text = first, Align = Align.Center },
                     Channel(firstMost).As(out firstBox),
-                    new Label { Style = Styles.ValueLabel, Text = second, Align = Align.Center, Padding = new Thickness(8f, 0f, 0f, 0f) },
+                    new Label { Base = { Padding = new Thickness(8f, 0f, 0f, 0f) }, Style = Styles.ValueLabel, Text = second, Align = Align.Center },
                     Channel(secondMost).As(out secondBox),
-                    new Label { Style = Styles.ValueLabel, Text = third, Align = Align.Center, Padding = new Thickness(8f, 0f, 0f, 0f) },
+                    new Label { Base = { Padding = new Thickness(8f, 0f, 0f, 0f) }, Style = Styles.ValueLabel, Text = third, Align = Align.Center },
                     Channel(thirdMost).As(out thirdBox)
                 }
             };

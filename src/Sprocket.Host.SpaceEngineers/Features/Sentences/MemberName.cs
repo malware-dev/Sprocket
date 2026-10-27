@@ -1,7 +1,9 @@
 using Lumel;
 using Lumel.Images;
 using Lumel.Layout;
+using Lumel.Styling;
 using Lumel.Text;
+using VRage.Game;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
@@ -73,24 +75,43 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <inheritdoc />
-        public string Font
+        public string Font => _name.Font;
+
+        /// <inheritdoc />
+        public float FontSize => _name.FontSize;
+
+        /// <inheritdoc />
+        public Color Color => _name.Color;
+
+        /// <summary>How this looks.</summary>
+        public new IStyle<MemberName> Style
         {
-            get { return _name.Font; }
-            set { _name.Font = value; }
+            get { return (IStyle<MemberName>)StyleSet; }
+            set { SetStyle(value); }
+        }
+
+        /// <summary>This member's own look whatever state it is in, laid over its style's.</summary>
+        public new TextLook Base => (TextLook)base.Base;
+
+        /// <inheritdoc />
+        protected override bool Fits(IStyle style)
+        {
+            return style is IStyle<MemberName>;
         }
 
         /// <inheritdoc />
-        public float FontSize
+        protected override ElementLook NewLook()
         {
-            get { return _name.FontSize; }
-            set { _name.FontSize = value; }
+            return new TextLook();
         }
 
         /// <inheritdoc />
-        public Color Color
+        protected override void Apply(ElementLook look)
         {
-            get { return _name.Color; }
-            set { _name.Color = value; }
+            base.Apply(look);
+
+            var text = (TextLook)look;
+            _name.Base.Wear(text.Font ?? MyFontEnum.White, text.FontSize ?? TextLook.NeutralFontSize, text.Color ?? Color.White);
         }
     }
 }

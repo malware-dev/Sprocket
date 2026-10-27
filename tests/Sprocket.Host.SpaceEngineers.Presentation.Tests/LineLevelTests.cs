@@ -26,6 +26,7 @@ public class LineLevelTests
     {
         var row = new StatusRow { Summary = "Sequence 1", Problem = Said, Level = level, Status = "ready" };
         row.Show(Simulation.Fresh().Texts);
+        row.Restyle();
 
         Assert.Equal(Ink(level, Palette.Faint), Words(row).Color);
         var flag = row.Within().OfType<Glyph>().Single(glyph => glyph.Symbol == Symbols.Warning);
@@ -41,6 +42,7 @@ public class LineLevelTests
     {
         var row = new TriggerRow { Problem = Said, Level = level };
         row.Show(null!, Simulation.Fresh().Texts);
+        row.Restyle();
 
         Assert.Equal(Ink(level, Palette.Faint), Words(row).Color);
         Assert.Equal(RemarkLook.Wash(level, Palette.None), row.Background);
@@ -55,6 +57,7 @@ public class LineLevelTests
     public void ASlotLineSaysEachLevel(NoticeLevel level)
     {
         var row = new PartRow(new Localization.Texts()) { Problem = Said, Level = level };
+        row.Restyle();
 
         Assert.Equal(Ink(level, Palette.Faint), Words(row).Color);
     }
@@ -68,10 +71,12 @@ public class LineLevelTests
     {
         var bar = new SequenceBar { Problem = Said, Level = level };
         bar.Show(Simulation.Fresh().Texts);
+        bar.Restyle();
         Assert.Equal(Ink(level, Palette.Muted), Words(bar).Color);
 
         var step = new StepRow { HasProblem = true, Level = level };
         step.Show(null!, Simulation.Fresh().Texts);
+        step.Restyle();
         var wash = level == NoticeLevel.Problem ? Palette.ProblemWash : level == NoticeLevel.Warning ? Palette.NoticeWash : Palette.None;
         Assert.Equal(wash, step.Background);
     }
@@ -82,6 +87,7 @@ public class LineLevelTests
     {
         var banner = new Banner();
         banner.Show(new Notice { Text = Said, Level = NoticeLevel.Info }, 0);
+        banner.Restyle();
 
         Assert.Equal(Palette.Ink, Words(banner).Color);
         Assert.DoesNotContain(banner.Within(), element => element.Background == Palette.NoticeWash || element.Background == Palette.ProblemWash);

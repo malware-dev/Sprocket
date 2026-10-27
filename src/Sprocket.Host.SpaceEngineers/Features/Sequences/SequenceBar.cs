@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _problem.Text = Problem;
             _problem.Style = Level == NoticeLevel.Warning ? Styles.WarningStatus : Level == NoticeLevel.Problem ? Styles.ProblemStatus : Styles.Status;
             _lastRun.Text = LastRun;
-            _light.Tint = JustRan ? Palette.Live : Palette.Dim;
+            _light.Base.Tint = JustRan ? Palette.Live : Palette.Dim;
 
             _skipped.IsVisible = Skipped.Length != 0;
             _skipped.Text = Skipped;

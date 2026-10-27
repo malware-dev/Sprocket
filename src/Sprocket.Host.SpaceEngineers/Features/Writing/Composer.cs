@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         /// <summary>A composer whose box and preview are <paramref name="high" /> tall, previewing in <paramref name="reads" />.</summary>
         /// <param name="high">How tall the box and the preview are.</param>
         /// <param name="reads">The style the text is read in.</param>
-        public Composer(float high, IStyle reads)
+        public Composer(float high, IStyle<RichText> reads)
         {
             CreateView(high, reads);
             _preview.Command = new Relay(() => Preview(!_previewing.IsVisible));

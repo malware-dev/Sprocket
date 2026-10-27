@@ -274,9 +274,6 @@ public class ReachTests
     /// <summary>Whether being under the pointer changes how <paramref name="element" /> is filled or edged.</summary>
     static bool Lights(Element element)
     {
-        if (element.HighlightEdge.A > 0)
-            return true;
-
         var was = element.IsHot;
         var fill = element.Background.PackedValue;
         var edge = element.Edge.PackedValue;

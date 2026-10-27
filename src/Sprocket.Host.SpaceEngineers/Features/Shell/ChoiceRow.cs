@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public ChoiceRow()
         {
             CreateView();
-            _given.Tint = Palette.Live;
+            _given.Base.Tint = Palette.Live;
         }
 
         /// <summary>The mark of what kind of thing the answer names, one of the symbols, or empty for none.</summary>

@@ -453,7 +453,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             tab.Style = level == NoticeLevel.Problem ? Styles.TabBroken : level == NoticeLevel.Warning ? Styles.TabWarned : Styles.Tab;
             mark.IsVisible = level != NoticeLevel.Info;
-            mark.Tint = level == NoticeLevel.Warning ? Palette.Notice : Palette.Problem;
+            mark.Base.Tint = level == NoticeLevel.Warning ? Palette.Notice : Palette.Problem;
             mark.Tip = Tip.For(mark.Tip, texts.Codex.SystemTabFlagged);
         }
 

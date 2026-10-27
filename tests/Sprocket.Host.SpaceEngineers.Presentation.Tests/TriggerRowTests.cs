@@ -44,6 +44,7 @@ public class TriggerRowTests
 
         row.Problem = "Nothing can start this.";
         row.Show(sim.World, sim.Texts);
+        row.Restyle();
 
         Assert.Equal(Palette.ProblemWash, row.Background);
         Assert.Contains(row.Within().OfType<Label>(), label => label.IsVisible && label.Text == "Nothing can start this.");

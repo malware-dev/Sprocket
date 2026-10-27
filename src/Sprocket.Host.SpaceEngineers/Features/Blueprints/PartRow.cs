@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Whether the slot stands under a category, in from its name; its blocks stay in line with every other slot's.</summary>
         public bool Indented
         {
-            set { _column.Padding = new Thickness(value ? Indent : 0f, 0f, 0f, 0f); }
+            set { _column.Base.Padding = new Thickness(value ? Indent : 0f, 0f, 0f, 0f); }
         }
 
         /// <summary>Whether its place can be changed at all: where it can, it shows a grip.</summary>
@@ -202,7 +202,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
                 // The grip's width and the gap after it, so the description starts under the slot's name. Held by the
                 // description's holder, since the description's style sets its own padding.
-                _aboutRoom.Padding = new Thickness(value ? 32f : 0f, 0f, 0f, 0f);
+                _aboutRoom.Base.Padding = new Thickness(value ? 32f : 0f, 0f, 0f, 0f);
             }
         }
 

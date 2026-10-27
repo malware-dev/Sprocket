@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Glyph _run;
         readonly Glyph _delete;
         readonly Label _subtitle;
-        readonly Banner _banner = new Banner { Padding = new Thickness(0f, 0f, Sizes.Bar, 0f) };
+        readonly Banner _banner = new Banner { Base = { Padding = new Thickness(0f, 0f, Sizes.Bar, 0f) } };
         readonly Grid _page;
         readonly ScrollView _scroll;
         readonly VStack _body;
@@ -103,12 +103,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
 
-            var root = new VStack { Background = Palette.Page };
+            var root = new VStack { Base = { Background = Palette.Page } };
             Children.Add(root);
             root.Children.Add(new VStack
             {
-                Background = Palette.Chrome,
-                Padding = new Thickness(16f, 8f),
+                Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f) },
                 Spacing = 4f,
                 Children =
                 {
@@ -117,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Spacing = 8f,
                         Children =
                         {
-                            new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
+                            new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Base = { Padding = LevelWithCapitals }, Command = new Relay(Back) }.As(out _back),
                             _title,
                             // Quietest first, Done or the close cross last: the row stands against the right edge, so a
                             // control's place depends only on what stands to its right.
@@ -139,7 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             root.Children.Add(new Rule(1f, Palette.Line));
             root.Children.Add(new Grid
             {
-                Padding = new Thickness(16f),
+                Base = { Padding = new Thickness(16f) },
                 Placement = Flex.Grow,
                 Columns = { GridLength.Flex(1f) },
                 Rows = { GridLength.Auto, GridLength.Flex(1f) },
@@ -152,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Children =
                 {
                     new Rule(1f, Palette.Line),
-                    new HStack { Background = Palette.Chrome, Padding = new Thickness(16f, 8f), Spacing = 8f }.As(out _actions)
+                    new HStack { Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f) }, Spacing = 8f }.As(out _actions)
                 }
             }.As(out _foot));
 

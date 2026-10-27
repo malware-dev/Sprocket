@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     new HStack
                     {
                         Spacing = 8f,
-                        Padding = new Thickness(0f, 0f, 0f, 8f),
+                        Base = { Padding = new Thickness(0f, 0f, 0f, 8f) },
                         IsVisible = false,
                         Children =
                         {
@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         }
                     }.As(out _troubled),
 
-                    new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }.As(out _rule),
+                    new Rule(1f, Palette.Line) { Base = { Padding = new Thickness(0f, 8f) } }.As(out _rule),
                     new HStack
                     {
                         Spacing = 12f,
@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
                         }
                     },
-                    new Label { Style = Styles.Aside, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _locked),
+                    new Label { Base = { Padding = new Thickness(4f, 0f, 0f, 8f) }, Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _locked),
                     new PartList { Spacing = 16f }.As(out _partList)
                 }
             };

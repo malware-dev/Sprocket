@@ -2,6 +2,7 @@ using Lumel;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Lumel.Styling;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -37,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The style the words are shown in where they are a heading's rather than a name's.</summary>
-        public TextStyle Words
+        public IStyle<Label> Words
         {
             set { _name.Style = value; }
         }
@@ -96,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void Begin(string name)
         {
             _renaming = true;
-            _pen.Tint = Palette.None;
+            _pen.Base.Tint = Palette.None;
             Tip = null;
             _name.IsVisible = false;
             _box.IsVisible = true;
@@ -108,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void End()
         {
             _renaming = false;
-            _pen.Tint = Palette.Faint;
+            _pen.Base.Tint = Palette.Faint;
             _name.IsVisible = true;
             _box.IsVisible = false;
             Refuse(null);

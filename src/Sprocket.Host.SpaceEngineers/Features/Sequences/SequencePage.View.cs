@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         Children =
                         {
                             new PlusMenu().As(out _add),
-                            new Label { Style = Styles.Aside, Padding = new Thickness(16f, 4f), IsVisible = false }.As(out _locked)
+                            new Label { Base = { Padding = new Thickness(16f, 4f) }, Style = Styles.Aside, IsVisible = false }.As(out _locked)
                         }
                     }
                 }

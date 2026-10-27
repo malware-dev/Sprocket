@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var troubled = status.Heard && status.Troubled;
             var says = status.Systems > 0 ? look.Texts.PanelAllNormal : look.Texts.PanelNothing;
 
-            Padding = new Thickness(inset);
+            Base.Padding = new Thickness(inset);
             Placement = FixedSize.Size(room.X, room.Y);
 
             var largest = look.Banner(room.Y - inset * 2f);
@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _icon.Placement = FixedSize.Size(size.BannerIcon, size.BannerIcon);
             _icon.IsVisible = Left(graphics, look, size, false) <= half;
             _heading.Style = size.Banner;
-            _heading.Color = look.Ink;
+            _heading.Base.Color = look.Ink;
             _heading.Text = look.Texts.PanelHeading;
             _heading.IsVisible = Left(graphics, look, size, true) <= half;
 
@@ -52,10 +52,10 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _problems.Show(look, size, status.Problems, true, troubled);
             _warnings.Show(look, size, status.Warnings, true, troubled);
             _check.Style = size.BannerMark;
-            _check.Tint = look.Ink;
+            _check.Base.Tint = look.Ink;
             _check.IsVisible = status.Heard && !troubled && status.Systems > 0;
             _says.Style = size.Banner;
-            _says.Color = status.Systems > 0 ? look.Ink : look.Quiet;
+            _says.Base.Color = status.Systems > 0 ? look.Ink : look.Quiet;
             _says.Text = says;
             _says.IsVisible = status.Heard && !troubled && Right(graphics, look, status, false, says, size) <= half;
         }

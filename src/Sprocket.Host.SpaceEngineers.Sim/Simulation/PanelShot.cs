@@ -13,6 +13,7 @@ using Size = System.Windows.Size;
 using Thickness = Lumel.Thickness;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Lumel.Sim;
+using Lumel.Styling;
 
 namespace Sprocket.Sim.Simulation;
 
@@ -23,7 +24,7 @@ namespace Sprocket.Sim.Simulation;
 /// </remarks>
 public static class PanelShot
 {
-    static readonly RichTextStyle Screen = new RichTextStyle
+    static readonly IStyle<RichText> Screen = new RichTextStyle
     {
         Base =
         {
@@ -62,19 +63,19 @@ public static class PanelShot
 
         var text = new RichText { Style = Screen, Document = Markdown.Parse(full) };
         if (code != null)
-            text.CodeFont = code;
+            text.Base.CodeFont = code;
 
         if (ink.HasValue)
         {
-            text.Color = ink.Value;
-            text.StrongColor = ink.Value;
-            text.EmphasisColor = ink.Value;
-            text.HeadingColor = ink.Value;
-            text.RuleColor = Color.Lerp(screen ?? Palette.Page, ink.Value, 0.5f);
+            text.Base.Color = ink.Value;
+            text.Base.StrongColor = ink.Value;
+            text.Base.EmphasisColor = ink.Value;
+            text.Base.HeadingColor = ink.Value;
+            text.Base.RuleColor = Color.Lerp(screen ?? Palette.Page, ink.Value, 0.5f);
         }
 
         Element shown = fit ? new Viewbox { Content = text, Placement = FixedSize.Size(room.X, room.Y) } : text;
-        var page = new VStack { Background = screen ?? Palette.Page, Padding = new Thickness(margin), Placement = FixedSize.Size(wide, high), Children = { shown } };
+        var page = new VStack { Base = { Background = screen ?? Palette.Page, Padding = new Thickness(margin) }, Placement = FixedSize.Size(wide, high), Children = { shown } };
 
         var surface = ScreenSession.Surface();
         surface.Target = new PixelSize(1920, 1080);

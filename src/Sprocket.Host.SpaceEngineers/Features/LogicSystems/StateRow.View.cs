@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         void CreateView()
         {
             Spacing = 8f;
-            Padding = new Thickness(20f, 4f, 20f, 4f);
+            Base.Padding = new Thickness(20f, 4f, 20f, 4f);
 
             Children.Add(new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             // One sentence: the state's name and what it holds, the value it starts as, and what it holds now.

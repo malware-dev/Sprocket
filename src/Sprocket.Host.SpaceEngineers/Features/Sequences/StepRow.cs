@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>Whether the pointer is on the step: the row itself, its grip, its number or any part of its sentence.</summary>
         /// <remarks>Asked every tick; reads a handful of flags, nothing measured.</remarks>
-        public bool Hot
+        public bool IsUnderPointer
         {
             get
             {
@@ -153,11 +153,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _number.Text = Number > 0 ? Number.ToString(CultureInfo.InvariantCulture) : "";
             }
 
-            _sentence.Padding = new Thickness(Depth * Indent, 0f, 0f, 0f);
-            _problem.Padding = _sentence.Padding;
+            _sentence.Base.Padding = new Thickness(Depth * Indent, 0f, 0f, 0f);
+            _problem.Base.Padding = _sentence.Base.Padding;
             _problem.Text = HasProblem ? Problem : "";
             _problem.IsVisible = HasProblem && Problem.Length != 0;
-            _problem.Color = RemarkLook.Of(Level, Palette.Faint);
+            _problem.Base.Color = RemarkLook.Of(Level, Palette.Faint);
 
             if (_led != Kind || _ledTerm != LeadTerm)
             {

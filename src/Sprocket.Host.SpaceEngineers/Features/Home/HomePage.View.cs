@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     }.As(out _headingLine),
                     new Label { Style = Styles.Empty, Wraps = true }.As(out _empty),
                     new VStack().As(out _list),
-                    new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _new) } }
+                    new HStack { Base = { Padding = new Thickness(0f, 8f, 0f, 0f) }, Children = { new Button { Style = Styles.Start }.As(out _new) } }
                 }
             };
         }

@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public bool IsWrong
         {
-            set { Edge = value ? Palette.Problem : Palette.None; }
+            set { Base.Edge = value ? Palette.Problem : Palette.None; }
         }
 
         /// <inheritdoc />

@@ -33,18 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
                     },
                     new EditBox
                     {
-                        Font = TextSizes.Mono,
-                        FontSize = 20f,
-                        Color = Palette.Ink,
-                        CaretColor = Palette.Ink,
-                        SelectionColor = Palette.Line,
+                        Style = Styles.ListingBox,
                         Numbered = true,
-                        NumberColor = Palette.Dim,
-                        Padding = new Thickness(20f, 8f, 8f, 8f),
-                        BarWidth = Sizes.Bar,
-                        Thumb = Palette.Thumb,
-                        HeldThumb = Palette.ThumbHeld,
-                        LeastThumb = 32f,
                         Placement = Flex.Grow
                     }.As(out _listing)
                 }

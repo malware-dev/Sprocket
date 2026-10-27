@@ -39,6 +39,7 @@ public class SlotTests
     {
         var chip = new SlotChip();
         chip.Say("Airlock");
+        chip.Restyle();
         chip.IsHot = true;
 
         Assert.Equal(Palette.Well, chip.Background);
@@ -60,6 +61,7 @@ public class SlotTests
     {
         var chip = new SlotChip { Command = new Relay(() => { }) };
         chip.Say("Airlock");
+        chip.Restyle();
         return chip;
     }
 

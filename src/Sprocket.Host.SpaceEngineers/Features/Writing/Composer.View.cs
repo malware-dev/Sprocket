@@ -5,7 +5,6 @@ using Lumel.Layout;
 using Lumel.Styling;
 using Lumel.Text;
 using Lumel.Viewing;
-using VRage.Game;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
 {
@@ -18,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         RichText _previewed;
 
         /// <summary>Makes the two buttons over the box, and the box and its preview in one room.</summary>
-        void CreateView(float high, IStyle reads)
+        void CreateView(float high, IStyle<RichText> reads)
         {
             Spacing = 6f;
 
@@ -38,19 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                 {
                     new EditBox
                     {
-                        Font = MyFontEnum.White,
-                        FontSize = 20f,
-                        Color = Palette.Ink,
-                        CaretColor = Palette.Ink,
-                        SelectionColor = Palette.Line,
-                        HintColor = Palette.Faint,
-                        Background = Palette.Page,
-                        Edge = Palette.Line,
-                        Padding = new Thickness(8f, 6f),
-                        BarWidth = Sizes.Bar,
-                        Thumb = Palette.Thumb,
-                        HeldThumb = Palette.ThumbHeld,
-                        LeastThumb = 24f,
+                        Style = Styles.WritingBox,
                         Placement = FixedSize.High(high)
                     }.As(out _box),
                     new ScrollView

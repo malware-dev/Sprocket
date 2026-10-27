@@ -28,26 +28,26 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var any = status.Systems > 0;
 
             _check.Style = size.Check;
-            _check.Tint = look.Ink;
+            _check.Base.Tint = look.Ink;
             _check.IsVisible = any;
             _underCheck.Placement = FixedSize.High(size.UnderMark);
             _underCheck.IsVisible = any;
 
             _says.Style = any ? size.Name : size.Sentence;
-            _says.Color = any ? look.Ink : look.Quiet;
+            _says.Base.Color = any ? look.Ink : look.Quiet;
             _says.Text = any ? look.Texts.PanelAllNormal : look.Texts.PanelNothing;
             _underSays.Placement = FixedSize.High(size.UnderLabel);
             _underSays.IsVisible = true;
 
             _count.Style = size.Label;
-            _count.Color = look.Quiet;
+            _count.Base.Color = look.Quiet;
             _count.Text = status.Systems == 1
                 ? look.Texts.PanelSystemsOne
                 : Template.Fill(look.Texts.PanelSystems, "count", status.Systems.ToString(CultureInfo.InvariantCulture));
             _count.IsVisible = any;
 
             _fix.Style = size.Label;
-            _fix.Color = look.Quiet;
+            _fix.Base.Color = look.Quiet;
             _fix.Text = look.Texts.PanelNothingFix;
             _fix.IsVisible = !any;
 

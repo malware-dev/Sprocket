@@ -21,20 +21,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Makes the headings, the lists, and the buttons that add to them.</summary>
         void CreateView()
         {
-            Padding = new Thickness(0f, 8f, 0f, 0f);
+            Base.Padding = new Thickness(0f, 8f, 0f, 0f);
             Children.Add(new Label { Style = Styles.Empty, Wraps = true, IsVisible = false }.As(out _empty));
             // The buttons start where the rows' grips do. The room above the states' heading is held by a plain holder, since
             // the heading's style sets its own padding.
             Children.Add(new RichText { Style = Styles.SubHeadingTerm, Align = Align.Left }.As(out _typesHeading));
             Children.Add(new CarryList { Spacing = 4f }.As(out _types));
-            Children.Add(new HStack { Padding = new Thickness(12f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes));
+            Children.Add(new HStack { Base = { Padding = new Thickness(12f, 8f, 0f, 0f) }, Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes));
             Children.Add(new VStack
             {
-                Padding = new Thickness(0f, 24f, 0f, 8f),
+                Base = { Padding = new Thickness(0f, 24f, 0f, 8f) },
                 Children = { new Label { Style = Styles.SubHeading }.As(out _statesHeading) }
             });
             Children.Add(new CarryList { Spacing = 4f }.As(out _states));
-            Children.Add(new HStack { Padding = new Thickness(12f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _addState) } }.As(out _addStates));
+            Children.Add(new HStack { Base = { Padding = new Thickness(12f, 8f, 0f, 0f) }, Children = { new Button { Style = Styles.Start }.As(out _addState) } }.As(out _addStates));
         }
     }
 }

@@ -48,31 +48,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <inheritdoc />
-        public string Font
-        {
-            get { return _name.Font; }
-            set { _name.Font = value; }
-        }
+        public string Font => _name.Font;
 
         /// <inheritdoc />
-        public float FontSize
-        {
-            get { return _name.FontSize; }
-            set
-            {
-                if (_name.FontSize == value)
-                    return;
-
-                _name.FontSize = value;
-                Resize(value);
-            }
-        }
+        public float FontSize => _name.FontSize;
 
         /// <inheritdoc />
-        public Color Color
+        public Color Color => _name.Color;
+
+        /// <summary>Draws the name in <paramref name="font" />, <paramref name="fontSize" /> and <paramref name="color" />, the icon as tall as a line of it.</summary>
+        public void Dress(string font, float fontSize, Color color)
         {
-            get { return _name.Color; }
-            set { _name.Color = value; }
+            _name.Base.Wear(font, fontSize, color);
+            Resize(fontSize);
         }
 
         void Resize(float size)

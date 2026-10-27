@@ -109,7 +109,13 @@ sealed class Easel
 
     readonly StringBuilder _measuring = new StringBuilder(32);
 
-    static readonly float Starting = new Label().FontSize;
+    static readonly float Starting = Styled(new Label()).FontSize;
+
+    static Label Styled(Label label)
+    {
+        label.Restyle();
+        return label;
+    }
 
     /// <summary>Lays out and draws again, which is what a frame is.</summary>
     public void Draw(float width, float height)

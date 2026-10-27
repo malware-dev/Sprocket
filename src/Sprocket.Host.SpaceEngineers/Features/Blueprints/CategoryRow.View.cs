@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void CreateView()
         {
             Spacing = 8f;
-            Padding = new Thickness(20f, 16f, 20f, 0f);
+            Base.Padding = new Thickness(20f, 16f, 20f, 0f);
 
             Children.Add(new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             Children.Add(new HStack

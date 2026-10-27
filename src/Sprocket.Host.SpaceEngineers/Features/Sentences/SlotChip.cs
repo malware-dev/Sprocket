@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Lumel;
 using Lumel.Controls;
+using Lumel.Styling;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -8,11 +8,16 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
     /// <summary>A fillable part of a sentence: a button holding what the part says, in pieces with their icons and marks.</summary>
-    /// <remarks>Its style dresses the pieces' words, which the button takes as its own.</remarks>
-    public class SlotChip : Button, ITextual
+    /// <remarks>Its looks dress the pieces' words, which the button takes as its own.</remarks>
+    public class SlotChip : Button
     {
+        /// <summary>Nothing fills the part yet, so it reads as an invitation.</summary>
+        public static readonly State Empty = State.Declare("Empty", 50);
+
+        /// <summary>The part cannot be pressed: it has no command, or cannot be used; it outweighs hot, so such a part never looks hot.</summary>
+        public static readonly State Still = State.Declare("Still", 150);
+
         readonly SlotPieces _pieces;
-        bool _empty;
 
         /// <summary>An empty part, pressable where it is given a command, its pieces in a line across.</summary>
         public SlotChip() : this(true)
@@ -25,6 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             _pieces = new SlotPieces(piecesAcross);
             Content = _pieces;
             Style = Styles.Slot;
+        }
+
+        /// <summary>How this looks.</summary>
+        public new IStyle<SlotChip> Style
+        {
+            get { return (IStyle<SlotChip>)StyleSet; }
+            set { SetStyle(value); }
         }
 
         /// <summary>What it says, in pieces: one element each for a block, a member and the words around them.</summary>
@@ -60,15 +72,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>Whether nothing fills the part yet, so it reads as an invitation.</summary>
         public bool IsEmpty
         {
-            get { return _empty; }
-            set
-            {
-                if (_empty == value)
-                    return;
-
-                _empty = value;
-                StateChanged();
-            }
+            get { return Is(Empty); }
+            set { Set(Empty, value); }
         }
 
         /// <summary>What it says, its pieces joined as they read.</summary>
@@ -95,37 +100,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             Command = part.Opens;
         }
 
-        // Lumel's Button lays its default style from its own constructor, before this one makes the pieces; the style set
-        // here at the end of construction gives the pieces their words' look again.
+        /// <inheritdoc />
+        public override State States => Command == null || !IsEnabled ? base.States | Still : base.States;
 
-        string ITextual.Font
+        /// <inheritdoc />
+        protected override bool Fits(IStyle style)
         {
-            get { return _pieces?.Font; }
-            set
-            {
-                if (_pieces != null)
-                    _pieces.Font = value;
-            }
+            return style is IStyle<SlotChip>;
         }
 
-        float ITextual.FontSize
+        /// <inheritdoc />
+        protected override void Apply(ElementLook look)
         {
-            get { return _pieces?.FontSize ?? 0f; }
-            set
-            {
-                if (_pieces != null)
-                    _pieces.FontSize = value;
-            }
-        }
-
-        Color ITextual.Color
-        {
-            get { return _pieces?.Color ?? Color.White; }
-            set
-            {
-                if (_pieces != null)
-                    _pieces.Color = value;
-            }
+            base.Apply(look);
+            _pieces.Dress(Font, FontSize, Color);
         }
     }
 }

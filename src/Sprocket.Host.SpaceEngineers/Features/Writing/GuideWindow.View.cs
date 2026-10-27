@@ -31,8 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                         Window = this,
                         Content = new HStack
                         {
-                            Background = Palette.Chrome,
-                            Padding = new Thickness(12f, 8f),
+                            Base = { Background = Palette.Chrome, Padding = new Thickness(12f, 8f) },
                             Spacing = 8f,
                             Children =
                             {

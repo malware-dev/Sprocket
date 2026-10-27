@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var size = look.Size;
             var wide = room.X - inset * 2f;
             var high = room.Y - inset * 2f;
-            Padding = new Thickness(inset);
+            Base.Padding = new Thickness(inset);
             Placement = FixedSize.Size(room.X, room.Y);
             Spacing = size.Between;
             Pages = 1;
@@ -71,13 +71,13 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _top.Spacing = size.Between;
             _icon.Placement = FixedSize.Size(size.Icon, size.Icon);
             _heading.Style = size.Plain;
-            _heading.Color = look.Quiet;
+            _heading.Base.Color = look.Quiet;
             _heading.Text = look.Texts.PanelHeading;
             _problems.Show(look, size, status.Problems, false, troubled);
             _warnings.Show(look, size, status.Warnings, false, troubled);
 
             _construct.Style = size.Plain;
-            _construct.Color = look.Quiet;
+            _construct.Base.Color = look.Quiet;
             _construct.Text = status.Construct;
             _construct.IsVisible = !troubled && status.Construct.Length > 0
                 && size.Icon + size.Between * 2f + look.Width(graphics, _heading.Text, size.Small) + look.Width(graphics, status.Construct, size.Small) <= wide;
@@ -169,7 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             if (Pages * (size.Dot + size.Between) > wide)
             {
                 _pageOf.Style = size.Plain;
-                _pageOf.Color = look.Quiet;
+                _pageOf.Base.Color = look.Quiet;
                 _pageOf.Text = Template.Fill(Template.Fill(look.Texts.PanelPage, "at", (at + 1).ToString(CultureInfo.InvariantCulture)), "count",
                     Pages.ToString(CultureInfo.InvariantCulture));
                 _pageOf.IsVisible = true;
@@ -186,7 +186,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 var dot = _dotted[i];
                 dot.Style = size.Dots;
                 dot.Symbol = i == at ? Symbols.Disc : Symbols.Ring;
-                dot.Tint = i == at ? look.Ink : look.Quiet;
+                dot.Base.Tint = i == at ? look.Ink : look.Quiet;
                 _dots.Children.Add(dot);
             }
 

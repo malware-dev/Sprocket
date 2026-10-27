@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 Placement = FixedSize.Wide(40f),
                 Align = Align.Tall,
-                Padding = new Thickness(12f, 0f, 8f, 0f),
+                Base = { Padding = new Thickness(12f, 0f, 8f, 0f) },
                 IsVisible = false
             }.As(out _mark));
 

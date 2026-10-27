@@ -21,12 +21,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         void CreateView()
         {
             Spacing = 8f;
-            Padding = new Thickness(0f, 0f, 0f, 16f);
+            Base.Padding = new Thickness(0f, 0f, 0f, 16f);
 
             Children.Add(new StatusRow().As(out _heading));
             Children.Add(new HStack
             {
-                Padding = new Thickness((Gutter - Sizes.Spine) / 2f, 0f, 0f, 0f),
+                Base = { Padding = new Thickness((Gutter - Sizes.Spine) / 2f, 0f, 0f, 0f) },
                 Spacing = (Gutter - Sizes.Spine) / 2f,
                 Children =
                 {
@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                         {
                             new RichText { Style = Styles.SubHeadingTerm, Align = Align.Left }.As(out _installations),
                             new VStack { Spacing = 8f }.As(out _list),
-                            new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _another) } }
+                            new HStack { Base = { Padding = new Thickness(0f, 8f, 0f, 0f) }, Children = { new Button { Style = Styles.Start }.As(out _another) } }
                         }
                     }
                 }

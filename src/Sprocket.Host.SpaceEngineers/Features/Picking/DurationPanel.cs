@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Children.Add(new Deck { Children = { _secondsPicks, _ticksPicks } }.As(out _picks));
 
             // As tall as a button, so a Done the holder lays over its right end sits on its line: 6 + 20 + 6 = 32.
-            Children.Add(new Label { Style = Styles.Aside, Padding = new Thickness(0f, 6f) }.As(out _other));
+            Children.Add(new Label { Base = { Padding = new Thickness(0f, 6f) }, Style = Styles.Aside }.As(out _other));
 
             _box.Edited += Show;
 

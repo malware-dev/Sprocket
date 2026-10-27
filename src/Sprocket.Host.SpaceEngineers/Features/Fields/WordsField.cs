@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             set
             {
-                _line.Edge = value ? Palette.Problem : Palette.None;
+                _line.Base.Edge = value ? Palette.Problem : Palette.None;
                 _list.IsWrong = value;
             }
         }

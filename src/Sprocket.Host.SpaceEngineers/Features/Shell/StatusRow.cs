@@ -263,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _summary.Text = Summary;
             }
 
-            _light.Tint = wrong
+            _light.Base.Tint = wrong
                 ? Palette.Problem
                 : JustRan
                     ? Palette.Live
@@ -293,13 +293,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _problem.Text = Problem;
             _problem.IsVisible = saying;
-            _problem.Color = RemarkLook.Of(Level, Palette.Faint);
+            _problem.Base.Color = RemarkLook.Of(Level, Palette.Faint);
 
             var marked = saying && Level != NoticeLevel.Info || Problems > 0 || Remarks > 0;
             var quietly = saying && Level != NoticeLevel.Info ? Level == NoticeLevel.Warning : Problems == 0;
 
             _below.IsVisible = marked;
-            _below.Tint = quietly ? Palette.Notice : Palette.Problem;
+            _below.Base.Tint = quietly ? Palette.Notice : Palette.Problem;
 
             var switches = Flips != null;
             var held = !string.IsNullOrEmpty(SwitchLocked);

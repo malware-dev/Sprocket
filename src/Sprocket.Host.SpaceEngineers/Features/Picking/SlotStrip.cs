@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var pressed = slot;
                 var square = new Layers { Style = Styles.SlotFree, Placement = FixedSize.Size(Square, Square), Command = new Relay(() => Press(pressed)) };
-                var picture = new Image { Padding = new Thickness(4f), IsVisible = false };
+                var picture = new Image { Base = { Padding = new Thickness(4f) }, IsVisible = false };
                 var number = new Label { Style = Styles.SlotNumber, Text = Number(slot), Align = Align.Center };
                 var ring = new Layers { Style = Styles.SlotChosen, IsVisible = false };
                 square.Children.Add(picture);

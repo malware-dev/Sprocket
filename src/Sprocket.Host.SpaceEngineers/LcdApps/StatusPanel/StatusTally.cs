@@ -23,9 +23,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             IsVisible = shown && count > 0;
             Spacing = size.Beside;
             _mark.Style = banner ? size.BannerMark : size.Count;
-            _mark.Tint = look.Shade(_level);
+            _mark.Base.Tint = look.Shade(_level);
             _count.Style = banner ? size.Banner : size.Plain;
-            _count.Color = look.Ink;
+            _count.Base.Color = look.Ink;
             _count.Text = count.ToString(CultureInfo.InvariantCulture);
         }
     }

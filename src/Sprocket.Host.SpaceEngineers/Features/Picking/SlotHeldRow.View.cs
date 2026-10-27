@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void CreateView()
         {
             Spacing = 20f;
-            Padding = new Thickness(48f, 0f, 8f, 8f);
+            Base.Padding = new Thickness(48f, 0f, 8f, 8f);
             Children.Add(new SlotChip(false) { Spacing = 4f }.As(out _blocks));
             Children.Add(new SlotChip { IsVisible = false, Align = Align.Top }.As(out _answers));
         }

@@ -1,3 +1,4 @@
+using VRage.Game;
 using Lumel.Layout;
 using Sprocket.Sim.Machine;
 using VRage.Utils;
@@ -40,7 +41,8 @@ public class BlockNameTests
     [Fact]
     public void TheIconStandsBeforeTheNameAsTallAsALine()
     {
-        var block = new BlockName { Name = "Airlock Door", Icon = "Door", FontSize = 32f };
+        var block = new BlockName { Name = "Airlock Door", Icon = "Door" };
+        block.Dress(MyFontEnum.White, 32f, Color.White);
         var easel = new Easel(new VStack { Children = { new HStack { Children = { block } } } }, 400f, 200f);
 
         var icon = block.Within().OfType<Image>().Single();
