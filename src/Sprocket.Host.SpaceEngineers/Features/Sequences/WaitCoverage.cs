@@ -81,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; !carrying && i < keys.Count && i < _waiter.Count; i++)
             {
                 var row = rows[keys[i]];
-                if (row.Kind == StepKind.Await && row.IsHot)
+                if (row.Kind == StepKind.Await && row.IsUnderPointer)
                 {
                     hot = i;
                     onWait = true;

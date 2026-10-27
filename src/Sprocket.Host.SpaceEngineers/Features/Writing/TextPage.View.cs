@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         {
             return new VStack
             {
-                Spacing = 6f,
+                Spacing = Gaps.Within,
                 Children =
                 {
                     new HStack

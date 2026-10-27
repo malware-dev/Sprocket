@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             Content = new VStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
                 Children =
                 {
                     new RichText { Style = Styles.MenuQuestion }.As(out _question),

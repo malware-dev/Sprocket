@@ -4,6 +4,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
@@ -20,8 +21,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         Label _line;
         RichText _about;
         Label _trouble;
+        Section _firstSection;
         RichText _firstHeading;
         Label _first;
+        Section _secondSection;
         RichText _secondHeading;
         Label _second;
 
@@ -30,12 +33,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             return new HStack
             {
-                Spacing = 40f,
+                Spacing = Gaps.Sections,
                 Children =
                 {
                     new VStack
                     {
-                        Spacing = 12f,
+                        Spacing = Gaps.Parts,
                         Placement = FixedSize.Wide(640f),
                         Children =
                         {
@@ -44,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                             {
                                 Style = Styles.ScrollView,
                                 Placement = Flex.Grow,
-                                Content = new VStack().As(out _list)
+                                Content = new VStack { Spacing = Gaps.Sections }.As(out _list)
                             }
                         }
                     },
@@ -55,30 +58,54 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                         {
                             new VStack
                             {
-                                Spacing = 12f,
-                                Base = { Padding = new Thickness(0f, 4f, 16f, 0f) },
+                                Spacing = Gaps.Sections,
                                 Children =
                                 {
-                                    new Label { Style = Styles.Name, Trims = true }.As(out _name),
-                                    new HStack
+                                    new VStack
                                     {
-                                        Spacing = 12f,
-                                        Base = { Padding = new Thickness(0f, 0f, 0f, 16f) },
+                                        Spacing = Gaps.Parts,
                                         Children =
                                         {
-                                            new Button { Style = Styles.Button }.As(out _add),
-                                            new Button { Style = Styles.Button }.As(out _keep),
-                                            new Button { Style = Styles.Button }.As(out _reset),
-                                            new Button { Style = Styles.Button }.As(out _copy)
+                                            new Label { Style = Styles.Name, Trims = true }.As(out _name),
+                                            new HStack
+                                            {
+                                                Spacing = Gaps.Parts,
+                                                Children =
+                                                {
+                                                    new Button { Style = Styles.Button }.As(out _add),
+                                                    new Button { Style = Styles.Button }.As(out _keep),
+                                                    new Button { Style = Styles.Button }.As(out _reset),
+                                                    new Button { Style = Styles.Button }.As(out _copy)
+                                                }
+                                            }.As(out _here)
                                         }
-                                    }.As(out _here),
-                                    new Label { Style = Styles.Detail }.As(out _line),
-                                    new RichText { Style = Styles.LibraryAbout, IsVisible = false }.As(out _about),
-                                    new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _trouble),
-                                    new RichText { Style = Styles.HeadingTerm, Align = Align.Left }.As(out _firstHeading),
-                                    new Label { Style = Styles.Detail, Wraps = true }.As(out _first),
-                                    new RichText { Style = Styles.HeadingTerm, Align = Align.Left }.As(out _secondHeading),
-                                    new Label { Style = Styles.Detail, Wraps = true }.As(out _second)
+                                    },
+                                    new VStack
+                                    {
+                                        Spacing = Gaps.Within,
+                                        Children =
+                                        {
+                                            new Label { Style = Styles.Detail }.As(out _line),
+                                            new RichText { Style = Styles.Description, IsVisible = false }.As(out _about),
+                                            new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _trouble)
+                                        }
+                                    },
+                                    new Section
+                                    {
+                                        Children =
+                                        {
+                                            new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _firstHeading),
+                                            new Label { Style = Styles.Detail, Wraps = true }.As(out _first)
+                                        }
+                                    }.As(out _firstSection),
+                                    new Section
+                                    {
+                                        Children =
+                                        {
+                                            new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _secondHeading),
+                                            new Label { Style = Styles.Detail, Wraps = true }.As(out _second)
+                                        }
+                                    }.As(out _secondSection)
                                 }
                             },
                             new VStack { Placement = Flex.Grow }

@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Focusable = true;
             Align = Align.Fill;
 
-            _line = new HStack { Spacing = 4f };
+            _line = new HStack { Spacing = Gaps.Within };
             for (var i = 0; i < words.Count; i++)
             {
                 var word = words[i];

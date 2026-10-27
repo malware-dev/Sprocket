@@ -20,21 +20,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Makes the grip, the name, the words before the choices, the choices with the way to add one after them, and the bin.</summary>
         void CreateView()
         {
-            Spacing = 8f;
-            Base.Padding = new Thickness(20f, 4f, 20f, 4f);
+            Spacing = Gaps.Parts;
 
             Children.Add(new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             // One line that carries on onto the next where the room runs out: the name, the words, the choices, the way to add one.
             Children.Add(new Flow
             {
                 Placement = Flex.Grow,
-                Spacing = 12f,
-                LineSpacing = 8f,
+                Spacing = Gaps.Parts,
+                LineSpacing = Gaps.Parts,
                 Children =
                 {
                     new NamePlate(false).As(out _name),
                     new Label { Style = Styles.Aside }.As(out _lead),
-                    new Flow { Spacing = 8f, LineSpacing = 8f }.As(out _choices),
+                    new Flow { Spacing = Gaps.Parts, LineSpacing = Gaps.Parts }.As(out _choices),
                     new Button { Style = Styles.Start }.As(out _add)
                 }
             });

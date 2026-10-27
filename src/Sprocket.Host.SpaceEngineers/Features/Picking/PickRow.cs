@@ -13,8 +13,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public partial class PickRow : HStack
     {
-        /// <summary>How far in a row stands under something it belongs to, as a slot stands under its category.</summary>
-        public const float Indent = 32f;
 
         HeldModifier _held;
         int _presses;
@@ -91,9 +89,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _mark.IsVisible = Many && !IsHeading;
 
-            // The room the row's style leaves out: the left edge where no box holds it, and above and below, except under a
-            // heading, which sits against the first row of its group.
-            _content.Base.Padding = new Thickness((_mark.IsVisible ? 0f : 12f) + (Indented ? Indent : 0f), 8f, 0f, IsHeading ? 0f : 8f);
+            // The room the row's style leaves out: the left edge where no box holds it, and above and below. A heading has more
+            // above it and none under, so it stands apart from the group before and against the first row of its own.
+            _content.Base.Padding = new Thickness((_mark.IsVisible ? 0f : 12f) + (Indented ? Sizes.Indent : 0f), IsHeading ? Gaps.Sections : Gaps.Parts, 0f, IsHeading ? 0f : Gaps.Parts);
             _mark.Many = Many;
             _mark.IsChecked = IsChosen;
             _mark.IsPressed = Many && pressable;

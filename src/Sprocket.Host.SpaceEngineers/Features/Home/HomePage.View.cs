@@ -3,6 +3,7 @@ using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
@@ -11,7 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         RichText _heading;
         Label _empty;
         TextBox _search;
-        HStack _headingLine;
         VStack _list;
         Button _new;
 
@@ -20,22 +20,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             return new VStack
             {
+                Spacing = Gaps.Sections,
                 Children =
                 {
-                    // The heading and the search over what it heads share one line, the box at its right end.
-                    new HStack
+                    new Section
                     {
-                        Spacing = 16f,
                         Children =
                         {
-                            new RichText { Style = Styles.HeadingTerm }.As(out _heading),
-                            new VStack { Placement = Flex.Grow },
-                            new TextBox { Style = Styles.Search, Focusable = true, Placement = FixedSize.Wide(SearchWide) }.As(out _search)
+                            // The heading and the search over what it heads share one line, the box at its right end.
+                            new HStack
+                            {
+                                Spacing = Gaps.Items,
+                                Children =
+                                {
+                                    new RichText { Style = Styles.H1Term }.As(out _heading),
+                                    new VStack { Placement = Flex.Grow },
+                                    new TextBox { Style = Styles.Search, Focusable = true, Placement = FixedSize.Wide(SearchWide) }.As(out _search)
+                                }
+                            },
+                            new Label { Style = Styles.Empty, Wraps = true }.As(out _empty),
+                            new VStack { Spacing = Gaps.Sections }.As(out _list)
                         }
-                    }.As(out _headingLine),
-                    new Label { Style = Styles.Empty, Wraps = true }.As(out _empty),
-                    new VStack().As(out _list),
-                    new HStack { Base = { Padding = new Thickness(0f, 8f, 0f, 0f) }, Children = { new Button { Style = Styles.Start }.As(out _new) } }
+                    },
+                    new HStack { Children = { new Button { Style = Styles.Start }.As(out _new) } }
                 }
             };
         }

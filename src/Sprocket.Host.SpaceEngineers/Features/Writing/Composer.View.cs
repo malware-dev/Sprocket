@@ -19,11 +19,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         /// <summary>Makes the two buttons over the box, and the box and its preview in one room.</summary>
         void CreateView(float high, IStyle<RichText> reads)
         {
-            Spacing = 6f;
+            Spacing = Gaps.Within;
 
             Children.Add(new HStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
                 Children =
                 {
                     new Button { Style = Styles.Button }.As(out _markup),

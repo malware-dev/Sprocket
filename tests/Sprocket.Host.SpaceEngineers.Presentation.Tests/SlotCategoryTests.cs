@@ -2,6 +2,7 @@ using Lumel;
 using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using VRage.Input;
@@ -43,7 +44,7 @@ public class SlotCategoryTests
         var editor = screen.Editor;
         AddCategory(screen);
 
-        Carry(screen, Row(screen, "slot 1"), Row(screen, "# Category 1"), true, PartRow.Indent);
+        Carry(screen, Row(screen, "slot 1"), Row(screen, "# Category 1"), true, Sizes.Indent);
 
         Assert.Equal(new[] { "slot 2", "slot 3", "# Category 1", "slot 1" }, Rows(screen));
         Assert.Equal("Category 1", Part(screen, "slot 1").Category);
@@ -108,7 +109,7 @@ public class SlotCategoryTests
         var screen = Slots();
         Put(screen, "slot 2", "Doors", "slot 3", "Doors");
 
-        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 3"), false, -PartRow.Indent);
+        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 3"), false, -Sizes.Indent);
 
         Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, Rows(screen));
         Assert.Equal("", Part(screen, "slot 3").Category);
@@ -121,7 +122,7 @@ public class SlotCategoryTests
         var screen = Slots();
         Put(screen, "slot 2", "Doors");
 
-        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 3"), false, PartRow.Indent);
+        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 3"), false, Sizes.Indent);
 
         Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, Rows(screen));
         Assert.Equal("Doors", Part(screen, "slot 3").Category);
@@ -134,7 +135,7 @@ public class SlotCategoryTests
         var screen = Slots();
         Put(screen, "slot 1", "Doors", "slot 2", "Doors");
 
-        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 2"), false, -PartRow.Indent);
+        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 2"), false, -Sizes.Indent);
 
         Assert.Equal(new[] { "# Doors", "slot 1", "slot 3", "slot 2" }, Rows(screen));
         Assert.Equal("Doors", Part(screen, "slot 3").Category);

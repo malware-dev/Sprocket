@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ClearTests
 {
-    const string OpenTheMenu = "60 196 type Airlock enter press trigger press when 60 244 60 285 type door";
+    const string OpenTheMenu = "60 196 type Airlock enter press trigger press when 60 248 60 289 type door";
     const string SearchTheBlocks = "60 196 type Airlock enter press trigger press when 150 200 type door";
 
     [Fact]
@@ -24,7 +24,7 @@ public class ClearTests
 
         Assert.True(picker.Shows("door"), "the menu was not narrowed to begin with");
 
-        picker.Do("181", "297");
+        picker.Do("181", "301");
 
         Assert.False(picker.Shows("door"), "the cross did not empty the box");
         Assert.True(picker.Shows("Button Panel"), "the kinds did not come back");

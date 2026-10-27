@@ -3,6 +3,7 @@ using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
@@ -21,20 +22,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Makes the headings, the lists, and the buttons that add to them.</summary>
         void CreateView()
         {
-            Base.Padding = new Thickness(0f, 8f, 0f, 0f);
+            Spacing = Gaps.Sections;
             Children.Add(new Label { Style = Styles.Empty, Wraps = true, IsVisible = false }.As(out _empty));
-            // The buttons start where the rows' grips do. The room above the states' heading is held by a plain holder, since
-            // the heading's style sets its own padding.
-            Children.Add(new RichText { Style = Styles.SubHeadingTerm, Align = Align.Left }.As(out _typesHeading));
-            Children.Add(new CarryList { Spacing = 4f }.As(out _types));
-            Children.Add(new HStack { Base = { Padding = new Thickness(12f, 8f, 0f, 0f) }, Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes));
-            Children.Add(new VStack
+            Children.Add(new Section
             {
-                Base = { Padding = new Thickness(0f, 24f, 0f, 8f) },
-                Children = { new Label { Style = Styles.SubHeading }.As(out _statesHeading) }
+                Children =
+                {
+                    new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _typesHeading),
+                    new VStack
+                    {
+                        Spacing = Gaps.Items,
+                        Children =
+                        {
+                            new CarryList { Spacing = Gaps.Items }.As(out _types),
+                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes)
+                        }
+                    }
+                }
             });
-            Children.Add(new CarryList { Spacing = 4f }.As(out _states));
-            Children.Add(new HStack { Base = { Padding = new Thickness(12f, 8f, 0f, 0f) }, Children = { new Button { Style = Styles.Start }.As(out _addState) } }.As(out _addStates));
+            Children.Add(new Section
+            {
+                Children =
+                {
+                    new Label { Style = Styles.H2 }.As(out _statesHeading),
+                    new VStack
+                    {
+                        Spacing = Gaps.Items,
+                        Children =
+                        {
+                            new CarryList { Spacing = Gaps.Items }.As(out _states),
+                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _addState) } }.As(out _addStates)
+                        }
+                    }
+                }
+            });
         }
     }
 }

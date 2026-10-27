@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public NumberField(Field field, ICommand submit, float wide)
         {
             _field = field;
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
             double least;
             var floored = Bound(field.Scaled(field.Least), out least);
             double most;

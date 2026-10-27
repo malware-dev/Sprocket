@@ -20,11 +20,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     /// <summary>One step of a sequence as the line it reads as: its number, a lead-in, then the parts that complete it.</summary>
     public partial class StepRow : HStack, ICarried
     {
-        const float Indent = 32f;
         const float SpineIn = 6f;
 
-        // Half the room the list leaves between its rows, so the spines of two rows meet.
-        const float Reach = 4f;
+        // Half the room the step list leaves between its rows, so the lines of two rows meet.
+        const float Reach = Gaps.Items / 2f;
 
         // How far left of the sentence the spine joining lit lines runs, and so how far it turns in.
         const float JoinOut = 10f;
@@ -153,7 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _number.Text = Number > 0 ? Number.ToString(CultureInfo.InvariantCulture) : "";
             }
 
-            _sentence.Base.Padding = new Thickness(Depth * Indent, 0f, 0f, 0f);
+            _sentence.Base.Padding = new Thickness(Depth * Sizes.Indent, 0f, 0f, 0f);
             _problem.Base.Padding = _sentence.Base.Padding;
             _problem.Text = HasProblem ? Problem : "";
             _problem.IsVisible = HasProblem && Problem.Length != 0;
@@ -167,6 +166,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _lead.Markdown = LeadTerm == null ? Markdown.Escape(lead) : CodexPages.Link(lead, LeadTerm);
                 _lead.IsVisible = lead.Length != 0;
                 _leadWaits.IsVisible = Kind == StepKind.Run || Kind == StepKind.Await;
+                // A run is waited for, as an action that takes time is, and carries that mark; a wait carries the clock it waits by.
+                _leadWaits.Symbol = Kind == StepKind.Run ? Symbols.Lasting : Symbols.Awaited;
+                _leadWaits.Halo = Symbols.OutlineOf(_leadWaits.Symbol);
             }
 
             _leadWaits.Set(LookStates.Paused, IsOff);
@@ -231,12 +233,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <inheritdoc />
-        protected override bool TakesPointer => Kind == StepKind.Await;
+        // Every step takes the pointer wherever nothing inside it does, so the pointer anywhere on a step lights what it is tied to.
+        protected override bool TakesPointer => true;
 
         /// <summary>Where the spine of the if <paramref name="level" /> ifs out from the sequence runs down its indent.</summary>
         public float SpineX(int level)
         {
-            return _sentence.Bounds.X + level * Indent + SpineIn;
+            return _sentence.Bounds.X + level * Sizes.Indent + SpineIn;
         }
 
         /// <summary>Draws the row, then its stretch of the spine joining lit lines where it is joined.</summary>

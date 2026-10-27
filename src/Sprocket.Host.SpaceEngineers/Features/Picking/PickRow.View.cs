@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             Children.Add(new HStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
                 Placement = Flex.Grow,
                 Children =
                 {
@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     new Image { Style = Styles.Picture, Placement = FixedSize.Size(56f, 56f), IsVisible = false }.As(out _picture),
                     new VStack
                     {
-                        Spacing = 4f,
+                        Spacing = Gaps.Within,
                         Placement = Flex.Grow,
                         Children =
                         {

@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>A field holding no color, its picker offering what <paramref name="offer" /> holds, its notes in <paramref name="texts" />.</summary>
         public ColorField(ColorOffer offer, Texts texts)
         {
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
             Style = Styles.ListLine;
             Focusable = true;
 
@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 // The box of its own keeps the popup as wide as the picker.
                 Content = new VStack
                 {
-                    Spacing = 8f,
+                    Spacing = Gaps.Parts,
                     Children =
                     {
                         new HStack { Children = { _picker } },

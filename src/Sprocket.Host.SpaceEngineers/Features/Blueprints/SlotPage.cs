@@ -178,7 +178,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _purpose.Markdown = _part.Annotation;
 
             // The few words its buttons say, for a slot answered by toolbar slots.
-            _shortHeading.IsVisible = _part.IsSignal;
+            _naming.IsVisible = _part.IsSignal;
             _shortHeading.Text = texts.SlotShort.ToUpperInvariant();
             _short.IsVisible = _part.IsSignal && editable;
             _short.Hint = texts.SlotShortHint;

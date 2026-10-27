@@ -247,7 +247,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _slotList.Landings = index => SlotArranger.Landings(_slotKeys, index);
             _slotList.Nests = (from, to) => SlotArranger.Nests(_slotKeys, from, to);
             _slotList.StandsIn = index => SlotArranger.StandsIn(_slotKeys, index);
-            _slotList.NestDepth = PartRow.Indent;
+            _slotList.NestDepth = Sizes.Indent;
             _slotList.Moves = (from, to) =>
             {
                 var into = _slotList.DroppedIn;

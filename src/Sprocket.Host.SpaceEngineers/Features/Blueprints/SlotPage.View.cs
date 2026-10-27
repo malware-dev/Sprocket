@@ -4,6 +4,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
@@ -14,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Label _purposeHeading;
         Composer _composer;
         RichText _purpose;
+        Section _naming;
         Label _shortHeading;
         TextBox _short;
         Label _shownShort;
@@ -27,24 +29,47 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             return new VStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Items,
                 Children =
                 {
-                    new Label { Base = { Padding = new Thickness(4f, 0f, 0f, 8f) }, Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _locked),
-
-                    new Label { Style = Styles.Heading }.As(out _purposeHeading),
-                    new Composer(160f, Styles.SlotDescription).As(out _composer),
-                    new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _purpose),
-
-                    new Label { Style = Styles.NextHeading, IsVisible = false }.As(out _shortHeading),
-                    new TextBox { Style = Styles.Search, Focusable = true, IsVisible = false, Longest = ShortLongest, Placement = FixedSize.Wide(460f) }.As(out _short),
-                    new Label { Style = Styles.Phrase, IsVisible = false }.As(out _shownShort),
-
-                    new Label { Style = Styles.NextHeading }.As(out _expectsHeading),
-                    new Label { Style = Styles.Phrase, Wraps = true }.As(out _expects),
-                    new SlotChip { IsVisible = false, Align = Align.Left }.As(out _expectsPart),
-
-                    new Switch { Style = Styles.Switch, IsVisible = false }.As(out _required)
+                    new Label { Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _locked),
+                    new VStack
+                    {
+                        Spacing = Gaps.Sections,
+                        Children =
+                        {
+                            new Section
+                            {
+                                Children =
+                                {
+                                    new Label { Style = Styles.H2 }.As(out _purposeHeading),
+                                    new Composer(160f, Styles.SlotDescription).As(out _composer),
+                                    new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _purpose)
+                                }
+                            },
+                            new Section
+                            {
+                                IsVisible = false,
+                                Children =
+                                {
+                                    new Label { Style = Styles.H2 }.As(out _shortHeading),
+                                    new TextBox { Style = Styles.Search, Focusable = true, IsVisible = false, Longest = ShortLongest, Placement = FixedSize.Wide(460f) }.As(out _short),
+                                    new Label { Style = Styles.Phrase, IsVisible = false }.As(out _shownShort)
+                                }
+                            }.As(out _naming),
+                            new Section
+                            {
+                                Children =
+                                {
+                                    new Label { Style = Styles.H2 }.As(out _expectsHeading),
+                                    new Label { Style = Styles.Phrase, Wraps = true }.As(out _expects),
+                                    new SlotChip { IsVisible = false, Align = Align.Left }.As(out _expectsPart)
+                                }
+                            },
+                            // Hidden: the runtime runs no installation with an optional slot left empty.
+                            new Switch { Style = Styles.Switch, IsVisible = false }.As(out _required)
+                        }
+                    }
                 }
             };
         }

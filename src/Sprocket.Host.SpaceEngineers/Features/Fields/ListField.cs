@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>A line saying no word yet, opening a list of <paramref name="words" /> over the screen it is on when pressed.</summary>
         public ListField(IList<string> words)
         {
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
             Style = Styles.ListLine;
             Focusable = true;
 

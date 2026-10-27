@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             return new VStack
             {
-                Spacing = 12f,
+                Spacing = Look.Gaps.Items,
                 Children =
                 {
                     new SequenceBar().As(out _bar),
@@ -26,10 +26,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
                     new HStack
                     {
-                        Spacing = 8f,
+                        Spacing = Look.Gaps.Parts,
                         Children =
                         {
                             new PlusMenu().As(out _add),
+                            // In the place of the button it stands for, its words where the button's were.
                             new Label { Base = { Padding = new Thickness(16f, 4f) }, Style = Styles.Aside, IsVisible = false }.As(out _locked)
                         }
                     }

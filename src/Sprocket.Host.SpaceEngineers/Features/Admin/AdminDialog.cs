@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
 
             Content = new VStack
             {
-                Spacing = 16f,
+                Spacing = Gaps.Items,
                 Children =
                 {
                     new Label { Style = Styles.Phrase, Text = texts.AdminTitle },
@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         {
             return new VStack
             {
-                Spacing = 16f,
+                Spacing = Gaps.Items,
                 Children =
                 {
                     Setting(texts.AdminFastest, texts.AdminFastestAbout, Choose(texts, world,
@@ -157,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         {
             return new VStack
             {
-                Spacing = 6f,
+                Spacing = Gaps.Within,
                 Children =
                 {
                     new Label { Style = Styles.Phrase, Text = name },

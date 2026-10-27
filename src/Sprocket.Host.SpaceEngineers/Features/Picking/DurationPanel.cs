@@ -49,9 +49,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _texts = texts;
             _input = input;
-            Spacing = 12f;
+            Spacing = Gaps.Parts;
 
-            var number = new HStack { Spacing = 8f };
+            var number = new HStack { Spacing = Gaps.Parts };
             number.Children.Add(new Glyph
             {
                 Symbol = Symbols.Minus,
@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             Children.Add(new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _caution));
 
-            _secondsPicks = new HStack { Spacing = 6f };
+            _secondsPicks = new HStack { Spacing = Gaps.Parts };
             foreach (var seconds in SecondsPicks)
             {
                 _secondsPicks.Children.Add(new Button
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 });
             }
 
-            _ticksPicks = new HStack { Spacing = 6f };
+            _ticksPicks = new HStack { Spacing = Gaps.Parts };
             foreach (var ticks in TicksPicks)
             {
                 _ticksPicks.Children.Add(new Button

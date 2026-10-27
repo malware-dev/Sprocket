@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             _renames = renames;
 
-            Spacing = 4f;
+            Spacing = Gaps.Within;
             Placement = Flex.Grow;
         }
 

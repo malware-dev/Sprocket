@@ -21,17 +21,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>An empty column <paramref name="width" /> across, headed <paramref name="title" />.</summary>
         public ArgumentsColumn(float width, string title)
         {
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
             Style = Styles.Column;
             Width = width;
 
             // Headed as a stage is, so the first argument lines up with the boxes beside it.
             Children.Add(new VStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
                 Children =
                 {
-                    new Label { Style = Styles.ColumnTitle, Text = title.ToUpperInvariant() }.As(out _title),
+                    new HStack
+                    {
+                        Placement = FixedSize.High(StageColumn.HeadHigh),
+                        Children = { new Label { Style = Styles.H1, Text = title.ToUpperInvariant() }.As(out _title) }
+                    },
                     new Label { Style = Styles.ColumnNote }
                 }
             }.As(out _head));

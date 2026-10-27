@@ -111,10 +111,42 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 ## Views
 
 - Every view, screen, control and style is built by the **lumel** skill's rules; load it for any UI code.
-- Sprocket's styles, palette, sizes and symbols are in `Features/Look`: `Styles`, `Palette`, `TextSizes`, `Symbols`.
+- Sprocket's styles, palette, sizes and symbols are in `Features/Look`: `Styles`, `Palette`, `Gaps`, `Sizes`, `TextSizes`, `Symbols`.
 - Which look a thing wears.
   - A thing that can only be renamed is a name plate (`NamePlate`): its words with a pencil, renamed in place.
   - Everything else a person presses is a button, a part of a sentence included.
+
+## Spacing and text
+
+Mal, 2026-10-27: "Consolidation. Consistency." Every screen follows these, and a review checks them. A
+size is named once in `Features/Look` and used by name; a number written into a view is a finding.
+
+- **Four gaps, each with one job** (`Gaps`):
+  - `Within`, 4: inside one thing. A heading over what it heads, a description under its name.
+  - `Parts`, 8: between the parts of one item, such as the buttons in a row or a chip beside a name.
+  - `Items`, 16: between the items of a list.
+  - `Sections`, 24: between sections, and between groups in a list.
+- **A heading stands closer to what it heads than to what is before it:** `Sections` above, `Within` under.
+- **A gap lives in one place:** the spacing of the stack holding both things. A heading carries no padding,
+  and no gap is made by padding one element.
+- **Padding is room inside a box that is seen**, such as a button, a row's ground or a text box, and comes from
+  that box's style.
+- **Left edges are shared.** A section heading starts at the content edge, and so does everything in its section
+  that nothing else holds.
+- **What a thing holds is set in under it by `Sizes.Indent`, 32,** and nothing else is set in. A heading among
+  its own rows, such as a category, is the exception: it is shaped like a row, its words where the rows' names start.
+- **Two heading levels, and the big one is rare** (Mal, 2026-10-27): a heading is `H2`. It is `H1` only where
+  headings stand under it, as home's LOGIC SYSTEMS has each group's INSTALLATIONS; headings beside each other share a
+  level. A category heads its slots, so a list that can hold categories is headed `H1`, whether or not it holds one
+  yet: an installation's SLOTS. A construct's name in the library is a row's name, not a heading. The `Term` forms are
+  the same levels with a codex term in them.
+- **The same shape is the same control.** A heading with what it heads is a `Section`; a screen does not build the
+  pair by hand.
+- **Text sizes are one scale, named by role** (`TextSizes`): `Title` 32, `Body` 24, `Small` 20, `Tiny` 16. Each
+  is the game's own size (33.3, 23.68, 21.09, 18.5) set onto the 4 grid. Sprocket looks like the game; where Mal
+  overrules the game, the exception is named beside the value with its reason.
+- **A text style is a role, never a screen:** a name, a detail, a heading, a quiet note. One role, one style.
+  Colors come from `Palette` only.
 
 ## The rota
 

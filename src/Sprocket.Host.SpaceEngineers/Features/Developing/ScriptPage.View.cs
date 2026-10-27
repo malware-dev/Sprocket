@@ -18,12 +18,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         {
             return new VStack
             {
-                Spacing = 6f,
+                Spacing = Gaps.Parts,
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 12f,
+                        Spacing = Gaps.Parts,
                         Children =
                         {
                             new Label { Style = Styles.ProblemLine, Wraps = true, IsVisible = false, Placement = Flex.Grow }.As(out _problem),

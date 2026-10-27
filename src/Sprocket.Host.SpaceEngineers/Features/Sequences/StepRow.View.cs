@@ -22,12 +22,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Makes the grip and the step's number, the sentence, the pause and the bin.</summary>
         void CreateView()
         {
-            Spacing = 12f;
-            Base.Padding = new Thickness(16f, 8f);
+            Spacing = Gaps.Parts;
 
             Children.Add(new HStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Within,
                 Children =
                 {
                     new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
@@ -37,15 +36,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             Children.Add(new VStack
             {
-                Spacing = 6f,
+                Spacing = Gaps.Within,
                 Placement = Flex.Grow,
                 Children =
                 {
                     new Flow
                     {
-                        Spacing = 8f,
-                        LineSpacing = 8f,
-                        Indent = 24f,
+                        Spacing = Gaps.Parts,
+                        LineSpacing = Gaps.Parts,
+                        Indent = Sizes.Indent,
                         Children =
                         {
                             new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.AwaitedOutline, HaloSize = 20f * Sizes.Halo }

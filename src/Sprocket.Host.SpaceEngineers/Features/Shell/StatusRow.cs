@@ -53,20 +53,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Command = _opens;
             Children.Add(new HStack
             {
-                Spacing = 16f,
+                Spacing = Gaps.Items,
                 Placement = Flex.Grow,
                 Children =
                 {
                     new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = FixedSize.Size(16f, 16f) }.As(out _light),
                     new VStack
                     {
-                        Spacing = 4f,
+                        Spacing = Gaps.Within,
                         Placement = Flex.Grow,
                         Children =
                         {
                             new HStack
                             {
-                                Spacing = 8f,
+                                Spacing = Gaps.Parts,
                                 Placement = FixedSize.High(32f),
                                 Children =
                                 {
@@ -76,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             },
                             new HStack
                             {
-                                Spacing = 8f,
+                                Spacing = Gaps.Parts,
                                 Placement = FixedSize.High(16f),
                                 Children =
                                 {
@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     },
                     new HStack
                     {
-                        Spacing = 8f,
+                        Spacing = Gaps.Parts,
                         Children =
                         {
                             new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),

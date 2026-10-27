@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Layout;
@@ -23,15 +24,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             return new VStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Items,
                 Children =
                 {
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _description),
 
                     new HStack
                     {
-                        Spacing = 8f,
-                        Base = { Padding = new Thickness(0f, 0f, 0f, 8f) },
+                        Spacing = Gaps.Parts,
                         IsVisible = false,
                         Children =
                         {
@@ -40,18 +40,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         }
                     }.As(out _troubled),
 
-                    new Rule(1f, Palette.Line) { Base = { Padding = new Thickness(0f, 8f) } }.As(out _rule),
-                    new HStack
+                    new Rule(1f, Palette.Line).As(out _rule),
+                    new Section
                     {
-                        Spacing = 12f,
                         Children =
                         {
-                            new RichText { Style = Styles.HeadingTerm }.As(out _partsHeading),
-                            new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
+                            new HStack
+                            {
+                                Spacing = Gaps.Parts,
+                                Children =
+                                {
+                                    new RichText { Style = Styles.H1Term }.As(out _partsHeading),
+                                    new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
+                                }
+                            },
+                            new Label { Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _locked),
+                            new PartList { Spacing = Gaps.Items }.As(out _partList)
                         }
-                    },
-                    new Label { Base = { Padding = new Thickness(4f, 0f, 0f, 8f) }, Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _locked),
-                    new PartList { Spacing = 16f }.As(out _partList)
+                    }
                 }
             };
         }

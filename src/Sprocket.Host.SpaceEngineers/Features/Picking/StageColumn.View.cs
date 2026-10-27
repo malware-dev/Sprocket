@@ -11,6 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     partial class StageColumn
     {
+        /// <summary>How tall a column's heading line is: as tall as the tallest thing it holds, a link to another view.</summary>
+        public const float HeadHigh = 28f;
+
         RichText _title;
         HStack _heads;
         HStack _viewLinks;
@@ -38,22 +41,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Makes the heading and whatever narrows the column, then the rows under it with the way to finish at their foot.</summary>
         void CreateView()
         {
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
             Style = Styles.Column;
 
-            // The eye stands on a line that is always shown, so it is there even when everything it would show is hidden.
+            // The eye stands on a line that is always shown, so it is there even when everything it would show is hidden. The line
+            // is one height whatever it holds, so every column's heading and search stand level.
             Children.Add(new HStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
+                Placement = FixedSize.High(HeadHigh),
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 16f,
+                        Spacing = Gaps.Items,
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new RichText { Style = Styles.ColumnTitleTerm }.As(out _title),
+                            new RichText { Style = Styles.H1Term }.As(out _title),
                             new HStack { IsVisible = false }.As(out _heads)
                         }
                     },
@@ -67,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             Children.Add(new HStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Within,
                 IsVisible = false,
                 Children =
                 {
@@ -81,13 +86,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             Children.Add(new HStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Within,
                 IsVisible = false,
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 8f,
+                        Spacing = Gaps.Parts,
                         Style = Styles.ListLine,
                         Children =
                         {
@@ -105,7 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // Over the choices and the rows, in the order the sentence says them, so a column further on stays free.
             Children.Add(new VStack { IsVisible = false }.As(out _given));
 
-            Children.Add(new HStack { Spacing = 8f, IsVisible = false }.As(out _options));
+            Children.Add(new HStack { Spacing = Gaps.Parts, IsVisible = false }.As(out _options));
 
             Children.Add(new ScrollView
             {
@@ -113,11 +118,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Placement = Flex.Grow,
                 Content = new VStack
                 {
-                    Spacing = 4f,
+                    Spacing = Gaps.Within,
                     Children =
                     {
                         new Label { Style = Styles.Note, Wraps = true, IsVisible = false }.As(out _note),
-                        new VStack { Spacing = 4f }.As(out _rows),
+                        new VStack { Spacing = Gaps.Within }.As(out _rows),
                         new Label { Style = Styles.Nothing, Wraps = true, IsVisible = false }.As(out _empty)
                     }
                 }
@@ -131,12 +136,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Flush = true,
                 Content = new Menu
                 {
-                    Spacing = 4f,
+                    Spacing = Gaps.Within,
                     Children =
                     {
                         new HStack
                         {
-                            Spacing = 4f,
+                            Spacing = Gaps.Within,
                             Children =
                             {
                                 new TextBox { Style = Styles.Search, Focusable = true, Hint = "Search", Placement = Flex.Grow }

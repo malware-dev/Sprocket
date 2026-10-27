@@ -288,9 +288,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
             _search.Hint = texts.PickSearch;
-            // The search, and the room under it, only where there is something to search.
+            // The search only where there is something to search.
             _search.IsVisible = _systems.Count != 0;
-            _headingLine.Base.Padding = new Thickness(0f, 0f, 0f, _search.IsVisible ? 16f : 0f);
 
             foreach (var system in _systems)
                 _groups[system].Arrange(texts);

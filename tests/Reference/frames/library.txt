@@ -20,11 +20,11 @@ on screen     Library
 013  SetClip    {X:256 Y:118 W:640 H:36}
 014  Text       at {X:268 Y:123.6399} scale 0.694  #85A1A9FF  "Search"
 015  ClearClip  
-016  SetClip    {X:256 Y:166 W:640 H:854}
-017  Text       at {X:260 Y:171.6399} scale 0.694  #85A1A9FF  "ON YOUR "
-018  Text       at {X:329.2067 Y:171.6399} scale 0.694  #4FC3F7FF  "CONSTRUCTS"
-019  Text       at {X:272 Y:207.6399} scale 0.694  #DCF5FDFF  "Test Rig (this construct)"
-020  Text       at {X:264 Y:239.2255} scale 0.833  #A2C3CDFF  "No logic systems on this construct."
-021  Text       at {X:260 Y:311.6399} scale 0.694  #85A1A9FF  "IN STORAGE"
-022  Text       at {X:264 Y:347.2255} scale 0.833  #A2C3CDFF  "No blueprints yet."
+016  SetClip    {X:256 Y:162 W:640 H:858}
+017  Text       at {X:256 Y:160.0543} scale 0.556  #85A1A9FF  "ON YOUR "
+018  Text       at {X:311.3734 Y:160.0543} scale 0.556  #4FC3F7FF  "CONSTRUCTS"
+019  Text       at {X:256 Y:179.6399} scale 0.694  #DCF5FDFF  "Test Rig (this construct)"
+020  Text       at {X:288 Y:203.6399} scale 0.694  #A2C3CDFF  "No logic systems on this construct."
+021  Text       at {X:256 Y:248.0543} scale 0.556  #85A1A9FF  "IN STORAGE"
+022  Text       at {X:256 Y:267.6399} scale 0.694  #A2C3CDFF  "No blueprints yet."
 023  ClearClip  

@@ -16,13 +16,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Makes the mark of what the answer names, its words with the caution under them, and the mark of the answer already given.</summary>
         void CreateView()
         {
-            Spacing = 16f;
+            Spacing = Gaps.Items;
             Style = Styles.Answer;
 
             Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false }.As(out _mark));
             Children.Add(new VStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Within,
                 Placement = Flex.Grow,
                 Children =
                 {

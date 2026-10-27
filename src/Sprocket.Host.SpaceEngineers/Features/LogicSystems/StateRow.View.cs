@@ -22,20 +22,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Makes the grip, the name, what it holds, the value it starts at, what it holds now, and the bin.</summary>
         void CreateView()
         {
-            Spacing = 8f;
-            Base.Padding = new Thickness(20f, 4f, 20f, 4f);
+            Spacing = Gaps.Parts;
 
             Children.Add(new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             // One sentence: the state's name and what it holds, the value it starts as, and what it holds now.
             Children.Add(new HStack
             {
-                Spacing = 12f,
+                Spacing = Gaps.Parts,
                 Placement = Flex.Grow,
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 4f,
+                        Spacing = Gaps.Within,
                         Children =
                         {
                             new Glyph { Style = Styles.Waits, Symbol = Symbols.State, Align = Align.Center },

@@ -4,6 +4,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     /// <summary>Things that are a size rather than a gap.</summary>
     public static class Sizes
     {
+        /// <summary>How far in a thing stands under what holds it: a slot under its category, an installation under its logic system, a nested step.</summary>
+        public const float Indent = 32f;
+
         /// <summary>A block's picture.</summary>
         public const float Icon = 54f;
 
@@ -42,4 +45,4 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>How far a spine turns in at its end, towards the last thing it runs beside.</summary>
         public const float SpineTurn = 12f;
     }
-}
+}

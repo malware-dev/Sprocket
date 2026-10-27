@@ -40,6 +40,68 @@ public class WaitRowTests
         Assert.Equal(new[] { false, false, false, true, false }, rows.Select(row => row.MarksLit).ToArray());
     }
 
+    /// <summary>The pointer itself, on a step's number, its words or the room after them, lights the wait covering it; and on the wait's words, the step.</summary>
+    [Theory]
+    [InlineData("number")]
+    [InlineData("words")]
+    [InlineData("after")]
+    public void ThePointerOnAStepLightsItsWait(string where)
+    {
+        var screen = Screen.Fresh();
+        var editor = screen.Editor;
+        editor.NewButtonSystem("Airlock");
+        editor.PressAdd("task");
+        editor.PressBlock("Airlock Inner Door");
+        editor.PressChoice("open");
+        editor.PressPrimary();
+        screen.Run(5);
+
+        var rows = editor.StepRows();
+        var step = rows.First(row => row.Kind == StepKind.Do);
+        var wait = rows.First(row => row.Kind == StepKind.Await);
+        var number = step.Within().OfType<Lumel.Text.Label>().First(label => label.Text == step.Number.ToString());
+        var at = where == "number" ? number.ToScreen(number.Bounds.Center)
+            : where == "words" ? step.ChipOf(step.Slots[0])!.ToScreen(step.ChipOf(step.Slots[0])!.Bounds.Center)
+            : step.ToScreen(new Vector2(step.Bounds.X + step.Bounds.Width * 0.6f, step.Bounds.Center.Y));
+
+        screen.Scene.MoveTo(at);
+        screen.Run(2);
+        Assert.True(wait.ClockLit, "the wait's clock is not lit with the pointer on the step's " + where);
+
+        var words = wait.Within().OfType<Lumel.Text.RichText>().First();
+        screen.Scene.MoveTo(words.ToScreen(words.Bounds.Center));
+        screen.Run(2);
+        Assert.True(step.MarksLit, "the step's mark is not lit with the pointer on the wait's words");
+    }
+
+    /// <summary>A run, which is waited for as an action that takes time is, leads with that mark, and a wait with its clock.</summary>
+    [Fact]
+    public void ARunLeadsWithTheMarkOfWhatIsWaitedFor()
+    {
+        var rig = Airlock(out var sequence);
+        Steps(rig, sequence, new Run(1), new Await());
+
+        var rows = rig.Editor.StepRows();
+        Assert.Equal(Symbols.Lasting, Lead(rows[0]));
+        Assert.Equal(Symbols.Awaited, Lead(rows[1]));
+    }
+
+    static string Lead(StepRow row) => row.Within().OfType<Glyph>().First(glyph => glyph.IsVisible).Symbol;
+
+    /// <summary>The pointer on a wait row's words lights the steps it covers, as the pointer on the row around them does.</summary>
+    [Fact]
+    public void AWaitRowLightsWhatItIsTiedToFromItsWords()
+    {
+        var rig = Airlock(out var sequence);
+        Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
+
+        var rows = rig.Editor.StepRows();
+        rows[2].Within().OfType<Lumel.Text.RichText>().First().IsHot = true;
+        rig.Tick();
+        Assert.Equal(new[] { true, true, false }, rows.Select(row => row.MarksLit).ToArray());
+        Assert.Equal(new[] { false, false, true }, rows.Select(row => row.ClockLit).ToArray());
+    }
+
     /// <summary>The pointer on a step lights its own mark and the wait row covering it, and nothing waits for a step with no wait below it.</summary>
     [Fact]
     public void AStepLightsTheWaitCoveringIt()

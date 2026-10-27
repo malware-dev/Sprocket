@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Lumel;
+using Lumel.Layout;
 using Lumel.Input;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
@@ -55,8 +56,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <inheritdoc />
         public override bool ScrollsItself => true;
 
-        /// <summary>The list, its headings and lines included, for whoever reads it back.</summary>
-        public Element.Collection Rows => _list.Children;
+        /// <summary>The list in the order it reads, its headings and lines included and a construct's rows among them, for whoever reads it back.</summary>
+        public IEnumerable<Element> Rows => InOrder(_list);
 
         /// <summary>The box that narrows the list.</summary>
         public TextBox SearchBox => _search;
@@ -94,14 +95,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _entries.Clear();
             _list.Children.Clear();
 
-            TermHeading(CodexPages.Within(texts.LibraryOnConstructs, "constructs", texts.LibraryOnConstructsTerm, CodexPages.Construct), Styles.HeadingTerm);
-            _list.Children.Add(new Label
-            {
-                Style = Styles.InnerName,
-                Text = Template.Fill(texts.LibraryThisConstruct, "name", Editor.World.Name),
-                Base = { Padding = new Thickness(16f, 8f, 0f, 4f) }
-            });
-
+            var constructs = Part(TermHeading(CodexPages.Within(texts.LibraryOnConstructs, "constructs", texts.LibraryOnConstructsTerm, CodexPages.Construct)), Gaps.Sections);
+            var held = Construct(constructs, Template.Fill(texts.LibraryThisConstruct, "name", Editor.World.Name));
             var here = 0;
             var systems = Editor.Program.Systems;
             for (var i = 0; i < systems.Count; i++)
@@ -113,11 +108,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 var system = systems[i];
                 var row = new StatusRow { Mark = Symbols.LogicSystem, Summary = system.Name, Depth = 1 };
                 row.Status = Installations(texts, system.Instances.Count);
-                Add(new Entry { Section = OnConstruct, Identity = system.Identity }, row);
+                Add(new Entry { Section = OnConstruct, Identity = system.Identity }, row, held);
             }
 
             if (here == 0)
-                Line(texts.LibraryNoneHere, Styles.Empty);
+                Line(texts.LibraryNoneHere, Styles.InnerEmpty, held);
 
             ListBackups(texts);
             ListKept(texts);
@@ -146,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (backups == null || backups.All.Count == 0)
                 return;
 
-            TermHeading(CodexPages.Link(texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup), Styles.NextHeadingTerm);
+            var lost = Part(TermHeading(CodexPages.Link(texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup)), Gaps.Sections);
             _listed.Clear();
 
             var all = backups.All;
@@ -177,20 +172,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 }
 
                 _listed.UnionWith(_group);
-                _list.Children.Add(new Label
-                {
-                    Style = Styles.InnerName,
-                    Text = latest.Construct,
-                    Base = { Padding = new Thickness(16f, 8f, 0f, 4f) }
-                });
-
+                var held = Construct(lost, latest.Construct);
                 foreach (var backup in _group)
-                    ListBackup(texts, backup);
+                    ListBackup(texts, backup, held);
             }
         }
 
         /// <summary>Lists <paramref name="backup" /> as a row, chosen and used as a blueprint from storage is.</summary>
-        void ListBackup(Texts texts, Backup backup)
+        void ListBackup(Texts texts, Backup backup, Panel into)
         {
             Add(new Entry { Section = BackedUp, Backup = backup, Identity = backup.Identity }, new StatusRow
             {
@@ -200,7 +189,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Status = Template.Fill(texts.LibraryLost, "time", Time(backup.Lost)),
                 Deletes = Editor.Act(CommandKind.ForgetBackup, () => Editor.Holdings.ForgetBackup(backup)),
                 DeleteText = texts.Codex.LibraryForgetBackup
-            });
+            }, into);
         }
 
         /// <summary>Lists the blueprints in the library, by name, reading each to know it will read.</summary>
@@ -210,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (shelf == null)
                 return;
 
-            Heading(texts.LibraryInStorage, Styles.NextHeading);
+            var kept = Part(new Label { Style = Styles.H2, Text = texts.LibraryInStorage.ToUpperInvariant() }, Gaps.Items);
 
             _volumes.Clear();
             _volumes.AddRange(shelf.All);
@@ -247,39 +236,67 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     row.Problems = 1;
                 }
 
-                Add(entry, row);
+                Add(entry, row, kept);
             }
 
             if (_volumes.Count == 0)
-                Line(texts.LibraryNoneSaved, Styles.Empty);
+                Line(texts.LibraryNoneSaved, Styles.InnerEmpty, kept);
         }
 
         /// <summary>Puts <paramref name="row" /> in the list for <paramref name="entry" />, pressed to choose it.</summary>
-        void Add(Entry entry, StatusRow row)
+        void Add(Entry entry, StatusRow row, Panel into)
         {
             entry.Row = row;
             row.Opens = Editor.Act(CommandKind.Expand, () => Choose(entry));
             row.Show(Editor.Texts);
             _entries.Add(entry);
-            _list.Children.Add(row);
+            into.Children.Add(row);
         }
 
-        void Heading(string text, IStyle<Label> style)
+        /// <summary>A heading that holds a term, written as <paramref name="markdown" /> with the term a link to its codex page, which resting on it shows.</summary>
+        RichText TermHeading(string markdown)
         {
-            _list.Children.Add(new Label { Style = style, Text = text.ToUpperInvariant() });
-        }
-
-        /// <summary>Adds a heading to the list that holds a term, written as <paramref name="markdown" /> with the term a link to its codex page, which resting on it shows.</summary>
-        void TermHeading(string markdown, IStyle<RichText> style)
-        {
-            var heading = new RichText { Style = style, Align = Align.Left, Markdown = markdown };
+            var heading = new RichText { Style = Styles.H2Term, Align = Align.Left, Markdown = markdown };
             Editor.Codex.Explain(heading);
-            _list.Children.Add(heading);
+            return heading;
         }
 
-        void Line(string text, IStyle<Label> style)
+        /// <summary>Adds a part of the list under <paramref name="heading" />, and gives back where what it heads goes, <paramref name="apart" /> from each other.</summary>
+        VStack Part(Element heading, float apart)
         {
-            _list.Children.Add(new Label { Style = style, Text = text, Wraps = true });
+            var body = new VStack { Spacing = apart };
+            _list.Children.Add(new Section { Children = { heading, body } });
+            return body;
+        }
+
+        /// <summary>Adds a construct's name to <paramref name="part" />, and gives back where its rows go, set in under the name.</summary>
+        VStack Construct(Panel part, string name)
+        {
+            var held = new VStack { Spacing = Gaps.Items, Base = { Padding = new Thickness(Sizes.Indent, 0f, 0f, 0f) } };
+            part.Children.Add(new Section { Children = { new Label { Style = Styles.InnerName, Text = name }, held } });
+            return held;
+        }
+
+        /// <summary>The headings, names, lines and rows inside <paramref name="holder" />, in the order they read.</summary>
+        static IEnumerable<Element> InOrder(Panel holder)
+        {
+            foreach (var child in holder.Children)
+            {
+                var inner = child as VStack;
+                if (inner == null)
+                {
+                    yield return child;
+                    continue;
+                }
+
+                foreach (var line in InOrder(inner))
+                    yield return line;
+            }
+        }
+
+        void Line(string text, IStyle<Label> style, Panel into)
+        {
+            into.Children.Add(new Label { Style = style, Text = text, Wraps = true });
         }
 
         /// <summary>Shows only the rows whose name holds the words typed in the search box, as every search box matches them.</summary>
@@ -324,8 +341,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _line.IsVisible = false;
             _about.IsVisible = false;
             _trouble.IsVisible = false;
-            Say(_firstHeading, _first, null, null, null);
-            Say(_secondHeading, _second, null, null, null);
+            Say(_firstSection, _firstHeading, _first, null, null, null);
+            Say(_secondSection, _secondHeading, _second, null, null, null);
 
             if (entry == null)
                 return;
@@ -395,21 +412,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     _names.Add(parts[i].Id);
             }
 
-            Say(_firstHeading, _first, texts.BlueprintParts, CodexPages.Slot, _names);
+            Say(_firstSection, _firstHeading, _first, texts.BlueprintParts, CodexPages.Slot, _names);
 
             _names.Clear();
             for (var i = 0; live != null && i < live.Instances.Count; i++)
                 _names.Add(SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, live, live.Instances[i]));
 
-            Say(_secondHeading, _second, texts.LibraryInstallationsHeading, CodexPages.Installation, _names);
+            Say(_secondSection, _secondHeading, _second, texts.LibraryInstallationsHeading, CodexPages.Installation, _names);
         }
 
         /// <summary>Shows <paramref name="names" /> under <paramref name="title" />, the term whose codex page is <paramref name="term" />, or neither where there are none.</summary>
-        static void Say(RichText heading, Label list, string title, string term, List<string> names)
+        static void Say(Section section, RichText heading, Label list, string title, string term, List<string> names)
         {
             var shown = names != null && names.Count > 0;
-            heading.IsVisible = shown;
-            list.IsVisible = shown;
+            section.IsVisible = shown;
             if (!shown)
                 return;
 

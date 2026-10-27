@@ -23,7 +23,7 @@ on screen     Automation for Test Rig
 016  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "x"
 017  Sprite     Lumel_Fill            {X:240 Y:101 W:1440 H:1}  #5B737BFF
 018  SetClip    {X:256 Y:118 W:1408 H:902}
-019  Text       at {X:260 Y:123.6399} scale 0.694  #4FC3F7FF  "LOGIC SYSTEMS"
-020  Text       at {X:264 Y:159.2255} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
+019  Text       at {X:256 Y:115.6399} scale 0.694  #4FC3F7FF  "LOGIC SYSTEMS"
+020  Text       at {X:256 Y:139.2255} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
 021  Text       at {X:272 Y:195.2255} scale 0.833  #A2C3CDFF  "+ logic system"
 022  ClearClip  

@@ -29,11 +29,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// </summary>
         void CreateView()
         {
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
 
             Children.Add(new HStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
                 Children =
                 {
                     new ColorPlane { Base = { Edge = Palette.Line }, Pale = Materials.Pale, Dark = Materials.Dark, Placement = FixedSize.Size(Wide - StripWide - 8f, PlaneHigh) }.As(out _plane),
@@ -42,14 +42,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             });
             Children.Add(new HStack
             {
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
                 Children =
                 {
                     new Swatch { Style = Styles.ColorSample, Placement = FixedSize.Size(ShownWide, ShownHigh) }.As(out _new),
                     new TabView
                     {
                         HeaderStyle = Styles.Tab,
-                        Spacing = 8f,
+                        Spacing = Gaps.Parts,
                         Placement = Flex.Grow,
                         Tabs =
                         {
@@ -64,10 +64,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     }.As(out _modes)
                 }
             });
-            Children.Add(Swatches().As(out _palette));
-            // Set further off than the paint colors are from each other, so the row that fills itself reads as a row apart.
-            Children.Add(Swatches().As(out _recent));
-            _recent.Base.Padding = new Thickness(0f, 8f, 0f, 0f);
+            // The paint colors and the colors chosen last, two lists, set further apart than the colors in either.
+            Children.Add(new VStack
+            {
+                Spacing = Gaps.Items,
+                Children = { Swatches().As(out _palette), Swatches().As(out _recent) }
+            });
         }
 
         /// <summary>Three channels in a line, each a letter before the box it is typed in.</summary>
@@ -76,16 +78,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             return new HStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Parts,
                 Children =
                 {
-                    new Label { Style = Styles.ValueLabel, Text = first, Align = Align.Center },
-                    Channel(firstMost).As(out firstBox),
-                    new Label { Base = { Padding = new Thickness(8f, 0f, 0f, 0f) }, Style = Styles.ValueLabel, Text = second, Align = Align.Center },
-                    Channel(secondMost).As(out secondBox),
-                    new Label { Base = { Padding = new Thickness(8f, 0f, 0f, 0f) }, Style = Styles.ValueLabel, Text = third, Align = Align.Center },
-                    Channel(thirdMost).As(out thirdBox)
+                    Lettered(first, Channel(firstMost).As(out firstBox)),
+                    Lettered(second, Channel(secondMost).As(out secondBox)),
+                    Lettered(third, Channel(thirdMost).As(out thirdBox))
                 }
+            };
+        }
+
+        /// <summary>A channel's letter, close before the box it is typed in.</summary>
+        static HStack Lettered(string letter, NumberBox box)
+        {
+            return new HStack
+            {
+                Spacing = Gaps.Within,
+                Children = { new Label { Style = Styles.ValueLabel, Text = letter, Align = Align.Center }, box }
             };
         }
 

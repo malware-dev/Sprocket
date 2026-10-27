@@ -42,13 +42,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _offers = new Relay(() => Carry(_notice?.Offers));
 
             Openness = 0f;
+            // The gap under the banner is part of what slides, so it opens and closes with the banner.
             Content = new VStack
             {
+                Base = { Padding = new Thickness(0f, 0f, 0f, Gaps.Items) },
                 Children =
                 {
+                    new VStack
+                    {
+                        Children =
+                        {
                     new HStack
                     {
-                        Spacing = 8f,
+                        Spacing = Gaps.Parts,
                         Command = _expands,
                         Children =
                         {
@@ -66,15 +72,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _diagnostic),
                                 new HStack
                                 {
-                                    Spacing = 8f,
+                                    Spacing = Gaps.Parts,
                                     Base = { Padding = new Thickness(16f, 0f, 16f, 8f) },
                                     Children = { new Button { Style = Styles.Button, Command = _offers }.As(out _offer) }
                                 }.As(out _actions)
                             }
                         }
                     }.As(out _more)
+                        }
+                    }.As(out _column)
                 }
-            }.As(out _column);
+            };
         }
 
         /// <summary>Shows <paramref name="notice" />, or slides away where there is none, moved along to <paramref name="tick" />.</summary>

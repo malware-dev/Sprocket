@@ -326,9 +326,12 @@ namespace Sprocket.Sim.Simulation
                 return;
             }
 
-            // Carried in several small moves rather than one, because the sliding is worked out a frame
-            // at a time and a single jump would land before anything had moved out of the way.
+            // Carried in several small moves rather than one, each a tick apart, because the sliding is worked
+            // out a frame at a time and a jump with no frame between would land before anything had moved out of
+            // the way.
+            scene.Move(step.At);
             scene.Down(step.At);
+            scene.Tick();
 
             for (int i = 1; i <= 12; i++)
             {
@@ -338,6 +341,7 @@ namespace Sprocket.Sim.Simulation
                     step.At.X + (step.To.X - step.At.X) * t,
                     step.At.Y + (step.To.Y - step.At.Y) * t));
 
+                scene.Tick();
                 drawn();
             }
 
@@ -345,6 +349,7 @@ namespace Sprocket.Sim.Simulation
                 return;
 
             scene.Up();
+            scene.Tick();
             drawn();
         }
     }

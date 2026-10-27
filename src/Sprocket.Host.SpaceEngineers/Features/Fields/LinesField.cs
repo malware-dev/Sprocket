@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public LinesField(int longest, Texts texts)
         {
             Longest = longest;
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
 
             Children.Add(new Label { Style = Styles.ListWord, Trims = true, Placement = Flex.Grow }.As(out _start));
 

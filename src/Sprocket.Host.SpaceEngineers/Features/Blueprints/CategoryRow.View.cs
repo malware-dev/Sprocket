@@ -16,8 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Makes the grip, the name that is renamed in place, and the bin.</summary>
         void CreateView()
         {
-            Spacing = 8f;
-            Base.Padding = new Thickness(20f, 16f, 20f, 0f);
+            Spacing = Gaps.Parts;
+            // A category starts a group among the slots, which stand Items apart, so it holds the rest of a Sections gap over it.
+            Base.Padding = new Thickness(0f, Gaps.Sections - Gaps.Items, 0f, 0f);
 
             Children.Add(new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             Children.Add(new HStack

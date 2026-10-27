@@ -129,7 +129,7 @@ public class RunStepTests
     /// <summary>Whether a visible mark of something a step waits for stands anywhere in <paramref name="element" />.</summary>
     static bool Waits(Lumel.Element element) =>
         element.Within().OfType<Lumel.Images.Glyph>()
-            .Any(glyph => Shown(glyph, element) && glyph.Symbol == Symbols.Awaited);
+            .Any(glyph => Shown(glyph, element) && glyph.Symbol == Symbols.Lasting);
 
     /// <summary>Whether <paramref name="element" /> is on the screen: it and everything it stands in, up to <paramref name="top" />, visible.</summary>
     static bool Shown(Lumel.Element element, Lumel.Element top)

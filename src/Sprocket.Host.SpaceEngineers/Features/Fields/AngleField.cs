@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>An empty angle held between <paramref name="least" /> and <paramref name="most" /> as written, either of which may be empty for a whole turn.</summary>
         public AngleField(string least, string most, ICommand submit)
         {
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
             var lowest = Bound(least, -Turn);
             var highest = Bound(most, Turn);
 

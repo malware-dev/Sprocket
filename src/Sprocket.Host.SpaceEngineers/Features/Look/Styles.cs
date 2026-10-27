@@ -37,19 +37,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A name, or a sentence that is the point of where it stands.</summary>
         public static readonly IStyle<Label> Name = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink }
         };
 
         /// <summary>The name of something listed inside a group, a size under the group's own.</summary>
         public static readonly IStyle<Label> InnerName = new TextStyle(Name)
         {
-            Base = { FontSize = 20f }
+            Base = { FontSize = TextSizes.Small }
         };
 
         /// <summary>What a list says while it has nothing in it.</summary>
         public static readonly IStyle<Label> Empty = new TextStyle(Name)
         {
-            Base = { Color = Palette.Muted, Padding = new Thickness(8f, 8f, 0f, 0f) }
+            Base = { Color = Palette.Muted }
+        };
+
+        /// <summary>What a group inside a list says while it has nothing in it, the size of the names listed in it.</summary>
+        public static readonly IStyle<Label> InnerEmpty = new TextStyle(InnerName)
+        {
+            Base = { Color = Palette.Muted }
         };
 
         /// <summary>A codex tip: the chrome's color, edged, with room inside the edge.</summary>
@@ -68,10 +74,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 EmphasisFont = TextSizes.Italic,
                 StrongEmphasisFont = TextSizes.BoldItalic,
                 CodeFont = TextSizes.Mono,
-                FontSize = 20f,
-                Heading1Size = 24f,
-                Heading2Size = 20f,
-                Heading3Size = 20f,
+                FontSize = TextSizes.Small,
+                Heading1Size = TextSizes.Body,
+                Heading2Size = TextSizes.Small,
+                Heading3Size = TextSizes.Small,
                 Color = Palette.Muted,
                 StrongColor = Palette.Muted,
                 EmphasisColor = Palette.Muted,
@@ -98,20 +104,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 EmphasisFont = TextSizes.Italic,
                 StrongEmphasisFont = TextSizes.BoldItalic,
                 CodeFont = TextSizes.Mono,
-                FontSize = 20f,
-                Heading1Size = 40f,
-                Heading2Size = 32f,
-                Heading3Size = 24f,
+                FontSize = TextSizes.Small,
+                Heading1Size = TextSizes.Title,
+                Heading2Size = TextSizes.Body,
+                Heading3Size = TextSizes.Body,
                 Color = Palette.Muted,
                 StrongColor = Palette.Muted,
                 EmphasisColor = Palette.Muted,
                 LinkColor = Palette.Link,
                 HeadingColor = Palette.Ink,
                 RuleColor = Palette.Line,
-                BlockSpacing = 8f,
+                BlockSpacing = Gaps.Parts,
                 RuledHeadings = 2,
-                Indent = 20f,
-                Padding = new Thickness(20f, 4f),
+                Indent = Sizes.Indent,
                 Boxes = Boxes
             }
         };
@@ -122,38 +127,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Padding = new Thickness(20f, 24f) }
         };
 
-        /// <summary>What the author of a blueprint wrote about it, in the library under its name.</summary>
-        public static readonly IStyle<RichText> LibraryAbout = new RichTextStyle(Description)
-        {
-            Base = { Padding = new Thickness(8f, 8f, 0f, 0f) }
-        };
-
         /// <summary>What the author of a blueprint wrote about one of its slots, under the slot's name.</summary>
         public static readonly IStyle<RichText> SlotDescription = new RichTextStyle(Description)
         {
             Base =
             {
-                FontSize = 16f,
-                Heading1Size = 20f,
-                Heading2Size = 16f,
-                Heading3Size = 16f,
+                FontSize = TextSizes.Tiny,
+                Heading1Size = TextSizes.Small,
+                Heading2Size = TextSizes.Tiny,
+                Heading3Size = TextSizes.Tiny,
                 Color = Palette.Faint,
                 StrongColor = Palette.Faint,
                 EmphasisColor = Palette.Faint,
-                BlockSpacing = 4f,
-                Indent = 16f,
-                Padding = new Thickness(0f)
+                BlockSpacing = Gaps.Within
             }
         };
 
         /// <summary>A question hanging under the control that raised it, small and quiet above its answers.</summary>
         public static readonly IStyle<RichText> MenuQuestion = new RichTextStyle(SlotDescription);
-
-        /// <summary>A description as it reads, with no room of its own around it.</summary>
-        public static readonly IStyle<RichText> Example = new RichTextStyle(Description)
-        {
-            Base = { Padding = new Thickness(0f) }
-        };
 
         /// <summary>The guide to rich text's window: the page's own color, edged, with nothing veiled behind it, casting a floating window's shadow.</summary>
         public static readonly IStyle<Window> GuideWindow = new WindowStyle
@@ -177,7 +168,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 EmphasisFont = TextSizes.Italic,
                 StrongEmphasisFont = TextSizes.BoldItalic,
                 CodeFont = TextSizes.Mono,
-                FontSize = 24f,
+                FontSize = TextSizes.Body,
                 Color = Palette.Ink,
                 StrongColor = Palette.Ink,
                 EmphasisColor = Palette.Ink,
@@ -190,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A screen's heading, in the largest words on it.</summary>
         public static readonly IStyle<Label> Title = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 32f, Color = Palette.Ink }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Title, Color = Palette.Ink }
         };
 
         /// <summary>Words in a heading around a name, quieter than the name.</summary>
@@ -212,7 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 32f,
+                FontSize = TextSizes.Title,
                 Color = Palette.Ink,
                 CaretColor = Palette.Ink,
                 SelectionColor = Palette.Line,
@@ -228,7 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 24f,
+                FontSize = TextSizes.Body,
                 Color = Palette.Ink,
                 CaretColor = Palette.Ink,
                 SelectionColor = Palette.Line,
@@ -250,14 +241,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The box a name in a row is typed in, a well on the page in the name's size.</summary>
         public static readonly IStyle<TextBox> PlateBox = new TextBoxStyle(TitleBox)
         {
-            Base = { FontSize = 24f }
+            Base = { FontSize = TextSizes.Body }
         };
 
-        /// <summary>A field holding what cannot be taken, marked as a heading's box is.</summary>
-        public static readonly IStyle<TextBox> FieldRefused = new TextBoxStyle(Field)
-        {
-            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
-        };
 
         /// <summary>A heading's name with its pencil, lit under the pointer where pressing it renames.</summary>
         public static readonly IStyle<Element> Plate = new ElementStyle
@@ -275,65 +261,55 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The pencil beside a name that can be renamed, whose color the view sets while the name is typed.</summary>
         public static readonly IStyle<Glyph> Pen = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Faint }
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Faint }
         };
 
         /// <summary>The arrow between two parts of a heading.</summary>
         public static readonly IStyle<Glyph> Join = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Faint }
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Faint }
         };
 
-        /// <summary>A section's name, over what it heads, with a name inside it in the bright ink.</summary>
-        public static readonly IStyle<RichText> Section = new RichTextStyle
+        /// <summary>The name of one of a page's own sections, in capitals, where the name is a term in the codex.</summary>
+        public static readonly IStyle<RichText> H1Term = new RichTextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint, StrongColor = Palette.Ink }
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = TextSizes.Small,
+                Color = Palette.Faint,
+                StrongColor = Palette.Ink,
+                EmphasisColor = Palette.Ink,
+                LinkColor = Palette.Link
+            }
         };
 
-        /// <summary>A section's name, in capitals, over what it heads, where the name is a term in the codex.</summary>
-        public static readonly IStyle<RichText> HeadingTerm = new RichTextStyle(Section)
+        /// <summary>The name of a section inside one of a page's sections or inside a tab, a size down, where the name is a term in the codex.</summary>
+        public static readonly IStyle<RichText> H2Term = new RichTextStyle(H1Term)
         {
-            Base = { EmphasisColor = Palette.Ink, LinkColor = Palette.Link, Padding = new Thickness(4f, 8f, 0f, 8f) }
+            Base = { FontSize = TextSizes.Tiny }
         };
 
-        /// <summary>A section's name a size down, heading part of a section, where the name is a term in the codex.</summary>
-        public static readonly IStyle<RichText> SubHeadingTerm = new RichTextStyle(HeadingTerm)
+        /// <summary>The name of one of a page's own sections, in capitals.</summary>
+        public static readonly IStyle<Label> H1 = new TextStyle
         {
-            Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 8f) }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Faint }
         };
 
-        /// <summary>A section's name following other content, with room above it, where the name holds a term in the codex.</summary>
-        public static readonly IStyle<RichText> NextHeadingTerm = new RichTextStyle(HeadingTerm)
+        /// <summary>The name of a section inside one of a page's sections or inside a tab, a size down.</summary>
+        public static readonly IStyle<Label> H2 = new TextStyle(H1)
         {
-            Base = { Padding = new Thickness(4f, 48f, 0f, 8f) }
-        };
-
-        /// <summary>A section's name, in capitals, over what it heads.</summary>
-        public static readonly IStyle<Label> Heading = new TextStyle
-        {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint, Padding = new Thickness(4f, 8f, 0f, 8f) }
-        };
-
-        /// <summary>A heading within a section, a size down from the section's own, over the part of it that it names.</summary>
-        public static readonly IStyle<Label> SubHeading = new TextStyle(Heading)
-        {
-            Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 0f) }
+            Base = { FontSize = TextSizes.Tiny }
         };
 
         /// <summary>A category's name on the installation panel: a section's name a size down, with room after it before the pencil that renames it.</summary>
-        public static readonly IStyle<Label> CategoryName = new TextStyle(SubHeading)
+        public static readonly IStyle<Label> CategoryName = new TextStyle(H2)
         {
             Base = { Padding = new Thickness(0f, 0f, 8f, 0f) }
         };
 
-        /// <summary>A section's name following other content, with room above it so it reads as the start of what comes after.</summary>
-        public static readonly IStyle<Label> NextHeading = new TextStyle(Heading)
-        {
-            Base = { Padding = new Thickness(4f, 48f, 0f, 8f) }
-        };
-
         /// <summary>The quiet line under a name: what it is doing, and when it last did anything.</summary>
-        public static readonly IStyle<Label> Needs = new TextStyle(Heading)
+        public static readonly IStyle<Label> Needs = new TextStyle(H1)
         {
             Base = { Color = Palette.Notice }
         };
@@ -341,19 +317,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A small note under or beside something, in the faint tone.</summary>
         public static readonly IStyle<Label> Detail = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Faint }
         };
 
         /// <summary>Table-talk said in a line of its own: a word about the game itself rather than the world, in italics.</summary>
         public static readonly IStyle<Label> TableTalk = new TextStyle
         {
-            Base = { Font = TextSizes.Italic, FontSize = 16f, Color = Palette.Faint }
+            Base = { Font = TextSizes.Italic, FontSize = TextSizes.Tiny, Color = Palette.Faint }
         };
 
         /// <summary>What a thing is doing, said in a line of its own tools rather than under its name; on its level's wash and stripes for a warning or a problem.</summary>
         public static readonly IStyle<Label> Status = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Muted },
             [LookStates.Warned] = { Color = Palette.Notice, Background = Palette.NoticeWash, Pattern = NoticeStripes, Padding = new Thickness(16f, 8f) },
             [LookStates.Broken] = { Color = Palette.Problem, Background = Palette.ProblemWash, Pattern = ProblemStripes, Padding = new Thickness(16f, 8f) }
         };
@@ -407,7 +383,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The words a sentence opens with, where they may be a term in the codex; dim on a paused step.</summary>
         public static readonly IStyle<RichText> PhraseTerm = new RichTextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, LinkColor = Palette.Link },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Muted, LinkColor = Palette.Link },
             [LookStates.Paused] = { Color = Palette.Dim, LinkColor = Palette.Dim }
         };
 
@@ -416,7 +392,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base =
             {
-                Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Background = Palette.Panel, Edge = Palette.ControlEdge,
+                Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink, Background = Palette.Panel, Edge = Palette.ControlEdge,
                 Padding = new Thickness(16f, 8f)
             },
             Empty = { Color = Palette.Notice },
@@ -430,7 +406,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base =
             {
-                Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Live, Background = Palette.LiveWash,
+                Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Live, Background = Palette.LiveWash,
                 Padding = new Thickness(16f, 8f)
             }
         };
@@ -508,19 +484,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A row's light drawn as a symbol of what the row is, large enough to be read rather than only seen.</summary>
         public static readonly IStyle<Glyph> Marked = new GlyphStyle(Light)
         {
-            Base = { FontSize = 20f }
+            Base = { FontSize = TextSizes.Small }
         };
 
         /// <summary>A mark beside a name, whose color the view sets from what it marks.</summary>
         public static readonly IStyle<Glyph> Flag = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 20f }
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Small }
         };
 
         /// <summary>The mark after a tab's words saying something on its page wants looking at, whose color the view sets from how much it matters.</summary>
         public static readonly IStyle<Glyph> TabMark = new GlyphStyle(Flag)
         {
-            Base = { FontSize = 16f, Padding = new Thickness(8f, 0f, 0f, 0f) }
+            Base = { FontSize = TextSizes.Tiny, Padding = new Thickness(8f, 0f, 0f, 0f) }
         };
 
         /// <summary>The chevron that opens a banner, whose color the view sets from the banner's.</summary>
@@ -536,7 +512,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Text shown as it will read in place of the box it is written in, framed as that box is so the editor keeps its edge.</summary>
         public static readonly IStyle<ScrollView> Preview = new ScrollViewStyle(ScrollView)
         {
-            Base = { Background = Palette.Page, Edge = Palette.Line, Padding = new Thickness(8f, 6f) }
+            Base = { Background = Palette.Page, Edge = Palette.Line, Padding = new Thickness(8f) }
         };
 
         /// <summary>An on/off switch: a square thumb and the word, sunk into a dark track while off, and edged under the pointer.</summary>
@@ -545,7 +521,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 16f,
+                FontSize = TextSizes.Tiny,
                 Color = Palette.Ink,
                 Background = Palette.Line,
                 Track = Palette.Well,
@@ -583,8 +559,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base =
             {
-                Font = TextSizes.Mono, FontSize = 20f, Color = Palette.Ink, CaretColor = Palette.Ink, SelectionColor = Palette.Line,
-                NumberColor = Palette.Dim, Padding = new Thickness(20f, 8f, 8f, 8f), BarWidth = Sizes.Bar, Thumb = Palette.Thumb,
+                Font = TextSizes.Mono, FontSize = TextSizes.Small, Color = Palette.Ink, CaretColor = Palette.Ink, SelectionColor = Palette.Line,
+                NumberColor = Palette.Dim, Padding = new Thickness(0f, 0f, Gaps.Parts, 0f), BarWidth = Sizes.Bar, Thumb = Palette.Thumb,
                 HeldThumb = Palette.ThumbHeld, LeastThumb = 32f
             }
         };
@@ -594,8 +570,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base =
             {
-                Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Ink, CaretColor = Palette.Ink, SelectionColor = Palette.Line,
-                HintColor = Palette.Faint, Background = Palette.Page, Edge = Palette.Line, Padding = new Thickness(8f, 6f),
+                Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink, CaretColor = Palette.Ink, SelectionColor = Palette.Line,
+                HintColor = Palette.Faint, Background = Palette.Page, Edge = Palette.Line, Padding = new Thickness(8f),
                 BarWidth = Sizes.Bar, Thumb = Palette.Thumb, HeldThumb = Palette.ThumbHeld, LeastThumb = 24f
             }
         };
@@ -606,7 +582,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 16f,
+                FontSize = TextSizes.Tiny,
                 Color = Palette.Ink,
                 Background = Palette.Panel,
                 Edge = Palette.ControlEdge,
@@ -621,14 +597,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <remarks>Padded as a block chip beside it is, so the name stands level with the first block.</remarks>
         public static readonly IStyle<Button> SlotName = new ButtonStyle(Button)
         {
-            Base = { FontSize = 24f },
+            Base = { FontSize = TextSizes.Body },
             [LookStates.Still] = { Color = Palette.Ink, Background = Palette.Well, Edge = Palette.None, Padding = new Thickness(16f, 8f) }
         };
 
         /// <summary>A slot's name on an installation's own page, which is never pressed: the words alone, level with the blocks beside them.</summary>
         public static readonly IStyle<Button> SlotNamePlain = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Padding = new Thickness(0f, 8f, 0f, 0f) }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink, Padding = new Thickness(0f, 8f, 0f, 0f) }
         };
 
         /// <summary>The header of one page of several, as the game draws the tabs across its terminal, the page showing on the lightest plate; on its level's wash and stripes where something on its page is worth a warning or is wrong.</summary>
@@ -637,7 +613,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 20f,
+                FontSize = TextSizes.Small,
                 Color = Palette.Muted,
                 Background = Palette.Panel,
                 Edge = Palette.Line,
@@ -659,7 +635,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 16f,
+                FontSize = TextSizes.Tiny,
                 Color = Palette.Chrome,
                 Background = Palette.Accent,
                 Padding = new Thickness(16f, 8f)
@@ -671,14 +647,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A way to start something, offered in place: a plus and quiet words, and a panel under the pointer.</summary>
         public static readonly IStyle<Button> Start = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, Padding = new Thickness(16f, 4f) },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Muted, Padding = new Thickness(16f, 4f) },
             Hot = { Background = Palette.Panel }
         };
 
         /// <summary>Words that do something when pressed, with no box round them, and a panel under the pointer; in the ink for the screen showing.</summary>
         public static readonly IStyle<Button> Plain = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
             Hot = { Background = Palette.Panel },
             [LookStates.Chosen] = { Color = Palette.Ink }
         };
@@ -686,7 +662,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A symbol that does something, lit under the pointer and dimmed while there is nothing for it to do.</summary>
         public static readonly IStyle<Glyph> Icon = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted },
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Muted },
             Hot = { Background = Palette.PanelHot, Tint = Palette.Ink },
             Disabled = { Tint = Palette.Dim }
         };
@@ -708,7 +684,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly IStyle<Glyph> Holds = new GlyphStyle(Icon)
         {
             Base = { FontSize = 12f },
-            [LookStates.Paused] = { FontSize = 20f, Background = Palette.NoticeWash, Tint = Palette.Notice },
+            [LookStates.Paused] = { FontSize = TextSizes.Small, Background = Palette.NoticeWash, Tint = Palette.Notice },
             [LookStates.Paused | State.Hot] = { Background = Palette.NoticeWash, Tint = Palette.Ink }
         };
 
@@ -740,7 +716,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A box a value is typed into, in a form of values; washed and edged in red while what was typed cannot be used.</summary>
         public static readonly IStyle<TextBox> Value = new TextBoxStyle(Field)
         {
-            Base = { FontSize = 20f, Padding = new Thickness(12f, 8f) },
+            Base = { FontSize = TextSizes.Small, Padding = new Thickness(12f, 8f) },
             [LookStates.Wrong] = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
@@ -748,13 +724,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <remarks>Muted rather than faint, for 6.6:1 against the panel, where faint gives 4.5:1, the least WCAG allows.</remarks>
         public static readonly IStyle<Label> ValueLabel = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Muted }
         };
 
         /// <summary>Why a form cannot be finished as it stands, beside the way to finish it.</summary>
         public static readonly IStyle<Label> Refusal = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Problem }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Problem }
         };
 
         /// <summary>One of a few words a value may be, pressed to give it; on a lighter plate, in the ink, where it is the one chosen.</summary>
@@ -763,7 +739,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 20f,
+                FontSize = TextSizes.Small,
                 Color = Palette.Muted,
                 Background = Palette.Well,
                 Edge = Palette.Line,
@@ -784,7 +760,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The line a list hangs from where it stands in a column's heading, as tall as the heading's words so nothing under it moves.</summary>
         public static readonly IStyle<Element> ListLineInHeading = new ElementStyle(ListLine)
         {
-            Base = { Padding = new Thickness(12f, 2f) }
+            Base = { Padding = new Thickness(12f, 0f) }
         };
 
         /// <summary>Controls hanging from what opened them, on the ground a form's controls stand on, so they look as they do in a form.</summary>
@@ -812,7 +788,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The words of an entry in a list hanging open; in the chrome's color on the row chosen.</summary>
         public static readonly IStyle<Label> ListWord = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Ink },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink },
             [LookStates.Chosen] = { Color = Palette.Chrome }
         };
 
@@ -829,23 +805,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.PanelHot }
         };
 
-        /// <summary>What a column of a pick asks.</summary>
-        public static readonly IStyle<Label> ColumnTitle = new TextStyle
-        {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
-        };
 
-        /// <summary>What a column of a pick asks, where its words may be a term in the codex.</summary>
-        public static readonly IStyle<RichText> ColumnTitleTerm = new RichTextStyle
-        {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, LinkColor = Palette.Link }
-        };
 
         /// <summary>A quiet line under what a column asks, or about what it lists.</summary>
         /// <remarks>Muted rather than faint, for 6.6:1 against the panel, where faint gives 4.5:1, the least WCAG allows.</remarks>
         public static readonly IStyle<Label> ColumnNote = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted }
         };
 
         /// <summary>A box a list is narrowed by typing into.</summary>
@@ -857,7 +823,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                FontSize = 20f,
+                FontSize = TextSizes.Small,
                 Color = Palette.Muted,
                 Background = Palette.SlotFill,
                 Padding = new Thickness(16f, 8f)
@@ -867,13 +833,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>What a list says where it has nothing in it.</summary>
         public static readonly IStyle<Label> Nothing = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted, Padding = new Thickness(4f, 8f, 0f, 0f) }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Muted, Padding = new Thickness(4f, 8f, 0f, 0f) }
         };
 
         /// <summary>A quiet link at the end of a column's heading to another way of looking at its list.</summary>
         public static readonly IStyle<Button> ViewLink = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted, Padding = new Thickness(8f, 4f) },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Muted, Padding = new Thickness(8f, 4f) },
             Hot = { Background = Palette.PanelHot, Color = Palette.Ink }
         };
 
@@ -890,9 +856,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The name of a thing to choose, at the size the game writes a block list in; muted where it is listed only to be read about, faint where it heads a group.</summary>
         public static readonly IStyle<MemberName> PickName = new MemberNameStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink },
             [LookStates.Off] = { Color = Palette.Muted },
-            [LookStates.Heading] = { Color = Palette.Faint }
+            [LookStates.Heading] = { FontSize = TextSizes.Tiny, Color = Palette.Faint }
         };
 
         /// <summary>A block's picture beside its name in a column, on a well of its own.</summary>
@@ -921,20 +887,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A toolbar slot's number, in its corner.</summary>
         public static readonly IStyle<Label> SlotNumber = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Ink, Padding = new Thickness(4f, 0f) }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Ink, Padding = new Thickness(4f, 0f) }
         };
 
         /// <summary>A page of a toolbar, offered beside its other pages; in the ink where its page holds a slot, on a lighter plate where it is the page showing.</summary>
         public static readonly IStyle<Button> SlotPage = new ButtonStyle(Word)
         {
-            Base = { FontSize = 16f, Padding = new Thickness(8f, 2f) },
+            Base = { FontSize = TextSizes.Tiny, Padding = new Thickness(8f, 4f) },
             [LookStates.Taken] = { Color = Palette.Ink }
         };
 
         /// <summary>A mark saying something has not been chosen: a ring for one of several, a box for any of them.</summary>
         public static readonly IStyle<Glyph> Mark = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 16f, Tint = Palette.Faint }
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Tiny, Tint = Palette.Faint }
         };
 
         /// <summary>A mark saying something has not been chosen, where it is pressed by itself, lit under the pointer.</summary>
@@ -958,7 +924,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens; dim on a paused step.</summary>
         public static readonly IStyle<Glyph> Waits = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted },
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Muted },
             [LookStates.Paused] = { Tint = Palette.Dim }
         };
 
@@ -972,14 +938,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The words of a choice about the picking itself; in the ink where it is chosen.</summary>
         public static readonly IStyle<Label> OptionWord = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Muted },
             [LookStates.Chosen] = { Color = Palette.Ink }
         };
 
         /// <summary>A count beside what it counts, quieter than it.</summary>
         public static readonly IStyle<Label> Count = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Faint }
         };
 
     }

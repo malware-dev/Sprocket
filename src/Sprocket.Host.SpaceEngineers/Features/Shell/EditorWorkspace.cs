@@ -108,12 +108,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             root.Children.Add(new VStack
             {
                 Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f) },
-                Spacing = 4f,
+                Spacing = Gaps.Within,
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 8f,
+                        Spacing = Gaps.Parts,
                         Children =
                         {
                             new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Base = { Padding = LevelWithCapitals }, Command = new Relay(Back) }.As(out _back),
@@ -136,14 +136,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 }
             }.As(out _head));
             root.Children.Add(new Rule(1f, Palette.Line));
-            root.Children.Add(new Grid
+            // The banner over the page, which fills what is left.
+            root.Children.Add(new VStack
             {
                 Base = { Padding = new Thickness(16f) },
                 Placement = Flex.Grow,
-                Columns = { GridLength.Flex(1f) },
-                Rows = { GridLength.Auto, GridLength.Flex(1f) },
-                Cells = { [0, 0] = _banner }
-            }.As(out _page));
+                Children =
+                {
+                    _banner,
+                    new Grid
+                    {
+                        Placement = Flex.Grow,
+                        Columns = { GridLength.Flex(1f) },
+                        Rows = { GridLength.Flex(1f) }
+                    }.As(out _page)
+                }
+            });
             // Shown only while the screen has actions, which only developer mode gives it.
             root.Children.Add(new VStack
             {
@@ -151,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Children =
                 {
                     new Rule(1f, Palette.Line),
-                    new HStack { Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f) }, Spacing = 8f }.As(out _actions)
+                    new HStack { Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f) }, Spacing = Gaps.Parts }.As(out _actions)
                 }
             }.As(out _foot));
 
@@ -173,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Nests = true,
                 Placement = FixedSize.Wide(Sizes.Popup),
                 MaxHeight = Sizes.TipHigh,
-                Spacing = 8f,
+                Spacing = Gaps.Parts,
                 Delay = TipDelay,
                 Grace = TipGrace,
                 BodyStyle = Styles.Tip,
@@ -412,12 +420,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // A second scroller around one the page has would fight it over one gesture.
             if (_shownPage.ScrollsItself)
             {
-                _page.Cells[1, 0] = drawn;
+                _page.Cells[0, 0] = drawn;
                 return;
             }
 
             _body.Children.Add(drawn);
-            _page.Cells[1, 0] = _scroll;
+            _page.Cells[0, 0] = _scroll;
             _scroll.Scrolled = _shownPage.Scrolled;
         }
 

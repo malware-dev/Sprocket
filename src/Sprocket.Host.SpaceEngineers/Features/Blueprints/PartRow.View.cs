@@ -26,19 +26,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Makes the part's name and what it says about itself, with the blocks beside them and what is still to do under those.</summary>
         void CreateView()
         {
-            Spacing = 20f;
-            Base.Padding = new Thickness(20f, 0f);
+            Spacing = Gaps.Parts;
 
             Children.Add(new VStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Within,
                 Align = Align.Top,
                 Placement = FixedSize.Wide(PartList.Widest),
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 8f,
+                        Spacing = Gaps.Parts,
                         Children =
                         {
                             new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
@@ -47,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                                 Style = Styles.SlotName,
                                 Content = new HStack
                                 {
-                                    Spacing = 8f,
+                                    Spacing = Gaps.Parts,
                                     Children =
                                     {
                                         new Glyph { Style = Styles.Waits, Align = Align.Center }.As(out _mark),
@@ -67,16 +66,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             Children.Add(new VStack
             {
-                Spacing = 4f,
+                Spacing = Gaps.Within,
                 Align = Align.Top,
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 20f,
+                        Spacing = Gaps.Parts,
                         Children =
                         {
-                            new SlotChip(false) { Spacing = 4f }.As(out _blocks),
+                            new SlotChip(false) { Spacing = Gaps.Within }.As(out _blocks),
                             new SlotChip { IsVisible = false, Align = Align.Top }.As(out _signals),
                             new Label { Style = Styles.ProblemLine, IsVisible = false }.As(out _problem),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)

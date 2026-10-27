@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                         Content = new HStack
                         {
                             Base = { Background = Palette.Chrome, Padding = new Thickness(12f, 8f) },
-                            Spacing = 8f,
+                            Spacing = Gaps.Parts,
                             Children =
                             {
                                 new RichText { Style = Styles.Tip, Placement = Flex.Grow }.As(out _title),

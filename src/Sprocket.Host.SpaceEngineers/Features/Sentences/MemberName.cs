@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>A member with no words and no mark yet.</summary>
         public MemberName()
         {
-            Spacing = 8f;
+            Spacing = Gaps.Parts;
             Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false, HaloSize = 20f * Sizes.Halo }.As(out _mark));
             Children.Add(new Label().As(out _name));
         }

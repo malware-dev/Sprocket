@@ -77,7 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _grip.IsVisible = value;
                 _remove.IsVisible = value;
-                Base.Padding = new Thickness(20f, 16f, 20f, 0f);
+                Base.Padding = new Thickness(0f, Gaps.Sections - Gaps.Items, 0f, 0f);
             }
         }
 
