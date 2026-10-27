@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _category = value ?? "";
-                _name.Text = _category;
+                _name.Text = _category.ToUpperInvariant();
             }
         }
 
@@ -77,7 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _grip.IsVisible = value;
                 _remove.IsVisible = value;
-                Padding = new Thickness(value ? 20f : 4f, 24f, 20f, 8f);
+                Padding = new Thickness(20f, 16f, 20f, 0f);
             }
         }
 

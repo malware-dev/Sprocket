@@ -129,7 +129,7 @@ public class SlotListTests
         var installed = screen.Editor.Current!.View.Within().OfType<PartRow>().First();
         var still = installed.Within().OfType<Lumel.Controls.Button>().First();
         Assert.Null(still.Command);
-        Assert.Same(Styles.SlotNameStill, still.Style);
+        Assert.Same(Styles.SlotNamePlain, still.Style);
     }
 
     /// <summary>A signal slot with a short name says it after its name, in brackets; one without says its name alone.</summary>

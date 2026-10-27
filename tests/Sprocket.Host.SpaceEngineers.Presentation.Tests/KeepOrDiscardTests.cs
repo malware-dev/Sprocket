@@ -26,7 +26,7 @@ public class KeepOrDiscardTests
 
         editor.PressChoice(editor.Texts.PickDiscardThem);
         screen.Run(5);
-        Assert.Empty(system.Categories);
+        Assert.Empty(system.EmptyCategories);
     }
 
     /// <summary>Keeping on the logic system's screen keeps its changes and goes back, asking nothing more.</summary>
@@ -42,7 +42,7 @@ public class KeepOrDiscardTests
         editor.PressChoice(editor.Texts.PickKeepThem);
         screen.Run(2);
 
-        Assert.Single(editor.Program.Systems[0].Categories);
+        Assert.Single(editor.Program.Systems[0].EmptyCategories);
         Assert.False(editor.Screen.HasQuestion, "going back asked something more");
         Assert.False(editor.Screen.CanGoBack, "keeping did not go back");
     }
@@ -59,7 +59,7 @@ public class KeepOrDiscardTests
         screen.Run(2);
 
         Assert.NotEqual(editor.Texts.PickKeepQuestion, editor.Question());
-        Assert.Single(editor.Program.Systems[0].Categories);
+        Assert.Single(editor.Program.Systems[0].EmptyCategories);
     }
 
     /// <summary>A step deleted on a sequence's screen is asked about on the way back, and discarding brings it back.</summary>

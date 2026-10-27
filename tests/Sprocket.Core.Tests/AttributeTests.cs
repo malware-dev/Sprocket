@@ -159,48 +159,55 @@ public class AttributeTests
         Assert.Contains("expected text for the attribute short.", trouble);
     }
 
-    /// <summary>A system's <c>categories</c> and a slot's <c>category</c> are read as the installation panel's arrangement and written back.</summary>
+    /// <summary>A slot's <c>category</c> is read as the category it stands under, and written back on the slot alone.</summary>
     [Fact]
-    public void CategoriesAreReadAndWrittenBack()
+    public void ASlotsCategoryIsReadAndWrittenBack()
     {
-        var text = Everywhere
-            .Replace("#@ systemNote: \"one\"\n", "#@ systemNote: \"one\"\n#@ categories: [ \"Doors\", \"Calls\" ]\n")
-            .Replace("    optional slot button expects signal\n", "    #@ category: \"Calls\"\n    optional slot button expects signal\n");
+        var text = Everywhere.Replace("    optional slot button expects signal\n", "    #@ category: \"Calls\"\n    optional slot button expects signal\n");
         var program = new Automation();
         Assert.Equal("", ProgramReader.Load(text, program, new Values()));
 
         var system = program.Systems[0];
-        Assert.Equal(new[] { "Doors", "Calls" }, system.Categories);
         Assert.Equal("Calls", system.FindPart("button")!.Category);
         Assert.Equal("", system.FindPart("inner")!.Category);
 
         var written = ProgramWriter.Save(program, new Values());
-        Assert.Contains("# The airlock.\n#@ categories: [ \"Doors\", \"Calls\" ]\n#@ systemNote: \"one\"\nsystem blueprint ", written);
-        Assert.Contains("    #@ category: \"Calls\"\n    optional slot button expects signal\n", written);
+        Assert.Contains("    required slot inner expects Door\n    #@ category: \"Calls\"\n    optional slot button expects signal\n", written);
+        Assert.DoesNotContain("categories", written);
     }
 
-    /// <summary>A slot under a category its system does not name is trouble.</summary>
+    /// <summary>
+    /// A program that lists its categories on the system has its slots stood as its panel showed them, the slots under no
+    /// category first, and is written back with the slots in that order and no list.
+    /// </summary>
     [Fact]
-    public void ACategoryTheSystemDoesNotNameIsTrouble()
+    public void AnEarlierListOfCategoriesStandsTheSlotsAsThePanelDid()
     {
-        var text = Everywhere.Replace("    optional slot button expects signal\n", "    #@ category: \"Calls\"\n    optional slot button expects signal\n");
+        var text = Everywhere
+            .Replace("#@ systemNote: \"one\"\n", "#@ systemNote: \"one\"\n#@ categories: [ \"Doors\" ]\n")
+            .Replace("    required slot inner expects Door\n", "    #@ category: \"Doors\"\n    required slot inner expects Door\n");
         var program = new Automation();
-        var trouble = ProgramReader.Load(text, program, new Values());
+        Assert.Equal("", ProgramReader.Load(text, program, new Values()));
 
-        Assert.Contains("category \"Calls\" is not among the system's categories.", trouble);
+        Assert.Equal(new[] { "button", "inner" }, program.Systems[0].Parts.Select(part => part.Id));
+
+        var written = ProgramWriter.Save(program, new Values());
+        Assert.True(written.IndexOf("slot button", StringComparison.Ordinal) < written.IndexOf("slot inner", StringComparison.Ordinal), written);
+        Assert.Contains("#@ category: \"Doors\"", written);
+        Assert.DoesNotContain("categories", written);
     }
 
-    /// <summary>A category named twice, or a list holding anything but text, is trouble.</summary>
+    /// <summary>An earlier list of categories that cannot be read says nothing, and is not written back.</summary>
     [Theory]
-    [InlineData("[ \"Doors\", \"Doors\" ]", "category \"Doors\" is named twice in the attribute categories.")]
-    [InlineData("[ \"Doors\", 4 ]", "expected a category's name as text in the attribute categories.")]
-    [InlineData("\"Doors\"", "expected a list of text for the attribute categories.")]
-    public void BadCategoriesAreTrouble(string written, string said)
+    [InlineData("[ \"Doors\", 4 ]")]
+    [InlineData("\"Doors\"")]
+    public void AnEarlierListThatCannotBeReadIsDropped(string written)
     {
         var text = Everywhere.Replace("#@ systemNote: \"one\"\n", "#@ systemNote: \"one\"\n#@ categories: " + written + "\n");
-        var trouble = ProgramReader.Load(text, new Automation(), new Values());
+        var program = new Automation();
 
-        Assert.Contains(said, trouble);
+        Assert.Equal("", ProgramReader.Load(text, program, new Values()));
+        Assert.DoesNotContain("categories", ProgramWriter.Save(program, new Values()));
     }
 
     /// <summary>A <c>{</c> may stand on a line of its own under any statement that opens a block; only a system's header is written so.</summary>

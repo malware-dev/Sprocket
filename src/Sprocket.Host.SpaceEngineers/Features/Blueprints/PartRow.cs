@@ -26,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         string _short = "";
 
         float _wide = PartList.Widest;
+        bool _plain;
         string _opensAbout;
         NoticeLevel _level = NoticeLevel.Problem;
 
@@ -75,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 var said = value ?? "";
                 _about.Markdown = said;
-                _about.IsVisible = said.Length != 0;
+                _aboutRoom.IsVisible = said.Length != 0;
             }
         }
 
@@ -87,7 +88,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _name.Command = value;
-                _name.Style = value != null ? Styles.SlotName : Styles.SlotNameStill;
+                StyleName();
+            }
+        }
+
+        /// <summary>Whether the slot's name is never pressed where it is shown, and stands as words alone rather than in a box.</summary>
+        public bool Plain
+        {
+            set
+            {
+                _plain = value;
+                StyleName();
             }
         }
 
@@ -185,7 +196,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Whether its place can be changed at all: where it can, it shows a grip.</summary>
         public bool Arranged
         {
-            set { _grip.IsVisible = value; }
+            set
+            {
+                _grip.IsVisible = value;
+
+                // The grip's width and the gap after it, so the description starts under the slot's name. Held by the
+                // description's holder, since the description's style sets its own padding.
+                _aboutRoom.Padding = new Thickness(value ? 32f : 0f, 0f, 0f, 0f);
+            }
         }
 
         /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
@@ -227,6 +245,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 _blocks.Tip = Tip.For(_blocks.Tip, about);
                 _signals.Tip = Tip.For(_signals.Tip, about);
             }
+        }
+
+        /// <summary>Styles the name as a button where it opens the slot, as words alone where it never does, and as a quiet box otherwise.</summary>
+        void StyleName()
+        {
+            _name.Style = _name.Command != null ? Styles.SlotName : _plain ? Styles.SlotNamePlain : Styles.SlotNameStill;
         }
 
         /// <summary>Says the slot's name, and its short name after it in brackets where it has one.</summary>

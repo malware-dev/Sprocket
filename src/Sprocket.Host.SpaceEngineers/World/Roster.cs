@@ -264,9 +264,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Gives <paramref name="block" />, a programmable block that parted from the construct of <paramref name="unit" />, a
         /// Sprocket of its own with a copy of the automation, and has each half keep what is on it.
         /// </summary>
-        /// <remarks>Both are changed in memory, and each is written into its block once the change is done.</remarks>
+        /// <remarks>
+        ///     Both are changed in memory, and each is written into its block once the change is done. A part holding none of
+        ///     the automation's blocks is given nothing.
+        /// </remarks>
         void Part(SprocketUnit unit, IMyTerminalBlock block)
         {
+            if (!Reaches(unit, block))
+            {
+                GameLog.Say($"{block.CustomName} parted from the construct of {unit.Block.CustomName} with none of its automation's blocks, and keeps none of it");
+                return;
+            }
+
             var half = SprocketUnit.PartedFrom(block, unit, _settings(), _rota, _memories.Claim(block.EntityId));
             half.Begin(_frame());
             Listen(half);
@@ -279,6 +288,20 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             AutomationMerge.Part(unit.Program, unit.World, half.World);
             Reworked(unit);
+        }
+
+        /// <summary>Whether the construct <paramref name="block" /> is on holds any block of <paramref name="unit" />'s installations.</summary>
+        bool Reaches(SprocketUnit unit, IMyTerminalBlock block)
+        {
+            var world = new GridWorld(block, _kinds);
+            try
+            {
+                return AutomationMerge.Reaches(unit.Program, world);
+            }
+            finally
+            {
+                world.Dispose();
+            }
         }
 
         /// <summary>Has <paramref name="unit" /> take in the change made to its program in place, closing any screen open on it.</summary>

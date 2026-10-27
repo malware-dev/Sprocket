@@ -341,6 +341,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 0f) }
         };
 
+        /// <summary>A category's name on the installation panel: a section's name a size down, with room after it before the pencil that renames it.</summary>
+        public static readonly TextStyle CategoryName = new TextStyle(SubHeading)
+        {
+            Base = { Padding = new Thickness(0f, 0f, 8f, 0f) }
+        };
+
         /// <summary>A section's name following other content, with room above it so it reads as the start of what comes after.</summary>
         public static readonly TextStyle NextHeading = new TextStyle(Heading)
         {
@@ -462,6 +468,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Empty = { Color = Palette.Notice },
             Still = { Background = Palette.None, Edge = Palette.None },
             Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot }
+        };
+
+        /// <summary>The blocks filling a slot on the installation panel: a slot in a sentence, on a quiet ground where it cannot be pressed.</summary>
+        public static readonly SlotStyle PanelSlot = new SlotStyle(Slot)
+        {
+            Still = { Background = Palette.Well }
         };
 
         /// <summary>A part of a sentence that is paused: there to be read and pressed, and quieter than one that runs.</summary>
@@ -633,10 +645,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { FontSize = 24f }
         };
 
-        /// <summary>A slot's name on the installation panel where pressing it opens nothing: the words alone, where the button's would stand.</summary>
+        /// <summary>A slot's name on an installation's own page, which is never pressed: the words alone, level with the blocks beside them.</summary>
+        public static readonly ButtonStyle SlotNamePlain = new ButtonStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Padding = new Thickness(0f, 8f, 0f, 0f) }
+        };
+
+        /// <summary>A slot's name on the installation panel where pressing it opens nothing: the button's box on a quiet ground, with no border.</summary>
         public static readonly ButtonStyle SlotNameStill = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Padding = new Thickness(16f, 8f) }
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Background = Palette.Well, Padding = new Thickness(16f, 8f) }
         };
 
         /// <summary>The header of one page of several, as the game draws the tabs across its terminal, the page showing on the lightest plate.</summary>

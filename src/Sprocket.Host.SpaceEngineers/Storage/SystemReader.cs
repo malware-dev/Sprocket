@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -65,7 +66,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             system.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.LastSequence, ScriptAttributes.Categories);
             system.IsBlueprint = blueprint;
             LastSequence(statement, system, trouble);
-            Categories(statement, system, trouble);
 
             // The header's clauses, each on a line of its own, in either order and each at most once.
             var at = first + 3;
@@ -132,6 +132,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     trouble.Say(inner, $"unexpected {ScriptQuotes.Headed(inner)}{(blueprint ? "; expected required, optional, type, let, whenever, when, every or sequence." : "; expected type, let, whenever, when, every or sequence.")}");
             }
 
+            Earlier(statement, system);
             Resolve(system, statement, trouble);
         }
 
@@ -156,30 +157,43 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             system.Used((int)number.Whole);
         }
 
-        /// <summary><c>#@ categories: [ "Doors", "Lights" ]</c> on a system: the categories its slots are shown under, each named once.</summary>
-        static void Categories(Statement statement, AutomationSystem system, ScriptTrouble trouble)
+        /// <summary>
+        /// Stands the slots of <paramref name="system" /> as its installation panel shows them where <paramref name="statement" />
+        /// carries <c>#@ categories: [ "Doors", "Lights" ]</c>: the slots under no category first, then each category's slots in
+        /// the order listed.
+        /// </summary>
+        /// <remarks>Nothing is said about a list that cannot be read: the attribute is the host's, and only says how slots stood.</remarks>
+        static void Earlier(Statement statement, AutomationSystem system)
         {
             ScriptAttribute attribute;
-            if (!ScriptAttributes.Find(statement, ScriptAttributes.Categories, out attribute))
+            if (!ScriptAttributes.Find(statement, ScriptAttributes.Categories, out attribute) || attribute.Value.Form != ValueForm.List)
                 return;
 
-            if (attribute.Value.Form != ValueForm.List)
-            {
-                trouble.Say(statement, $"expected a list of text for the attribute {ScriptAttributes.Categories}.");
-                return;
-            }
-
+            var listed = new List<string>();
             var items = statement.Within(attribute.Value);
             for (var i = 0; i < items.Count; i++)
             {
-                var name = items[i];
-                if (name.Form != ValueForm.Text || name.Word.Trim().Length == 0)
-                    trouble.Say(statement, $"expected a category's name as text in the attribute {ScriptAttributes.Categories}.");
-                else if (system.Categories.Contains(name.Word))
-                    trouble.Say(statement, $"category \"{name.Word}\" is named twice in the attribute {ScriptAttributes.Categories}.");
-                else
-                    system.Categories.Add(name.Word);
+                if (items[i].Form == ValueForm.Text && !listed.Contains(items[i].Word))
+                    listed.Add(items[i].Word);
             }
+
+            var order = new List<Part>();
+            foreach (var part in system.Parts)
+            {
+                if (!listed.Contains(part.Category))
+                    order.Add(part);
+            }
+
+            foreach (var category in listed)
+            {
+                foreach (var part in system.Parts)
+                {
+                    if (part.Category == category)
+                        order.Add(part);
+                }
+            }
+
+            system.Arrange(order);
         }
 
         /// <summary>
@@ -239,8 +253,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             part.Short = attribute.Value.Word;
         }
 
-        /// <summary><c>#@ category: "Doors"</c> on a slot: the category of its system it is shown under, text.</summary>
-        static void Category(Statement statement, AutomationSystem system, Part part, ScriptTrouble trouble)
+        /// <summary><c>#@ category: "Doors"</c> on a slot: the category it is shown under with the slots beside it under the same one, text.</summary>
+        static void Category(Statement statement, Part part, ScriptTrouble trouble)
         {
             ScriptAttribute attribute;
             if (!ScriptAttributes.Find(statement, ScriptAttributes.Category, out attribute))
@@ -249,12 +263,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (attribute.Value.Form != ValueForm.Text)
             {
                 trouble.Say(statement, $"expected text for the attribute {ScriptAttributes.Category}.");
-                return;
-            }
-
-            if (!system.Categories.Contains(attribute.Value.Word))
-            {
-                trouble.Say(statement, $"category \"{attribute.Value.Word}\" is not among the system's {ScriptAttributes.Categories}.");
                 return;
             }
 
@@ -287,7 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             part.Annotation = statement.Annotation;
             part.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Short, ScriptAttributes.Category);
             Short(statement, part, trouble);
-            Category(statement, system, part, trouble);
+            Category(statement, part, trouble);
             part.Optional = optional;
 
             if (!statement.Says(2, Keyword.Expects))

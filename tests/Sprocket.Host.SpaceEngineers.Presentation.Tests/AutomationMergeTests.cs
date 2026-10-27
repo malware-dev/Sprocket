@@ -310,6 +310,27 @@ public class AutomationMergeTests
         Assert.Single(Parted(sim.Unit, half.World).Systems);
     }
 
+    /// <summary>A part that takes a programmable block and none of the automation's blocks is given no copy of it.</summary>
+    [Fact]
+    public void APartWithNoneOfTheAutomationsBlocksGetsNoCopy()
+    {
+        var rig = Rig.Demo();
+        var rotor = rig.Rotor(50, "Arm Rotor");
+        rig.OnHeadOf(rotor);
+        var spare = rig.Programmable(200, "Arm Automation");
+        rig.OnBase();
+        var sim = Airlock(rig);
+        sim.Editor.SwitchOn();
+        sim.Tick();
+
+        rig.Detach(rotor);
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        Assert.Single(sim.Roster.All);
+        Assert.False(BlockStorage.HasProgram(spare.Block), "the part was written a copy");
+    }
+
     /// <summary>The airlock logic system on <paramref name="rig" />: its button opens the inner door.</summary>
     static Simulation Airlock(Rig rig)
     {

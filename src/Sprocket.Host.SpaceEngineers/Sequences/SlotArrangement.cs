@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>How a system's slots stand on the installation panel: their order, the category each is under, and the order of the categories.</summary>
+    /// <summary>How a system's slots stand on the installation panel: their order, the category each is under, and the categories with none.</summary>
     public sealed class SlotArrangement
     {
         /// <summary>Every slot of the system, in its order.</summary>
@@ -11,8 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The category each slot of <see cref="Order" /> is under, at the same place, empty for none.</summary>
         public List<string> Placed { get; } = new List<string>();
 
-        /// <summary>The system's categories, in the order they are shown.</summary>
-        public List<string> Categories { get; } = new List<string>();
+        /// <summary>The categories with no slot under them.</summary>
+        public List<EmptyCategory> Empty { get; } = new List<EmptyCategory>();
 
         /// <summary>How the slots of <paramref name="system" /> stand now.</summary>
         public static SlotArrangement Of(AutomationSystem system)
@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 arrangement.Placed.Add(parts[i].Category);
             }
 
-            arrangement.Categories.AddRange(system.Categories);
+            arrangement.Empty.AddRange(system.EmptyCategories);
             return arrangement;
         }
 
@@ -36,38 +36,22 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = 0; i < Order.Count; i++)
                 Order[i].Category = Placed[i];
 
-            var categories = system.Categories;
-            categories.Clear();
-            for (var i = 0; i < Categories.Count; i++)
-                categories.Add(Categories[i]);
+            var empty = system.EmptyCategories;
+            empty.Clear();
+            for (var i = 0; i < Empty.Count; i++)
+                empty.Add(Empty[i]);
         }
 
         /// <summary>Whether the slots of <paramref name="system" /> stand as this says.</summary>
         public bool Matches(AutomationSystem system)
         {
-            var parts = system.Parts;
-            if (parts.Count != Order.Count || system.Categories.Count != Categories.Count)
-                return false;
-
-            for (var i = 0; i < Order.Count; i++)
-            {
-                if (parts[i] != Order[i] || parts[i].Category != Placed[i])
-                    return false;
-            }
-
-            for (var i = 0; i < Categories.Count; i++)
-            {
-                if (system.Categories[i] != Categories[i])
-                    return false;
-            }
-
-            return true;
+            return Same(Of(system));
         }
 
         /// <summary>Whether <paramref name="other" /> stands the same slots the same way.</summary>
         public bool Same(SlotArrangement other)
         {
-            if (other.Order.Count != Order.Count || other.Categories.Count != Categories.Count)
+            if (other.Order.Count != Order.Count || other.Empty.Count != Empty.Count)
                 return false;
 
             for (var i = 0; i < Order.Count; i++)
@@ -76,9 +60,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     return false;
             }
 
-            for (var i = 0; i < Categories.Count; i++)
+            for (var i = 0; i < Empty.Count; i++)
             {
-                if (other.Categories[i] != Categories[i])
+                if (other.Empty[i] != Empty[i])
                     return false;
             }
 

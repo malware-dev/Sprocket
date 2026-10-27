@@ -11,10 +11,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>A signal slot's few words shown with each toolbar slot that answers it, text: <c>#@ short: "Call"</c>.</summary>
         public const string Short = "short";
 
-        /// <summary>A system's slot categories, in the order the installation panel shows them, a list of text: <c>#@ categories: [ "Doors", "Lights" ]</c>.</summary>
+        /// <summary>A system's slot categories in the order its installation panel shows them, a list of text read to stand the slots and never written: <c>#@ categories: [ "Doors", "Lights" ]</c>.</summary>
         public const string Categories = "categories";
 
-        /// <summary>The category a slot is shown under, one of its system's, text: <c>#@ category: "Doors"</c>.</summary>
+        /// <summary>The category a slot is shown under with the slots beside it under the same one, text: <c>#@ category: "Doors"</c>.</summary>
         public const string Category = "category";
 
         /// <summary>The attributes of <paramref name="statement" /> other than those named in <paramref name="used" />, kept as written, or null where there are none.</summary>

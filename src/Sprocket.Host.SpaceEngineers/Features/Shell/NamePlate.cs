@@ -36,6 +36,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
+        /// <summary>The style the words are shown in where they are a heading's rather than a name's.</summary>
+        public TextStyle Words
+        {
+            set { _name.Style = value; }
+        }
+
         /// <summary>Whether the words are in italics, for names shown that are not the plate's own.</summary>
         public bool Emphasized
         {

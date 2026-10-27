@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     {
                         Spacing = 8f,
                         LineSpacing = 8f,
+                        Indent = 24f,
                         Children =
                         {
                             new Label { Style = Styles.Phrase }.As(out _lead),

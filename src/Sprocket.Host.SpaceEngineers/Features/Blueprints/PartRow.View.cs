@@ -15,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Glyph _mark;
         Button _name;
         Label _words;
+        VStack _aboutRoom;
         RichText _about;
         SlotChip _blocks;
         SlotChip _signals;
@@ -26,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void CreateView()
         {
             Spacing = 20f;
-            Padding = new Thickness(20f, 8f);
+            Padding = new Thickness(20f, 0f);
 
             Children.Add(new VStack
             {
@@ -56,7 +57,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             }.As(out _name)
                         }
                     },
-                    new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about)
+                    new VStack
+                    {
+                        IsVisible = false,
+                        Children = { new RichText { Style = Styles.SlotDescription }.As(out _about) }
+                    }.As(out _aboutRoom)
                 }
             }.As(out _column));
 
@@ -71,8 +76,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Spacing = 20f,
                         Children =
                         {
-                            new SlotChip(false) { Spacing = 4f }.As(out _blocks),
-                            new SlotChip { IsVisible = false, Align = Align.Top }.As(out _signals),
+                            new SlotChip(false) { Spacing = 4f, Style = Styles.PanelSlot }.As(out _blocks),
+                            new SlotChip { IsVisible = false, Align = Align.Top, Style = Styles.PanelSlot }.As(out _signals),
                             new Label { Style = Styles.ProblemLine, IsVisible = false }.As(out _problem),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)
                         }

@@ -81,8 +81,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             copy.Attributes = Kept(system.Attributes);
             copy.IsBlueprint = system.IsBlueprint;
             copy.Used(system.LastSequenceNumber);
-            foreach (var category in system.Categories)
-                copy.Categories.Add(category);
 
             copy.Changed = system.Changed;
             copy.Origin = system.Origin;

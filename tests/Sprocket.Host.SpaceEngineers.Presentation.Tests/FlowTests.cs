@@ -26,6 +26,37 @@ public class FlowTests
         Assert.Equal(new Vector2(210f, 45f), flow.DesiredSize);
     }
 
+    /// <summary>Every line after the first starts in by the flow's indent, and has that much less room.</summary>
+    [Fact]
+    public void LinesAfterTheFirstAreIndented()
+    {
+        var first = Box(100f, 20f);
+        var second = Box(100f, 20f);
+        var third = Box(100f, 20f);
+        var flow = new Flow { Spacing = 10f, LineSpacing = 5f, Indent = 40f, Children = { first, second, third } };
+
+        _ = new Easel(new VStack { Children = { flow } }, 250f, 200f);
+
+        Assert.Equal(new RectangleF(0f, 0f, 100f, 20f), first.Bounds);
+        Assert.Equal(new RectangleF(110f, 0f, 100f, 20f), second.Bounds);
+        Assert.Equal(new RectangleF(40f, 25f, 100f, 20f), third.Bounds);
+    }
+
+    /// <summary>A child that fits the first line's room but not an indented line's starts a line of its own.</summary>
+    [Fact]
+    public void AnIndentedLineHasLessRoom()
+    {
+        var first = Box(100f, 20f);
+        var second = Box(200f, 20f);
+        var third = Box(100f, 20f);
+        var flow = new Flow { Spacing = 10f, LineSpacing = 5f, Indent = 40f, Children = { first, second, third } };
+
+        _ = new Easel(new VStack { Children = { flow } }, 250f, 200f);
+
+        Assert.Equal(new RectangleF(40f, 25f, 200f, 20f), second.Bounds);
+        Assert.Equal(new RectangleF(40f, 50f, 100f, 20f), third.Bounds);
+    }
+
     /// <summary>A child shorter than its line sits on the line's middle.</summary>
     [Fact]
     public void AShorterChildIsCenteredDownItsLine()

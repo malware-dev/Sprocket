@@ -89,6 +89,21 @@ namespace Sprocket.Host.SpaceEngineers.World
             Rekey(program, world);
         }
 
+        /// <summary>Whether any installation of <paramref name="program" /> has a block on <paramref name="world" />.</summary>
+        public static bool Reaches(Automation program, GridWorld world)
+        {
+            foreach (var system in program.Systems)
+            {
+                foreach (var instance in system.Uses)
+                {
+                    if (Count(instance, program, world) > 0)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Adds a copy of <paramref name="instance" /> to <paramref name="into" />, unless an identical installation is there
         /// already; answers the installation of <paramref name="into" /> that stands for it.

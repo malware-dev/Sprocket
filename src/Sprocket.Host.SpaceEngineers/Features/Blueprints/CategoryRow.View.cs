@@ -17,15 +17,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void CreateView()
         {
             Spacing = 8f;
-            Padding = new Thickness(20f, 24f, 20f, 8f);
+            Padding = new Thickness(20f, 16f, 20f, 0f);
 
             Children.Add(new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             Children.Add(new HStack
             {
                 Placement = Flex.Grow,
-                Children = { new NamePlate(false).As(out _name) }
+                Children = { new NamePlate(false) { Words = Styles.CategoryName }.As(out _name) }
             });
-            Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f) }.As(out _remove));
+            Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(24f, 24f) }.As(out _remove));
         }
     }
 }

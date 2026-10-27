@@ -1,5 +1,5 @@
 using Lumel.Controls;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -7,7 +7,7 @@ using Xunit;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// Optimize slots on the installation panel lists the changes that give a logic system as few slots as its steps and triggers
+/// Optimize slots on the logic system's installation panel tab lists the changes that give a logic system as few slots as its steps and triggers
 /// can name, and makes them only once they are approved, as one step back.
 /// </summary>
 public class OptimizeSlotsTests
@@ -191,18 +191,20 @@ public class OptimizeSlotsTests
         screen.Run(2);
     }
 
-    /// <summary>Leaves the sequence, keeping what was made, and opens the installation panel of <paramref name="system" />.</summary>
+    /// <summary>Leaves the sequence, keeping what was made, and opens the installation panel tab of <paramref name="system" />.</summary>
     static void Panel(Screen screen, AutomationSystem system)
     {
         screen.Editor.BackKeeping();
         screen.Run(2);
-        screen.Editor.Push(new BlueprintPage(screen.Editor, system));
+        screen.Editor.Push(new LogicSystemPage(screen.Editor, system));
+        screen.Run(2);
+        screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
         screen.Run(2);
     }
 
-    /// <summary>The Optimize slots button on the installation panel, found by what it says.</summary>
+    /// <summary>The Optimize slots button on the logic system's installation panel tab, found by what it says.</summary>
     static Button Optimize(Screen screen) =>
-        screen.Editor.Blueprint().View.Within().OfType<Button>().Single(button => button.Text == screen.Editor.Texts.SlotOptimize);
+        ((LogicSystemPage)screen.Editor.Current!).View.Within().OfType<Button>().Single(button => button.Text == screen.Editor.Texts.SlotOptimize);
 
     /// <summary>Presses Optimize slots.</summary>
     static void Press(Screen screen)

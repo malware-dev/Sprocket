@@ -45,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     {
                         Spacing = 8f,
                         LineSpacing = 8f,
+                        Indent = 24f,
                         Children =
                         {
                             new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.AwaitedOutline, HaloSize = 20f * Sizes.Halo }

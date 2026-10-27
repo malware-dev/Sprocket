@@ -722,7 +722,7 @@
   </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
     <value>Reduce the slots to as few as the steps and triggers need.</value>
-    <comment>Tooltip on the Optimize slots button on the installation panel, beside the SLOTS heading, while the logic system is switched off and the slots can be changed.</comment>
+    <comment>Tooltip on the Optimize slots button on the installation panel tab of a logic system's screen, beside + category, while the logic system is switched off and the slots can be changed.</comment>
   </data>
   <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
     <value>Remove this unused slot.</value>
@@ -733,7 +733,7 @@
     <comment>Tooltip on the grip beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
   </data>
   <data name="Sprocket.Slot.Drag" xml:space="preserve">
-    <value>Drag to move the slot, into a category or out of one.</value>
+    <value>Drag to move the slot. At the bottom of a category, drag right to put it in or left to leave it out.</value>
     <comment>Tooltip on the grip beside a slot's name on a logic system's Installation panel tab.</comment>
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">

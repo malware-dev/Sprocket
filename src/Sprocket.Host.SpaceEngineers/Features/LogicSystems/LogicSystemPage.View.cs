@@ -41,10 +41,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Button _newSequence;
         Label _noSequences;
         VStack _sequenceList;
-        RichText _slotsHeading;
         PartList _slotList;
         VStack _addCategory;
         Button _newCategory;
+        Button _optimize;
 
         /// <inheritdoc />
         protected override Element CreateView()
@@ -153,13 +153,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                                 new RichText { Style = Styles.Description, IsVisible = false }.As(out _description)
                                             }
                                         }.As(out _describing),
-                                        new RichText { Style = Styles.SubHeadingTerm, IsVisible = false }.As(out _slotsHeading),
-                                        new PartList { Spacing = 4f, IsVisible = false }.As(out _slotList),
+                                        new PartList { Spacing = 16f, IsVisible = false }.As(out _slotList),
                                         new VStack
                                         {
-                                            Padding = new Thickness(0f, 8f, 0f, 0f),
+                                            Padding = new Thickness(12f, 16f, 0f, 0f),
                                             IsVisible = false,
-                                            Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newCategory) } } }
+                                            Children =
+                                            {
+                                                new HStack
+                                                {
+                                                    Children =
+                                                    {
+                                                        new Button { Style = Styles.Start }.As(out _newCategory),
+                                                        new HStack { Placement = Flex.Spare },
+                                                        new Button { Style = Styles.Button, Align = Align.Center }.As(out _optimize)
+                                                    }
+                                                }
+                                            }
                                         }.As(out _addCategory)
                                     }
                                 }

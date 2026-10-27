@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
@@ -39,6 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         readonly List<string> _marks = new List<string>();
         readonly SlotFill _fill;
         readonly SlotArranger _arranger;
+        readonly OptimizeQuestion _optimizing;
 
         int _wiring = -1;
         Element _focused;
@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _system = system;
             _fill = new SlotFill(editor, system);
             _arranger = new SlotArranger(editor, system);
-
+            _optimizing = new OptimizeQuestion(editor);
         }
 
         /// <inheritdoc />
@@ -241,14 +241,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         protected override void ViewCreated()
         {
             _triggerRows = new KeyedChildren<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
-            Editor.Codex.Explain(_slotsHeading);
             _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
             _slotRows = new KeyedChildren<object, Element>(_slotList.Children, SlotRow);
             _stateWork = new StateTab(Editor, _system, _statePanel, Changes, Locked);
             _slotList.Landings = index => SlotArranger.Landings(_slotKeys, index);
+            _slotList.Nests = (from, to) => SlotArranger.Nests(_slotKeys, from, to);
+            _slotList.StandsIn = index => SlotArranger.StandsIn(_slotKeys, index);
+            _slotList.NestDepth = PartRow.Indent;
             _slotList.Moves = (from, to) =>
             {
-                var move = Editor.Act(CommandKind.MoveSlot, () => _arranger.Move(_slotKeys, from, to));
+                var into = _slotList.DroppedIn;
+                var move = Editor.Act(CommandKind.MoveSlot, () => _arranger.Move(_slotKeys, from, to, into));
                 if (move != null)
                     move.Execute();
             };
@@ -437,7 +440,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             ArrangeSlots(texts);
 
-            _noPanelLine.IsVisible = !_describing.IsVisible && !_slotsHeading.IsVisible && !Editable;
+            _noPanelLine.IsVisible = !_describing.IsVisible && _parts.Count == 0 && !Editable;
             _noPanel.Text = texts.SystemNoPanel;
         }
 
@@ -495,29 +498,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (shown != null)
                 PartList.Listed(_system, _parts, _slotKeys, true);
 
-            _slotsHeading.IsVisible = _parts.Count > 0;
             _slotList.IsVisible = _parts.Count > 0;
-            _slotsHeading.Markdown = CodexPages.Link(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
-            _addCategory.IsVisible = _parts.Count > 0 && Editable;
+            _addCategory.IsVisible = _parts.Count > 0;
+            _newCategory.IsVisible = Editable;
             _newCategory.Text = StatusRow.Plus + texts.CategoryAdd;
             _newCategory.Command = Changes(CommandKind.AddCategory, () => _arranger.Add(Editor.Texts));
             _newCategory.Tip = Tip.For(_newCategory.Tip, texts.Codex.TermCategory);
+            _optimize.Text = texts.SlotOptimize;
+            _optimize.Command = Changes(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system));
+            _optimize.Tip = Tip.For(_optimize.Tip, Editable ? texts.Codex.SlotOptimizeAbout : Locked());
             _slotRows.Show(_slotKeys);
             if (shown == null)
                 return;
 
             for (var i = 0; i < _slotKeys.Count; i++)
             {
-                var category = _slotKeys[i] as string;
-                if (category != null)
-                    ArrangeCategory(texts, (CategoryRow)_slotRows[category], category, SlotArranger.Carries(_slotKeys, i));
+                var heading = _slotKeys[i] as CategoryHeading;
+                if (heading != null)
+                    ArrangeCategory(texts, (CategoryRow)_slotRows[heading], heading, SlotArranger.Carries(_slotKeys, i));
             }
 
             foreach (var part in _parts)
             {
                 var row = (PartRow)_slotRows[part];
                 row.Arranged = true;
-                row.Indented = _system.Categories.Contains(part.Category);
+                row.Indented = part.Category.Length > 0;
                 row.Grips(Editable, Editable ? texts.Codex.SlotDrag : Locked());
 
                 row.Name = part.Id;
@@ -555,10 +560,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             return new CategoryRow();
         }
 
-        /// <summary>Shows the category <paramref name="name" /> over the <paramref name="carries" /> slots under it, renamed, removed and carried while the system may be changed.</summary>
-        void ArrangeCategory(Texts texts, CategoryRow row, string name, int carries)
+        /// <summary>Shows the category <paramref name="heading" /> heads over the <paramref name="carries" /> slots under it, renamed, removed and carried while the system may be changed.</summary>
+        void ArrangeCategory(Texts texts, CategoryRow row, CategoryHeading heading, int carries)
         {
             var editable = Editable;
+            var name = heading.Name;
 
             row.Name = name;
             row.Carries = carries;
@@ -568,11 +574,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 Name = name,
                 NameRequired = true,
-                Accepts = wanted => _arranger.Accepts(name, wanted),
-                Renames = wanted => _arranger.Rename(name, wanted)
+                Accepts = SlotArranger.Accepts,
+                Renames = wanted => _arranger.Rename(heading, wanted)
             }));
             row.RenamesAbout = editable ? texts.Codex.CategoryRenameAbout : Locked();
-            row.Removes = Changes(CommandKind.RemoveCategory, () => _arranger.Remove(name));
+            row.Removes = Changes(CommandKind.RemoveCategory, () => _arranger.Remove(heading));
             row.RemovesAbout = editable ? texts.Codex.CategoryRemove : Locked();
         }
 

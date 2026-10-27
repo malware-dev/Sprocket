@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
         readonly List<Part> _parts = new List<Part>();
-        readonly List<string> _categories = new List<string>();
+        readonly List<EmptyCategory> _emptyCategories = new List<EmptyCategory>();
         readonly List<DeclaredType> _types = new List<DeclaredType>();
         readonly List<State> _states = new List<State>();
         readonly List<Trigger> _triggers = new List<Trigger>();
@@ -241,8 +241,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </summary>
         public IReadOnlyList<Part> Parts => _parts;
 
-        /// <summary>The names of the categories its slots are shown under on the installation panel, in the order they are shown.</summary>
-        public IList<string> Categories => _categories;
+        /// <summary>The categories on its installation panel with no slot under them, which the program does not keep.</summary>
+        public IList<EmptyCategory> EmptyCategories => _emptyCategories;
 
         /// <summary>The types it declares, in the order they are written.</summary>
         public IList<DeclaredType> Types => _types;

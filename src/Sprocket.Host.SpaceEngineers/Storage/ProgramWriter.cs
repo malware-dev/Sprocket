@@ -274,9 +274,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system.LastSequenceNumber > system.HighestSequenceNumber())
                 pen.Attribute(ScriptAttributes.LastSequence, system.LastSequenceNumber.ToString(CultureInfo.InvariantCulture));
 
-            if (system.Categories.Count > 0)
-                pen.AttributeTexts(ScriptAttributes.Categories, system.Categories);
-
             pen.Attributes(system.Attributes);
             pen.Start(Keyword.System);
             if (system.IsBlueprint)

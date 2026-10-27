@@ -67,7 +67,7 @@ public class ProgramCopyTests
 
         var system = copy.Systems[0];
         system.Name = "Changed";
-        system.Categories.Add("More");
+        system.Parts[0].Category = "More";
         system.Parts[0].Short = "Other";
         ((Act)system.Sequences[0].Steps[0]).Targets.Add("door2");
         ((WhenTrigger)system.Triggers[1]).Sources.Add("door2");
@@ -147,8 +147,6 @@ public class ProgramCopyTests
         system.IsBlueprint = true;
         system.Annotation = "Cycles the airlock.";
         system.Attributes = Attributes("systemNote", "\"airlock\"");
-        system.Categories.Add("Doors");
-        system.Categories.Add("Screens");
         system.Changed = new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc);
         system.Origin = new Guid("9d0f1a2b-3c4d-4e5f-8a6b-7c8d9e0f1a2b");
         system.OriginChanged = new DateTime(2026, 9, 13, 8, 0, 0, DateTimeKind.Utc);

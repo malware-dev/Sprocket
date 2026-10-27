@@ -552,7 +552,7 @@
     <value>Dra for å flytte kategorien med plassene sine.</value>
   </data>
   <data name="Sprocket.Slot.Drag" xml:space="preserve">
-    <value>Dra for å flytte plassen, inn i en kategori eller ut av en.</value>
+    <value>Dra for å flytte plassen. Nederst i en kategori drar du til høyre for å legge den inn, eller til venstre for å holde den utenfor.</value>
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
     <value>Hvilken sort blokk som kan fylle denne plassen. Trykk for å velge en annen.</value>

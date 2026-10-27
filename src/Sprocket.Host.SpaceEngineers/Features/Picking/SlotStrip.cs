@@ -54,11 +54,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var line = new HStack();
             line.Children.Add(new Layers { Placement = FixedSize.Size(Indent, 1f) });
             VStack body;
-            line.Children.Add(new VStack { Spacing = 8f }.As(out body));
+            line.Children.Add(new VStack { Spacing = 8f, Placement = Flex.Grow }.As(out body));
             Content = line;
             body.Children.Add(new HStack { Spacing = 4f }.As(out _pages));
             body.Children.Add(new HStack { Spacing = 4f }.As(out _row));
-            body.Children.Add(new Label { Style = Styles.ValueLabel }.As(out _says));
+            body.Children.Add(new Label { Style = Styles.ValueLabel, Wraps = true }.As(out _says));
         }
 
         /// <summary>Raised with the page and slot somebody pressed, each counted from 1.</summary>
