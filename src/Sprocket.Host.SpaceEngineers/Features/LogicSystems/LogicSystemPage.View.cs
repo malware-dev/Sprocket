@@ -3,10 +3,8 @@ using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Features.Writing;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
@@ -20,14 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Tab _stateTab;
         StatePanel _statePanel;
         Tab _panelTab;
-        Label _noPanel;
+        SlotPanel _slotPanel;
         Label _noTriggers;
         VStack _noTriggersLine;
-        VStack _noPanelLine;
-        Section _describing;
-        Label _descriptionHeading;
-        Composer _composer;
-        RichText _description;
         HStack _using;
         Label _usingLead;
         HStack _usingChoice;
@@ -41,10 +34,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Button _newSequence;
         Label _noSequences;
         VStack _sequenceList;
-        PartList _slotList;
-        VStack _addCategory;
-        Button _newCategory;
-        Button _optimize;
 
         /// <inheritdoc />
         protected override Element CreateView()
@@ -126,52 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                             new Tab { Content = new StatePanel().As(out _statePanel) }.As(out _stateTab),
                             new Tab
                             {
-                                Content = new VStack
-                                {
-                                    Spacing = Gaps.Sections,
-                                    Children =
-                                    {
-                                        new VStack
-                                        {
-                                            IsVisible = false,
-                                            Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noPanel) }
-                                        }.As(out _noPanelLine),
-                                        new Section
-                                        {
-                                            IsVisible = false,
-                                            Children =
-                                            {
-                                                new Label { Style = Styles.H2 }.As(out _descriptionHeading),
-                                                new Composer(120f, Styles.Description).As(out _composer),
-                                                new RichText { Style = Styles.Description, IsVisible = false }.As(out _description)
-                                            }
-                                        }.As(out _describing),
-                                        new VStack
-                                        {
-                                            Spacing = Gaps.Items,
-                                            Children =
-                                            {
-                                                new PartList { Spacing = Gaps.Items, IsVisible = false }.As(out _slotList),
-                                                new VStack
-                                                {
-                                                    IsVisible = false,
-                                            Children =
-                                            {
-                                                new HStack
-                                                {
-                                                    Children =
-                                                    {
-                                                        new Button { Style = Styles.Start }.As(out _newCategory),
-                                                        new HStack { Placement = Flex.Spare },
-                                                        new Button { Style = Styles.Button, Align = Align.Center }.As(out _optimize)
-                                                    }
-                                                }
-                                            }
-                                        }.As(out _addCategory)
-                                            }
-                                        }
-                                    }
-                                }
+                                Content = new SlotPanel().As(out _slotPanel)
                             }.As(out _panelTab)
                         }
                     }.As(out _tabs)

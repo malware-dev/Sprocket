@@ -736,7 +736,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return null;
 
             if (!(_keys[from] is Else))
-                return Gaps(from);
+                return DropPlaces(from);
 
             var open = _sequence.OpenOf(_shown[from]);
             var branches = _sequence.Branches(open);
@@ -762,7 +762,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Every gap between the rows the row at <paramref name="from" /> does not carry, but the one just under the end of a branch.</summary>
-        List<int> Gaps(int from)
+        List<int> DropPlaces(int from)
         {
             var span = _rows[_keys[from]].Carries + 1;
             var gaps = new List<int>();

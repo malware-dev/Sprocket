@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             return new VStack
             {
-                Spacing = Look.Gaps.Items,
+                Spacing = Gaps.Items,
                 Children =
                 {
                     new SequenceBar().As(out _bar),
@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
                     new HStack
                     {
-                        Spacing = Look.Gaps.Parts,
+                        Spacing = Gaps.Parts,
                         Children =
                         {
                             new PlusMenu().As(out _add),

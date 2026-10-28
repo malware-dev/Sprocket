@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using Lumel;
 using Lumel.Layout;
-using Lumel.Input;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -22,32 +19,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
     /// <remarks>The list is made again only when the screen is rebuilt, by something done on this page or a change to the program.</remarks>
     public sealed partial class LibraryPage : EditorPage
     {
-        const int OnConstruct = 0;
-        const int BackedUp = 1;
-        const int Kept = 2;
-
-        readonly List<Entry> _entries = new List<Entry>();
+        readonly List<LibraryListing> _entries = new List<LibraryListing>();
         readonly List<LibraryEntry> _volumes = new List<LibraryEntry>();
-        readonly List<string> _names = new List<string>();
         readonly List<Backup> _group = new List<Backup>();
         readonly HashSet<Backup> _listed = new HashSet<Backup>();
-        readonly Relay _adds;
-        readonly Relay _keeps;
-        readonly Relay _resets;
-        readonly Relay _copies;
 
-        Entry _chosen;
-        string _refused = "";
+        LibraryListing _chosen;
         Guid _opening;
 
         /// <summary>The library, in the editor <paramref name="editor" />, with the blueprint <paramref name="opening" /> chosen first, or the first one where that is empty.</summary>
         public LibraryPage(SprocketEditor editor, Guid opening) : base(editor)
         {
             _opening = opening;
-            _adds = new Relay(Add);
-            _keeps = new Relay(Keep);
-            _resets = new Relay(Reset);
-            _copies = new Relay(Copy);
         }
 
         /// <inheritdoc />
@@ -69,20 +52,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 List();
         }
 
-        /// <summary>Gives the details their fixed words and makes the list for the first time.</summary>
+        /// <summary>Gives the search its hint and makes the list for the first time.</summary>
         protected override void ViewCreated()
         {
-            var texts = Editor.Texts;
-            _search.Hint = texts.PickSearch;
+            _search.Hint = Editor.Texts.PickSearch;
             _search.Edited += Narrow;
-            Editor.Codex.Explain(_firstHeading);
-            Editor.Codex.Explain(_secondHeading);
-            _add.Text = texts.LibraryAdd;
-            _add.Command = _adds;
-            _add.Tip = Tip.For(_add.Tip, texts.Codex.LibraryPutOn);
-            _keep.Command = _keeps;
-            _reset.Command = _resets;
-            _copy.Command = _copies;
             List();
         }
 
@@ -108,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 var system = systems[i];
                 var row = new StatusRow { Mark = Symbols.LogicSystem, Summary = system.Name, Depth = 1 };
                 row.Status = Installations(texts, system.Instances.Count);
-                Add(new Entry { Section = OnConstruct, Identity = system.Identity }, row, held);
+                Add(new LibraryListing { Section = LibrarySection.OnConstruct, Identity = system.Identity }, row, held);
             }
 
             if (here == 0)
@@ -117,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             ListBackups(texts);
             ListKept(texts);
 
-            Entry again = null;
+            LibraryListing again = null;
             for (var i = 0; i < _entries.Count && again == null; i++)
             {
                 if (_opening != Guid.Empty ? _entries[i].Identity == _opening : _entries[i].Same(was))
@@ -181,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>Lists <paramref name="backup" /> as a row, chosen and used as a blueprint from storage is.</summary>
         void ListBackup(Texts texts, Backup backup, Panel into)
         {
-            Add(new Entry { Section = BackedUp, Backup = backup, Identity = backup.Identity }, new StatusRow
+            Add(new LibraryListing { Section = LibrarySection.BackedUp, Backup = backup, Identity = backup.Identity }, new StatusRow
             {
                 Mark = Symbols.Blueprint,
                 Summary = backup.Name,
@@ -207,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             foreach (var volume in _volumes)
             {
-                var entry = new Entry { Section = Kept, Identity = volume.Identity };
+                var entry = new LibraryListing { Section = LibrarySection.Kept, Identity = volume.Identity };
                 if (volume.State == LibraryEntryState.Read)
                 {
                     var trial = new Automation();
@@ -244,7 +218,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Puts <paramref name="row" /> in the list for <paramref name="entry" />, pressed to choose it.</summary>
-        void Add(Entry entry, StatusRow row, Panel into)
+        void Add(LibraryListing entry, StatusRow row, Panel into)
         {
             entry.Row = row;
             row.Opens = Editor.Act(CommandKind.Expand, () => Choose(entry));
@@ -310,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Marks <paramref name="entry" /> as chosen and shows its details.</summary>
-        void Choose(Entry entry)
+        void Choose(LibraryListing entry)
         {
             var texts = Editor.Texts;
             if (_chosen != null)
@@ -319,9 +293,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 _chosen.Row.Show(texts);
             }
 
-            if (!ReferenceEquals(_chosen, entry))
-                _refused = "";
-
             _chosen = entry;
             if (entry != null)
             {
@@ -329,253 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 entry.Row.Show(texts);
             }
 
-            Describe();
-        }
-
-        /// <summary>Shows the details of what is chosen: a blueprint, wherever it is listed.</summary>
-        void Describe()
-        {
-            var entry = _chosen;
-            _name.IsVisible = entry != null;
-            _here.IsVisible = false;
-            _line.IsVisible = false;
-            _about.IsVisible = false;
-            _trouble.IsVisible = false;
-            Say(_firstSection, _firstHeading, _first, null, null, null);
-            Say(_secondSection, _secondHeading, _second, null, null, null);
-
-            if (entry == null)
-                return;
-
-            _name.Text = entry.Row.Summary;
-            DescribeBlueprint(entry);
-        }
-
-        /// <summary>The details of a blueprint: whether it is on this construct, how it stands with the library, and what it holds.</summary>
-        void DescribeBlueprint(Entry entry)
-        {
-            // Read from its file only when chosen, so the list is drawn without reading any.
-            if (entry.Backup != null && entry.Read == null && entry.Trouble.Length == 0 && Editor.Backups != null)
-                entry.Trouble = Editor.Backups.Open(entry.Backup, Editor.World.Values, out entry.Read);
-
-            var texts = Editor.Texts;
-            var shelf = Editor.Shelf;
-            if (entry.Read != null && shelf != null)
-                shelf.Link(entry.Read);
-            var live = Live(entry);
-            var volume = Shelved(entry, live);
-            var system = entry.Section == OnConstruct ? live : entry.Read;
-            var free = Editor.Holder == null;
-
-            _here.IsVisible = true;
-            _add.IsVisible = live == null;
-            _adds.CanExecute = free && system != null;
-
-            var here = entry.Section == OnConstruct;
-            var kept = here ? live : entry.Section == BackedUp ? entry.Read : null;
-            var same = shelf != null && kept != null && volume != null && shelf.Holds(kept);
-            var newer = here && live != null && volume != null && !same && !Editor.Holdings.ChangedSince(live);
-            _keep.IsVisible = kept != null && shelf != null;
-            _keep.Text = volume == null ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
-            _keeps.CanExecute = !same;
-            _keep.Tip = Tip.For(_keep.Tip, same ? texts.Codex.LibrarySame
-                : newer ? texts.Codex.SystemsUpdateFromLibraryAbout
-                : volume == null ? texts.Codex.SystemsMakeBlueprintAbout : texts.Codex.SystemsUpdateBlueprintAbout);
-
-            _reset.IsVisible = here && live != null && volume != null && !same && !newer;
-            _reset.Text = texts.LibraryReset;
-            _reset.Tip = Tip.For(_reset.Tip, texts.Codex.LibraryResetAbout);
-
-            // A blueprint in storage is copied by putting it on a construct, so it offers no copy of itself.
-            _copy.IsVisible = entry.Section != Kept;
-            _copy.Text = texts.LibraryCopy;
-            _copies.CanExecute = free && system != null;
-            _copy.Tip = Tip.For(_copy.Tip, texts.Codex.LibraryCopyAbout);
-
-            var trouble = _refused.Length > 0 ? _refused : system == null ? entry.Trouble : "";
-            _trouble.Text = trouble;
-            _trouble.IsVisible = trouble.Length > 0;
-
-            if (system == null)
-                return;
-
-            _line.Text = Made(texts, system);
-            _line.IsVisible = _line.Text.Length > 0;
-            _about.Markdown = system.Annotation;
-            _about.IsVisible = system.Annotation.Length > 0;
-
-            _names.Clear();
-            var parts = system.Parts;
-            for (var i = 0; i < parts.Count; i++)
-            {
-                if (!parts[i].Optional)
-                    _names.Add(parts[i].Id);
-            }
-
-            Say(_firstSection, _firstHeading, _first, texts.BlueprintParts, CodexPages.Slot, _names);
-
-            _names.Clear();
-            for (var i = 0; live != null && i < live.Instances.Count; i++)
-                _names.Add(SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, live, live.Instances[i]));
-
-            Say(_secondSection, _secondHeading, _second, texts.LibraryInstallationsHeading, CodexPages.Installation, _names);
-        }
-
-        /// <summary>Shows <paramref name="names" /> under <paramref name="title" />, the term whose codex page is <paramref name="term" />, or neither where there are none.</summary>
-        static void Say(Section section, RichText heading, Label list, string title, string term, List<string> names)
-        {
-            var shown = names != null && names.Count > 0;
-            section.IsVisible = shown;
-            if (!shown)
-                return;
-
-            heading.Markdown = CodexPages.Link(title.ToUpperInvariant(), term);
-            var joined = new StringBuilder();
-            for (var i = 0; i < names.Count; i++)
-            {
-                if (i > 0)
-                    joined.Append(", ");
-
-                joined.Append(names[i]);
-            }
-
-            list.Text = joined.ToString();
-        }
-
-        /// <summary>Puts the chosen blueprint on this construct as a logic system, with its first installation.</summary>
-        void Add()
-        {
-            var entry = _chosen;
-            if (entry == null || Live(entry) != null || (entry.Backup != null && entry.Read == null))
-                return;
-
-            if (entry.Backup != null)
-            {
-                Run(CommandKind.PutOn, () => _refused = Editor.Holdings.PutOn(entry.Read));
-            }
-            else
-            {
-                var volume = Editor.Shelf?.Find(entry.Identity);
-                if (volume != null)
-                    Run(CommandKind.PutOn, () => _refused = Editor.Holdings.PutOn(volume));
-            }
-
-            Describe();
-        }
-
-        /// <summary>Puts the chosen logic system, as it is on this construct, in the library; or a backed up one, as its backup keeps it.</summary>
-        void Keep()
-        {
-            var entry = _chosen;
-            if (entry == null || entry.Section == Kept)
-                return;
-
-            if (entry.Section == BackedUp)
-            {
-                var backed = entry.Read;
-                if (backed != null)
-                    Run(CommandKind.Shelve, () => Editor.Holdings.ShelveBackup(backed));
-
-                return;
-            }
-
-            var live = Live(entry);
-            if (live == null)
-                return;
-
-            if (!Editor.Holdings.Stored(live))
-                Run(CommandKind.Shelve, () => Editor.Holdings.Shelve(live));
-            else if (Editor.Holdings.ChangedSince(live))
-                Run(CommandKind.Shelve, () => Editor.Holdings.AskUpdate(live));
-            else
-                Run(CommandKind.Renew, () => Editor.Holdings.AskRenew(live));
-        }
-
-        /// <summary>Puts the chosen blueprint in the library back in the place of the logic system on this construct, after asking.</summary>
-        void Reset()
-        {
-            var live = _chosen == null || _chosen.Section != OnConstruct ? null : Live(_chosen);
-            if (live != null)
-                Run(CommandKind.Renew, () => Editor.Holdings.AskReset(live));
-        }
-
-        /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
-        void Copy()
-        {
-            var entry = _chosen;
-            var text = entry == null ? null : Source(entry);
-            if (text == null)
-                return;
-
-            Run(CommandKind.PutOn, delegate
-            {
-                var made = Editor.Holdings.Copy(text, out _refused);
-                if (made != null)
-                    Editor.Push(new LogicSystemPage(Editor, made));
-            });
-
-            Describe();
-        }
-
-        void Run(CommandKind kind, Action action)
-        {
-            var command = Editor.Act(kind, action);
-            if (command != null)
-                command.Execute();
-        }
-
-        /// <summary>
-        /// The logic system on this construct <paramref name="entry" /> is of, or null: itself, the one the backup keeps, or the
-        /// one made from the blueprint in the library.
-        /// </summary>
-        AutomationSystem Live(Entry entry)
-        {
-            var program = Editor.Program;
-            var system = entry.Section == Kept ? program.MadeFrom(entry.Identity) : program.FindSystem(entry.Identity);
-            return system != null && system.IsBlueprint ? system : null;
-        }
-
-        /// <summary>
-        /// The blueprint in the library <paramref name="entry" /> is, or the one its logic system, <paramref name="live" /> or the
-        /// backup's, is linked to; null where the library has none.
-        /// </summary>
-        LibraryEntry Shelved(Entry entry, AutomationSystem live)
-        {
-            var shelf = Editor.Shelf;
-            if (shelf == null)
-                return null;
-
-            if (entry.Section == Kept)
-                return shelf.Find(entry.Identity);
-
-            var linked = entry.Section == BackedUp ? entry.Read : live;
-            return linked != null && linked.HasOrigin ? shelf.Find(linked.Origin) : null;
-        }
-
-        /// <summary>The text <paramref name="entry" /> keeps its blueprint as, or null where it has none that reads.</summary>
-        string Source(Entry entry)
-        {
-            if (entry.Section == Kept)
-            {
-                var volume = Editor.Shelf?.Find(entry.Identity);
-                return volume?.Text;
-            }
-
-            var system = entry.Section == BackedUp ? entry.Read : Live(entry);
-            return system == null ? null : ProgramWriter.Blueprint(system);
-        }
-
-        /// <summary>Who made <paramref name="system" /> and when it last changed, as far as either is known.</summary>
-        static string Made(Texts texts, AutomationSystem system)
-        {
-            var by = system.Namespace;
-            if (!system.Changed.HasValue)
-                return by.Length == 0 ? "" : Template.Fill(texts.LibraryBy, "name", by);
-
-            var time = Time(system.Changed.Value);
-            return by.Length == 0
-                ? Template.Fill(texts.LibraryChanged, "time", time)
-                : Template.Fill(Template.Fill(texts.LibraryByChanged, "name", by), "time", time);
+            _detail.Show(entry);
         }
 
         static string Installations(Texts texts, int count)
@@ -629,23 +354,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public static string Time(DateTime utc)
         {
             return utc.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-        }
-
-        /// <summary>One row of the list, and what it stands for.</summary>
-        sealed class Entry
-        {
-            public int Section;
-            public Guid Identity;
-            public Backup Backup;
-            public AutomationSystem Read;
-            public string Trouble = "";
-            public StatusRow Row;
-
-            /// <summary>Whether <paramref name="other" /> stands for the same thing in the same list.</summary>
-            public bool Same(Entry other)
-            {
-                return other != null && other.Section == Section && other.Identity == Identity && other.Backup == Backup;
-            }
         }
     }
 }
