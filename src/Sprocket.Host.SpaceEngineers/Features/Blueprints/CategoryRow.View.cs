@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Children.Add(new HStack
             {
                 Placement = Flex.Grow,
-                Children = { new NamePlate(false) { Words = Styles.CategoryName }.As(out _name) }
+                Children = { new NamePlate(false) { Words = Styles.CategoryName, WordsBox = Styles.CategoryBox }.As(out _name) }
             });
             Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(24f, 24f) }.As(out _remove));
         }

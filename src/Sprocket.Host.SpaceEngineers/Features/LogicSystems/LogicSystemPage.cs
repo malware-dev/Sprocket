@@ -45,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         ListField _blocksets;
         StateTab _stateWork;
         string _madeName;
+        string _naming;
         string _madeAbout;
         bool _madeOn;
         NoticeLevel _standing;
@@ -503,7 +504,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _addCategory.IsVisible = _parts.Count > 0;
             _newCategory.IsVisible = Editable;
             _newCategory.Text = StatusRow.Plus + texts.CategoryAdd;
-            _newCategory.Command = Changes(CommandKind.AddCategory, () => _arranger.Add(Editor.Texts));
+            // A category just added opens its name for typing once its row stands.
+            _newCategory.Command = Changes(CommandKind.AddCategory, () => _naming = _arranger.Add(Editor.Texts));
             _newCategory.Tip = Tip.For(_newCategory.Tip, texts.Codex.TermCategory);
             _optimize.Text = texts.SlotOptimize;
             _optimize.Command = Changes(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system));
@@ -579,6 +581,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Renames = wanted => _arranger.Rename(heading, wanted)
             }));
             row.RenamesAbout = editable ? texts.Codex.CategoryRenameAbout : Locked();
+            if (name == _naming)
+            {
+                _naming = null;
+                row.Renames.Execute();
+            }
+
             row.Removes = Changes(CommandKind.RemoveCategory, () => _arranger.Remove(heading));
             row.RemovesAbout = editable ? texts.Codex.CategoryRemove : Locked();
         }

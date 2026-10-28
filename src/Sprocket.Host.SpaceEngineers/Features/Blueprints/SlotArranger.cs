@@ -148,8 +148,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Make(slot != null ? ChangeKind.MoveSlot : ChangeKind.MoveCategory, now, thing, null);
         }
 
-        /// <summary>Adds an empty category under every slot, named as <paramref name="texts" /> names a new one, counting on from how many there are.</summary>
-        public void Add(Texts texts)
+        /// <summary>Adds an empty category under every slot, named as <paramref name="texts" /> names a new one, counting on from how many there are, and gives back its name.</summary>
+        public string Add(Texts texts)
         {
             var now = SlotArrangement.Of(_system);
             var names = Names();
@@ -160,6 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             now.Empty.Add(new EmptyCategory(name, null));
             Make(ChangeKind.AddCategory, now, name, null);
+            return name;
         }
 
         /// <summary>Whether a category may be called <paramref name="name" />: anything but nothing.</summary>

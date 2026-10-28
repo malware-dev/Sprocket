@@ -308,6 +308,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Padding = new Thickness(0f, 0f, 8f, 0f) }
         };
 
+        /// <summary>The box a category's name is typed in: the name's own face and size, its words where the name's stood, on a well.</summary>
+        public static readonly IStyle<TextBox> CategoryBox = new TextBoxStyle(PlateBox)
+        {
+            Base = { FontSize = TextSizes.Tiny, Padding = new Thickness(0f, 4f, 8f, 4f) }
+        };
+
         /// <summary>The quiet line under a name: what it is doing, and when it last did anything.</summary>
         public static readonly IStyle<Label> Needs = new TextStyle(H1)
         {

@@ -43,6 +43,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set { _name.Style = value; }
         }
 
+        /// <summary>The style of the box the words are renamed in, where they are a heading's rather than a name's.</summary>
+        public IStyle<TextBox> WordsBox
+        {
+            set { _box.Style = value; }
+        }
+
         /// <summary>Whether the words are in italics, for names shown that are not the plate's own.</summary>
         public bool Emphasized
         {

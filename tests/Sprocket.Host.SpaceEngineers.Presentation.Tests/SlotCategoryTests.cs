@@ -36,6 +36,36 @@ public class SlotCategoryTests
         Assert.Equal(new[] { "Category 1" }, Empty(screen));
     }
 
+    /// <summary>A category just added opens its name for typing at once, and what is typed names it.</summary>
+    [Fact]
+    public void ANewCategoryOpensItsNameForTyping()
+    {
+        var screen = Slots();
+        AddCategory(screen);
+
+        var row = Category(screen, "Category 1");
+        Assert.True(row.Plate.IsRenaming, "the new category's name is not open for typing");
+        Assert.Same(row.Plate.Box, screen.Editor.Input!.Focused);
+
+        row.Plate.Box.Text = "Doors";
+        screen.Editor.Input.Key(MyKeys.Enter, false, false);
+        screen.Run(5);
+        Assert.Contains("# Doors", Rows(screen));
+    }
+
+    /// <summary>A category's name is typed in its own face and size, so its words stay as they were when renaming starts.</summary>
+    [Fact]
+    public void ACategoryIsRenamedInItsOwnFace()
+    {
+        var screen = Slots();
+        AddCategory(screen);
+
+        var row = Category(screen, "Category 1");
+        var name = row.Plate.Within().OfType<Lumel.Text.Label>().First();
+        Assert.Equal(name.FontSize, row.Plate.Box.FontSize);
+        Assert.Equal(name.Font, row.Plate.Box.Font);
+    }
+
     /// <summary>A slot carried right under a category's name goes into it, stands there in the program's order, and one step back takes it out again.</summary>
     [Fact]
     public void ASlotCarriedRightUnderACategoryIsInIt()
