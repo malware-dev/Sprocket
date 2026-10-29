@@ -3,7 +3,7 @@ using Lumel.Styling;
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
     /// <summary>How a member's name looks: the face, size and color of its words.</summary>
-    public class MemberNameStyle : Style<MemberName, TextLook>
+    public class MemberNameStyle : Style<MemberName, MemberNameLook>
     {
         /// <summary>A style with nothing set, which applies as the neutral values.</summary>
         public MemberNameStyle()

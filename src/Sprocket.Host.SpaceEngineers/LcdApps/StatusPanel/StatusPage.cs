@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var high = room.Y - inset * 2f;
             Base.Padding = new Thickness(inset);
             Placement = FixedSize.Size(room.X, room.Y);
-            Spacing = size.Between;
+            Base.Spacing = size.Between;
             Pages = 1;
 
             Top(graphics, look, status, wide);
@@ -68,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var size = look.Size;
             var troubled = status.Heard && status.Troubled;
             _top.IsVisible = true;
-            _top.Spacing = size.Between;
+            _top.Base.Spacing = size.Between;
             _icon.Placement = FixedSize.Size(size.Icon, size.Icon);
             _heading.Style = size.Plain;
             _heading.Base.Color = look.Quiet;
@@ -179,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             while (_dotted.Count < Pages)
                 _dotted.Add(new Glyph());
 
-            _dots.Spacing = size.Between;
+            _dots.Base.Spacing = size.Between;
             _dots.Children.Clear();
             for (var i = 0; i < Pages; i++)
             {

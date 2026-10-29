@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             _pen.Align = Align.Center;
-            _box.Longest = NameLongest;
+            _box.MaxLength = NameLongest;
         }
     }
 }

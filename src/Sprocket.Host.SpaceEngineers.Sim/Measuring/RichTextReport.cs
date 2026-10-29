@@ -41,7 +41,7 @@ public static class RichTextReport
 
         device.Fonts = fonts;
         ScreenSession.Install(device);
-        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new ScreenSpaceImages(device));
+        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new MaterialImages(device.TextureSize), () => 0);
 
         var report = new StringBuilder();
         report.AppendLine("Rich text timing, Release only, " + (game != null ? "with the game's font widths." : "with a stand-in font (the game is not installed)."));
@@ -283,7 +283,7 @@ public static class RichTextReport
 
     static int Characters(Document document) => Characters(document.Blocks);
 
-    static int Characters(IList<Block> blocks)
+    static int Characters(IReadOnlyList<Block> blocks)
     {
         var count = 0;
         foreach (var block in blocks)

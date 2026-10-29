@@ -7,7 +7,8 @@ using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
-using VRageMath;
+using Sandbox.ModAPI;
+using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
@@ -28,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly SprocketEditor _editor;
 
+        readonly VStack _frame;
         readonly VStack _head;
         readonly Glyph _back;
         readonly HeadingRow _title;
@@ -49,13 +51,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly VStack _foot;
         readonly HStack _actions;
 
-        readonly Relay _undoes;
-        readonly Relay _redoes;
-        readonly Relay _libraries;
-        readonly Relay _flips;
-        readonly Relay _dones;
-        readonly Relay _runs;
-        readonly Relay _deletes;
+        readonly RelayCommand _undoes;
+        readonly RelayCommand _redoes;
+        readonly RelayCommand _libraries;
+        readonly RelayCommand _flips;
+        readonly RelayCommand _dones;
+        readonly RelayCommand _runs;
+        readonly RelayCommand _deletes;
 
         readonly Arguments _undone = new Arguments();
         readonly Arguments _redone = new Arguments();
@@ -72,8 +74,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         Element _raisedBy;
 
-        readonly Relay _commits;
-        readonly Relay _ends;
+        readonly RelayCommand _commits;
+        readonly RelayCommand _ends;
 
         // The plate whose name is being typed, a heading's or a row's, and what giving it does.
         NamePlate _plate;
@@ -86,42 +88,41 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         bool _checkedTaken;
 
         /// <summary>The chrome for <paramref name="editor" />, which it hands its input root and window layer to.</summary>
-        public EditorWorkspace(SprocketEditor editor)
+        public EditorWorkspace(SprocketEditor editor) : base("Sprocket", () => editor.CurrentTick)
         {
             _editor = editor;
             _title = new HeadingRow(Rename);
-            _commits = new Relay(CommitRename);
-            _ends = new Relay(EndRename);
+            _commits = new RelayCommand(CommitRename);
+            _ends = new RelayCommand(EndRename);
 
-            _undoes = new Relay(() => Run(_editor.Screen.Undo));
-            _redoes = new Relay(() => Run(_editor.Screen.Redo));
-            _libraries = new Relay(() => Run(_editor.Screen.Library));
-            _flips = new Relay(() => Run(_editor.Screen.Flip));
-            _dones = new Relay(() => Run(_editor.Screen.Primary));
-            _runs = new Relay(() => Run(_editor.Screen.Running ? _editor.Screen.Stops : _editor.Screen.Runs));
-            _deletes = new Relay(() => Run(_editor.Screen.Deletes));
+            _undoes = new RelayCommand(() => Run(_editor.Screen.Undo));
+            _redoes = new RelayCommand(() => Run(_editor.Screen.Redo));
+            _libraries = new RelayCommand(() => Run(_editor.Screen.Library));
+            _flips = new RelayCommand(() => Run(_editor.Screen.Flip));
+            _dones = new RelayCommand(() => Run(_editor.Screen.Primary));
+            _runs = new RelayCommand(() => Run(_editor.Screen.Running ? _editor.Screen.Stops : _editor.Screen.Runs));
+            _deletes = new RelayCommand(() => Run(_editor.Screen.Deletes));
 
             _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
 
-            var root = new VStack { Base = { Background = Palette.Page } };
+            var root = _frame = new VStack { Base = { Background = Palette.Page } };
             Children.Add(root);
             root.Children.Add(new VStack
             {
-                Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f) },
-                Spacing = Gaps.Within,
+                Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f), Spacing = Gaps.Within },
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Children =
                         {
-                            new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Base = { Padding = LevelWithCapitals }, Command = new Relay(Back) }.As(out _back),
+                            new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Base = { Padding = LevelWithCapitals }, Command = new RelayCommand(Back) }.As(out _back),
                             _title,
                             // Quietest first, Done or the close cross last: the row stands against the right edge, so a
                             // control's place depends only on what stands to its right.
-                            new HazardButton { Style = Styles.Button, Command = new Relay(OpenAdmin) }.As(out _admin),
-                            new Glyph { Symbol = "?", Style = Styles.Tips, Placement = FixedSize.Size(32f, 32f), Command = new Relay(ToggleTips) }.As(out _tips),
+                            new HazardButton { Style = Styles.Button, Command = new RelayCommand(OpenAdmin) }.As(out _admin),
+                            new Glyph { Symbol = "?", Style = Styles.Tips, Placement = FixedSize.Size(32f, 32f), Command = new RelayCommand(ToggleTips) }.As(out _tips),
                             new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
                             new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _undoes }.As(out _undo),
                             new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _redoes }.As(out _redo),
@@ -129,13 +130,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f), Command = _deletes }.As(out _delete),
                             new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
                             new Button { Style = Styles.Primary, Command = _dones }.As(out _done),
-                            new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = new Relay(Back) }.As(out _close)
+                            new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = new RelayCommand(Back) }.As(out _close)
                         }
                     },
                     new Label { Style = Styles.Detail }.As(out _subtitle)
                 }
             }.As(out _head));
-            root.Children.Add(new Rule(1f, Palette.Line));
+            root.Children.Add(new Separator());
             // The banner over the page, which fills what is left.
             root.Children.Add(new VStack
             {
@@ -158,41 +159,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 IsVisible = false,
                 Children =
                 {
-                    new Rule(1f, Palette.Line),
-                    new HStack { Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f) }, Spacing = Gaps.Parts }.As(out _actions)
+                    new Separator(),
+                    new HStack { Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, Padding = new Thickness(16f, 8f) }}.As(out _actions)
                 }
             }.As(out _foot));
 
             _dialog = new MessageBox
             {
-                Style = Styles.Dialog,
-                Placement = FixedSize.Wide(Sizes.Popup),
-                MessageStyle = Styles.Question,
-                ButtonStyle = Styles.Button,
-                DefaultStyle = Styles.Primary,
-                Cancel = new Relay(() => _editor.Unask()),
+                Style = Styles.Asking,
+                Placement = FixedSize.Width(Sizes.Popup),
+                CancelCommand = new RelayCommand(() => _editor.Unask()),
                 ShowsCancel = false
             };
 
             _codexTip = new CodexTip
             {
                 Style = Styles.CodexTip,
-                Shadow = Styles.ShortShadow,
-                Nests = true,
-                Placement = FixedSize.Wide(Sizes.Popup),
-                MaxHeight = Sizes.TipHigh,
-                Spacing = Gaps.Parts,
-                Delay = TipDelay,
-                Grace = TipGrace,
-                BodyStyle = Styles.Tip,
-                StepStyle = Styles.Icon,
-                BackSymbol = Symbols.Left,
-                ForwardSymbol = Symbols.Right,
-                Pages = _editor.Codex.Find
+                OpensNestedTips = true,
+                Placement = FixedSize.Width(Sizes.Popup),
+                ShowDelay = TipDelay,
+                CloseDelay = TipGrace,
+                FnResolvePage = _editor.Codex.Find,
+                FnIsPinKeyHeld = () => MyAPIGateway.Input?.IsAnyAltKeyPressed() == true
             };
 
-            Tips = _codexTip;
+            base.CodexTip = _codexTip;
             Input.FocusChanged += Refocused;
+            Input.PreviewPointerDown += PressReaching;
+            Input.PreviewWheel += Turning;
 
             _editor.Input = Input;
             _editor.Windows = Windows;
@@ -200,13 +194,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether a question with answers is waiting, which owns Enter and Escape.</summary>
-        public override bool IsQuestioning => Windows.IsOpen(_dialog) || Windows.IsOpen(_confirm);
+        public bool IsQuestioning => Windows.IsOpen(_dialog) || Windows.IsOpen(_confirm);
 
         /// <inheritdoc />
         protected override bool ShowsTips => _editor.TipsShown;
-
-        /// <inheritdoc />
-        protected override int Now => _editor.CurrentTick;
 
         /// <summary>Why the name in hand cannot be given as it stands, or empty when it can or none is.</summary>
         string Blocked
@@ -238,7 +229,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_editor.Current != _shownPage)
                 Show(screen);
 
-            _banner.Show(_editor.Notice, _editor.CurrentTick);
+            _banner.Show(_editor.Notice);
 
             if (screen.Revision == _seen)
                 return;
@@ -249,15 +240,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <inheritdoc />
-        /// <remarks>Nothing scrolls while a name is being typed.</remarks>
-        public override void ScrollBy(Vector2 point, float amount)
+        /// <remarks>While a question is open it takes Enter as its default answer and no other key; Escape is <see cref="Escape" /> whatever is open.</remarks>
+        public override bool Key(MyKeys key, bool shift, bool ctrl)
         {
-            if (_plate == null)
-                base.ScrollBy(point, amount);
+            if (key == MyKeys.Escape)
+                return !Escape();
+
+            if (IsQuestioning)
+                return key != MyKeys.Enter || TakeDefault();
+
+            return base.Key(key, shift, ctrl);
         }
 
         /// <summary>Escape, answering whether the host should close the editor.</summary>
-        public override bool Escape()
+        public bool Escape()
         {
             if (IsQuestioning)
             {
@@ -284,10 +280,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Takes the answer the page said Enter takes, and says whether there was one.</summary>
-        public override bool TakeDefault()
+        public bool TakeDefault()
         {
             if (Windows.IsOpen(_dialog))
-                return _dialog.TakeAccept();
+                return _dialog.PerformAccept();
 
             var taken = _editor.Screen.Default;
             if (!Windows.IsOpen(_confirm) || taken == null)
@@ -302,7 +298,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             if (Windows.IsOpen(_dialog))
             {
-                _dialog.TakeCancel();
+                _dialog.PerformCancel();
                 return;
             }
 
@@ -310,43 +306,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _editor.Unask();
         }
 
-        /// <inheritdoc />
-        /// <remarks>While the name being typed cannot be given, only a press on its plate goes on.</remarks>
-        protected override bool Admits(Vector2 point)
+        /// <summary>Notes what a press is about to reach, under which a question it raises hangs.</summary>
+        void PressReaching(Element target)
         {
-            return Blocked.Length == 0 || _plate.Reaches(point);
-        }
-
-        /// <inheritdoc />
-        protected override void Pressing(Element target)
-        {
-            // A question this press raises hangs under the target.
             _raisedBy = target;
         }
 
-        /// <inheritdoc />
-        protected override Element RootUnder(Vector2 point)
+        /// <summary>Holds the wheel while a name is being typed, and gives the screen's scroller the wheel turned anywhere on the screen unless the page scrolls itself.</summary>
+        void Turning(WheelEventArgs wheel)
         {
-            return Blocked.Length > 0 ? _plate.Under(point) : base.RootUnder(point);
-        }
-
-        /// <inheritdoc />
-        protected override Element RootSayingAt(Vector2 point)
-        {
-            return Blocked.Length > 0 ? _plate.SayingAt(point) : base.RootSayingAt(point);
-        }
-
-        /// <inheritdoc />
-        /// <remarks>The screen's scroller takes the wheel unless the page scrolls itself.</remarks>
-        protected override void ScrollRoot(Vector2 point, float amount)
-        {
-            if (_shownPage == null || !_shownPage.ScrollsItself)
+            if (_plate != null)
             {
-                _scroll.ScrollBy(amount);
+                wheel.Handled = true;
                 return;
             }
 
-            base.ScrollRoot(point, amount);
+            if (_shownPage != null && _shownPage.ScrollsItself || !Within(wheel.Target, _frame))
+                return;
+
+            _scroll.ScrollBy(wheel.Amount);
+            wheel.Handled = true;
+        }
+
+        /// <summary>Whether <paramref name="element" /> is <paramref name="holder" /> or inside it.</summary>
+        static bool Within(Element element, Element holder)
+        {
+            for (var at = element; at != null; at = at.Parent)
+            {
+                if (at == holder)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Keeps presses to the plate while the name being typed on it cannot be given as it stands.</summary>
+        void Confine()
+        {
+            Input.Confined = Blocked.Length > 0 ? _plate : null;
         }
 
         /// <summary>Opens the question the screen raised, or puts away the one it no longer asks.</summary>
@@ -385,15 +382,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var yes = screen.Answers.Count > 0 ? screen.Answers[0] : null;
             var no = screen.Answers.Count > 1 ? screen.Answers[1] : null;
 
-            _dialog.Message = screen.QuestionArguments == null ? Markdown.Parse(screen.Question) : Template.Read(screen.Question);
+            _dialog.Message = screen.QuestionArguments == null ? Markdown.Parse(screen.Question) : Template.Parse(screen.Question);
             _dialog.MessageArguments = screen.QuestionArguments;
             _dialog.YesText = yes != null ? yes.Text : "";
             _dialog.YesCommand = yes?.Command;
             _dialog.NoText = no != null ? no.Text : "";
             _dialog.NoCommand = no?.Command;
-            _dialog.Default = yes != null && yes == screen.Default ? MessageButton.Yes
-                : no != null && no == screen.Default ? MessageButton.No
-                : (MessageButton?)null;
+            _dialog.DefaultButton = yes != null && yes == screen.Default ? MessageBoxResult.Yes
+                : no != null && no == screen.Default ? MessageBoxResult.No
+                : (MessageBoxResult?)null;
 
             Windows.Open(_dialog);
         }
@@ -406,7 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             // Each page keeps how far down it was read, so coming back from a page opened from it finds the place again.
             if (_shownPage != null && !_shownPage.ScrollsItself)
-                _shownPage.Scrolled = _scroll.Scrolled;
+                _shownPage.Scrolled = _scroll.VerticalOffset;
 
             _shownPage = _editor.Current;
 
@@ -426,7 +423,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _body.Children.Add(drawn);
             _page.Cells[0, 0] = _scroll;
-            _scroll.Scrolled = _shownPage.Scrolled;
+            _scroll.ScrollToVerticalOffset(_shownPage.Scrolled);
         }
 
         /// <summary>Writes what the screen says onto the chrome: the heading, the words and states beside it, what each control does, and the way on.</summary>
@@ -492,7 +489,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var broken = screen.Standing == NoticeLevel.Problem;
             var warned = !broken && (screen.Standing == NoticeLevel.Warning || screen.HasSwitch && !screen.SwitchIsOn);
             RemarkLook.Ground(_head, broken ? NoticeLevel.Problem : warned ? NoticeLevel.Warning : NoticeLevel.Info, Palette.Chrome);
-            _switch.Says(texts.SwitchOn, texts.SwitchOff);
+            _switch.OnText = texts.SwitchOn;
+            _switch.OffText = texts.SwitchOff;
             _flips.CanExecute = screen.HasSwitch && !screen.SwitchLocked;
             _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);
 
@@ -559,7 +557,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (screen.CanGoBack)
                 Run(screen.Back);
             else
-                Close();
+                RequestClose();
         }
 
         /// <summary>Begins renaming the part of the heading at <paramref name="index" />.</summary>
@@ -589,6 +587,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             plate.Begin(naming.Name);
             Input.Focus(plate.Box);
             _seen = -1;
+            Confine();
         }
 
         /// <summary>Begins renaming the part of the heading that arrives to be named, once for that part.</summary>
@@ -645,6 +644,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             plate.Box.Edited -= Retyped;
             plate.End();
             _seen = -1;
+            Confine();
 
             if (Input.Focused == plate.Box)
                 Input.Focus(null);
@@ -654,6 +654,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void Retyped()
         {
             _seen = -1;
+            Confine();
         }
 
         /// <summary>Takes the keyboard leaving a name being typed as the press away it is, which gives the name.</summary>

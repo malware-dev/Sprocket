@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         readonly List<bool> _seen = new List<bool>();
         readonly List<string> _parts = new List<string>();
         readonly List<bool> _texts = new List<bool>();
-        readonly Relay _submit;
+        readonly RelayCommand _submit;
 
         bool _judged;
         bool _offered;
@@ -34,10 +34,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public FieldSet()
         {
             Focusable = true;
-            ColumnSpacing = 8f;
-            RowSpacing = 8f;
+            Base.ColumnSpacing = 8f;
+            Base.RowSpacing = 8f;
 
-            _submit = new Relay(delegate
+            _submit = new RelayCommand(delegate
             {
                 var submitted = Submitted;
                 if (submitted != null)
@@ -260,7 +260,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>Finishes the form on Enter, while it or a part of it that does not take Enter holds the keyboard.</summary>
-        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKeyDown(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (key != MyKeys.Enter)
                 return false;
@@ -403,7 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 if (!string.IsNullOrEmpty(about))
                     named.Tip = Tip.For(named.Tip, about);
 
-                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField ? FormRowLines.Two : FormRowLines.Fit);
+                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
                 return;
             }
 

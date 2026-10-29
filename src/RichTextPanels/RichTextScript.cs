@@ -40,7 +40,11 @@ namespace RichTextPanels
         readonly SpriteGraphics _graphics;
         readonly RichText _text = new RichText
         {
-            Base = { Font = Face, StrongFont = "SpaceEngineersBold", EmphasisFont = "SpaceEngineersItalic", StrongEmphasisFont = "SpaceEngineersBoldItalic" }
+            Base =
+            {
+                Font = Face, StrongFont = "SpaceEngineersBold", EmphasisFont = "SpaceEngineersItalic", StrongEmphasisFont = "SpaceEngineersBoldItalic",
+                CodeBackground = new Color(255, 255, 255, 10), CodePadding = new Thickness(4f, -1f)
+            }
         };
 
         readonly Viewbox _box;
@@ -59,7 +63,7 @@ namespace RichTextPanels
         public RichTextScript(IMyTextSurface surface, IMyCubeBlock block, Vector2 size)
             : base(surface, block, size)
         {
-            _graphics = new SpriteGraphics(surface, _sprites, new PanelPictures());
+            _graphics = new SpriteGraphics(surface, _sprites, new MaterialImages(new GameScreenSpace().TextureSize), () => GameClock.Now);
             _text.Base.CodeFont = CodeFace.Of(surface);
             _box = new Viewbox { Content = _text };
             _page = new Grid
@@ -157,6 +161,7 @@ namespace RichTextPanels
             _text.Base.Color = _foreground;
             _text.Base.StrongColor = _foreground;
             _text.Base.EmphasisColor = _foreground;
+            _text.Base.LinkColor = _foreground;
             _text.Base.HeadingColor = _foreground;
             _text.Base.RuleColor = Color.Lerp(_background, _foreground, 0.5f);
             _box.Base.Padding = new Thickness(_padding / 100f * Math.Min(room.X, room.Y));
@@ -164,8 +169,7 @@ namespace RichTextPanels
             // The instructions are sentences that wrap, so they are never fitted: they are shown at the panel's own size, and
             // in one line where the whole of them does not fit.
             var blank = IsBlank(source);
-            _box.Grows = _fitted && !blank;
-            _box.Shrinks = _fitted && !blank;
+            _box.StretchDirection = _fitted && !blank ? StretchDirection.Both : StretchDirection.None;
             if (blank)
             {
                 _text.Markdown = Instructions.Full;

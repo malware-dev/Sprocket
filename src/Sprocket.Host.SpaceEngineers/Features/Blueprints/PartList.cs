@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     /// with every slot's name in one column as wide as the widest of them needs.
     /// </summary>
     /// <remarks>Where the slots can be arranged, a slot is carried by its grip and a category by its own, with its slots.</remarks>
-    public class PartList : CarryList
+    public class PartList : ReorderList
     {
         /// <summary>The widest the column gets.</summary>
         public const float Widest = 560f;

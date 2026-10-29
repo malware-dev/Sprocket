@@ -81,7 +81,7 @@ public class StatusPictureTests
                         if (sprite.Type != SpriteType.TEXT || string.IsNullOrEmpty(sprite.Data))
                             continue;
 
-                        var wanted = sprite.FontId == Symbols.Font ? Contrast.Mark : Contrast.Text;
+                        var wanted = sprite.FontId == Symbols.Font ? Contrast.MinimumNonTextRatio : Contrast.MinimumTextRatio;
                         var reached = Math.Min(wanted, Contrast.Ratio(ink, ground));
                         Assert.True(Contrast.Ratio(sprite.Color!.Value, ground) >= reached - 0.01f,
                             colors.Key + ", " + scene + " on " + shape.Name + ": \"" + sprite.Data + "\" stands "
@@ -163,7 +163,7 @@ public class StatusPictureTests
         picture.Look.Slid = 0.3f;
         Draw(picture, face, status, texts, 1, 0);
         face.Sprites.Clear();
-        var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+        var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
         graphics.Begin();
         picture.Look.Slid = 0.7f;
         picture.Redraw(graphics);
@@ -242,7 +242,7 @@ public class StatusPictureTests
     static void Draw(StatusPicture picture, Face face, ConstructStatus status, Localization.Texts texts, int turn, int from)
     {
         face.Sprites.Clear();
-        var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+        var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
         graphics.Begin();
         picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, face.Shape.Metres, turn, from);
     }

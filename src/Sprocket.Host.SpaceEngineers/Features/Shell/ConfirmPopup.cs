@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var asks = !string.IsNullOrEmpty(question);
             _question.IsVisible = asks;
-            _question.Document = !asks ? null : arguments == null ? Markdown.Parse(question) : Template.Read(question);
+            _question.Document = !asks ? null : arguments == null ? Markdown.Parse(question) : Template.Parse(question);
             _question.Arguments = arguments;
 
             _answers.Children.Clear();

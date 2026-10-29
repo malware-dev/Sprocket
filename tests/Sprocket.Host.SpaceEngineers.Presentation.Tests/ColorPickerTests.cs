@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>The color picker takes a code written with or without its hash, and always shows it as the script writes one.</summary>
 public class ColorPickerTests
 {
-    static ColorPicker Field() => new ColorPicker(new ColorOffer(new List<Hsv>(), null, null), new Relay(() => { }), new Texts());
+    static ColorPicker Field() => new ColorPicker(new ColorOffer(new List<Hsv>(), null, null), new RelayCommand(() => { }), new Texts());
 
     /// <summary>A code written without the hash is taken, and given back with it.</summary>
     [Theory]

@@ -11,19 +11,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     {
         Label _empty;
         RichText _typesHeading;
-        CarryList _types;
+        ReorderList _types;
         HStack _addTypes;
         Button _addType;
         Label _statesHeading;
-        CarryList _states;
+        ReorderList _states;
         HStack _addStates;
         Button _addState;
 
         /// <summary>Makes the headings, the lists, and the buttons that add to them.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Sections;
-            Children.Add(new Label { Style = Styles.Empty, Wraps = true, IsVisible = false }.As(out _empty));
+            Base.Spacing = Gaps.Sections;
+            Children.Add(new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _empty));
             Children.Add(new Section
             {
                 Children =
@@ -31,10 +31,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _typesHeading),
                     new VStack
                     {
-                        Spacing = Gaps.Items,
+                        Base = { Spacing = Gaps.Items },
                         Children =
                         {
-                            new CarryList { Spacing = Gaps.Items }.As(out _types),
+                            new ReorderList { Base = { Spacing = Gaps.Items } }.As(out _types),
                             new HStack { Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes)
                         }
                     }
@@ -47,10 +47,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     new Label { Style = Styles.H2 }.As(out _statesHeading),
                     new VStack
                     {
-                        Spacing = Gaps.Items,
+                        Base = { Spacing = Gaps.Items },
                         Children =
                         {
-                            new CarryList { Spacing = Gaps.Items }.As(out _states),
+                            new ReorderList { Base = { Spacing = Gaps.Items } }.As(out _states),
                             new HStack { Children = { new Button { Style = Styles.Start }.As(out _addState) } }.As(out _addStates)
                         }
                     }

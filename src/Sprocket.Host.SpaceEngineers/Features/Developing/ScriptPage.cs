@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         public override bool ScrollsItself => true;
 
         /// <summary>The box the script is written in, where the view has been made.</summary>
-        public EditBox Listing => _listing;
+        public TextArea Listing => _listing;
 
         /// <summary>The button that puts what the box says in place of the program, where the view has been made.</summary>
         public Button Apply => _apply;
@@ -95,7 +95,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
 
         void Show()
         {
-            _shown = Written();
+            // Setting a box's text replaces it, measuring every line again and putting the caret at the start, so the same
+            // listing written out again is left where it is.
+            var written = Written();
+            if (written == _shown && _listing.Text == written)
+                return;
+
+            _shown = written;
             _listing.Text = _shown;
         }
 

@@ -14,11 +14,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void CreateView()
         {
             Style = Styles.Menu;
-            Gap = 4f;
+            Base.Gap = 4f;
 
             Content = new VStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
                     new RichText { Style = Styles.MenuQuestion }.As(out _question),

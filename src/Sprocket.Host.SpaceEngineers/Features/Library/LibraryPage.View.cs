@@ -17,13 +17,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             return new HStack
             {
-                Spacing = Gaps.Sections,
+                Base = { Spacing = Gaps.Sections },
                 Children =
                 {
                     new VStack
                     {
-                        Spacing = Gaps.Parts,
-                        Placement = FixedSize.Wide(640f),
+                        Base = { Spacing = Gaps.Parts },
+                        Placement = FixedSize.Width(640f),
                         Children =
                         {
                             new TextBox { Style = Styles.Search, Focusable = true }.As(out _search),
@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                             {
                                 Style = Styles.ScrollView,
                                 Placement = Flex.Grow,
-                                Content = new VStack { Spacing = Gaps.Sections }.As(out _list)
+                                Content = new VStack { Base = { Spacing = Gaps.Sections } }.As(out _list)
                             }
                         }
                     },

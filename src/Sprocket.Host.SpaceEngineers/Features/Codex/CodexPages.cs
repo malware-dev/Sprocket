@@ -102,8 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Makes the links in <paramref name="text" /> explain what they are on: resting on one shows the page it names, while the terms are <see cref="Shown" />.</summary>
         public void Explain(RichText text)
         {
-            text.LinkTip = link => Find(link.Target);
-            text.LinksPlain = () => !Shown;
+            text.FnResolveLinkTip = link => Shown ? Find(link.Target) : null;
         }
 
         /// <summary>Lets go of every page read in the language that was spoken, so the next reading is in the one spoken now.</summary>

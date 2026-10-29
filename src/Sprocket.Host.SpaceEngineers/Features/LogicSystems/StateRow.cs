@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     /// A state on a logic system's State tab: its name, what it holds, the value it starts at, and what the installation
     /// shown holds now, with a grip that carries it and a bin.
     /// </summary>
-    public partial class StateRow : HStack, ICarried
+    public partial class StateRow : HStack, IReorderable, IDragged
     {
         /// <summary>A state with no name yet.</summary>
         public StateRow()
@@ -103,18 +103,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
         public void Grips(bool can, string about)
         {
-            _grip.CanCarry = can;
-            _grip.Color = can ? Palette.Faint : Palette.Dim;
+            _grip.CanDrag = can;
+            _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
             _grip.Tip = Tip.For(_grip.Tip, about);
         }
 
         /// <inheritdoc />
-        public Grip Grip => _grip;
+        public DragHandle DragHandle => _grip;
 
         /// <inheritdoc />
-        public bool IsCarried { get; set; }
+        public bool IsDragging { get; private set; }
 
         /// <inheritdoc />
-        public int Carries => 0;
+        bool IDragged.IsDragging
+        {
+            set { IsDragging = value; }
+        }
+
+        /// <inheritdoc />
+        public int DraggedWithCount => 0;
     }
 }

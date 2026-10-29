@@ -40,12 +40,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             return new VStack
             {
-                Spacing = Gaps.Items,
+                Base = { Spacing = Gaps.Items },
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Children =
                         {
                             new Label { Style = Styles.Phrase }.As(out _usingLead),
@@ -53,11 +53,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         }
                     }.As(out _using),
 
-                    new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _halted),
+                    new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _halted),
 
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         IsVisible = false,
                         Children =
                         {
@@ -67,24 +67,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
                     new TabView
                     {
-                        HeaderStyle = Styles.Tab,
-                        Spacing = Gaps.Items,
+                        Base = { Spacing = Gaps.Items },
                         Tabs =
                         {
                             new Tab
                             {
-                                Marker = new Glyph { Symbol = Symbols.Warning, Style = Styles.TabMark, IsVisible = false }.As(out _triggersMark),
+                                Style = Styles.Tab,
+                                Badge = new Glyph { Symbol = Symbols.Warning, Style = Styles.TabMark, IsVisible = false }.As(out _triggersMark),
                                 Content = new VStack
                                 {
-                                    Spacing = Gaps.Items,
+                                    Base = { Spacing = Gaps.Items },
                                     Children =
                                     {
                                         new VStack
                                         {
                                             IsVisible = false,
-                                            Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noTriggers) }
+                                            Children = { new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noTriggers) }
                                         }.As(out _noTriggersLine),
-                                        new VStack { Spacing = Gaps.Items }.As(out _triggerList),
+                                        new VStack { Base = { Spacing = Gaps.Items } }.As(out _triggerList),
                                         new VStack
                                         {
                                             Children =
@@ -97,14 +97,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                             }.As(out _triggersTab),
                             new Tab
                             {
-                                Marker = new Glyph { Symbol = Symbols.Warning, Style = Styles.TabMark, IsVisible = false }.As(out _sequencesMark),
+                                Style = Styles.Tab,
+                                Badge = new Glyph { Symbol = Symbols.Warning, Style = Styles.TabMark, IsVisible = false }.As(out _sequencesMark),
                                 Content = new VStack
                                 {
-                                    Spacing = Gaps.Items,
+                                    Base = { Spacing = Gaps.Items },
                                     Children =
                                     {
-                                        new Label { Style = Styles.Empty, Wraps = true }.As(out _noSequences),
-                                        new VStack { Spacing = Gaps.Items }.As(out _sequenceList),
+                                        new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noSequences),
+                                        new VStack { Base = { Spacing = Gaps.Items } }.As(out _sequenceList),
                                         new VStack
                                         {
                                             Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
@@ -112,9 +113,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                     }
                                 }
                             }.As(out _sequencesTab),
-                            new Tab { Content = new StatePanel().As(out _statePanel) }.As(out _stateTab),
+                            new Tab { Style = Styles.Tab, Content = new StatePanel().As(out _statePanel) }.As(out _stateTab),
                             new Tab
                             {
+                                Style = Styles.Tab,
                                 Content = new SlotPanel().As(out _slotPanel)
                             }.As(out _panelTab)
                         }

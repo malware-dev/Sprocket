@@ -8,7 +8,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
     /// <summary>A type on a logic system's State tab: its name, then the words before its choices and the choices, with a grip that carries it, a way to add a choice, and a bin.</summary>
-    public partial class TypeRow : HStack, ICarried
+    public partial class TypeRow : HStack, IReorderable, IDragged
     {
         /// <summary>A type with no name and no choices yet, each choice it comes to have shown on a plate of its own.</summary>
         public TypeRow()
@@ -53,18 +53,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
         public void Grips(bool can, string about)
         {
-            _grip.CanCarry = can;
-            _grip.Color = can ? Palette.Faint : Palette.Dim;
+            _grip.CanDrag = can;
+            _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
             _grip.Tip = Tip.For(_grip.Tip, about);
         }
 
         /// <inheritdoc />
-        public Grip Grip => _grip;
+        public DragHandle DragHandle => _grip;
 
         /// <inheritdoc />
-        public bool IsCarried { get; set; }
+        public bool IsDragging { get; private set; }
 
         /// <inheritdoc />
-        public int Carries => 0;
+        bool IDragged.IsDragging
+        {
+            set { IsDragging = value; }
+        }
+
+        /// <inheritdoc />
+        public int DraggedWithCount => 0;
     }
 }

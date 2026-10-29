@@ -8,6 +8,7 @@ using VRageMath;
 using Lumel;
 using Lumel.Drawing;
 using Lumel.Input;
+using Lumel.Screens;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
 using Lumel.Text;
@@ -159,6 +160,9 @@ namespace Sprocket.Sim.Simulation
             _ship.Editor.Opened();
         }
 
+        /// <summary>The frame the ship is on, which the screen is timed by.</summary>
+        public int CurrentTick => _ship.Editor.CurrentTick;
+
         /// <summary>Advances the ship one frame. The clock is the window's, as it is the game's in the mod.</summary>
         public void Tick()
         {
@@ -215,12 +219,6 @@ namespace Sprocket.Sim.Simulation
 
                 return null;
             }
-        }
-
-        /// <summary>Whether the caret is drawn this frame.</summary>
-        public bool CaretVisible
-        {
-            set => _view.CaretVisible = value;
         }
 
         /// <summary>Whether a question with answers is waiting, which owns Enter and Escape.</summary>
@@ -308,7 +306,7 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Moves whatever is under the pointer. Positive scrolls down.</summary>
         public void ScrollBy(Vector2 point, float amount)
         {
-            _view.ScrollBy(point, amount);
+            _view.Wheel(point, amount);
         }
 
         /// <summary>How many times the screen has written what the editor says onto its controls.</summary>
@@ -323,7 +321,7 @@ namespace Sprocket.Sim.Simulation
             set
             {
                 var held = value;
-                _view.IsKeepKeyHeld = () => held;
+                _view.CodexTip.FnIsPinKeyHeld = () => held;
             }
         }
 
@@ -339,7 +337,7 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public Element? Under(Vector2 point)
         {
-            return _view.Under(point);
+            return _view.HitTest(point);
         }
 
         /// <summary>Where a press reaches the first thing on the screen saying <paramref name="text" />, in UI units.</summary>
@@ -386,7 +384,7 @@ namespace Sprocket.Sim.Simulation
         public void Up()
         {
             _view.PointerUp(_at, PointerButton.Left);
-            _view.TakeClose();
+            ((IClosingWorkspace)_view).TakeCloseRequest();
         }
 
         /// <summary>Brings the editor up to date and draws it into <paramref name="g" />.</summary>

@@ -31,8 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Focusable = true;
 
             Children.Add(new Switch { Style = Styles.Switch }.As(out _switch));
-            _switch.Says(on, off);
-            _switch.Command = new Relay(Flip);
+            _switch.OnText = on;
+            _switch.OffText = off;
+            _switch.Command = new RelayCommand(Flip);
         }
 
         /// <inheritdoc />
@@ -52,14 +53,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public bool IsWrong
         {
-            set { Base.Edge = value ? Palette.Problem : Palette.None; }
+            set { Base.Border = value ? Palette.Problem : Palette.None; }
         }
 
         /// <inheritdoc />
         public Element Keyboard => this;
 
         /// <inheritdoc />
-        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKeyDown(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             var by = KeyboardChoice.By(key);
             if (by == 0)
@@ -73,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        protected override void OnText(char c)
+        protected override void OnTextInput(char c)
         {
             var word = KeyboardChoice.Letter(_words, _text, c);
             if (word != null)
@@ -83,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Gives the other word, or the first where neither has been given.</summary>
         void Flip()
         {
-            if (_switch.Presses > 1)
+            if (_switch.ClickCount > 1)
             {
                 _submit.Execute();
                 return;

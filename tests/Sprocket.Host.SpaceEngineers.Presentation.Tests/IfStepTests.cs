@@ -145,7 +145,7 @@ public class IfStepTests
             rows.Select(row => row.Kind));
         Assert.Equal(new[] { 0, 1, 1, 0, 1, 1, 0, 0 }, rows.Select(row => row.Depth));
         Assert.Equal(new[] { 1, 2, 0, 3, 4, 0, 0, 5 }, rows.Select(row => row.Number));
-        Assert.Equal(6, rows[0].Carries);
+        Assert.Equal(6, rows[0].DraggedWithCount);
     }
 
     /// <summary>How an if compares is a part of its own, chosen from a menu under it of the comparisons its value takes, as one edit.</summary>
@@ -270,7 +270,7 @@ public class IfStepTests
         var list = (StepList)rig.Editor.StepRows()[0].Parent!;
 
         // The if's row to the top: the wait it was under is now after the whole of it.
-        list.Moves!(1, 0);
+        Dropped.On(list, 1, 0);
         rig.Tick();
         Assert.IsType<If>(sequence.Steps[0]);
         Assert.Equal(60, Assert.IsType<Wait>(sequence.Steps[1]).Ticks);
@@ -278,7 +278,7 @@ public class IfStepTests
         Assert.Equal(30, Assert.IsType<Wait>(sequence.Steps[3]).Ticks);
 
         // That wait above the end of the branch: into the if, after the step already there.
-        list.Moves!(4, 2);
+        Dropped.On(list, 4, 2);
         rig.Tick();
         Assert.IsType<If>(sequence.Steps[0]);
         Assert.Equal(60, Assert.IsType<Wait>(sequence.Steps[1]).Ticks);
@@ -298,7 +298,7 @@ public class IfStepTests
 
         // Rows: if, wait 60, end, otherwise if, wait 120, end, otherwise, wait 30, end, closing. Carrying wait 120, the
         // others are counted without it: the gaps under the three ends are 3, 5 and 8.
-        Assert.Equal(new[] { 0, 1, 2, 4, 6, 7, 9 }, list.Landings!(4));
+        Assert.Equal(new[] { 0, 1, 2, 4, 6, 7, 9 }, list.FnAllowedDropIndexes!(4));
     }
 
     /// <summary>An otherwise if dragged above its if becomes the if, with its steps, and the if becomes an otherwise if.</summary>
@@ -309,7 +309,7 @@ public class IfStepTests
         var list = (StepList)rig.Editor.StepRows()[0].Parent!;
 
         // Rows: if, wait 60, end, otherwise if, wait 120, end, otherwise, wait 30, end, closing.
-        list.Moves!(3, 0);
+        Dropped.On(list, 3, 0);
         rig.Tick();
 
         Assert.Same(second, ((If)sequence.Steps[0]).Test);
@@ -334,7 +334,7 @@ public class IfStepTests
         var before = sequence.Steps.ToList();
         var list = (StepList)rig.Editor.StepRows()[0].Parent!;
 
-        list.Moves!(3, to);
+        Dropped.On(list, 3, to);
         rig.Tick();
 
         Assert.Equal(before, sequence.Steps);
@@ -349,7 +349,7 @@ public class IfStepTests
         var list = (StepList)rig.Editor.StepRows()[0].Parent!;
 
         // Above the if, or where it stands now, right above the otherwise.
-        Assert.Equal(new[] { 0, 3 }, list.Landings!(3));
+        Assert.Equal(new[] { 0, 3 }, list.FnAllowedDropIndexes!(3));
     }
 
     /// <summary>if A { wait 60 } otherwise if B { wait 120 } otherwise { wait 30 }, on the screen.</summary>

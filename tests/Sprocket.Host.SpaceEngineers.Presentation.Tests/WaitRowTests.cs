@@ -27,14 +27,14 @@ public class WaitRowTests
             Open(rig, "Airlock Outer Door"), new Await());
 
         var rows = rig.Editor.StepRows();
-        rows[2].IsHot = true;
+        ((IInputTarget)rows[2]).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { true, true, false, false, false }, rows.Select(row => row.MarksLit).ToArray());
         Assert.Equal(new[] { false, false, true, false, false }, rows.Select(row => row.ClockLit).ToArray());
 
-        rows[2].IsHot = false;
+        ((IInputTarget)rows[2]).IsPointerOver = false;
         var chip = rows[3].ChipOf(rows[3].Slots[0])!;
-        chip.IsHot = true;
+        ((IInputTarget)chip).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { false, false, false, false, true }, rows.Select(row => row.ClockLit).ToArray());
         Assert.Equal(new[] { false, false, false, true, false }, rows.Select(row => row.MarksLit).ToArray());
@@ -96,7 +96,7 @@ public class WaitRowTests
         Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
 
         var rows = rig.Editor.StepRows();
-        rows[2].Within().OfType<Lumel.Text.RichText>().First().IsHot = true;
+        ((IInputTarget)rows[2].Within().OfType<Lumel.Text.RichText>().First()).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { true, true, false }, rows.Select(row => row.MarksLit).ToArray());
         Assert.Equal(new[] { false, false, true }, rows.Select(row => row.ClockLit).ToArray());
@@ -112,14 +112,14 @@ public class WaitRowTests
 
         var rows = rig.Editor.StepRows();
         var chip = rows[0].ChipOf(rows[0].Slots[0])!;
-        chip.IsHot = true;
+        ((IInputTarget)chip).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { false, false, true, false }, rows.Select(row => row.ClockLit).ToArray());
         Assert.Equal(new[] { true, false, false, false }, rows.Select(row => row.MarksLit).ToArray());
 
         // Nothing waits for the last step, so it lights nothing.
-        chip.IsHot = false;
-        rows[3].ChipOf(rows[3].Slots[0])!.IsHot = true;
+        ((IInputTarget)chip).IsPointerOver = false;
+        ((IInputTarget)rows[3].ChipOf(rows[3].Slots[0])!).IsPointerOver = true;
         rig.Tick();
         Assert.All(rows, row => Assert.False(row.ClockLit || row.MarksLit));
     }
@@ -132,13 +132,13 @@ public class WaitRowTests
         Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
 
         var rows = rig.Editor.StepRows();
-        rows[1].IsHot = true;
+        ((IInputTarget)rows[1]).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { false, false, true }, rows.Select(row => row.ClockLit).ToArray());
         Assert.Equal(new[] { false, true, false }, rows.Select(row => row.MarksLit).ToArray());
 
-        rows[1].IsHot = false;
-        rows[0].Within().OfType<Lumel.Text.RichText>().First().IsHot = true;
+        ((IInputTarget)rows[1]).IsPointerOver = false;
+        ((IInputTarget)rows[0].Within().OfType<Lumel.Text.RichText>().First()).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { false, false, true }, rows.Select(row => row.ClockLit).ToArray());
         Assert.Equal(new[] { true, false, false }, rows.Select(row => row.MarksLit).ToArray());
@@ -156,12 +156,12 @@ public class WaitRowTests
         rig.Tick();
 
         var rows = rig.Editor.StepRows();
-        rows[4].IsHot = true;
+        ((IInputTarget)rows[4]).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { true, true, false, true, false }, rows.Select(row => row.MarksLit).ToArray());
 
-        rows[4].IsHot = false;
-        rows[2].IsHot = true;
+        ((IInputTarget)rows[4]).IsPointerOver = false;
+        ((IInputTarget)rows[2]).IsPointerOver = true;
         rig.Tick();
         Assert.All(rows, row => Assert.False(row.MarksLit || row.ClockLit));
     }
@@ -177,7 +177,7 @@ public class WaitRowTests
         rig.Tick();
 
         var rows = rig.Editor.StepRows();
-        rows[2].IsHot = true;
+        ((IInputTarget)rows[2]).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { true, false, false }, rows.Select(row => row.MarksLit).ToArray());
     }
@@ -190,8 +190,8 @@ public class WaitRowTests
         Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
 
         var rows = rig.Editor.StepRows();
-        ((IInputTarget)rows[0].Grip).PointerDown(Vector2.Zero, PointerButton.Left, 1, false, false);
-        rows[2].IsHot = true;
+        ((IInputTarget)rows[0].DragHandle).PointerDown(Vector2.Zero, PointerButton.Left, 1, false, false);
+        ((IInputTarget)rows[2]).IsPointerOver = true;
         rig.Tick();
         Assert.All(rows, row => Assert.False(row.ClockLit || row.MarksLit));
     }
@@ -248,7 +248,7 @@ public class WaitRowTests
             Open(rig, "Airlock Outer Door"));
 
         var rows = rig.Editor.StepRows();
-        rows[0].ChipOf(rows[0].Slots[0])!.IsHot = true;
+        ((IInputTarget)rows[0].ChipOf(rows[0].Slots[0])!).IsPointerOver = true;
         rig.Tick();
         Assert.Equal(new[] { true, true, true, true, false }, rows.Select(row => row.Joins).ToArray());
         Assert.True(rows[0].JoinFirst);

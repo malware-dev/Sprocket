@@ -55,7 +55,7 @@ public class SystemTabsTests
     {
         var screen = WithAnUnstartedSequence();
 
-        var sequences = Assert.IsType<Glyph>(Tabs(screen)[1].Marker);
+        var sequences = Assert.IsType<Glyph>(Tabs(screen)[1].Badge);
         Assert.True(sequences.IsVisible);
         Assert.Equal(screen.Editor.Texts.Codex.SystemTabFlagged, sequences.Tip?.Text);
     }
@@ -66,11 +66,11 @@ public class SystemTabsTests
     {
         var screen = WithAnUnstartedSequence();
         var tabs = Tabs(screen);
-        var mark = Assert.IsType<Glyph>(tabs[1].Marker);
+        var mark = Assert.IsType<Glyph>(tabs[1].Badge);
         var warned = mark.Tint == Palette.Notice;
 
         Assert.True(tabs[1].Is(warned ? LookStates.Warned : LookStates.Broken));
-        var current = tabs[1].IsCurrent;
+        var current = tabs[1].IsSelected;
         Assert.Same(warned ? current ? Styles.NoticeStripesHot : Styles.NoticeStripes : current ? Styles.ProblemStripesHot : Styles.ProblemStripes, tabs[1].Pattern);
         Assert.Same(Styles.Tab, tabs[0].Style);
         Assert.False(tabs[0].Is(LookStates.Warned) || tabs[0].Is(LookStates.Broken));
@@ -89,13 +89,13 @@ public class SystemTabsTests
         screen.Run(2);
         screen.Editor.NewSystem("Hangar");
         screen.Run(2);
-        Assert.True(Tabs(screen)[0].IsCurrent, "a logic system never opened did not open on its first tab");
+        Assert.True(Tabs(screen)[0].IsSelected, "a logic system never opened did not open on its first tab");
 
         screen.Editor.GoToRoot();
         screen.Run(2);
         screen.Editor.OpenBlueprintSystem(0);
         screen.Run(2);
-        Assert.True(Tabs(screen)[2].IsCurrent, "the logic system did not open on the tab it was left on");
+        Assert.True(Tabs(screen)[2].IsSelected, "the logic system did not open on the tab it was left on");
     }
 
     /// <summary>A sequence that wants looking at marks the Sequences tab in its color, wherever the screen is, and the Triggers tab stays plain.</summary>
@@ -105,10 +105,10 @@ public class SystemTabsTests
         var screen = WithAnUnstartedSequence();
         var tabs = Tabs(screen);
 
-        var sequences = Assert.IsType<Glyph>(tabs[1].Marker);
+        var sequences = Assert.IsType<Glyph>(tabs[1].Badge);
         Assert.True(sequences.IsVisible, "the Sequences tab carries no mark for a sequence nothing starts");
         Assert.Equal(Palette.Notice, sequences.Tint);
-        Assert.False(tabs[0].Marker!.IsVisible);
+        Assert.False(tabs[0].Badge!.IsVisible);
 
         screen.Editor.PressTab(screen.Editor.Texts.SystemSequences);
         screen.Run(2);
@@ -120,8 +120,8 @@ public class SystemTabsTests
         screen.Editor.OpenBlueprintSystem(0);
         screen.Run(130);
         var again = Tabs(screen);
-        Assert.True(again[1].IsCurrent);
-        Assert.True(again[1].Marker!.IsVisible, "the Sequences tab opened onto carries no mark");
-        Assert.True(again[1].Marker!.Bounds.Width > 0f, "the Sequences tab's mark was given no room");
+        Assert.True(again[1].IsSelected);
+        Assert.True(again[1].Badge!.IsVisible, "the Sequences tab opened onto carries no mark");
+        Assert.True(again[1].Badge!.Bounds.Width > 0f, "the Sequences tab's mark was given no room");
     }
 }

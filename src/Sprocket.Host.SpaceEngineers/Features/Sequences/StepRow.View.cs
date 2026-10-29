@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
     partial class StepRow
     {
-        Grip _grip;
+        DragHandle _grip;
         Label _number;
         Flow _sentence;
         Label _problem;
@@ -22,38 +22,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Makes the grip and the step's number, the sentence, the pause and the bin.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
 
             Children.Add(new HStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Children =
                 {
-                    new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
-                    new Label { Style = Styles.Aside, Placement = FixedSize.Wide(36f) }.As(out _number)
+                    new DragHandle { Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
+                    new Label { Style = Styles.Aside, Placement = FixedSize.Width(36f) }.As(out _number)
                 }
             });
 
             Children.Add(new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Placement = Flex.Grow,
                 Children =
                 {
                     new Flow
                     {
-                        Spacing = Gaps.Parts,
-                        LineSpacing = Gaps.Parts,
-                        Indent = Sizes.Indent,
+                        Base = { Spacing = Gaps.Parts, LineSpacing = Gaps.Parts, Indent = Sizes.Indent },
                         Children =
                         {
-                            new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.AwaitedOutline, HaloSize = 20f * Sizes.Halo }
+                            new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.AwaitedOutline, Base = { HaloSize = 20f * Sizes.Halo } }
                                 .As(out _leadWaits),
                             new RichText { Style = Styles.PhraseTerm }.As(out _lead)
                         }
                     }.As(out _sentence),
 
-                    new Label { Style = Styles.Problem, Wraps = true, IsVisible = false }.As(out _problem)
+                    new Label { Style = Styles.Problem, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _problem)
                 }
             });
 

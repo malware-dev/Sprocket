@@ -52,12 +52,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _kindLine.Tip = Tip.For(null, texts.Codex.PickKindAbout);
 
             _narrow.Edited += () => Typed(_narrow, _narrowClear, Narrowed);
-            _narrowClear.Command = new Relay(() => Emptied(_narrow, _narrowClear, Narrowed));
+            _narrowClear.Command = new RelayCommand(() => Emptied(_narrow, _narrowClear, Narrowed));
             _kindNarrow.Edited += () => Typed(_kindNarrow, _kindNarrowClear, KindsNarrowed);
-            _kindNarrowClear.Command = new Relay(() => Emptied(_kindNarrow, _kindNarrowClear, KindsNarrowed));
+            _kindNarrowClear.Command = new RelayCommand(() => Emptied(_kindNarrow, _kindNarrowClear, KindsNarrowed));
 
             // The list hangs off this line and is reachable only while it hangs there, so its rows cannot be pressed through it.
-            _kindLine.Command = new Relay(delegate
+            _kindLine.Command = new RelayCommand(delegate
             {
                 _kinds.Toggle();
                 if (_kinds.IsOpen && KindsOpened != null)
@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     return;
 
                 _width = value;
-                Placement = FixedSize.Wide(value);
+                Placement = FixedSize.Width(value);
             }
         }
 

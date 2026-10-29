@@ -634,7 +634,7 @@ public class StateEditingTests
         Assert.Equal(CodexPages.Link(editor.Texts.PickStates.ToUpperInvariant(), CodexPages.LogicSystemStates), heading.Markdown);
         Assert.Same(editor.Codex.Find(CodexPages.LogicSystemStates), heading.TipAt(at));
         var bounds = heading.Bounds;
-        var said = Page(screen).View.SayingAt(new VRageMath.Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
+        var said = Page(screen).View.TipOwnerAt(new VRageMath.Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
         Assert.Same(heading, said);
         var starts = Target.Within(view).OfType<Label>().Single(label => label.Text == editor.Texts.StateStarts);
         Assert.NotNull(starts.Tip);

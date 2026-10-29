@@ -20,10 +20,10 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
             Children.Add(new Glyph { Symbol = Symbols.Check, Align = Align.Center }.As(out _check));
             Children.Add(new VStack().As(out _underCheck));
-            Children.Add(new Label { Wraps = true, Centres = true }.As(out _says));
+            Children.Add(new Label { TextWrapping = TextWrapping.Wrap, Base = { TextAlignment = TextAlignment.Center } }.As(out _says));
             Children.Add(new VStack().As(out _underSays));
-            Children.Add(new Label { Wraps = true, Centres = true }.As(out _count));
-            Children.Add(new Label { Wraps = true, Centres = true }.As(out _fix));
+            Children.Add(new Label { TextWrapping = TextWrapping.Wrap, Base = { TextAlignment = TextAlignment.Center } }.As(out _count));
+            Children.Add(new Label { TextWrapping = TextWrapping.Wrap, Base = { TextAlignment = TextAlignment.Center } }.As(out _fix));
         }
     }
 }

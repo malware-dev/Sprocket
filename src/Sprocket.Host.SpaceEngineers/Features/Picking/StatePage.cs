@@ -440,7 +440,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _asking = asking;
             _form.Show(_asking, filled, null, texts);
-            _form.Rows.Add(_othersHeading, _othersList, FormRowLines.Two);
+            _form.Rows.Add(_othersHeading, _othersList, FormLabelPlacement.Above);
             _seenWord = Word;
         }
 

@@ -49,24 +49,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _texts = texts;
             _input = input;
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
 
-            var number = new HStack { Spacing = Gaps.Parts };
+            var number = new HStack { Base = { Spacing = Gaps.Parts } };
             number.Children.Add(new Glyph
             {
                 Symbol = Symbols.Minus,
                 Style = Styles.Icon,
                 Placement = FixedSize.Size(32f, 32f),
-                Command = new Relay(() => Step(-1)),
+                Command = new RelayCommand(() => Step(-1)),
                 Tip = Tip.For(null, texts.Codex.WaitShorter)
             });
             number.Children.Add(new NumberBox
             {
-                Style = Styles.Value,
+                Style = Styles.Number,
                 Focusable = true,
-                Least = 0,
+                Minimum = 0,
                 Widest = Widest,
-                Submit = new Relay(() => Raise(Submitted)),
+                Submit = new RelayCommand(() => Raise(Submitted)),
                 Tip = Tip.For(null, texts.Codex.SequenceWaitTypedAbout)
             }.As(out _box));
             number.Children.Add(new Glyph
@@ -74,43 +74,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Symbol = Symbols.Plus,
                 Style = Styles.Icon,
                 Placement = FixedSize.Size(32f, 32f),
-                Command = new Relay(() => Step(1)),
+                Command = new RelayCommand(() => Step(1)),
                 Tip = Tip.For(null, texts.Codex.WaitLonger)
             });
             // At the right end, across from the number it is the unit of.
-            number.Children.Add(new HStack { Placement = Flex.Spare });
+            number.Children.Add(new HStack { Placement = Flex.Spacer });
             number.Children.Add(new Switch
             {
                 Style = Styles.Switch,
                 Tip = Tip.For(null, texts.Codex.TermTick),
-                Command = new Relay(() => Unit(!_inSeconds))
+                Command = new RelayCommand(() => Unit(!_inSeconds))
             }.As(out _unit));
-            _unit.Says(texts.WaitInSeconds, texts.WaitInTicks);
+            _unit.OnText = texts.WaitInSeconds;
+            _unit.OffText = texts.WaitInTicks;
             Children.Add(number);
 
-            Children.Add(new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _caution));
+            Children.Add(new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _caution));
 
-            _secondsPicks = new HStack { Spacing = Gaps.Parts };
+            _secondsPicks = new HStack { Base = { Spacing = Gaps.Parts } };
             foreach (var seconds in SecondsPicks)
             {
                 _secondsPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
-                    Placement = FixedSize.Wide(PickWidth),
+                    Placement = FixedSize.Width(PickWidth),
                     Text = seconds == 60 ? texts.WaitPickMinute : Template.Fill(texts.WaitPickSeconds, "count", Said(seconds)),
-                    Command = new Relay(() => Give(Said(seconds)))
+                    Command = new RelayCommand(() => Give(Said(seconds)))
                 });
             }
 
-            _ticksPicks = new HStack { Spacing = Gaps.Parts };
+            _ticksPicks = new HStack { Base = { Spacing = Gaps.Parts } };
             foreach (var ticks in TicksPicks)
             {
                 _ticksPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
-                    Placement = FixedSize.Wide(PickWidth),
+                    Placement = FixedSize.Width(PickWidth),
                     Text = Template.Fill(texts.WaitPickTicks, "count", Said(ticks)),
-                    Command = new Relay(() => Give(Said(ticks)))
+                    Command = new RelayCommand(() => Give(Said(ticks)))
                 });
             }
 
@@ -176,10 +177,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <inheritdoc />
         /// <remarks>Escape is said as <see cref="Cancelled" />, whatever in the panel holds the keyboard, where anything listens.</remarks>
-        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKeyDown(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (key != MyKeys.Escape || Cancelled == null)
-                return base.OnKey(input, key, shift, ctrl);
+                return base.OnKeyDown(input, key, shift, ctrl);
 
             Raise(Cancelled);
             return true;
@@ -222,9 +223,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void Shape(bool seconds)
         {
             _inSeconds = seconds;
-            _box.Whole = !seconds;
-            _box.Step = seconds ? SecondsStep : TicksStep;
-            _box.Format = seconds ? SecondsFormat : "0";
+            _box.IsInteger = !seconds;
+            _box.SmallChange = seconds ? SecondsStep : TicksStep;
+            _box.FormatString = seconds ? SecondsFormat : "0";
             _unit.IsOn = seconds;
             _picks.Top = seconds ? _secondsPicks : _ticksPicks;
         }

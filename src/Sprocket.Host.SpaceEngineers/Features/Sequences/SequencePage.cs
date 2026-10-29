@@ -231,10 +231,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         protected override void ViewCreated()
         {
             _rows = new KeyedChildren<object, StepRow>(_steps.Children, delegate { return Row(); });
-            _steps.Landings = Landings;
-            _steps.Moves = (from, to) =>
+            _steps.FnAllowedDropIndexes = Landings;
+            _steps.Reordered += moved =>
             {
-                var move = Editor.Act(CommandKind.MoveStep, () => Move(from, to));
+                var move = Editor.Act(CommandKind.MoveStep, () => Move(moved.From, moved.To));
                 if (move != null)
                     move.Execute();
             };
@@ -266,7 +266,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (recount)
                 Mark();
 
-            _ties.Light(_keys, _rows, _steps.IsCarrying);
+            _ties.Light(_keys, _rows, _steps.IsDragging);
             var glow = _ties.Glow(tick);
 
             for (var i = 0; i < _keys.Count; i++)
@@ -281,7 +281,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             _bar.Show(texts);
-            _steps.Slide();
 
             if (_length != null)
                 _length.Hang();
@@ -375,7 +374,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Number = closes ? 0 : ++number;
                 row.Kind = Kind(step);
                 row.LeadTerm = Term(row.Kind);
-                row.Carries = step is If ? Within(i) : Kind(step) == StepKind.OtherwiseIf ? Branch(i) : 0;
+                row.DraggedWithCount = step is If ? Within(i) : Kind(step) == StepKind.OtherwiseIf ? Branch(i) : 0;
                 row.Slots.Clear();
                 Word(row, step);
                 row.Deletes = closes ? null : Changes(CommandKind.DeleteStep, () => _stepwork.Remove(index));
@@ -384,7 +383,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     : Changes(CommandKind.DuplicateStep, () => _stepwork.Duplicate(index));
                 row.IsOff = step.IsOff || index <= offTo;
                 row.Pauses = branch || closes ? null : Changes(CommandKind.SwitchStep, () => _stepwork.SwitchStep(index));
-                row.Grip.CanCarry = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
+                row.DragHandle.CanDrag = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
                 Branches(row, texts, step, index);
                 row.Locked = locked;
 
@@ -405,13 +404,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Number = 0;
             row.Kind = StepKind.Adds;
             row.LeadTerm = null;
-            row.Carries = 0;
+            row.DraggedWithCount = 0;
             row.Slots.Clear();
             row.Deletes = null;
             row.Copies = null;
             row.IsOff = off;
             row.Pauses = null;
-            row.Grip.CanCarry = false;
+            row.DragHandle.CanDrag = false;
             row.Locked = locked;
             row.Adds.Clear();
             row.Adds.Add(new AddOption(texts.SequenceStep, null, Kinds(texts, at)));
@@ -742,7 +741,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var branches = _sequence.Branches(open);
             var otherwise = _sequence.Otherwise(open);
             var end = _sequence.EndOf(open);
-            var span = _rows[_keys[from]].Carries + 1;
+            var span = _rows[_keys[from]].DraggedWithCount + 1;
             var allowed = new List<int>();
             for (var r = 0; r < _keys.Count; r++)
             {
@@ -764,7 +763,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Every gap between the rows the row at <paramref name="from" /> does not carry, but the one just under the end of a branch.</summary>
         List<int> DropPlaces(int from)
         {
-            var span = _rows[_keys[from]].Carries + 1;
+            var span = _rows[_keys[from]].DraggedWithCount + 1;
             var gaps = new List<int>();
             var above = 0;
             object last = null;
@@ -791,7 +790,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var line = _shown[from];
             var open = _sequence.OpenOf(line);
-            var last = from + _rows[_keys[from]].Carries;
+            var last = from + _rows[_keys[from]].DraggedWithCount;
             var others = _shown.Count - (last - from + 1);
             if (open < 0 || to < 0 || to > others)
                 return;
@@ -826,7 +825,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return;
             }
 
-            var last = from + _rows[_keys[from]].Carries;
+            var last = from + _rows[_keys[from]].DraggedWithCount;
             var others = _shown.Count - (last - from + 1);
             if (last >= _shown.Count || to < 0 || to > others)
                 return;

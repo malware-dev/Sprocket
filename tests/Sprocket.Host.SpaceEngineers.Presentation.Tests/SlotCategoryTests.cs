@@ -301,16 +301,16 @@ public class SlotCategoryTests
         screen.Run(5);
 
         var category = Category(screen, "Category 1");
-        Assert.False(category.Grip.CanCarry);
+        Assert.False(category.DragHandle.CanDrag);
         Assert.Null(category.Renames);
         Assert.Null(category.Removes);
-        Assert.All(screen.Editor.SystemSlots(), row => Assert.False(row.Grip.CanCarry));
+        Assert.All(screen.Editor.SystemSlots(), row => Assert.False(row.DragHandle.CanDrag));
 
         var page = (LogicSystemPage)screen.Editor.Current!;
         var add = page.View.Within().OfType<Button>().Single(button => button.Text.EndsWith(screen.Editor.Texts.CategoryAdd));
         Assert.Null(add.Command);
         Assert.False(Shown(add), "the button to add a category shows");
-        Assert.Equal(screen.Editor.Texts.Codex.SystemTurnOffToEdit, category.Grip.Tip?.Text);
+        Assert.Equal(screen.Editor.Texts.Codex.SystemTurnOffToEdit, category.DragHandle.Tip?.Text);
     }
 
     /// <summary>An installation's own panel stands its slots the same way, under the names of the categories that hold any, with nothing to carry.</summary>
@@ -328,7 +328,7 @@ public class SlotCategoryTests
 
         var rows = screen.Editor.Blueprint().Parts.Select(Said).ToArray();
         Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, rows);
-        Assert.All(screen.Editor.Blueprint().Parts.OfType<ICarried>(), row => Assert.False(row.Grip.IsVisible));
+        Assert.All(screen.Editor.Blueprint().Parts.OfType<IReorderable>(), row => Assert.False(row.DragHandle.IsVisible));
     }
 
     /// <summary>The screen, switched off to be written, of a button system whose sequence closes both airlock doors, the outer one first, on its installation panel.</summary>
@@ -411,7 +411,7 @@ public class SlotCategoryTests
     /// </summary>
     static void Carry(Screen screen, Element row, Element onto, bool below, float across = 0f)
     {
-        var grip = (Element)((ICarried)row).Grip;
+        var grip = (Element)((IReorderable)row).DragHandle;
         var from = grip.ToScreen(grip.Bounds.Center);
         var edge = onto.ToScreen(new Vector2(onto.Bounds.X, below ? onto.Bounds.Bottom - 2f : onto.Bounds.Y + 2f));
 

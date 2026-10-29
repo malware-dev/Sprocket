@@ -30,14 +30,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Focusable = true;
             Align = Align.Fill;
 
-            _line = new HStack { Spacing = Gaps.Within };
+            _line = new HStack { Base = { Spacing = Gaps.Within } };
             for (var i = 0; i < words.Count; i++)
             {
                 var word = words[i];
                 _words.Add(word);
 
                 var button = new Button { Style = Styles.Word, Text = word };
-                button.Command = new Relay(() => Pressed(button, word));
+                button.Command = new RelayCommand(() => Pressed(button, word));
                 _buttons.Add(button);
                 _line.Children.Add(button);
             }
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             _list = new ListField(words) { Focusable = false };
             _list.Edited += Listed;
 
-            var held = Hold();
+            var held = CreateChildren();
             held.Add(_line);
             held.Add(_list);
         }
@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             set
             {
-                _line.Base.Edge = value ? Palette.Problem : Palette.None;
+                _line.Base.Border = value ? Palette.Problem : Palette.None;
                 _list.IsWrong = value;
             }
         }
@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKeyDown(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             var by = KeyboardChoice.By(key);
             if (by == 0)
@@ -115,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        protected override void OnText(char c)
+        protected override void OnTextInput(char c)
         {
             var word = KeyboardChoice.Letter(_words, _text, c);
             if (word != null)
@@ -151,9 +151,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        protected override Element UnderContent(Vector2 point)
+        protected override Element HitTestContent(Vector2 point)
         {
-            return Shown.Under(point);
+            return Shown.HitTest(point);
         }
 
         void Listed()
@@ -165,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         void Pressed(Button button, string word)
         {
             Give(word);
-            if (button.Presses > 1)
+            if (button.ClickCount > 1)
                 _submit.Execute();
         }
 

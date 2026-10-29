@@ -123,7 +123,7 @@ namespace Sprocket.Sim
                             var path = Path.Combine(args[1], colors.Key, scene + "-" + screen + ".png");
                             FaceShot.Save(path, face, zoom, () =>
                             {
-                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
                                 graphics.Begin();
                                 new StatusPicture().Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 0, 0);
                             });
@@ -155,7 +155,7 @@ namespace Sprocket.Sim
                             var shown = turn;
                             FaceShot.Save(path, face, zoom, () =>
                             {
-                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
                                 graphics.Begin();
                                 picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, shown, shown);
                             });
@@ -186,7 +186,7 @@ namespace Sprocket.Sim
                             var path = Path.Combine(args[1], scene, shape.Name + "-" + slid.ToString(CultureInfo.InvariantCulture) + ".png");
                             FaceShot.Save(path, face, zoom, () =>
                             {
-                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
                                 graphics.Begin();
                                 picture.Look.Slid = slid / 100f;
                                 picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 1, 0);
@@ -389,12 +389,12 @@ namespace Sprocket.Sim
         }
 
         /// <summary>The alignment an <c>align=</c> argument names, or left where none does.</summary>
-        static Alignment Aligned(string[] args)
+        static TextAlignment Aligned(string[] args)
         {
             var given = Array.Find(args, a => a.StartsWith("align=", StringComparison.Ordinal));
             return given == null
-                ? Alignment.Left
-                : (Alignment)Enum.Parse(typeof(Alignment), given.Substring(6), true);
+                ? TextAlignment.Left
+                : (TextAlignment)Enum.Parse(typeof(TextAlignment), given.Substring(6), true);
         }
 
         /// <summary>

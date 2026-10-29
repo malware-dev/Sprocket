@@ -31,13 +31,12 @@ namespace RichTextPanels
             {
                 Align = Align.Center,
                 Placement = FixedSize.Size(792f, 920f),
-                Base = { Background = Page, Padding = new Thickness(24f) },
-                Spacing = 16f,
+                Base = { Background = Page, Padding = new Thickness(24f), Spacing = 16f },
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = 16f,
+                        Base = { Spacing = 16f },
                         Children =
                         {
                             new Label { Base = { Color = Ink, Font = "SpaceEngineersBold", FontSize = 32f }, Text = "Writing rich text", Placement = Flex.Grow },
@@ -48,9 +47,9 @@ namespace RichTextPanels
                 }
             };
 
-            var workspace = new ScreenSpaceWorkspace(root);
-            close.Command = new Relay(workspace.Close);
-            workspace.Open("RichTextHelp");
+            var workspace = new ScreenSpaceWorkspace("RichTextHelp", root);
+            close.Command = new RelayCommand(workspace.RequestClose);
+            workspace.Open();
         }
 
         static RichText Text(string code)
@@ -60,6 +59,7 @@ namespace RichTextPanels
                 Markdown = Guide.Text,
                 Base =
                 {
+                    CodeBackground = new Color(255, 255, 255, 10), CodePadding = new Thickness(4f, -1f),
                     Font = "White",
                     StrongFont = "SpaceEngineersBold",
                     EmphasisFont = "SpaceEngineersItalic",
@@ -74,6 +74,7 @@ namespace RichTextPanels
                     Color = Muted,
                     StrongColor = Ink,
                     EmphasisColor = Ink,
+                    LinkColor = Ink,
                     HeadingColor = Ink,
                     RuleColor = Line,
                     Padding = new Thickness(0f,

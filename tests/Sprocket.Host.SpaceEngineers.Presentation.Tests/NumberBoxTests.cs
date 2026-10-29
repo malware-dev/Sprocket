@@ -40,7 +40,7 @@ public class NumberBoxTests
         input.PointerDown(at, PointerButton.Left, 1, false, false);
         input.PointerUp(at, PointerButton.Left);
 
-        Assert.Equal(2, box.Caret);
+        Assert.Equal(2, box.CaretIndex);
     }
 
     /// <summary>Only what can still become a number is taken: digits, one point unless it is whole, and a leading minus where it may be below nought.</summary>
@@ -57,11 +57,11 @@ public class NumberBoxTests
         box.Insert(".");
         Assert.Equal("1.5", box.Text);
 
-        var (negative, _, _) = Laid("", b => b.Negative = true);
+        var (negative, _, _) = Laid("", b => b.Minimum = null);
         negative.Insert("-2.5");
         Assert.Equal("-2.5", negative.Text);
 
-        var (whole, _, _) = Laid("", b => b.Whole = true);
+        var (whole, _, _) = Laid("", b => b.IsInteger = true);
         whole.Insert("3.");
         Assert.Equal("", whole.Text);
     }
@@ -72,8 +72,8 @@ public class NumberBoxTests
     {
         var (box, _, input) = Laid("12", b =>
         {
-            b.Step = 5;
-            b.Most = 20;
+            b.SmallChange = 5;
+            b.Maximum = 20;
         });
         var edits = 0;
         box.Edited += () => edits++;
@@ -129,7 +129,7 @@ public class NumberBoxTests
 
     static (NumberBox, Easel, InputRoot) Laid(string text, Action<NumberBox>? shape = null)
     {
-        var box = new NumberBox { Placement = FixedSize.Wide(300f) };
+        var box = new NumberBox { Placement = FixedSize.Width(300f) };
         shape?.Invoke(box);
         box.Text = text;
         var root = new VStack { Children = { box } };

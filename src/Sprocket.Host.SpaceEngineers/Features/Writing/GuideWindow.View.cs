@@ -31,16 +31,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                         Window = this,
                         Content = new HStack
                         {
-                            Base = { Background = Palette.Chrome, Padding = new Thickness(12f, 8f) },
-                            Spacing = Gaps.Parts,
+                            Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, Padding = new Thickness(12f, 8f) },
                             Children =
                             {
                                 new RichText { Style = Styles.Tip, Placement = Flex.Grow }.As(out _title),
-                                new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = new Relay(Close) }.As(out _close)
+                                new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = new RelayCommand(Close) }.As(out _close)
                             }
                         }
                     },
-                    new Rule(1f, Palette.Line),
+                    new Separator(),
                     new ScrollView
                     {
                         Style = Styles.ScrollView,

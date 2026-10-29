@@ -43,7 +43,7 @@ public class ColorChoiceTests
     {
         var (picker, input) = Laid(new ColorOffer(new Hsv[0], null, null));
         picker.Text = "#FF0000";
-        var plane = picker.Within().OfType<ColorPlane>().Single();
+        var plane = picker.Within().OfType<ColorSpectrum>().Single();
 
         Press(input, plane, new Vector2(plane.ContentBounds.Right, plane.ContentBounds.Y));
         Assert.Equal("#FF0000", picker.Text);
@@ -61,12 +61,12 @@ public class ColorChoiceTests
     {
         var (picker, input) = Laid(new ColorOffer(new Hsv[0], null, null));
         picker.Text = "#FF0000";
-        var strip = picker.Within().OfType<HueStrip>().Single();
+        var strip = picker.Within().OfType<HueSlider>().Single();
 
         Press(input, strip, new Vector2(strip.ContentBounds.Center.X, strip.ContentBounds.Center.Y));
 
         Assert.Equal("#00FFFF", picker.Text);
-        Assert.Equal(0.5f, picker.Within().OfType<ColorPlane>().Single().Hue, 2);
+        Assert.Equal(0.5f, picker.Within().OfType<ColorSpectrum>().Single().Hue, 2);
     }
 
     /// <summary>A channel typed in its box gives the color and stays as typed while the other boxes follow.</summary>
@@ -95,14 +95,14 @@ public class ColorChoiceTests
         var told = 0;
         var picker = Field(new ColorOffer(new Hsv[0], player, () => told++)).Picker;
         var modes = picker.Within().OfType<TabView>().Single();
-        Assert.Equal(0, modes.Current);
+        Assert.Equal(0, modes.SelectedIndex);
 
         modes.Tabs[1].Command!.Execute();
 
         Assert.Equal(1, player.ColorTab);
         Assert.Equal(1, told);
         var again = Field(new ColorOffer(new Hsv[0], player, null)).Picker;
-        Assert.Equal(1, again.Within().OfType<TabView>().Single().Current);
+        Assert.Equal(1, again.Within().OfType<TabView>().Single().SelectedIndex);
     }
 
     /// <summary>A color given in the picker reaches the field only on Done, and Done puts the picker away.</summary>

@@ -21,8 +21,16 @@ sealed class Recording(RectangleF area) : IGraphics
 
     public IImageCatalog? Images => null;
 
+    /// <summary>The tick every frame is drawn at: the first.</summary>
+    public int Now => 0;
+
+    /// <summary>How many times something drawn asked for the next frame too.</summary>
+    public int FramesRequested { get; private set; }
+
+    public void RequestFrame() => FramesRequested++;
+
     /// <summary>Whether it draws part of a picture as the screen does, or the whole picture as a text panel does.</summary>
-    public bool DrawsParts { get; set; } = true;
+    public bool SupportsSourceRectangles { get; set; } = true;
 
     public Vector2 MeasureText(string font, StringBuilder text, float size) => new Vector2(text.Length * size * 0.5f, size);
 

@@ -152,7 +152,7 @@ public class SlotListTests
         screen.Editor.OpenSlot(name);
         screen.Run(2);
         var page = (SlotPage)screen.Editor.Current!;
-        Assert.Equal(512, page.Short.Longest);
+        Assert.Equal(512, page.Short.MaxLength);
         screen.Editor.Input!.Focus(page.Short);
         page.Short.Insert("Call");
         screen.Run(2);

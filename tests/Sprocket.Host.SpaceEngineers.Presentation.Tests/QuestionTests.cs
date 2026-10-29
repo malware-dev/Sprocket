@@ -14,7 +14,7 @@ public class QuestionTests
     {
         var screen = Screen.Fresh("60", "130", "type", "Airlock", "enter", "tick", "2");
         var button = screen.Editor.Current.View!.Within().OfType<Button>().Last();
-        button.Command = new Relay(delegate
+        button.Command = new RelayCommand(delegate
         {
             screen.Editor.AskHere("Which one?");
             screen.Editor.Answer("This one", () => { });

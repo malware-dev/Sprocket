@@ -23,7 +23,7 @@ public class UnitTests
 
         Assert.Equal("25", ((NumberBox)slider.Keyboard).Text);
         Assert.Equal("0.25", slider.Text);
-        Assert.Equal(0.25f, Assert.IsType<Slider>(slider.Children[0]).Fraction, 3);
+        Assert.Equal(0.25f, Assert.IsType<Slider>(slider.Children[0]).Value, 3);
     }
 
     /// <summary>The unit stands after the box.</summary>

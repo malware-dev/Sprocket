@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// </summary>
         public void Fill(IGraphics graphics, List<StatusCard> cards, int from, int to, bool two, float between, float column, float high)
         {
-            Spacing = between;
+            Base.Spacing = between;
             _second.IsVisible = two;
 
             var filled = 0f;

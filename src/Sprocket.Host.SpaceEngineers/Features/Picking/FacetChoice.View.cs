@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>The drop box goes ahead of it once there are names to offer.</remarks>
         void CreateView()
         {
-            Spacing = Gaps.Items;
+            Base.Spacing = Gaps.Items;
             Base.Padding = new Thickness(12f, 0f, 0f, 0f);
             Children.Add(new Label { Style = Styles.ValueLabel, Align = Align.Left }.As(out _says));
         }

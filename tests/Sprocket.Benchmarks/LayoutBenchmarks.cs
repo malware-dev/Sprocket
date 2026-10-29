@@ -41,7 +41,7 @@ public class LayoutBenchmarks
 
         device.Fonts = fonts;
         ScreenSession.Install(device);
-        _graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new ScreenSpaceImages(device));
+        _graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new MaterialImages(device.TextureSize), () => 0);
 
         var source = Source(Shape);
         _first = Markdown.Parse(source);

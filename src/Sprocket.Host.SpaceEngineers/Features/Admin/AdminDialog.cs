@@ -31,25 +31,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             _editor = editor;
             var texts = editor.Texts;
             Style = Styles.Dialog;
-            Placement = FixedSize.Wide(Wide);
-            var close = new Relay(Close);
-            Cancel = close;
-            Accept = close;
+            Placement = FixedSize.Width(Wide);
+            var close = new RelayCommand(Close);
+            CancelCommand = close;
+            AcceptCommand = close;
 
             Content = new VStack
             {
-                Spacing = Gaps.Items,
+                Base = { Spacing = Gaps.Items },
                 Children =
                 {
                     new Label { Style = Styles.Phrase, Text = texts.AdminTitle },
-                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminLine },
+                    new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Wrap, Text = texts.AdminLine },
                     new TabView
                     {
-                        HeaderStyle = Styles.Tab,
                         Tabs =
                         {
-                            new Tab { Header = texts.AdminThisWorld, Content = Page(texts, true) },
-                            new Tab { Header = texts.AdminEveryWorld, Tip = Tip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
+                            new Tab { Style = Styles.Tab, Header = texts.AdminThisWorld, Content = Page(texts, true) },
+                            new Tab { Style = Styles.Tab, Header = texts.AdminEveryWorld, Tip = Tip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
                         }
                     },
                     new Button { Style = Styles.Primary, Text = texts.AdminClose, Align = Align.Right, Command = close }
@@ -67,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         {
             return new VStack
             {
-                Spacing = Gaps.Items,
+                Base = { Spacing = Gaps.Items },
                 Children =
                 {
                     Setting(texts.AdminFastest, texts.AdminFastestAbout, Choose(texts, world,
@@ -157,11 +156,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         {
             return new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Children =
                 {
                     new Label { Style = Styles.Phrase, Text = name },
-                    new Label { Style = Styles.Detail, Wraps = true, Text = about },
+                    new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Wrap, Text = about },
                     control
                 }
             };

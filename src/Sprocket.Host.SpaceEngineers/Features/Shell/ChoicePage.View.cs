@@ -15,11 +15,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             return new VStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
-                    new Label { Style = Styles.Empty, Wraps = true, IsVisible = false }.As(out _empty),
-                    new VStack { Spacing = Gaps.Parts }.As(out _answers)
+                    new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _empty),
+                    new VStack { Base = { Spacing = Gaps.Parts } }.As(out _answers)
                 }
             };
         }

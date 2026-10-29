@@ -11,30 +11,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         Label _problem;
         HStack _spacer;
         Button _apply;
-        EditBox _listing;
+        TextArea _listing;
 
         /// <summary>What is wrong with the text beside the button that applies it, over the script on a listing that fills the rest of the page and moves both ways.</summary>
         protected override Element CreateView()
         {
             return new VStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Children =
                         {
-                            new Label { Style = Styles.ProblemLine, Wraps = true, IsVisible = false, Placement = Flex.Grow }.As(out _problem),
+                            new Label { Style = Styles.ProblemLine, TextWrapping = TextWrapping.Wrap, IsVisible = false, Placement = Flex.Grow }.As(out _problem),
                             new HStack { Placement = Flex.Grow }.As(out _spacer),
                             new Button { Style = Styles.Primary }.As(out _apply)
                         }
                     },
-                    new EditBox
+                    new TextArea
                     {
                         Style = Styles.ListingBox,
-                        Numbered = true,
+                        ShowLineNumbers = true,
                         Placement = Flex.Grow
                     }.As(out _listing)
                 }

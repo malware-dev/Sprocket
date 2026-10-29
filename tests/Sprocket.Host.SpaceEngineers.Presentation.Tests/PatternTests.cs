@@ -1,7 +1,7 @@
+using Lumel.Input;
 using Lumel;
 using Lumel.Drawing;
 using Lumel.Layout;
-using Lumel.Styling;
 using VRage.Utils;
 using VRageMath;
 using Xunit;
@@ -47,7 +47,7 @@ public class PatternTests
     [Fact]
     public void OnAPanelThePatternClipsWholeTiles()
     {
-        var graphics = new Recording(Area) { DrawsParts = false };
+        var graphics = new Recording(Area) { SupportsSourceRectangles = false };
         new Pattern(Stripes, 64, 64f, Color.White).Draw(graphics, new RectangleF(10f, 20f, 160f, 40f), new Vector2(10f, 20f));
 
         var tiles = graphics.Pieces.Where(piece => piece.Material == Stripes).Select(piece => piece.Destination).ToList();
@@ -71,10 +71,10 @@ public class PatternTests
         Assert.False(editor.Program.Systems[0].Enabled);
         Assert.Same(Features.Look.Styles.NoticeStripes, row.Pattern);
 
-        row.IsHot = true;
+        ((IInputTarget)row).IsPointerOver = true;
         Assert.Same(Features.Look.Styles.NoticeStripesHot, row.Pattern);
         Assert.Equal(Features.Look.Palette.NoticeWashHot, row.Background);
-        row.IsHot = false;
+        ((IInputTarget)row).IsPointerOver = false;
         Assert.Same(Features.Look.Styles.NoticeStripes, row.Pattern);
 
         editor.SwitchSystem(editor.Program.Systems[0], true);
@@ -104,8 +104,8 @@ public class PatternTests
     public void AStyleLaysItsPatternAndTheNextTakesItAway()
     {
         var pattern = new Pattern(Stripes, 64, 64f, Color.White);
-        var striped = new ElementStyle { Base = { Background = Color.Black, Pattern = pattern } };
-        var plain = new ElementStyle { Base = { Background = Color.Gray } };
+        var striped = new StackStyle { Base = { Background = Color.Black, Pattern = pattern } };
+        var plain = new StackStyle { Base = { Background = Color.Gray } };
         var element = new VStack { Style = striped, Placement = FixedSize.Size(100f, 40f), Align = Align.Left | Align.Top };
         var root = new VStack { Children = { element } };
         root.Measure(new Recording(Area), new Vector2(Area.Width, Area.Height));

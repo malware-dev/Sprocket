@@ -117,7 +117,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (asks && _runs == null)
             {
                 _runs = new Switch { Style = Styles.Switch, Command = _editor.Act(CommandKind.TriggerStops, () => Stopping(!Stops)) };
-                _runs.Says(SentenceText.RunWord, SentenceText.StopWord);
+                _runs.OnText = SentenceText.RunWord;
+                _runs.OffText = SentenceText.StopWord;
                 stage.Options.Add(_runs);
             }
 

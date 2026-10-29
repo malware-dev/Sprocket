@@ -1,3 +1,4 @@
+using Lumel.Input;
 using Lumel.Text;
 using Lumel;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -274,13 +275,13 @@ public class ReachTests
     /// <summary>Whether being under the pointer changes how <paramref name="element" /> is filled or edged.</summary>
     static bool Lights(Element element)
     {
-        var was = element.IsHot;
+        var was = element.IsPointerOver;
         var fill = element.Background.PackedValue;
-        var edge = element.Edge.PackedValue;
+        var edge = element.Border.PackedValue;
 
-        element.IsHot = !was;
-        var changed = element.Background.PackedValue != fill || element.Edge.PackedValue != edge;
-        element.IsHot = was;
+        ((IInputTarget)element).IsPointerOver = !was;
+        var changed = element.Background.PackedValue != fill || element.Border.PackedValue != edge;
+        ((IInputTarget)element).IsPointerOver = was;
 
         return changed;
     }

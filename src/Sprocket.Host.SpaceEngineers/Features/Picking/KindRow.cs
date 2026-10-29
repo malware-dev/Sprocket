@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>A kind saying nothing yet, narrowed to by pressing it once it has a command.</summary>
         public KindRow()
         {
-            Spacing = Gaps.Sections;
+            Base.Spacing = Gaps.Sections;
             Style = Styles.MenuRow;
 
             Children.Add(new Label { Style = Styles.OptionWord, Placement = Flex.Grow }.As(out _name));

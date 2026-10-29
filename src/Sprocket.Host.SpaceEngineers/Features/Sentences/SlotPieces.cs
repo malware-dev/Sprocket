@@ -12,7 +12,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
     /// <summary>What a part of a sentence says, in pieces: each block it names with its icon, a member with its marks, and the words around them.</summary>
-    public class SlotPieces : Stacking, ITextual
+    public class SlotPieces : Stack, ITextual
     {
         /// <summary>How wide a color shown in place of the words is: a short word's width.</summary>
         const float SampleWide = 44f;
@@ -224,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
                 var member = child as MemberName;
                 if (member != null)
-                    member.Base.Wear(_font, _fontSize, _color);
+                    member.Dress(_font, _fontSize, _color);
 
                 var words = child as Label;
                 if (words != null)

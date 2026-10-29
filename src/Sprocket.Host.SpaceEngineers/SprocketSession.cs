@@ -689,7 +689,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.Gui != null)
                 MyAPIGateway.Gui.CloseTerminalScreen();
 
-            _screen.Open("Sprocket");
+            _screen.Open();
         }
 
         /// <inheritdoc />

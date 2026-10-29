@@ -12,15 +12,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// <summary>A notice as a banner that slides in, opens for the rest of its text, and slides out.</summary>
     public class Banner : Reveal
     {
-        const float Frames = 12f;
-
         readonly VStack _column;
 
         readonly Reveal _more;
 
         readonly HStack _heading;
-        readonly Relay _expands;
-        readonly Relay _offers;
+        readonly RelayCommand _expands;
+        readonly RelayCommand _offers;
         readonly Label _text;
         readonly Glyph _chevron;
         readonly Label _detail;
@@ -29,19 +27,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Button _offer;
 
         Notice _notice;
-        int _stepped = -1;
-
-        float _progress;
-
-        float _opening;
 
         /// <summary>A banner showing nothing, shut.</summary>
         public Banner()
         {
-            _expands = new Relay(() => Carry(_notice?.Expands));
-            _offers = new Relay(() => Carry(_notice?.Offers));
+            _expands = new RelayCommand(() => Carry(_notice?.Expands));
+            _offers = new RelayCommand(() => Carry(_notice?.Offers));
 
-            Openness = 0f;
             // The gap under the banner is part of what slides, so it opens and closes with the banner.
             Content = new VStack
             {
@@ -54,11 +46,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         {
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Command = _expands,
                         Children =
                         {
-                            new Label { Style = Styles.Name, Wraps = true, Placement = Flex.Grow }.As(out _text),
+                            new Label { Style = Styles.Name, TextWrapping = TextWrapping.Wrap, Placement = Flex.Grow }.As(out _text),
                             new Glyph { Symbol = Symbols.Down, Style = Styles.Chevron, Placement = FixedSize.Size(32f, 32f) }.As(out _chevron)
                         }
                     }.As(out _heading),
@@ -68,12 +60,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         {
                             Children =
                             {
-                                new Label { Style = Styles.Opened, Wraps = true }.As(out _detail),
-                                new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _diagnostic),
+                                new Label { Style = Styles.Opened, TextWrapping = TextWrapping.Wrap }.As(out _detail),
+                                new Label { Style = Styles.Diagnostic, TextWrapping = TextWrapping.Wrap }.As(out _diagnostic),
                                 new HStack
                                 {
-                                    Spacing = Gaps.Parts,
-                                    Base = { Padding = new Thickness(16f, 0f, 16f, 8f) },
+                                    Base = { Spacing = Gaps.Parts, Padding = new Thickness(16f, 0f, 16f, 8f) },
                                     Children = { new Button { Style = Styles.Button, Command = _offers }.As(out _offer) }
                                 }.As(out _actions)
                             }
@@ -85,9 +76,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             };
         }
 
-        /// <summary>Shows <paramref name="notice" />, or slides away where there is none, moved along to <paramref name="tick" />.</summary>
+        /// <summary>Shows <paramref name="notice" />, or slides away where there is none.</summary>
         /// <remarks>Called every frame; costs a handful of comparisons once the slide has settled.</remarks>
-        public void Show(Notice notice, int tick)
+        public void Show(Notice notice)
         {
             _notice = notice;
 
@@ -97,9 +88,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Say(notice);
             }
 
-            Slide(tick);
+            Slide();
 
-            if (notice == null && Shut)
+            if (notice == null && IsClosed)
                 IsVisible = false;
         }
 
@@ -131,27 +122,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _offer.Text = notice.OfferText;
         }
 
-        /// <summary>Moves the banner towards where it should be, by however many ticks have passed.</summary>
-        /// <remarks>Costs one comparison a tick once the banner has settled.</remarks>
-        void Slide(int tick)
+        /// <summary>Opens the banner while it has a notice that is not leaving, and its rest while that is expanded.</summary>
+        void Slide()
         {
-            var since = _stepped < 0 ? 1 : tick - _stepped;
-            _stepped = tick;
-
-            if (since < 1)
-                return;
-
-            var step = since / Frames;
-            var shown = _notice != null && !_notice.Leaving;
-
-            _progress = Towards(_progress, shown ? 1f : 0f, step);
-            _opening = Towards(_opening, _notice != null && _notice.Expanded ? 1f : 0f, step);
-
-            Openness = Eased(_progress);
-            _more.Openness = Eased(_opening);
+            IsOpen = _notice != null && !_notice.Leaving;
+            _more.IsOpen = _notice != null && _notice.Expanded;
 
             // Whoever raised the banner waits for this to drop it.
-            if (_notice != null && _notice.Leaving && Shut)
+            if (_notice != null && _notice.Leaving && IsClosed)
                 _notice.Closed = true;
         }
 
@@ -159,28 +137,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             if (command != null && command.CanExecute)
                 command.Execute();
-        }
-
-        static float Towards(float value, float wanted, float step)
-        {
-            return value < wanted ? Least(value + step, wanted) : Most(value - step, wanted);
-        }
-
-        /// <summary>Most of the movement early, settling rather than stopping: the remaining distance, cubed.</summary>
-        static float Eased(float progress)
-        {
-            var left = 1f - progress;
-            return 1f - (left * left * left);
-        }
-
-        static float Least(float value, float bound)
-        {
-            return value < bound ? value : bound;
-        }
-
-        static float Most(float value, float bound)
-        {
-            return value > bound ? value : bound;
         }
     }
 }

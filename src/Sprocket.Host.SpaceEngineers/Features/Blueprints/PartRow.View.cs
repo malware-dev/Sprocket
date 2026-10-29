@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     partial class PartRow
     {
         VStack _column;
-        Grip _grip;
+        DragHandle _grip;
         Glyph _mark;
         Button _name;
         Label _words;
@@ -26,27 +26,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Makes the part's name and what it says about itself, with the blocks beside them and what is still to do under those.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
 
             Children.Add(new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Align = Align.Top,
-                Placement = FixedSize.Wide(PartList.Widest),
+                Placement = FixedSize.Width(PartList.Widest),
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Children =
                         {
-                            new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
+                            new DragHandle { IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
                             new Button
                             {
                                 Style = Styles.SlotName,
                                 Content = new HStack
                                 {
-                                    Spacing = Gaps.Parts,
+                                    Base = { Spacing = Gaps.Parts },
                                     Children =
                                     {
                                         new Glyph { Style = Styles.Waits, Align = Align.Center }.As(out _mark),
@@ -66,13 +66,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             Children.Add(new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Align = Align.Top,
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Children =
                         {
                             new SlotChip(false) { Spacing = Gaps.Within }.As(out _blocks),
@@ -81,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)
                         }
                     },
-                    new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _marks)
+                    new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _marks)
                 }
             });
         }

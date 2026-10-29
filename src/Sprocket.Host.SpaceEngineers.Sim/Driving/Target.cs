@@ -211,7 +211,7 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>The names the root's headings say, one for each blueprint.</summary>
         public static List<string> RootHeadingNames(this SprocketEditor editor) =>
-            RootHeadings(editor).Select(heading => heading.AboutArguments!.Of("name")).ToList();
+            RootHeadings(editor).Select(heading => heading.AboutArguments!.Get("name")).ToList();
 
         /// <summary>What the root's buttons for starting something say, in order.</summary>
         public static List<string> RootStarts(this SprocketEditor editor) =>
@@ -513,20 +513,20 @@ namespace Sprocket.Sim.Driving
         {
             var arguments = editor.Screen.QuestionArguments;
             var question = editor.Screen.Question;
-            var document = arguments == null ? Markdown.Parse(question) : Template.Read(question);
+            var document = arguments == null ? Markdown.Parse(question) : Template.Parse(question);
 
             var said = new System.Text.StringBuilder();
             Block last = null;
             foreach (var block in document.Blocks)
             {
-                var listed = block.Kind == BlockKind.Bullet;
+                var listed = block.Kind == BlockKind.BulletListItem;
                 if (last != null)
-                    said.Append(listed && last.Kind == BlockKind.Bullet ? "\n" : "\n\n");
+                    said.Append(listed && last.Kind == BlockKind.BulletListItem ? "\n" : "\n\n");
                 if (listed)
                     said.Append("- ");
 
                 foreach (var run in block.Runs)
-                    said.Append(run.IsBreak ? "\n" : run.Slot != null ? arguments?.Of(run.Slot) : run.Text);
+                    said.Append(run.IsBreak ? "\n" : run.Slot != null ? arguments?.Get(run.Slot) : run.Text);
 
                 last = block;
             }
@@ -726,7 +726,7 @@ namespace Sprocket.Sim.Driving
             var view = LogicSystem(editor).View;
             var tab = Within(view).OfType<Tab>().FirstOrDefault(each => each.Header == header)
                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' has no tab saying '{header}'.");
-            if (!tab.IsCurrent)
+            if (!tab.IsSelected)
                 tab.Command!.Execute();
 
             return view;
@@ -735,7 +735,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The page of each tab in <paramref name="view" /> that is not showing, each pressed in turn as it is asked for.</summary>
         static IEnumerable<Element> OtherTabs(Element view)
         {
-            foreach (var tab in Within(view).OfType<Tab>().Where(each => !each.IsCurrent).ToList())
+            foreach (var tab in Within(view).OfType<Tab>().Where(each => !each.IsSelected).ToList())
             {
                 tab.Command!.Execute();
                 yield return view;

@@ -19,7 +19,7 @@ public class SliderTests
 
         field.Text = "200";
 
-        Assert.Equal(Math.Log(200) / Math.Log(50000), slider.Fraction, 3);
+        Assert.Equal(Math.Log(200) / Math.Log(50000), slider.Value, 3);
     }
 
     /// <summary>A narrow range runs straight, so its middle is the number halfway between the bounds.</summary>
@@ -31,7 +31,7 @@ public class SliderTests
 
         field.Text = "5";
 
-        Assert.Equal(0.25f, slider.Fraction, 3);
+        Assert.Equal(0.25f, slider.Value, 3);
     }
 
     /// <summary>A bounded value gets a slider, its label is the value's name alone, and a new step opens on what the block holds.</summary>
@@ -52,7 +52,7 @@ public class SliderTests
     [Fact]
     public void ANumberBoxReplacesWhatItHeldWhenTypedInto()
     {
-        var box = new NumberBox { Style = Styles.Value, Focusable = true, SelectsAll = true, Text = "4.5" };
+        var box = new NumberBox { Style = Styles.Number, Focusable = true, SelectsAll = true, Text = "4.5" };
         var input = new InputRoot(box);
 
         input.Focus(box);

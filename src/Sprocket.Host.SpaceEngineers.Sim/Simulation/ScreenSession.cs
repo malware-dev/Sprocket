@@ -45,6 +45,8 @@ namespace Sprocket.Sim.Simulation
                 // real player's.
                 .Gives("BuildColorSlots", () => Painted)
                 .Gives("IdentityId", () => Machine.Simulation.Viewer)
+                // The game plays the screens' click sounds from the player's character, and the stand-in player is bodiless.
+                .Gives("Character", () => null)
                 .Done();
 
             MyAPIGateway.Session = Pretend.To<IMySession>()

@@ -29,20 +29,20 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _mark.Symbol = StatusLook.Mark(item.Level);
             var shade = look.Shade(item.Level);
             _mark.Base.Tint = look.IsFresh(item) ? Color.Lerp(shade, look.Ink, look.Pulse) : shade;
-            _underMark.Placement = FixedSize.High(size.UnderMark);
+            _underMark.Placement = FixedSize.Height(size.UnderMark);
 
             var over = Over(look.Texts, item);
             _system.Style = size.Label;
             _system.Base.Color = look.Quiet;
             _system.Text = over;
             _system.IsVisible = over.Length > 0;
-            _underLabel.Placement = FixedSize.High(size.UnderLabel);
+            _underLabel.Placement = FixedSize.Height(size.UnderLabel);
             _underLabel.IsVisible = _system.IsVisible;
 
             _name.Style = size.Name;
             _name.Base.Color = look.Ink;
             _name.Text = Title(look.Texts, item);
-            _underName.Placement = FixedSize.High(size.UnderName);
+            _underName.Placement = FixedSize.Height(size.UnderName);
             _underName.IsVisible = true;
 
             _sentence.Style = size.Sentence;

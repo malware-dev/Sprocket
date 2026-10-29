@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     /// <summary>The states Sprocket puts its controls in, each of which a style gives a look of its own.</summary>
     /// <remarks>
     ///     All weigh less than hot (100), so a look for one lies under a style's hot look, as a style based on the plain one
-    ///     would; a look a state has while hot is a joining with <see cref="State.Hot" />. Still outweighs hot, so a thing
+    ///     would; a look a state has while hot is a joining with <see cref="State.PointerOver" />. Still outweighs hot, so a thing
     ///     that cannot be pressed never looks hot.
     /// </remarks>
     public static class LookStates

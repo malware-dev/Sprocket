@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                     break;
             }
 
-            _name.Spacing = size.Between;
+            _name.Base.Spacing = size.Between;
             _icon.Placement = FixedSize.Size(size.BannerIcon, size.BannerIcon);
             _icon.IsVisible = Left(graphics, look, size, false) <= half;
             _heading.Style = size.Banner;
@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _heading.Text = look.Texts.PanelHeading;
             _heading.IsVisible = Left(graphics, look, size, true) <= half;
 
-            _right.Spacing = size.Between;
+            _right.Base.Spacing = size.Between;
             _problems.Show(look, size, status.Problems, true, troubled);
             _warnings.Show(look, size, status.Warnings, true, troubled);
             _check.Style = size.BannerMark;

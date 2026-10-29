@@ -51,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public PickStrip(Texts texts)
         {
             _texts = texts;
-            Spacing = Gap;
+            Base.Spacing = Gap;
 
             // Pressed anywhere down its length: it is the whole of what that page was, and going back to it is the one thing it does.
             _fold = Folded(Symbols.Left, texts.Codex.PickBack);
@@ -219,7 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var eased = Eased(_slide);
             Slid(_slideFrom + (_slideTo - _slideFrom) * eased);
-            _resized.Placement = FixedSize.Wide(_resizedFrom + (_resizedTo - _resizedFrom) * eased);
+            _resized.Placement = FixedSize.Width(_resizedFrom + (_resizedTo - _resizedFrom) * eased);
         }
 
         /// <summary>Gives the keyboard to the box of the column at <paramref name="opens" />, the first time its page is shown.</summary>
@@ -241,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             if (Page > 0)
             {
-                _fold.Placement = FixedSize.Wide(FoldWidth);
+                _fold.Placement = FixedSize.Width(FoldWidth);
                 Children.Add(_fold);
             }
 
@@ -312,7 +312,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (previous == folding)
                 {
                     from = Across(folding);
-                    _fold.Placement = FixedSize.Wide(from);
+                    _fold.Placement = FixedSize.Width(from);
                     Children.Add(_fold);
                     before = false;
                     continue;
@@ -343,7 +343,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (column == unfolding)
                 {
                     _reveal.Content = column;
-                    _reveal.Placement = FixedSize.Wide(FoldWidth);
+                    _reveal.Placement = FixedSize.Width(FoldWidth);
                     Children.Add(_reveal);
                     before = false;
                     continue;
@@ -392,7 +392,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Children.Remove(leaving);
 
             _leaving.Clear();
-            _resized.Placement = FixedSize.Wide(_resizedTo);
+            _resized.Placement = FixedSize.Width(_resizedTo);
             Slid(0f);
 
             // The column that came back stands on its own where its window stood, looking the same.
@@ -467,7 +467,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_next.Parent == null)
                 Children.Add(_next);
 
-            _next.Placement = FixedSize.Wide(room);
+            _next.Placement = FixedSize.Width(room);
             _stages[_stages.Count - 1].Width = Width - (room > 0f ? room + Gap : 0f);
         }
 
@@ -489,7 +489,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return new VStack
             {
                 Style = Styles.Fold,
-                Placement = FixedSize.Wide(FoldWidth),
+                Placement = FixedSize.Width(FoldWidth),
                 Tip = Tip.For(null, tip),
                 Children = { new Glyph { Symbol = symbol, Style = Styles.Waits, Placement = Flex.Grow } }
             };

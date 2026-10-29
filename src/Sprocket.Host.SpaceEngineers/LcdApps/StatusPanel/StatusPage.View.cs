@@ -2,7 +2,6 @@ using Lumel;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Viewing;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
@@ -17,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         StatusTally _warnings;
         Grid _middle;
         StatusCalm _calm;
-        Slide _slide;
+        PageSlide _slide;
         StatusColumns _leaving;
         StatusColumns _coming;
         HStack _dots;
@@ -34,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             {
                 Children =
                 {
-                    new Image { Source = StatusPicture.Icon(), Tint = Color.White, Align = Align.Center }.As(out _icon),
+                    new Image { Source = StatusPicture.Icon(), Base = { Tint = Color.White }, Align = Align.Center }.As(out _icon),
                     new Label { Placement = Flex.Grow, Align = Align.Center }.As(out _heading),
                     new Label { Align = Align.Center }.As(out _construct),
                     new StatusTally(StatusLevel.Problem).As(out _problems),
@@ -53,14 +52,14 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 }
             }.As(out _middle));
 
-            _slide = new Slide
+            _slide = new PageSlide
             {
                 Leaving = new StatusColumns().As(out _leaving),
                 Coming = new StatusColumns().As(out _coming)
             };
 
             Children.Add(new HStack { Align = Align.Center }.As(out _dots));
-            Children.Add(new Label { Centres = true }.As(out _pageOf));
+            Children.Add(new Label { Base = { TextAlignment = TextAlignment.Center } }.As(out _pageOf));
         }
     }
 }

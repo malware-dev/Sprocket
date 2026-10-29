@@ -49,8 +49,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Check = new GlyphStyle { Base = { Font = Symbols.Font, FontSize = Fours(big * 1.5f) } };
             Count = new GlyphStyle { Base = { Font = Symbols.Font, FontSize = small } };
             Dots = new GlyphStyle { Base = { Font = Symbols.Font, FontSize = dot } };
-            Plain = new TextStyle { Base = { Font = MyFontEnum.White, FontSize = small } };
-            Banner = new TextStyle { Base = { Font = MyFontEnum.White, FontSize = body } };
+            Plain = new LabelStyle { Base = { Font = MyFontEnum.White, FontSize = small } };
+            Banner = new LabelStyle { Base = { Font = MyFontEnum.White, FontSize = body } };
             BannerMark = new GlyphStyle { Base = { Font = Symbols.Font, FontSize = body } };
         }
 
@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             var top = Fours(size * TextSizes.CapTop);
             var bottom = Fours(size * (1f - TextSizes.Baseline));
-            return new TextStyle { Base = { Font = MyFontEnum.White, FontSize = size, Padding = new Thickness(0f, -top, 0f, -bottom) } };
+            return new LabelStyle { Base = { Font = MyFontEnum.White, FontSize = size, Padding = new Thickness(0f, -top, 0f, -bottom) } };
         }
 
         static float Fours(float size)

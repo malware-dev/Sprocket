@@ -19,19 +19,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Makes the sentence with its opening and joining words, the badge and the problem under it, and the bin.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
 
             Children.Add(new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Placement = Flex.Grow,
                 Children =
                 {
                     new Flow
                     {
-                        Spacing = Gaps.Parts,
-                        LineSpacing = Gaps.Parts,
-                        Indent = Sizes.Indent,
+                        Base = { Spacing = Gaps.Parts, LineSpacing = Gaps.Parts, Indent = Sizes.Indent },
                         Children =
                         {
                             new Label { Style = Styles.Phrase }.As(out _lead),
@@ -40,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         }
                     }.As(out _sentence),
 
-                    new Label { Style = Styles.Problem, Wraps = true }.As(out _problem)
+                    new Label { Style = Styles.Problem, TextWrapping = TextWrapping.Wrap }.As(out _problem)
                 }
             });
 

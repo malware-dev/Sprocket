@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps
         void Move(int tick)
         {
             _loop.Run(tick);
-            if (_loop.Busy)
+            if (_loop.IsBusy)
                 return;
 
             _looping = false;

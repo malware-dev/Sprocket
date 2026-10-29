@@ -29,12 +29,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>A field holding no color, its picker offering what <paramref name="offer" /> holds, its notes in <paramref name="texts" />.</summary>
         public ColorField(ColorOffer offer, Texts texts)
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             Style = Styles.ListLine;
             Focusable = true;
 
-            var done = new Relay(Done);
-            _picker = new ColorPicker(offer, done, texts) { Placement = FixedSize.Wide(ColorPicker.Wide) };
+            var done = new RelayCommand(Done);
+            _picker = new ColorPicker(offer, done, texts) { Placement = FixedSize.Width(ColorPicker.Wide) };
 
             Children.Add(new Swatch { Style = Styles.ColorSample, Placement = FixedSize.Size(SwatchWide, 20f) }.As(out _swatch));
             Children.Add(ListField.Fold());
@@ -43,11 +43,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             {
                 Style = Styles.Menu,
                 Anchor = this,
-                Gap = 4f,
+                Base = { Gap = 4f },
                 // The box of its own keeps the popup as wide as the picker.
                 Content = new VStack
                 {
-                    Spacing = Gaps.Parts,
+                    Base = { Spacing = Gaps.Parts },
                     Children =
                     {
                         new HStack { Children = { _picker } },
@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     }
                 }
             };
-            Command = new Relay(() =>
+            Command = new RelayCommand(() =>
             {
                 if (!_popup.IsOpen)
                 {

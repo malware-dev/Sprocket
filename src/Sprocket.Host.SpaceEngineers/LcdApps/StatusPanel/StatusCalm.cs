@@ -30,13 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _check.Style = size.Check;
             _check.Base.Tint = look.Ink;
             _check.IsVisible = any;
-            _underCheck.Placement = FixedSize.High(size.UnderMark);
+            _underCheck.Placement = FixedSize.Height(size.UnderMark);
             _underCheck.IsVisible = any;
 
             _says.Style = any ? size.Name : size.Sentence;
             _says.Base.Color = any ? look.Ink : look.Quiet;
             _says.Text = any ? look.Texts.PanelAllNormal : look.Texts.PanelNothing;
-            _underSays.Placement = FixedSize.High(size.UnderLabel);
+            _underSays.Placement = FixedSize.Height(size.UnderLabel);
             _underSays.IsVisible = true;
 
             _count.Style = size.Label;

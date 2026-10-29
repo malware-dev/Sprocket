@@ -86,7 +86,7 @@ public class LineLevelTests
     public void ABannerNoteHasNoWash()
     {
         var banner = new Banner();
-        banner.Show(new Notice { Text = Said, Level = NoticeLevel.Info }, 0);
+        banner.Show(new Notice { Text = Said, Level = NoticeLevel.Info });
         banner.Restyle();
 
         Assert.Equal(Palette.Ink, Words(banner).Color);

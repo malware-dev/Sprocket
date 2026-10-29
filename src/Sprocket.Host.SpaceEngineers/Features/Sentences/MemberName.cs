@@ -18,8 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>A member with no words and no mark yet.</summary>
         public MemberName()
         {
-            Spacing = Gaps.Parts;
-            Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false, HaloSize = 20f * Sizes.Halo }.As(out _mark));
+            Base.Spacing = Gaps.Parts;
+            Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false, Base = { HaloSize = 20f * Sizes.Halo } }.As(out _mark));
             Children.Add(new Label().As(out _name));
         }
 
@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The color of the outline around its mark, transparent for none: tied to the wait or step under the pointer.</summary>
         public Color Glow
         {
-            set { _mark.HaloTint = value; }
+            set { _mark.Base.HaloTint = value; }
         }
 
         /// <summary>Whether its mark is as quiet as the words of a paused step.</summary>
@@ -66,12 +66,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>Whether the words take all the room given and run onto further lines where they are wider.</summary>
         public bool Wraps
         {
-            get { return _name.Wraps; }
+            get { return _name.TextWrapping == TextWrapping.Wrap; }
             set
             {
-                _name.Wraps = value;
+                _name.TextWrapping = value ? TextWrapping.Wrap : TextWrapping.NoWrap;
                 _name.Placement = value ? Flex.Grow : null;
             }
+        }
+
+        /// <summary>Draws the words in <paramref name="font" />, <paramref name="fontSize" /> and <paramref name="color" />, touching only what differs.</summary>
+        public void Dress(string font, float fontSize, Color color)
+        {
+            var look = Base;
+            if (look.Font != font)
+                look.Font = font;
+
+            if (look.FontSize != fontSize)
+                look.FontSize = fontSize;
+
+            if (look.Color != color)
+                look.Color = color;
         }
 
         /// <inheritdoc />
@@ -91,7 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>This member's own look whatever state it is in, laid over its style's.</summary>
-        public new TextLook Base => (TextLook)base.Base;
+        public new MemberNameLook Base => (MemberNameLook)base.Base;
 
         /// <inheritdoc />
         protected override bool Fits(IStyle style)
@@ -102,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <inheritdoc />
         protected override ElementLook NewLook()
         {
-            return new TextLook();
+            return new MemberNameLook();
         }
 
         /// <inheritdoc />
@@ -110,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             base.Apply(look);
 
-            var text = (TextLook)look;
+            var text = (MemberNameLook)look;
             _name.Base.Wear(text.Font ?? MyFontEnum.White, text.FontSize ?? TextLook.NeutralFontSize, text.Color ?? Color.White);
         }
     }

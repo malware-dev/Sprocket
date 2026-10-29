@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>An empty section; its heading is the first of its children.</summary>
         public Section()
         {
-            Spacing = Gaps.Within;
+            Base.Spacing = Gaps.Within;
         }
     }
 }

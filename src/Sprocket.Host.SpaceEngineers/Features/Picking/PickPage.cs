@@ -633,8 +633,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override void Refresh()
         {
             _strip.Tick();
-            if (_slots != null)
-                _slots.Slide();
         }
 
         /// <summary>Goes straight on to the page after this one as soon as this is built, for a part pressed that stands for something on that page.</summary>

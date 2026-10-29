@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Makes the name and type, the new type's choices with the way to add one, and the value it starts as, one under the next.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             Placement = Flex.Grow;
 
             Children.Add(new FieldSet().As(out _head));
@@ -29,10 +29,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _choicesRow.Rows.Add(new Label { Style = Styles.ValueLabel }.As(out _choicesLabel),
                 new HStack
                 {
-                    Spacing = Gaps.Parts,
+                    Base = { Spacing = Gaps.Parts },
                     Children =
                     {
-                        new Flow { Spacing = Gaps.Parts, LineSpacing = Gaps.Parts }.As(out _chips),
+                        new Flow { Base = { Spacing = Gaps.Parts, LineSpacing = Gaps.Parts } }.As(out _chips),
                         new Button { Style = Styles.Start }.As(out _addChoice)
                     }
                 });

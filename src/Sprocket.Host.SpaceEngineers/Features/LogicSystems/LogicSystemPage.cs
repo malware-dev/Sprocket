@@ -232,9 +232,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             int shown;
             if (Editor.Habits.Tabs.TryGetValue(_system.Id, out shown))
-                _tabs.Current = shown;
+                _tabs.SelectedIndex = shown;
 
-            _tabs.Switched += at => Editor.Habits.Tabs[_system.Id] = at;
+            _tabs.SelectionChanged += at => Editor.Habits.Tabs[_system.Id] = at;
 
             Show(true);
         }
@@ -311,10 +311,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Flag(_sequencesTab, _sequencesMark, sequenced, texts);
             _standing = Worse(triggered, sequenced);
 
-            // A handful of rows, each still unless one is carried or has just landed.
-            _panelWork.Slide();
-            _stateWork.Slide();
-            if (_tabs.Current >= 0 && _tabs.Current < _tabs.Tabs.Count && _tabs.Tabs[_tabs.Current] == _stateTab)
+            if (_tabs.SelectedIndex >= 0 && _tabs.SelectedIndex < _tabs.Tabs.Count && _tabs.Tabs[_tabs.SelectedIndex] == _stateTab)
                 _stateWork.Live();
 
             _triggersWork.Hang();

@@ -30,11 +30,11 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 {
                     new Glyph { Align = Align.Center }.As(out _mark),
                     new VStack().As(out _underMark),
-                    new Label { Wraps = true, Centres = true }.As(out _system),
+                    new Label { TextWrapping = TextWrapping.Wrap, Base = { TextAlignment = TextAlignment.Center } }.As(out _system),
                     new VStack().As(out _underLabel),
-                    new Label { Wraps = true, Centres = true }.As(out _name),
+                    new Label { TextWrapping = TextWrapping.Wrap, Base = { TextAlignment = TextAlignment.Center } }.As(out _name),
                     new VStack().As(out _underName),
-                    new Label { Wraps = true, Centres = true }.As(out _sentence)
+                    new Label { TextWrapping = TextWrapping.Wrap, Base = { TextAlignment = TextAlignment.Center } }.As(out _sentence)
                 }
             }.As(out _body);
         }

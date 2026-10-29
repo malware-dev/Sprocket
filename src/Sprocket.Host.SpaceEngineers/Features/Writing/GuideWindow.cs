@@ -1,3 +1,4 @@
+using System.Linq;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -26,9 +27,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         /// <remarks>The page's title, a heading of the first level it opens with, is the window's title.</remarks>
         public void Show(Texts texts)
         {
-            Document title;
-            _body.Document = Markdown.Parse(texts.GuideRichText).Untitled(out title);
-            _title.Document = title;
+            var guide = Markdown.Parse(texts.GuideRichText);
+            var blocks = guide.Blocks;
+            var titled = blocks.Count > 0 && blocks[0].Kind == BlockKind.Heading && blocks[0].Level == 1;
+            _body.Document = titled ? new Document(blocks.Skip(1)) : guide;
+            _title.Document = titled ? new Document(new[] { blocks[0] }) : null;
             _close.Tip = Lumel.Tip.For(_close.Tip, texts.Codex.ChromeClose);
         }
 

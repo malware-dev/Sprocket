@@ -18,9 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
     {
         readonly SprocketEditor _editor;
         readonly List<string> _names = new List<string>();
-        readonly Relay _adds;
-        readonly Relay _keeps;
-        readonly Relay _copies;
+        readonly RelayCommand _adds;
+        readonly RelayCommand _keeps;
+        readonly RelayCommand _copies;
 
         LibraryListing _chosen;
         string _refused = "";
@@ -29,9 +29,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public BlueprintDetail(SprocketEditor editor)
         {
             _editor = editor;
-            _adds = new Relay(Add);
-            _keeps = new Relay(Keep);
-            _copies = new Relay(Copy);
+            _adds = new RelayCommand(Add);
+            _keeps = new RelayCommand(Keep);
+            _copies = new RelayCommand(Copy);
 
             CreateView();
 
@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _add.Command = _adds;
             _add.Tip = Lumel.Tip.For(_add.Tip, texts.Codex.LibraryPutOn);
             _keep.Command = _keeps;
-            _reset.Command = new Relay(Reset);
+            _reset.Command = new RelayCommand(Reset);
             _copy.Command = _copies;
         }
 

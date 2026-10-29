@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>An answer saying nothing yet, given by pressing it once it has a command.</summary>
         public OptionRow()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             Style = Styles.Option;
 
             Children.Add(new ChoiceMark { Placement = FixedSize.Size(20f, 20f) }.As(out _mark));

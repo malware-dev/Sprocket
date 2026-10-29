@@ -16,10 +16,10 @@ public class SlotTests
         var chip = Pressable();
 
         Assert.Equal(Palette.Panel, chip.Background);
-        Assert.Equal(Palette.ControlEdge, chip.Edge);
+        Assert.Equal(Palette.ControlEdge, chip.Border);
         Assert.Equal(Palette.Ink, Words(chip).Color);
 
-        chip.IsHot = true;
+        ((IInputTarget)chip).IsPointerOver = true;
         Assert.Equal(Palette.PanelHot, chip.Background);
     }
 
@@ -40,10 +40,10 @@ public class SlotTests
         var chip = new SlotChip();
         chip.Say("Airlock");
         chip.Restyle();
-        chip.IsHot = true;
+        ((IInputTarget)chip).IsPointerOver = true;
 
         Assert.Equal(Palette.Well, chip.Background);
-        Assert.Equal(Palette.None, chip.Edge);
+        Assert.Equal(Palette.None, chip.Border);
     }
 
     /// <summary>A part whose command cannot be carried out now is still as well.</summary>
@@ -51,15 +51,15 @@ public class SlotTests
     public void APartWhoseCommandIsOffIsStill()
     {
         var chip = Pressable();
-        ((Relay)chip.Command!).CanExecute = false;
+        ((RelayCommand)chip.Command!).CanExecute = false;
 
         Assert.Equal(Palette.Well, chip.Background);
-        Assert.Equal(Palette.None, chip.Edge);
+        Assert.Equal(Palette.None, chip.Border);
     }
 
     static SlotChip Pressable()
     {
-        var chip = new SlotChip { Command = new Relay(() => { }) };
+        var chip = new SlotChip { Command = new RelayCommand(() => { }) };
         chip.Say("Airlock");
         chip.Restyle();
         return chip;

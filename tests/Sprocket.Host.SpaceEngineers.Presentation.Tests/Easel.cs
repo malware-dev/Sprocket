@@ -65,10 +65,13 @@ sealed class Easel
         _device.SafeArea = new RectangleF(0f, 0f, width, height);
         _device.ViewportSize = new Vector2(width, height);
 
-        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, images ?? new ScreenSpaceImages(_device));
+        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, images ?? new MaterialImages(_device.TextureSize), () => Now);
 
         Draw(width, height);
     }
+
+    /// <summary>The tick the frames are drawn at, which a test moves on to run what moves over time.</summary>
+    public int Now { get; set; }
 
     /// <summary>Everything the last frame asked for.</summary>
     public IList<DrawCommand> Commands => _device.Commands;

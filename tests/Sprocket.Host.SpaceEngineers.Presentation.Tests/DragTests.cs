@@ -110,7 +110,7 @@ public class DragTests
         screen.Scene.Move(new Vector2(grab.X, grab.Y + 20f));
         screen.Run(5);
 
-        Assert.True(editor.StepRows()[3].IsCarried);
+        Assert.True(editor.StepRows()[3].IsDragging);
         Assert.Equal(resting, Spine(screen, editor.StepRows()));
     }
 

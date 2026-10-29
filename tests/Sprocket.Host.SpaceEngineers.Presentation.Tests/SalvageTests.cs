@@ -132,7 +132,7 @@ public class SalvageTests
         _ = page.View;
         Assert.Equal(Broken, page.Listing.Text);
         Assert.StartsWith("Line 5: ", page.Problem);
-        Assert.Equal("        nonsense", page.Listing.SelectedText());
+        Assert.Equal("        nonsense", page.Listing.SelectedText);
     }
 
     /// <summary>Mending the text puts its program in place, which runs and saves like any other.</summary>

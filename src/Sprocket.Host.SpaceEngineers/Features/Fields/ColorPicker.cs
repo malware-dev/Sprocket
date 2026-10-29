@@ -95,11 +95,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             Recall();
 
-            _modes.Current = offer.Tab;
-            _modes.Switched += at => _offer.Tab = at;
+            _modes.SelectedIndex = offer.Tab;
+            _modes.SelectionChanged += at => _offer.Tab = at;
 
-            _plane.Moved += () => Give(Hsv.Of(_color.Hue, _plane.Saturation, _plane.Value));
-            _strip.Moved += () => Give(_color.Hued(_strip.Hue));
+            _plane.ColorChanged += () => Give(Hsv.Of(_color.Hue, _plane.Saturation, _plane.Value));
+            _strip.ValueChanged += () => Give(_color.Hued(_strip.Hue));
 
             _hueBox.Edited += () => Typed(_hueBox, 360f, part => Give(_color.Hued(part)));
             _saturationBox.Edited += () => Typed(_saturationBox, 100f, part => Give(_color.Saturated(part)));
@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 Style = Styles.ColorChoice,
                 Color = color,
                 Placement = FixedSize.Size(SwatchSize, SwatchSize),
-                Command = new Relay(pressed)
+                Command = new RelayCommand(pressed)
             };
         }
 

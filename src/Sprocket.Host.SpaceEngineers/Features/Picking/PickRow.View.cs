@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // anywhere near the box is the box's and never takes the row alone; its padding sets where the box is drawn.
             Children.Add(new ChoiceMark
             {
-                Placement = FixedSize.Wide(40f),
+                Placement = FixedSize.Width(40f),
                 Align = Align.Tall,
                 Base = { Padding = new Thickness(12f, 0f, 8f, 0f) },
                 IsVisible = false
@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             Children.Add(new HStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Placement = Flex.Grow,
                 Children =
                 {
@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     new Image { Style = Styles.Picture, Placement = FixedSize.Size(56f, 56f), IsVisible = false }.As(out _picture),
                     new VStack
                     {
-                        Spacing = Gaps.Within,
+                        Base = { Spacing = Gaps.Within },
                         Placement = Flex.Grow,
                         Children =
                         {

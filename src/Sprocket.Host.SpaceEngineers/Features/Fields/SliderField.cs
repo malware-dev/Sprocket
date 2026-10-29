@@ -32,13 +32,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             _logarithmic = _least > 0 && _most / _least >= Wide;
             _format = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##";
 
-            Spacing = Gaps.Parts;
-            Children.Add(new Slider { TrackTint = Palette.Line, TrackHeight = 4f, GripColor = Palette.Ink, Placement = Flex.Grow }.As(out _slider));
+            Base.Spacing = Gaps.Parts;
+            Children.Add(new Slider { Base = { TrackTint = Palette.Line, TrackHeight = 4f, Thumb = Palette.Ink }, Placement = Flex.Grow }.As(out _slider));
             Children.Add(new NumberField(field, submit, Box).As(out _number));
 
-            _slider.Moved += delegate
+            _slider.ValueChanged += delegate
             {
-                _number.Text = _field.Unscaled(Spelled(Valued(_slider.Fraction)));
+                _number.Text = _field.Unscaled(Spelled(Valued(_slider.Value)));
                 Raise();
             };
 
@@ -95,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return;
 
             value = Math.Max(_least, Math.Min(_most, value));
-            _slider.Fraction = (float)(_logarithmic
+            _slider.Value = (float)(_logarithmic
                 ? Math.Log(value / _least) / Math.Log(_most / _least)
                 : (value - _least) / (_most - _least));
         }

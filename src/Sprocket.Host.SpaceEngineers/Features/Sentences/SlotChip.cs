@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public float Spacing
         {
             get { return _pieces.Spacing; }
-            set { _pieces.Spacing = value; }
+            set { _pieces.Base.Spacing = value; }
         }
 
         /// <summary>The texts what the members it says have to say are in.</summary>

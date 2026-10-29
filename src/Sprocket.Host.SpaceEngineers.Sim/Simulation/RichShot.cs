@@ -9,6 +9,7 @@ using VRageMath;
 using Color = VRageMath.Color;
 using Size = System.Windows.Size;
 using Thickness = Lumel.Thickness;
+using TextAlignment = Lumel.Text.TextAlignment;
 using Lumel.Text;
 using Lumel.Viewing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -25,6 +26,7 @@ public static class RichShot
     {
         Base =
         {
+            CodeBackground = new Color(255, 255, 255, 10), CodePadding = new Thickness(4f, -1f),
             Font = MyFontEnum.White,
             StrongFont = TextSizes.Bold,
             EmphasisFont = TextSizes.Italic,
@@ -42,16 +44,20 @@ public static class RichShot
             RuleColor = Palette.Line,
             BlockSpacing = 12f,
             Indent = 24f,
-            Boxes = Styles.Boxes
+            Callouts =
+            {
+                ["warning"] = { BarColor = Palette.Notice, Background = Palette.NoticeWash, Color = Palette.Ink },
+                ["player"] = { BarColor = Palette.Accent, Background = Palette.Panel, IsEmphasized = true }
+            }
         }
     };
 
     /// <summary>Writes <paramref name="markdown" />, laid out <paramref name="wide" /> across, to <paramref name="path" />, and answers how big the picture is.</summary>
     /// <remarks>Drawn in <paramref name="style" />, or the style of a page where that is null. A strong, emphasis or link color given here is tried in place of the style's, for comparing one against another; the page is laid out as <paramref name="align" /> says, and shrinks to fit a room <paramref name="fit" /> tall where that is above zero.</remarks>
     public static Vector2 Save(string path, string markdown, float wide, IStyle<RichText> style, Color? strong, Color? emphasis, Color? link,
-        Alignment align, float fit)
+        TextAlignment align, float fit)
     {
-        var text = new RichText { Base = { Alignment = align }, Style = style ?? Page, Document = Markdown.Parse(markdown) };
+        var text = new RichText { Base = { TextAlignment = align }, Style = style ?? Page, Document = Markdown.Parse(markdown) };
 
         if (strong.HasValue)
             text.Base.StrongColor = strong.Value;
@@ -62,7 +68,7 @@ public static class RichShot
         if (emphasis.HasValue)
             text.Base.EmphasisColor = emphasis.Value;
 
-        Element shown = fit > 0f ? new Viewbox { Content = text, Grows = false, Placement = FixedSize.Size(wide, fit) } : text;
+        Element shown = fit > 0f ? new Viewbox { Content = text, StretchDirection = StretchDirection.DownOnly, Placement = FixedSize.Size(wide, fit) } : text;
         var page = new VStack { Base = { Background = Palette.Page, Padding = new Thickness(24f) }, Children = { shown } };
 
         var surface = ScreenSession.Surface();

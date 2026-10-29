@@ -49,8 +49,9 @@ public class CodexTests
     public void TheEditorsTipsNestAndCastAShadow()
     {
         var tip = Screen.Fresh("tick", "3").Scene.CodexTip;
+        tip.Restyle();
 
-        Assert.True(tip.Nests);
+        Assert.True(tip.OpensNestedTips);
         Assert.Same(Styles.ShortShadow, tip.Shadow);
     }
 
@@ -154,8 +155,8 @@ public class CodexTests
         var view = editor.Current.View!;
         var onWords = words.ToScreen(new Vector2(words.Bounds.X + words.Bounds.Width / 2f, words.Bounds.Y + words.Bounds.Height / 2f));
         var beside = field.ToScreen(new Vector2(field.Bounds.X + 2f, words.Bounds.Y + words.Bounds.Height / 2f));
-        Assert.NotNull(view.SayingAt(onWords));
-        Assert.Null(view.SayingAt(beside));
+        Assert.NotNull(view.TipOwnerAt(onWords));
+        Assert.Null(view.TipOwnerAt(beside));
     }
 
     /// <summary>A logic system's installations heading is the term installation: resting on it shows the codex's page on it, and it takes no press.</summary>
@@ -233,7 +234,7 @@ public class CodexTests
         Assert.Same(row, tip.Anchor);
         var first = tip.Page;
 
-        tip.Go(new Lumel.Tip("Another page."));
+        tip.Navigate(new Lumel.Tip("Another page."));
         screen.Run(1);
         var back = Target.Within(tip).OfType<Lumel.Images.Glyph>().First(glyph => glyph.IsVisible);
         Assert.False(menu.Bounds.Contains(Middle(back)), "the tip's back step is inside the menu");
@@ -361,16 +362,17 @@ public class CodexTests
         }
     }
 
-    /// <summary>Every attribute a page of the codex asks its boxes for, in every language, is markdown-lite's own or one the codex gives a look.</summary>
+    /// <summary>Every class a page of the codex asks its callouts for, in every language, is markdown-lite's own or one the codex gives a look.</summary>
     [Fact]
     public void EveryBoxInTheCodexAsksForSomethingItHas()
     {
         var native = new[] { "left", "center", "right" };
+        var callouts = ((RichTextStyle)Styles.Description).Base.Callouts;
         foreach (var (file, key, text) in Pages())
         {
             foreach (var name in Names(Markdown.Parse(text).Blocks))
             {
-                Assert.True(native.Contains(name, StringComparer.OrdinalIgnoreCase) || Styles.Boxes.Find(name) != null,
+                Assert.True(native.Contains(name, StringComparer.OrdinalIgnoreCase) || callouts.Find(name) != null,
                     file + " " + key + " asks for " + name + ", which nothing gives a look");
             }
         }
@@ -391,11 +393,11 @@ public class CodexTests
     /// <summary>The first point on the screen where a link to <paramref name="target" /> sits, and the text it sits in.</summary>
     static Vector2 FirstLink(Screen screen, out RichText text, string target) => Links.First(screen.Scene.Editor.Current!.View, target, out text);
 
-    /// <summary>Every attribute the boxes in <paramref name="blocks" /> name, inside quotes and other boxes too.</summary>
-    static IEnumerable<string> Names(IList<Block> blocks) =>
-        blocks.SelectMany(block => block.Names.Concat(Names(block.Blocks)));
+    /// <summary>Every class the callouts in <paramref name="blocks" /> name, inside quotes and other callouts too.</summary>
+    static IEnumerable<string> Names(IReadOnlyList<Block> blocks) =>
+        blocks.SelectMany(block => block.Classes.Concat(Names(block.Blocks)));
 
     /// <summary>The target of every link in <paramref name="blocks" />, inside tables, quotes and boxes too.</summary>
-    static IEnumerable<string> Targets(IList<Block> blocks) =>
+    static IEnumerable<string> Targets(IReadOnlyList<Block> blocks) =>
         blocks.SelectMany(block => block.Runs.OfType<LinkRun>().Select(run => run.Link.Target).Concat(Targets(block.Blocks)));
 }

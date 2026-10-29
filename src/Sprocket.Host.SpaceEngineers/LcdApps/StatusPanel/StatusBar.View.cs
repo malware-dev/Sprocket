@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                         Align = Align.Left | Align.Center,
                         Children =
                         {
-                            new Image { Source = StatusPicture.Icon(), Tint = Color.White, Align = Align.Center }.As(out _icon),
+                            new Image { Source = StatusPicture.Icon(), Base = { Tint = Color.White }, Align = Align.Center }.As(out _icon),
                             new Label { Align = Align.Center }.As(out _heading)
                         }
                     }.As(out _name),

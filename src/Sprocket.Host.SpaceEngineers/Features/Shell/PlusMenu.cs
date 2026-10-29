@@ -14,13 +14,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// <remarks>The menu's entries are made when somebody opens it, so a screen shown every tick makes none.</remarks>
     public class PlusMenu : Button
     {
-        static readonly AddOption[] _none = Array.Empty<AddOption>();
+        static readonly AddOption[] None = Array.Empty<AddOption>();
 
         readonly Popup _menu;
         readonly VStack _entries;
         readonly ICommand _toggles;
 
-        IList<AddOption> _choices = _none;
+        IList<AddOption> _choices = None;
 
         /// <summary>A plus offering nothing yet, hidden until it is shown something to add.</summary>
         public PlusMenu()
@@ -28,8 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Style = Styles.Start;
             IsVisible = false;
             _entries = new VStack();
-            _menu = new Popup { Style = Styles.Menu, Anchor = this, Side = PopupSide.Beside, Gap = 4f, Content = _entries };
-            _toggles = new Relay(Toggle);
+            _menu = new Popup { Style = Styles.Menu, Anchor = this, Side = PopupSide.Right, Base = { Gap = 4f }, Content = _entries };
+            _toggles = new RelayCommand(Toggle);
         }
 
         /// <summary>Everything it was given to offer, in the order the menu lists them, those that may not be added now among them.</summary>
@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </summary>
         public void Show(AddOption head)
         {
-            _choices = head.Choices ?? _none;
+            _choices = head.Choices ?? None;
 
             var offered = Offered();
             IsVisible = offered > 0;
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _entries.Children.Add(new HStack
                 {
                     Style = Styles.MenuRow,
-                    Command = new Relay(() => Choose(choice)),
+                    Command = new RelayCommand(() => Choose(choice)),
                     Tip = Tip.For(null, choice.About),
                     Children = { new Label { Style = Styles.ListWord, Text = choice.Text } }
                 });

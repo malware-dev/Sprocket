@@ -43,11 +43,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _changes = changes;
             _locked = locked;
             _typeRows = new KeyedChildren<DeclaredType, TypeRow>(panel.Types.Children, TypeRowFor);
-            _stateRows = new KeyedChildren<State, StateRow>(panel.States.Children, StateRowFor);
+            _stateRows = new KeyedChildren<State, StateRow>(panel.StateList.Children, StateRowFor);
             editor.Codex.Explain(panel.TypesHeading);
 
-            panel.Types.Moves = (from, to) => Move(CommandKind.MoveType, () => _editor.Do(_system, new MoveType(_types[from], from, to)));
-            panel.States.Moves = (from, to) => Move(CommandKind.MoveState, () => _editor.Do(_system, new MoveState(_states[from], from, to)));
+            panel.Types.Reordered += moved => Move(CommandKind.MoveType, () => _editor.Do(_system, new MoveType(_types[moved.From], moved.From, moved.To)));
+            panel.StateList.Reordered += moved => Move(CommandKind.MoveState, () => _editor.Do(_system, new MoveState(_states[moved.From], moved.From, moved.To)));
         }
 
         /// <summary>Lays the tab out again from the system's types and states.</summary>
@@ -100,13 +100,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (row.Now != now)
                     row.Now = now;
             }
-        }
-
-        /// <summary>Slides the rows being carried, and the rows making room for them.</summary>
-        public void Slide()
-        {
-            _panel.Types.Slide();
-            _panel.States.Slide();
         }
 
         void ArrangeType(Texts texts, TypeRow row, DeclaredType type, bool editable, string locked)

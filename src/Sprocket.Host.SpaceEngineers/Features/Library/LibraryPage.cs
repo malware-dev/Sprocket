@@ -238,7 +238,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>Adds a part of the list under <paramref name="heading" />, and gives back where what it heads goes, <paramref name="apart" /> from each other.</summary>
         VStack Part(Element heading, float apart)
         {
-            var body = new VStack { Spacing = apart };
+            var body = new VStack { Base = { Spacing = apart } };
             _list.Children.Add(new Section { Children = { heading, body } });
             return body;
         }
@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>Adds a construct's name to <paramref name="part" />, and gives back where its rows go, set in under the name.</summary>
         VStack Construct(Panel part, string name)
         {
-            var held = new VStack { Spacing = Gaps.Items, Base = { Padding = new Thickness(Sizes.Indent, 0f, 0f, 0f) } };
+            var held = new VStack { Base = { Spacing = Gaps.Items, Padding = new Thickness(Sizes.Indent, 0f, 0f, 0f) } };
             part.Children.Add(new Section { Children = { new Label { Style = Styles.InnerName, Text = name }, held } });
             return held;
         }
@@ -270,7 +270,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         void Line(string text, IStyle<Label> style, Panel into)
         {
-            into.Children.Add(new Label { Style = style, Text = text, Wraps = true });
+            into.Children.Add(new Label { Style = style, Text = text, TextWrapping = TextWrapping.Wrap });
         }
 
         /// <summary>Shows only the rows whose name holds the words typed in the search box, as every search box matches them.</summary>

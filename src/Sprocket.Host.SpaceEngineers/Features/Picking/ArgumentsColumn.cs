@@ -21,26 +21,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>An empty column <paramref name="width" /> across, headed <paramref name="title" />.</summary>
         public ArgumentsColumn(float width, string title)
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             Style = Styles.Column;
             Width = width;
 
             // Headed as a stage is, so the first argument lines up with the boxes beside it.
             Children.Add(new VStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
                     new HStack
                     {
-                        Placement = FixedSize.High(StageColumn.HeadHigh),
+                        Placement = FixedSize.Height(StageColumn.HeadHigh),
                         Children = { new Label { Style = Styles.H1, Text = title.ToUpperInvariant() }.As(out _title) }
                     },
                     new Label { Style = Styles.ColumnNote }
                 }
             }.As(out _head));
             Children.Add(new FieldSet().As(out _form));
-            Children.Add(new Label { Style = Styles.Refusal, Wraps = true, IsVisible = false }.As(out _why));
+            Children.Add(new Label { Style = Styles.Refusal, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _why));
 
             // The rest of the strip's height, so the column stands as tall as the stages beside it.
             Children.Add(new VStack { Placement = Flex.Grow }.As(out _rest));
@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _width = value;
                 if (!_inset)
-                    Placement = FixedSize.Wide(value);
+                    Placement = FixedSize.Width(value);
             }
         }
 
@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _inset = value;
                 Style = value ? null : Styles.Column;
-                Placement = value ? null : FixedSize.Wide(_width);
+                Placement = value ? null : FixedSize.Width(_width);
                 _head.IsVisible = !value;
                 _rest.IsVisible = !value;
             }

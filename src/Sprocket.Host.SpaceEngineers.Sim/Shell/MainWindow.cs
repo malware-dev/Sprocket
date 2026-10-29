@@ -40,7 +40,6 @@ namespace Sprocket.Sim.Shell
         readonly TextBlock _status = new TextBlock();
 
         Point _pointer;
-        bool _caretVisible = true;
         string _lastStatus;
 
         // The last frame's window-pixels-to-UI-units scale, kept so a click can be placed without
@@ -137,16 +136,6 @@ namespace Sprocket.Sim.Shell
                 _surface.InvalidateVisual();
             };
             clock.Start();
-
-            // The caret blinks on the window's clock too. The box has none of its own, on purpose: a widget
-            // that knew what a tick was would be a widget that knew which target it was on.
-            var blink = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(530) };
-            blink.Tick += delegate
-            {
-                _caretVisible = !_caretVisible;
-                _surface.InvalidateVisual();
-            };
-            blink.Start();
         }
 
         void OnFrame(ScreenSpaceGraphics g)
@@ -160,7 +149,6 @@ namespace Sprocket.Sim.Shell
             // journey is ToTarget's business and belongs in one place.
             _scale = _screen.Width > 0f ? _surface.Target.Width / _screen.Width : 1f;
 
-            _editor.CaretVisible = _caretVisible;
             _editor.Draw(g);
 
             Vector2 size = g.Size;
@@ -346,10 +334,9 @@ namespace Sprocket.Sim.Shell
             return _editor.Key(game, shift, control);
         }
 
-        /// <summary>Shows the caret immediately after an edit, so typing never hides it mid-blink.</summary>
+        /// <summary>Draws the screen again after an edit.</summary>
         void Wake()
         {
-            _caretVisible = true;
             _surface.InvalidateVisual();
         }
     }

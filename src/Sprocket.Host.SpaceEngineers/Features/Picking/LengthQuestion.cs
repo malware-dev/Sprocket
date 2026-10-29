@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 Style = Styles.Panel,
                 // Done laid over the panel's bottom right corner, on the line saying the length in the other unit.
-                Content = new Layers
+                Content = new ZStack
                 {
                     Children =
                     {
@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                             Style = Styles.Primary,
                             Text = editor.Texts.ChromeDone,
                             Align = Align.Right | Align.Bottom,
-                            Command = new Relay(() => Finish(false))
+                            Command = new RelayCommand(() => Finish(false))
                         }
                     }
                 }

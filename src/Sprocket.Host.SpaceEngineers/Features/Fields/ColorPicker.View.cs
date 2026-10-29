@@ -8,8 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     partial class ColorPicker
     {
-        ColorPlane _plane;
-        HueStrip _strip;
+        ColorSpectrum _plane;
+        HueSlider _strip;
         Swatch _new;
         TabView _modes;
         NumberBox _hueBox;
@@ -29,36 +29,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// </summary>
         void CreateView()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
 
             Children.Add(new HStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
-                    new ColorPlane { Base = { Edge = Palette.Line }, Pale = Materials.Pale, Dark = Materials.Dark, Placement = FixedSize.Size(Wide - StripWide - 8f, PlaneHigh) }.As(out _plane),
-                    new HueStrip { Base = { Edge = Palette.Line }, Hues = Materials.Hues, Placement = FixedSize.Size(StripWide, PlaneHigh) }.As(out _strip)
+                    new ColorSpectrum { Base = { Pale = Materials.Pale, Dark = Materials.Dark, Border = Palette.Line }, Placement = FixedSize.Size(Wide - StripWide - 8f, PlaneHigh) }.As(out _plane),
+                    new HueSlider { Base = { Hues = Materials.Hues, Border = Palette.Line }, Placement = FixedSize.Size(StripWide, PlaneHigh) }.As(out _strip)
                 }
             });
             Children.Add(new HStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
                     new Swatch { Style = Styles.ColorSample, Placement = FixedSize.Size(ShownWide, ShownHigh) }.As(out _new),
                     new TabView
                     {
-                        HeaderStyle = Styles.Tab,
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Placement = Flex.Grow,
                         Tabs =
                         {
-                            new Tab { Header = "HSV", Content = Channels("H", 360, out _hueBox, "S", 100, out _saturationBox, "V", 100, out _valueBox) },
-                            new Tab { Header = "RGB", Content = Channels("R", 255, out _redBox, "G", 255, out _greenBox, "B", 255, out _blueBox) },
+                            new Tab { Style = Styles.Tab, Header = "HSV", Content = Channels("H", 360, out _hueBox, "S", 100, out _saturationBox, "V", 100, out _valueBox) },
+                            new Tab { Style = Styles.Tab, Header = "RGB", Content = Channels("R", 255, out _redBox, "G", 255, out _greenBox, "B", 255, out _blueBox) },
                             new Tab
                             {
+                                Style = Styles.Tab,
                                 Header = "Hex",
-                                Content = new TextBox { Style = Styles.Value, Focusable = true, SelectsAll = true, Placement = FixedSize.Wide(CodeWide) }.As(out _written)
+                                Content = new TextBox { Style = Styles.Value, Focusable = true, SelectsAll = true, Placement = FixedSize.Width(CodeWide) }.As(out _written)
                             }
                         }
                     }.As(out _modes)
@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             // The paint colors and the colors chosen last, two lists, set further apart than the colors in either.
             Children.Add(new VStack
             {
-                Spacing = Gaps.Items,
+                Base = { Spacing = Gaps.Items },
                 Children = { Swatches().As(out _palette), Swatches().As(out _recent) }
             });
         }
@@ -78,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             return new HStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
                     Lettered(first, Channel(firstMost).As(out firstBox)),
@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             return new HStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Children = { new Label { Style = Styles.ValueLabel, Text = letter, Align = Align.Center }, box }
             };
         }
@@ -104,15 +104,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             var said = most.ToString(System.Globalization.CultureInfo.InvariantCulture);
             return new NumberBox
             {
-                Style = Styles.Value, Focusable = true, SelectsAll = true, Whole = true, Least = 0, Most = most, Widest = said,
-                Placement = FixedSize.Wide(ChannelWide)
+                Style = Styles.Number, Focusable = true, SelectsAll = true, IsInteger = true, Minimum = 0, Maximum = most, Widest = said,
+                Placement = FixedSize.Width(ChannelWide)
             };
         }
 
         /// <summary>Rows of swatches in columns of their width, as many to a row as fill the picker's width exactly.</summary>
         static Grid Swatches()
         {
-            var grid = new Grid { ColumnSpacing = Gap, RowSpacing = Gap };
+            var grid = new Grid { Base = { ColumnSpacing = Gap, RowSpacing = Gap } };
             for (var i = 0; i < Across; i++)
                 grid.Columns.Add(SwatchSize);
 

@@ -1,3 +1,5 @@
+using VRageMath;
+using Lumel.Input;
 using Lumel;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -186,10 +188,10 @@ public class FieldTests
         form.Submitted += () => finished++;
         var flip = form.Within().OfType<Lumel.Controls.Switch>().Single();
 
-        flip.Presses = 1;
+        ((IInputTarget)flip).PointerDown(Vector2.Zero, PointerButton.Left, 1, false, false);
         flip.Command!.Execute();
         var given = form.Answer;
-        flip.Presses = 2;
+        ((IInputTarget)flip).PointerDown(Vector2.Zero, PointerButton.Left, 2, false, false);
         flip.Command!.Execute();
 
         Assert.Equal(1, finished);

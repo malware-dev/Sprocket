@@ -16,19 +16,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Makes the mark of what the answer names, its words with the caution under them, and the mark of the answer already given.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Items;
+            Base.Spacing = Gaps.Items;
             Style = Styles.Answer;
 
             Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false }.As(out _mark));
             Children.Add(new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Placement = Flex.Grow,
                 Children =
                 {
                     new Label { Style = Styles.Name }.As(out _words),
 
-                    new Label { Style = Styles.WarningLine, Wraps = true, IsVisible = false }.As(out _caution)
+                    new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _caution)
                 }
             });
             Children.Add(new Glyph { Symbol = Symbols.Check, Style = Styles.Icon, Placement = FixedSize.Size(24f, 24f), IsVisible = false }.As(out _given));

@@ -28,17 +28,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>Makes the name over its buttons, the lines about it, and the sections naming its slots and installations.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Sections;
+            Base.Spacing = Gaps.Sections;
 
             Children.Add(new VStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
-                    new Label { Style = Styles.Name, Trims = true }.As(out _name),
+                    new Label { Style = Styles.Name, TextWrapping = TextWrapping.Trim }.As(out _name),
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Children =
                         {
                             new Button { Style = Styles.Button }.As(out _add),
@@ -51,12 +51,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             });
             Children.Add(new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Children =
                 {
                     new Label { Style = Styles.Detail }.As(out _line),
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _about),
-                    new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _trouble)
+                    new Label { Style = Styles.Diagnostic, TextWrapping = TextWrapping.Wrap }.As(out _trouble)
                 }
             });
             Children.Add(new Section
@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Children =
                 {
                     new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _firstHeading),
-                    new Label { Style = Styles.Detail, Wraps = true }.As(out _first)
+                    new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Wrap }.As(out _first)
                 }
             }.As(out _firstSection));
             Children.Add(new Section
@@ -72,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Children =
                 {
                     new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _secondHeading),
-                    new Label { Style = Styles.Detail, Wraps = true }.As(out _second)
+                    new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Wrap }.As(out _second)
                 }
             }.As(out _secondSection));
         }

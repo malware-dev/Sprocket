@@ -104,8 +104,17 @@ public sealed class Face
     /// <summary>The color behind its text.</summary>
     public Color BackgroundColor { get; set; } = Color.Black;
 
-    /// <summary>The fonts it offers, by the game's ids.</summary>
-    public List<string> Fonts { get; } = ["Debug", "Monospace"];
+    // The fonts the game defines itself, as Content/Data/Fonts.sbc lists them.
+    static readonly string[] Stock =
+    [
+        "Debug", "Red", "Green", "Blue", "White", "DarkBlue", "UrlNormal", "UrlHighlight", "ErrorMessageBoxCaption",
+        "ErrorMessageBoxText", "InfoMessageBoxCaption", "InfoMessageBoxText", "ScreenCaption", "GameCredits", "LoadingScreen",
+        "BuildInfo", "BuildInfoHighlight", "Monospace"
+    ];
+
+    /// <summary>The fonts it offers, by the game's ids: every font defined, the game's own and then the mods'.</summary>
+    /// <remarks>The game answers a screen's fonts with every font definition loaded, so the mods' fonts are among them.</remarks>
+    public List<string> Fonts { get; } = Offered();
 
     /// <summary>The font its text is in, by the game's id.</summary>
     public string Font { get; set; } = "Debug";
@@ -133,4 +142,13 @@ public sealed class Face
 
     /// <summary>The sprites of the last frame an app drew on it, in the order they were added.</summary>
     public List<MySprite> Sprites { get; } = [];
+
+    static List<string> Offered()
+    {
+        var fonts = new List<string>(Stock);
+        foreach (var font in SprocketContent.Instance.Fonts)
+            fonts.Add(font.Name);
+
+        return fonts;
+    }
 }

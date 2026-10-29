@@ -202,7 +202,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 ? Editor.Act(CommandKind.SlotType, () => Editor.Push(new SlotTypePage(Editor, _system, _part)))
                 : null;
 
-            _required.Says(texts.BlueprintRequired, texts.BlueprintOptional);
+            _required.OnText = texts.BlueprintRequired;
+            _required.OffText = texts.BlueprintOptional;
             _required.IsOn = !_part.Optional;
             _required.Tip = Tip.For(_required.Tip, texts.Codex.BlueprintRequiredAbout);
             _required.Command = editable

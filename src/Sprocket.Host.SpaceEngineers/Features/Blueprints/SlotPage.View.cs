@@ -29,13 +29,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             return new VStack
             {
-                Spacing = Gaps.Items,
+                Base = { Spacing = Gaps.Items },
                 Children =
                 {
-                    new Label { Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _locked),
+                    new Label { Style = Styles.Aside, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _locked),
                     new VStack
                     {
-                        Spacing = Gaps.Sections,
+                        Base = { Spacing = Gaps.Sections },
                         Children =
                         {
                             new Section
@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                                 Children =
                                 {
                                     new Label { Style = Styles.H2 }.As(out _shortHeading),
-                                    new TextBox { Style = Styles.Search, Focusable = true, IsVisible = false, Longest = ShortLongest, Placement = FixedSize.Wide(460f) }.As(out _short),
+                                    new TextBox { Style = Styles.Search, Focusable = true, IsVisible = false, MaxLength = ShortLongest, Placement = FixedSize.Width(460f) }.As(out _short),
                                     new Label { Style = Styles.Phrase, IsVisible = false }.As(out _shownShort)
                                 }
                             }.As(out _naming),
@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                                 Children =
                                 {
                                     new Label { Style = Styles.H2 }.As(out _expectsHeading),
-                                    new Label { Style = Styles.Phrase, Wraps = true }.As(out _expects),
+                                    new Label { Style = Styles.Phrase, TextWrapping = TextWrapping.Wrap }.As(out _expects),
                                     new SlotChip { IsVisible = false, Align = Align.Left }.As(out _expectsPart)
                                 }
                             },

@@ -1,3 +1,4 @@
+using VRage.Input;
 using Lumel.Input;
 using Lumel.Screens;
 using Lumel.Text;
@@ -34,11 +35,11 @@ public class TerminalNoticeTests
         var ok = easel.Written.First(text => text.Text == "OK");
         var at = new Vector2(ok.Position.X, ok.Position.Y) / easel.Pixels + new Vector2(4f, 4f);
 
-        Assert.False(stage.TakeClose());
+        Assert.False(((IClosingWorkspace)stage).TakeCloseRequest());
         stage.PointerDown(at, PointerButton.Left, 1, false, false);
         stage.PointerUp(at, PointerButton.Left);
 
-        Assert.True(stage.TakeClose());
+        Assert.True(((IClosingWorkspace)stage).TakeCloseRequest());
     }
 
     /// <summary>Enter closes the notice, as its OK does.</summary>
@@ -47,9 +48,8 @@ public class TerminalNoticeTests
     {
         var stage = Notice();
 
-        Assert.True(stage.IsQuestioning);
-        Assert.True(stage.TakeDefault());
-        Assert.True(stage.TakeClose());
+        Assert.True(stage.Key(MyKeys.Enter, false, false));
+        Assert.True(((IClosingWorkspace)stage).TakeCloseRequest());
     }
 
     static Workspace Notice()

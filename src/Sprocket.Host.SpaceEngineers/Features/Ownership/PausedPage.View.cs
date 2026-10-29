@@ -27,15 +27,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
                     new VStack
                     {
                         Align = Align.Center,
-                        Placement = FixedSize.Wide(Column),
-                        Spacing = Gaps.Items,
+                        Placement = FixedSize.Width(Column),
+                        Base = { Spacing = Gaps.Items },
                         Children =
                         {
                             new RichText { Style = Styles.Reading }.As(out _body),
                             new HStack
                             {
                                 Align = Align.Center,
-                                Spacing = Gaps.Parts,
+                                Base = { Spacing = Gaps.Parts },
                                 Children =
                                 {
                                     new Button { Style = Styles.Button }.As(out _resume),

@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             Texts = texts;
             Ink = ink;
             Ground = ground;
-            Quiet = Contrast.Separate(Color.Lerp(ground, ink, 0.55f), ground, ink, Contrast.Text);
+            Quiet = Contrast.EnsureContrast(Color.Lerp(ground, ink, 0.55f), ground, ink, Contrast.MinimumTextRatio);
         }
 
         /// <summary>The size whose words fill <paramref name="high" /> of a bar's height, and no smaller than the floor.</summary>
@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>The color of <paramref name="level" />'s mark, moved toward the text color as far as it takes to be seen on the background.</summary>
         public Color Shade(StatusLevel level)
         {
-            return Contrast.Separate(level == StatusLevel.Problem ? Palette.Problem : Palette.Notice, Ground, Ink, Contrast.Mark);
+            return Contrast.EnsureContrast(level == StatusLevel.Problem ? Palette.Problem : Palette.Notice, Ground, Ink, Contrast.MinimumNonTextRatio);
         }
 
         /// <summary>The mark of <paramref name="level" />: a cross for a problem, the warning mark for the rest.</summary>

@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             CreateView();
 
-            _box.Message = Template.Read(message);
+            _box.Message = Template.Parse(message);
             _box.MessageArguments = arguments;
             _box.YesText = ok;
         }
@@ -22,17 +22,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>The game dims what is behind it, as it does behind the editor.</remarks>
         public static void Show(string message, Arguments arguments, string ok)
         {
-            Hosted(message, arguments, ok).Open("SprocketNotice");
+            Hosted(message, arguments, ok).Open();
         }
 
         /// <summary>The workspace saying <paramref name="message" />, its slots filled from <paramref name="arguments" />, whose one button, <paramref name="ok" />, closes it.</summary>
         public static ScreenSpaceWorkspace Hosted(string message, Arguments arguments, string ok)
         {
             var notice = new TerminalNotice(message, arguments, ok);
-            var workspace = new SprocketWorkspace(notice);
-            notice._box.YesCommand = new Relay(workspace.Close);
-            workspace.Accept = new Relay(() => notice._box.TakeAccept());
+            var workspace = new SprocketWorkspace("SprocketNotice", notice);
+            notice._box.YesCommand = new RelayCommand(workspace.RequestClose);
             return workspace;
+        }
+
+        /// <inheritdoc />
+        /// <remarks>Enter is the box's OK, wherever the keyboard is.</remarks>
+        protected override bool OnIntent(InputRoot input, Intent intent)
+        {
+            return intent == Intent.Accept ? _box.PerformAccept() : base.OnIntent(input, intent);
         }
     }
 }

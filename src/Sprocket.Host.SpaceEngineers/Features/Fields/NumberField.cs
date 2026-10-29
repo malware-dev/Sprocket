@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public NumberField(Field field, ICommand submit, float wide)
         {
             _field = field;
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             double least;
             var floored = Bound(field.Scaled(field.Least), out least);
             double most;
@@ -35,16 +35,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             Children.Add(new NumberBox
             {
-                Style = Styles.Value,
+                Style = Styles.Number,
                 Focusable = true,
                 SelectsAll = true,
                 Submit = submit,
-                Placement = FixedSize.Wide(wide),
-                Whole = field.Entry == FieldInput.Whole,
-                Negative = !floored || least < 0,
-                Least = floored ? least : (double?)null,
-                Most = ceilinged ? most : (double?)null,
-                Format = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##"
+                Placement = FixedSize.Width(wide),
+                IsInteger = field.Entry == FieldInput.Whole,
+                Minimum = floored ? least : (double?)null,
+                Maximum = ceilinged ? most : (double?)null,
+                FormatString = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##"
             }.As(out _box));
 
             var unit = (field.Unit ?? "").Trim();

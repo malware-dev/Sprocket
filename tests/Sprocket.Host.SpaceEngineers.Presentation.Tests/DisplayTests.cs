@@ -44,7 +44,8 @@ public class DisplayTests
     public void PaddingKeepsWhatIsShownFromTheEdges()
     {
         var page = new VStack();
-        var display = new Display { Padding = new Thickness(24f), Children = { page } };
+        var display = new Display { Children = { page } };
+        display.Root.Base.Padding = new Thickness(24f);
 
         _ = new Easel(display.Root, 1000f, 600f);
 
@@ -57,10 +58,10 @@ public class DisplayTests
     {
         var graphics = Screen(new RectangleF(240f, 0f, 1440f, 1080f), new Vector2(1920f, 1080f));
 
-        var room = graphics.Room(new ScreenSpaceWorkspace().Area);
+        var room = graphics.BoundsOf(new ScreenSpaceWorkspace("Test").Area);
 
         Assert.Equal(1440f, room.Width, 3);
-        Assert.Equal(1080f * ScreenSpaceGraphics.DashboardHeight, room.Height, 3);
+        Assert.Equal(1080f * ScreenSpaceGraphics.TerminalHeight, room.Height, 3);
         Assert.Equal(0f, room.X, 3);
         Assert.Equal((1080f - room.Height) * 0.5f, room.Y, 3);
     }
@@ -71,7 +72,7 @@ public class DisplayTests
     {
         var graphics = Screen(new RectangleF(240f, 0f, 1440f, 1080f), new Vector2(1920f, 1080f));
 
-        var room = graphics.Room(ScreenArea.Window);
+        var room = graphics.BoundsOf(ScreenArea.Window);
 
         Assert.Equal(new RectangleF(-240f, 0f, 1920f, 1080f), room);
     }
@@ -85,7 +86,7 @@ public class DisplayTests
         device.SafeArea = safe;
         device.ViewportSize = viewport;
 
-        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new ScreenSpaceImages(device));
+        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, new MaterialImages(device.TextureSize), () => 0);
         graphics.Begin();
         return graphics;
     }

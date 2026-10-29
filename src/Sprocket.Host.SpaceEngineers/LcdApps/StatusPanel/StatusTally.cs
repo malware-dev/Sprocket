@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public void Show(StatusLook look, PanelSize size, int count, bool banner, bool shown)
         {
             IsVisible = shown && count > 0;
-            Spacing = size.Beside;
+            Base.Spacing = size.Beside;
             _mark.Style = banner ? size.BannerMark : size.Count;
             _mark.Base.Tint = look.Shade(_level);
             _count.Style = banner ? size.Banner : size.Plain;

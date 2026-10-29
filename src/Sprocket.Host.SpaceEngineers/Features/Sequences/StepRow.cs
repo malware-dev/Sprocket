@@ -18,7 +18,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
     /// <summary>One step of a sequence as the line it reads as: its number, a lead-in, then the parts that complete it.</summary>
-    public partial class StepRow : HStack, ICarried
+    public partial class StepRow : HStack, IReorderable, IDragged
     {
         const float SpineIn = 6f;
 
@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public int Depth { get; set; }
 
         /// <summary>How many rows after it are carried with it: the rest of the if, for the row that opens one.</summary>
-        public int Carries { get; set; }
+        public int DraggedWithCount { get; set; }
 
         /// <summary>The pluses it offers after its sentence to add to the sequence with.</summary>
         public List<AddOption> Adds { get; }
@@ -102,12 +102,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             get
             {
                 // The row takes the pointer wherever nothing inside it does, as on its plain words and the room round them.
-                if (IsHot || _grip.IsHot || _sentence.IsHot || _lead.IsHot || _leadWaits.IsHot)
+                if (IsPointerOver || _grip.IsPointerOver || _sentence.IsPointerOver || _lead.IsPointerOver || _leadWaits.IsPointerOver)
                     return true;
 
                 foreach (var chip in _chips)
                 {
-                    if (chip.IsHot)
+                    if (chip.IsPointerOver)
                         return true;
                 }
 
@@ -133,11 +133,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>How much <see cref="Problem" /> matters: a problem, a warning or a note.</summary>
         public NoticeLevel Level { get; set; } = NoticeLevel.Problem;
 
-        /// <summary>Whether the row is being carried to another place.</summary>
-        public bool IsCarried { get; set; }
+        /// <summary>Whether the row is being dragged to another place.</summary>
+        public bool IsDragging { get; private set; }
+
+        /// <inheritdoc />
+        bool IDragged.IsDragging
+        {
+            set { IsDragging = value; }
+        }
 
         /// <summary>The handle the row is dragged by.</summary>
-        public Grip Grip => _grip;
+        public DragHandle DragHandle => _grip;
 
         /// <summary>Where a spine of the ifs it stands in that ends at it turns in: level with its sentence.</summary>
         public float SpineAt => Bounds.Y + Bounds.Height * 0.5f;
@@ -172,7 +178,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             _leadWaits.Set(LookStates.Paused, IsOff);
-            _leadWaits.HaloTint = !IsOff && (MarksLit || Kind == StepKind.Await && ClockLit) ? Glow : Palette.None;
+            _leadWaits.Base.HaloTint = !IsOff && (MarksLit || Kind == StepKind.Await && ClockLit) ? Glow : Palette.None;
             foreach (var chip in _chips)
                 chip.Glow = MarksLit && !IsOff ? Glow : Palette.None;
 
@@ -208,8 +214,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             var fixedInPlace = branch && Kind != StepKind.OtherwiseIf;
-            _grip.Color = fixedInPlace ? Palette.None : _grip.CanCarry ? Palette.Faint : Palette.Dim;
-            _grip.Tip = Tip.For(_grip.Tip, _grip.CanCarry ? texts.Codex.SequenceDragStep : Why());
+            _grip.Base.Color = fixedInPlace ? Palette.None : _grip.CanDrag ? Palette.Faint : Palette.Dim;
+            _grip.Tip = Tip.For(_grip.Tip, _grip.CanDrag ? texts.Codex.SequenceDragStep : Why());
             _duplicate.Command = Copies;
             _duplicate.IsEnabled = Copies != null;
             _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.Codex.SequenceCopyStep : Why());
@@ -222,8 +228,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _pause.IsEnabled = Pauses != null;
             _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.Codex.SequenceUnpauseStep : texts.Codex.SequencePauseStep);
 
-            RemarkLook.Ground(this, IsCarried || !HasProblem ? NoticeLevel.Info : Level,
-                IsCarried ? Palette.SlotFill : IsCurrent ? Palette.LiveWash : Palette.None);
+            RemarkLook.Ground(this, IsDragging || !HasProblem ? NoticeLevel.Info : Level,
+                IsDragging ? Palette.SlotFill : IsCurrent ? Palette.LiveWash : Palette.None);
         }
 
         /// <summary>Makes the words its line opens with, where they are a term, show the page <paramref name="codex" /> has on it.</summary>
@@ -261,7 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var first = onLine ? line : top;
             var last = onLine ? line : bottom;
 
-            Spine.Down(g, x, JoinFirst ? first : top, JoinLast ? last + Sizes.Spine : bottom, Sizes.Spine, Glow);
+            TreeLine.Down(g, x, JoinFirst ? first : top, JoinLast ? last + Sizes.Spine : bottom, Sizes.Spine, Glow);
             if (onLine)
                 g.Fill(new RectangleF(x, line, JoinOut, Sizes.Spine), Glow);
         }

@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>A line saying no word yet, opening a list of <paramref name="words" /> over the screen it is on when pressed.</summary>
         public ListField(IList<string> words)
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             Style = Styles.ListLine;
             Focusable = true;
 
@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var row = new HStack
                 {
                     Style = Styles.MenuRow,
-                    Command = new Relay(() => Choose(_words[at])),
+                    Command = new RelayCommand(() => Choose(_words[at])),
                     Children = { named }
                 };
 
@@ -65,9 +65,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             var scroll = new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = rows };
             // Never narrower than the line it drops from.
-            var list = new Popup { Style = Styles.Menu, Anchor = this, Flush = true, Content = scroll };
+            var list = new Popup { Style = Styles.Menu, Anchor = this, MatchAnchorWidth = true, Content = scroll };
 
-            Command = new Relay(delegate
+            Command = new RelayCommand(delegate
             {
                 if (list.IsOpen)
                 {
@@ -160,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKeyDown(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             var by = KeyboardChoice.By(key);
             if (by == 0)
@@ -174,7 +174,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        protected override void OnText(char c)
+        protected override void OnTextInput(char c)
         {
             var word = KeyboardChoice.Letter(_words, _text, c);
             if (word != null)

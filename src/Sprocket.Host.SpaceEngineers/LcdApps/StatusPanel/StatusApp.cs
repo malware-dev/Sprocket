@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Lumel;
 using Lumel.Drawing;
 using Lumel.Images;
 using Lumel.Text;
@@ -73,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public StatusApp(IMyTextSurface surface, IngameBlock block, Vector2 size)
             : base(surface, block, size)
         {
-            _graphics = new SpriteGraphics(surface, _sprites, new PanelPictures());
+            _graphics = new SpriteGraphics(surface, _sprites, new MaterialImages(new GameScreenSpace().TextureSize), () => GameClock.Now);
             _status = _source.Status;
             _heard = Heard;
         }
@@ -338,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
                 frame.Add(Fill(size, Surface.ScriptBackgroundColor));
                 var line = MySprite.CreateText(texts == null ? said ?? "" : Template.Fill(texts.PanelFailed, "reason", said ?? ""),
-                    MyFontEnum.White, Palette.Problem, scale, TextAlignment.LEFT);
+                    MyFontEnum.White, Palette.Problem, scale, VRage.Game.GUI.TextPanel.TextAlignment.LEFT);
                 line.Position = origin + new Vector2(10f, 10f);
                 frame.Add(line);
             }

@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>A block with no name and no icon yet.</summary>
         public BlockName()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             Children.Add(new Image { IsVisible = false }.As(out _icon));
             Children.Add(new Label().As(out _name));
             Resize(_name.FontSize);

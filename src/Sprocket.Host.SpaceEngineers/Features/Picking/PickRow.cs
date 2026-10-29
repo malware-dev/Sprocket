@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 _art = Icon;
                 _picture.Source = Icons.PictureFor(Icon ?? "");
-                _picture.Tint = string.IsNullOrEmpty(Icon) ? Palette.None : Color.White;
+                _picture.Base.Tint = string.IsNullOrEmpty(Icon) ? Palette.None : Color.White;
             }
 
             _name.Name = IsHeading ? (Text ?? "").ToUpperInvariant() : Text;

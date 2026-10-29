@@ -229,18 +229,23 @@ public class ToolbarSlotTests
     [Fact]
     public void TheSlotsSlideOpenAndGoWithTheirLine()
     {
-        var sim = Picking("Cockpit");
+        // On a screen, since the slots open as they are drawn.
+        var screen = Screen.Fresh();
+        screen.Editor.NewSystem("Airlock");
+        screen.Editor.PressStart(SentenceText.WhenWord);
+        screen.Editor.PressBlock("Cockpit");
+        screen.Run(1);
 
-        sim.Editor.PressChoice("hotbar slot is pressed");
-        sim.Tick();
-        Assert.True(sim.Editor.Slots()!.Openness < 1f, "the slots were open at once");
+        screen.Editor.PressChoice("hotbar slot is pressed");
+        screen.Run(2);
+        Assert.True(screen.Editor.Slots()!.Progress < 1f, "the slots were open at once");
 
-        Settle(sim);
-        Assert.Equal(1f, sim.Editor.Slots()!.Openness);
+        screen.Run(15);
+        Assert.Equal(1f, screen.Editor.Slots()!.Progress);
 
-        sim.Editor.PressChoice("becomes occupied");
-        sim.Tick();
-        Assert.Null(sim.Editor.Slots());
+        screen.Editor.PressChoice("becomes occupied");
+        screen.Run(1);
+        Assert.Null(screen.Editor.Slots());
     }
 
     static Simulation Picking(string block, Action<Seat>? hotbar = null, Action<Rig>? made = null)

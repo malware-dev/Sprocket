@@ -4,6 +4,7 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
 {
@@ -16,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         public Composer(float high, IStyle<RichText> reads)
         {
             CreateView(high, reads);
-            _preview.Command = new Relay(() => Preview(!_previewing.IsVisible));
+            _preview.Command = new RelayCommand(() => Preview(!_previewing.IsVisible));
         }
 
         /// <summary>The markup written, which setting replaces, leaving the box as a new piece of writing.</summary>
@@ -43,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         }
 
         /// <summary>The box the markup is typed in, which holds the keyboard while it is being written.</summary>
-        public EditBox Box => _box;
+        public TextArea Box => _box;
 
         /// <summary>What the button for the guide to the marks does.</summary>
         public ICommand Guides
@@ -72,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
 
             _previewing.IsVisible = showing;
             _box.IsVisible = !showing;
-            _preview.IsPressed = showing;
+            _preview.Set(LookStates.Chosen, showing);
         }
     }
 }

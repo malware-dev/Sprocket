@@ -12,22 +12,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
     {
         Button _markup;
         Button _preview;
-        EditBox _box;
+        TextArea _box;
         ScrollView _previewing;
         RichText _previewed;
 
         /// <summary>Makes the two buttons over the box, and the box and its preview in one room.</summary>
         void CreateView(float high, IStyle<RichText> reads)
         {
-            Spacing = Gaps.Within;
+            Base.Spacing = Gaps.Within;
 
             Children.Add(new HStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
                     new Button { Style = Styles.Button }.As(out _markup),
-                    new Button { Style = Styles.Button }.As(out _preview)
+                    new Button { Style = Styles.Toggle }.As(out _preview)
                 }
             });
 
@@ -35,16 +35,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
             {
                 Children =
                 {
-                    new EditBox
+                    new TextArea
                     {
                         Style = Styles.WritingBox,
-                        Placement = FixedSize.High(high)
+                        Placement = FixedSize.Height(high)
                     }.As(out _box),
                     new ScrollView
                     {
                         Style = Styles.Preview,
                         IsVisible = false,
-                        Placement = FixedSize.High(high),
+                        Placement = FixedSize.Height(high),
                         Content = new RichText { Style = reads }.As(out _previewed)
                     }.As(out _previewing)
                 }

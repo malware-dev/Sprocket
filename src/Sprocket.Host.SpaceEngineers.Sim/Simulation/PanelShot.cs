@@ -28,6 +28,7 @@ public static class PanelShot
     {
         Base =
         {
+            CodeBackground = new Color(255, 255, 255, 10), CodePadding = new Thickness(4f, -1f),
             Font = MyFontEnum.White,
             StrongFont = TextSizes.Bold,
             EmphasisFont = TextSizes.Italic,
@@ -40,6 +41,7 @@ public static class PanelShot
             Color = Palette.Ink,
             StrongColor = Palette.Ink,
             EmphasisColor = Palette.Ink,
+            LinkColor = Palette.Ink,
             HeadingColor = Palette.Ink,
             RuleColor = Palette.Line,
             BlockSpacing = 12f,
@@ -70,6 +72,7 @@ public static class PanelShot
             text.Base.Color = ink.Value;
             text.Base.StrongColor = ink.Value;
             text.Base.EmphasisColor = ink.Value;
+            text.Base.LinkColor = ink.Value;
             text.Base.HeadingColor = ink.Value;
             text.Base.RuleColor = Color.Lerp(screen ?? Palette.Page, ink.Value, 0.5f);
         }

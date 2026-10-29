@@ -5,31 +5,31 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
-    /// <summary>A sequence's steps, one row each, any of which can be carried by its grip to another place in the list.</summary>
-    /// <remarks>A row that opens an if carries the rows of the if with it, as one block, and every if draws a spine down its rows.</remarks>
-    public class StepList : CarryList
+    /// <summary>A sequence's steps, one row each, any of which can be dragged by its grip to another place in the list.</summary>
+    /// <remarks>A row that opens an if takes the rows of the if with it, as one block, and every if draws a spine down its rows.</remarks>
+    public class StepList : ReorderList
     {
         /// <summary>An empty list.</summary>
         public StepList()
         {
-            Spacing = Gaps.Items;
+            Base.Spacing = Gaps.Items;
         }
 
-        /// <summary>Draws the spines of the rows standing in the list, or of the rows being carried.</summary>
-        protected override void DrawBeside(IGraphics g, bool carried)
+        /// <summary>Draws the spines of the rows standing in the list, or of the rows being dragged.</summary>
+        protected override void DrawBeside(IGraphics g, bool dragged)
         {
             var reach = Spacing * 0.5f;
-            var floor = carried ? ((StepRow)Children[CarryingAt]).Depth : 0;
+            var floor = dragged ? ((StepRow)Children[DraggedIndex]).Depth : 0;
             StepRow above = null;
             var aboveBottom = 0f;
 
             for (var i = 0; i < Children.Count; i++)
             {
-                if (Carried(i) != carried)
+                if (Dragged(i) != dragged)
                     continue;
 
                 var row = (StepRow)Children[i];
-                var next = Next(i, carried);
+                var next = Next(i, dragged);
                 var shift = row.RenderTransform.Translate.Y;
                 var top = row.Bounds.Y + shift - reach;
                 var bottom = row.Bounds.Y + row.Bounds.Height + shift + reach;
@@ -41,9 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     var x = row.SpineX(level);
                     var from = level < joined ? Math.Min(top, aboveBottom) : top;
                     if (level >= through)
-                        Spine.Turning(g, x, from, row.SpineAt + shift, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
+                        TreeLine.Turning(g, x, from, row.SpineAt + shift, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
                     else
-                        Spine.Down(g, x, from, bottom, Sizes.Spine, Palette.Line);
+                        TreeLine.Down(g, x, from, bottom, Sizes.Spine, Palette.Line);
                 }
 
                 above = row;
@@ -51,12 +51,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
         }
 
-        /// <summary>The next row after <paramref name="index" /> that is carried, or that is not, as <paramref name="carried" /> says; null for none.</summary>
-        StepRow Next(int index, bool carried)
+        /// <summary>The next row after <paramref name="index" /> that is dragged, or that is not, as <paramref name="dragged" /> says; null for none.</summary>
+        StepRow Next(int index, bool dragged)
         {
             for (var i = index + 1; i < Children.Count; i++)
             {
-                if (Carried(i) == carried)
+                if (Dragged(i) == dragged)
                     return (StepRow)Children[i];
             }
 

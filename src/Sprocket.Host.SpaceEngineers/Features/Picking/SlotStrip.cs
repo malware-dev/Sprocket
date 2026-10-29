@@ -25,17 +25,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     {
         const float Square = 36f;
         const float Indent = 28f;
-        const float Frames = 12f;
 
         readonly Texts _texts;
         readonly HStack _pages;
         readonly HStack _row;
         readonly Label _says;
         readonly List<Button> _tabs = new List<Button>();
-        readonly List<Layers> _squares = new List<Layers>();
+        readonly List<ZStack> _squares = new List<ZStack>();
         readonly List<Image> _pictures = new List<Image>();
         readonly List<Label> _numbers = new List<Label>();
-        readonly List<Layers> _rings = new List<Layers>();
+        readonly List<ZStack> _rings = new List<ZStack>();
         readonly List<string> _drawn = new List<string>();
         readonly SlotHeld _empty = new SlotHeld();
 
@@ -45,20 +44,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         int _page = 1;
         int _chosenPage;
         int _chosenSlot;
-        float _progress;
 
         /// <summary>No toolbar yet, saying its fixed words in <paramref name="texts" />.</summary>
         public SlotStrip(Texts texts)
         {
             _texts = texts;
             var line = new HStack();
-            line.Children.Add(new Layers { Placement = FixedSize.Size(Indent, 1f) });
+            line.Children.Add(new ZStack { Placement = FixedSize.Size(Indent, 1f) });
             VStack body;
-            line.Children.Add(new VStack { Spacing = Gaps.Parts, Placement = Flex.Grow }.As(out body));
+            line.Children.Add(new VStack { Base = { Spacing = Gaps.Parts }, Placement = Flex.Grow }.As(out body));
             Content = line;
-            body.Children.Add(new HStack { Spacing = Gaps.Within }.As(out _pages));
-            body.Children.Add(new HStack { Spacing = Gaps.Within }.As(out _row));
-            body.Children.Add(new Label { Style = Styles.ValueLabel, Wraps = true }.As(out _says));
+            body.Children.Add(new HStack { Base = { Spacing = Gaps.Within } }.As(out _pages));
+            body.Children.Add(new HStack { Base = { Spacing = Gaps.Within } }.As(out _row));
+            body.Children.Add(new Label { Style = Styles.ValueLabel, TextWrapping = TextWrapping.Wrap }.As(out _says));
+            IsOpen = true;
         }
 
         /// <summary>Raised with the page and slot somebody pressed, each counted from 1.</summary>
@@ -92,18 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Paint();
         }
 
-        /// <summary>Opens a step further, until it is all in view.</summary>
-        /// <remarks>Called every tick the picker is shown; one comparison once open, as a reveal changes nothing it already holds.</remarks>
-        public void Slide()
-        {
-            if (_progress >= 1f)
-                return;
-
-            _progress = Math.Min(1f, _progress + 1f / Frames);
-            var left = 1f - _progress;
-            Openness = 1f - left * left * left;
-        }
-
         void Shape(int pages, int slots)
         {
             _pageCount = pages;
@@ -119,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 for (var page = 1; page <= pages; page++)
                 {
                     var turned = page;
-                    var tab = new Button { Style = Styles.SlotPage, Text = Number(page), Command = new Relay(() => Turn(turned)) };
+                    var tab = new Button { Style = Styles.SlotPage, Text = Number(page), Command = new RelayCommand(() => Turn(turned)) };
                     _tabs.Add(tab);
                     _pages.Children.Add(tab);
                 }
@@ -134,10 +121,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var slot = 1; slot <= slots; slot++)
             {
                 var pressed = slot;
-                var square = new Layers { Style = Styles.SlotFree, Placement = FixedSize.Size(Square, Square), Command = new Relay(() => Press(pressed)) };
+                var square = new ZStack { Style = Styles.SlotFree, Placement = FixedSize.Size(Square, Square), Command = new RelayCommand(() => Press(pressed)) };
                 var picture = new Image { Base = { Padding = new Thickness(4f) }, IsVisible = false };
                 var number = new Label { Style = Styles.SlotNumber, Text = Number(slot), Align = Align.Center };
-                var ring = new Layers { Style = Styles.SlotChosen, IsVisible = false };
+                var ring = new ZStack { Style = Styles.SlotChosen, IsVisible = false };
                 square.Children.Add(picture);
                 square.Children.Add(number);
                 square.Children.Add(ring);

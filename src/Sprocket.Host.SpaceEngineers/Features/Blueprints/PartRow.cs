@@ -16,7 +16,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>One slot of a blueprint: its name, what it says about itself, the blocks one installation fills it with, and what is still to do about it.</summary>
-    public partial class PartRow : HStack, ICarried
+    public partial class PartRow : HStack, IReorderable, IDragged
     {
         readonly List<Mention> _pieces = new List<Mention>();
         readonly List<Mention> _signalPieces = new List<Mention>();
@@ -181,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     return;
 
                 _wide = value;
-                _column.Placement = FixedSize.Wide(value);
+                _column.Placement = FixedSize.Width(value);
             }
         }
 
@@ -207,19 +207,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
         public void Grips(bool can, string about)
         {
-            _grip.CanCarry = can;
-            _grip.Color = can ? Palette.Faint : Palette.Dim;
+            _grip.CanDrag = can;
+            _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
             _grip.Tip = Tip.For(_grip.Tip, about);
         }
 
         /// <inheritdoc />
-        public Grip Grip => _grip;
+        public DragHandle DragHandle => _grip;
 
         /// <inheritdoc />
-        public bool IsCarried { get; set; }
+        public bool IsDragging { get; private set; }
+
+        /// <inheritdoc />
+        bool IDragged.IsDragging
+        {
+            set { IsDragging = value; }
+        }
 
         /// <summary>None: a slot goes alone.</summary>
-        public int Carries => 0;
+        public int DraggedWithCount => 0;
 
         /// <summary>The blocks the installation fills the slot with, by entity id; none where it is empty.</summary>
         public List<long> Blocks { get; }

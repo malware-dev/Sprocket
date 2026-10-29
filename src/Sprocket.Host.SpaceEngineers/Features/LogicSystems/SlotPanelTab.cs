@@ -54,14 +54,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var slots = panel.Slots;
             _slotRows = new KeyedChildren<object, Element>(slots.Children, SlotRow);
-            slots.Landings = index => SlotArranger.Landings(_slotKeys, index);
-            slots.Nests = (from, to) => SlotArranger.Nests(_slotKeys, from, to);
-            slots.StandsIn = index => SlotArranger.StandsIn(_slotKeys, index);
-            slots.NestDepth = Sizes.Indent;
-            slots.Moves = (from, to) =>
+            slots.FnAllowedDropIndexes = index => SlotArranger.Landings(_slotKeys, index);
+            slots.FnCanIndent = (from, to) => SlotArranger.Nests(_slotKeys, from, to);
+            slots.FnIsIndented = index => SlotArranger.StandsIn(_slotKeys, index);
+            slots.Base.IndentWidth = Sizes.Indent;
+            slots.Reordered += moved =>
             {
-                var into = slots.DroppedIn;
-                var move = _editor.Act(CommandKind.MoveSlot, () => _arranger.Move(_slotKeys, from, to, into));
+                var move = _editor.Act(CommandKind.MoveSlot, () => _arranger.Move(_slotKeys, moved.From, moved.To, moved.IsIndented));
                 if (move != null)
                     move.Execute();
             };
@@ -76,13 +75,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             ArrangeDescription(texts);
             ArrangeSlots(texts);
             _panel.Empty = !_panel.Describing.IsVisible && _parts.Count == 0 && !Editable ? texts.SystemNoPanel : "";
-        }
-
-        /// <summary>Moves a carried row a step towards where it is going.</summary>
-        /// <remarks>Called every tick; a handful of rows, each still unless one is carried or has just landed.</remarks>
-        public void Slide()
-        {
-            _panel.Slots.Slide();
         }
 
         /// <summary>Writes the description box into the blueprint once the keyboard has left it.</summary>
@@ -235,7 +227,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var name = heading.Name;
 
             row.Name = name;
-            row.Carries = carries;
+            row.DraggedWithCount = carries;
             row.Arranged = true;
             row.Grips(editable, editable ? texts.Codex.CategoryDrag : locked);
             row.Renames = _changes(CommandKind.RenameCategory, () => _editor.Rename(row.Plate, new Naming

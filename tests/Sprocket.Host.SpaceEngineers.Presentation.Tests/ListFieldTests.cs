@@ -68,7 +68,7 @@ public class ListFieldTests
         var shown = new List<string>();
         for (var y = 140f; y < Area.Height; y += 4f)
         {
-            var row = layer.Under(new Vector2(20f, y), out _) as HStack;
+            var row = layer.HitTest(new Vector2(20f, y), out _) as HStack;
             if (row?.Children[0] is Label word && !shown.Contains(word.Text))
                 shown.Add(word.Text);
         }

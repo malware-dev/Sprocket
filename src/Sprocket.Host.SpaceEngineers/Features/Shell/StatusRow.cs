@@ -16,14 +16,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What goes before the words of anything that adds.</summary>
         public const string Plus = "+ ";
 
-        static readonly FixedSize ThingHeight = FixedSize.High(68f);
+        static readonly FixedSize ThingHeight = FixedSize.Height(68f);
 
-        readonly Relay _opens;
-        readonly Relay _runs;
-        readonly Relay _flips;
-        readonly Relay _copies;
-        readonly Relay _offers;
-        readonly Relay _bins;
+        readonly RelayCommand _opens;
+        readonly RelayCommand _runs;
+        readonly RelayCommand _flips;
+        readonly RelayCommand _copies;
+        readonly RelayCommand _offers;
+        readonly RelayCommand _bins;
         readonly Glyph _light;
         readonly Label _summary;
         readonly Label _status;
@@ -42,46 +42,46 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>An empty row, filled in by setting what it shows and calling <see cref="Show" />.</summary>
         public StatusRow()
         {
-            _opens = new Relay(() => Carry(Opens));
-            _runs = new Relay(() => Carry(Running ? Stops : Runs));
-            _flips = new Relay(() => Carry(Flips));
-            _copies = new Relay(() => Carry(Copies));
-            _offers = new Relay(() => Carry(Offers));
-            _bins = new Relay(() => Carry(Deletes));
+            _opens = new RelayCommand(() => Carry(Opens));
+            _runs = new RelayCommand(() => Carry(Running ? Stops : Runs));
+            _flips = new RelayCommand(() => Carry(Flips));
+            _copies = new RelayCommand(() => Carry(Copies));
+            _offers = new RelayCommand(() => Carry(Offers));
+            _bins = new RelayCommand(() => Carry(Deletes));
 
             Style = Styles.Row;
             Command = _opens;
             Children.Add(new HStack
             {
-                Spacing = Gaps.Items,
+                Base = { Spacing = Gaps.Items },
                 Placement = Flex.Grow,
                 Children =
                 {
                     new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = FixedSize.Size(16f, 16f) }.As(out _light),
                     new VStack
                     {
-                        Spacing = Gaps.Within,
+                        Base = { Spacing = Gaps.Within },
                         Placement = Flex.Grow,
                         Children =
                         {
                             new HStack
                             {
-                                Spacing = Gaps.Parts,
-                                Placement = FixedSize.High(32f),
+                                Base = { Spacing = Gaps.Parts },
+                                Placement = FixedSize.Height(32f),
                                 Children =
                                 {
-                                    new Label { Style = Styles.Name, Trims = true }.As(out _summary),
+                                    new Label { Style = Styles.Name, TextWrapping = TextWrapping.Trim }.As(out _summary),
                                     new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = FixedSize.Size(32f, 32f) }.As(out _below)
                                 }
                             },
                             new HStack
                             {
-                                Spacing = Gaps.Parts,
-                                Placement = FixedSize.High(16f),
+                                Base = { Spacing = Gaps.Parts },
+                                Placement = FixedSize.Height(16f),
                                 Children =
                                 {
                                     new Label { Style = Styles.Detail }.As(out _status),
-                                    new Label { Style = Styles.Detail, Trims = true }.As(out _problem),
+                                    new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Trim }.As(out _problem),
                                     new Label { Style = Styles.Detail }.As(out _lastRun)
                                 }
                             }.As(out _detail)
@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     },
                     new HStack
                     {
-                        Spacing = Gaps.Parts,
+                        Base = { Spacing = Gaps.Parts },
                         Children =
                         {
                             new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
@@ -305,7 +305,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var held = !string.IsNullOrEmpty(SwitchLocked);
             _switch.IsVisible = switches;
             _switch.IsOn = SwitchIsOn;
-            _switch.Says(texts.SwitchOn, texts.SwitchOff);
+            _switch.OnText = texts.SwitchOn;
+            _switch.OffText = texts.SwitchOff;
             _flips.CanExecute = switches && !held;
             _switch.Tip = Tip.For(_switch.Tip,
                 !switches ? null : held ? SwitchLocked : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));

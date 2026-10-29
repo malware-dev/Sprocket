@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             return new VStack
             {
-                Spacing = Gaps.Sections,
+                Base = { Spacing = Gaps.Sections },
                 Children =
                 {
                     new Section
@@ -30,16 +30,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                             // The heading and the search over what it heads share one line, the box at its right end.
                             new HStack
                             {
-                                Spacing = Gaps.Items,
+                                Base = { Spacing = Gaps.Items },
                                 Children =
                                 {
                                     new RichText { Style = Styles.H1Term }.As(out _heading),
                                     new VStack { Placement = Flex.Grow },
-                                    new TextBox { Style = Styles.Search, Focusable = true, Placement = FixedSize.Wide(SearchWide) }.As(out _search)
+                                    new TextBox { Style = Styles.Search, Focusable = true, Placement = FixedSize.Width(SearchWide) }.As(out _search)
                                 }
                             },
-                            new Label { Style = Styles.Empty, Wraps = true }.As(out _empty),
-                            new VStack { Spacing = Gaps.Sections }.As(out _list)
+                            new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _empty),
+                            new VStack { Base = { Spacing = Gaps.Sections } }.As(out _list)
                         }
                     },
                     new HStack { Children = { new Button { Style = Styles.Start }.As(out _new) } }

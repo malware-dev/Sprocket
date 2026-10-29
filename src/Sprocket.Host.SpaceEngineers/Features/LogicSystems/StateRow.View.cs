@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
     partial class StateRow
     {
-        Grip _grip;
+        DragHandle _grip;
         NamePlate _name;
         Button _holds;
         Label _startsLead;
@@ -22,19 +22,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Makes the grip, the name, what it holds, the value it starts at, what it holds now, and the bin.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
 
-            Children.Add(new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
+            Children.Add(new DragHandle { Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             // One sentence: the state's name and what it holds, the value it starts as, and what it holds now.
             Children.Add(new HStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Placement = Flex.Grow,
                 Children =
                 {
                     new HStack
                     {
-                        Spacing = Gaps.Within,
+                        Base = { Spacing = Gaps.Within },
                         Children =
                         {
                             new Glyph { Style = Styles.Waits, Symbol = Symbols.State, Align = Align.Center },

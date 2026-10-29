@@ -17,13 +17,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Children.Add(new Label { Placement = Flex.Grow });
             Children.Add(new MessageBox
             {
-                Style = Styles.Dialog,
+                Style = Styles.Asking,
                 Align = Align.Center,
-                Placement = FixedSize.Wide(Sizes.Popup),
-                MessageStyle = Styles.Question,
-                ButtonStyle = Styles.Button,
-                DefaultStyle = Styles.Primary,
-                Default = MessageButton.Yes
+                Placement = FixedSize.Width(Sizes.Popup),
+                DefaultButton = MessageBoxResult.Yes
             }.As(out _box));
             Children.Add(new Label { Placement = Flex.Grow });
         }

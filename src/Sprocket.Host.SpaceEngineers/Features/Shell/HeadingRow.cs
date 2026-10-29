@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             _renames = renames;
 
-            Spacing = Gaps.Within;
+            Base.Spacing = Gaps.Within;
             Placement = Flex.Grow;
         }
 
@@ -160,11 +160,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             public readonly Label Lead;
             public readonly NamePlate Plate;
             public readonly Label After;
-            public readonly Relay Renames;
+            public readonly RelayCommand Renames;
 
             public Part(HeadingRow row, int index)
             {
-                Renames = new Relay(() => row.Rename(index));
+                Renames = new RelayCommand(() => row.Rename(index));
 
                 Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = FixedSize.Size(32f, 32f) };
                 Mark = new Glyph { Base = { Padding = EditorWorkspace.LevelWithCapitals }, Style = Styles.Join, Placement = FixedSize.Size(32f, 32f) };

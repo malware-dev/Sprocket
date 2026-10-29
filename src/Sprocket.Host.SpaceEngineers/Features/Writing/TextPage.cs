@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         public override bool Edits => true;
 
         /// <summary>The box the text is written in, where the view has been made.</summary>
-        public EditBox Box => _box;
+        public TextArea Box => _box;
 
         /// <summary>How many characters it holds of the most it may, as the page says it.</summary>
         public string Counted => _count == null ? "" : _count.Text;
@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         /// <summary>Fills the box, holds it to the most the block takes, and gives it the keyboard.</summary>
         protected override void ViewCreated()
         {
-            _box.Longest = _longest;
+            _box.MaxLength = _longest;
             _box.Text = _given;
             _box.Edited += Count;
             Count();

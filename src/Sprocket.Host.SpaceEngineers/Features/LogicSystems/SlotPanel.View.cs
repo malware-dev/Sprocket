@@ -25,12 +25,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Makes the line said while there is nothing, the description under its heading, and the slots with the ways to group and tidy them.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Sections;
+            Base.Spacing = Gaps.Sections;
 
             Children.Add(new VStack
             {
                 IsVisible = false,
-                Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _empty) }
+                Children = { new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _empty) }
             }.As(out _emptyLine));
             Children.Add(new Section
             {
@@ -44,10 +44,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }.As(out _describing));
             Children.Add(new VStack
             {
-                Spacing = Gaps.Items,
+                Base = { Spacing = Gaps.Items },
                 Children =
                 {
-                    new PartList { Spacing = Gaps.Items, IsVisible = false }.As(out _slots),
+                    new PartList { Base = { Spacing = Gaps.Items }, IsVisible = false }.As(out _slots),
                     new VStack
                     {
                         IsVisible = false,
@@ -58,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                 Children =
                                 {
                                     new Button { Style = Styles.Start }.As(out _addCategory),
-                                    new HStack { Placement = Flex.Spare },
+                                    new HStack { Placement = Flex.Spacer },
                                     new Button { Style = Styles.Button, Align = Align.Center }.As(out _optimize)
                                 }
                             }

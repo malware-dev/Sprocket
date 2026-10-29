@@ -8,7 +8,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>A category of slots on the installation panel: its name over the slots under it, with a grip that carries them all, and a bin.</summary>
-    public partial class CategoryRow : HStack, ICarried
+    public partial class CategoryRow : HStack, IReorderable, IDragged
     {
         string _category = "";
 
@@ -84,19 +84,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
         public void Grips(bool can, string about)
         {
-            _grip.CanCarry = can;
-            _grip.Color = can ? Palette.Faint : Palette.Dim;
+            _grip.CanDrag = can;
+            _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
             _grip.Tip = Tip.For(_grip.Tip, about);
         }
 
         /// <inheritdoc />
-        public Grip Grip => _grip;
+        public DragHandle DragHandle => _grip;
 
         /// <inheritdoc />
-        public bool IsCarried { get; set; }
+        public bool IsDragging { get; private set; }
+
+        /// <inheritdoc />
+        bool IDragged.IsDragging
+        {
+            set { IsDragging = value; }
+        }
 
         /// <summary>How many slots stand under it, which go with it when it is carried.</summary>
-        public int Carries { get; set; }
+        public int DraggedWithCount { get; set; }
 
     }
 }

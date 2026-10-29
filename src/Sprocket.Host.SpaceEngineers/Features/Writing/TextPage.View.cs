@@ -8,14 +8,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
     public sealed partial class TextPage
     {
         Label _count;
-        EditBox _box;
+        TextArea _box;
 
         /// <summary>How many characters it holds, at the right, over a box that fills the rest of the page and moves both ways.</summary>
         protected override Element CreateView()
         {
             return new VStack
             {
-                Spacing = Gaps.Within,
+                Base = { Spacing = Gaps.Within },
                 Children =
                 {
                     new HStack
@@ -26,10 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                             new Label { Style = Styles.Status }.As(out _count)
                         }
                     },
-                    new EditBox
+                    new TextArea
                     {
                         Style = Styles.ListingBox,
-                        Numbered = true,
+                        ShowLineNumbers = true,
                         Focusable = true,
                         Placement = Flex.Grow
                     }.As(out _box)

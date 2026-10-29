@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _history = new EditHistory(program, runner, texts);
             Ago = new AgoText(texts);
             Codex = new CodexPages(texts);
-            Guides = new Relay(() => Act(CommandKind.OpenGuide, OpenGuide)?.Execute());
+            Guides = new RelayCommand(() => Act(CommandKind.OpenGuide, OpenGuide)?.Execute());
 
             _dates = new ChangeDates(_program);
             _claims = new SlotClaims(this);
@@ -349,7 +349,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Adds the answer <paramref name="text" /> to the standing question, carrying out <paramref name="chosen" />, after the answers already offered; the one Enter takes where <paramref name="byDefault" />.</summary>
         public void Answer(string text, Action chosen, bool byDefault)
         {
-            var command = _gate.Refuses(CommandKind.Answer) ? null : new Relay(() => Reply(chosen));
+            var command = _gate.Refuses(CommandKind.Answer) ? null : new RelayCommand(() => Reply(chosen));
             _screen.Answer(new ChoiceEntry(text, false, command), byDefault);
         }
 
@@ -376,7 +376,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>A command that carries <paramref name="action" /> out as a press of <paramref name="kind" />, or null where the editor refuses that kind of press.</summary>
         public ICommand Act(CommandKind kind, Action action)
         {
-            return _gate.Refuses(kind) ? null : new Relay(() => Carry(kind, action));
+            return _gate.Refuses(kind) ? null : new RelayCommand(() => Carry(kind, action));
         }
 
         void Carry(CommandKind kind, Action action)
@@ -1027,9 +1027,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 Style = Styles.Menu,
                 Anchor = Input.Focused,
-                Gap = 4f,
-                Placement = FixedSize.Wide(360f),
-                Content = new Label { Style = Styles.TableTalk, Wraps = true, Text = Texts.WritingPasteNote }
+                Base = { Gap = 4f },
+                Placement = FixedSize.Width(360f),
+                Content = new Label { Style = Styles.TableTalk, TextWrapping = TextWrapping.Wrap, Text = Texts.WritingPasteNote }
             }.Open();
         }
 

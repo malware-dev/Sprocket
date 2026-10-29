@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public RichText TypesHeading => _typesHeading;
 
         /// <summary>The types, one row each, in order.</summary>
-        public CarryList Types => _types;
+        public ReorderList Types => _types;
 
         /// <summary>The button that adds a type.</summary>
         public Button AddType => _addType;
@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public Label StatesHeading => _statesHeading;
 
         /// <summary>The states, one row each, in order.</summary>
-        public CarryList States => _states;
+        public ReorderList StateList => _states;
 
         /// <summary>The button that adds a state.</summary>
         public Button AddState => _addState;

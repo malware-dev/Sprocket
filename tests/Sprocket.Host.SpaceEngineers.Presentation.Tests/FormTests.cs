@@ -19,14 +19,14 @@ public class FormTests
     public void ALabelAndAFieldThatFitShareALine()
     {
         Label label, field;
-        var form = new Form { Rows = { { new Label { Text = "radius" }.As(out label), new Label { Text = "4", Placement = FixedSize.Wide(Box) }.As(out field) } } };
+        var form = new Form { Rows = { { new Label { Text = "radius" }.As(out label), new Label { Text = "4", Placement = FixedSize.Width(Box) }.As(out field) } } };
 
         _ = new Easel(form, Wide, High);
 
         Assert.Equal(0f, label.Bounds.X, 3);
         Assert.Equal(Wide, field.Bounds.X + field.Bounds.Width, 3);
         Assert.True(field.Bounds.Y < label.Bounds.Y + label.Bounds.Height, "the field is not on the label's line");
-        Assert.False(form.Rows[0].Stacked);
+        Assert.False(Stacked(form.Rows[0]));
     }
 
     /// <summary>Where they do not fit, the field moves under its label, from the left, and nothing passes the right-hand edge.</summary>
@@ -36,12 +36,12 @@ public class FormTests
         Label label, field;
         var form = new Form
         {
-            Rows = { { new Label { Text = "the longest label a value was ever given" }.As(out label), new Label { Text = "4", Placement = FixedSize.Wide(Box) }.As(out field) } }
+            Rows = { { new Label { Text = "the longest label a value was ever given" }.As(out label), new Label { Text = "4", Placement = FixedSize.Width(Box) }.As(out field) } }
         };
 
         _ = new Easel(form, 200f, High);
 
-        Assert.True(form.Rows[0].Stacked);
+        Assert.True(Stacked(form.Rows[0]));
         Assert.Equal(0f, field.Bounds.X, 3);
         Assert.True(field.Bounds.Y >= label.Bounds.Y + label.Bounds.Height, "the field is not under its label");
         Assert.True(field.Bounds.X + field.Bounds.Width <= 200f + 0.01f, "the field passes the right-hand edge");
@@ -55,15 +55,15 @@ public class FormTests
         {
             Rows =
             {
-                { new Label { Text = "radius" }, new Label { Text = "4", Placement = FixedSize.Wide(Box) } },
-                { new Label { Text = "the longest label a value was ever given" }, new Label { Text = "5", Placement = FixedSize.Wide(Box) } }
+                { new Label { Text = "radius" }, new Label { Text = "4", Placement = FixedSize.Width(Box) } },
+                { new Label { Text = "the longest label a value was ever given" }, new Label { Text = "5", Placement = FixedSize.Width(Box) } }
             }
         };
 
         _ = new Easel(form, 260f, High);
 
-        Assert.False(form.Rows[0].Stacked);
-        Assert.True(form.Rows[1].Stacked);
+        Assert.False(Stacked(form.Rows[0]));
+        Assert.True(Stacked(form.Rows[1]));
     }
 
     /// <summary>A row asked for two lines puts its field under the label however wide the form, across its whole width.</summary>
@@ -71,11 +71,11 @@ public class FormTests
     public void TwoLinesPutsTheFieldUnderTheLabelAcrossTheWholeWidth()
     {
         Label label, field;
-        var form = new Form { Rows = { { new Label { Text = "text" }.As(out label), new Label { Text = "Hello", Align = Align.Wide }.As(out field), FormRowLines.Two } } };
+        var form = new Form { Rows = { { new Label { Text = "text" }.As(out label), new Label { Text = "Hello", Align = Align.Wide }.As(out field), FormLabelPlacement.Above } } };
 
         _ = new Easel(form, Wide, High);
 
-        Assert.True(form.Rows[0].Stacked);
+        Assert.True(Stacked(form.Rows[0]));
         Assert.True(field.Bounds.Y >= label.Bounds.Y + label.Bounds.Height, "the field is not under its label");
         Assert.Equal(0f, field.Bounds.X, 3);
         Assert.Equal(Wide, field.Bounds.Width, 3);
@@ -114,7 +114,7 @@ public class FormTests
         easel.Draw(Wide, High);
 
         Assert.DoesNotContain(easel.Written, text => text.Text == "font");
-        Assert.NotSame(label, form.Under(stood));
+        Assert.NotSame(label, form.HitTest(stood));
     }
 
     /// <summary>Clearing the rows takes their elements away, so a form can be asked something else.</summary>
@@ -148,9 +148,12 @@ public class FormTests
         var form = screen.Editor.Pick().Arguments!.Form;
         var at = form.Fields.ToList().FindIndex(field => field is LinesField);
         Assert.True(at >= 0, "show text has no box of several lines");
-        Assert.True(form.Rows[at].Stacked, "the text is not under its label");
+        Assert.True(Stacked(form.Rows[at]), "the text is not under its label");
 
         form.Fields[at].Text = "Cycling\nStand clear";
         Assert.EndsWith("\"Cycling&br;Stand clear\"", form.Answer);
     }
+
+    /// <summary>Whether <paramref name="row" />'s field was laid out under its label rather than beside it.</summary>
+    static bool Stacked(FormRow row) => row.Field.Bounds.Y >= row.Label.Bounds.Y + row.Label.Bounds.Height - 0.01f;
 }

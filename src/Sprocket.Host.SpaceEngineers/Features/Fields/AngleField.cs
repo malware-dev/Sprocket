@@ -25,35 +25,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>An empty angle held between <paramref name="least" /> and <paramref name="most" /> as written, either of which may be empty for a whole turn.</summary>
         public AngleField(string least, string most, ICommand submit)
         {
-            Spacing = Gaps.Parts;
+            Base.Spacing = Gaps.Parts;
             var lowest = Bound(least, -Turn);
             var highest = Bound(most, Turn);
 
             Children.Add(new Dial
             {
-                Most = Math.Min(Turn, Math.Max(Math.Abs(lowest), Math.Abs(highest))),
-                MarkColor = Palette.Faint,
-                QuarterColor = Palette.Muted,
-                NeedleColor = Palette.Ink,
-                HeldColor = Palette.Live
+                Style = Styles.Dial,
+                MaximumAngle = Math.Min(Turn, Math.Max(Math.Abs(lowest), Math.Abs(highest)))
             }.As(out _dial));
 
             Children.Add(new NumberBox
             {
-                Style = Styles.Value,
+                Style = Styles.Number,
                 Focusable = true,
                 Submit = submit,
                 Widest = "-360.0",
-                Negative = lowest < 0,
-                Step = Notch,
-                Least = lowest,
-                Most = highest,
-                Format = "0.0"
+                SmallChange = Notch,
+                Minimum = lowest,
+                Maximum = highest,
+                FormatString = "0.0"
             }.As(out _box));
 
-            _dial.Turned += delegate
+            _dial.AngleChanged += delegate
             {
-                _box.Text = ((int)_dial.Degrees).ToString("0.0", CultureInfo.InvariantCulture);
+                _box.Text = ((int)(_dial.Angle ?? 0f)).ToString("0.0", CultureInfo.InvariantCulture);
                 _box.MoveCaret(_box.Length, false);
                 Raise();
             };
@@ -101,13 +97,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             float said;
             if (float.TryParse(_box.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out said))
             {
-                _dial.Degrees = said;
-                _dial.Shows = true;
+                _dial.Angle = said;
                 return;
             }
 
             if (string.IsNullOrEmpty(_box.Text))
-                _dial.Shows = false;
+                _dial.Angle = null;
         }
 
         void Raise()

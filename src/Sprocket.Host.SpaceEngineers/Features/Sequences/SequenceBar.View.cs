@@ -17,11 +17,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Makes the state on the left and the news of what was skipped after it.</summary>
         void CreateView()
         {
-            Spacing = Gaps.Items;
+            Base.Spacing = Gaps.Items;
 
             Children.Add(new HStack
             {
-                Spacing = Gaps.Parts,
+                Base = { Spacing = Gaps.Parts },
                 Children =
                 {
                     new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = FixedSize.Size(16f, 16f) }.As(out _light),

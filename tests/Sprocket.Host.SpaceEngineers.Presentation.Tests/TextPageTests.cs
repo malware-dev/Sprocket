@@ -15,7 +15,7 @@ public class TextPageTests
     [Fact]
     public void ABoxHoldsToTheMostItMay()
     {
-        var box = new EditBox { Longest = 5, Text = "abc" };
+        var box = new TextArea { MaxLength = 5, Text = "abc" };
 
         box.Insert("defgh");
         Assert.Equal("deabc", box.Text);
@@ -45,7 +45,7 @@ public class TextPageTests
 
         screen.Do("press", "Edit", "tick", "2");
         var page = Assert.IsType<TextPage>(screen.Editor.Current);
-        Assert.Equal(64000, page.Box!.Longest);
+        Assert.Equal(64000, page.Box!.MaxLength);
         page.Box.Insert("\n[Sprocket]\ncycle=12");
         screen.Do("tick", "2");
         Assert.Equal("20 of 64000 characters", page.Counted);
