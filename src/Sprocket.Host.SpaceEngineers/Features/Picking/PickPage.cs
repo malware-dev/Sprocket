@@ -1019,6 +1019,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 row.Text = entity.Name;
                 row.Secondary = Kind(entity);
+                row.Grid = OtherGrid(entity);
                 row.Icon = entity.Kind.Icon;
                 row.HasPicture = icons;
                 row.Many = true;
@@ -1032,12 +1033,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>The kind of <paramref name="entity" />, and the grid it is on where that is not the programmable block's own.</summary>
         string Kind(GridEntity entity)
         {
-            var home = Editor.World.Grid;
-            var grid = entity.Block.CubeGrid;
-            if (home == null || grid == null || grid == home)
+            var grid = OtherGrid(entity);
+            if (grid.Length == 0)
                 return entity.Kind.DisplayName;
 
-            return Template.Fill(Template.Fill(Editor.Texts.PickOnGrid, "kind", entity.Kind.DisplayName), "grid", grid.CustomName);
+            return Template.Fill(Template.Fill(Editor.Texts.PickOnGrid, "kind", entity.Kind.DisplayName), "grid", grid);
+        }
+
+        /// <summary>The name of the grid <paramref name="entity" /> is on where that is not the programmable block's own, or empty.</summary>
+        string OtherGrid(GridEntity entity)
+        {
+            var home = Editor.World.Grid;
+            var grid = entity.Block.CubeGrid;
+            return home == null || grid == null || grid == home ? "" : grid.CustomName;
         }
 
         void FillFilters()
@@ -1259,6 +1267,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             else
                 _facets = null;
 
+            var lastIndented = -1;
+            for (var i = 0; facets && i < _rows.Count; i++)
+            {
+                if (_rows[i] >= 0 && _offers.Types[_rows[i]] == type)
+                    lastIndented = i;
+            }
+
             for (var i = 0; i < _rows.Count; i++)
             {
                 var at = _rows[i];
@@ -1267,6 +1282,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 row.HasPicture = false;
                 row.Secondary = "";
                 row.Indented = facets && at >= 0 && _offers.Types[at] == type;
+                row.EndsSpine = i == lastIndented;
 
                 if (at < 0)
                 {

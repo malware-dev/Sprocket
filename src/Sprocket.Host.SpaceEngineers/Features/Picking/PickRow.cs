@@ -1,7 +1,10 @@
 using System;
 using Lumel;
+using Lumel.Controls;
+using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Layout;
+using Lumel.Text;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
@@ -23,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             Text = "";
             Secondary = "";
+            Grid = "";
             Status = "";
             CreateView();
         }
@@ -35,6 +39,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Something quieter about it, such as a block's kind.</summary>
         public string Secondary { get; set; }
+
+        /// <summary>The name of the grid <see cref="Secondary" /> says the block is on, drawn a step brighter than the rest of it, or empty where it names none.</summary>
+        public string Grid { get; set; }
 
         /// <summary>What it is doing now, in the player's words, or empty for a thing that does nothing.</summary>
         public string Status { get; set; }
@@ -66,6 +73,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Whether it stands in under the row before it, as one of the things that row chooses between.</summary>
         public bool Indented { get; set; }
 
+        /// <summary>Whether it is the last of the rows standing in under the row before them, where their spine turns in.</summary>
+        public bool EndsSpine { get; set; }
+
         /// <summary>The mark of what kind of member it is, one of the symbols, or empty for none.</summary>
         public string Mark { get; set; } = "";
 
@@ -82,6 +92,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         protected override bool TakesPointer => IsPickable;
 
+        /// <summary>Draws the row, then its stretch of the spine where it stands in under the row before it.</summary>
+        protected override void DrawContent(IGraphics g)
+        {
+            base.DrawContent(g);
+
+            if (!Indented)
+                return;
+
+            // Down the middle of the indent, and up across the column's gap to the row above, so the stretches join.
+            var x = _content.Bounds.X + (_mark.IsVisible ? 0f : MarkInset) + (Sizes.Indent - Sizes.Spine) / 2f;
+            var top = Bounds.Y - Gaps.Within;
+            if (EndsSpine)
+                TreeLine.Turning(g, x, top, Bounds.Y + Bounds.Height * 0.5f, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
+            else
+                TreeLine.Down(g, x, top, Bounds.Y + Bounds.Height, Sizes.Spine, Palette.Line);
+        }
+
         /// <summary>Shows what it has been told.</summary>
         public void Show()
         {
@@ -91,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             // The room the row's style leaves out: the left edge where no box holds it, and above and below. A heading has more
             // above it and none under, so it stands apart from the group before and against the first row of its own.
-            _content.Base.Padding = new Thickness((_mark.IsVisible ? 0f : 12f) + (Indented ? Sizes.Indent : 0f), IsHeading ? Gaps.Sections : Gaps.Parts, 0f, IsHeading ? 0f : Gaps.Parts);
+            _content.Base.Padding = new Thickness((_mark.IsVisible ? 0f : MarkInset) + (Indented ? Sizes.Indent : 0f), IsHeading ? Gaps.Sections : Gaps.Parts, 0f, IsHeading ? 0f : Gaps.Parts);
             _mark.Many = Many;
             _mark.IsChecked = IsChosen;
             _mark.IsPressed = Many && pressable;
@@ -110,8 +137,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _name.Mark = Mark;
 
             var detail = Detail(Secondary, Status);
-            _detail.Text = detail;
-            _detail.IsVisible = detail.Length != 0;
+            var at = string.IsNullOrEmpty(Grid) ? -1 : detail.LastIndexOf(Grid, StringComparison.Ordinal);
+            _detail.Text = at < 0 ? detail : "";
+            _detail.IsVisible = at < 0 && detail.Length != 0;
+            _onGrid.IsVisible = at >= 0;
+            if (at >= 0)
+                _onGrid.Markdown = Markdown.Escape(detail.Substring(0, at)) + "**" + Markdown.Escape(Grid) + "**" + Markdown.Escape(detail.Substring(at + Grid.Length));
 
             Set(LookStates.Still, IsHeading || !pressable);
             Set(LookStates.Chosen, IsChosen && !Many);

@@ -8,8 +8,8 @@ on screen     Automation for Test Rig
 001  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  SetClip    {X:256 Y:53 W:1172 H:40}
 003  Text       at {X:256 Y:53.39666} scale 1.111  #A2C3CDFF  "Automation for"
-004  Text       at {X:430.6234 Y:53.39666} scale 1.111  #DCF5FDFF  "Test Rig"
-005  Text       at {X:526.9529 Y:59.01406} scale 0.401  #85A1A9FF  "p"
+004  Text       at {X:426.6234 Y:53.39666} scale 1.111  #DCF5FDFF  "Test Rig"
+005  Text       at {X:522.9529 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 006  ClearClip  
 007  Text       at {X:1447.325 Y:55.81107} scale 0.972  #4FC3F7FF  "?"
 008  Text       at {X:1482.2 Y:61.51406} scale 0.401  #5F7278FF  "u"

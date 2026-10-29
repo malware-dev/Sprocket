@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class GlyphAtlasTests
 {
     /// <summary>
-    /// In white text a white glyph stays white, and the chip behind the installation's mark comes out at the darker shade
+    /// In white text a white glyph stays white, and the chip behind the logic system's mark comes out at the darker shade
     /// the page gives it.
     /// </summary>
     [Fact]
@@ -26,9 +26,9 @@ public class GlyphAtlasTests
         page.CopyPixels(pixels, width * 4, 0);
 
         Assert.All(Shades(pixels, width, Origin("q")), shade => Assert.Equal(255, shade));
-        var installation = Shades(pixels, width, Origin("I"));
-        Assert.Contains(255, installation);
-        Assert.Contains(installation, shade => shade >= 190 && shade <= 205);
+        var logicSystem = Shades(pixels, width, Origin("y"));
+        Assert.Contains(255, logicSystem);
+        Assert.Contains(logicSystem, shade => shade >= 190 && shade <= 205);
     }
 
     /// <summary>The screen's mark has a glyph of its own on the page, with ink in it.</summary>

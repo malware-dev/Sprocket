@@ -323,6 +323,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             ArrangeUsing(texts);
             ArrangeLock();
+            Headed();
 
             _triggersTab.Header = texts.SystemTriggers;
             _sequencesTab.Header = texts.SystemSequences;
@@ -420,6 +421,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _halted.Text = halt == null
                 ? ""
                 : SequenceText.Stopped(Editor.Texts, halt, _system, SystemSummary.Problems(Editor.Runner, _system, through) == 0);
+            Headed();
+        }
+
+        /// <summary>Shows the lines above the tabs only while one of them is shown, so the tabs start at the top otherwise.</summary>
+        void Headed()
+        {
+            _head.IsVisible = _using.IsVisible || _halted.IsVisible || _locked.IsVisible;
         }
 
         /// <summary>Why nothing can be changed, said over each part that cannot be pressed; empty while it can.</summary>

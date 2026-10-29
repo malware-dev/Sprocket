@@ -198,7 +198,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A name in a heading, spaced as its box is so the box takes its place without moving it; in italics where it is set apart.</summary>
         public static readonly IStyle<Label> TitleName = new LabelStyle(Title)
         {
-            Base = { Padding = new Thickness(8f, 4f) },
+            Base = { Padding = new Thickness(0f, 4f, 8f, 4f) },
             [LookStates.Emphasized] = { Font = TextSizes.Italic }
         };
 
@@ -213,7 +213,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 CaretColor = Palette.Ink,
                 SelectionColor = Palette.Line,
                 Background = Palette.PanelHot,
-                Padding = new Thickness(8f, 4f)
+                Padding = new Thickness(0f, 4f, 8f, 4f)
             },
             [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
         };
@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The box a name in a row is typed in, a well on the page in the name's size.</summary>
         public static readonly IStyle<TextBox> PlateBox = new TextBoxStyle(TitleBox)
         {
-            Base = { FontSize = TextSizes.Body }
+            Base = { FontSize = TextSizes.Body, Padding = new Thickness(8f, 4f) }
         };
 
 
@@ -865,6 +865,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly IStyle<Label> ColumnNote = new LabelStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted }
+        };
+
+        /// <summary>The quiet line under a block's name that says the grid it is on, the grid's name a step brighter than the rest.</summary>
+        public static readonly IStyle<RichText> ColumnNoteOnGrid = new RichTextStyle
+        {
+            Base = { Font = MyFontEnum.White, StrongFont = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted, StrongColor = Palette.Ink }
         };
 
         /// <summary>A box a list is narrowed by typing into.</summary>

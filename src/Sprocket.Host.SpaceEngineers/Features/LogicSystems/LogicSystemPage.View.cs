@@ -33,6 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         VStack _addSequence;
         Button _newSequence;
         Label _noSequences;
+        VStack _head;
         VStack _sequenceList;
 
         /// <inheritdoc />
@@ -40,30 +41,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             return new VStack
             {
-                Base = { Spacing = Gaps.Items },
+                Base = { Spacing = Gaps.Sections },
                 Children =
                 {
-                    new HStack
+                    new VStack
                     {
-                        Base = { Spacing = Gaps.Parts },
+                        Base = { Spacing = Gaps.Items },
                         Children =
                         {
-                            new Label { Style = Styles.Phrase }.As(out _usingLead),
-                            new HStack { Placement = Flex.Grow }.As(out _usingChoice)
-                        }
-                    }.As(out _using),
+                            new HStack
+                            {
+                                Base = { Spacing = Gaps.Parts },
+                                Children =
+                                {
+                                    new Label { Style = Styles.Phrase }.As(out _usingLead),
+                                    new HStack { Placement = Flex.Grow }.As(out _usingChoice)
+                                }
+                            }.As(out _using),
 
-                    new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _halted),
+                            new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _halted),
 
-                    new HStack
-                    {
-                        Base = { Spacing = Gaps.Parts },
-                        IsVisible = false,
-                        Children =
-                        {
-                            new Label { Style = Styles.Aside }.As(out _lockedText)
+                            new HStack
+                            {
+                                Base = { Spacing = Gaps.Parts },
+                                IsVisible = false,
+                                Children =
+                                {
+                                    new Label { Style = Styles.Aside }.As(out _lockedText)
+                                }
+                            }.As(out _locked)
                         }
-                    }.As(out _locked),
+                    }.As(out _head),
 
                     new TabView
                     {

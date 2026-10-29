@@ -1225,6 +1225,9 @@
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automasjonen i denne blokken kan ikke redigeres.</value>
   </data>
+  <data name="Sprocket.Library.Title" xml:space="preserve">
+    <value>Plantegningsbibliotek</value>
+  </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Endret {time}</value>
   </data>

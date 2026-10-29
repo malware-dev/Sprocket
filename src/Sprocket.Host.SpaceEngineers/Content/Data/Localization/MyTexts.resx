@@ -52,7 +52,7 @@
   </data>
   <data name="Sprocket.Systems.Load" xml:space="preserve">
     <value>Library</value>
-    <comment>Button in the editor's heading bar on the home screen that opens the library, which holds the backups and the blueprints. Also the heading of the library screen.</comment>
+    <comment>Button in the editor's heading bar on the home screen that opens the library, which holds the backups and the blueprints.</comment>
   </data>
   <data name="Sprocket.Systems.Heading" xml:space="preserve">
     <value>Logic systems</value>
@@ -1611,6 +1611,10 @@
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>This block's automation cannot be edited.</value>
     <comment>A message box over the terminal when the button in a programmable block's terminal that opens the automation editor is pressed and the server turns the request down.</comment>
+  </data>
+  <data name="Sprocket.Library.Title" xml:space="preserve">
+    <value>Blueprint library</value>
+    <comment>Heading of the library screen, which holds the blueprints, the logic systems on the player's constructs and the backups.</comment>
   </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Changed {time}</value>

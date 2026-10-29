@@ -57,34 +57,42 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Placement = Flex.Grow,
                 Children =
                 {
-                    new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = FixedSize.Size(16f, 16f) }.As(out _light),
-                    new VStack
+                    new HStack
                     {
-                        Base = { Spacing = Gaps.Within },
+                        Base = { Spacing = Gaps.Parts },
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new HStack
+                            new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = FixedSize.Size(16f, 16f) }.As(out _light),
+                            new VStack
                             {
-                                Base = { Spacing = Gaps.Parts },
-                                Placement = FixedSize.Height(32f),
+                                Base = { Spacing = Gaps.Within },
+                                Placement = Flex.Grow,
                                 Children =
                                 {
-                                    new Label { Style = Styles.Name, TextWrapping = TextWrapping.Trim }.As(out _summary),
-                                    new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = FixedSize.Size(32f, 32f) }.As(out _below)
+                                    new HStack
+                                    {
+                                        Base = { Spacing = Gaps.Parts },
+                                        Placement = FixedSize.Height(32f),
+                                        Children =
+                                        {
+                                            new Label { Style = Styles.Name, TextWrapping = TextWrapping.Trim }.As(out _summary),
+                                            new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = FixedSize.Size(32f, 32f) }.As(out _below)
+                                        }
+                                    },
+                                    new HStack
+                                    {
+                                        Base = { Spacing = Gaps.Parts },
+                                        Placement = FixedSize.Height(16f),
+                                        Children =
+                                        {
+                                            new Label { Style = Styles.Detail }.As(out _status),
+                                            new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Trim }.As(out _problem),
+                                            new Label { Style = Styles.Detail }.As(out _lastRun)
+                                        }
+                                    }.As(out _detail)
                                 }
-                            },
-                            new HStack
-                            {
-                                Base = { Spacing = Gaps.Parts },
-                                Placement = FixedSize.Height(16f),
-                                Children =
-                                {
-                                    new Label { Style = Styles.Detail }.As(out _status),
-                                    new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Trim }.As(out _problem),
-                                    new Label { Style = Styles.Detail }.As(out _lastRun)
-                                }
-                            }.As(out _detail)
+                            }
                         }
                     },
                     new HStack

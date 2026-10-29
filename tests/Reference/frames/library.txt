@@ -2,13 +2,13 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Library
+on screen     Blueprint library
 
 000  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 003  SetClip    {X:296 Y:53 W:1328 H:40}
-004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Library"
+004  Text       at {X:296 Y:53.39666} scale 1.111  #DCF5FDFF  "Blueprint library"
 005  ClearClip  
 006  Text       at {X:1643.282 Y:55.81107} scale 0.972  #4FC3F7FF  "?"
 007  Sprite     Lumel_Fill            {X:240 Y:101 W:1440 H:1}  #5B737BFF
@@ -24,7 +24,9 @@ on screen     Library
 017  Text       at {X:256 Y:160.0543} scale 0.556  #85A1A9FF  "ON YOUR "
 018  Text       at {X:311.3734 Y:160.0543} scale 0.556  #4FC3F7FF  "CONSTRUCTS"
 019  Text       at {X:256 Y:179.6399} scale 0.694  #DCF5FDFF  "Test Rig (this construct)"
-020  Text       at {X:288 Y:203.6399} scale 0.694  #A2C3CDFF  "No logic systems on this construct."
-021  Text       at {X:256 Y:248.0543} scale 0.556  #85A1A9FF  "IN STORAGE"
-022  Text       at {X:256 Y:267.6399} scale 0.694  #A2C3CDFF  "No blueprints yet."
-023  ClearClip  
+020  Sprite     Lumel_Fill            {X:271 Y:206 W:2 H:12}  #5B737BFF
+021  Sprite     Lumel_Fill            {X:271 Y:216 W:12 H:2}  #5B737BFF
+022  Text       at {X:288 Y:203.6399} scale 0.694  #A2C3CDFF  "No logic systems on this construct."
+023  Text       at {X:256 Y:248.0543} scale 0.556  #85A1A9FF  "IN STORAGE"
+024  Text       at {X:256 Y:267.6399} scale 0.694  #A2C3CDFF  "No blueprints yet."
+025  ClearClip  

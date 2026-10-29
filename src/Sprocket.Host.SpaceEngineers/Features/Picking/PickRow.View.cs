@@ -14,6 +14,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         Image _picture;
         MemberName _name;
         Label _detail;
+        RichText _onGrid;
+
+        // How far into the row's head the mark's box is drawn, and where the words of a row without one start.
+        const float MarkInset = 12f;
 
         /// <summary>Makes the mark and the picture, then the name with what is quieter about it under it.</summary>
         void CreateView()
@@ -26,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 Placement = FixedSize.Width(40f),
                 Align = Align.Tall,
-                Base = { Padding = new Thickness(12f, 0f, 8f, 0f) },
+                Base = { Padding = new Thickness(MarkInset, 0f, 8f, 0f) },
                 IsVisible = false
             }.As(out _mark));
 
@@ -45,7 +49,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         Children =
                         {
                             new MemberName { Style = Styles.PickName, Wraps = true }.As(out _name),
-                            new Label { Style = Styles.ColumnNote, IsVisible = false }.As(out _detail)
+                            new Label { Style = Styles.ColumnNote, IsVisible = false }.As(out _detail),
+                            new RichText { Style = Styles.ColumnNoteOnGrid, Align = Align.Left, IsVisible = false }.As(out _onGrid)
                         }
                     }
                 }

@@ -484,9 +484,9 @@ def chip(pin_width=0.065):
     return shapes
 
 
-def chip_at(cx, cy, grow=0.0):
-    """The logic system's chip, smaller, about (cx, cy), every part grown by <grow> on all sides."""
-    half_wide, half_tall, pin, pin_width = 0.15, 0.23, 0.10, 0.065
+def chip_at(cx, cy, grow=0.0, pin_width=0.065):
+    """The installation's chip, smaller, about (cx, cy), every part grown by <grow> on all sides."""
+    half_wide, half_tall, pin = 0.15, 0.23, 0.10
     parts = [poly((cx - half_wide - grow, cy - half_tall - grow), (cx + half_wide + grow, cy - half_tall - grow),
                   (cx + half_wide + grow, cy + half_tall + grow), (cx - half_wide - grow, cy + half_tall + grow))]
     step = 2 * half_tall / 4
@@ -497,33 +497,47 @@ def chip_at(cx, cy, grow=0.0):
     return parts
 
 
-def installed():
+def stacked(gap, pin_width=0.065):
     """
-    Installation: the logic system's chip in front of another of the same, one of however many.
+    The pieces of a chip in front of another of the same: the front chip, the room cut round it <gap> wide, and the chip
+    behind, offset up and to the right, every pin <pin_width> thick.
+    """
+    offset = 0.16
+    cx, cy = 0.5 - offset / 2, 0.5 + offset / 2
+    return (chip_at(cx, cy, 0.0, pin_width), chip_at(cx, cy, gap, pin_width),
+            chip_at(cx + offset, cy - offset, 0.0, pin_width))
+
+
+def installed():
+    """Installation: a chip, solid. One copy of a logic system, working on one set of blocks."""
+    return chip()
+
+
+def logic():
+    """
+    Logic system: a chip in front of another of the same, the thing that can have however many installations.
 
     The chip behind is drawn darker rather than fainter, so it is solid and never reads as a shadow, and only a little
     darker, so the two read as one kind. The gap between them follows the front chip's own outline, pins and all.
     """
-    offset, gap = 0.16, 0.05
-    cx, cy = 0.5 - offset / 2, 0.5 + offset / 2
-    return [], chip_at(cx, cy, gap), chip_at(cx, cy), chip_at(cx + offset, cy - offset)
-
-
-def logic():
-    """Logic system: a chip, solid. The working thing a blueprint is the mould of."""
-    return chip()
+    front, room, behind = stacked(0.05)
+    return [], room, front, behind
 
 
 def blueprint():
     """
-    Blueprint: the logic system's chip cut out of a solid square, the mould the chip is made from.
+    Blueprint: the logic system's two chips cut out of a solid square, the mould the logic system is made from.
 
-    The chip is cut at its full size, inside a thin rim, and with broader pins than the logic system's own: the cut-out is
-    what has to read at row size, and a chip shrunk to leave a wide rim closes up into a dot.
+    The chip behind is cut first, the square is laid back over the room round the front chip, and the front chip is cut
+    last, so a rim of the square stands between the two cut-outs and they read as two chips rather than one hole.
+
+    The pins are cut thinner than the logic system's are drawn, since a dark pin between light gaps reads heavier than a
+    light pin between dark ones of the same width.
     """
-    half = 0.34
+    half = 0.40
     square = poly((0.5 - half, 0.5 - half), (0.5 + half, 0.5 - half), (0.5 + half, 0.5 + half), (0.5 - half, 0.5 + half))
-    return [square], chip(0.085)
+    front, room, behind = stacked(0.06, 0.045)
+    return [square], behind, room, (), front
 
 
 def steps():
@@ -843,9 +857,9 @@ GLYPHS = [
     # Every letter of the word is taken in lower case.
     ("B", "block", lambda: cube()),
     # Every letter of "logic" is taken; "y" is the first of "system" left.
-    ("y", "logic system", lambda: solid(logic())),
+    ("y", "logic system", lambda: logic()),
     # Every letter of the word is taken in lower case.
-    ("I", "installation", lambda: installed()),
+    ("I", "installation", lambda: solid(installed())),
     # Hidden: "h" with the eye open, showing what is hidden, and "H" with it shut.
     ("h", "hidden shown", lambda: toolbar_eye()),
     ("H", "hidden hidden", lambda: toolbar_eye_shut()),
@@ -949,8 +963,8 @@ def fitted(make, extent=EXTENT):
     return made
 
 
-def ink(shapes, holes, over=(), behind=()):
-    """Where a set of shapes actually puts ink, at the oversampled size, with any drawn back over the holes."""
+def ink(shapes, holes, over=(), behind=(), cut=()):
+    """Where a set of shapes actually puts ink, at the oversampled size, with any drawn back over the holes and cut again."""
     from PIL import Image, ImageDraw
 
     size = CELL * OVER
@@ -968,6 +982,9 @@ def ink(shapes, holes, over=(), behind=()):
 
     for shape in over:
         draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
+
+    for hole in cut:
+        draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
 
     return page.getbbox()
 
@@ -1051,6 +1068,7 @@ def render(glyph, framed=None, outlined=False, extent=EXTENT):
     shapes, holes = made[0], made[1]
     over = made[2] if len(made) > 2 else ()
     behind = made[3] if len(made) > 3 else ()
+    cut = made[4] if len(made) > 4 else ()
     size = CELL * OVER
 
     # Coverage, and brightness already multiplied by it, drawn alike but for the shapes behind.
@@ -1066,6 +1084,8 @@ def render(glyph, framed=None, outlined=False, extent=EXTENT):
             draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
         for shape in over:
             draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
+        for hole in cut:
+            draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
 
     # The middle of the page, sized so the mark drawn at EXTENT comes out at FILL: of its own ink, or its partner's. An
     # outline is centred on its mark's ink and takes in more of the page, so the mark comes out OUTLINE_SHRINK as large.

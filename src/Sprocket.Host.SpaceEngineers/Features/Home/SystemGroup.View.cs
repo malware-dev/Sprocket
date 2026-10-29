@@ -10,7 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
     public partial class SystemGroup
     {
         StatusRow _heading;
-        TreeLine _spine;
         RichText _installations;
         Button _another;
         VStack _list;
@@ -21,33 +20,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             Base.Spacing = Gaps.Parts;
 
             Children.Add(new StatusRow().As(out _heading));
-            Children.Add(new HStack
+            Children.Add(new Gutter(Sizes.Indent, Gaps.Items)
             {
-                Base = { Spacing = (Sizes.Indent - Sizes.Spine) / 2f, Padding = new Thickness((Sizes.Indent - Sizes.Spine) / 2f, 0f, 0f, 0f) },
-                Children =
+                Body =
                 {
-                    new TreeLine() { Placement = FixedSize.Width(Sizes.Spine) }.As(out _spine),
-                    new VStack
+                    Children =
                     {
-                        Base = { Spacing = Gaps.Items },
-                        Placement = Flex.Grow,
-                        Children =
+                        new Section
                         {
-                            new Section
+                            Children =
                             {
-                                Children =
-                                {
-                                    new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _installations),
-                                    new VStack { Base = { Spacing = Gaps.Items } }.As(out _list)
-                                }
-                            },
-                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _another) } }
-                        }
+                                new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _installations),
+                                new VStack { Base = { Spacing = Gaps.Items } }.As(out _list)
+                            }
+                        },
+                        new HStack { Children = { new Button { Style = Styles.Start }.As(out _another) } }
                     }
                 }
             });
-
-            _spine.Ends = _another;
         }
     }
 }

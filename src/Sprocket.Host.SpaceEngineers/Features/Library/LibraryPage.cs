@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <inheritdoc />
-        public override string Title => Editor.Texts.SystemsLoad;
+        public override string Title => Editor.Texts.LibraryTitle;
 
         /// <inheritdoc />
         public override bool ScrollsItself => true;
@@ -243,12 +243,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             return body;
         }
 
-        /// <summary>Adds a construct's name to <paramref name="part" />, and gives back where its rows go, set in under the name.</summary>
+        /// <summary>Adds a construct's name to <paramref name="part" />, and gives back where its rows go, set in under the name with a spine beside them.</summary>
         VStack Construct(Panel part, string name)
         {
-            var held = new VStack { Base = { Spacing = Gaps.Items, Padding = new Thickness(Sizes.Indent, 0f, 0f, 0f) } };
+            var held = new Gutter(Sizes.Indent, Gaps.Items);
             part.Children.Add(new Section { Children = { new Label { Style = Styles.InnerName, Text = name }, held } });
-            return held;
+            return held.Body;
         }
 
         /// <summary>The headings, names, lines and rows inside <paramref name="holder" />, in the order they read.</summary>
@@ -256,7 +256,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             foreach (var child in holder.Children)
             {
-                var inner = child as VStack;
+                var inner = child as VStack ?? (child as Gutter)?.Body;
                 if (inner == null)
                 {
                     yield return child;

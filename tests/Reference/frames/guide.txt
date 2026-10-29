@@ -31,9 +31,9 @@ on screen     Airlock
 024  Sprite     Sprocket_Stripes      {X:1648 Y:45 W:32 H:56}  #2E230AFF
 025  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 026  SetClip    {X:296 Y:53 W:1063 H:40}
-027  Text       at {X:302.1563 Y:59.01406} scale 0.401  #85A1A9FF  "y"
-028  Text       at {X:340 Y:53.39666} scale 1.111  #DCF5FDFF  "Airlock"
-029  Text       at {X:426.8629 Y:59.01406} scale 0.401  #85A1A9FF  "p"
+027  Text       at {X:296 Y:59.01406} scale 0.401  #85A1A9FF  "y"
+028  Text       at {X:323.6875 Y:53.39666} scale 1.111  #DCF5FDFF  "Airlock"
+029  Text       at {X:410.5504 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 030  ClearClip  
 031  Text       at {X:1377.885 Y:55.81107} scale 0.972  #4FC3F7FF  "?"
 032  Text       at {X:1412.76 Y:61.51406} scale 0.401  #A2C3CDFF  "u"
@@ -55,52 +55,52 @@ on screen     Airlock
 048  Sprite     Lumel_Fill            {X:551 Y:118 W:1 H:36}  #5B737BFF
 049  Text       at {X:435 Y:123.6399} scale 0.694  #DCF5FDFF  "Installation 1"
 050  Text       at {X:527.9537 Y:128.4932} scale 0.241  #A2C3CDFF  "v"
-051  Sprite     Lumel_Fill            {X:256 Y:170 W:349 H:36}  #29363EFF
-052  Sprite     Lumel_Fill            {X:256 Y:170 W:349 H:1}  #5B737BFF
-053  Sprite     Lumel_Fill            {X:256 Y:205 W:349 H:1}  #5B737BFF
-054  Sprite     Lumel_Fill            {X:256 Y:170 W:1 H:36}  #5B737BFF
-055  Sprite     Lumel_Fill            {X:604 Y:170 W:1 H:36}  #5B737BFF
-056  Text       at {X:404.1917 Y:175.6399} scale 0.694  #A2C3CDFF  "Triggers"
-057  Sprite     Lumel_Fill            {X:605 Y:170 W:349 H:36}  #29363EFF
-058  Sprite     Lumel_Fill            {X:605 Y:170 W:349 H:1}  #5B737BFF
-059  Sprite     Lumel_Fill            {X:605 Y:205 W:349 H:1}  #5B737BFF
-060  Sprite     Lumel_Fill            {X:605 Y:170 W:1 H:36}  #5B737BFF
-061  Sprite     Lumel_Fill            {X:953 Y:170 W:1 H:36}  #5B737BFF
-062  Text       at {X:744.1117 Y:175.6399} scale 0.694  #A2C3CDFF  "Sequences"
-063  Sprite     Lumel_Fill            {X:954 Y:170 W:349 H:36}  #29363EFF
-064  Sprite     Lumel_Fill            {X:954 Y:170 W:349 H:1}  #5B737BFF
-065  Sprite     Lumel_Fill            {X:954 Y:205 W:349 H:1}  #5B737BFF
-066  Sprite     Lumel_Fill            {X:954 Y:170 W:1 H:36}  #5B737BFF
-067  Sprite     Lumel_Fill            {X:1302 Y:170 W:1 H:36}  #5B737BFF
-068  Text       at {X:1111.895 Y:175.6399} scale 0.694  #A2C3CDFF  "State"
-069  Sprite     Lumel_Fill            {X:1303 Y:170 W:349 H:36}  #5B737BFF
-070  Sprite     Lumel_Fill            {X:1303 Y:170 W:349 H:1}  #5B737BFF
-071  Sprite     Lumel_Fill            {X:1303 Y:205 W:349 H:1}  #5B737BFF
-072  Sprite     Lumel_Fill            {X:1303 Y:170 W:1 H:36}  #5B737BFF
-073  Sprite     Lumel_Fill            {X:1651 Y:170 W:1 H:36}  #5B737BFF
-074  Text       at {X:1420.87 Y:175.6399} scale 0.694  #DCF5FDFF  "Installation panel"
-075  Text       at {X:256 Y:220.0543} scale 0.556  #85A1A9FF  "DESCRIPTION"
-076  Sprite     Lumel_Fill            {X:256 Y:242 W:73 H:32}  #3C4C52FF
-077  Sprite     Lumel_Fill            {X:256 Y:242 W:73 H:1}  #70757AFF
-078  Sprite     Lumel_Fill            {X:256 Y:273 W:73 H:1}  #70757AFF
-079  Sprite     Lumel_Fill            {X:256 Y:242 W:1 H:32}  #70757AFF
-080  Sprite     Lumel_Fill            {X:328 Y:242 W:1 H:32}  #70757AFF
-081  Text       at {X:272 Y:248.0543} scale 0.556  #DCF5FDFF  "Markup"
-082  Sprite     Lumel_Fill            {X:337 Y:242 W:73 H:32}  #29363EFF
-083  Sprite     Lumel_Fill            {X:337 Y:242 W:73 H:1}  #3F474FFF
-084  Sprite     Lumel_Fill            {X:337 Y:273 W:73 H:1}  #3F474FFF
-085  Sprite     Lumel_Fill            {X:337 Y:242 W:1 H:32}  #3F474FFF
-086  Sprite     Lumel_Fill            {X:409 Y:242 W:1 H:32}  #3F474FFF
-087  Text       at {X:352.9667 Y:248.0543} scale 0.556  #DCF5FDFF  "Preview"
-088  Sprite     Lumel_Fill            {X:256 Y:278 W:1396 H:120}  #141B20FF
-089  Sprite     Lumel_Fill            {X:256 Y:278 W:1396 H:1}  #5B737BFF
-090  Sprite     Lumel_Fill            {X:256 Y:397 W:1396 H:1}  #5B737BFF
-091  Sprite     Lumel_Fill            {X:256 Y:278 W:1 H:120}  #5B737BFF
-092  Sprite     Lumel_Fill            {X:1651 Y:278 W:1 H:120}  #5B737BFF
-093  SetClip    {X:256 Y:278 W:1396 H:120}
-094  SetClip    {X:264 Y:286 W:1368 H:92}
-095  Text       at {X:264 Y:283.6399} scale 0.694  #85A1A9FF  "What this logic system does, and what whoever fills it in needs to know."
-096  SetClip    {X:256 Y:278 W:1396 H:120}
+051  Sprite     Lumel_Fill            {X:256 Y:178 W:349 H:36}  #29363EFF
+052  Sprite     Lumel_Fill            {X:256 Y:178 W:349 H:1}  #5B737BFF
+053  Sprite     Lumel_Fill            {X:256 Y:213 W:349 H:1}  #5B737BFF
+054  Sprite     Lumel_Fill            {X:256 Y:178 W:1 H:36}  #5B737BFF
+055  Sprite     Lumel_Fill            {X:604 Y:178 W:1 H:36}  #5B737BFF
+056  Text       at {X:404.1917 Y:183.6399} scale 0.694  #A2C3CDFF  "Triggers"
+057  Sprite     Lumel_Fill            {X:605 Y:178 W:349 H:36}  #29363EFF
+058  Sprite     Lumel_Fill            {X:605 Y:178 W:349 H:1}  #5B737BFF
+059  Sprite     Lumel_Fill            {X:605 Y:213 W:349 H:1}  #5B737BFF
+060  Sprite     Lumel_Fill            {X:605 Y:178 W:1 H:36}  #5B737BFF
+061  Sprite     Lumel_Fill            {X:953 Y:178 W:1 H:36}  #5B737BFF
+062  Text       at {X:744.1117 Y:183.6399} scale 0.694  #A2C3CDFF  "Sequences"
+063  Sprite     Lumel_Fill            {X:954 Y:178 W:349 H:36}  #29363EFF
+064  Sprite     Lumel_Fill            {X:954 Y:178 W:349 H:1}  #5B737BFF
+065  Sprite     Lumel_Fill            {X:954 Y:213 W:349 H:1}  #5B737BFF
+066  Sprite     Lumel_Fill            {X:954 Y:178 W:1 H:36}  #5B737BFF
+067  Sprite     Lumel_Fill            {X:1302 Y:178 W:1 H:36}  #5B737BFF
+068  Text       at {X:1111.895 Y:183.6399} scale 0.694  #A2C3CDFF  "State"
+069  Sprite     Lumel_Fill            {X:1303 Y:178 W:349 H:36}  #5B737BFF
+070  Sprite     Lumel_Fill            {X:1303 Y:178 W:349 H:1}  #5B737BFF
+071  Sprite     Lumel_Fill            {X:1303 Y:213 W:349 H:1}  #5B737BFF
+072  Sprite     Lumel_Fill            {X:1303 Y:178 W:1 H:36}  #5B737BFF
+073  Sprite     Lumel_Fill            {X:1651 Y:178 W:1 H:36}  #5B737BFF
+074  Text       at {X:1420.87 Y:183.6399} scale 0.694  #DCF5FDFF  "Installation panel"
+075  Text       at {X:256 Y:228.0543} scale 0.556  #85A1A9FF  "DESCRIPTION"
+076  Sprite     Lumel_Fill            {X:256 Y:250 W:73 H:32}  #3C4C52FF
+077  Sprite     Lumel_Fill            {X:256 Y:250 W:73 H:1}  #70757AFF
+078  Sprite     Lumel_Fill            {X:256 Y:281 W:73 H:1}  #70757AFF
+079  Sprite     Lumel_Fill            {X:256 Y:250 W:1 H:32}  #70757AFF
+080  Sprite     Lumel_Fill            {X:328 Y:250 W:1 H:32}  #70757AFF
+081  Text       at {X:272 Y:256.0543} scale 0.556  #DCF5FDFF  "Markup"
+082  Sprite     Lumel_Fill            {X:337 Y:250 W:73 H:32}  #29363EFF
+083  Sprite     Lumel_Fill            {X:337 Y:250 W:73 H:1}  #3F474FFF
+084  Sprite     Lumel_Fill            {X:337 Y:281 W:73 H:1}  #3F474FFF
+085  Sprite     Lumel_Fill            {X:337 Y:250 W:1 H:32}  #3F474FFF
+086  Sprite     Lumel_Fill            {X:409 Y:250 W:1 H:32}  #3F474FFF
+087  Text       at {X:352.9667 Y:256.0543} scale 0.556  #DCF5FDFF  "Preview"
+088  Sprite     Lumel_Fill            {X:256 Y:286 W:1396 H:120}  #141B20FF
+089  Sprite     Lumel_Fill            {X:256 Y:286 W:1396 H:1}  #5B737BFF
+090  Sprite     Lumel_Fill            {X:256 Y:405 W:1396 H:1}  #5B737BFF
+091  Sprite     Lumel_Fill            {X:256 Y:286 W:1 H:120}  #5B737BFF
+092  Sprite     Lumel_Fill            {X:1651 Y:286 W:1 H:120}  #5B737BFF
+093  SetClip    {X:256 Y:286 W:1396 H:120}
+094  SetClip    {X:264 Y:294 W:1368 H:92}
+095  Text       at {X:264 Y:291.6399} scale 0.694  #85A1A9FF  "What this logic system does, and what whoever fills it in needs to know."
+096  SetClip    {X:256 Y:286 W:1396 H:120}
 097  SetClip    {X:256 Y:118 W:1408 H:902}
 098  ClearClip  
 099  Sprite     Sprocket_Shadow       {X:946 Y:96 W:24 H:24}  #000000AA

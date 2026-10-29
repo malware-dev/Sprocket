@@ -9,6 +9,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
@@ -24,7 +25,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     public class SlotStrip : Reveal
     {
         const float Square = 36f;
-        const float Indent = 28f;
+        // Where the words of the row above start: the row's room before its mark, the mark, and the gap after it.
+        const float Indent = 40f;
 
         readonly Texts _texts;
         readonly HStack _pages;
@@ -49,10 +51,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public SlotStrip(Texts texts)
         {
             _texts = texts;
-            var line = new HStack();
-            line.Children.Add(new ZStack { Placement = FixedSize.Size(Indent, 1f) });
-            VStack body;
-            line.Children.Add(new VStack { Base = { Spacing = Gaps.Parts }, Placement = Flex.Grow }.As(out body));
+            // The gutter's spine runs down under the row's mark and ties the strip to the row it belongs to.
+            var line = new Gutter(Indent, Gaps.Parts);
+            var body = line.Body;
             Content = line;
             body.Children.Add(new HStack { Base = { Spacing = Gaps.Within } }.As(out _pages));
             body.Children.Add(new HStack { Base = { Spacing = Gaps.Within } }.As(out _row));
