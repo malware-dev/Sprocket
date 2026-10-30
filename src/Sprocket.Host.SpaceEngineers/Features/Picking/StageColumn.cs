@@ -9,6 +9,7 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
@@ -43,9 +44,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _kindNarrow.Hint = texts.PickSearch;
 
 
-            _narrowClear.Tip = Tip.For(null, texts.Codex.PickClearTyped);
-            _kindNarrowClear.Tip = Tip.For(null, texts.Codex.PickClearTyped);
-            _kindClear.Tip = Tip.For(null, texts.Codex.PickEveryKind);
+            _narrowClear.Tip = KeptTip.For(null, texts.Codex.PickClearTyped);
+            _kindNarrowClear.Tip = KeptTip.For(null, texts.Codex.PickClearTyped);
+            _kindClear.Tip = KeptTip.For(null, texts.Codex.PickEveryKind);
             _showHidden = texts.Codex.PickShowHidden;
             _hideHidden = texts.Codex.PickHideHidden;
             ShowsHidden = false;

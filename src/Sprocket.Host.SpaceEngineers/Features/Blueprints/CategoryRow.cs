@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>What pressing the bin does, or why it cannot be pressed, said where the pointer rests on it.</summary>
         public string RemovesAbout
         {
-            set { _remove.Tip = Tip.For(_remove.Tip, value); }
+            set { _remove.Tip = KeptTip.For(_remove.Tip, value); }
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             _grip.CanDrag = can;
             _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
-            _grip.Tip = Tip.For(_grip.Tip, about);
+            _grip.Tip = KeptTip.For(_grip.Tip, about);
         }
 
         /// <inheritdoc />

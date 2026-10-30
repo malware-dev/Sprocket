@@ -1624,18 +1624,6 @@
     <value>No blueprints yet.</value>
     <comment>In the library, a line in the section of blueprints kept in storage where the player keeps no blueprints yet.</comment>
   </data>
-  <data name="Sprocket.Library.OnConstructs" xml:space="preserve">
-    <value>On your {constructs}</value>
-    <comment>In the library, the heading at the top of the list, over the logic systems on the construct the editor was opened on. Shown in capitals. {constructs} is filled with the word constructs, shown as a link to the codex page on constructs.</comment>
-  </data>
-  <data name="Sprocket.Library.OnConstructsTerm" xml:space="preserve">
-    <value>constructs</value>
-    <comment>In the library, the word that fills {constructs} in the heading at the top of the list (On your constructs), shown in capitals as a link to the codex page on constructs.</comment>
-  </data>
-  <data name="Sprocket.Library.ThisConstruct" xml:space="preserve">
-    <value>{name} (this construct)</value>
-    <comment>In the library, the line under the top heading of the list, over the logic systems on the construct the editor was opened on. {name} is that construct's name.</comment>
-  </data>
   <data name="Sprocket.Library.NoneHere" xml:space="preserve">
     <value>No logic systems on this construct.</value>
     <comment>In the library, a line in the top section of the list where the construct the editor was opened on has no logic systems.</comment>
@@ -1676,10 +1664,6 @@
     <value>Delete this blueprint from storage?</value>
     <comment>In the library, the question in the dialog that opens when the bin on a blueprint's row in the section of blueprints kept in storage is pressed. The blueprint's name, or its file's name where it did not read, follows it in bold.</comment>
   </data>
-  <data name="Sprocket.Library.Add" xml:space="preserve">
-    <value>Add to this construct</value>
-    <comment>In the library, the button in the details of the chosen blueprint that puts it on the construct the editor was opened on. Shows only where that blueprint is not on the construct already.</comment>
-  </data>
   <data name="Sprocket.Library.By" xml:space="preserve">
     <value>By {name}</value>
     <comment>In the library, the line under the chosen blueprint's name in its details, and the line under a blueprint's row in the section of blueprints kept in storage where somebody else made it, where no change time is known. {name} is who made it.</comment>
@@ -1711,10 +1695,6 @@
   <data name="Sprocket.Library.Twice" xml:space="preserve">
     <value>Another file in storage holds the same blueprint.</value>
     <comment>In the library, shown as a problem in place of the line under a row in the section of blueprints kept in storage, where the file holds a blueprint that an earlier file in storage already holds.</comment>
-  </data>
-  <data name="Sprocket.Library.Copy" xml:space="preserve">
-    <value>Make a copy</value>
-    <comment>In the library, the button in the details of the chosen logic system on this construct, or of a backup, that puts a copy of it on the construct the editor was opened on, as a separate logic system, and opens it. Never shown for a blueprint in storage.</comment>
   </data>
   <data name="Sprocket.Library.CopyName" xml:space="preserve">
     <value>{name} {number}</value>
@@ -1768,10 +1748,6 @@
     <value>Keep it</value>
     <comment>An answer in the dialog that opens before a logic system is replaced by its blueprint in the library, both to update it from a newer blueprint and to reset it to its blueprint: closes the dialog and leaves the logic system as it is. It is the answer Enter takes.</comment>
   </data>
-  <data name="Sprocket.Library.Reset" xml:space="preserve">
-    <value>Reset to blueprint</value>
-    <comment>In the library, a button in the chosen logic system's details, shown while it has changed since its blueprint in the library: puts the blueprint back in place of the logic system, after asking.</comment>
-  </data>
   <data name="Sprocket.Library.ResetQuestion" xml:space="preserve">
     <value>Reset this logic system to its blueprint?</value>
     <comment>The question in the dialog that opens when the button in the library that resets a logic system to its blueprint is pressed. The logic system's name follows it in bold.</comment>
@@ -1823,6 +1799,54 @@
   <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
     <value>Leave it</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: closes the dialog and keeps nothing. It is the answer Enter takes.</comment>
+  </data>
+  <data name="Sprocket.Library.MakeQuestion" xml:space="preserve">
+    <value>Make a blueprint of this logic system?</value>
+    <comment>In the library, the question asked when the right-pointing arrow in the strip between its panes is pressed while a logic system with no blueprint is chosen. The logic system's name follows in bold.</comment>
+  </data>
+  <data name="Sprocket.Library.MakeKept" xml:space="preserve">
+    <value>A copy of it is kept in the library, where any construct can use it.</value>
+    <comment>In the library, the line under the question whether to make a blueprint of a logic system, saying what making it does.</comment>
+  </data>
+  <data name="Sprocket.Library.MakeConfirm" xml:space="preserve">
+    <value>Make blueprint</value>
+    <comment>In the library, the answer to the question whether to make a blueprint of a logic system that makes it.</comment>
+  </data>
+  <data name="Sprocket.Library.MakeLeave" xml:space="preserve">
+    <value>Leave it</value>
+    <comment>In the library, the answer to the question whether to make a blueprint of a logic system that leaves things as they are; Enter gives it.</comment>
+  </data>
+  <data name="Sprocket.Library.AddQuestion" xml:space="preserve">
+    <value>Add this blueprint to this construct?</value>
+    <comment>In the library, the question asked when the left-pointing arrow in the strip between its panes is pressed while a blueprint or backup that is not on this construct is chosen. Its name follows in bold.</comment>
+  </data>
+  <data name="Sprocket.Library.AddBecomes" xml:space="preserve">
+    <value>It becomes a logic system here, with an empty installation to fill.</value>
+    <comment>In the library, the line under the question whether to add a blueprint to this construct, saying what adding it does.</comment>
+  </data>
+  <data name="Sprocket.Library.AddConfirm" xml:space="preserve">
+    <value>Add</value>
+    <comment>In the library, the answer to the question whether to add a blueprint to this construct that adds it.</comment>
+  </data>
+  <data name="Sprocket.Library.AddLeave" xml:space="preserve">
+    <value>Leave it</value>
+    <comment>In the library, the answer to the question whether to add a blueprint to this construct that leaves things as they are; Enter gives it.</comment>
+  </data>
+  <data name="Sprocket.Library.CopyQuestion" xml:space="preserve">
+    <value>Make a copy of this logic system?</value>
+    <comment>In the library, the question asked when the copy mark in the strip between its panes is pressed while a logic system on this construct is chosen. Its name follows in bold.</comment>
+  </data>
+  <data name="Sprocket.Library.CopySeparate" xml:space="preserve">
+    <value>The copy is a separate logic system on this construct, linked to no blueprint, and opens to be changed.</value>
+    <comment>In the library, the line under the question whether to make a copy of a logic system, saying what the copy is.</comment>
+  </data>
+  <data name="Sprocket.Library.CopyConfirm" xml:space="preserve">
+    <value>Make a copy</value>
+    <comment>In the library, the answer to the question whether to make a copy of a logic system that makes it.</comment>
+  </data>
+  <data name="Sprocket.Library.CopyLeave" xml:space="preserve">
+    <value>Leave it</value>
+    <comment>In the library, the answer to the question whether to make a copy of a logic system that leaves things as they are; Enter gives it.</comment>
   </data>
   <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
     <value>Run which sequence?</value>

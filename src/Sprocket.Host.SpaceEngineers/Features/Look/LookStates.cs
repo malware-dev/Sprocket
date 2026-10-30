@@ -10,6 +10,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     /// </remarks>
     public static class LookStates
     {
+        /// <summary>Its terms are words like any other, as they are while the player has turned tips off.</summary>
+        /// <remarks>Weighs less than paused, so a paused step's dimmed terms stay dim.</remarks>
+        public static readonly State Plain = State.Declare("Plain", 30);
+
         /// <summary>Quieter than one that runs: a paused step's words, marks and parts.</summary>
         public static readonly State Paused = State.Declare("Paused", 40);
 

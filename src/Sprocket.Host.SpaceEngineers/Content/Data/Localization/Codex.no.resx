@@ -101,7 +101,10 @@
     <value>Lukk editoren</value>
   </data>
   <data name="Sprocket.Chrome.Tips" xml:space="preserve">
-    <value>Slå av alle tips. Trykk igjen for å slå dem på igjen.</value>
+    <value>Vis færre tips.</value>
+  </data>
+  <data name="Sprocket.Chrome.TipsOn" xml:space="preserve">
+    <value>Vis alle tips.</value>
   </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
     <value>![](mark:undo)&amp;nbsp;[Angre](Term.Undo)

@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>What pressing the bin does, or why it cannot be pressed, said where the pointer rests on it.</summary>
         public string RemovesAbout
         {
-            set { _remove.Tip = Tip.For(_remove.Tip, value); }
+            set { _remove.Tip = KeptTip.For(_remove.Tip, value); }
         }
 
         /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
@@ -105,7 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             _grip.CanDrag = can;
             _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
-            _grip.Tip = Tip.For(_grip.Tip, about);
+            _grip.Tip = KeptTip.For(_grip.Tip, about);
         }
 
         /// <inheritdoc />

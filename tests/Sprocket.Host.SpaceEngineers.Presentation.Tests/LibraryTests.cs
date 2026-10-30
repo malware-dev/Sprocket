@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.Home;
-using Lumel.Controls;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Library;
@@ -27,8 +26,8 @@ public class LibraryTests
         Assert.Equal("", written.Read());
         var hangar = Other();
         var airlock = Blueprinted().Editor.Program.Systems[0];
-        written.Take("Hangar [Airlock] ; = 2", Saved, new[] { hangar });
-        written.Take("Lost Ship", Saved.AddHours(1), new[] { airlock });
+        written.Take("Hangar [Airlock] ; = 2", Saved, new[] { hangar }, new Values());
+        written.Take("Lost Ship", Saved.AddHours(1), new[] { airlock }, new Values());
 
         var read = new Backups(folder);
         Assert.Equal("", read.Read());
@@ -65,7 +64,7 @@ public class LibraryTests
         Assert.False(backups.Intact);
         Assert.Empty(backups.All);
 
-        backups.Take("Kept", Saved, new[] { Other() });
+        backups.Take("Kept", Saved, new[] { Other() }, new Values());
         Assert.Equal(text, folder.Files["backups.ini"]);
         Assert.False(folder.Has("backup-1.cog"));
     }
@@ -81,7 +80,7 @@ public class LibraryTests
         Assert.Empty(backups.All);
         Assert.Empty(folder.Files);
 
-        backups.Take("Lost Ship", Saved, new[] { Other() });
+        backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
         Assert.True(folder.Has("backups.ini"));
         Assert.True(folder.Has("backup-1.cog"));
     }
@@ -93,19 +92,22 @@ public class LibraryTests
         var folder = new Folder();
         var backups = new Backups(folder);
 
-        backups.Take("Lost Ship", Saved, new[] { Other() });
+        backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
 
         Assert.Single(backups.All);
         Assert.Empty(folder.Files);
     }
 
-    /// <summary>Each loss is kept on its own: a logic system lost again is kept again, in a file of its own, beside the earlier backup.</summary>
+    /// <summary>Each loss of a changed logic system is kept on its own: lost again after a change, it is kept again, in a file of its own, beside the earlier backup.</summary>
     [Fact]
     public void EachLossIsKeptOnItsOwn()
     {
         var rig = Hangared();
         var airlock = rig.Editor.Program.Systems[0];
         var hangar = rig.Editor.Program.Systems[1];
+
+        // Last changed well before now, so the rename below, which the backup stamps with the time now, is a later version.
+        airlock.Changed = Saved;
         rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
 
         rig.Editor.Program.RemoveSystem(hangar);
@@ -119,6 +121,20 @@ public class LibraryTests
         Assert.DoesNotContain("Airlock Mk II", rig.WorldFolder.Files[rig.Backups.All[0].File]);
     }
 
+    /// <summary>A logic system lost again unchanged, the same identity and the same date, is not backed up twice.</summary>
+    [Fact]
+    public void AnUnchangedLogicSystemIsNotBackedUpTwice()
+    {
+        var rig = Hangared();
+        rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
+        Assert.Equal(2, rig.Backups.All.Count);
+
+        rig.Unit.BackUp(rig.Backups, Saved.AddHours(1), rig.Shelf);
+
+        Assert.Equal(2, rig.Backups.All.Count);
+        Assert.All(rig.Backups.All, b => Assert.Equal(Saved, b.Lost));
+    }
+
     /// <summary>Every backup under one construct's name is listed under that name once, the latest first, each with when it was lost.</summary>
     [Fact]
     public void AConstructsBackupsAreListedTogether()
@@ -126,6 +142,10 @@ public class LibraryTests
         var rig = Hangared();
         rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
         rig.Editor.Program.RemoveSystem(rig.Editor.Program.Systems[1]);
+
+        // Changed after the first backup, as an edit on the screen stamps it, so it is a version of its own.
+        var airlock = rig.Editor.Program.Systems[0];
+        airlock.Changed = (airlock.Changed ?? Saved).AddDays(1);
         rig.Unit.BackUp(rig.Backups, Saved.AddHours(1), rig.Shelf);
 
         rig.Editor.GoToRoot();
@@ -156,7 +176,7 @@ public class LibraryTests
         Assert.Equal(0, row.Problems);
 
         ChooseLost(rig, page);
-        Assert.False(Add(rig, page).Command!.CanExecute);
+        Assert.False(Live(ToConstruct(page)));
     }
 
     /// <summary>A lost construct whose every logic system has its equal in the library leaves no backup: the library has it all.</summary>
@@ -201,9 +221,9 @@ public class LibraryTests
     public void BackupsAreListedByNameTheLatestFirst()
     {
         var rig = Blueprinted();
-        rig.Backups.Take("Lost Ship", Saved.AddHours(1), new[] { Other() });
+        rig.Backups.Take("Lost Ship", Saved.AddHours(1), new[] { Other() }, new Values());
         rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
-        rig.Backups.Take("Lost Ship", Saved.AddHours(-1), new[] { Other() });
+        rig.Backups.Take("Lost Ship", Saved.AddHours(-1), new[] { Other() }, new Values());
         Assert.Equal(3, rig.Backups.All.Count);
 
         rig.Editor.GoToRoot();
@@ -235,7 +255,7 @@ public class LibraryTests
 
         ChooseLost(rig, page);
         Assert.True(row.Chosen);
-        Assert.True(Add(rig, page).Command!.CanExecute);
+        Assert.True(Live(ToConstruct(page)));
     }
 
     /// <summary>A backed up blueprint's bin forgets it alone, after asking, deleting its file, and the rest are kept.</summary>
@@ -244,7 +264,7 @@ public class LibraryTests
     {
         var rig = WithLost(out var lost, out var page, (sim, _) =>
         {
-            sim.Backups.Take("Lost Ship", Saved, new[] { Other() });
+            sim.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
         });
         var file = rig.Backups.All.Single(b => b.Identity == lost.Identity).File;
 
@@ -268,7 +288,9 @@ public class LibraryTests
         var rig = WithLost(out var lost, out var page);
         ChooseLost(rig, page);
 
-        Add(rig, page).Command!.Execute();
+        ToConstruct(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
         rig.Tick();
 
         var arrived = Assert.Single(rig.Editor.Program.Systems);
@@ -280,67 +302,75 @@ public class LibraryTests
     }
 
     /// <summary>
-    /// The library adds a blueprint to this construct with a button, which is there only while the blueprint is not on this
-    /// construct already.
+    /// The strip's arrow onto this construct puts a chosen backup on it, and is dim once the logic system it keeps is on this
+    /// construct.
     /// </summary>
     [Fact]
-    public void TheLibraryAddsABlueprintWithAButton()
+    public void TheArrowOntoThisConstructPutsABackupOn()
     {
         var rig = WithLost(out var lost, out var page);
         ChooseLost(rig, page);
-        var add = Add(rig, page);
-        Assert.True(add.IsVisible);
+        var add = ToConstruct(page);
+        Assert.True(Live(add));
+        Assert.Equal(rig.Texts.Codex.LibraryPutOn, Says(add));
 
         add.Command!.Execute();
         rig.Tick();
-
-        Assert.Equal(lost.Identity, Assert.Single(rig.Editor.Program.Systems).Identity);
-        Assert.False(add.IsVisible, "the button to add it is there while it is on this construct");
-    }
-
-    /// <summary>A lost construct's logic system copied arrives as a logic system of its own.</summary>
-    [Fact]
-    public void ALostConstructsLogicSystemIsCopied()
-    {
-        var rig = WithLost(out var lost, out var page);
-        ChooseLost(rig, page);
-
-        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryCopy).Command!.Execute();
+        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
         rig.Tick();
 
-        var copy = Assert.Single(rig.Editor.Program.Systems);
-        Assert.NotEqual(lost.Identity, copy.Identity);
-        Assert.Equal("Airlock 2", copy.Name);
-        Assert.Single(copy.Instances);
+        Assert.Equal(lost.Identity, Assert.Single(rig.Editor.Program.Systems).Identity);
+        page.Rows.OfType<StatusRow>().Last(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
+        rig.Tick();
+        Assert.False(Live(add), "the arrow puts it on while it is on this construct");
     }
 
-    /// <summary>A lost construct's logic system is kept in storage with Make blueprint, and is not put on this construct by it.</summary>
+    /// <summary>A backup is a blueprint, so it offers no copy: the arrow onto this construct puts it on.</summary>
     [Fact]
-    public void ALostConstructsLogicSystemIsKeptInStorage()
+    public void ABackupOffersNoCopy()
+    {
+        var rig = WithLost(out _, out var page);
+        ChooseLost(rig, page);
+
+        Assert.False(Live(Copies(page)));
+    }
+
+    /// <summary>
+    /// The arrow into the library promotes a chosen backup to a blueprint in storage: the backup is gone, the blueprint is
+    /// chosen, and nothing is put on this construct.
+    /// </summary>
+    [Fact]
+    public void ABackupIsPromotedToABlueprint()
     {
         var rig = WithLost(out var lost, out var page);
         ChooseLost(rig, page);
 
-        var keep = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsMakeBlueprint);
-        Assert.True(keep.Command!.CanExecute);
-        keep.Command.Execute();
+        var keep = ToLibrary(page);
+        Assert.True(Live(keep));
+        Assert.Equal(rig.Texts.Codex.SystemsMakeBlueprintAbout, Says(keep));
+        keep.Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryMakeConfirm);
         rig.Tick();
 
         var volume = Assert.Single(rig.Shelf.All);
         Assert.NotEqual(lost.Identity, volume.Identity);
         Assert.Equal(ProgramWriter.Blueprint(lost, volume.Identity), volume.Text);
         Assert.Empty(rig.Editor.Program.Systems);
+        Assert.Empty(rig.Backups.All);
+        var chosen = Assert.Single(page.Rows.OfType<StatusRow>(), r => r.Chosen);
+        Assert.Equal("Airlock", chosen.Summary);
+        Assert.StartsWith("Changed ", chosen.Status);
     }
 
-    /// <summary>A lost construct's logic system whose blueprint storage keeps otherwise replaces it with Update blueprint, after asking.</summary>
+    /// <summary>A backup whose blueprint storage keeps otherwise replaces it through the arrow into the library, after asking, and is promoted.</summary>
     [Fact]
     public void ALostConstructsLogicSystemUpdatesItsBlueprintAfterAsking()
     {
         var rig = WithLost(out var lost, out var page, Linked);
         ChooseLost(rig, page);
 
-        var update = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateBlueprint);
-        update.Command!.Execute();
+        ToLibrary(page).Command!.Execute();
         rig.Tick();
         Assert.Contains(rig.Texts.LibraryKeepBackupLinked, rig.Editor.Question());
         Assert.Equal("Airlock Mk 0", Assert.Single(rig.Shelf.All).Name);
@@ -348,18 +378,20 @@ public class LibraryTests
         rig.Editor.PressChoice(rig.Texts.LibraryKeepBackupUpdate);
         rig.Tick();
 
-        Assert.True(rig.Shelf.Holds(lost));
-        Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
+        var volume = Assert.Single(rig.Shelf.All);
+        Assert.Equal("Airlock", volume.Name);
+        Assert.Equal(lost.Changed, volume.Changed);
+        Assert.Empty(rig.Backups.All);
     }
 
-    /// <summary>A lost construct's logic system linked to a blueprint in the library is kept beside it as a new blueprint, when asked to.</summary>
+    /// <summary>A backup linked to a blueprint in the library is kept beside it as a new blueprint, when asked to.</summary>
     [Fact]
     public void ALostConstructsLogicSystemIsKeptAsANewBlueprint()
     {
         var rig = WithLost(out var lost, out var page, Linked);
         ChooseLost(rig, page);
 
-        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateBlueprint).Command!.Execute();
+        ToLibrary(page).Command!.Execute();
         rig.Tick();
         rig.Editor.PressChoice(rig.Texts.LibraryKeepBackupNew);
         rig.Tick();
@@ -380,11 +412,14 @@ public class LibraryTests
             Assert.Equal("", sim.Shelf.Read());
         });
         Assert.False(lost.HasOrigin);
-        page.Rows.OfType<StatusRow>().First(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
+
+        // The backups are listed after storage, which holds its own row of the same name.
+        page.Rows.OfType<StatusRow>().Last(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
         rig.Tick();
 
-        var keep = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateBlueprint);
-        Assert.False(keep.Command!.CanExecute, "the library offers to keep a backup it holds already");
+        var keep = ToLibrary(page);
+        Assert.False(Live(keep), "the library offers to keep a backup it holds already");
+        Assert.Equal(rig.Texts.Codex.LibrarySame, Says(keep));
         Assert.Single(rig.Shelf.All);
     }
 
@@ -395,7 +430,9 @@ public class LibraryTests
         var rig = WithLost(out var lost, out var page, Linked);
         ChooseLost(rig, page);
 
-        Add(rig, page).Command!.Execute();
+        ToConstruct(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
         rig.Tick();
 
         var arrived = Assert.Single(rig.Editor.Program.Systems);
@@ -404,57 +441,161 @@ public class LibraryTests
         Assert.True(rig.Editor.Holdings.Stored(arrived));
     }
 
-    /// <summary>Make a copy on a backup copies the backup, even while the logic system it keeps is on this construct, changed.</summary>
+    /// <summary>
+    /// A backup put back on and unchanged since is promoted with it: the arrow into the library from this construct makes the
+    /// blueprint, and the backup, which kept the same logic system as it is, is gone.
+    /// </summary>
     [Fact]
-    public void MakeACopyOfABackupCopiesTheBackup()
+    public void ARestoredUnchangedLogicSystemPromotesItsBackup()
     {
         var rig = WithLost(out _, out var page);
         ChooseLost(rig, page);
-        Add(rig, page).Command!.Execute();
+        ToConstruct(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
         rig.Tick();
 
-        var here = Assert.Single(rig.Editor.Program.Systems);
-        here.Name = "Changed";
-        page = Reopened(rig);
-        ChooseLost(rig, page);
-
-        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryCopy).Command!.Execute();
+        Choose(rig, page, "Airlock");
+        Assert.True(Live(ToLibrary(page)));
+        ToLibrary(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryMakeConfirm);
         rig.Tick();
 
-        Assert.Equal(2, rig.Editor.Program.Systems.Count);
-        Assert.Equal("Airlock 2", Assert.Single(rig.Editor.Program.Systems, s => s != here).Name);
+        Assert.Single(rig.Shelf.All);
+        Assert.Empty(rig.Backups.All);
     }
 
-    /// <summary>A blueprint in the library offers no copy of itself, even while a logic system made from it is on this construct.</summary>
+    /// <summary>A backup put back on and changed after is another version: making its blueprint leaves the backup.</summary>
     [Fact]
-    public void AStoredBlueprintOffersNoCopy()
+    public void ARestoredChangedLogicSystemLeavesItsBackup()
+    {
+        var rig = WithLost(out _, out var page);
+        ChooseLost(rig, page);
+        ToConstruct(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
+        rig.Tick();
+
+        // Renamed, which the screen stamps with the time now, after the backup's date.
+        var here = Assert.Single(rig.Editor.Program.Systems);
+        here.Name = "Airlock Mk II";
+        page = Reopened(rig);
+        Assert.True(here.Changed > Saved);
+
+        Choose(rig, page, "Airlock Mk II");
+        ToLibrary(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryMakeConfirm);
+        rig.Tick();
+
+        Assert.Single(rig.Shelf.All);
+        Assert.Single(rig.Backups.All);
+    }
+
+    /// <summary>Copy is offered for a logic system on this construct alone: a blueprint in storage goes on with the arrow instead.</summary>
+    [Fact]
+    public void CopyIsOfferedOnlyForThisConstruct()
     {
         var rig = Blueprinted();
-        var here = rig.Editor.Program.Systems[0];
-        rig.Shelf.Keep(here);
-        here.Name = "Changed";
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
         var page = Reopened(rig);
 
-        page.Rows.OfType<StatusRow>().Single(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
+        Choose(rig, page, "Airlock");
+        Assert.True(Live(Copies(page)));
+        Assert.Equal(rig.Texts.Codex.LibraryCopyAbout, Says(Copies(page)));
+
+        page.Rows.OfType<StatusRow>().Last(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
         rig.Tick();
-        Assert.False(Add(rig, page).IsVisible, "the button to add it is there while a logic system made from it is on this construct");
-        Assert.DoesNotContain(page.View!.Within().OfType<Button>(), b => b.IsVisible
-            && (b.Text == rig.Texts.SystemsUpdateFromLibrary || b.Text == rig.Texts.SystemsUpdateBlueprint
-                || b.Text == rig.Texts.SystemsMakeBlueprint || b.Text == rig.Texts.LibraryReset));
-        Assert.DoesNotContain(page.View!.Within().OfType<Button>(), b => b.IsVisible && b.Text == rig.Texts.LibraryCopy);
+        Assert.False(Live(Copies(page)), "a blueprint in storage offers a copy of itself");
+    }
+
+    /// <summary>Making a blueprint asks first, naming the chosen logic system, and leaving it stores nothing.</summary>
+    [Fact]
+    public void MakingABlueprintAsksAndLeavingItStoresNothing()
+    {
+        var rig = Blueprinted();
+        rig.Editor.Program.Systems[0].Name = "Port Lock";
+        var page = Reopened(rig);
+        Choose(rig, page, "Port Lock");
+
+        ToLibrary(page).Command!.Execute();
+        rig.Tick();
+        Assert.StartsWith(rig.Texts.LibraryMakeQuestion, rig.Editor.Question());
+        Assert.Contains("Port Lock", rig.Editor.Question());
+
+        rig.Editor.PressChoice(rig.Texts.LibraryMakeLeave);
+        rig.Tick();
+
+        Assert.Empty(rig.Shelf.All);
+    }
+
+    /// <summary>Putting a blueprint on this construct asks first, naming the chosen backup, and leaving it puts nothing on.</summary>
+    [Fact]
+    public void PuttingABlueprintOnAsksAndLeavingItPutsNothingOn()
+    {
+        var rig = WithLost(out _, out var page);
+        ChooseLost(rig, page);
+
+        ToConstruct(page).Command!.Execute();
+        rig.Tick();
+        Assert.StartsWith(rig.Texts.LibraryAddQuestion, rig.Editor.Question());
+        Assert.Contains("Airlock", rig.Editor.Question());
+
+        rig.Editor.PressChoice(rig.Texts.LibraryAddLeave);
+        rig.Tick();
+
+        Assert.Empty(rig.Editor.Program.Systems);
+        Assert.Single(rig.Backups.All);
+    }
+
+    /// <summary>Making a copy asks first, naming the chosen logic system, and leaving it makes no copy.</summary>
+    [Fact]
+    public void MakingACopyAsksAndLeavingItMakesNone()
+    {
+        var rig = Blueprinted();
+        rig.Editor.Program.Systems[0].Name = "Port Lock";
+        var page = Reopened(rig);
+        Choose(rig, page, "Port Lock");
+
+        Copies(page).Command!.Execute();
+        rig.Tick();
+        Assert.StartsWith(rig.Texts.LibraryCopyQuestion, rig.Editor.Question());
+        Assert.Contains("Port Lock", rig.Editor.Question());
+
+        rig.Editor.PressChoice(rig.Texts.LibraryCopyLeave);
+        rig.Tick();
+
+        Assert.Equal("Port Lock", Assert.Single(rig.Editor.Program.Systems).Name);
+    }
+
+    /// <summary>Making a copy, once asked, puts a logic system of its own on this construct.</summary>
+    [Fact]
+    public void MakingACopyAnsweredMakesOne()
+    {
+        var rig = Blueprinted();
+        var page = Reopened(rig);
+        Choose(rig, page, "Airlock");
+
+        Copies(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryCopyConfirm);
+        rig.Tick();
+
+        Assert.Equal(new[] { "Airlock", "Airlock 2" }, rig.Editor.Program.Systems.Select(s => s.Name));
     }
 
     /// <summary>
-    /// The library lists the blueprints on this construct, then the constructs that are lost, then the blueprints kept for
-    /// every world, choosing the first.
+    /// The library lists this construct's logic systems under its name, then storage, then the backups, choosing the
+    /// first.
     /// </summary>
     [Fact]
-    public void TheLibraryListsThisConstructThenTheLostThenTheKept()
+    public void TheLibraryListsThisConstructThenStorageThenBackups()
     {
         var rig = Blueprinted();
         rig.Editor.Program.Systems[0].Changed = Saved;
         rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
-        rig.Backups.Take("Lost Ship", Saved, new[] { Other() });
+        rig.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
 
         rig.Editor.GoToRoot();
         rig.Editor.OpenLibrary();
@@ -462,27 +603,31 @@ public class LibraryTests
 
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
         Assert.NotNull(page.View);
+        Assert.Equal(rig.Editor.World.Name, Assert.IsType<Label>(page.Rows.First()).Text);
         var rows = page.Rows.OfType<StatusRow>().ToList();
-        Assert.Equal(new[] { "Airlock", "Hangar", "Airlock" }, rows.Select(r => r.Summary));
+        Assert.Equal(new[] { "Airlock", "Airlock", "Hangar" }, rows.Select(r => r.Summary));
         Assert.Equal("2 installations", rows[0].Status);
-        Assert.StartsWith("Lost ", rows[1].Status);
-        Assert.StartsWith("Changed ", rows[2].Status);
+        Assert.StartsWith("Changed ", rows[1].Status);
+        Assert.StartsWith("Lost ", rows[2].Status);
         Assert.True(rows[0].Chosen);
     }
 
-    /// <summary>The library's search finds the words typed in a row's name in the order typed, as every search box does.</summary>
+    /// <summary>
+    /// The library's search finds the words typed in a row's name in the order typed, as every search box does, and narrows
+    /// the library's side alone: this construct's logic system stays.
+    /// </summary>
     [Theory]
-    [InlineData("", new[] { "Airlock", "Hangar", "Airlock" })]
+    [InlineData("", new[] { "Airlock", "Airlock", "Hangar" })]
     [InlineData("airl", new[] { "Airlock", "Airlock" })]
     [InlineData("air lock", new[] { "Airlock", "Airlock" })]
-    [InlineData("lock air", new string[0])]
-    [InlineData("HANG", new[] { "Hangar" })]
+    [InlineData("lock air", new[] { "Airlock" })]
+    [InlineData("HANG", new[] { "Airlock", "Hangar" })]
     public void TheLibrarySearchMatchesAsEverySearchDoes(string typed, string[] shown)
     {
         var rig = Blueprinted();
         rig.Editor.Program.Systems[0].Changed = Saved;
         rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
-        rig.Backups.Take("Lost Ship", Saved, new[] { Other() });
+        rig.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
         rig.Editor.GoToRoot();
         rig.Editor.OpenLibrary();
         rig.Tick();
@@ -494,6 +639,50 @@ public class LibraryTests
 
         var rows = page.Rows.OfType<StatusRow>().Where(r => r.IsVisible);
         Assert.Equal(shown, rows.Select(r => r.Summary));
+    }
+
+    /// <summary>This construct's search narrows this construct's side alone: the library's rows stay.</summary>
+    [Fact]
+    public void ThisConstructsSearchNarrowsItsOwnSide()
+    {
+        var rig = Blueprinted();
+        rig.Editor.Program.Systems[0].Changed = Saved;
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
+        var page = Reopened(rig);
+
+        SearchHere(page, "hang");
+        rig.Tick();
+
+        Assert.Equal(new[] { "Airlock", "Hangar" }, page.Rows.OfType<StatusRow>().Where(r => r.IsVisible).Select(r => r.Summary));
+        Assert.StartsWith("Changed ", page.Rows.OfType<StatusRow>().First(r => r.IsVisible).Status);
+    }
+
+    /// <summary>
+    /// Making a blueprint in the library chooses it in storage, clearing a search there that would hide it, so it is in
+    /// view.
+    /// </summary>
+    [Fact]
+    public void MakingABlueprintChoosesItInStorage()
+    {
+        var rig = Blueprinted();
+        rig.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
+        var page = Reopened(rig);
+        page.Search("hang");
+        rig.Tick();
+
+        Choose(rig, page, "Airlock");
+        Assert.Equal(rig.Texts.Codex.SystemsMakeBlueprintAbout, Says(ToLibrary(page)));
+        ToLibrary(page).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryMakeConfirm);
+        rig.Tick();
+
+        Assert.Equal("", page.SearchBox.Text);
+        var chosen = Assert.Single(page.Rows.OfType<StatusRow>(), r => r.Chosen);
+        Assert.Equal("Airlock", chosen.Summary);
+        Assert.True(chosen.IsVisible);
+        Assert.StartsWith("Changed ", chosen.Status);
     }
 
     /// <summary>
@@ -560,8 +749,9 @@ public class LibraryTests
         rig.Tick();
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
         Assert.NotNull(page.View);
-        var update = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateFromLibrary);
-        Assert.True(update.Command!.CanExecute);
+        var update = ToConstruct(page);
+        Assert.True(Live(update));
+        Assert.Equal(rig.Texts.Codex.SystemsUpdateFromLibraryAbout, Says(update));
     }
 
     /// <summary>
@@ -1158,13 +1348,14 @@ public class LibraryTests
         system.Changed = DateTime.UtcNow.AddMinutes(1);
         rig.Editor.Invalidate();
         rig.Tick();
-        Assert.DoesNotContain(rig.Editor.Current.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryReset);
+        Assert.Equal(rig.Texts.SystemsUpdateBlueprint, Assert.Single(rig.Editor.RootHeadings()).ButtonText);
 
         rig.Editor.OpenLibrary();
         rig.Tick();
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
-        var reset = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryReset);
-        Assert.True(reset.IsVisible);
+        var reset = ToConstruct(page);
+        Assert.True(Live(reset));
+        Assert.Equal(rig.Texts.Codex.LibraryResetAbout, Says(reset));
 
         reset.Command!.Execute();
         rig.Tick();
@@ -1178,7 +1369,7 @@ public class LibraryTests
         Assert.Equal(filled, now.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList());
         Assert.Equal(switched, now.Instances.Select(i => i.Enabled).ToList());
         Assert.True(rig.Shelf.Holds(now));
-        Assert.False(reset.IsVisible, "the logic system and its blueprint are the same, and reset is still offered");
+        Assert.False(Live(reset), "the logic system and its blueprint are the same, and reset is still offered");
 
         rig.Editor.GoToRoot();
         rig.Tick();
@@ -1251,7 +1442,7 @@ public class LibraryTests
         rig.Editor.OpenLibrary();
         rig.Tick();
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
-        Assert.False(Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryReset).IsVisible);
+        Assert.Equal(rig.Texts.Codex.SystemsUpdateFromLibraryAbout, Says(ToConstruct(page)));
     }
 
     /// <summary>The same, whose blueprint in the library is a newer copy, renamed Airlock Mk II.</summary>
@@ -1263,8 +1454,10 @@ public class LibraryTests
         system.Changed = Saved.AddDays(1);
         rig.Shelf.Keep(system);
 
+        // Made from the blueprint's version of a day before, and unchanged since: the library's copy is the newer by its date.
         system.Name = "Airlock";
         system.Changed = Saved;
+        system.OriginChanged = Saved;
         rig.Editor.Stamp(true);
         rig.Editor.Invalidate();
         rig.Tick();
@@ -1278,9 +1471,11 @@ public class LibraryTests
     /// </summary>
     static Simulation WithLost(out AutomationSystem lost, out LibraryPage page, Action<Simulation, AutomationSystem>? before = null)
     {
+        // Last changed well before now, so an edit after it is put back, which is stamped with the time now, is a later version.
         lost = Blueprinted().Editor.Program.Systems[0];
+        lost.Changed = Saved;
         var rig = Simulation.Fresh();
-        rig.Backups.Take("Lost Ship", Saved, new[] { lost });
+        rig.Backups.Take("Lost Ship", Saved, new[] { lost }, new Values());
         before?.Invoke(rig, lost);
 
         rig.Editor.GoToRoot();
@@ -1297,9 +1492,12 @@ public class LibraryTests
     {
         system.Name = "Airlock Mk 0";
         sim.Shelf.Keep(system);
+
+        // Renamed, and dated after the blueprint it is linked to, as an edit on the screen stamps it.
         system.Name = "Airlock";
+        system.Changed = (system.Changed ?? Saved).AddDays(1);
         sim.Backups.Forget(sim.Backups.All[0]);
-        sim.Backups.Take("Lost Ship", Saved, new[] { system });
+        sim.Backups.Take("Lost Ship", Saved, new[] { system }, new Values());
     }
 
     /// <summary>The library opened again from the home screen, listing what is there now.</summary>
@@ -1341,10 +1539,43 @@ public class LibraryTests
         return other;
     }
 
-    /// <summary>The library's button that adds what is chosen to this construct.</summary>
-    static Button Add(Simulation rig, LibraryPage page)
+    /// <summary>The strip between the library's panes, once the page's view is made, as reading it makes it.</summary>
+    static LibraryMoves Strip(LibraryPage page)
     {
-        return Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryAdd);
+        Assert.NotNull(page.View);
+        return page.Moves;
+    }
+
+    /// <summary>The strip's button that puts the chosen row on this construct.</summary>
+    static MoveButton ToConstruct(LibraryPage page) => Strip(page).ToConstruct;
+
+    /// <summary>The strip's button that puts the chosen row in the library.</summary>
+    static MoveButton ToLibrary(LibraryPage page) => Strip(page).ToLibrary;
+
+    /// <summary>The strip's button that copies the chosen logic system.</summary>
+    static MoveButton Copies(LibraryPage page) => Strip(page).Copies;
+
+    /// <summary>Whether <paramref name="button" /> can be pressed.</summary>
+    static bool Live(MoveButton button) => button.Command!.CanExecute;
+
+    /// <summary>What <paramref name="button" />'s tip says it will do.</summary>
+    static string? Says(MoveButton button) => button.Tip?.Text;
+
+    /// <summary>Chooses the first row named <paramref name="name" />, reading this construct's side first.</summary>
+    static void Choose(Simulation rig, LibraryPage page, string name)
+    {
+        page.Rows.OfType<StatusRow>().First(r => r.Depth == 1 && r.Summary == name).Opens!.Execute();
+        rig.Tick();
+    }
+
+    /// <summary>Types <paramref name="words" /> into the search on this construct's side, over whatever it held.</summary>
+    static void SearchHere(LibraryPage page, string words)
+    {
+        page.ConstructSearchBox.SelectAll();
+        if (words.Length == 0)
+            page.ConstructSearchBox.Backspace();
+        else
+            page.ConstructSearchBox.Insert(words);
     }
 
     static Simulation Blueprinted()

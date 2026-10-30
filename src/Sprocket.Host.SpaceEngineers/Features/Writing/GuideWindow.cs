@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
             var titled = blocks.Count > 0 && blocks[0].Kind == BlockKind.Heading && blocks[0].Level == 1;
             _body.Document = titled ? new Document(blocks.Skip(1)) : guide;
             _title.Document = titled ? new Document(new[] { blocks[0] }) : null;
-            _close.Tip = Lumel.Tip.For(_close.Tip, texts.Codex.ChromeClose);
+            _close.Tip = KeptTip.For(_close.Tip, texts.Codex.ChromeClose);
         }
 
         /// <inheritdoc />

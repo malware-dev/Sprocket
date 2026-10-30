@@ -26,6 +26,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>Its row in the list.</summary>
         public StatusRow Row;
 
+        /// <summary>
+        /// The logic system on <paramref name="program" /> it is of, or null: itself, the one its backup keeps, or the one made from
+        /// its blueprint in the library.
+        /// </summary>
+        public AutomationSystem LiveIn(Automation program)
+        {
+            var system = Section == LibrarySection.Kept ? program.MadeFrom(Identity) : program.FindSystem(Identity);
+            return system != null && system.IsBlueprint ? system : null;
+        }
+
         /// <summary>Whether <paramref name="other" /> stands for the same thing in the same part of the library.</summary>
         public bool Same(LibraryListing other)
         {

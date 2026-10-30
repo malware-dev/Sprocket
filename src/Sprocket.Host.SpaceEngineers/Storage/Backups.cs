@@ -110,13 +110,17 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         /// <summary>
         /// Keeps <paramref name="systems" />, the logic systems of the construct called <paramref name="construct" />, as it
-        /// loses its automation at <paramref name="lost" />.
+        /// loses its automation at <paramref name="lost" />; one already backed up as it is, by its identity and the date it last
+        /// changed, is not kept twice. <paramref name="values" /> reads the backups already kept.
         /// </summary>
-        public void Take(string construct, DateTime lost, IList<AutomationSystem> systems)
+        public void Take(string construct, DateTime lost, IList<AutomationSystem> systems, Values values)
         {
             for (var i = 0; i < systems.Count; i++)
             {
                 var system = systems[i];
+                if (Keeping(system, values) != null)
+                    continue;
+
                 var backup = new Backup(Free(), system.Identity, system.Name, construct, lost);
                 _all.Add(backup);
                 if (Writes)
@@ -125,6 +129,23 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (Writes)
                 WriteIndex();
+        }
+
+        /// <summary>The backup that keeps <paramref name="system" /> as it is, the same logic system last changed at the same time, or null; <paramref name="values" /> reads the backups.</summary>
+        /// <remarks>Reads the file of each backup of the same logic system, so it is for a construct losing its automation or a blueprint being kept, never for a repeating path.</remarks>
+        public Backup Keeping(AutomationSystem system, Values values)
+        {
+            foreach (var backup in _all)
+            {
+                if (backup.Identity != system.Identity)
+                    continue;
+
+                AutomationSystem read;
+                if (Open(backup, values, out read).Length == 0 && read.Changed == system.Changed)
+                    return backup;
+            }
+
+            return null;
         }
 
         /// <summary>The logic system <paramref name="backup" /> keeps, read from its file, answering what was wrong with it, or empty.</summary>

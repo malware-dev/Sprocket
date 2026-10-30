@@ -165,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             add.Tip = Tip.For(add.Tip, texts.Codex.TermCategory);
             optimize.Text = texts.SlotOptimize;
             optimize.Command = _changes(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system));
-            optimize.Tip = Tip.For(optimize.Tip, editable ? texts.Codex.SlotOptimizeAbout : locked);
+            optimize.Tip = editable ? Tip.For(optimize.Tip, texts.Codex.SlotOptimizeAbout) : KeptTip.For(optimize.Tip, locked);
             _slotRows.Show(_slotKeys);
             if (shown == null)
                 return;

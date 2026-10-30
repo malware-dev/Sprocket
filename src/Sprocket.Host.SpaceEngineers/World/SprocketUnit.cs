@@ -646,7 +646,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (unkept.Count == 0)
                 return;
 
-            backups.Take(_world.Name, saved, unkept);
+            backups.Take(_world.Name, saved, unkept, _world.Values);
         }
 
         /// <summary>

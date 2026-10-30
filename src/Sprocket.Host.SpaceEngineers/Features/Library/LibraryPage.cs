@@ -26,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         LibraryListing _chosen;
         Guid _opening;
+        bool _openingKept;
 
         /// <summary>The library, in the editor <paramref name="editor" />, with the blueprint <paramref name="opening" /> chosen first, or the first one where that is empty.</summary>
         public LibraryPage(SprocketEditor editor, Guid opening) : base(editor)
@@ -39,11 +40,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <inheritdoc />
         public override bool ScrollsItself => true;
 
-        /// <summary>The list in the order it reads, its headings and lines included and a construct's rows among them, for whoever reads it back.</summary>
-        public IEnumerable<Element> Rows => InOrder(_list);
+        /// <summary>Both lists in the order they read, this construct's first, their headings and lines included and the rows among them, for whoever reads them back.</summary>
+        public IEnumerable<Element> Rows
+        {
+            get
+            {
+                foreach (var line in InOrder(_here))
+                    yield return line;
 
-        /// <summary>The box that narrows the list.</summary>
+                foreach (var line in InOrder(_list))
+                    yield return line;
+            }
+        }
+
+        /// <summary>The box that narrows the library's list.</summary>
         public TextBox SearchBox => _search;
+
+        /// <summary>The box that narrows this construct's list.</summary>
+        public TextBox ConstructSearchBox => _hereSearch;
+
+        /// <summary>The strip of moves between the two lists.</summary>
+        public LibraryMoves Moves => _moves;
+
+        /// <summary>Has the list, when it is next made, choose the blueprint in storage <paramref name="blueprint" /> and bring it into view.</summary>
+        public void ShowKept(Guid blueprint)
+        {
+            _opening = blueprint;
+            _openingKept = true;
+        }
 
         /// <summary>Makes the list again, once the view is made; until then <see cref="ViewCreated" /> does.</summary>
         public override void Build()
@@ -57,6 +81,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             _search.Hint = Editor.Texts.PickSearch;
             _search.Edited += Narrow;
+            _hereSearch.Hint = Editor.Texts.PickSearch;
+            _hereSearch.Edited += Narrow;
             List();
         }
 
@@ -67,10 +93,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var was = _chosen;
             _chosen = null;
             _entries.Clear();
+            _here.Children.Clear();
             _list.Children.Clear();
 
-            var constructs = Part(TermHeading(CodexPages.Within(texts.LibraryOnConstructs, "constructs", texts.LibraryOnConstructsTerm, CodexPages.Construct)), Gaps.Sections);
-            var held = Construct(constructs, Template.Fill(texts.LibraryThisConstruct, "name", Editor.World.Name));
+            var held = Construct(_here, Editor.World.Name);
             var here = 0;
             var systems = Editor.Program.Systems;
             for (var i = 0; i < systems.Count; i++)
@@ -88,20 +114,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (here == 0)
                 Line(texts.LibraryNoneHere, Styles.InnerEmpty, held);
 
-            ListBackups(texts);
             ListKept(texts);
+            ListBackups(texts);
 
             LibraryListing again = null;
             for (var i = 0; i < _entries.Count && again == null; i++)
             {
-                if (_opening != Guid.Empty ? _entries[i].Identity == _opening : _entries[i].Same(was))
-                    again = _entries[i];
+                var entry = _entries[i];
+                if (_opening != Guid.Empty ? entry.Identity == _opening && (!_openingKept || entry.Section == LibrarySection.Kept) : entry.Same(was))
+                    again = entry;
             }
 
+            var reveals = _openingKept && again != null;
             _opening = Guid.Empty;
+            _openingKept = false;
 
             Choose(again ?? (_entries.Count > 0 ? _entries[0] : null));
             Narrow();
+
+            if (!reveals)
+                return;
+
+            // A search that would hide what was just kept is cleared, so it shows.
+            var onConstruct = again.Section == LibrarySection.OnConstruct;
+            if (!again.Row.IsVisible)
+            {
+                (onConstruct ? _hereSearch : _search).Text = "";
+                Narrow();
+            }
+
+            (onConstruct ? _hereScroll : _listScroll).BringIntoView(again.Row);
         }
 
         /// <summary>
@@ -251,11 +293,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             return held.Body;
         }
 
-        /// <summary>The headings, names, lines and rows inside <paramref name="holder" />, in the order they read.</summary>
-        static IEnumerable<Element> InOrder(Panel holder)
+        /// <summary>The headings, names, lines and rows inside <paramref name="holder" />, in the order they read, leaving out what the chosen row has opened.</summary>
+        IEnumerable<Element> InOrder(Panel holder)
         {
             foreach (var child in holder.Children)
             {
+                if (child == _opened)
+                    continue;
+
                 var inner = child as VStack ?? (child as Gutter)?.Body;
                 if (inner == null)
                 {
@@ -273,17 +318,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             into.Children.Add(new Label { Style = style, Text = text, TextWrapping = TextWrapping.Wrap });
         }
 
-        /// <summary>Shows only the rows whose name holds the words typed in the search box, as every search box matches them.</summary>
+        /// <summary>Shows only the rows whose name holds the words typed in their side's search box, as every search box matches them.</summary>
         void Narrow()
         {
             foreach (var entry in _entries)
             {
                 var row = entry.Row;
-                row.IsVisible = EntityQuery.MatchesText(row.Summary, _search.Text);
+                var search = entry.Section == LibrarySection.OnConstruct ? _hereSearch : _search;
+                row.IsVisible = EntityQuery.MatchesText(row.Summary, search.Text);
             }
+
+            _opened.IsVisible = _chosen != null && _chosen.Row.IsVisible;
         }
 
-        /// <summary>Marks <paramref name="entry" /> as chosen and shows its details.</summary>
+        /// <summary>Marks <paramref name="entry" /> as the one chosen row, on either side, opens what it holds under it, and offers its moves.</summary>
         void Choose(LibraryListing entry)
         {
             var texts = Editor.Texts;
@@ -293,14 +341,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 _chosen.Row.Show(texts);
             }
 
+            (_opened.Parent as Panel)?.Children.Remove(_opened);
             _chosen = entry;
-            if (entry != null)
-            {
-                entry.Row.Chosen = true;
-                entry.Row.Show(texts);
-            }
+            _moves.Show(entry);
+            if (entry == null)
+                return;
 
-            _detail.Show(entry);
+            // A backup is read from its file only when chosen, so the list is drawn without reading any.
+            if (entry.Backup != null && entry.Read == null && entry.Trouble.Length == 0 && Editor.Backups != null)
+                entry.Trouble = Editor.Backups.Open(entry.Backup, Editor.World.Values, out entry.Read);
+
+            if (entry.Read != null)
+                Editor.Shelf?.Link(entry.Read);
+
+            entry.Row.Chosen = true;
+            entry.Row.Show(texts);
+            _moves.Show(entry);
+            _detail.Show(entry, _moves.Refusal);
+
+            var holder = (Panel)entry.Row.Parent;
+            holder.Children.Insert(holder.Children.IndexOf(entry.Row) + 1, _opened);
+            _opened.IsVisible = entry.Row.IsVisible;
         }
 
         static string Installations(Texts texts, int count)

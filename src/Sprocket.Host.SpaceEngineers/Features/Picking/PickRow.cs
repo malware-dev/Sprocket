@@ -7,6 +7,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
@@ -146,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             Set(LookStates.Still, IsHeading || !pressable);
             Set(LookStates.Chosen, IsChosen && !Many);
-            Tip = Tip.For(Tip, IsWithheld ? Why : About);
+            Tip = IsWithheld ? KeptTip.For(Tip, Why) : Tip.For(Tip, About);
         }
 
         /// <inheritdoc />

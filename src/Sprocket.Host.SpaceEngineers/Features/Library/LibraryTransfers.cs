@@ -19,11 +19,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _dates = dates;
         }
 
-        /// <summary>Puts the blueprint <paramref name="system" /> in the library as it is now.</summary>
+        /// <summary>
+        /// Puts the blueprint <paramref name="system" /> in the library as it is now, promoting the backup that keeps it as it is,
+        /// where there is one; and has the library, where it is showing, choose it and bring it into view.
+        /// </summary>
         public void Shelve(AutomationSystem system)
         {
             _editor.Stamp(true);
-            _editor.Shelf.Keep(system);
+            var twin = _editor.Backups?.Keeping(system, _editor.World.Values);
+            var kept = _editor.Shelf.Keep(system);
+            if (twin != null)
+                _editor.Backups.Forget(twin);
+
+            (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
             _editor.Invalidate();
         }
 
@@ -204,16 +212,50 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _editor.Answer(_editor.Texts.LibraryUpdateConfirm, () => Shelve(system));
         }
 
+        /// <summary>Asks before making a blueprint of the logic system <paramref name="system" /> in the library; leaving it is the answer Enter takes.</summary>
+        public void AskShelve(AutomationSystem system)
+        {
+            var texts = _editor.Texts;
+            Confirm(texts.LibraryMakeQuestion, texts.LibraryMakeKept, system.Name, texts.LibraryMakeConfirm, texts.LibraryMakeLeave, () => Shelve(system));
+        }
+
+        /// <summary>Asks before <paramref name="putOn" /> adds the blueprint called <paramref name="named" /> to this construct; leaving it is the answer Enter takes.</summary>
+        public void AskPutOn(string named, Action putOn)
+        {
+            var texts = _editor.Texts;
+            Confirm(texts.LibraryAddQuestion, texts.LibraryAddBecomes, named, texts.LibraryAddConfirm, texts.LibraryAddLeave, putOn);
+        }
+
+        /// <summary>Asks before <paramref name="copy" /> makes a copy of the logic system called <paramref name="named" />; leaving it is the answer Enter takes.</summary>
+        public void AskCopy(string named, Action copy)
+        {
+            var texts = _editor.Texts;
+            Confirm(texts.LibraryCopyQuestion, texts.LibraryCopySeparate, named, texts.LibraryCopyConfirm, texts.LibraryCopyLeave, copy);
+        }
+
+        /// <summary>Asks <paramref name="question" /> of what is called <paramref name="named" />, saying <paramref name="says" />, and runs <paramref name="act" /> on <paramref name="confirm" />; <paramref name="leave" /> is the answer Enter takes.</summary>
+        void Confirm(string question, string says, string named, string confirm, string leave, Action act)
+        {
+            _editor.Stamp(true);
+
+            var arguments = new Arguments();
+            arguments.Set("named", named);
+
+            _editor.Ask($"{question}\n\n**{{named}}**\n\n{says}", arguments);
+            _editor.Answer(leave, () => { }, true);
+            _editor.Answer(confirm, act);
+        }
+
         /// <summary>
-        /// Puts the logic system <paramref name="backed" />, as a backup keeps it, in the library: where the blueprint it is
-        /// linked to is there, after asking whether it updates that blueprint or is kept as a new one; leaving both is the
-        /// answer Enter takes.
+        /// Promotes the backup whose logic system reads as <paramref name="backed" /> to a blueprint in the library, and it is a
+        /// backup no longer: where the blueprint it is linked to is there, after asking whether it updates that blueprint or is
+        /// kept as a new one; leaving both is the answer Enter takes.
         /// </summary>
-        public void ShelveBackup(AutomationSystem backed)
+        public void PromoteBackup(AutomationSystem backed)
         {
             if (!Stored(backed))
             {
-                Shelve(backed);
+                AskShelve(backed);
                 return;
             }
 

@@ -201,7 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 _chips[i].Texts = texts;
                 var press = Slots[i].Opens == null ? Why() : About(texts, Kind, Slots[i]);
-                _chips[i].Tip = Tip.For(_chips[i].Tip, PartTips.Of(texts, world, Slots[i], texts.Codex.PartStepBlocks, press));
+                _chips[i].Tip = KeptTip.For(_chips[i].Tip, PartTips.Of(texts, world, Slots[i], texts.Codex.PartStepBlocks, press));
                 Part(i, Slots[i], world);
             }
 
@@ -215,18 +215,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fixedInPlace = branch && Kind != StepKind.OtherwiseIf;
             _grip.Base.Color = fixedInPlace ? Palette.None : _grip.CanDrag ? Palette.Faint : Palette.Dim;
-            _grip.Tip = Tip.For(_grip.Tip, _grip.CanDrag ? texts.Codex.SequenceDragStep : Why());
+            _grip.Tip = KeptTip.For(_grip.Tip, _grip.CanDrag ? texts.Codex.SequenceDragStep : Why());
             _duplicate.Command = Copies;
             _duplicate.IsEnabled = Copies != null;
-            _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.Codex.SequenceCopyStep : Why());
+            _duplicate.Tip = KeptTip.For(_duplicate.Tip, Copies != null ? texts.Codex.SequenceCopyStep : Why());
             _delete.Command = Deletes;
             _delete.IsEnabled = Deletes != null;
-            _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.Codex.SequenceDeleteStep : Why());
+            _delete.Tip = KeptTip.For(_delete.Tip, Deletes != null ? texts.Codex.SequenceDeleteStep : Why());
 
             _pause.Set(LookStates.Paused, IsOff);
             _pause.Command = Pauses;
             _pause.IsEnabled = Pauses != null;
-            _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.Codex.SequenceUnpauseStep : texts.Codex.SequencePauseStep);
+            _pause.Tip = KeptTip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.Codex.SequenceUnpauseStep : texts.Codex.SequencePauseStep);
 
             RemarkLook.Ground(this, IsDragging || !HasProblem ? NoticeLevel.Info : Level,
                 IsDragging ? Palette.SlotFill : IsCurrent ? Palette.LiveWash : Palette.None);

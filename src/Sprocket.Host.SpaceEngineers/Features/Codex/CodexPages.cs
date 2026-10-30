@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Lumel;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Codex
@@ -99,10 +100,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Whether the terms on the screens look like terms and explain themselves; while not, they are words like any other.</summary>
         public bool Shown { get; set; } = true;
 
-        /// <summary>Makes the links in <paramref name="text" /> explain what they are on: resting on one shows the page it names, while the terms are <see cref="Shown" />.</summary>
+        /// <summary>Makes the links in <paramref name="text" /> explain what they are on: resting on one shows the page it names, while the terms are <see cref="Shown" />; while not, they take the text's plain look.</summary>
         public void Explain(RichText text)
         {
             text.FnResolveLinkTip = link => Shown ? Find(link.Target) : null;
+            text.Set(LookStates.Plain, !Shown);
         }
 
         /// <summary>Lets go of every page read in the language that was spoken, so the next reading is in the one spoken now.</summary>

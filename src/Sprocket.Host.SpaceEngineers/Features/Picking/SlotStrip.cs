@@ -172,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var at = slot - 1;
                 _squares[at].Set(LookStates.Answering, held.Answering);
                 _squares[at].Set(LookStates.Taken, held.Taken);
-                _squares[at].Tip = held.Holds ? new Tip(Tipped(held)) : null;
+                _squares[at].Tip = held.Holds ? new KeptTip(Tipped(held)) : null;
                 _rings[at].IsVisible = _page == _chosenPage && slot == _chosenSlot;
 
                 if (_drawn[at] != held.Picture)

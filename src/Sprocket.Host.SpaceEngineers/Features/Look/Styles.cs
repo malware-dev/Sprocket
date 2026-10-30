@@ -275,7 +275,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Faint }
         };
 
-        /// <summary>The name of one of a page's own sections, in capitals, where the name is a term in the codex.</summary>
+        /// <summary>The name of one of a page's own sections, in capitals, where the name is a term in the codex; the term in the heading's own color while tips are off.</summary>
         public static readonly IStyle<RichText> H1Term = new RichTextStyle
         {
             Base =
@@ -288,7 +288,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 StrongColor = Palette.Ink,
                 EmphasisColor = Palette.Ink,
                 LinkColor = Palette.Link
-            }
+            },
+            [LookStates.Plain] = { LinkColor = Palette.Faint }
         };
 
         /// <summary>The name of a section inside one of a page's sections or inside a tab, a size down, where the name is a term in the codex.</summary>
@@ -393,10 +394,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             [LookStates.Paused] = { Color = Palette.Dim }
         };
 
-        /// <summary>The words a sentence opens with, where they may be a term in the codex; dim on a paused step.</summary>
+        /// <summary>The words a sentence opens with, where they may be a term in the codex; the term in the words' own color while tips are off, and all of it dim on a paused step.</summary>
         public static readonly IStyle<RichText> PhraseTerm = new RichTextStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Muted, LinkColor = Palette.Link, CodeBackground = CodeWash, CodePadding = CodeRoom },
+            [LookStates.Plain] = { LinkColor = Palette.Muted },
             [LookStates.Paused] = { Color = Palette.Dim, LinkColor = Palette.Dim }
         };
 
@@ -434,6 +436,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly IStyle<Label> Diagnostic = new LabelStyle(Detail)
         {
             Base = { Color = Palette.Dim, Padding = new Thickness(16f, 0f, 16f, 8f) }
+        };
+
+        /// <summary>The strip between the library's panes, a step darker than the buttons in it.</summary>
+        public static readonly IStyle<Stack> MoveStrip = new StackStyle
+        {
+            Base = { Background = Palette.Well, Padding = new Thickness(Gaps.Within), Spacing = Gaps.Parts }
+        };
+
+        /// <summary>A button in the strip between the library's panes, lit under the pointer; quiet where it cannot be pressed.</summary>
+        public static readonly IStyle<Element> Move = new ElementStyle
+        {
+            Base = { Background = Palette.Panel },
+            PointerOver = { Background = Palette.PanelHot },
+            Disabled = { Background = Palette.Chrome }
+        };
+
+        /// <summary>A mark on a button in the strip between the library's panes; dim while the button cannot be pressed.</summary>
+        public static readonly IStyle<Glyph> MoveMark = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Body, Tint = Palette.Ink },
+            [LookStates.Off] = { Tint = Palette.Dim }
         };
 
         /// <summary>A row of a list that opens what it names.</summary>

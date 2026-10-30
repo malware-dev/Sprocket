@@ -10,6 +10,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A block's picture.</summary>
         public const float Icon = 54f;
 
+        /// <summary>How wide and tall a button in the strip between the library's panes is.</summary>
+        public const float Move = 40f;
+
+        /// <summary>How wide the strip between the library's panes is: a button with room either side.</summary>
+        public const float MoveStrip = Move + Gaps.Within * 2f;
+
         /// <summary>One stage of a pick.</summary>
         public const float Column = 460f;
 

@@ -197,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _expects.Text = Expected(texts);
             _expectsPart.IsVisible = typed;
             _expectsPart.Say(Expected(texts));
-            _expectsPart.Tip = Tip.For(_expectsPart.Tip, editable ? texts.Codex.SlotExpectsAbout : _locked.Text);
+            _expectsPart.Tip = editable ? Tip.For(_expectsPart.Tip, texts.Codex.SlotExpectsAbout) : KeptTip.For(_expectsPart.Tip, _locked.Text);
             _expectsPart.Command = typed && editable
                 ? Editor.Act(CommandKind.SlotType, () => Editor.Push(new SlotTypePage(Editor, _system, _part)))
                 : null;

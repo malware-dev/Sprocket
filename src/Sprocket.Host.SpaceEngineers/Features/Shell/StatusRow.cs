@@ -277,11 +277,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     ? Palette.Live
                     : Palette.Dim;
 
-            _light.Tip = Tip.For(_light.Tip, wrong
-                ? texts.Codex.RowBroken
-                : JustRan
-                    ? texts.Codex.RowRan
-                    : texts.Codex.RowIdle);
+            _light.Tip = wrong
+                ? KeptTip.For(_light.Tip, texts.Codex.RowBroken)
+                : Tip.For(_light.Tip, JustRan ? texts.Codex.RowRan : texts.Codex.RowIdle);
 
             _status.Text = Status;
             _lastRun.Text = LastRun;
@@ -291,7 +289,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _run.Symbol = Running ? Symbols.Stop : Symbols.Play;
             _run.IsVisible = doing != null;
             _runs.CanExecute = doing != null;
-            _run.Tip = Tip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts)) : null);
+            _run.Tip = KeptTip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts)) : null);
 
             var saying = !string.IsNullOrEmpty(Problem);
 
@@ -316,14 +314,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _switch.OnText = texts.SwitchOn;
             _switch.OffText = texts.SwitchOff;
             _flips.CanExecute = switches && !held;
-            _switch.Tip = Tip.For(_switch.Tip,
-                !switches ? null : held ? SwitchLocked : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));
+            _switch.Tip = switches && held
+                ? KeptTip.For(_switch.Tip, SwitchLocked)
+                : Tip.For(_switch.Tip, !switches ? null : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));
 
             var locked = !string.IsNullOrEmpty(Locked);
             var copies = Copies != null;
             _duplicate.IsVisible = copies || locked && DuplicateText != null;
             _copies.CanExecute = copies;
-            _duplicate.Tip = Tip.For(_duplicate.Tip, copies ? DuplicateText : locked ? Locked : null);
+            _duplicate.Tip = KeptTip.For(_duplicate.Tip, copies ? DuplicateText : locked ? Locked : null);
 
             var offers = Offers != null;
             _button.IsVisible = offers;
@@ -337,7 +336,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _delete.IsVisible = bins || locked;
             _delete.Symbol = BinMark ?? Symbols.Delete;
             _bins.CanExecute = bins;
-            _delete.Tip = Tip.For(_delete.Tip, bins ? DeleteText : locked ? Locked : null);
+            _delete.Tip = KeptTip.For(_delete.Tip, bins ? DeleteText : locked ? Locked : null);
         }
 
         static void Carry(ICommand command)

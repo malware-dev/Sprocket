@@ -1234,15 +1234,6 @@
   <data name="Sprocket.Library.NoneSaved" xml:space="preserve">
     <value>Ingen plantegninger ennå.</value>
   </data>
-  <data name="Sprocket.Library.OnConstructs" xml:space="preserve">
-    <value>På {constructs} dine</value>
-  </data>
-  <data name="Sprocket.Library.OnConstructsTerm" xml:space="preserve">
-    <value>konstruksjonene</value>
-  </data>
-  <data name="Sprocket.Library.ThisConstruct" xml:space="preserve">
-    <value>{name} (denne konstruksjonen)</value>
-  </data>
   <data name="Sprocket.Library.NoneHere" xml:space="preserve">
     <value>Ingen logikksystemer på denne konstruksjonen.</value>
   </data>
@@ -1273,9 +1264,6 @@
   <data name="Sprocket.Library.ForgetQuestion" xml:space="preserve">
     <value>Slette denne plantegningen fra lageret?</value>
   </data>
-  <data name="Sprocket.Library.Add" xml:space="preserve">
-    <value>Legg til på denne konstruksjonen</value>
-  </data>
   <data name="Sprocket.Library.By" xml:space="preserve">
     <value>Av {name}</value>
   </data>
@@ -1299,9 +1287,6 @@
   </data>
   <data name="Sprocket.Library.Twice" xml:space="preserve">
     <value>En annen fil i lageret har den samme plantegningen.</value>
-  </data>
-  <data name="Sprocket.Library.Copy" xml:space="preserve">
-    <value>Lag en kopi</value>
   </data>
   <data name="Sprocket.Library.CopyName" xml:space="preserve">
     <value>{name} {number}</value>
@@ -1342,9 +1327,6 @@
   <data name="Sprocket.Library.RenewKeep" xml:space="preserve">
     <value>Behold det</value>
   </data>
-  <data name="Sprocket.Library.Reset" xml:space="preserve">
-    <value>Tilbakestill til plantegning</value>
-  </data>
   <data name="Sprocket.Library.ResetQuestion" xml:space="preserve">
     <value>Tilbakestille dette logikksystemet til plantegningen sin?</value>
   </data>
@@ -1383,6 +1365,42 @@
   </data>
   <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
     <value>La den være</value>
+  </data>
+  <data name="Sprocket.Library.MakeQuestion" xml:space="preserve">
+    <value>Lagre logikksystemet som plantegning?</value>
+  </data>
+  <data name="Sprocket.Library.MakeKept" xml:space="preserve">
+    <value>En kopi legges i biblioteket, klar til bruk på alle konstruksjoner.</value>
+  </data>
+  <data name="Sprocket.Library.MakeConfirm" xml:space="preserve">
+    <value>Lagre</value>
+  </data>
+  <data name="Sprocket.Library.MakeLeave" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="Sprocket.Library.AddQuestion" xml:space="preserve">
+    <value>Legge plantegningen til på denne konstruksjonen?</value>
+  </data>
+  <data name="Sprocket.Library.AddBecomes" xml:space="preserve">
+    <value>Den blir et logikksystem her, med en tom installasjon klar til å fylles.</value>
+  </data>
+  <data name="Sprocket.Library.AddConfirm" xml:space="preserve">
+    <value>Legg til</value>
+  </data>
+  <data name="Sprocket.Library.AddLeave" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="Sprocket.Library.CopyQuestion" xml:space="preserve">
+    <value>Kopiere logikksystemet?</value>
+  </data>
+  <data name="Sprocket.Library.CopySeparate" xml:space="preserve">
+    <value>Kopien blir et eget logikksystem på denne konstruksjonen, uten kobling til noen plantegning, og åpnes for redigering.</value>
+  </data>
+  <data name="Sprocket.Library.CopyConfirm" xml:space="preserve">
+    <value>Kopier</value>
+  </data>
+  <data name="Sprocket.Library.CopyLeave" xml:space="preserve">
+    <value>Avbryt</value>
   </data>
   <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
     <value>Kjøre hvilken sekvens?</value>

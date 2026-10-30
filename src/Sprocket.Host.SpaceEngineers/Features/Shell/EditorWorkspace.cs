@@ -7,7 +7,6 @@ using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
-using Sandbox.ModAPI;
 using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -84,6 +83,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         // Whether the name being typed is the one a page arrived to be given, which belongs to making what it is on.
         bool _arriving;
+
+        // Whether the terms on the screen are plain, so the whole screen is visited only when tips are turned off or on.
+        bool _plain;
         string _checkedText;
         bool _checkedTaken;
 
@@ -179,11 +181,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Placement = FixedSize.Width(Sizes.Popup),
                 ShowDelay = TipDelay,
                 CloseDelay = TipGrace,
-                FnResolvePage = _editor.Codex.Find,
-                FnIsPinKeyHeld = () => MyAPIGateway.Input?.IsAnyAltKeyPressed() == true
+                FnResolvePage = _editor.Codex.Find
             };
 
-            base.CodexTip = _codexTip;
+            CodexTip = _codexTip;
             Input.FocusChanged += Refocused;
             Input.PreviewPointerDown += PressReaching;
             Input.PreviewWheel += Turning;
@@ -197,7 +198,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public bool IsQuestioning => Windows.IsOpen(_dialog) || Windows.IsOpen(_confirm);
 
         /// <inheritdoc />
-        protected override bool ShowsTips => _editor.TipsShown;
+        /// <remarks>While the player has turned tips off, only a <see cref="KeptTip" /> opens.</remarks>
+        protected override Tip TipFor(Element owner, Tip tip)
+        {
+            return _editor.TipsShown || tip is KeptTip ? tip : null;
+        }
 
         /// <summary>Why the name in hand cannot be given as it stands, or empty when it can or none is.</summary>
         string Blocked
@@ -388,9 +393,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _dialog.YesCommand = yes?.Command;
             _dialog.NoText = no != null ? no.Text : "";
             _dialog.NoCommand = no?.Command;
-            _dialog.DefaultButton = yes != null && yes == screen.Default ? MessageBoxResult.Yes
-                : no != null && no == screen.Default ? MessageBoxResult.No
-                : (MessageBoxResult?)null;
+            _dialog.DefaultButton = yes != null && yes == screen.Default ? MessageBoxAnswer.Yes
+                : no != null && no == screen.Default ? MessageBoxAnswer.No
+                : (MessageBoxAnswer?)null;
 
             Windows.Open(_dialog);
         }
@@ -426,6 +431,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _scroll.ScrollToVerticalOffset(_shownPage.Scrolled);
         }
 
+        /// <summary>Puts every text in <paramref name="element" /> in the look its terms have while tips are off where <paramref name="plain" />, and takes it out otherwise.</summary>
+        static void Plain(Element element, bool plain)
+        {
+            if (element is RichText)
+                element.Set(LookStates.Plain, plain);
+
+            for (var i = 0; i < element.VisualChildCount; i++)
+                Plain(element.GetVisualChild(i), plain);
+        }
+
         /// <summary>Writes what the screen says onto the chrome: the heading, the words and states beside it, what each control does, and the way on.</summary>
         void Dress(EditorScreen screen)
         {
@@ -444,16 +459,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var closes = !screen.CanGoBack;
             _back.IsVisible = screen.CanGoBack;
-            _back.Tip = Tip.For(_back.Tip, _back.IsVisible ? texts.Codex.ChromeBack : null);
+            _back.Tip = KeptTip.For(_back.Tip, _back.IsVisible ? texts.Codex.ChromeBack : null);
             _close.IsVisible = closes;
-            _close.Tip = Tip.For(_close.Tip, !closes ? null : texts.Codex.ChromeClose);
+            _close.Tip = KeptTip.For(_close.Tip, !closes ? null : texts.Codex.ChromeClose);
 
             // Asked as the screen is dressed, which is enough: creative tools are switched on and off with the editor put away.
             _admin.IsVisible = !screen.CanGoBack && _editor.MayAdminister;
             _admin.Text = texts.AdminButton;
 
             _tips.Set(LookStates.Off, !_editor.TipsShown);
-            _tips.Tip = Tip.For(_tips.Tip, texts.Codex.ChromeTips);
+            _tips.Tip = KeptTip.For(_tips.Tip, _editor.TipsShown ? texts.Codex.ChromeTips : texts.Codex.ChromeTipsOn);
+            if (_plain == _editor.TipsShown)
+            {
+                _plain = !_editor.TipsShown;
+                Plain(Root, _plain);
+            }
 
             _undone.Set("action", screen.UndoText);
             _redone.Set("action", screen.RedoText);
@@ -461,9 +481,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _undo.IsVisible = screen.HasHistory;
             _redo.IsVisible = screen.HasHistory;
             _undoes.CanExecute = screen.Undo != null;
-            _undo.Tip = Tip.For(_undo.Tip, screen.Undo != null ? texts.Codex.ChromeUndo : null, _undone);
+            _undo.Tip = KeptTip.For(_undo.Tip, screen.Undo != null ? texts.Codex.ChromeUndo : null, _undone);
             _redoes.CanExecute = screen.Redo != null;
-            _redo.Tip = Tip.For(_redo.Tip, screen.Redo != null ? texts.Codex.ChromeRedo : null, _redone);
+            _redo.Tip = KeptTip.For(_redo.Tip, screen.Redo != null ? texts.Codex.ChromeRedo : null, _redone);
 
             _library.IsVisible = screen.Library != null;
             _library.Text = texts.SystemsLoad;
@@ -474,12 +494,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _run.IsVisible = doing != null;
             _run.Symbol = screen.Running ? Symbols.Stop : Symbols.Play;
             _runs.CanExecute = doing != null;
-            _run.Tip = Tip.For(_run.Tip, doing == null ? null : screen.Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts));
+            _run.Tip = KeptTip.For(_run.Tip, doing == null ? null : screen.Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts));
 
             // A bin held back keeps its place, so nothing beside it moves when a switch is flipped.
             _delete.IsVisible = screen.Deletes != null || screen.DeleteLocked != null;
             _deletes.CanExecute = screen.Deletes != null;
-            _delete.Tip = Tip.For(_delete.Tip, screen.Deletes != null ? screen.DeleteAbout : screen.DeleteLocked);
+            _delete.Tip = KeptTip.For(_delete.Tip, screen.Deletes != null ? screen.DeleteAbout : screen.DeleteLocked);
 
             _switch.IsVisible = screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;

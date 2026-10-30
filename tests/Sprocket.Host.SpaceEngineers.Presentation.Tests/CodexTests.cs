@@ -2,6 +2,7 @@ using System.IO;
 using System.Xml.Linq;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
+using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Content;
@@ -74,6 +75,7 @@ public class CodexTests
         Assert.False(editor.TipsShown);
         Assert.Equal(new[] { false }, kept);
         Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
+        Assert.Equal(Palette.Faint, term.LinkColor);
 
         screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", (EditorWorkspace.TipDelay * 2).ToString());
         Assert.False(screen.Scene.CodexTip.IsOpen, "a tip opened with tips off");
@@ -82,6 +84,22 @@ public class CodexTests
         Assert.True(editor.TipsShown);
         Assert.Equal(new[] { false, true }, kept);
         Assert.NotNull(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
+        Assert.Equal(Palette.Link, term.LinkColor);
+    }
+
+    /// <summary>With tips off, a button of only a mark still says what it does, and the question mark says it turns them back on.</summary>
+    [Fact]
+    public void AMarksTipStaysWithTipsOff()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var mark = screen.Scene.Find("?");
+        screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
+        Assert.False(screen.Editor.TipsShown);
+
+        screen.Do("move", ((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", (EditorWorkspace.TipDelay * 2).ToString());
+
+        Assert.True(screen.Scene.CodexTip.IsOpen, "the question mark's tip stayed shut with tips off");
+        Assert.Equal(screen.Editor.Texts.Codex.ChromeTipsOn, screen.Scene.CodexTip.Page.Text);
     }
 
     /// <summary>A press beside an open tip closes it and still reaches what it lands on.</summary>
@@ -190,11 +208,11 @@ public class CodexTests
         Assert.Equal("ON YOUR SHIPS", CodexPages.Within("On your ships", "constructs", "constructs", CodexPages.Construct));
     }
 
-    /// <summary>The library's first heading holds the term construct in every language: resting on it shows the codex's page on constructs.</summary>
+    /// <summary>The library heads this construct's side with the construct's name, in every language.</summary>
     [Theory]
     [InlineData("")]
     [InlineData("no")]
-    public void TheLibrarysHeadingExplainsConstructs(string culture)
+    public void TheLibraryHeadsThisConstructWithItsName(string culture)
     {
         var screen = Screen.Fresh("tick", "3");
         var editor = screen.Editor;
@@ -206,9 +224,9 @@ public class CodexTests
 
         editor.OpenLibrary();
         screen.Run(2);
-        var at = FirstLink(screen, out var heading, CodexPages.Construct);
+        var page = Assert.IsType<LibraryPage>(editor.Current);
 
-        Assert.Same(editor.Codex.Find(CodexPages.Construct), heading.TipAt(at));
+        Assert.Equal(editor.World.Name, Assert.IsType<Label>(page.Rows.First()).Text);
     }
 
     /// <summary>
@@ -248,9 +266,9 @@ public class CodexTests
         Assert.False(tip.IsOpen, "the tip stayed after its element's menu closed");
     }
 
-    /// <summary>The wheel turned over an open tip scrolls nothing: the page beneath stays where it is.</summary>
+    /// <summary>The wheel turned over an open tip scrolls the page beneath it.</summary>
     [Fact]
-    public void TheWheelOverATipScrollsNothing()
+    public void TheWheelOverATipScrollsThePage()
     {
         var screen = Screen.Fresh("tick", "3");
         for (var i = 0; i < 16; i++)
@@ -272,13 +290,8 @@ public class CodexTests
         var before = screen.Text("Airlock 0").At.Y;
         screen.Scene.ScrollBy(onTip, 200f);
         screen.Run(1);
-        Assert.Equal(before, screen.Text("Airlock 0").At.Y);
-        Assert.Equal(heading.At.Y, screen.Text("LOGIC SYSTEMS").At.Y);
-
-        // Beside the tip, the same wheel scrolls the page, so the page is one that scrolls.
-        screen.Scene.ScrollBy(new Vector2(onTip.X, 900f), 200f);
-        screen.Run(1);
-        Assert.NotEqual(before, screen.Text("Airlock 0").At.Y);
+        Assert.True(screen.Text("Airlock 0").At.Y < before, "the page stayed put under the tip");
+        Assert.True(screen.Text("LOGIC SYSTEMS").At.Y < heading.At.Y, "the heading stayed put under the tip");
     }
 
     /// <summary>The Markup button opens the guide to rich text, which is read again in the language the editor comes to speak.</summary>

@@ -126,8 +126,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void Refuse(string why)
         {
             _box.Set(LookStates.Wrong, why != null);
-            _box.Tip = Tip.For(_box.Tip, why);
-            Tip = Tip.For(Tip, why);
+            _box.Tip = KeptTip.For(_box.Tip, why);
+            Tip = why == null ? null : KeptTip.For(Tip, why);
         }
     }
 }

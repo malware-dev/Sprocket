@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Style = Styles.Asking,
                 Align = Align.Center,
                 Placement = FixedSize.Width(Sizes.Popup),
-                DefaultButton = MessageBoxResult.Yes
+                DefaultButton = MessageBoxAnswer.Yes
             }.As(out _box));
             Children.Add(new Label { Placement = Flex.Grow });
         }

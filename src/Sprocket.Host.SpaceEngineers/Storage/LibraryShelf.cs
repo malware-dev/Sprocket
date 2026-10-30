@@ -134,11 +134,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Delete(volume.File);
         }
 
-        /// <summary>Whether the blueprint the logic system <paramref name="blueprint" /> is linked to is the logic system as it is now.</summary>
+        /// <summary>
+        /// Whether the blueprint the logic system <paramref name="blueprint" /> is linked to is the logic system as it is now, by their
+        /// dates: the blueprint is still the version the logic system was made from or last brought up to date with, and the logic
+        /// system has not changed since.
+        /// </summary>
         public bool Holds(AutomationSystem blueprint)
         {
             var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
-            return had != null && had.Text == ProgramWriter.Blueprint(blueprint, had.Identity);
+            if (had == null || had.Changed != blueprint.OriginChanged)
+                return false;
+
+            return !blueprint.Changed.HasValue || blueprint.OriginChanged.HasValue && blueprint.Changed.Value <= blueprint.OriginChanged.Value;
         }
 
         /// <summary>Reads the index and every file it names, answering what was wrong with any of them, or empty.</summary>

@@ -11,6 +11,7 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Input;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
@@ -58,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Style = Styles.Icon,
                 Placement = FixedSize.Size(32f, 32f),
                 Command = new RelayCommand(() => Step(-1)),
-                Tip = Tip.For(null, texts.Codex.WaitShorter)
+                Tip = KeptTip.For(null, texts.Codex.WaitShorter)
             });
             number.Children.Add(new NumberBox
             {
@@ -75,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Style = Styles.Icon,
                 Placement = FixedSize.Size(32f, 32f),
                 Command = new RelayCommand(() => Step(1)),
-                Tip = Tip.For(null, texts.Codex.WaitLonger)
+                Tip = KeptTip.For(null, texts.Codex.WaitLonger)
             });
             // At the right end, across from the number it is the unit of.
             number.Children.Add(new HStack { Placement = Flex.Spacer });

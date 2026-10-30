@@ -1,5 +1,4 @@
 using Lumel;
-using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -9,12 +8,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
     public partial class BlueprintDetail
     {
-        Label _name;
-        HStack _here;
-        Button _add;
-        Button _keep;
-        Button _reset;
-        Button _copy;
         Label _line;
         RichText _about;
         Label _trouble;
@@ -25,30 +18,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         RichText _secondHeading;
         Label _second;
 
-        /// <summary>Makes the name over its buttons, the lines about it, and the sections naming its slots and installations.</summary>
+        /// <summary>Makes the lines about it, and the sections naming its slots and installations.</summary>
         void CreateView()
         {
-            Base.Spacing = Gaps.Sections;
+            Base.Spacing = Gaps.Items;
 
-            Children.Add(new VStack
-            {
-                Base = { Spacing = Gaps.Parts },
-                Children =
-                {
-                    new Label { Style = Styles.Name, TextWrapping = TextWrapping.Trim }.As(out _name),
-                    new HStack
-                    {
-                        Base = { Spacing = Gaps.Parts },
-                        Children =
-                        {
-                            new Button { Style = Styles.Button }.As(out _add),
-                            new Button { Style = Styles.Button }.As(out _keep),
-                            new Button { Style = Styles.Button }.As(out _reset),
-                            new Button { Style = Styles.Button }.As(out _copy)
-                        }
-                    }.As(out _here)
-                }
-            });
             Children.Add(new VStack
             {
                 Base = { Spacing = Gaps.Within },

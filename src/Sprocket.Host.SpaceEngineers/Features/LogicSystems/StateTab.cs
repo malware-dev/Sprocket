@@ -148,7 +148,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.Start.Text = state.Start.Said;
             row.Start.Command = _changes(CommandKind.ChangeStart, () => Starts(state));
             row.Start.Set(LookStates.Still, row.Start.Command == null);
-            row.Start.Tip = Tip.For(row.Start.Tip, editable ? null : locked);
+            row.Start.Tip = KeptTip.For(row.Start.Tip, editable ? null : locked);
             row.NowLead = texts.StateNow;
             row.NowAbout = texts.Codex.StateNowAbout;
 

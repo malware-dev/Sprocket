@@ -356,7 +356,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
             _newSequence.Command = Changes(CommandKind.NewSequence, () => Editor.NewSequence(_system));
-            _newSequence.Tip = Tip.For(_newSequence.Tip, _newSequence.Command != null ? null : Locked());
+            _newSequence.Tip = KeptTip.For(_newSequence.Tip, _newSequence.Command != null ? null : Locked());
 
             _sequenceRows.Show(_sequences);
             _noSequences.IsVisible = _sequences.Count == 0 && !Editable;
@@ -389,7 +389,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             tab.Set(LookStates.Warned, level == NoticeLevel.Warning);
             mark.IsVisible = level != NoticeLevel.Info;
             mark.Base.Tint = level == NoticeLevel.Warning ? Palette.Notice : Palette.Problem;
-            mark.Tip = Tip.For(mark.Tip, texts.Codex.SystemTabFlagged);
+            mark.Tip = KeptTip.For(mark.Tip, texts.Codex.SystemTabFlagged);
         }
 
         /// <summary>The graver of <paramref name="one" /> and <paramref name="other" />: a problem over a warning over a note, as the levels are ordered.</summary>
