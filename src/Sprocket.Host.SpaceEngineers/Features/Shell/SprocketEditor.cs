@@ -1025,7 +1025,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _toldPasting = true;
             new Popup
             {
-                Style = Styles.Menu,
+                Style = Styles.Popup,
                 Anchor = Input.Focused,
                 Base = { Gap = 4f },
                 Placement = FixedSize.Width(360f),

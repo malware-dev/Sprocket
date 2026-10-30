@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             _popup = new Popup
             {
-                Style = Styles.Menu,
+                Style = Styles.Popup,
                 Anchor = this,
                 Base = { Gap = 4f },
                 // The box of its own keeps the popup as wide as the picker.

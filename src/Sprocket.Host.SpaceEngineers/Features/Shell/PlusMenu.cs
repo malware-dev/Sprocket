@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
-using Lumel.Layout;
-using Lumel.Text;
+using Lumel.Menus;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
@@ -16,8 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     {
         static readonly AddOption[] None = Array.Empty<AddOption>();
 
-        readonly Popup _menu;
-        readonly VStack _entries;
+        readonly Menu _menu;
         readonly ICommand _toggles;
 
         IList<AddOption> _choices = None;
@@ -27,8 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             Style = Styles.Start;
             IsVisible = false;
-            _entries = new VStack();
-            _menu = new Popup { Style = Styles.Menu, Anchor = this, Side = PopupSide.Right, Base = { Gap = 4f }, Content = _entries };
+            _menu = new Menu { Style = Styles.Menu, Anchor = this, Side = PopupSide.Right, Base = { Gap = 4f } };
             _toggles = new RelayCommand(Toggle);
         }
 
@@ -92,30 +89,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
-            _entries.Children.Clear();
+            _menu.Items.Clear();
             for (var i = 0; i < _choices.Count; i++)
             {
                 var choice = _choices[i];
                 if (choice.Adds == null)
                     continue;
 
-                _entries.Children.Add(new HStack
-                {
-                    Style = Styles.MenuRow,
-                    Command = new RelayCommand(() => Choose(choice)),
-                    Tip = Tip.For(null, choice.About),
-                    Children = { new Label { Style = Styles.ListWord, Text = choice.Text } }
-                });
+                _menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = choice.Text, Command = choice.Adds, Tip = Tip.For(null, choice.About) });
             }
 
             _menu.Open();
-        }
-
-        /// <summary>Puts the menu away, then adds what <paramref name="choice" /> adds.</summary>
-        void Choose(AddOption choice)
-        {
-            _menu.Close();
-            choice.Adds.Execute();
         }
     }
 }

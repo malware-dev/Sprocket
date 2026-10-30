@@ -4,9 +4,8 @@ using Lumel;
 using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
+using Lumel.Menus;
 using Lumel.Text;
-using Lumel.Viewing;
-using Lumel.Windows;
 using System.Text;
 using Lumel.Drawing;
 using VRage.Input;
@@ -25,10 +24,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         readonly List<string> _words = new List<string>();
         readonly List<StringBuilder> _spelled = new List<StringBuilder>();
-        readonly List<Element> _rows = new List<Element>();
-        readonly List<Label> _named = new List<Label>();
+        readonly List<MenuItem> _rows = new List<MenuItem>();
         readonly Label _said;
-        readonly Action _close;
 
         string _text = "";
 
@@ -42,7 +39,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Children.Add(new Label { Style = Styles.ListWord, Placement = Flex.Grow }.As(out _said));
             Children.Add(Fold());
 
-            var rows = new VStack();
+            // Never narrower than the line it drops from.
+            var list = new Menu { Style = Styles.Menu, Anchor = this, MatchAnchorWidth = true };
             for (var i = 0; i < words.Count; i++)
             {
                 var word = words[i];
@@ -50,22 +48,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _spelled.Add(new StringBuilder(word));
 
                 var at = i;
-                var named = new Label { Style = Styles.ListWord, Text = word };
-                var row = new HStack
-                {
-                    Style = Styles.MenuRow,
-                    Command = new RelayCommand(() => Choose(_words[at])),
-                    Children = { named }
-                };
-
-                _named.Add(named);
+                var row = new MenuItem { Style = Styles.MenuItem, Text = word, Command = new RelayCommand(() => Give(_words[at])) };
                 _rows.Add(row);
-                rows.Children.Add(row);
+                list.Items.Add(row);
             }
-
-            var scroll = new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = rows };
-            // Never narrower than the line it drops from.
-            var list = new Popup { Style = Styles.Menu, Anchor = this, MatchAnchorWidth = true, Content = scroll };
 
             Command = new RelayCommand(delegate
             {
@@ -77,18 +63,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
                 var given = _words.IndexOf(_text);
                 for (var i = 0; i < _rows.Count; i++)
-                {
-                    _rows[i].Set(LookStates.Chosen, i == given);
-                    _named[i].Set(LookStates.Chosen, i == given);
-                }
+                    _rows[i].IsChosen = i == given;
 
+                list.Highlight = given >= 0 ? _rows[given] : null;
                 list.Open();
-
-                if (given >= 0)
-                    scroll.BringIntoView(_rows[given]);
             });
-
-            _close = list.Close;
         }
 
         /// <summary>The mark a drop-down line ends with, placed as every drop-down places it.</summary>
@@ -146,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             _words[index] = word;
             _spelled[index].Clear().Append(word);
-            _named[index].Text = word;
+            _rows[index].Text = word;
             if (_text == was)
                 Text = word;
 
@@ -179,12 +158,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             var word = KeyboardChoice.Letter(_words, _text, c);
             if (word != null)
                 Give(word);
-        }
-
-        void Choose(string word)
-        {
-            _close();
-            Give(word);
         }
 
         void Give(string word)

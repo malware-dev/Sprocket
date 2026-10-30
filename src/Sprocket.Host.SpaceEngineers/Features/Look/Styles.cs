@@ -5,6 +5,7 @@ using Lumel.Controls;
 using Lumel.Drawing;
 using Lumel.Images;
 using Lumel.Layout;
+using Lumel.Menus;
 using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
@@ -253,14 +254,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A heading's name with its pencil, lit under the pointer where pressing it renames.</summary>
         public static readonly IStyle<Stack> Plate = new StackStyle
         {
-            PointerOver = { Background = Palette.Panel }
+            Base = { HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.Panel },
+            [State.Focused] = { Background = Palette.Panel }
         };
 
         /// <summary>A name that opens a menu rather than being renamed at a press, drawn as the game's button around its words.</summary>
         public static readonly IStyle<Stack> PlateButton = new StackStyle
         {
             Base = { Background = Palette.Panel, Border = Palette.ControlEdge, Padding = new Thickness(8f, 4f) },
-            PointerOver = { Background = Palette.PanelHot, Border = Palette.ControlEdgeHot }
+            PointerOver = { Background = Palette.PanelHot, Border = Palette.ControlEdgeHot },
+            [State.Focused] = { Background = Palette.PanelHot, Border = Palette.ControlEdgeHot }
         };
 
         /// <summary>The pencil beside a name that can be renamed, whose color the view sets while the name is typed.</summary>
@@ -383,8 +387,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base = { Background = Palette.Panel, Padding = new Thickness(20f, 16f) },
             PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot },
             [LookStates.Chosen] = { Background = Palette.PanelHot },
-            [LookStates.Chosen | State.PointerOver] = { Background = Palette.Line }
+            [LookStates.Chosen | State.PointerOver] = { Background = Palette.Line },
+            [LookStates.Chosen | State.Focused] = { Background = Palette.Line }
         };
 
         /// <summary>The words of a sentence around the parts somebody chose; dim on a paused step.</summary>
@@ -408,11 +414,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink, Background = Palette.Panel, Border = Palette.ControlEdge,
-                Padding = new Thickness(16f, 8f)
+                Padding = new Thickness(16f, 8f),
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
             },
             Empty = { Color = Palette.Notice },
             Still = { Background = Palette.Well, Border = Palette.None },
             PointerOver = { Background = Palette.PanelHot, Border = Palette.ControlEdgeHot },
+            [State.Focused] = { Background = Palette.PanelHot, Border = Palette.ControlEdgeHot },
             [LookStates.Paused] = { Color = Palette.Dim, Background = Palette.Chrome }
         };
 
@@ -447,8 +455,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A button in the strip between the library's panes, lit under the pointer; quiet where it cannot be pressed.</summary>
         public static readonly IStyle<Element> Move = new ElementStyle
         {
-            Base = { Background = Palette.Panel },
+            Base = { Background = Palette.Panel, HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot },
             Disabled = { Background = Palette.Chrome }
         };
 
@@ -462,8 +471,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A row of a list that opens what it names.</summary>
         public static readonly IStyle<Stack> Row = new StackStyle
         {
-            Base = { Background = Palette.Panel, Padding = new Thickness(16f, 8f) },
-            PointerOver = { Background = Palette.PanelHot }
+            Base = { Background = Palette.Panel, Padding = new Thickness(16f, 8f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot }
         };
 
         /// <summary>A row whose sequence is running.</summary>
@@ -476,7 +486,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly IStyle<Stack> Broken = new StackStyle(Row)
         {
             Base = { Background = Palette.ProblemWash, Pattern = ProblemStripes },
-            PointerOver = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot }
+            PointerOver = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot },
+            [State.Focused] = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot }
         };
 
         /// <summary>The row chosen from a list, whose details stand beside it.</summary>
@@ -495,7 +506,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly IStyle<Stack> Parked = new StackStyle(Row)
         {
             Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
-            PointerOver = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot }
+            PointerOver = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot },
+            [State.Focused] = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot }
         };
 
         /// <summary>The chosen row, with a warning, stopped or switched off.</summary>
@@ -508,7 +520,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly IStyle<Stack> Still = new StackStyle(Row)
         {
             Base = { Background = Palette.None },
-            PointerOver = { Background = Palette.None }
+            PointerOver = { Background = Palette.None },
+            [State.Focused] = { Background = Palette.None }
         };
 
         /// <summary>A state light, whose color the view sets from the state.</summary>
@@ -563,10 +576,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Track = Palette.Well,
                 Thumb = Palette.Ink,
                 WordPadding = new Thickness(8f, 4f),
-                Padding = new Thickness(4f)
+                Padding = new Thickness(4f),
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
             },
             On = { Track = Palette.None },
             PointerOver = { Border = Palette.ControlEdgeHot },
+            [State.Focused] = { Border = Palette.ControlEdgeHot },
             Disabled = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, Track = Palette.Well }
         };
 
@@ -580,8 +595,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A color to choose in the color picker: a patch edged in the chrome's color, edged in ink under the pointer.</summary>
         public static readonly IStyle<Swatch> ColorChoice = new SwatchStyle
         {
-            Base = { Border = Palette.Chrome },
-            PointerOver = { Border = Palette.Ink }
+            Base = { Border = Palette.Chrome, HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Border = Palette.Ink },
+            [State.Focused] = { Border = Palette.Ink }
         };
 
         /// <summary>A color shown on its own, in a sentence where its words would be or beside the box it is typed in: a patch with a hairline round it.</summary>
@@ -624,9 +640,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Color = Palette.Ink,
                 Background = Palette.Panel,
                 Border = Palette.ControlEdge,
-                Padding = new Thickness(16f, 8f)
+                Padding = new Thickness(16f, 8f),
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
             },
             PointerOver = { Background = Palette.PanelHot, Border = Palette.ControlEdgeHot },
+            [State.Focused] = { Background = Palette.PanelHot, Border = Palette.ControlEdgeHot },
             Pressed = { Background = Palette.Line },
             Disabled = { Color = Palette.Dim }
         };
@@ -661,15 +679,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Color = Palette.Muted,
                 Background = Palette.Panel,
                 Border = Palette.Line,
-                Padding = new Thickness(8f, 8f)
+                Padding = new Thickness(8f, 8f),
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
             },
             PointerOver = { Background = Palette.PanelHot, Color = Palette.Ink },
+            [State.Focused] = { Background = Palette.PanelHot, Color = Palette.Ink },
             Selected = { Background = Palette.Line, Color = Palette.Ink },
             [LookStates.Warned] = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
             [LookStates.Warned | State.PointerOver] = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot },
+            [LookStates.Warned | State.Focused] = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot },
             [LookStates.Warned | Lumel.Controls.Tab.Selected] = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot, Border = Palette.Accent },
             [LookStates.Broken] = { Background = Palette.ProblemWash, Pattern = ProblemStripes },
             [LookStates.Broken | State.PointerOver] = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot },
+            [LookStates.Broken | State.Focused] = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot },
             [LookStates.Broken | Lumel.Controls.Tab.Selected] = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot, Border = Palette.Accent }
         };
 
@@ -682,32 +704,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 FontSize = TextSizes.Tiny,
                 Color = Palette.Chrome,
                 Background = Palette.Accent,
-                Padding = new Thickness(16f, 8f)
+                Padding = new Thickness(16f, 8f),
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
             },
             PointerOver = { Background = Palette.Ink },
+            [State.Focused] = { Background = Palette.Ink },
             Disabled = { Color = Palette.Dim, Background = Palette.Panel }
         };
 
         /// <summary>A way to start something, offered in place: a plus and quiet words, and a panel under the pointer.</summary>
         public static readonly IStyle<Button> Start = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Muted, Padding = new Thickness(16f, 4f) },
-            PointerOver = { Background = Palette.Panel }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Muted, Padding = new Thickness(16f, 4f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.Panel },
+            [State.Focused] = { Background = Palette.Panel }
         };
 
         /// <summary>Words that do something when pressed, with no box round them, and a panel under the pointer; in the ink for the screen showing.</summary>
         public static readonly IStyle<Button> Plain = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted, Padding = new Thickness(16f, 8f) },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted, Padding = new Thickness(16f, 8f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.Panel },
+            [State.Focused] = { Background = Palette.Panel },
             [LookStates.Chosen] = { Color = Palette.Ink }
         };
 
         /// <summary>A symbol that does something, lit under the pointer and dimmed while there is nothing for it to do.</summary>
         public static readonly IStyle<Glyph> Icon = new GlyphStyle
         {
-            Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Muted },
+            Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Muted, HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.PanelHot, Tint = Palette.Ink },
+            [State.Focused] = { Background = Palette.PanelHot, Tint = Palette.Ink },
             Disabled = { Tint = Palette.Dim }
         };
 
@@ -747,32 +774,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base = { FontSize = 12f },
             [LookStates.Paused] = { FontSize = TextSizes.Small, Background = Palette.NoticeWash, Tint = Palette.Notice },
-            [LookStates.Paused | State.PointerOver] = { Background = Palette.NoticeWash, Tint = Palette.Ink }
+            [LookStates.Paused | State.PointerOver] = { Background = Palette.NoticeWash, Tint = Palette.Ink },
+            [LookStates.Paused | State.Focused] = { Background = Palette.NoticeWash, Tint = Palette.Ink }
         };
 
         /// <summary>A symbol that throws something away, lit in the color of something wrong under the pointer.</summary>
         public static readonly IStyle<Glyph> Bin = new GlyphStyle(Icon)
         {
-            PointerOver = { Background = Palette.ProblemWash, Tint = Palette.Problem }
+            PointerOver = { Background = Palette.ProblemWash, Tint = Palette.Problem },
+            [State.Focused] = { Background = Palette.ProblemWash, Tint = Palette.Problem }
         };
 
         /// <summary>The strip a banner saying something is wrong is opened by, lit by an edge in its color.</summary>
         public static readonly IStyle<Stack> ProblemStrip = new StackStyle
         {
-            Base = { Padding = new Thickness(16f, 8f) },
-            PointerOver = { Border = Palette.Problem }
+            Base = { Padding = new Thickness(16f, 8f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Border = Palette.Problem },
+            [State.Focused] = { Border = Palette.Problem }
         };
 
         /// <summary>The strip a banner with a warning is opened by, lit by an edge in its color.</summary>
         public static readonly IStyle<Stack> NoticeStrip = new StackStyle(ProblemStrip)
         {
-            PointerOver = { Border = Palette.Notice }
+            PointerOver = { Border = Palette.Notice },
+            [State.Focused] = { Border = Palette.Notice }
         };
 
         /// <summary>The strip a banner with a note is opened by, lit in the ink of its words.</summary>
         public static readonly IStyle<Stack> InfoStrip = new StackStyle(ProblemStrip)
         {
-            PointerOver = { Border = Palette.Ink }
+            PointerOver = { Border = Palette.Ink },
+            [State.Focused] = { Border = Palette.Ink }
         };
 
         /// <summary>A box a value is typed into, in a form of values; washed and edged in red while what was typed cannot be used.</summary>
@@ -793,6 +825,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base = { MarkColor = Palette.Faint, QuarterColor = Palette.Muted, NeedleColor = Palette.Ink },
             PointerOver = { NeedleColor = Palette.Live },
+            [State.Focused] = { NeedleColor = Palette.Live },
             Dragging = { NeedleColor = Palette.Live }
         };
 
@@ -819,17 +852,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Color = Palette.Muted,
                 Background = Palette.Well,
                 Border = Palette.Line,
-                Padding = new Thickness(12f, 4f)
+                Padding = new Thickness(12f, 4f),
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
             },
             PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
+            [State.Focused] = { Background = Palette.Panel, Border = Palette.Muted },
             [LookStates.Chosen] = { Color = Palette.Ink, Background = Palette.Line }
         };
 
         /// <summary>The line a list hangs from, saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used.</summary>
         public static readonly IStyle<Stack> ListLine = new StackStyle
         {
-            Base = { Background = Palette.Well, Border = Palette.Line, Padding = new Thickness(12f, 8f) },
+            Base = { Background = Palette.Well, Border = Palette.Line, Padding = new Thickness(12f, 8f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
+            [State.Focused] = { Background = Palette.Panel, Border = Palette.Muted },
             [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
         };
 
@@ -845,27 +881,52 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(12f), Shadow = ShortShadow }
         };
 
-        /// <summary>A menu or a list hanging open from what opened it, on the tone every hanging thing shares: the one a form's controls stand on.</summary>
-        public static readonly IStyle<Popup> Menu = new PopupStyle
+        /// <summary>Something hanging open from what opened it, on the tone every hanging thing shares: the one a form's controls stand on.</summary>
+        public static readonly IStyle<Popup> Popup = new PopupStyle
         {
             Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
+        };
+
+        /// <summary>A menu hanging open from what opened it, on the tone every hanging thing shares.</summary>
+        public static readonly IStyle<Menu> Menu = new MenuStyle(Popup)
+        {
+            Base = { ScrollStyle = ScrollView }
+        };
+
+        /// <summary>One entry of a menu, lit a step past the menu's own tone where the menu lights it, and marked with a square in the accent where it is the one chosen.</summary>
+        public static readonly IStyle<MenuItem> MenuItem = new MenuItemStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = TextSizes.Small,
+                Color = Palette.Ink,
+                Padding = new Thickness(12f, 8f),
+                Mark = Palette.Accent,
+                MarkSize = 8f,
+                MarkSpacing = 12f,
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
+            },
+            Highlighted = { Background = Palette.Line },
+            Disabled = { Color = Palette.Dim, Mark = Palette.Dim }
         };
 
         /// <summary>One entry of a menu, lit a step past the menu's own tone under the pointer; set in under its family where nested, and lit in the accent where it is the one chosen.</summary>
         public static readonly IStyle<Stack> MenuRow = new StackStyle
         {
-            Base = { Padding = new Thickness(12f, 8f) },
+            Base = { Padding = new Thickness(12f, 8f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.Line },
+            [State.Focused] = { Background = Palette.Line },
             [LookStates.Nested] = { Padding = new Thickness(32f, 8f, 12f, 8f) },
             [LookStates.Chosen] = { Background = Palette.Accent },
-            [LookStates.Chosen | State.PointerOver] = { Background = Palette.Ink }
+            [LookStates.Chosen | State.PointerOver] = { Background = Palette.Ink },
+            [LookStates.Chosen | State.Focused] = { Background = Palette.Ink }
         };
 
-        /// <summary>The words of an entry in a list hanging open; in the chrome's color on the row chosen.</summary>
+        /// <summary>The word a drop-down line shows.</summary>
         public static readonly IStyle<Label> ListWord = new LabelStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink },
-            [LookStates.Chosen] = { Color = Palette.Chrome }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink }
         };
 
         /// <summary>One column of a pick: a panel with a hairline round it.</summary>
@@ -877,8 +938,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A column standing for a page of a pick, pressed anywhere down its length to turn to it.</summary>
         public static readonly IStyle<Stack> Fold = new StackStyle
         {
-            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(0f, 16f) },
-            PointerOver = { Background = Palette.PanelHot }
+            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(0f, 16f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot }
         };
 
 
@@ -921,8 +983,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A quiet link at the end of a column's heading to another way of looking at its list.</summary>
         public static readonly IStyle<Button> ViewLink = new ButtonStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Muted, Padding = new Thickness(8f, 4f) },
-            PointerOver = { Background = Palette.PanelHot, Color = Palette.Ink }
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Muted, Padding = new Thickness(8f, 4f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.PanelHot, Color = Palette.Ink },
+            [State.Focused] = { Background = Palette.PanelHot, Color = Palette.Ink }
         };
 
         /// <summary>A thing to choose in a column, lit under the pointer and where it is the one chosen, and never lit where it cannot be picked.</summary>
@@ -930,8 +993,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base = { Padding = new Thickness(0f, 0f, 12f, 0f) },
             PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot },
             [LookStates.Chosen] = { Background = Palette.PanelHot },
             [LookStates.Chosen | State.PointerOver] = { Background = Palette.Line },
+            [LookStates.Chosen | State.Focused] = { Background = Palette.Line },
             [LookStates.Still] = { Background = Palette.None }
         };
 
@@ -952,12 +1017,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A toolbar slot that holds nothing, offered under a toolbar a person presses; filled where it holds a slot, washed green while it waits for its signal.</summary>
         public static readonly IStyle<Element> SlotFree = new ElementStyle
         {
-            Base = { Background = Palette.Well, Border = Palette.Line },
+            Base = { Background = Palette.Well, Border = Palette.Line, HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
+            [State.Focused] = { Background = Palette.Panel, Border = Palette.Muted },
             [LookStates.Taken] = { Background = Palette.SlotFill, Border = Palette.SlotEdge },
             [LookStates.Taken | State.PointerOver] = { Background = Palette.PanelHot, Border = Palette.Ink },
+            [LookStates.Taken | State.Focused] = { Background = Palette.PanelHot, Border = Palette.Ink },
             [LookStates.Answering] = { Background = Palette.LiveWash, Border = Palette.Live },
-            [LookStates.Answering | State.PointerOver] = { Background = Palette.PanelHot, Border = Palette.Live }
+            [LookStates.Answering | State.PointerOver] = { Background = Palette.PanelHot, Border = Palette.Live },
+            [LookStates.Answering | State.Focused] = { Background = Palette.PanelHot, Border = Palette.Live }
         };
 
         /// <summary>The ring around the toolbar slot chosen, over whatever the slot holds.</summary>
@@ -988,7 +1056,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A mark saying something has not been chosen, where it is pressed by itself, lit under the pointer.</summary>
         public static readonly IStyle<Glyph> MarkPressed = new GlyphStyle(Mark)
         {
-            PointerOver = { Background = Palette.PanelHot }
+            Base = { HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot }
         };
 
         /// <summary>A mark saying something has been chosen.</summary>
@@ -1000,7 +1070,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A mark saying something has been chosen, where it is pressed by itself.</summary>
         public static readonly IStyle<Glyph> MarkOnPressed = new GlyphStyle(MarkOn)
         {
-            PointerOver = { Background = Palette.PanelHot }
+            Base = { HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot }
         };
 
         /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens; dim on a paused step.</summary>
@@ -1014,7 +1086,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly IStyle<Stack> Option = new StackStyle
         {
             Base = { Padding = new Thickness(12f, 4f) },
-            PointerOver = { Background = Palette.PanelHot }
+            PointerOver = { Background = Palette.PanelHot },
+            [State.Focused] = { Background = Palette.PanelHot }
         };
 
         /// <summary>The words of a choice about the picking itself; in the ink where it is chosen.</summary>

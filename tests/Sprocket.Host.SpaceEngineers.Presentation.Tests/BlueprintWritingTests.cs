@@ -230,7 +230,7 @@ public class BlueprintWritingTests
         Assert.False(part.Optional);
     }
 
-    /// <summary>A blueprint's description is written at the top of its logic system's screen, as one step back.</summary>
+    /// <summary>A blueprint's description is written on its logic system's installation panel, as one step back.</summary>
     [Fact]
     public void TheDescriptionIsWrittenOnTheLogicSystemsScreen()
     {
@@ -238,6 +238,8 @@ public class BlueprintWritingTests
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         var page = (Features.LogicSystems.LogicSystemPage)editor.Current!;
+        editor.PressTab(editor.Texts.SystemInstallationPanel);
+        screen.Run(2);
 
         editor.Input.Focus(page.About.Box);
         screen.Do("type", "Cycles the airlock.").Run(1);

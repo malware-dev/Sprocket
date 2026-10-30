@@ -244,7 +244,7 @@ public class CodexTests
         var plus = Target.Within(editor.Current!.View!).OfType<PlusMenu>().First(menu => menu.IsVisible && menu.Choices.Count(c => c.Adds != null) > 1);
         Press(screen, Middle(plus));
         var menu = editor.Windows!.Top!;
-        var row = Target.Within(menu).OfType<Lumel.Layout.HStack>().First(stack => stack.Tip != null);
+        var row = Target.Within(menu).OfType<Lumel.Menus.MenuItem>().First(item => item.Tip != null);
 
         var at = Middle(row);
         screen.Do("move", Say(at.X), Say(at.Y), "tick", EditorWorkspace.TipDelay.ToString());

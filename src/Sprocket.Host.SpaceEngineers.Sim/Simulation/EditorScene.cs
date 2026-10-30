@@ -81,6 +81,9 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public SprocketEditor Editor => _ship.Editor;
 
+        /// <summary>The workspace the editor is shown in, windows included.</summary>
+        public EditorWorkspace View => _view;
+
         /// <summary>Says everything in <paramref name="culture" />, such as <c>no</c>, read from the mod's own texts; one frame passes while the screen is built again in it.</summary>
         public void Speak(string culture)
         {

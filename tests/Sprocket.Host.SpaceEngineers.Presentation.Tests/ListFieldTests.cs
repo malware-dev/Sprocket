@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Lumel.Layout;
-using Lumel.Text;
+using Lumel.Menus;
 using Lumel.Windows;
 using VRageMath;
 using Xunit;
@@ -68,9 +67,9 @@ public class ListFieldTests
         var shown = new List<string>();
         for (var y = 140f; y < Area.Height; y += 4f)
         {
-            var row = layer.HitTest(new Vector2(20f, y), out _) as HStack;
-            if (row?.Children[0] is Label word && !shown.Contains(word.Text))
-                shown.Add(word.Text);
+            var row = layer.HitTest(new Vector2(20f, y), out _) as MenuItem;
+            if (row != null && !shown.Contains(row.Text))
+                shown.Add(row.Text);
         }
 
         return shown;

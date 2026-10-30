@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _kinds = new Popup
             {
-                Style = Styles.Menu,
+                Style = Styles.Popup,
                 Anchor = _kindLine,
                 Base = { Gap = 4f },
                 MatchAnchorWidth = true,
