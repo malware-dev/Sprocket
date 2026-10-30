@@ -17,14 +17,13 @@ The general rules are in **csharp-standards**. These hold only here.
   of Sprocket. It is a submodule of the private `malware-dev/Lumel` repository, which other mods build in too: a change
   to it is committed and pushed in the submodule, and Sprocket then records the submodule's new commit. A control, layout or drawing primitive with nothing of Sprocket in it goes in Lumel, with
   its colors and sizes as properties. `Features/Look` holds Sprocket's palette, sizes and styles.
-- `src/Sprocket.Gravity` (a gravity field's size) is a shared project too, built into Sprocket and into the small mod
-  that needs it.
+- `Sprocket.Gravity` (a gravity field's size) is a shared project in `..\..\Libraries\Gravity`, a repository of its
+  own, built into Sprocket and into Gravity Field Fit.
+- The analyzers are `..\..\..\BuildTools\Standards`, a repository of its own. The font mods Sprocket requires, and the
+  simulator reads, are its siblings under `Mods`.
 - The network channel and its codec are the `Mal.MdkModMixin.Network` package, a mixin from the malforge feed whose
   source is built into Sprocket and into the small mods that send messages. It is shared with mods outside this
   repository, so a change to it is made in the package.
-- `src/Sprocket.DoorAutoClose`, `src/Sprocket.GravityFit` and `src/Sprocket.MultiRename` are small mods of their
-  own, split out of Sprocket, whose names do not say Sprocket. Each has its own session, its own texts and storage
-  keys where it has any, and calls the game directly where Sprocket has machinery of its own.
 - Lumel controls (anything deriving from `Element`) are never `sealed`. A user control derives from the
   layout it needs; there is no `UserControl` base.
 - `src/Sprocket.Host.SpaceEngineers.Sim` is the harness: it references the mod and drives it over

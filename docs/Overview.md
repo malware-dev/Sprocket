@@ -39,20 +39,24 @@ that shows it.
 | Project | What it is |
 |---|---|
 | `src/Lumel` | The user interface framework: elements, layout, controls, text, drawing. A shared project, compiled into each mod that uses it, and it knows nothing of Sprocket, so any mod can use it as it is. A submodule of the `malware-dev/Lumel` repository. Its `Sim` folder is a shared project of its own, for a harness and never a mod: it draws a Lumel screen on a desktop from the game's content and a mod's, in the game's own fonts, and writes it as a picture |
-| `src/Sprocket.Gravity` | A shared project: how big a gravity generator's field must be to cover part of its grid. Sprocket and Gravity Field Fit build it in |
-| `src/Sprocket.DoorAutoClose` | A mod of its own, Door Auto-Close: the slider on every door that closes it a set time after it finishes opening |
-| `src/Sprocket.MultiRename` | A mod of its own, Multi-Rename: the game's own Name box renames several selected blocks at once |
-| `src/Sprocket.GravityFit` | A mod of its own, Gravity Field Fit: the buttons on a box gravity generator that size its field to its grid or to its pressurized rooms |
 | `src/Sprocket.Host.SpaceEngineers.Sim` | The simulator: runs the real mod outside the game, over blocks it makes up, and draws its screens to pictures. The tests and every check of what a screen looks like go through it |
 | `src/Sprocket.Localization.Generator` | A source generator that writes a class from each of the mod's text files at build time, `Texts` from `MyTexts.resx` and `Codex` from `Codex.resx`, and reports every text that cannot be said |
-| `src/Sprocket.Standards` | Analyzers holding the mod to two of its rules: nothing is `internal` (STD001), and nothing goes unused (STD002) |
-| `src/Maltek.Sans`, `src/Maltek.Mono`, `src/Maltek.Symbols` | Font mods: the editor's lettering, its code face, and the symbols its buttons and marks are drawn in. Each is a mod of its own that Sprocket requires |
-| `src/SpaceEngineers.FontStyles` | A font mod with bold, italic and bold italic cuts of the game's own face, for any display mod to require |
-| `src/RichTextPanels` | A mod of its own: a Rich Text app for LCD panels, showing a panel's text as markdown-lite, built on Lumel |
 | `tools/rename-world.py` | Points a saved world at the mod under a new name |
 
-`art` holds the sources the fonts, the symbols and the logo are drawn from, each with the script that draws it.
+`art` holds the sources the logo, the color picker, the shadow and the stripes are drawn from, each with the script that
+draws it.
 `build` holds what the projects running the mod outside the game share: the reference to the game's own assemblies.
+
+## What it builds with from outside
+
+Each of these is a repository of its own, found by a path relative to this one.
+
+| Folder | What Sprocket takes from it |
+|---|---|
+| `..\..\Libraries\Gravity` | `Sprocket.Gravity`, a shared project: how big a gravity generator's field must be to cover part of its grid, built into Sprocket and Gravity Field Fit |
+| `..\..\..\BuildTools\Standards` | The analyzers holding the mod to two of its rules: nothing is `internal` (STD001), and nothing goes unused (STD002) |
+| `..\Maltek.Sans`, `..\Maltek.Mono`, `..\Maltek.Symbols` | Font mods Sprocket requires: the editor's lettering, its code face, and the symbols its buttons and marks are drawn in. The simulator reads Symbols' and Mono's fonts from there |
+| `..\SpaceEngineers.FontStyles` | A font mod with bold, italic and bold italic cuts of the game's own face. The simulator reads its fonts from there |
 
 ## The tests
 
@@ -61,9 +65,7 @@ that shows it.
 | `tests/Sprocket.Core.Tests` | The model, the runtime, storage and the blocks, run through the simulator, below the screens |
 | `tests/Sprocket.Host.SpaceEngineers.Tests` | The mod tested on its own, outside the simulator: a player's settings |
 | `tests/Sprocket.Host.SpaceEngineers.Presentation.Tests` | The screens: each test presses and reads by name, as a player would |
-| `tests/Sprocket.DoorAutoClose.Tests` | Door Auto-Close, over the simulator's doors |
 | `tests/Sprocket.Localization.Generator.Tests` | The generator, run as the compiler runs it |
-| `tests/Sprocket.Standards.Tests` | The analyzers |
 | `tests/Sprocket.Benchmarks` | How long laying out a screen and reading a program take |
 
 ## Building and testing

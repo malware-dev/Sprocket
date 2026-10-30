@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The font every symbol here is drawn in.</summary>
         /// <remarks>
         ///     Declared by the Maltek Symbols mod this one requires; the glyphs are drawn by
-        ///     <c>art/symbols/build_font.py</c>.
+        ///     its <c>art/symbols/build_font.py</c>.
         /// </remarks>
         public const string Font = "MaltekSymbols";
 

@@ -48,16 +48,16 @@
         harness showing symbols the game does not have.
     -->
     <ItemGroup>
-        <None Include="..\Maltek.Symbols\Content\Data\**\*;..\Maltek.Symbols\Content\Fonts\**\*">
-            <Link>Content\Mods\Maltek.Symbols\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\Maltek.Symbols\Content\', '%(FullPath)'))</Link>
+        <None Include="..\..\..\Maltek.Symbols\Maltek.Symbols\Content\Data\**\*;..\..\..\Maltek.Symbols\Maltek.Symbols\Content\Fonts\**\*">
+            <Link>Content\Mods\Maltek.Symbols\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\..\..\Maltek.Symbols\Maltek.Symbols\Content\', '%(FullPath)'))</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Include="..\Maltek.Mono\Content\Data\**\*;..\Maltek.Mono\Content\Fonts\**\*">
-            <Link>Content\Mods\Maltek.Mono\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\Maltek.Mono\Content\', '%(FullPath)'))</Link>
+        <None Include="..\..\..\Maltek.Mono\Maltek.Mono\Content\Data\**\*;..\..\..\Maltek.Mono\Maltek.Mono\Content\Fonts\**\*">
+            <Link>Content\Mods\Maltek.Mono\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\..\..\Maltek.Mono\Maltek.Mono\Content\', '%(FullPath)'))</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Include="..\SpaceEngineers.FontStyles\Content\Data\**\*;..\SpaceEngineers.FontStyles\Content\Fonts\**\*">
-            <Link>Content\Mods\SpaceEngineers.FontStyles\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\SpaceEngineers.FontStyles\Content\', '%(FullPath)'))</Link>
+        <None Include="..\..\..\SpaceEngineers.FontStyles\SpaceEngineers.FontStyles\Content\Data\**\*;..\..\..\SpaceEngineers.FontStyles\SpaceEngineers.FontStyles\Content\Fonts\**\*">
+            <Link>Content\Mods\SpaceEngineers.FontStyles\$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)\..\..\..\SpaceEngineers.FontStyles\SpaceEngineers.FontStyles\Content\', '%(FullPath)'))</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -129,7 +129,7 @@
     </ItemGroup>
     <!-- Held to the same standards as the mod; loaded from its copy, see Loaded.targets. -->
     <ItemGroup>
-        <ProjectReference Include="..\Sprocket.Standards\Sprocket.Standards.csproj" ReferenceOutputAssembly="false" />
-        <Analyzer Include="..\Sprocket.Standards\bin\Loaded\Sprocket.Standards.dll" />
+        <ProjectReference Include="..\..\..\..\..\BuildTools\Standards\Sprocket.Standards\Sprocket.Standards.csproj" ReferenceOutputAssembly="false" />
+        <Analyzer Include="..\..\..\..\..\BuildTools\Standards\Sprocket.Standards\bin\Loaded\Sprocket.Standards.dll" />
     </ItemGroup>
 </Project>
