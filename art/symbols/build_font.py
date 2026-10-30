@@ -293,6 +293,50 @@ def bin_():
     return [handle, lid, body], slots
 
 
+def disk(clear=()):
+    """
+    Save: a floppy disk as every save button draws it. Solid, as the bin is, with its top right corner cut off, the
+    shutter's window across the top and the hub's round hole below taken back out.
+
+    Anything in clear is taken out of the body as well, to keep a mark drawn over it standing clear.
+    """
+    left, top, right, bottom, corner = 0.25, 0.25, 0.75, 0.75, 0.12
+    body = poly((left, top), (right - corner, top), (right, top + corner), (right, bottom), (left, bottom))
+
+    window = poly((0.335, 0.335), (0.585, 0.335), (0.585, 0.44), (0.335, 0.44))
+    hub = poly(*[(0.5 + 0.085 * math.cos(math.radians(a)), 0.605 + 0.085 * math.sin(math.radians(a))) for a in range(0, 360, 6)])
+
+    return [body], [window, hub] + list(clear)
+
+
+def disk_new():
+    """
+    Save as: the disk with a plus on its bottom right corner, a new copy of what is shown rather than over the one it came
+    from. A plus a little wider than the one drawn is taken out of the disk, so the plus stands clear of it.
+
+    The plus is drawn at the lighter line duplicate's sheets are, for the same reason: a mark set against another at the
+    set's weight closes up into a blob at the small sizes.
+    """
+    line, cx, cy, arm, gap = 0.094, 0.80, 0.80, 0.17, 0.045
+
+    def cross(reach, w):
+        return [stroke((cx - reach, cy), (cx + reach, cy), w), stroke((cx, cy - reach), (cx, cy + reach), w)]
+
+    shapes, holes = disk(cross(arm + gap, line + 2 * gap))
+    return shapes, holes, cross(arm, line)
+
+
+def disk_edit():
+    """
+    Save as: the disk with a pencil on its bottom right corner, as save as is drawn wherever it has a button of its own. A
+    pencil a little wider than the one drawn is taken out of the disk, so the pencil stands clear of it.
+    """
+    tip, neck, butt, barrel, gap = (0.60, 0.92), (0.67, 0.85), (0.92, 0.60), 0.13, 0.045
+
+    shapes, holes = disk([stroke(neck, (butt[0] + gap, butt[1] - gap), barrel + 2 * gap), head((tip[0] - gap, tip[1] + gap), neck, barrel + 2 * gap)])
+    return shapes, holes, [stroke(neck, butt, barrel), head(tip, neck, barrel)]
+
+
 def sheets():
     """
     Duplicate: two sheets, the one behind showing only the edges the one in front does not cover.
@@ -818,6 +862,10 @@ GLYPHS = [
     ("u", "undo", lambda: solid(uturn(False))),
     ("r", "redo", lambda: solid(uturn(True))),
     ("d", "delete", lambda: bin_()),
+    ("f", "save", lambda: disk()),
+    # "s" is refresh's; "f" for a file, and "F" and "E" for saving one as a new file, with a plus or a pencil.
+    ("F", "save as new", lambda: disk_new()),
+    ("E", "save as", lambda: disk_edit()),
     ("<", "chevron left", lambda: solid(chevron(0))),
     ("^", "chevron up", lambda: solid(chevron(1))),
     (">", "chevron right", lambda: solid(chevron(2))),
@@ -926,7 +974,7 @@ FILL = 60.0 / 64.0
 
 # A glyph fitted short of EXTENT, where filling it would make the mark weigh more than the rest of the set: a full square
 # fills its extent edge to edge, where a hexagon or a chip leaves its corners empty.
-SIZED = {"S": EXTENT * 0.84}
+SIZED = {"S": EXTENT * 0.84, "f": EXTENT * 0.84}
 
 
 def fitted(make, extent=EXTENT):
