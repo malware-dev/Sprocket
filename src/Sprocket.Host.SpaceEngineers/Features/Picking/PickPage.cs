@@ -1059,7 +1059,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var every = Limit ?? texts.PickAnything;
             var current = _kindRows.Show(texts, every, _listing);
             var anything = _kindRows[""];
-            anything.Tip = Tip.For(anything.Tip, Limit == null ? null : Template.Fill(texts.Codex.PickLimitAbout, "kind", Limit));
+            anything.Tip = CodexTip.For(anything.Tip, Limit == null ? null : Template.Fill(texts.Codex.PickLimitAbout, "kind", Limit));
 
             _blocks.Kind = current;
             _blocks.KindText = _kinds.Search;
@@ -1102,7 +1102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 for (var i = 0; i < SentenceText.Readings.Count; i++)
                     words.Add(SentenceText.Quantified(SentenceText.Readings[i]));
 
-                _reads = new ListField(words) { Tip = Tip.For(null, Editor.Texts.Codex.SequenceReadAbout) };
+                _reads = new ListField(words) { Tip = CodexTip.For(null, Editor.Texts.Codex.SequenceReadAbout) };
                 _reads.Edited += delegate
                 {
                     var reads = Editor.Act(CommandKind.ReadBlocks, () => Quantify(Read(_reads.Text)));

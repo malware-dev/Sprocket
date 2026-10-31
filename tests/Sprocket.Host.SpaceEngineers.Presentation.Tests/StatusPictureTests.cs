@@ -147,9 +147,9 @@ public class StatusPictureTests
             Assert.True(sliding[word].X > second[word].X + width / 4f, "\"" + word + "\" from the next page is not moved right");
     }
 
-    /// <summary>A sliding page drawn again is drawn as a fresh layout of it would be.</summary>
+    /// <summary>A sliding page moved on without being laid out again is drawn as a fresh layout of it would be.</summary>
     [Fact]
-    public void ASlidingPageDrawnAgainIsDrawnAsLaidOut()
+    public void ASlidingPageMovedOnIsDrawnAsLaidOut()
     {
         var status = StatusScenes.Make("trouble", out var texts);
         var face = Face(ScreenShape.Reference.First(shape => shape.Name == "programmable-block-automatons"));
@@ -160,13 +160,14 @@ public class StatusPictureTests
         Draw(picture, face, status, texts, 1, 0);
         var laid = face.Sprites.ToList();
 
+        var panel = StatusFace.Panel(picture, face);
         picture.Look.Slid = 0.3f;
-        Draw(picture, face, status, texts, 1, 0);
-        face.Sprites.Clear();
-        var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
-        graphics.Begin();
+        StatusFace.Lay(picture, panel, face, status, texts, 1, 0);
+        panel.Draw(new List<MySprite>());
         picture.Look.Slid = 0.7f;
-        picture.Redraw(graphics);
+        picture.Slide();
+        face.Sprites.Clear();
+        panel.Draw(face.Sprites);
 
         Assert.Equal(laid, face.Sprites);
     }
@@ -241,10 +242,7 @@ public class StatusPictureTests
 
     static void Draw(StatusPicture picture, Face face, ConstructStatus status, Localization.Texts texts, int turn, int from)
     {
-        face.Sprites.Clear();
-        var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
-        graphics.Begin();
-        picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, face.Shape.Metres, turn, from);
+        StatusFace.Draw(picture, face, status, texts, turn, from);
     }
 
     /// <summary>A screen of <paramref name="shape" /> measuring with the harness's stand-in widths and the mod's own faces.</summary>

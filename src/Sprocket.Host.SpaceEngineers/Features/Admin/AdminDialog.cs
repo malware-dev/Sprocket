@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         Tabs =
                         {
                             new Tab { Style = Styles.Tab, Header = texts.AdminThisWorld, Content = Page(texts, true) },
-                            new Tab { Style = Styles.Tab, Header = texts.AdminEveryWorld, Tip = Tip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
+                            new Tab { Style = Styles.Tab, Header = texts.AdminEveryWorld, Tip = CodexTip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
                         }
                     },
                     new Button { Style = Styles.Primary, Text = texts.AdminClose, Align = Align.Right, Command = close }
@@ -106,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
 
             var field = new ListField(listed) { Align = Align.Left };
             if (defaulted)
-                field.Explain(0, Tip.For(null, texts.Codex.AdminDefaultAbout));
+                field.Explain(0, CodexTip.For(null, texts.Codex.AdminDefaultAbout));
 
             var choice = new Choice(world, field, words, defaulted ? defaults : null, given, standing, giving);
             field.Edited += () => Change(choice);

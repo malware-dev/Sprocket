@@ -280,7 +280,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         void Arrange(Texts texts)
         {
             _new.Text = StatusRow.Plus + texts.SystemsNew;
-            _new.Tip = Tip.For(_new.Tip, texts.Codex.SystemsNewAbout);
+            _new.Tip = CodexTip.For(_new.Tip, texts.Codex.SystemsNewAbout);
 
             _groups.Show(_systems);
 

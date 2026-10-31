@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (asks)
             {
                 _runs.IsOn = !Stops;
-                _runs.Tip = Tip.For(null, Stops ? texts.Codex.PickStopAbout : texts.Codex.PickRunAbout);
+                _runs.Tip = CodexTip.For(null, Stops ? texts.Codex.PickStopAbout : texts.Codex.PickRunAbout);
             }
 
             var offersOne = !Stops && (_editor.DeveloperMode || Outcome == Outcome.One);

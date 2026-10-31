@@ -147,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             Set(LookStates.Still, IsHeading || !pressable);
             Set(LookStates.Chosen, IsChosen && !Many);
-            Tip = IsWithheld ? KeptTip.For(Tip, Why) : Tip.For(Tip, About);
+            Tip = IsWithheld ? KeptTip.For(Tip, Why) : CodexTip.For(Tip, About);
         }
 
         /// <inheritdoc />

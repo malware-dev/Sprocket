@@ -7,7 +7,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Lumel.Text;
-using Lumel.Drawing;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
@@ -123,9 +122,7 @@ namespace Sprocket.Sim
                             var path = Path.Combine(args[1], colors.Key, scene + "-" + screen + ".png");
                             FaceShot.Save(path, face, zoom, () =>
                             {
-                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
-                                graphics.Begin();
-                                new StatusPicture().Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 0, 0);
+                                StatusFace.Draw(new StatusPicture(), face, status, texts, 0, 0);
                             });
                             Console.WriteLine(path);
                         }
@@ -155,9 +152,7 @@ namespace Sprocket.Sim
                             var shown = turn;
                             FaceShot.Save(path, face, zoom, () =>
                             {
-                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
-                                graphics.Begin();
-                                picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, shown, shown);
+                                StatusFace.Draw(picture, face, status, texts, shown, shown);
                             });
                             Console.WriteLine(path);
                         }
@@ -186,10 +181,8 @@ namespace Sprocket.Sim
                             var path = Path.Combine(args[1], scene, shape.Name + "-" + slid.ToString(CultureInfo.InvariantCulture) + ".png");
                             FaceShot.Save(path, face, zoom, () =>
                             {
-                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null, () => 0);
-                                graphics.Begin();
                                 picture.Look.Slid = slid / 100f;
-                                picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 1, 0);
+                                StatusFace.Draw(picture, face, status, texts, 1, 0);
                             });
                             if (picture.Pages < 2)
                             {

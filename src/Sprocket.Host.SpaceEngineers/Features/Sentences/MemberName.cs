@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What the member says while the pointer rests on it, words and mark alike, or null for nothing.</summary>
         public string About
         {
-            set { Tip = Tip.For(Tip, value); }
+            set { Tip = CodexTip.For(Tip, value); }
         }
 
         /// <summary>Whether the words take all the room given and run onto further lines where they are wider.</summary>

@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Lumel;
 using Lumel.Drawing;
-using Lumel.Images;
+using Lumel.Screens;
 using Lumel.Text;
 using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
@@ -33,8 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         readonly StatusSource _source = new StatusSource();
         readonly StatusPicture _picture = new StatusPicture();
         readonly List<SprocketUnit> _found = new List<SprocketUnit>();
-        readonly List<MySprite> _sprites = new List<MySprite>();
-        readonly SpriteGraphics _graphics;
+        readonly TextPanel _panel;
         readonly Action _heard;
 
         const int Turn = 3;
@@ -54,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         bool _seenHeard;
         bool _moving;
         bool _laid;
+        bool _unsent;
         int _from;
         int _slideAt = -1;
         int _pulseAt = -1;
@@ -74,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public StatusApp(IMyTextSurface surface, IngameBlock block, Vector2 size)
             : base(surface, block, size)
         {
-            _graphics = new SpriteGraphics(surface, _sprites, new MaterialImages(new GameScreenSpace().TextureSize), () => GameClock.Now);
+            _panel = new TextPanel(surface) { Content = _picture.Root };
             _status = _source.Status;
             _heard = Heard;
         }
@@ -104,6 +103,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             SprocketSession.Still(this);
             if (_watching != 0)
                 SprocketSession.Unwatch(_watching, _heard);
+
+            _panel.Dispose();
         }
 
         /// <summary>The status this panel watches arriving from the server, which it draws at once rather than at its next turn.</summary>
@@ -219,12 +220,10 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             if (lay)
                 Lay(_slideAt >= 0 ? _from : _turn);
             else
-            {
-                _graphics.Begin();
-                _picture.Redraw(_graphics);
-            }
+                _picture.Slide();
 
-            output.AddRange(_sprites);
+            _panel.Draw(output);
+            _unsent = false;
 
             // The game draws the panel's own frame again whenever its texture is made afresh, so it is handed the last one.
             if (!_moving)
@@ -236,19 +235,23 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>Lays the status out showing the page the app is on, with the page <paramref name="from" /> places in beside it to slide from.</summary>
         void Lay(int from)
         {
-            _graphics.Begin();
-            _picture.Draw(_graphics, _status, SprocketSession.Texts, _ink, _ground, _padding, Metres(), _turn, from);
+            _panel.Graphics.Begin();
+            _picture.Lay(_panel.Graphics, _status, SprocketSession.Texts, _ink, _ground, _padding, Metres(), _turn, from);
             _laid = true;
+            _unsent = true;
         }
 
-        /// <summary>Hands the game the frame last laid out.</summary>
+        /// <summary>Hands the game the frame just laid out, drawn, or else the last frame drawn again.</summary>
         void Hand()
         {
-            using (MySpriteDrawFrame frame = Surface.DrawFrame())
+            if (!_unsent)
             {
-                foreach (MySprite sprite in _sprites)
-                    frame.Add(sprite);
+                _panel.Resend();
+                return;
             }
+
+            _unsent = false;
+            _panel.Draw();
         }
 
         /// <summary>Notes which installations newly want looking at, for their marks to pulse, and answers whether any do.</summary>

@@ -47,7 +47,7 @@ public class SimShotTests
         try
         {
             OnSta(() => SimShot.Save(file, 1920, 1080, SprocketContent.Instance, notice));
-            var ok = Find<Button>(notice.Root)!;
+            var ok = Find<Button>(notice.Windows.Top!)!;
             Assert.False(ok.IsPointerOver);
 
             notice.Pointer = ok.Bounds.Center;

@@ -392,16 +392,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             if (words != null && !string.IsNullOrEmpty(about))
                 words.Explain(about);
             else if (!string.IsNullOrEmpty(about))
-                element.Tip = Tip.For(element.Tip, about);
+                element.Tip = CodexTip.For(element.Tip, about);
 
             if (field is SliderField)
-                ((SliderField)field).Keyboard.Tip = Tip.For(((SliderField)field).Keyboard.Tip, _wanted[at].Takes(_language).Trim('(', ')'));
+                ((SliderField)field).Keyboard.Tip = CodexTip.For(((SliderField)field).Keyboard.Tip, _wanted[at].Takes(_language).Trim('(', ')'));
 
             if (label.Length > 0)
             {
                 var named = new Label { Style = Styles.ValueLabel, Text = label };
                 if (!string.IsNullOrEmpty(about))
-                    named.Tip = Tip.For(named.Tip, about);
+                    named.Tip = CodexTip.For(named.Tip, about);
 
                 Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
                 return;

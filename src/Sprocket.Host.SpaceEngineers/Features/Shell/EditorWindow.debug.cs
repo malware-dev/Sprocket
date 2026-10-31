@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     // A .debug.cs file: compiled into local builds only and not packed for the game, where the call to Wrote
     // compiles to nothing.
-    public partial class EditorWorkspace
+    public partial class EditorWindow
     {
         int _wires;
 
@@ -18,13 +18,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>Words hidden under a window or scrolled out of sight are passed over.</remarks>
         public bool Find(string text, out Vector2 at)
         {
-            for (var i = Windows.Count - 1; i >= 0; i--)
+            for (var i = _workspace.Windows.Count - 1; i >= 0; i--)
             {
-                if (Find(Windows[i], text, out at))
+                if (Find(_workspace.Windows[i], text, out at))
                     return true;
             }
 
-            return Find(Root, text, out at);
+            at = default(Vector2);
+            return false;
         }
 
         partial void Wrote()
@@ -46,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 var bounds = element.Bounds;
                 var middle = new Vector2(bounds.X + bounds.Width * 0.5f, bounds.Y + bounds.Height * 0.5f);
-                if (Reaches(HitTest(middle), element))
+                if (Reaches(_workspace.HitTest(middle), element))
                 {
                     at = middle;
                     return true;

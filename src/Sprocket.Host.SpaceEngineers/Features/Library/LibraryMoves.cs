@@ -78,7 +78,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var updates = !backed && live != null && volume != null && !same && changed;
             var shelves = backed && kept != null && !same;
             _outs.CanExecute = shelf != null && (makes || updates || shelves);
-            _out.Tip = KeptTip.For(_out.Tip, same ? codex.LibrarySame : updates ? codex.SystemsUpdateBlueprintAbout : codex.SystemsMakeBlueprintAbout);
+            _out.Tip = KeptTip.For(_out.Tip, same ? codex.LibrarySame
+                : backed ? codex.LibraryPromoteAbout
+                : updates ? codex.SystemsUpdateBlueprintAbout : codex.SystemsMakeBlueprintAbout);
 
             var putsOn = entry != null && entry.Section != LibrarySection.OnConstruct && live == null && system != null;
             var replaces = !backed && live != null && volume != null && !same;

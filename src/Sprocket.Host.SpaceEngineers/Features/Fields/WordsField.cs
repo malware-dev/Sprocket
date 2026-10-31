@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Gives <paramref name="about" />, in markdown-lite, as the tip of what is seen of the field: its row of words, and the list they fold into.</summary>
         public void Explain(string about)
         {
-            _line.Tip = Tip.For(_line.Tip, about);
+            _line.Tip = CodexTip.For(_line.Tip, about);
             _list.Tip = _line.Tip;
         }
 

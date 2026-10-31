@@ -162,10 +162,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             add.Text = StatusRow.Plus + texts.CategoryAdd;
             // A category just added opens its name for typing once its row stands.
             add.Command = _changes(CommandKind.AddCategory, () => _naming = _arranger.Add(_editor.Texts));
-            add.Tip = Tip.For(add.Tip, texts.Codex.TermCategory);
+            add.Tip = CodexTip.For(add.Tip, texts.Codex.TermCategory);
             optimize.Text = texts.SlotOptimize;
             optimize.Command = _changes(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system));
-            optimize.Tip = editable ? Tip.For(optimize.Tip, texts.Codex.SlotOptimizeAbout) : KeptTip.For(optimize.Tip, locked);
+            optimize.Tip = editable ? CodexTip.For(optimize.Tip, texts.Codex.SlotOptimizeAbout) : KeptTip.For(optimize.Tip, locked);
             _slotRows.Show(_slotKeys);
             if (shown == null)
                 return;

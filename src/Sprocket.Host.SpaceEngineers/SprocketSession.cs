@@ -58,6 +58,8 @@ namespace Sprocket.Host.SpaceEngineers
 
         Roster _roster;
 
+        // Everything Sprocket shows on the game's screen: the editor and the notices.
+        SprocketWorkspace _workspace;
         SprocketScreen _screen;
         long _open;
 
@@ -269,6 +271,7 @@ namespace Sprocket.Host.SpaceEngineers
             // Space Engineers hands a session component to nothing, so terminal controls, screen hosts and
             // block components reach it only through this static.
             _current = this;
+            _workspace = new SprocketWorkspace(null);
 
             // Made here rather than with the session, since the mods they are read from are known only once the world loads.
             _kinds = new BlockKinds();
@@ -282,7 +285,7 @@ namespace Sprocket.Host.SpaceEngineers
                 Dropped = unit =>
                 {
                     if (_shown == unit && _screen != null)
-                        _screen.CloseNow();
+                        _screen.Close();
                 }
             };
 
@@ -552,7 +555,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             if (holder.Length == 0 || program.Length == 0 || block == null)
             {
-                TerminalNotice.Show(_texts.TerminalRefused, new Arguments(), _texts.TerminalOk);
+                TerminalNotice.Show(_workspace, _texts.TerminalRefused, new Arguments(), _texts.TerminalOk);
                 return;
             }
 
@@ -566,7 +569,7 @@ namespace Sprocket.Host.SpaceEngineers
             var construct = block == null ? "" : _constructs.Name(block.CubeGrid);
             var arguments = new Arguments();
             arguments.Set("construct", construct);
-            TerminalNotice.Show(_texts.TerminalForeign, arguments, _texts.TerminalOk);
+            TerminalNotice.Show(_workspace, _texts.TerminalForeign, arguments, _texts.TerminalOk);
         }
 
         /// <summary>Opens the editor on a copy to look at while <paramref name="holder" /> edits the real one.</summary>
@@ -679,9 +682,9 @@ namespace Sprocket.Host.SpaceEngineers
             if (_screen == null || _open != block.EntityId || _shown != unit)
             {
                 if (_screen != null)
-                    _screen.CloseNow();
+                    _screen.Close();
 
-                _screen = new SprocketScreen(unit, block, closed);
+                _screen = new SprocketScreen(unit, _workspace, block, closed);
                 _open = block.EntityId;
                 _shown = unit;
             }
@@ -689,7 +692,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.Gui != null)
                 MyAPIGateway.Gui.CloseTerminalScreen();
 
-            _screen.Open();
+            _workspace.Open(_screen);
         }
 
         /// <inheritdoc />
@@ -844,8 +847,9 @@ namespace Sprocket.Host.SpaceEngineers
 
             _gameTexts = null;
 
-            if (_screen != null)
-                _screen.CloseNow();
+            // Closes the editor as the world unloads, which leaves the block's screen as it is.
+            if (_workspace != null)
+                _workspace.Dispose();
 
             if (_copy != null)
                 _copy.Dispose();
@@ -860,6 +864,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _channel.Dispose();
 
             _roster = null;
+            _workspace = null;
             _screen = null;
             _shown = null;
             _copy = null;

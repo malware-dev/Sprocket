@@ -63,6 +63,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override bool Edits => true;
 
+        /// <inheritdoc />
+        /// <remarks>Each tab's section scrolls under the heading and the tab row, which stay where they are.</remarks>
+        public override bool ScrollsItself => true;
+
         /// <summary>The panel a timer's rate is being given in, or null while none is open.</summary>
         public DurationPanel Rate => _triggersWork?.Rate;
 
@@ -329,10 +333,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _sequencesTab.Header = texts.SystemSequences;
             _stateTab.Header = texts.SystemState;
             _panelTab.Header = texts.SystemInstallationPanel;
-            _triggersTab.Tip = Tip.For(_triggersTab.Tip, texts.Codex.TermTrigger);
-            _sequencesTab.Tip = Tip.For(_sequencesTab.Tip, texts.Codex.TermSequence);
-            _stateTab.Tip = Tip.For(_stateTab.Tip, texts.Codex.TermLogicSystemStates);
-            _panelTab.Tip = Tip.For(_panelTab.Tip, texts.Codex.TermInstallationPanel);
+            _triggersTab.Tip = CodexTip.For(_triggersTab.Tip, texts.Codex.TermTrigger);
+            _sequencesTab.Tip = CodexTip.For(_sequencesTab.Tip, texts.Codex.TermSequence);
+            _stateTab.Tip = CodexTip.For(_stateTab.Tip, texts.Codex.TermLogicSystemStates);
+            _panelTab.Tip = CodexTip.For(_panelTab.Tip, texts.Codex.TermInstallationPanel);
             _stateWork.Arrange(texts);
             _addTrigger.Show(new AddOption(texts.SystemTrigger, null, new[]
             {
@@ -459,7 +463,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             Blocksets(texts);
             _blocksets.Text = SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, shown);
-            _blocksets.Tip = Tip.For(_blocksets.Tip, texts.Codex.SystemUsingAbout);
+            _blocksets.Tip = CodexTip.For(_blocksets.Tip, texts.Codex.SystemUsingAbout);
         }
 
         /// <summary>The list of the blocksets made from the blueprint, made again only where what they are called has changed.</summary>

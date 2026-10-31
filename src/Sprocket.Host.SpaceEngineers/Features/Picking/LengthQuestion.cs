@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     }
                 }
             };
-            _window.Closed += () => Finish(true);
+            _window.Closed += _ => Finish(true);
         }
 
         /// <summary>The panel the length is given in.</summary>

@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
                 shown.Plate.About = part.CanRename || part.Opens != null ? part.About : null;
 
-                shown.Mark.Tip = Tip.For(shown.Mark.Tip, part.MarkAbout);
+                shown.Mark.Tip = CodexTip.For(shown.Mark.Tip, part.MarkAbout);
                 shown.Lead.Text = part.Lead;
                 shown.After.Text = part.After;
             }
@@ -167,7 +167,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Renames = new RelayCommand(() => row.Rename(index));
 
                 Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = FixedSize.Size(32f, 32f) };
-                Mark = new Glyph { Base = { Padding = EditorWorkspace.LevelWithCapitals }, Style = Styles.Join, Placement = FixedSize.Height(32f) };
+                Mark = new Glyph { Base = { Padding = EditorWindow.LevelWithCapitals }, Style = Styles.Join, Placement = FixedSize.Height(32f) };
                 Lead = new Label { Style = Styles.TitleLead };
                 After = new Label { Style = Styles.TitleLead };
 

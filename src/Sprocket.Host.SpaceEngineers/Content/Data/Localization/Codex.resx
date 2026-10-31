@@ -213,11 +213,11 @@
     <comment>Tooltip on the Choose a version button on a logic system's heading row on the home screen. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
-    <value>The ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) in the library has more recent changes. Update your construct's version.</value>
+    <value>The ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) in the library has more recent changes. Update the logic system on this construct.</value>
     <comment>Tooltip on the button on a logic system's heading row on the home screen, and in the library on the left-pointing arrow in the strip between its panes, that puts the library's newer blueprint in the logic system's place; shown where the blueprint was changed after the logic system.</comment>
   </data>
   <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
-    <value>Update the ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) from the copy on your current construct.</value>
+    <value>Update the ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) from this construct's logic system.</value>
     <comment>Tooltip on the button on a logic system's heading row on the home screen, and in the library on the right-pointing arrow in the strip between its panes, that brings the library's blueprint up to date from the logic system; shown once the library holds a blueprint and the logic system was changed after it.</comment>
   </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
@@ -645,7 +645,7 @@
     <comment>In the library, the tooltip on the bin at the end of a blueprint's row in the section of blueprints kept in storage.</comment>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
-    <value>Add it as a logic system, with an empty installation to fill.</value>
+    <value>Add to this construct as a logic system, with an empty installation to fill.</value>
     <comment>In the library, the tooltip on the left-pointing arrow in the strip between its panes while a blueprint or backup is chosen: pressing it puts that one on the construct the editor was opened on as a logic system with one empty installation.</comment>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
@@ -661,8 +661,12 @@
     <comment>Tooltip on the dimmed bin of an installation's row on the home screen, shown when it is the logic system's only installation and so cannot be deleted.</comment>
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
-    <value>Add a copy to this construct as a separate logic system.</value>
+    <value>Duplicate this logic system on this construct.</value>
     <comment>In the library, the tooltip on the copy mark in the strip between its panes: it puts a copy of the chosen logic system on this construct as a separate logic system. It can be pressed only while a logic system on this construct is chosen.</comment>
+  </data>
+  <data name="Sprocket.Library.PromoteAbout" xml:space="preserve">
+    <value>Make this [backup](Term.Backup) a ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint).</value>
+    <comment>In the library, the tooltip on the right-pointing arrow in the strip between its panes while a backup is chosen: pressing it makes the backup a blueprint in storage, no longer marked as a backup.</comment>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
     <value>Delete this logic system, with its installations. It has no blueprint in the library, so this is its only copy.</value>

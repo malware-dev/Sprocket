@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _showHidden = texts.Codex.PickShowHidden;
             _hideHidden = texts.Codex.PickHideHidden;
             ShowsHidden = false;
-            _kindLine.Tip = Tip.For(null, texts.Codex.PickKindAbout);
+            _kindLine.Tip = CodexTip.For(null, texts.Codex.PickKindAbout);
 
             _narrow.Edited += () => Typed(_narrow, _narrowClear, Narrowed);
             _narrowClear.Command = new RelayCommand(() => Emptied(_narrow, _narrowClear, Narrowed));
@@ -195,7 +195,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             set
             {
                 _hidden.Symbol = value ? Symbols.HiddenShown : Symbols.HiddenHidden;
-                _hidden.Tip = Tip.For(_hidden.Tip, value ? _hideHidden : _showHidden);
+                _hidden.Tip = CodexTip.For(_hidden.Tip, value ? _hideHidden : _showHidden);
             }
         }
 

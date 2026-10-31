@@ -3,6 +3,7 @@ using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
+using Lumel.Viewing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
@@ -76,30 +77,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     new TabView
                     {
                         Base = { Spacing = Gaps.Items },
+                        Placement = Flex.Grow,
                         Tabs =
                         {
                             new Tab
                             {
                                 Style = Styles.Tab,
                                 Badge = new Glyph { Symbol = Symbols.Warning, Style = Styles.TabMark, IsVisible = false }.As(out _triggersMark),
-                                Content = new VStack
+                                Content = new ScrollView
                                 {
-                                    Base = { Spacing = Gaps.Items },
-                                    Children =
+                                    Style = Styles.ScrollView,
+                                    Content = new VStack
                                     {
-                                        new VStack
+                                        Base = { Spacing = Gaps.Items },
+                                        Children =
                                         {
-                                            IsVisible = false,
-                                            Children = { new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noTriggers) }
-                                        }.As(out _noTriggersLine),
-                                        new VStack { Base = { Spacing = Gaps.Items } }.As(out _triggerList),
-                                        new VStack
-                                        {
-                                            Children =
+                                            new VStack
                                             {
-                                                new HStack { Children = { new PlusMenu().As(out _addTrigger) } }
-                                            }
-                                        }.As(out _addTriggers)
+                                                IsVisible = false,
+                                                Children = { new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noTriggers) }
+                                            }.As(out _noTriggersLine),
+                                            new VStack { Base = { Spacing = Gaps.Items } }.As(out _triggerList),
+                                            new VStack
+                                            {
+                                                Children =
+                                                {
+                                                    new HStack { Children = { new PlusMenu().As(out _addTrigger) } }
+                                                }
+                                            }.As(out _addTriggers)
+                                        }
                                     }
                                 }
                             }.As(out _triggersTab),
@@ -107,25 +113,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                             {
                                 Style = Styles.Tab,
                                 Badge = new Glyph { Symbol = Symbols.Warning, Style = Styles.TabMark, IsVisible = false }.As(out _sequencesMark),
-                                Content = new VStack
+                                Content = new ScrollView
                                 {
-                                    Base = { Spacing = Gaps.Items },
-                                    Children =
+                                    Style = Styles.ScrollView,
+                                    Content = new VStack
                                     {
-                                        new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noSequences),
-                                        new VStack { Base = { Spacing = Gaps.Items } }.As(out _sequenceList),
-                                        new VStack
+                                        Base = { Spacing = Gaps.Items },
+                                        Children =
                                         {
-                                            Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
-                                        }.As(out _addSequence)
+                                            new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noSequences),
+                                            new VStack { Base = { Spacing = Gaps.Items } }.As(out _sequenceList),
+                                            new VStack
+                                            {
+                                                Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
+                                            }.As(out _addSequence)
+                                        }
                                     }
                                 }
                             }.As(out _sequencesTab),
-                            new Tab { Style = Styles.Tab, Content = new StatePanel().As(out _statePanel) }.As(out _stateTab),
                             new Tab
                             {
                                 Style = Styles.Tab,
-                                Content = new SlotPanel().As(out _slotPanel)
+                                Content = new ScrollView { Style = Styles.ScrollView, Content = new StatePanel().As(out _statePanel) }
+                            }.As(out _stateTab),
+                            new Tab
+                            {
+                                Style = Styles.Tab,
+                                Content = new ScrollView { Style = Styles.ScrollView, Content = new SlotPanel().As(out _slotPanel) }
                             }.As(out _panelTab)
                         }
                     }.As(out _tabs)

@@ -162,10 +162,10 @@
     <value>To [konstruksjoner](Term.Construct) ble satt sammen, hver med sin egen versjon av {name}. Begge forblir slått av til du velger én.</value>
   </data>
   <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
-    <value>![](mark:blueprint)&amp;nbsp;[Plantegningen](Term.Blueprint) i biblioteket har nyere endringer. Oppdater versjonen på konstruksjonen din.</value>
+    <value>![](mark:blueprint)&amp;nbsp;[Plantegningen](Term.Blueprint) i biblioteket har nyere endringer. Oppdater logikksystemet på denne konstruksjonen.</value>
   </data>
   <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
-    <value>Oppdater ![](mark:blueprint)&amp;nbsp;[plantegningen](Term.Blueprint) fra kopien på konstruksjonen din.</value>
+    <value>Oppdater ![](mark:blueprint)&amp;nbsp;[plantegningen](Term.Blueprint) fra logikksystemet på denne konstruksjonen.</value>
   </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
     <value>Åpner editoren for logikksystemet **{name}**.</value>
@@ -486,7 +486,7 @@
     <value>Slett den fra lageret</value>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
-    <value>Legg den til som et logikksystem, med en tom installasjon å fylle.</value>
+    <value>Legg til på denne konstruksjonen som et logikksystem, med en tom installasjon å fylle.</value>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
     <value>Ta dette logikksystemet og installasjonene av det bort fra denne konstruksjonen.</value>
@@ -498,7 +498,10 @@
     <value>Et logikksystem trenger minst én installasjon.</value>
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
-    <value>Legg til en kopi på denne konstruksjonen som et eget logikksystem.</value>
+    <value>Dupliser logikksystemet på denne konstruksjonen.</value>
+  </data>
+  <data name="Sprocket.Library.PromoteAbout" xml:space="preserve">
+    <value>Gjør denne [sikkerhetskopien](Term.Backup) til en ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint).</value>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
     <value>Slett dette logikksystemet, med installasjonene. Det har ingen plantegning i biblioteket, så dette er den eneste kopien.</value>

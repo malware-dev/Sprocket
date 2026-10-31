@@ -26,7 +26,7 @@ public class ControlSoundTests
     {
         var screen = Screen.Fresh(Script(script));
 
-        var silent = screen.Scene.View.Root.Within()
+        var silent = screen.Scene.View.Within()
             .Where(e => e.Command != null && Shown(e))
             .Where(e => e.SoundFor(ControlSound.Hover) != ControlCues.Hover || e.SoundFor(ControlSound.Click) != ControlCues.Click)
             .Select(e => e.GetType().Name)

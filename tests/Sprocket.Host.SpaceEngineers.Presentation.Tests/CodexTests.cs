@@ -23,13 +23,13 @@ public class CodexTests
         var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
         var button = screen.Scene.Under(at)!;
 
-        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", (EditorWorkspace.TipDelay - 1).ToString());
-        Assert.False(screen.Scene.CodexTip.IsOpen, "the tip opened before the pointer had rested for the delay");
+        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", (Styles.TipDelay - 1).ToString());
+        Assert.Null(screen.Scene.ShownTip);
 
         screen.Do("tick", "1");
         var tip = screen.Scene.CodexTip;
-        Assert.True(tip.IsOpen, "no tip opened");
-        Assert.Same(button, tip.Anchor);
+        Assert.NotNull(tip);
+        Assert.Same(button, tip.Owner);
         Assert.Equal(screen.Editor.Texts.Codex.SystemsNewAbout, tip.Page!.Text);
     }
 
@@ -49,10 +49,12 @@ public class CodexTests
     [Fact]
     public void TheEditorsTipsNestAndCastAShadow()
     {
-        var tip = Screen.Fresh("tick", "3").Scene.CodexTip;
-        tip.Restyle();
+        var screen = Screen.Fresh("tick", "3");
+        var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
+        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", Styles.TipDelay.ToString());
+        var tip = screen.Scene.CodexTip!;
 
-        Assert.True(tip.OpensNestedTips);
+        Assert.True(screen.Scene.View.Codex.OpensNestedTips);
         Assert.Same(Styles.ShortShadow, tip.Shadow);
     }
 
@@ -77,8 +79,8 @@ public class CodexTests
         Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
         Assert.Equal(Palette.Faint, term.LinkColor);
 
-        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", (EditorWorkspace.TipDelay * 2).ToString());
-        Assert.False(screen.Scene.CodexTip.IsOpen, "a tip opened with tips off");
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", (Styles.TipDelay * 2).ToString());
+        Assert.Null(screen.Scene.ShownTip);
 
         screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
         Assert.True(editor.TipsShown);
@@ -96,10 +98,64 @@ public class CodexTests
         screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
         Assert.False(screen.Editor.TipsShown);
 
-        screen.Do("move", ((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", (EditorWorkspace.TipDelay * 2).ToString());
+        screen.Do("move", ((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", (Styles.TipDelay * 2).ToString());
 
-        Assert.True(screen.Scene.CodexTip.IsOpen, "the question mark's tip stayed shut with tips off");
-        Assert.Equal(screen.Editor.Texts.Codex.ChromeTipsOn, screen.Scene.CodexTip.Page.Text);
+        var shown = screen.Scene.ShownTip;
+        Assert.NotNull(shown);
+        Assert.Equal(screen.Editor.Texts.Codex.ChromeTipsOn, shown.Text);
+    }
+
+    /// <summary>Under the pointer, the tips toggle still shows whether tips are on or off, and a press shows the change at once.</summary>
+    [Fact]
+    public void TheTipsToggleTellsOnFromOffUnderThePointer()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var mark = screen.Scene.Find("?");
+        var x = ((int)mark.X).ToString();
+        var y = ((int)mark.Y).ToString();
+        screen.Do("move", x, y, "tick", "3");
+        var on = screen.Text("?").Ink;
+
+        screen.Do(x, y, "tick", "3");
+        Assert.False(screen.Editor.TipsShown);
+
+        Assert.NotEqual(on, screen.Text("?").Ink);
+    }
+
+    /// <summary>A kept tip's plain version gives each link as its words alone, and keeps its pictures and escapes.</summary>
+    [Fact]
+    public void AKeptTipsPlainVersionHasNoLinks()
+    {
+        var kept = new KeptTip("Keep a ![](mark:blueprint)&nbsp;[blueprint](Term.Blueprint), and [a \\] b](Term.Other).");
+
+        Assert.Equal("Keep a ![](mark:blueprint)&nbsp;blueprint, and a \\] b.", kept.Plain.Text);
+    }
+
+    /// <summary>With tips off, a kept tip shows its plain version, so no link in it opens a tip of its own.</summary>
+    [Fact]
+    public void AKeptTipShowsNoLinksWithTipsOff()
+    {
+        var screen = Screen.Fresh("press \"+ logic system\" type Airlock enter".Split(' '));
+        var editor = screen.Editor;
+        editor.GoToRoot();
+        editor.OpenLibrary();
+        screen.Run(2);
+        var page = Assert.IsType<LibraryPage>(editor.Current);
+        page.Rows.OfType<StatusRow>().First(row => row.Summary == "Airlock").Opens!.Execute();
+        screen.Run(2);
+
+        var mark = screen.Scene.Find("?");
+        screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
+        Assert.False(editor.TipsShown);
+
+        var arrow = page.Moves.ToLibrary.Bounds;
+        screen.Do("move", ((int)(arrow.X + arrow.Width / 2)).ToString(), ((int)(arrow.Y + arrow.Height / 2)).ToString(),
+            "tick", (Styles.TipDelay * 2).ToString());
+
+        var shown = screen.Scene.ShownTip;
+        Assert.NotNull(shown);
+        Assert.Equal(((KeptTip)page.Moves.ToLibrary.Tip!).Plain.Text, shown.Text);
+        Assert.DoesNotContain("(Term.", shown.Text);
     }
 
     /// <summary>A press beside an open tip closes it and still reaches what it lands on.</summary>
@@ -108,12 +164,12 @@ public class CodexTests
     {
         var screen = Screen.Fresh("tick", "3");
         var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
-        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", EditorWorkspace.TipDelay.ToString());
-        Assert.True(screen.Scene.CodexTip.IsOpen);
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", Styles.TipDelay.ToString());
+        Assert.NotNull(screen.Scene.CodexTip);
 
         screen.Do(((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", "3");
 
-        Assert.False(screen.Scene.CodexTip.IsOpen, "the press left the tip open");
+        Assert.Null(screen.Scene.ShownTip);
         Assert.IsNotType<Features.Home.HomePage>(screen.Editor.Current);
     }
 
@@ -135,10 +191,10 @@ public class CodexTests
         var screen = Screen.Fresh("tick", "3");
         var at = FirstLink(screen, out var heading, CodexPages.LogicSystem);
 
-        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", EditorWorkspace.TipDelay.ToString());
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", Styles.TipDelay.ToString());
 
-        var tip = screen.Scene.CodexTip;
-        Assert.Same(heading, tip.Anchor);
+        var tip = screen.Scene.CodexTip!;
+        Assert.Same(heading, tip.Owner);
         Assert.Equal(Lumel.TipSide.Right, tip.Side);
         Assert.Equal(heading.Bounds.X + heading.Bounds.Width, tip.Bounds.X, 1);
         Assert.True(heading.Bounds.Width <= heading.DesiredSize.X + 1f, "the heading is wider than its words");
@@ -247,9 +303,9 @@ public class CodexTests
         var row = Target.Within(menu).OfType<Lumel.Menus.MenuItem>().First(item => item.Tip != null);
 
         var at = Middle(row);
-        screen.Do("move", Say(at.X), Say(at.Y), "tick", EditorWorkspace.TipDelay.ToString());
-        var tip = screen.Scene.CodexTip;
-        Assert.Same(row, tip.Anchor);
+        screen.Do("move", Say(at.X), Say(at.Y), "tick", Styles.TipDelay.ToString());
+        var tip = screen.Scene.CodexTip!;
+        Assert.Same(row, tip.Owner);
         var first = tip.Page;
 
         tip.Navigate(new Lumel.Tip("Another page."));
@@ -282,8 +338,9 @@ public class CodexTests
         var name = screen.Text("Airlock 0");
         var over = new Vector2(name.At.X, name.At.Y);
         var spot = Screen.Ui(over.X + 4f, over.Y + 6f);
-        screen.Do("move", Say(spot.X), Say(spot.Y), "tick", EditorWorkspace.TipDelay.ToString());
+        screen.Do("move", Say(spot.X), Say(spot.Y), "tick", Styles.TipDelay.ToString());
         var tip = screen.Scene.CodexTip;
+        Assert.NotNull(tip);
         Assert.True(tip.IsOpen, "no tip opened over the first logic system");
         var onTip = new Vector2(tip.Bounds.X + tip.Bounds.Width / 2f, tip.Bounds.Y + tip.Bounds.Height / 2f);
 

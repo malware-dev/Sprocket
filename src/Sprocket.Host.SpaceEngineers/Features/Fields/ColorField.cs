@@ -121,7 +121,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Shows the color it holds, its swatch filled and its code under the pointer, or the swatch's edge alone where none is.</summary>
         void Shown()
         {
-            Tip = Tip.For(Tip, _text.Length > 0 ? _text : null);
+            Tip = CodexTip.For(Tip, _text.Length > 0 ? _text : null);
 
             Color color;
             byte alpha;

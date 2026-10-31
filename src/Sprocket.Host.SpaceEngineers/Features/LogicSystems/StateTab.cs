@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _panel.AddType.Text = StatusRow.Plus + texts.StateTypeAdd;
             _panel.AddType.Command = _changes(CommandKind.AddType, AddType);
             // The type page shows on the heading over the types, and on the button only while that heading is hidden.
-            _panel.AddType.Tip = Tip.For(_panel.AddType.Tip, _panel.TypesHeading.IsVisible ? null : texts.Codex.TermType);
+            _panel.AddType.Tip = CodexTip.For(_panel.AddType.Tip, _panel.TypesHeading.IsVisible ? null : texts.Codex.TermType);
             _panel.AddState.Text = StatusRow.Plus + texts.StateStateAdd;
             _panel.AddState.Command = _changes(CommandKind.AddState, AddState);
 

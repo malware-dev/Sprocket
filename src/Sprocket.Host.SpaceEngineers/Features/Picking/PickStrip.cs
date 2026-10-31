@@ -490,7 +490,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 Style = Styles.Fold,
                 Placement = FixedSize.Width(FoldWidth),
-                Tip = Tip.For(null, tip),
+                Tip = CodexTip.For(null, tip),
                 Children = { new Glyph { Symbol = symbol, Style = Styles.Waits, Placement = Flex.Grow } }
             };
         }

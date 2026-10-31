@@ -347,7 +347,7 @@ public class LibraryTests
 
         var keep = ToLibrary(page);
         Assert.True(Live(keep));
-        Assert.Equal(rig.Texts.Codex.SystemsMakeBlueprintAbout, Says(keep));
+        Assert.Equal(rig.Texts.Codex.LibraryPromoteAbout, Says(keep));
         keep.Command!.Execute();
         rig.Tick();
         rig.Editor.PressChoice(rig.Texts.LibraryMakeConfirm);

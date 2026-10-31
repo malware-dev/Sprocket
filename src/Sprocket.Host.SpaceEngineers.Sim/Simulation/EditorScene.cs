@@ -8,7 +8,6 @@ using VRageMath;
 using Lumel;
 using Lumel.Drawing;
 using Lumel.Input;
-using Lumel.Screens;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
 using Lumel.Text;
@@ -23,13 +22,14 @@ namespace Sprocket.Sim.Simulation
     /// </summary>
     /// <remarks>
     /// Three things meet here and none of them knows about the other two: core decides what is on screen,
-    /// <see cref="EditorWorkspace" /> decides how this target draws it, and the simulated ship supplies a world
+    /// <see cref="EditorWindow" /> decides how this target draws it, and the simulated ship supplies a world
     /// and a clock. The same three meet in the mod, with the game supplying the third.
     /// </remarks>
     public sealed class EditorScene
     {
         readonly Ship _ship;
-        EditorWorkspace _view;
+        readonly SprocketWorkspace _workspace = new SprocketWorkspace();
+        EditorWindow _view;
 
         Vector2 _at;
 
@@ -69,7 +69,8 @@ namespace Sprocket.Sim.Simulation
         EditorScene(Ship ship)
         {
             _ship = ship;
-            _view = new EditorWorkspace(_ship.Editor);
+            _view = new EditorWindow(_ship.Editor, _workspace);
+            _workspace.Open(_view);
         }
 
         /// <summary>
@@ -81,8 +82,11 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public SprocketEditor Editor => _ship.Editor;
 
+        /// <summary>The editor's window.</summary>
+        public EditorWindow View => _view;
+
         /// <summary>The workspace the editor is shown in, windows included.</summary>
-        public EditorWorkspace View => _view;
+        public SprocketWorkspace Workspace => _workspace;
 
         /// <summary>Says everything in <paramref name="culture" />, such as <c>no</c>, read from the mod's own texts; one frame passes while the screen is built again in it.</summary>
         public void Speak(string culture)
@@ -159,7 +163,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>The screen closed and opened again, as a player looking again does.</summary>
         public void Reopen()
         {
-            _view = new EditorWorkspace(_ship.Editor);
+            _view.Close();
+            _view = new EditorWindow(_ship.Editor, _workspace);
+            _workspace.Open(_view);
             _ship.Editor.Opened();
         }
 
@@ -213,7 +219,7 @@ namespace Sprocket.Sim.Simulation
         {
             get
             {
-                var box = _view.Input.Focused as TextBox;
+                var box = _workspace.Input.Focused as TextBox;
                 for (Element? at = box; at != null; at = at.Parent)
                 {
                     if (at is FieldSet)
@@ -242,7 +248,7 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Enter, as the game's screen hands it over: the answer a question names, or whatever holds the keyboard.</summary>
         public void Enter()
         {
-            _view.Key(MyKeys.Enter, false, false);
+            _workspace.Key(MyKeys.Enter, false, false);
         }
 
         /// <summary>Escape, as the game's screen hands it over: closing what is open over the page, or else going back.</summary>
@@ -255,19 +261,19 @@ namespace Sprocket.Sim.Simulation
         /// <summary>A key going down, as the game's screen hands one over, answering whether anything took it.</summary>
         public bool Key(MyKeys key, bool shift, bool ctrl)
         {
-            return _view.Key(key, shift, ctrl);
+            return _workspace.Key(key, shift, ctrl);
         }
 
         /// <summary>Tab, which moves the keyboard to the next thing that takes it.</summary>
         public void Tab()
         {
-            _view.Key(MyKeys.Tab, false, false);
+            _workspace.Key(MyKeys.Tab, false, false);
         }
 
         /// <summary>An arrow key: one across for right, minus one for left, and down the same way.</summary>
         public void Arrow(int across, int down)
         {
-            _view.Key(across < 0 ? MyKeys.Left : across > 0 ? MyKeys.Right : down < 0 ? MyKeys.Up : MyKeys.Down, false, false);
+            _workspace.Key(across < 0 ? MyKeys.Left : across > 0 ? MyKeys.Right : down < 0 ? MyKeys.Up : MyKeys.Down, false, false);
         }
 
         /// <summary>Types <paramref name="text" /> into whatever has the keyboard.</summary>
@@ -277,7 +283,7 @@ namespace Sprocket.Sim.Simulation
                 return;
 
             foreach (var character in text)
-                _view.Text(character);
+                _workspace.Text(character);
         }
 
         /// <summary>Empties whatever has the keyboard, as selecting everything and deleting it would.</summary>
@@ -287,11 +293,11 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public void Clear()
         {
-            if (_view.Input.Focused == null)
+            if (_workspace.Input.Focused == null)
                 return;
 
-            _view.Key(MyKeys.A, false, true);
-            _view.Key(MyKeys.Back, false, false);
+            _workspace.Key(MyKeys.A, false, true);
+            _workspace.Key(MyKeys.Back, false, false);
         }
 
         /// <summary>
@@ -303,20 +309,23 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public void MoveTo(Vector2 point)
         {
-            _view.Pointer = point;
+            _workspace.Pointer = point;
         }
 
         /// <summary>Moves whatever is under the pointer. Positive scrolls down.</summary>
         public void ScrollBy(Vector2 point, float amount)
         {
-            _view.Wheel(point, amount);
+            _workspace.Wheel(point, amount);
         }
 
         /// <summary>How many times the screen has written what the editor says onto its controls.</summary>
         public int Wires => _view.Wires;
 
-        /// <summary>The tip the screen shows for whatever the pointer rests on.</summary>
-        public CodexTip CodexTip => _view.CodexTip;
+        /// <summary>The tip open on whatever the pointer rests on, or null where none is.</summary>
+        public Tip? ShownTip => _workspace.ShownTip;
+
+        /// <summary>The codex tip open on whatever the pointer rests on, or null where none is or the tip open is a plain one.</summary>
+        public CodexTip? CodexTip => _view.ShownCodexTip;
 
         /// <summary>Whether the keep key is held, as the game's screen answers the view when it asks.</summary>
         public bool IsKeepKeyHeld
@@ -324,7 +333,7 @@ namespace Sprocket.Sim.Simulation
             set
             {
                 var held = value;
-                _view.CodexTip.FnIsPinKeyHeld = () => held;
+                _view.Codex.FnIsPinKeyHeld = () => held;
             }
         }
 
@@ -340,7 +349,7 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public Element? Under(Vector2 point)
         {
-            return _view.HitTest(point);
+            return _workspace.HitTest(point);
         }
 
         /// <summary>Where a press reaches the first thing on the screen saying <paramref name="text" />, in UI units.</summary>
@@ -368,35 +377,35 @@ namespace Sprocket.Sim.Simulation
         public void Down(Vector2 point, int presses = 1)
         {
             _at = point;
-            _view.PointerDown(point, PointerButton.Left, presses, Held == HeldModifier.Through, Held == HeldModifier.Also);
+            _workspace.PointerDown(point, PointerButton.Left, presses, Held == HeldModifier.Through, Held == HeldModifier.Also);
         }
 
         /// <summary>The pointer moving to <paramref name="point" /> with the button down.</summary>
         public void Move(Vector2 point)
         {
             _at = point;
-            _view.PointerMove(point);
+            _workspace.PointerMove(point);
         }
 
         /// <summary>The button coming up where the pointer last was.</summary>
         /// <remarks>
-        /// A request to leave is taken and dropped on the floor, on purpose. There is no window here to close - the editor
-        /// is the whole of what this program draws - and leaving the request standing would mean the next host to ask got a
-        /// yes for a press somebody made minutes ago.
+        /// A press that closes the editor, such as on its close cross, opens it again at once: the editor is the whole of what
+        /// this program draws.
         /// </remarks>
         public void Up()
         {
-            _view.PointerUp(_at, PointerButton.Left);
-            ((IClosingWorkspace)_view).TakeCloseRequest();
+            _workspace.PointerUp(_at, PointerButton.Left);
+            if (!_view.IsOpen)
+                _workspace.Open(_view);
         }
 
         /// <summary>Brings the editor up to date and draws it into <paramref name="g" />.</summary>
         public void Draw(ScreenSpaceGraphics g)
         {
-            _view.Update();
+            _workspace.Update();
 
             // Where it goes is the editor's own business, and it is the same answer in the mod.
-            _view.Draw(g);
+            _workspace.DrawScreen(g, g.BoundsOf(ScreenArea.Window), g.BoundsOf(ScreenArea.Terminal));
         }
     }
 }

@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 _about = value;
                 if (!_renaming)
-                    Tip = Tip.For(Tip, value);
+                    Tip = CodexTip.For(Tip, value);
             }
         }
 
@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _name.IsVisible = true;
             _box.IsVisible = false;
             Refuse(null);
-            Tip = Tip.For(Tip, _about);
+            Tip = CodexTip.For(Tip, _about);
         }
 
         /// <summary>Marks the box as holding a name that cannot be given, saying <paramref name="why" /> on the box and the plate, or clears the mark for null.</summary>

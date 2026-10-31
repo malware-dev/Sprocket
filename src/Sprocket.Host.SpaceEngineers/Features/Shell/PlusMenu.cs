@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (offered != 1)
             {
                 Text = head.Shown;
-                Tip = Tip.For(Tip, head.About);
+                Tip = CodexTip.For(Tip, head.About);
                 Command = _toggles;
                 return;
             }
@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     continue;
 
                 Text = only.Shown;
-                Tip = Tip.For(Tip, only.About);
+                Tip = CodexTip.For(Tip, only.About);
                 Command = only.Adds;
                 return;
             }
@@ -96,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (choice.Adds == null)
                     continue;
 
-                _menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = choice.Text, Command = choice.Adds, Tip = Tip.For(null, choice.About) });
+                _menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = choice.Text, Command = choice.Adds, Tip = CodexTip.For(null, choice.About) });
             }
 
             _menu.Open();

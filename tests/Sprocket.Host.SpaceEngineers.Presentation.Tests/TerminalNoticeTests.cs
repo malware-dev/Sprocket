@@ -18,7 +18,7 @@ public class TerminalNoticeTests
     [Fact]
     public void ANoticeSaysItsMessageWithTheConstructNamed()
     {
-        var easel = new Easel(Notice().Root, Width, Height);
+        var easel = new Easel(Notice().Windows.Top!, Width, Height);
 
         var said = string.Join(" ", easel.Written.Select(text => text.Text));
         Assert.Contains("Hailstone", said);
@@ -31,15 +31,15 @@ public class TerminalNoticeTests
     public void PressingOkClosesTheNotice()
     {
         var stage = Notice();
-        var easel = new Easel(stage.Root, Width, Height);
+        var easel = new Easel(stage.Windows.Top!, Width, Height);
         var ok = easel.Written.First(text => text.Text == "OK");
         var at = new Vector2(ok.Position.X, ok.Position.Y) / easel.Pixels + new Vector2(4f, 4f);
 
-        Assert.False(((IClosingWorkspace)stage).TakeCloseRequest());
+        Assert.Equal(1, stage.Windows.Count);
         stage.PointerDown(at, PointerButton.Left, 1, false, false);
         stage.PointerUp(at, PointerButton.Left);
 
-        Assert.True(((IClosingWorkspace)stage).TakeCloseRequest());
+        Assert.Equal(0, stage.Windows.Count);
     }
 
     /// <summary>Enter closes the notice, as its OK does.</summary>
@@ -49,7 +49,7 @@ public class TerminalNoticeTests
         var stage = Notice();
 
         Assert.True(stage.Key(MyKeys.Enter, false, false));
-        Assert.True(((IClosingWorkspace)stage).TakeCloseRequest());
+        Assert.Equal(0, stage.Windows.Count);
     }
 
     static Workspace Notice()

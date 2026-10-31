@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             Style = Styles.MoveStrip;
             Placement = FixedSize.Width(Sizes.MoveStrip);
-            Align = Align.Top;
+            Align = Align.Center;
             Children.Add(new MoveButton(Symbols.Right).As(out _out));
             Children.Add(new MoveButton(Symbols.Left).As(out _in));
             Children.Add(new MoveButton(Symbols.Duplicate).As(out _copy));

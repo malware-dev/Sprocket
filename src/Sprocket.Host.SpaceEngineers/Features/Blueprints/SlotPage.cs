@@ -182,7 +182,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _shortHeading.Text = texts.SlotShort.ToUpperInvariant();
             _short.IsVisible = _part.IsSignal && editable;
             _short.Hint = texts.SlotShortHint;
-            _short.Tip = Tip.For(_short.Tip, texts.Codex.SlotShortAbout);
+            _short.Tip = CodexTip.For(_short.Tip, texts.Codex.SlotShortAbout);
             if (!_short.IsFocused)
                 _short.Text = _part.Short;
 
@@ -197,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _expects.Text = Expected(texts);
             _expectsPart.IsVisible = typed;
             _expectsPart.Say(Expected(texts));
-            _expectsPart.Tip = editable ? Tip.For(_expectsPart.Tip, texts.Codex.SlotExpectsAbout) : KeptTip.For(_expectsPart.Tip, _locked.Text);
+            _expectsPart.Tip = editable ? CodexTip.For(_expectsPart.Tip, texts.Codex.SlotExpectsAbout) : KeptTip.For(_expectsPart.Tip, _locked.Text);
             _expectsPart.Command = typed && editable
                 ? Editor.Act(CommandKind.SlotType, () => Editor.Push(new SlotTypePage(Editor, _system, _part)))
                 : null;
@@ -205,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _required.OnText = texts.BlueprintRequired;
             _required.OffText = texts.BlueprintOptional;
             _required.IsOn = !_part.Optional;
-            _required.Tip = Tip.For(_required.Tip, texts.Codex.BlueprintRequiredAbout);
+            _required.Tip = CodexTip.For(_required.Tip, texts.Codex.BlueprintRequiredAbout);
             _required.Command = editable
                 ? Editor.Act(CommandKind.MakeOptional, () => Make(new SetOptional(_part, !_part.Optional)))
                 : null;

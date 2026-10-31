@@ -26,13 +26,13 @@ on screen     Blueprint library
 019  Sprite     Lumel_Fill            {X:271 Y:196 W:12 H:2}  #5B737BFF
 020  Text       at {X:288 Y:183.6399} scale 0.694  #A2C3CDFF  "No logic systems on this construct."
 021  ClearClip  
-022  Sprite     Lumel_Fill            {X:936 Y:118 W:48 H:144}  #20272DFF
-023  Sprite     Lumel_Fill            {X:940 Y:122 W:40 H:40}  #1B242AFF
-024  Text       at {X:948.1875 Y:128.2745} scale 0.482  #5F7278FF  ">"
-025  Sprite     Lumel_Fill            {X:940 Y:170 W:40 H:40}  #1B242AFF
-026  Text       at {X:948.1875 Y:176.2745} scale 0.482  #5F7278FF  "<"
-027  Sprite     Lumel_Fill            {X:940 Y:218 W:40 H:40}  #1B242AFF
-028  Text       at {X:948.1875 Y:224.2745} scale 0.482  #5F7278FF  "2"
+022  Sprite     Lumel_Fill            {X:936 Y:497 W:48 H:144}  #20272DFF
+023  Sprite     Lumel_Fill            {X:940 Y:501 W:40 H:40}  #1B242AFF
+024  Text       at {X:948.1875 Y:507.0625} scale 0.482  #5F7278FF  ">"
+025  Sprite     Lumel_Fill            {X:940 Y:549 W:40 H:40}  #1B242AFF
+026  Text       at {X:948.1875 Y:555.0625} scale 0.482  #5F7278FF  "<"
+027  Sprite     Lumel_Fill            {X:940 Y:597 W:40 H:40}  #1B242AFF
+028  Text       at {X:948.1875 Y:603.0625} scale 0.482  #5F7278FF  "2"
 029  Sprite     Lumel_Fill            {X:1000 Y:118 W:664 H:36}  #141B20FF
 030  Sprite     Lumel_Fill            {X:1000 Y:118 W:664 H:1}  #5B737BFF
 031  Sprite     Lumel_Fill            {X:1000 Y:153 W:664 H:1}  #5B737BFF

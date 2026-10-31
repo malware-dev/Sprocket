@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             if (text == null)
                 return null;
 
-            page = new Tip(text);
+            page = new CodexTip(text);
             _read[id] = page;
             return page;
         }

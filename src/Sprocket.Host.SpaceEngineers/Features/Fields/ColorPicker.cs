@@ -67,14 +67,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             CreateView();
             _written.Submit = submit;
 
-            _plane.Tip = Tip.For(null, texts.Codex.ColorPlaneAbout);
-            _strip.Tip = Tip.For(null, texts.Codex.ColorHue);
-            _hueBox.Tip = Tip.For(null, texts.Codex.ColorHue);
-            _saturationBox.Tip = Tip.For(null, texts.Codex.ColorSaturation);
-            _valueBox.Tip = Tip.For(null, texts.Codex.ColorBrightness);
+            _plane.Tip = CodexTip.For(null, texts.Codex.ColorPlaneAbout);
+            _strip.Tip = CodexTip.For(null, texts.Codex.ColorHue);
+            _hueBox.Tip = CodexTip.For(null, texts.Codex.ColorHue);
+            _saturationBox.Tip = CodexTip.For(null, texts.Codex.ColorSaturation);
+            _valueBox.Tip = CodexTip.For(null, texts.Codex.ColorBrightness);
             foreach (var box in Boxes())
                 box.Submit = submit;
-            _written.Tip = Tip.For(null, texts.Codex.ColorCodeAbout);
+            _written.Tip = CodexTip.For(null, texts.Codex.ColorCodeAbout);
 
             var paint = offer.Paint;
             for (var i = 0; i < paint.Count; i++)

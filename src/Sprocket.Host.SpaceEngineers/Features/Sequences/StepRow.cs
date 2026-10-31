@@ -182,7 +182,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             foreach (var chip in _chips)
                 chip.Glow = MarksLit && !IsOff ? Glow : Palette.None;
 
-            _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.Codex.MemberWaits : Kind == StepKind.Await ? texts.Codex.SequenceAwaitRow : null);
+            _sentence.Tip = CodexTip.For(_sentence.Tip, Kind == StepKind.Run ? texts.Codex.MemberWaits : Kind == StepKind.Await ? texts.Codex.SequenceAwaitRow : null);
 
             var adds = Kind == StepKind.End || Kind == StepKind.Adds;
             var branch = adds || Kind == StepKind.OtherwiseIf || Kind == StepKind.Otherwise;

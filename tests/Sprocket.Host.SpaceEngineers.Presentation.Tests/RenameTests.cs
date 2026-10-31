@@ -96,7 +96,7 @@ public class RenameTests
         var back = screen.Marks(Symbols.Left)[0];
         var title = screen.Drawings.First(d => d.IsText && d.Scale > 0.8f);
 
-        Assert.Equal(screen.MiddleOf(title) + EditorWorkspace.LevelWithCapitals.Top, screen.MiddleOf(back), 1);
+        Assert.Equal(screen.MiddleOf(title) + EditorWindow.LevelWithCapitals.Top, screen.MiddleOf(back), 1);
     }
 
     /// <summary>The pointer resting on the grid's name says what it is and that pressing it renames the grid.</summary>
@@ -108,7 +108,7 @@ public class RenameTests
 
         var name = screen.Text("Test Rig");
         var at = Screen.Ui(name.At.X + 8f, screen.MiddleOf(name));
-        screen.Do("move", Say(at.X), Say(at.Y), "tick", EditorWorkspace.TipDelay.ToString());
+        screen.Do("move", Say(at.X), Say(at.Y), "tick", Styles.TipDelay.ToString());
 
         Assert.True(screen.Legible.Any(t => t.Contains("taken from its largest grid")), "resting on the grid's name said nothing about it");
     }

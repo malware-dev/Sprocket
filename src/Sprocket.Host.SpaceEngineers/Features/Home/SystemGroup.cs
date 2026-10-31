@@ -134,7 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _installationsWord = texts.SystemsInstallations.ToUpperInvariant();
             HeadInstallations();
             _another.Text = StatusRow.Plus + texts.SystemsAddAnother;
-            _another.Tip = Tip.For(_another.Tip, texts.Codex.SystemsAddAnotherAbout, _named);
+            _another.Tip = CodexTip.For(_another.Tip, texts.Codex.SystemsAddAnotherAbout, _named);
         }
 
         /// <summary>Whether the heading over the installations is the term, explained by the codex's page on it: only the first shown on the screen is, as a page explains a term once.</summary>

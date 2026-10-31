@@ -60,9 +60,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         public void Show(Texts texts)
         {
             _markup.Text = texts.WritingMarkup;
-            _markup.Tip = Tip.For(_markup.Tip, texts.Codex.WritingMarkupAbout);
+            _markup.Tip = CodexTip.For(_markup.Tip, texts.Codex.WritingMarkupAbout);
             _preview.Text = _previewing.IsVisible ? texts.WritingEdit : texts.WritingPreview;
-            _preview.Tip = Tip.For(_preview.Tip, _previewing.IsVisible ? null : texts.Codex.WritingPreviewAbout);
+            _preview.Tip = CodexTip.For(_preview.Tip, _previewing.IsVisible ? null : texts.Codex.WritingPreviewAbout);
         }
 
         /// <summary>Shows the text as it will read in place of its box, or the box again.</summary>

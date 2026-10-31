@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Xunit;
 
@@ -18,7 +19,7 @@ public class LayoutWorkTests
     public void AnIdleSecondMeasuresNoText()
     {
         var screen = Screen.Fresh("60", "130", "type", "Airlock", "enter");
-        screen.Run(EditorWorkspace.TipDelay + 5);
+        screen.Run(Styles.TipDelay + 5);
 
         var settled = screen.Measured;
         screen.Run(60);

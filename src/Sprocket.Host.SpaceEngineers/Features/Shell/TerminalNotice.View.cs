@@ -1,6 +1,4 @@
-using Lumel;
 using Lumel.Layout;
-using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
@@ -8,21 +6,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     public partial class TerminalNotice
     {
-        MessageBox _box;
-
-        /// <summary>Builds the box, centered across the screen.</summary>
+        /// <summary>Gives the box the editor's look for a question, as wide as a popup, with OK as what Enter presses.</summary>
         void CreateView()
         {
-            Align = Align.Fill;
-            Children.Add(new Label { Placement = Flex.Grow });
-            Children.Add(new MessageBox
-            {
-                Style = Styles.Asking,
-                Align = Align.Center,
-                Placement = FixedSize.Width(Sizes.Popup),
-                DefaultButton = MessageBoxAnswer.Yes
-            }.As(out _box));
-            Children.Add(new Label { Placement = Flex.Grow });
+            Style = Styles.Asking;
+            Placement = FixedSize.Width(Sizes.Popup);
+            DefaultButton = MessageBoxAnswer.Yes;
         }
     }
 }

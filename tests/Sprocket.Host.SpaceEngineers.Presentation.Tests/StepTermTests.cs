@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
@@ -67,10 +66,10 @@ public class StepTermTests
         var at = Links.First(rows.First(row => row.Kind == StepKind.If), CodexPages.If, out _);
 
         // The first point of a link is on its top left corner; a few units in is on its words.
-        screen.Do("move", Say(at.X + 4f), Say(at.Y + 6f), "tick", EditorWorkspace.TipDelay.ToString());
+        screen.Do("move", Say(at.X + 4f), Say(at.Y + 6f), "tick", Styles.TipDelay.ToString());
 
-        Assert.True(screen.Scene.CodexTip.IsOpen, "no tip opened on the if");
-        Assert.Same(screen.Editor.Codex.Find(CodexPages.If), screen.Scene.CodexTip.Page);
+        Assert.NotNull(screen.Scene.CodexTip);
+        Assert.Same(screen.Editor.Codex.Find(CodexPages.If), screen.Scene.CodexTip!.Page);
     }
 
     /// <summary>Once the first of a word is taken away, the next one on the screen becomes its term.</summary>

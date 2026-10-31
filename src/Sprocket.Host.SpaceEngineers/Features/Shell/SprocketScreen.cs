@@ -1,4 +1,5 @@
 using System;
+using Lumel.Windows;
 using Sandbox.Game;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
@@ -12,15 +13,15 @@ using IngameSurfaces = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>Sprocket's editor on a screen the game owns, opened from a programmable block.</summary>
-    public sealed class SprocketScreen : EditorWorkspace
+    public sealed class SprocketScreen : EditorWindow
     {
         readonly SprocketUnit _unit;
         readonly IMyTerminalBlock _opened;
         readonly Action _closed;
 
-        /// <summary>The editor on <paramref name="unit" />, opened from <paramref name="opened" />, telling <paramref name="closed" /> each time it closes.</summary>
-        public SprocketScreen(SprocketUnit unit, IMyTerminalBlock opened, Action closed)
-            : base(unit.Editor)
+        /// <summary>The editor on <paramref name="unit" />, in <paramref name="workspace" />, opened from <paramref name="opened" />, telling <paramref name="closed" /> each time it closes.</summary>
+        public SprocketScreen(SprocketUnit unit, SprocketWorkspace workspace, IMyTerminalBlock opened, Action closed)
+            : base(unit.Editor, workspace)
         {
             _unit = unit;
             _opened = opened;
@@ -31,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <inheritdoc />
         protected override void OnOpened()
         {
+            base.OnOpened();
             _unit.Showing = true;
             Hud(false);
             _unit.Editor.Opened();
@@ -46,13 +48,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             MyVisualScriptLogicProvider.ShowHud(shown, 0);
         }
 
-        /// <summary>Gives the heads-up display back, and offers the status app to the block, on the way out.</summary>
-        protected override void OnClosed(bool isUnloading)
+        /// <summary>Gives the heads-up display back, and offers the status app to the block on the way out, unless the world is unloading.</summary>
+        protected override void OnClosed(CloseReason reason)
         {
+            base.OnClosed(reason);
             _unit.Showing = false;
             Hud(true);
 
-            if (!isUnloading)
+            if (reason != CloseReason.WorldUnloading)
                 Offer();
 
             if (_closed != null)

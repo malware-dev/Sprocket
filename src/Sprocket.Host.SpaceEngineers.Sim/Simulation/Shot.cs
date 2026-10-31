@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Lumel.Drawing;
 using Lumel.Screens;
 using Lumel.Sim;
 
@@ -74,11 +75,15 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <summary>Writes <paramref name="workspace" />, a screen of its own such as a notice, in its area of a <paramref name="width" /> by <paramref name="height" /> frame.</summary>
-        public static void Save(string path, int width, int height, ScreenSpaceWorkspace workspace)
+        public static void Save(string path, int width, int height, Workspace workspace)
         {
             var surface = ScreenSession.Surface();
             surface.Target = new PixelSize(width, height);
-            surface.Frame += workspace.Draw;
+            surface.Frame += g =>
+            {
+                workspace.Update();
+                workspace.DrawScreen(g, g.BoundsOf(ScreenArea.Window), g.BoundsOf(ScreenArea.Terminal));
+            };
 
             var bitmap = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
             SimShot.Take(bitmap, null, surface, new Size(width, height));

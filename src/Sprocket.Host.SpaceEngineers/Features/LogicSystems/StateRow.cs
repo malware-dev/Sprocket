@@ -68,19 +68,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>What the state holds, said where the pointer rests on it.</summary>
         public string KindAbout
         {
-            set { _holds.Tip = Tip.For(_holds.Tip, value); }
+            set { _holds.Tip = CodexTip.For(_holds.Tip, value); }
         }
 
         /// <summary>What the value a state starts as is, said where the pointer rests on the words before it.</summary>
         public string StartsAbout
         {
-            set { _startsLead.Tip = Tip.For(_startsLead.Tip, value); }
+            set { _startsLead.Tip = CodexTip.For(_startsLead.Tip, value); }
         }
 
         /// <summary>Said where the pointer rests on what the installation shown holds now.</summary>
         public string NowAbout
         {
-            set { _now.Tip = Tip.For(_now.Tip, value); }
+            set { _now.Tip = CodexTip.For(_now.Tip, value); }
         }
 
         /// <summary>What pressing the bin does, which is removing the state, or null where it cannot be.</summary>

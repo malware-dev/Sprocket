@@ -8,25 +8,22 @@ using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
 using VRage.Input;
+using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>A <see cref="SprocketEditor" /> on the screen: the chrome around the page, the page's own view, and whatever hangs over them.</summary>
-    public partial class EditorWorkspace : SprocketWorkspace
+    /// <summary>A <see cref="SprocketEditor" /> on the screen, filling the workspace's area: the chrome around the page, the page's own view, and whatever hangs over them.</summary>
+    public partial class EditorWindow : Window
     {
-        /// <summary>How many ticks the pointer rests on something before its tip opens.</summary>
-        public const int TipDelay = 30;
-
-        /// <summary>How many ticks a tip stays open while the pointer crosses from what it explains onto it.</summary>
-        public const int TipGrace = 15;
-
         /// <summary>Lifts a symbol in the heading so its middle is level with the middle of the heading's capitals.</summary>
         /// <remarks>Measured in the game.</remarks>
         public static readonly Thickness LevelWithCapitals = new Thickness(0f, -2.5f, 0f, 2.5f);
 
         readonly SprocketEditor _editor;
+        readonly SprocketWorkspace _workspace;
+        readonly Lumel.Codex _codex;
 
         readonly VStack _frame;
         readonly VStack _head;
@@ -63,7 +60,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly MessageBox _dialog;
         readonly ConfirmPopup _confirm = new ConfirmPopup();
-        readonly CodexTip _codexTip;
         readonly List<ChoiceEntry> _actionsShown = new List<ChoiceEntry>();
 
         EditorPage _shownPage;
@@ -89,10 +85,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _checkedText;
         bool _checkedTaken;
 
-        /// <summary>The chrome for <paramref name="editor" />, which it hands its input root and window layer to.</summary>
-        public EditorWorkspace(SprocketEditor editor) : base("Sprocket", () => editor.CurrentTick)
+        /// <summary>The chrome for <paramref name="editor" />, opened in <paramref name="workspace" />, whose input root and window layer it hands the editor.</summary>
+        public EditorWindow(SprocketEditor editor, SprocketWorkspace workspace)
         {
             _editor = editor;
+            _workspace = workspace;
+            Style = Styles.Editor;
             _title = new HeadingRow(Rename);
             _commits = new RelayCommand(CommitRename);
             _ends = new RelayCommand(EndRename);
@@ -108,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
 
             var root = _frame = new VStack { Base = { Background = Palette.Page } };
-            Children.Add(root);
+            Content = root;
             root.Children.Add(new VStack
             {
                 Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f), Spacing = Gaps.Within },
@@ -174,34 +172,63 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 ShowsCancel = false
             };
 
-            _codexTip = new CodexTip
+            _codex = new Lumel.Codex
             {
-                Style = Styles.CodexTip,
                 OpensNestedTips = true,
-                Placement = FixedSize.Width(Sizes.Popup),
-                ShowDelay = TipDelay,
-                CloseDelay = TipGrace,
                 FnResolvePage = _editor.Codex.Find
             };
 
-            CodexTip = _codexTip;
-            Input.FocusChanged += Refocused;
-            Input.PreviewPointerDown += PressReaching;
-            Input.PreviewWheel += Turning;
-
             _editor.Input = Input;
-            _editor.Windows = Windows;
+            _editor.Windows = _workspace.Windows;
             _editor.Renamer = Rename;
         }
 
+        /// <summary>The workspace's input root, which the editor's pages and popups share.</summary>
+        InputRoot Input => _workspace.Input;
+
+        /// <summary>What a codex tip opened here shares: where its links lead, and that each opens beside it.</summary>
+        public Lumel.Codex Codex => _codex;
+
+        /// <summary>The codex tip open over the editor, or null where none is or the tip open is a plain one.</summary>
+        public CodexTip ShownCodexTip => _workspace.ShownTip as CodexTip;
+
         /// <summary>Whether a question with answers is waiting, which owns Enter and Escape.</summary>
-        public bool IsQuestioning => Windows.IsOpen(_dialog) || Windows.IsOpen(_confirm);
+        public bool IsQuestioning => _workspace.Windows.IsOpen(_dialog) || _workspace.Windows.IsOpen(_confirm);
+
+        /// <summary>Fills the workspace's area, as the game's terminal does.</summary>
+        public override RectangleF Place(RectangleF area, Vector2 size)
+        {
+            return area;
+        }
 
         /// <inheritdoc />
-        /// <remarks>While the player has turned tips off, only a <see cref="KeptTip" /> opens.</remarks>
-        protected override Tip TipFor(Element owner, Tip tip)
+        /// <remarks>Listens to the workspace's input for as long as it is open, since the workspace outlives it.</remarks>
+        protected override void OnOpened()
         {
-            return _editor.TipsShown || tip is KeptTip ? tip : null;
+            Input.FocusChanged += Refocused;
+            Input.PreviewPointerDown += PressReaching;
+            Input.PreviewWheel += Turning;
+        }
+
+        /// <inheritdoc />
+        protected override void OnClosed(CloseReason reason)
+        {
+            EndRename();
+            Input.FocusChanged -= Refocused;
+            Input.PreviewPointerDown -= PressReaching;
+            Input.PreviewWheel -= Turning;
+        }
+
+        /// <summary>
+        /// The tip to open for <paramref name="tip" />, the one an element carries where the pointer rests: every tip while tips are shown, and
+        /// while they are off only a <see cref="KeptTip" />, as its plain version.
+        /// </summary>
+        public Tip TipFor(Tip tip)
+        {
+            if (_editor.TipsShown)
+                return tip;
+
+            return (tip as KeptTip)?.Plain;
         }
 
         /// <summary>Why the name in hand cannot be given as it stands, or empty when it can or none is.</summary>
@@ -222,7 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Brings the chrome into line with the screen, and puts the page's view on it where the page changed.</summary>
-        public override void Update()
+        public void Update()
         {
             var screen = _editor.Screen;
 
@@ -244,17 +271,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Dress(screen);
         }
 
-        /// <inheritdoc />
-        /// <remarks>While a question is open it takes Enter as its default answer and no other key; Escape is <see cref="Escape" /> whatever is open.</remarks>
-        public override bool Key(MyKeys key, bool shift, bool ctrl)
+        /// <summary>
+        /// Whether the editor decides what <paramref name="key" /> does before anything on the screen is offered it, with
+        /// <paramref name="taken" /> saying whether anything was done.
+        /// </summary>
+        /// <remarks>Escape is <see cref="Escape" /> whatever is open, closing the editor where that says to; while a question is open it takes Enter as its default answer and no other key.</remarks>
+        public bool Decides(MyKeys key, out bool taken)
         {
+            taken = true;
             if (key == MyKeys.Escape)
-                return !Escape();
+            {
+                if (Escape())
+                    Close();
+
+                return true;
+            }
 
             if (IsQuestioning)
-                return key != MyKeys.Enter || TakeDefault();
+            {
+                taken = key != MyKeys.Enter || TakeDefault();
+                return true;
+            }
 
-            return base.Key(key, shift, ctrl);
+            taken = false;
+            return false;
         }
 
         /// <summary>Escape, answering whether the host should close the editor.</summary>
@@ -266,7 +306,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return false;
             }
 
-            if (CloseTop())
+            if (_workspace.CloseOverEditor())
                 return false;
 
             if (_plate != null)
@@ -287,11 +327,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Takes the answer the page said Enter takes, and says whether there was one.</summary>
         public bool TakeDefault()
         {
-            if (Windows.IsOpen(_dialog))
+            if (_workspace.Windows.IsOpen(_dialog))
                 return _dialog.PerformAccept();
 
             var taken = _editor.Screen.Default;
-            if (!Windows.IsOpen(_confirm) || taken == null)
+            if (!_workspace.Windows.IsOpen(_confirm) || taken == null)
                 return false;
 
             Run(taken.Command);
@@ -301,13 +341,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Puts the standing question away without answering it.</summary>
         public void Dismiss()
         {
-            if (Windows.IsOpen(_dialog))
+            if (_workspace.Windows.IsOpen(_dialog))
             {
                 _dialog.PerformCancel();
                 return;
             }
 
-            Windows.Close(_confirm);
+            _workspace.Windows.Close(_confirm);
             _editor.Unask();
         }
 
@@ -356,15 +396,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             if (!screen.HasQuestion)
             {
-                Windows.Close(_dialog);
-                Windows.Close(_confirm);
+                _workspace.Windows.Close(_dialog);
+                _workspace.Windows.Close(_confirm);
                 _hanging = false;
                 return;
             }
 
             if (_asked == screen.Asked)
             {
-                if (_hanging && !Windows.IsOpen(_confirm))
+                if (_hanging && !_workspace.Windows.IsOpen(_confirm))
                 {
                     _hanging = false;
                     _editor.Unask();
@@ -374,13 +414,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
 
             _asked = screen.Asked;
-            Windows.Close(_dialog);
-            Windows.Close(_confirm);
+            _workspace.Windows.Close(_dialog);
+            _workspace.Windows.Close(_confirm);
 
             _hanging = screen.QuestionIsHere && _raisedBy != null;
             if (_hanging)
             {
-                _confirm.Ask(screen.Question, screen.QuestionArguments, screen.Answers, screen.Default, _raisedBy, Windows);
+                _confirm.Ask(screen.Question, screen.QuestionArguments, screen.Answers, screen.Default, _raisedBy, _workspace.Windows);
                 return;
             }
 
@@ -397,14 +437,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 : no != null && no == screen.Default ? MessageBoxAnswer.No
                 : (MessageBoxAnswer?)null;
 
-            Windows.Open(_dialog);
+            _workspace.Windows.Open(_dialog);
         }
 
         /// <summary>Puts the page on top on the screen, in the screen's scroller unless it scrolls itself.</summary>
         void Show(EditorScreen screen)
         {
             EndRename();
-            Windows.Close(_confirm);
+            _workspace.Windows.Close(_confirm);
 
             // Each page keeps how far down it was read, so coming back from a page opened from it finds the place again.
             if (_shownPage != null && !_shownPage.ScrollsItself)
@@ -472,7 +512,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_plain == _editor.TipsShown)
             {
                 _plain = !_editor.TipsShown;
-                Plain(Root, _plain);
+                Plain(this, _plain);
             }
 
             _undone.Set("action", screen.UndoText);
@@ -488,7 +528,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _library.IsVisible = screen.Library != null;
             _library.Text = texts.SystemsLoad;
             _libraries.CanExecute = screen.Library != null;
-            _library.Tip = Tip.For(_library.Tip, screen.Library != null ? texts.Codex.TermLibrary : null);
+            _library.Tip = CodexTip.For(_library.Tip, screen.Library != null ? texts.Codex.TermLibrary : null);
 
             var doing = screen.Running ? screen.Stops : screen.Runs;
             _run.IsVisible = doing != null;
@@ -512,12 +552,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _switch.OnText = texts.SwitchOn;
             _switch.OffText = texts.SwitchOff;
             _flips.CanExecute = screen.HasSwitch && !screen.SwitchLocked;
-            _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);
+            _switch.Tip = CodexTip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);
 
             _done.IsVisible = screen.HasPrimary;
             _done.Text = screen.PrimaryText;
             _dones.CanExecute = screen.Primary != null;
-            _done.Tip = Tip.For(_done.Tip, screen.PrimaryAbout.Length != 0 ? screen.PrimaryAbout : null);
+            _done.Tip = CodexTip.For(_done.Tip, screen.PrimaryAbout.Length != 0 ? screen.PrimaryAbout : null);
 
             ShowActions(screen);
         }
@@ -577,7 +617,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (screen.CanGoBack)
                 Run(screen.Back);
             else
-                RequestClose();
+                Close();
         }
 
         /// <summary>Begins renaming the part of the heading at <paramref name="index" />.</summary>
@@ -693,10 +733,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Input.Focus(box);
         }
 
-        /// <summary>Turns tips off where they are shown and on where they are not, closing a tip that is open.</summary>
+        /// <summary>Turns tips off where they are shown and on where they are not.</summary>
+        /// <remarks>The press on the toggle has already closed a tip that was open.</remarks>
         void ToggleTips()
         {
-            _codexTip.Close();
             _editor.ToggleTips();
         }
 
@@ -704,7 +744,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void OpenAdmin()
         {
             if (_editor.MayAdminister)
-                Windows.Open(new Admin.AdminDialog(_editor));
+                _workspace.Windows.Open(new Admin.AdminDialog(_editor));
         }
 
         /// <summary>Carries out <paramref name="command" />, where there is one that can be.</summary>

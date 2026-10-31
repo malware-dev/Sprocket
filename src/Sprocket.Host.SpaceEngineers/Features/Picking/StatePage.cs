@@ -250,7 +250,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 // shows a state.
                 _othersList = new VStack { IsVisible = false };
                 _others = new KeyedChildren<string, PickRow>(_othersList.Children, Other);
-                _othersHeading = new Label { Style = Styles.ValueLabel, Text = texts.PickStateValueOf, Tip = Tip.For(null, texts.Codex.PickStateValueOfAbout) };
+                _othersHeading = new Label { Style = Styles.ValueLabel, Text = texts.PickStateValueOf, Tip = CodexTip.For(null, texts.Codex.PickStateValueOfAbout) };
                 _value.Options.Add(_form);
 
                 if (_aim != null)

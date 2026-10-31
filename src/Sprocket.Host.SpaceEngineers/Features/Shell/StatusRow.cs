@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var pressable = Opens != null;
             _opens.CanExecute = pressable;
-            Tip = Tip.For(Tip, About, AboutArguments);
+            Tip = CodexTip.For(Tip, About, AboutArguments);
             var wrong = Problems > 0;
 
             // A row is off where its own switch is, or where the logic system above it holds its switch.
@@ -279,7 +279,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _light.Tip = wrong
                 ? KeptTip.For(_light.Tip, texts.Codex.RowBroken)
-                : Tip.For(_light.Tip, JustRan ? texts.Codex.RowRan : texts.Codex.RowIdle);
+                : CodexTip.For(_light.Tip, JustRan ? texts.Codex.RowRan : texts.Codex.RowIdle);
 
             _status.Text = Status;
             _lastRun.Text = LastRun;
@@ -316,7 +316,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _flips.CanExecute = switches && !held;
             _switch.Tip = switches && held
                 ? KeptTip.For(_switch.Tip, SwitchLocked)
-                : Tip.For(_switch.Tip, !switches ? null : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));
+                : CodexTip.For(_switch.Tip, !switches ? null : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));
 
             var locked = !string.IsNullOrEmpty(Locked);
             var copies = Copies != null;
@@ -327,7 +327,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var offers = Offers != null;
             _button.IsVisible = offers;
             _offers.CanExecute = offers;
-            _button.Tip = Tip.For(_button.Tip, offers ? ButtonAbout : null);
+            _button.Tip = CodexTip.For(_button.Tip, offers ? ButtonAbout : null);
 
             if (offers)
                 _button.Text = ButtonText;

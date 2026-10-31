@@ -68,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Minimum = 0,
                 Widest = Widest,
                 Submit = new RelayCommand(() => Raise(Submitted)),
-                Tip = Tip.For(null, texts.Codex.SequenceWaitTypedAbout)
+                Tip = CodexTip.For(null, texts.Codex.SequenceWaitTypedAbout)
             }.As(out _box));
             number.Children.Add(new Glyph
             {
@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             number.Children.Add(new Switch
             {
                 Style = Styles.Switch,
-                Tip = Tip.For(null, texts.Codex.TermTick),
+                Tip = CodexTip.For(null, texts.Codex.TermTick),
                 Command = new RelayCommand(() => Unit(!_inSeconds))
             }.As(out _unit));
             _unit.OnText = texts.WaitInSeconds;
