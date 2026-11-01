@@ -5,15 +5,14 @@ description: >
   SEWorkshopTool (no game launch). Use ONLY when the user explicitly asks to
   push/upload/publish with the tool ("do the workshop upload", "push it via
   SEWorkshopTool", "re-upload the alpha"). Do NOT auto-invoke for routine
-  builds, packaging, dry-runs the user didn't ask for, or when they've said
-  they'll publish from the game.
+  builds, packaging, or dry-runs the user didn't ask for.
 ---
 
 # SE Workshop Publish (headless via SEWorkshopTool)
 
 ## Default — do NOT publish unprompted
 
-The user publishes from the in-game UI by default. Only run SEWorkshopTool when they explicitly ask **this turn** ("do the reupload with the tool", "push it"). An ambiguous "go" or "proceed" is **not** authorization to upload — if unsure, ASK. A previous turn's authorization does not carry over.
+Only run SEWorkshopTool when they explicitly ask **this turn** ("do the reupload with the tool", "push it"). An ambiguous "go" or "proceed" is **not** authorization to upload — if unsure, ASK. A previous turn's authorization does not carry over.
 
 ## Fixed paths (this user)
 
