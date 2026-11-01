@@ -560,7 +560,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A screen's scroll, whose bar is as wide as the one the game reserves for its own.</summary>
         public static readonly IStyle<ScrollView> ScrollView = new ScrollViewStyle
         {
-            Base = { ScrollBarWidth = Sizes.Bar, Thumb = Palette.Thumb, MinThumbLength = 32f },
+            Base = { ScrollBarWidth = Sizes.Bar, ScrollBarGap = Gaps.Parts, Thumb = Palette.Thumb, MinThumbLength = 32f },
             Dragging = { Thumb = Palette.ThumbHeld }
         };
 
@@ -618,8 +618,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = TextSizes.Mono, FontSize = TextSizes.Small, Color = Palette.Ink, CaretColor = Palette.Ink, SelectionColor = Palette.Line,
-                LineNumberColor = Palette.Dim, Padding = new Thickness(0f, 0f, Gaps.Parts, 0f), ScrollBarWidth = Sizes.Bar, Thumb = Palette.Thumb,
-                MinThumbLength = 32f
+                LineNumberColor = Palette.Dim, Padding = new Thickness(0f, 0f, Gaps.Parts, 0f), ScrollBarWidth = Sizes.Bar, ScrollBarGap = Gaps.Parts,
+                Thumb = Palette.Thumb, MinThumbLength = 32f
             },
             Dragging = { Thumb = Palette.ThumbHeld }
         };
@@ -631,7 +631,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             {
                 Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink, CaretColor = Palette.Ink, SelectionColor = Palette.Line,
                 HintColor = Palette.Faint, Background = Palette.Page, Border = Palette.Line, Padding = new Thickness(8f),
-                ScrollBarWidth = Sizes.Bar, Thumb = Palette.Thumb, MinThumbLength = 24f
+                ScrollBarWidth = Sizes.Bar, ScrollBarGap = Gaps.Parts, Thumb = Palette.Thumb, MinThumbLength = 24f
             },
             Dragging = { Thumb = Palette.ThumbHeld }
         };

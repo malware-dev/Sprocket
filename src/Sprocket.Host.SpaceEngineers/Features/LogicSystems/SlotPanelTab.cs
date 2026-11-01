@@ -5,6 +5,7 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -156,8 +157,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var add = _panel.AddCategory;
             var optimize = _panel.Optimize;
-            _panel.Slots.IsVisible = _parts.Count > 0;
-            _panel.Adds.IsVisible = _parts.Count > 0;
+            _panel.Slotting.IsVisible = _parts.Count > 0;
+            _panel.SlotsHeading.Markdown = CodexPages.Link(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
             add.IsVisible = editable;
             add.Text = StatusRow.Plus + texts.CategoryAdd;
             // A category just added opens its name for typing once its row stands.

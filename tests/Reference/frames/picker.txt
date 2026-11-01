@@ -76,13 +76,13 @@ on screen     slot 1
 069  Text       at {X:752 Y:199.6399} scale 0.694  #85A1A9FF  "Search"
 070  SetClip    {X:256 Y:118 W:1408 H:902}
 071  SetClip    {X:740 Y:238 W:428 H:766}
-072  Sprite     Lumel_Fill            {X:740 Y:238 W:416 H:96}  #374851FF
+072  Sprite     Lumel_Fill            {X:740 Y:238 W:408 H:96}  #374851FF
 073  Text       at {X:756 Y:243.6399} scale 0.694  #A2C3CDFF  "Everything these blocks offer in the terminal, under the"
 074  Text       at {X:756 Y:263.6399} scale 0.694  #A2C3CDFF  "terminal's own names. Using them is your own call. The"
 075  Text       at {X:756 Y:283.6399} scale 0.694  #A2C3CDFF  "organized list holds the ones known to work with the"
 076  Text       at {X:756 Y:303.6399} scale 0.694  #A2C3CDFF  "automation."
 077  Text       at {X:752 Y:360.0543} scale 0.556  #85A1A9FF  "VALUES"
-078  Sprite     Lumel_Fill            {X:740 Y:382 W:416 H:40}  #5B737BFF
+078  Sprite     Lumel_Fill            {X:740 Y:382 W:408 H:40}  #5B737BFF
 079  Text       at {X:752 Y:390.5141} scale 0.401  #A2C3CDFF  "l"
 080  Text       at {X:779.6875 Y:387.2255} scale 0.833  #DCF5FDFF  "Charge Mode"
 081  Text       at {X:752 Y:434.5141} scale 0.401  #A2C3CDFF  "l"

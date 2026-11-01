@@ -116,11 +116,11 @@
   </data>
   <data name="Sprocket.Slot.Optimize" xml:space="preserve">
     <value>Optimize slots</value>
-    <comment>The button on the installation panel tab of a logic system's screen, beside + category, shown while the logic system has slots. Pressing it lists the changes that give the logic system as few slots as its steps and triggers can name, and makes them only once they are approved.</comment>
+    <comment>The button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading, shown while the logic system has slots. Pressing it lists the changes that give the logic system as few slots as its steps and triggers can name, and makes them only once they are approved.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeQuestion" xml:space="preserve">
     <value>Optimizing the slots makes these changes:</value>
-    <comment>First line of the question Optimize slots asks, under the button on the installation panel tab of a logic system's screen, beside + category; a list of the changes follows, one each.</comment>
+    <comment>First line of the question Optimize slots asks, under the button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading; a list of the changes follows, one each.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeMakes" xml:space="preserve">
     <value>{slot} is added, holding {blocks}.</value>
@@ -140,19 +140,19 @@
   </data>
   <data name="Sprocket.Slot.OptimizeApply" xml:space="preserve">
     <value>Optimize</value>
-    <comment>Answer to the question Optimize slots asks, under the button on the installation panel tab of a logic system's screen, beside + category: makes every change listed, as one step that Undo takes back.</comment>
+    <comment>Answer to the question Optimize slots asks, under the button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading: makes every change listed, as one step that Undo takes back.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeCancel" xml:space="preserve">
     <value>Cancel</value>
-    <comment>Answer to the question Optimize slots asks, under the button on the installation panel tab of a logic system's screen, beside + category, the one Enter takes: changes nothing.</comment>
+    <comment>Answer to the question Optimize slots asks, under the button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading, the one Enter takes: changes nothing.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeNothing" xml:space="preserve">
     <value>The slots are already as few as they can be.</value>
-    <comment>Said in place of the list of changes, under the Optimize slots button on the installation panel tab of a logic system's screen, beside + category, where optimizing would change nothing.</comment>
+    <comment>Said in place of the list of changes, under the Optimize slots button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading, where optimizing would change nothing.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeOk" xml:space="preserve">
     <value>OK</value>
-    <comment>The one answer to what Optimize slots says where it has nothing to change, under the button on the installation panel tab of a logic system's screen, beside + category: closes it.</comment>
+    <comment>The one answer to what Optimize slots says where it has nothing to change, under the button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading: closes it.</comment>
   </data>
   <data name="Sprocket.Slot.Unused" xml:space="preserve">
     <value>Unused</value>

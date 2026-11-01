@@ -730,7 +730,7 @@
   </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
     <value>Reduce the slots to as few as the steps and triggers need.</value>
-    <comment>Tooltip on the Optimize slots button on the installation panel tab of a logic system's screen, beside + category, while the logic system is switched off and the slots can be changed.</comment>
+    <comment>Tooltip on the Optimize slots button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading, while the logic system is switched off and the slots can be changed.</comment>
   </data>
   <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
     <value>Remove this unused slot.</value>

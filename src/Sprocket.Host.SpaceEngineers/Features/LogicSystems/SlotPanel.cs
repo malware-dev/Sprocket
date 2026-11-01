@@ -38,11 +38,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The description as it reads while the logic system may not be changed.</summary>
         public RichText Description => _description;
 
+        /// <summary>The slots under their heading, with the ways to tidy them and to add a category; shown while there are slots.</summary>
+        public Section Slotting => _slotting;
+
+        /// <summary>The heading over the slots, which links what a slot is.</summary>
+        public RichText SlotsHeading => _slotsHeading;
+
         /// <summary>The slots and categories, one row each, carried to be put in order.</summary>
         public PartList Slots => _slots;
-
-        /// <summary>The line holding the ways to add a category and to tidy the slots; shown while there are slots.</summary>
-        public VStack Adds => _adds;
 
         /// <summary>The button that adds a category.</summary>
         public Button AddCategory => _addCategory;

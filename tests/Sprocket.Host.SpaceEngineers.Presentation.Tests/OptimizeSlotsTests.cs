@@ -1,4 +1,5 @@
 using Lumel.Controls;
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
@@ -34,6 +35,21 @@ public class OptimizeSlotsTests
         Assert.True(button.IsVisible);
         Assert.Null(button.Command);
         Assert.Equal(editor.Texts.Codex.SystemTurnOffToEdit, button.Tip?.Text);
+    }
+
+    /// <summary>The button sits on the line of the SLOTS heading, above the slots it tidies.</summary>
+    [Fact]
+    public void OptimizeSitsOnTheSlotsHeading()
+    {
+        var screen = Built(out var system);
+        Off(screen, Light);
+        Panel(screen, system);
+
+        var button = Optimize(screen).Bounds;
+        var heading = screen.Text(screen.Editor.Texts.BlueprintParts.ToUpperInvariant());
+        var slots = ((LogicSystemPage)screen.Editor.Current!).View.Within().OfType<PartList>().Single().Bounds;
+        Assert.InRange(heading.At.Y, button.Y, button.Y + button.Height);
+        Assert.True(button.Y + button.Height <= slots.Y, "the button sits above the slots");
     }
 
     /// <summary>Pressed, it lists each change and changes nothing, and Cancel leaves everything as it was.</summary>

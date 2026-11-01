@@ -17,8 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Label _descriptionHeading;
         Composer _composer;
         RichText _description;
+        Section _slotting;
+        RichText _slotsHeading;
         PartList _slots;
-        VStack _adds;
         Button _addCategory;
         Button _optimize;
 
@@ -42,30 +43,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _description)
                 }
             }.As(out _describing));
-            Children.Add(new VStack
+            Children.Add(new Section
             {
-                Base = { Spacing = Gaps.Items },
+                IsVisible = false,
                 Children =
                 {
-                    new PartList { Base = { Spacing = Gaps.Items }, IsVisible = false }.As(out _slots),
-                    new VStack
+                    new HStack
                     {
-                        IsVisible = false,
                         Children =
                         {
-                            new HStack
-                            {
-                                Children =
-                                {
-                                    new Button { Style = Styles.Start }.As(out _addCategory),
-                                    new HStack { Placement = Flex.Spacer },
-                                    new Button { Style = Styles.Button, Align = Align.Center }.As(out _optimize)
-                                }
-                            }
+                            new RichText { Style = Styles.H2Term, Align = Align.Center }.As(out _slotsHeading),
+                            new HStack { Placement = Flex.Spacer },
+                            new Button { Style = Styles.Button, Align = Align.Center }.As(out _optimize)
                         }
-                    }.As(out _adds)
+                    },
+                    new VStack
+                    {
+                        Base = { Spacing = Gaps.Items },
+                        Children =
+                        {
+                            new PartList { Base = { Spacing = Gaps.Items } }.As(out _slots),
+                            new Button { Style = Styles.Start, Align = Align.Left }.As(out _addCategory)
+                        }
+                    }
                 }
-            });
+            }.As(out _slotting));
         }
     }
 }
