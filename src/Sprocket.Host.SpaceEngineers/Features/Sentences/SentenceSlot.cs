@@ -30,6 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What pressing this part does, or null where it cannot be pressed.</summary>
         public ICommand Opens { get; }
 
+        /// <summary>The word joining this part to the one before it, where what laid out its sentence gave one; empty otherwise.</summary>
+        public string Joined { get; set; } = "";
+
         /// <summary>
         /// What each value it asks for wants, one per value, or null where it asks for none.
         /// </summary>

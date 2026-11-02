@@ -58,31 +58,77 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// is null where the line does not say how it reads, <paramref name="value" />, which is null where the blocks are the
         /// subject, and <paramref name="blocks" />.
         /// </summary>
+        /// <remarks>Each part is given the word that joins it to the one before, which a row draws between them.</remarks>
         public void Lay(List<SentenceSlot> into, SentenceSlot reading, SentenceSlot value, SentenceSlot blocks)
         {
-            if (reading != null && Leads)
-                into.Add(reading);
-
-            if (value != null)
-                into.Add(value);
-
-            if (reading != null && !Leads)
-                into.Add(reading);
-
-            into.Add(blocks);
+            var named = value != null;
+            var parts = new[] { reading, value, blocks };
+            foreach (var part in Order(reading != null, named))
+            {
+                var slot = parts[(int)part];
+                slot.Joined = Before(part, named);
+                into.Add(slot);
+            }
         }
 
         /// <summary>
         /// The line as words, up to what it compares with: <paramref name="value" /> on <paramref name="blocks" />, or the blocks
-        /// alone where <paramref name="value" /> is null.
+        /// alone where <paramref name="value" /> is null; the same words, in the same order, as <see cref="Lay" /> gives a row.
         /// </summary>
         public string Says(string value, string blocks)
         {
-            var read = IsRead ? $"{Reading} {blocks}" : blocks;
-            if (value == null)
-                return read;
+            var named = value != null;
+            var said = new List<string>();
+            foreach (var part in Order(IsRead, named))
+            {
+                var joined = Before(part, named);
+                if (joined.Length != 0)
+                    said.Add(joined);
 
-            return Leads ? $"{Reading} {value} on {blocks}" : $"{SentenceText.TheWord} {value} on {read}";
+                said.Add(part == LinePart.Reading ? Reading : part == LinePart.Value ? value : blocks);
+            }
+
+            return string.Join(" ", said);
+        }
+
+        /// <summary>The parts of the line in the order they are said, with the reading where <paramref name="read" /> and the value where <paramref name="named" />.</summary>
+        List<LinePart> Order(bool read, bool named)
+        {
+            var order = new List<LinePart>(3);
+            if (read && Leads)
+                order.Add(LinePart.Reading);
+
+            if (named)
+                order.Add(LinePart.Value);
+
+            if (read && !Leads)
+                order.Add(LinePart.Reading);
+
+            order.Add(LinePart.Blocks);
+            return order;
+        }
+
+        /// <summary>The word that joins <paramref name="part" /> to what comes before it in a line that names a value where <paramref name="named" />.</summary>
+        string Before(LinePart part, bool named)
+        {
+            if (!named)
+                return "";
+
+            if (part == LinePart.Value)
+                return Leads ? "" : SentenceText.TheWord;
+
+            if (part == LinePart.Reading)
+                return Leads ? "" : SentenceText.OnWord;
+
+            return Leads || !IsRead ? SentenceText.OnWord : "";
+        }
+
+        /// <summary>The parts of a line testing blocks, up to its comparison, each numbered by its place among Lay's arguments.</summary>
+        enum LinePart
+        {
+            Reading,
+            Value,
+            Blocks
         }
 
         /// <summary>The words saying how a line reads several blocks by <paramref name="quantifier" />.</summary>

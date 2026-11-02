@@ -46,6 +46,35 @@ public class TestShapeTests
         Assert.Equal(plural, shape.IsPlural);
     }
 
+    /// <summary>A row's parts, with the words joining them, read exactly as the line's plain words do, for every shape.</summary>
+    [Fact]
+    public void ARowAndItsWordsAlwaysAgree()
+    {
+        foreach (var quantifier in new[] { Quantifier.Any, Quantifier.All, Quantifier.Sum, Quantifier.Average })
+        foreach (var namesValue in new[] { false, true })
+        foreach (var many in new[] { false, true })
+        foreach (var slotted in new[] { false, true })
+        {
+            var shape = TestShape.Of(quantifier, namesValue, many, slotted);
+            var reading = new ActionSlot(null!, null!);
+            var value = namesValue ? new ActionSlot(null!, null!) : null;
+            var blocks = new ActionSlot(null!, null!);
+            var parts = new List<SentenceSlot>();
+            shape.Lay(parts, shape.IsRead ? reading : null, value, blocks);
+
+            var row = new List<string>();
+            foreach (var part in parts)
+            {
+                if (part.Joined.Length != 0)
+                    row.Add(part.Joined);
+
+                row.Add(part == reading ? shape.Reading : part == value ? "radius" : "Lamp");
+            }
+
+            Assert.Equal(shape.Says(namesValue ? "radius" : null, "Lamp"), string.Join(" ", row));
+        }
+    }
+
     /// <summary>The parts of a row stand in the order the line says them.</summary>
     [Theory]
     [InlineData(Quantifier.Sum, "reading value blocks")]

@@ -53,7 +53,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What a wait for everything started above it reads as, on a row of its own and where it is offered.</summary>
         public const string AwaitWords = "wait for pending tasks";
 
-        const string OnWord = "on";
+        /// <summary>The word joining a value to the blocks it is read or set on.</summary>
+        public const string OnWord = "on";
+
         const string ToWord = "to";
 
         const int Said = 2;
@@ -171,24 +173,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </summary>
         public static string Joining(IList<SentenceSlot> slots, int slot, bool tests)
         {
+            // A test's parts carry the words joining them, given by the shape that laid them out (TestShape.Lay).
+            if (tests)
+                return slots[slot].Joined;
+
             // A step setting one of the system's states says what it is set to after it.
-            if (!tests && slot == 1 && slots.Count > 1 && slots[0] is SystemStateSlot)
+            if (slot == 1 && slots.Count > 1 && slots[0] is SystemStateSlot)
                 return ToWord;
 
-            // A test's value can stand after the part saying how its blocks are read, and a step enabling a state after the verb.
+            // A step enabling a state names its value after the verb.
             var at = Valued(slots);
             var value = at >= 0 && at < slots.Count ? slots[at] as ActionSlot : null;
-            if (value == null || value.Action == null || !(tests || value.Action.Sets))
+            if (value == null || value.Action == null || !value.Action.Sets)
                 return "";
-
-            // A test's value opens its line with "the" where no words saying how it reads its blocks stand before it (TestShape).
-            if (tests && slot == at)
-                return at == 0 ? TheWord : "";
 
             if (slot == at + 1)
                 return OnWord;
 
-            return slot == at + 2 && !tests ? ToWord : "";
+            return slot == at + 2 ? ToWord : "";
         }
 
         /// <summary>Whether <paramref name="quantifier" /> reads a total of a number on the blocks, a sum or an average.</summary>
