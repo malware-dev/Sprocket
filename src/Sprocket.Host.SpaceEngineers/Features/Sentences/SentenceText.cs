@@ -58,13 +58,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         const int Said = 2;
 
-        const string SumWords = "the sum of";
-
-        const string AverageWords = "the average of";
-
-        const string AnyInWords = "any in";
-
-        const string AllInWords = "all in";
+        /// <summary>The word a test says before the value it names.</summary>
+        public const string TheWord = "the";
 
         /// <summary>Every way a test can read its blocks, in the order they are offered.</summary>
         public static readonly IReadOnlyList<Quantifier> Readings = new[] { Quantifier.Any, Quantifier.All, Quantifier.Sum, Quantifier.Average };
@@ -186,49 +181,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (value == null || value.Action == null || !(tests || value.Action.Sets))
                 return "";
 
+            // A test's value opens its line with "the" where no words saying how it reads its blocks stand before it (TestShape).
+            if (tests && slot == at)
+                return at == 0 ? TheWord : "";
+
             if (slot == at + 1)
                 return OnWord;
 
             return slot == at + 2 && !tests ? ToWord : "";
         }
 
-        /// <summary>
-        /// How a line reads the blocks it names, as the part saying so has it: for a line naming slots, any in, all in, the sum
-        /// of and the average of; for one naming blocks, as <see cref="Quantified" /> says it.
-        /// </summary>
-        public static string Reading(Quantifier quantifier, bool slotted)
-        {
-            if (!slotted)
-                return Quantified(quantifier);
-
-            switch (quantifier)
-            {
-                case Quantifier.All: return AllInWords;
-                case Quantifier.Sum: return SumWords;
-                case Quantifier.Average: return AverageWords;
-            }
-
-            return AnyInWords;
-        }
-
-        /// <summary>
-        /// Whether the part saying how a line reads its blocks by <paramref name="quantifier" /> stands at the front of the line:
-        /// a total does, and so does every reading of a line naming blocks; on a line naming slots, where
-        /// <paramref name="slotted" />, any in and all in stand just before the slots.
-        /// </summary>
-        public static bool Leads(Quantifier quantifier, bool slotted) => !slotted || Totals(quantifier);
-
         /// <summary>Whether <paramref name="quantifier" /> reads a total of a number on the blocks, a sum or an average.</summary>
         public static bool Totals(Quantifier quantifier) => quantifier == Quantifier.Sum || quantifier == Quantifier.Average;
 
-        /// <summary>How a test reads its blocks, as the list choosing it offers it: any, all, the sum of, the average of.</summary>
+        /// <summary>How a test reads its blocks, as the list choosing it offers it: any, all / each, the sum of, the average of.</summary>
+        /// <remarks>A line says the reading in its own words, which <see cref="TestShape" /> gives.</remarks>
         public static string Quantified(Quantifier quantifier)
         {
             switch (quantifier)
             {
-                case Quantifier.All: return "all";
-                case Quantifier.Sum: return SumWords;
-                case Quantifier.Average: return AverageWords;
+                case Quantifier.All: return "all / each";
+                case Quantifier.Sum: return "the sum of";
+                case Quantifier.Average: return "the average of";
             }
 
             return "any";

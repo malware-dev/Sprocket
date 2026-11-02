@@ -54,7 +54,7 @@ public class WatchedNumberTests
         Assert.Equal(5.0, when.Value.Number);
 
         var row = rig.Editor.Triggers()[0];
-        Assert.Equal(new[] { "When", "the average of", "radius", "on", "slot 1", "is below", "5 m", "then run", "Sequence 1" },
+        Assert.Equal(new[] { "When", "the average of the", "radius", "on", "slot 1", "is below", "5 m", "then run", "Sequence 1" },
             Said(row).Take(9));
 
         rig.Editor.Triggers()[0].Starts[1].Opens!.Execute();
@@ -85,7 +85,7 @@ public class WatchedNumberTests
         Assert.Equal(Relation.Below, ((WhenTrigger)system.Triggers[0]).Relation);
     }
 
-    /// <summary>How several blocks are read is chosen from a menu in the sentence's own words, as one edit.</summary>
+    /// <summary>How several blocks are read is chosen from a menu in the words the picker offers, as one edit.</summary>
     [Fact]
     public void TheReadingIsChosenFromAMenu()
     {
@@ -94,12 +94,12 @@ public class WatchedNumberTests
 
         rig.Editor.Triggers()[0].Starts[0].Opens!.Execute();
         rig.Tick();
-        Assert.Equal(new[] { "any in", "all in", "the sum of", "the average of" }, rig.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "any", "all / each", "the sum of", "the average of" }, rig.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
 
         rig.Editor.PressAnswer("the sum of");
         rig.Tick();
         Assert.Equal(Quantifier.Sum, ((WhenTrigger)system.Triggers[0]).Quantifier);
-        Assert.Equal("the sum of", Said(rig.Editor.Triggers()[0])[1]);
+        Assert.Equal("the sum of the", Said(rig.Editor.Triggers()[0])[1]);
     }
 
     /// <summary>A new logic system's trigger picker, with both of the airlock's lights picked and read as <paramref name="reading" /> says.</summary>

@@ -462,16 +462,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         static string Tested(Bindings bindings, Comparison test, SystemInstance through, bool slotted)
         {
             var targets = SystemInstance.Through(through, test.Targets);
-            var blocks = Named(bindings, targets, test.Quantifier != Quantifier.Any, slotted ? test.Targets : null);
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Provider, test.MemberId);
+            var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || targets.Count > 1, slotted);
+            var blocks = Named(bindings, targets, shape.JoinsAll, slotted ? test.Targets : null);
             if (value == null)
-                return $"{SentenceText.Empty} on {blocks}";
+                return shape.Says(SentenceText.Empty, blocks);
 
             var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, targets));
             var given = SentenceText.Given(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation), test.Value }, fields, null,
-                ArgumentRole.Checked, test.Quantifier == Quantifier.All && targets.Count > 1));
-            var read = value.IsStatus ? blocks : $"{SentenceText.Value(value)} on {blocks}";
-            return $"{(targets.Count > 1 ? $"{SentenceText.Quantified(test.Quantifier)} {read}" : read)} {given}";
+                ArgumentRole.Checked, shape.IsPlural));
+            return $"{shape.Says(value.IsStatus ? null : SentenceText.Value(value), blocks)} {given}";
         }
 
         /// <summary>
@@ -494,14 +494,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             }
 
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), provider, id);
+            var shape = TestShape.Of(quantifier, true, slots != null || targets.Count > 1, slots != null);
+            var read = Named(bindings, targets, shape.JoinsAll, slots);
 
             if (value == null)
-                return $"{SentenceText.Empty} on {blocks}";
+                return shape.Says(SentenceText.Empty, read);
 
             var fields = new List<Field>();
             value.Fields(fields);
-            var read = $"{SentenceText.Value(value)} on {blocks}";
-            return $"{(quantifier == Quantifier.Sum || quantifier == Quantifier.Average ? $"{SentenceText.Quantified(quantifier)} {read}" : read)} {Compared(relation)} {SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null))}";
+            return $"{shape.Says(SentenceText.Value(value), read)} {Compared(relation)} {SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null))}";
         }
 
         /// <summary>The blocks <paramref name="targets" />, or the slots <paramref name="slots" /> by their names where there are slots.</summary>

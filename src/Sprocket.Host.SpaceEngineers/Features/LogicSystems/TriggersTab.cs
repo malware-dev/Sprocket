@@ -113,7 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var blocks = _editor.Blocks(_system, moment.Sources);
                 var slotted = _system.IsBlueprint;
                 if (watching != null && slotted)
-                    row.Starts.Add(Reading(watching, false));
+                    row.Starts.Add(Reading(watching, TestShape.Of(watching.Quantifier, false, true, true), false));
 
                 row.Starts.Add(new EntitiesSlot(blocks, moment.Sources, all, MarkText.OfSlots(_system, moment.Sources), Starts(trigger, OpeningColumn.Blocks)));
                 row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, OpeningColumn.What), all && (slotted || blocks.Count > 1)));
@@ -182,23 +182,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             // A line naming slots says how it reads them whatever they hold; one naming blocks, only where it names several.
             var slotted = _system.IsBlueprint;
-            var many = slotted || blocks.Count > 1;
-            var reading = many ? Reading(when, true) : null;
-            var front = SentenceText.Leads(when.Quantifier, slotted);
-            if (reading != null && front)
-                row.Starts.Add(reading);
-
-            row.Starts.Add(new ActionSlot(value, Starts(when, OpeningColumn.What)));
-            if (reading != null && !front)
-                row.Starts.Add(reading);
-
-            row.Starts.Add(new EntitiesSlot(blocks, when.Sources, when.Quantifier != Quantifier.Any, MarkText.OfSlots(_system, when.Sources),
-                Starts(when, OpeningColumn.Blocks)));
+            var shape = TestShape.Of(when.Quantifier, true, slotted || blocks.Count > 1, slotted);
+            var reading = shape.IsRead ? Reading(when, shape, true) : null;
+            shape.Lay(row.Starts, reading, new ActionSlot(value, Starts(when, OpeningColumn.What)),
+                new EntitiesSlot(blocks, when.Sources, shape.JoinsAll, MarkText.OfSlots(_system, when.Sources), Starts(when, OpeningColumn.Blocks)));
             if (value == null)
                 return;
 
             var fields = ComparisonQuestion.Fields(value, _editor.SlotBlocks.Events(_system, when.Sources));
-            var plural = when.Quantifier == Quantifier.All && many;
+            var plural = shape.IsPlural;
             row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(when.Relation) }, fields.GetRange(0, 1),
                 _changes(CommandKind.OpenTrigger, () => Relate(when, fields[0], plural)), ArgumentRole.Compared, plural));
             row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, fields.GetRange(1, fields.Count - 1), Starts(when, OpeningColumn.Arguments), ArgumentRole.Checked));
@@ -224,21 +216,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
-        /// <summary>The part saying how <paramref name="when" /> reads the blocks in its slots, pressed to choose another way, a total among them where it <paramref name="compares" /> a number.</summary>
-        SentenceSlot Reading(WhenTrigger when, bool compares)
+        /// <summary>
+        /// The part saying how <paramref name="when" /> reads its blocks, in the words <paramref name="shape" /> says it with,
+        /// pressed to choose another way, a total among them where it <paramref name="compares" /> a number.
+        /// </summary>
+        SentenceSlot Reading(WhenTrigger when, TestShape shape, bool compares)
         {
-            var slotted = _system.IsBlueprint;
-            var said = SentenceText.Reading(when.Quantifier, slotted);
+            var said = shape.Reading;
             return new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                _changes(CommandKind.OpenTrigger, () => Quantify(when, compares, slotted)), ArgumentRole.Read);
+                _changes(CommandKind.OpenTrigger, () => Quantify(when, compares)), ArgumentRole.Read);
         }
 
         /// <summary>
-        /// Offers the ways <paramref name="when" /> can read its blocks in a menu under the part pressed, in the words of a line
-        /// naming slots where <paramref name="slotted" />, a total among them where it <paramref name="compares" /> a number, and
-        /// changes it to the one chosen.
+        /// Offers the ways <paramref name="when" /> can read its blocks in a menu under the part pressed, in the words the picker
+        /// offers them in, a total among them where it <paramref name="compares" /> a number, and changes it to the one chosen.
         /// </summary>
-        void Quantify(WhenTrigger when, bool compares, bool slotted)
+        void Quantify(WhenTrigger when, bool compares)
         {
             _editor.AskHere("");
             for (var i = 0; i < SentenceText.Readings.Count; i++)
@@ -247,7 +240,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (!compares && SentenceText.Totals(reading))
                     continue;
 
-                _editor.Answer(SentenceText.Reading(reading, slotted), delegate
+                _editor.Answer(SentenceText.Quantified(reading), delegate
                 {
                     if (reading == when.Quantifier)
                         return;

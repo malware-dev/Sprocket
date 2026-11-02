@@ -556,7 +556,7 @@ public class VocabularyTests
         var open = ship.When(BlockKinds.Own, "status", Quantifier.Any, Relation.IsNot, Literal.Name("closed"), ship.Door);
         ship.Start();
 
-        Assert.Equal("When the sum of radius on Left Lamp and Right Lamp is at least 7 m",
+        Assert.Equal("When the sum of the radius on Left Lamp and Right Lamp is at least 7 m",
             SequenceText.Trigger(null!, ship.Runner.Bindings, null!, radius, null));
         Assert.Equal("When Door is not closed", SequenceText.Trigger(null!, ship.Runner.Bindings, null!, open, null));
     }

@@ -103,6 +103,46 @@ public class CheckViewTests
         Assert.Equal("if all Airlock Inner Door and Airlock Outer Door are open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
     }
 
+    /// <summary>
+    /// A check of a value on several blocks names the value first and says how it reads them beside the blocks, and its row
+    /// beside the slot that holds them; the reading is offered as the picker words it.
+    /// </summary>
+    [Fact]
+    public void SeveralBlocksAreReadBesideThem()
+    {
+        var rig = Airlock();
+        var sequence = rig.Editor.Program.Systems[0].Sequences[0];
+        rig.Editor.PressAdd(SentenceText.IfWord);
+        rig.Tick();
+        rig.Editor.TickBlock("Airlock Inner Door");
+        rig.Editor.TickBlock("Airlock Outer Door");
+        rig.Tick();
+        rig.Tick();
+
+        What(rig).Entries().First(entry => entry.Text == "power" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
+        rig.Tick();
+        rig.Editor.Typed("is on");
+        rig.Tick();
+
+        var opens = sequence.Steps.OfType<If>().Single();
+        var step = sequence.Steps.IndexOf(opens);
+        var through = rig.Editor.StandIn(sequence.System);
+        const string any = "if the power on any of Airlock Inner Door and Airlock Outer Door is on";
+        Assert.Equal(any, SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
+        Assert.Equal("if the power on any in slot 2 is on", rig.Editor.Reads(step));
+
+        var reading = rig.Editor.StepRows()[step].Slots.OfType<ArgumentsSlot>().First();
+        reading.Opens!.Execute();
+        rig.Tick();
+        Assert.Equal(new[] { "any", "all / each" }, rig.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+
+        rig.Editor.PressAnswer("all / each");
+        rig.Tick();
+        const string each = "if the power on each of Airlock Inner Door and Airlock Outer Door is on";
+        Assert.Equal(each, SequenceText.Step(rig.Editor.Runner.Bindings, sequence, sequence.Steps.OfType<If>().Single(), through));
+        Assert.Equal("if the power on each in slot 2 is on", rig.Editor.Reads(step));
+    }
+
     /// <summary>Any other value is named in the check, and a number is offered more than sameness.</summary>
     [Fact]
     public void AValueIsNamedAndANumberMeasured()
@@ -119,7 +159,7 @@ public class CheckViewTests
         rig.Tick();
 
         var opens = sequence.Steps.OfType<If>().Single();
-        Assert.Equal("if power on Airlock Outer Door is on", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
+        Assert.Equal("if the power on Airlock Outer Door is on", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
     }
 
     /// <summary>What can start a trigger has the two views every list of members has: the organized one lists what Sprocket vouches for, and the terminal view leaves it out.</summary>
@@ -207,7 +247,7 @@ public class CheckViewTests
 
         var opens = sequence.Steps.OfType<If>().Single();
         Assert.Equal(Quantifier.Average, opens.Compared.Quantifier);
-        Assert.StartsWith("if the average of " + number + " on ", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
+        Assert.StartsWith("if the average of the " + number + " on ", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
     }
 
     /// <summary>Adds an if, and selects the airlock's outer door for it.</summary>

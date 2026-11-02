@@ -67,29 +67,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>
-        /// Offers the ways <paramref name="test" /> can read its blocks in a menu under the part pressed, in the sentence's own
-        /// words, those of a line naming slots where <paramref name="slotted" />, the one it reads them by marked, and changes it
-        /// to the one chosen as one edit; a sum and an average only of what is <paramref name="numeric" />.
+        /// Offers the ways <paramref name="test" /> can read its blocks in a menu under the part pressed, in the words the picker
+        /// offers them in, the one it reads them by marked, and changes it to the one chosen as one edit; a sum and an average
+        /// only of what is <paramref name="numeric" />.
         /// </summary>
-        public void Quantify(Step step, Comparison test, bool numeric, bool slotted)
+        public void Quantify(Step step, Comparison test, bool numeric)
         {
             _editor.AskHere("");
             for (var i = 0; i < SentenceText.Readings.Count; i++)
             {
                 var reading = SentenceText.Readings[i];
                 if (numeric || reading == Quantifier.Any || reading == Quantifier.All)
-                    Quantifying(step, test, reading, slotted);
+                    Quantifying(step, test, reading);
             }
         }
 
         /// <summary>
         /// Offers reading the blocks of <paramref name="test" /> by <paramref name="quantifier" /> as an answer to the standing
-        /// menu, in the words of a line naming slots where <paramref name="slotted" />, marked where the test reads them so, and
-        /// changes the test to it as one edit.
+        /// menu, marked where the test reads them so, and changes the test to it as one edit.
         /// </summary>
-        void Quantifying(Step step, Comparison test, Quantifier quantifier, bool slotted)
+        void Quantifying(Step step, Comparison test, Quantifier quantifier)
         {
-            _editor.Answer(SentenceText.Reading(quantifier, slotted), () =>
+            _editor.Answer(SentenceText.Quantified(quantifier), () =>
             {
                 if (quantifier == test.Quantifier)
                     return;

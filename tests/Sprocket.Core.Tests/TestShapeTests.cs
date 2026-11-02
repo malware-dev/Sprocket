@@ -1,0 +1,65 @@
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Xunit;
+
+namespace Sprocket.Tests;
+
+/// <summary>
+/// A line testing blocks says how it reads them beside the blocks where it names a value, and at the front where the blocks
+/// are its subject; a sum and an average always open it.
+/// </summary>
+public class TestShapeTests
+{
+    /// <summary>A line naming a value says "the" before it, and how it reads its blocks beside them.</summary>
+    [Theory]
+    [InlineData(Quantifier.Any, false, false, "the radius on Lamp")]
+    [InlineData(Quantifier.Any, true, false, "the radius on any of Lamp")]
+    [InlineData(Quantifier.All, true, false, "the radius on each of Lamp")]
+    [InlineData(Quantifier.Sum, true, false, "the sum of the radius on Lamp")]
+    [InlineData(Quantifier.Average, true, false, "the average of the radius on Lamp")]
+    [InlineData(Quantifier.Any, true, true, "the radius on any in Lamp")]
+    [InlineData(Quantifier.All, true, true, "the radius on each in Lamp")]
+    [InlineData(Quantifier.Sum, true, true, "the sum of the radius on Lamp")]
+    public void ALineNamingAValueReadsItsBlocksBesideThem(Quantifier quantifier, bool many, bool slotted, string said)
+    {
+        var shape = TestShape.Of(quantifier, true, many, slotted);
+
+        Assert.Equal(said, shape.Says("radius", "Lamp"));
+        Assert.True(shape.JoinsAll);
+        Assert.False(shape.IsPlural);
+    }
+
+    /// <summary>A line whose blocks are its subject says how it reads them first, in the plural where all of them must.</summary>
+    [Theory]
+    [InlineData(Quantifier.Any, false, false, "Door", false, false)]
+    [InlineData(Quantifier.Any, true, false, "any Door", false, false)]
+    [InlineData(Quantifier.All, true, false, "all Door", true, true)]
+    [InlineData(Quantifier.Any, true, true, "any in Door", false, false)]
+    [InlineData(Quantifier.All, true, true, "all in Door", true, true)]
+    public void ALineAboutTheBlocksReadsThemFirst(Quantifier quantifier, bool many, bool slotted, string said, bool joinsAll,
+        bool plural)
+    {
+        var shape = TestShape.Of(quantifier, false, many, slotted);
+
+        Assert.Equal(said, shape.Says(null, "Door"));
+        Assert.Equal(joinsAll, shape.JoinsAll);
+        Assert.Equal(plural, shape.IsPlural);
+    }
+
+    /// <summary>The parts of a row stand in the order the line says them.</summary>
+    [Theory]
+    [InlineData(Quantifier.Sum, "reading value blocks")]
+    [InlineData(Quantifier.Any, "value reading blocks")]
+    [InlineData(Quantifier.All, "value reading blocks")]
+    public void APartsRowFollowsTheLine(Quantifier quantifier, string order)
+    {
+        var reading = new ActionSlot(null!, null!);
+        var value = new ActionSlot(null!, null!);
+        var blocks = new ActionSlot(null!, null!);
+        var parts = new List<SentenceSlot>();
+
+        TestShape.Of(quantifier, true, true, false).Lay(parts, reading, value, blocks);
+
+        Assert.Equal(order, string.Join(" ", parts.Select(part => part == reading ? "reading" : part == value ? "value" : "blocks")));
+    }
+}

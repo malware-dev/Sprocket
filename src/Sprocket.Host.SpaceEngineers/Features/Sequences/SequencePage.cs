@@ -596,34 +596,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             // A line naming slots says how it reads them whatever they hold; one naming blocks, only where it names several.
             var slotted = _sequence.System.IsBlueprint;
-            var many = slotted || blocks.Count > 1;
-            var said = SentenceText.Reading(test.Quantifier, slotted);
+            var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || blocks.Count > 1, slotted);
             var numeric = value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
-            var reading = many
+            var said = shape.Reading;
+            var reading = shape.IsRead
                 ? new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                    Changes(CommandKind.StepSlot, () => _stepwork.Quantify(step, test, numeric, slotted)), ArgumentRole.Read)
+                    Changes(CommandKind.StepSlot, () => _stepwork.Quantify(step, test, numeric)), ArgumentRole.Read)
                 : null;
-            var front = SentenceText.Leads(test.Quantifier, slotted);
-            if (reading != null && front)
-                row.Slots.Add(reading);
-
-            if (value == null || !value.IsStatus)
-                row.Slots.Add(new ActionSlot(value, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.What))));
-
-            if (reading != null && !front)
-                row.Slots.Add(reading);
-
-            row.Slots.Add(new EntitiesSlot(blocks, test.Targets, test.Quantifier != Quantifier.Any, MarkText.OfSlots(_sequence.System, test.Targets),
+            var named = shape.NamesValue
+                ? new ActionSlot(value, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.What)))
+                : null;
+            var targets = new EntitiesSlot(blocks, test.Targets, shape.JoinsAll, MarkText.OfSlots(_sequence.System, test.Targets),
                 Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Blocks)))
             {
                 Screens = Editor.SlotBlocks.Screens(_sequence.System, test.Targets, blocks)
-            });
+            };
+            shape.Lay(row.Slots, reading, named, targets);
 
             if (value == null)
                 return;
 
             var fields = ComparisonQuestion.Fields(value, Editor.SlotBlocks.Events(_sequence.System, test.Targets));
-            var plural = test.Quantifier == Quantifier.All && many;
+            var plural = shape.IsPlural;
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, fields.GetRange(0, 1),
                 Changes(CommandKind.StepSlot, () => _stepwork.Relate(step, test, fields[0], plural)), ArgumentRole.Compared, plural));
             row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields.GetRange(1, fields.Count - 1),

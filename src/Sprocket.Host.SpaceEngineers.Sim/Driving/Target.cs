@@ -15,6 +15,7 @@ using Lumel.Input;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Sim.Driving
 {
@@ -444,8 +445,14 @@ namespace Sprocket.Sim.Driving
             var trigger = editor.Triggers()[which];
             var line = SentenceText.Lead(trigger.Kind, trigger.Starts.Count);
 
-            foreach (SentenceSlot slot in trigger.Starts)
-                line += " " + SentenceText.InTrigger(editor.World, slot);
+            for (var i = 0; i < trigger.Starts.Count; i++)
+            {
+                var join = SentenceText.Joining(trigger.Starts, i, true);
+                if (join.Length > 0)
+                    line += " " + join;
+
+                line += " " + SentenceText.InTrigger(editor.World, trigger.Starts[i]);
+            }
 
             return line;
         }
@@ -458,7 +465,7 @@ namespace Sprocket.Sim.Driving
 
             for (var i = 0; i < row.Slots.Count; i++)
             {
-                var join = SentenceText.Joining(row.Slots, i);
+                var join = SentenceText.Joining(row.Slots, i, row.Kind == StepKind.If || row.Kind == StepKind.OtherwiseIf);
                 if (join.Length > 0)
                     line += (line.Length > 0 ? " " : "") + join;
 

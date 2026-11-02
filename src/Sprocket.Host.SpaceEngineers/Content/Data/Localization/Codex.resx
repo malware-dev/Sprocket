@@ -342,7 +342,7 @@
   </data>
   <data name="Sprocket.Sequence.ReadAbout" xml:space="preserve">
     <value>Choose whether any or all of the blocks must pass, or whether their sum or average is checked.</value>
-    <comment>Tooltip on how an if reads its blocks where it names several: on the part of its sentence on a sequence's screen, and on the box over the column of blocks in the selector an if or a trigger on a number is made with. The choices are "any", "all", "the sum of" and "the average of"; pressing either opens a menu of them.</comment>
+    <comment>Tooltip on how an if reads its blocks where it names several: on the part of its sentence on a sequence's screen, and on the box over the column of blocks in the selector an if or a trigger on a number is made with. The choices are "any", "all / each", "the sum of" and "the average of"; the sentence says "all" as "each" where it reads a value, and pressing either opens a menu of them.</comment>
   </data>
   <data name="Sprocket.Sequence.CheckedAbout" xml:space="preserve">
     <value>Change the value to check for.</value>
