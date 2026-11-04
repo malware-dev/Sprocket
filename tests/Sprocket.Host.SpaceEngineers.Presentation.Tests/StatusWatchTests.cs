@@ -10,8 +10,9 @@ using Xunit;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// A client's status panel hears how a construct's automation stands from the server: it asks once, is answered at once,
-/// hears every change and nothing else, and lets go once no panel has shown it for five seconds.
+/// A status panel hears how a construct's automation stands from the server: a client's asks once, is answered at once,
+/// hears every change and nothing else, and lets go once no panel has shown it for five seconds; a host's takes what the
+/// server works out, with nothing sent.
 /// </summary>
 public class StatusWatchTests : IDisposable
 {
@@ -23,6 +24,7 @@ public class StatusWatchTests : IDisposable
     readonly Rota _serverRota = new Rota();
     readonly Rota _annaRota = new Rota();
     readonly StatusWatch _annas;
+    readonly StatusWatch _hosts;
     readonly Simulation _sim;
     readonly AutomationSystem _airlock;
     readonly List<ulong> _connected = new List<ulong>();
@@ -43,7 +45,7 @@ public class StatusWatchTests : IDisposable
         _server = _wire.Server();
         _anna = _wire.Client("Anna");
         _connected.Add(_anna.Id);
-        Watch(_server, _serverRota);
+        _hosts = Watch(_server, _serverRota);
         _annas = Watch(_anna, _annaRota);
     }
 
@@ -165,6 +167,72 @@ public class StatusWatchTests : IDisposable
         Run(Rota.Hundred);
 
         Assert.Equal(delivered, _wire.Delivered);
+        Assert.Equal(0, _serverRota.Count);
+    }
+
+    /// <summary>A host's own panels are answered at once from what the server works out, with nothing sent.</summary>
+    [Fact]
+    public void AHostsPanelIsAnsweredWithNothingSent()
+    {
+        var delivered = _wire.Delivered;
+        ConstructStatus status = null!;
+
+        _wire.As(_server, () => status = _hosts.Watch(Barge, () => _redrawn++));
+        _wire.Settle();
+
+        Assert.True(status.Heard);
+        Assert.Equal("Mining Barge", status.Construct);
+        Assert.Equal(1, status.Systems);
+        Assert.Equal(delivered, _wire.Delivered);
+    }
+
+    /// <summary>Every panel on a host showing one construct shares one status, and a change redraws each of them once, with nothing sent.</summary>
+    [Fact]
+    public void AHostsPanelsShareOneStatus()
+    {
+        var first = 0;
+        var second = 0;
+        ConstructStatus one = null!;
+        ConstructStatus other = null!;
+        _wire.As(_server, () =>
+        {
+            one = _hosts.Watch(Barge, () => first++);
+            other = _hosts.Watch(Barge, () => second++);
+        });
+
+        var delivered = _wire.Delivered;
+        _airlock.Enabled = false;
+        _sim.Tick();
+        Run(Rota.Hundred);
+
+        Assert.Same(one, other);
+        Assert.Single(one.Items);
+        Assert.Equal(StatusLevel.Off, one.Items[0].Level);
+        Assert.Equal(1, first);
+        Assert.Equal(1, second);
+        Assert.Equal(delivered, _wire.Delivered);
+    }
+
+    /// <summary>A host's construct that does not change redraws nothing, however long its panels show it.</summary>
+    [Fact]
+    public void AHostsUnchangedConstructRedrawsNothing()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            _wire.As(_server, () => _hosts.Watch(Barge, () => _redrawn++));
+            Run(Rota.Hundred);
+        }
+
+        Assert.Equal(0, _redrawn);
+    }
+
+    /// <summary>A host's construct no panel has shown for five seconds is let go, and the watch leaves the rota.</summary>
+    [Fact]
+    public void AHostsUnseenConstructIsLetGo()
+    {
+        _wire.As(_server, () => _hosts.Watch(Barge, () => _redrawn++));
+        Run(StatusWatch.Unseen + 2 * Rota.Hundred);
+
         Assert.Equal(0, _serverRota.Count);
     }
 

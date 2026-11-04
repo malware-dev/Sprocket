@@ -6,7 +6,6 @@ using Lumel.Text;
 using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game;
 using VRage.Game.GUI.TextPanel;
 using VRage.Game.ModAPI;
@@ -17,10 +16,15 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 {
     /// <summary>The construct's automation on a screen: the installations that want looking at, one at a time, or that all is normal.</summary>
     /// <remarks>
-    /// The game runs it only while somebody can see the screen. It looks at the automation every hundred ticks, a second
-    /// and a half, works it out again only when the automation has changed, and lays the screen out again only when what it
-    /// shows, the screen's size or its colors have changed. Every other run hands the game the frame it already has. On a
-    /// client the automation runs on the server, so the panel watches what the server says of it instead.
+    /// The game runs it only while somebody can see the screen. It works nothing out: the session's watch keeps how the
+    /// construct's automation stands, once for every panel showing it, and the panel draws that. It looks every hundred
+    /// ticks, a second and a half, and lays the screen out again only when what it shows, the screen's size or its colors
+    /// have changed. Every other run hands the game the frame it already has.
+    /// <para>
+    /// The game runs a screen's app for the first time while it builds the block, which during a world's load happens on
+    /// several threads at once. The panel draws nothing until the game's own thread has answered it, and from then on runs
+    /// there.
+    /// </para>
     /// </remarks>
     [MyTextSurfaceScript(Id, "Automation")]
     public class StatusApp : MyTextSurfaceScriptBase, ILiveSurface
@@ -29,11 +33,11 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <remarks>Never change it: a surface stores the script it was given by this name.</remarks>
         public const string Id = "Sprocket_Status";
 
-        readonly StatusSource _source = new StatusSource();
+        readonly ConstructStatus _none = new ConstructStatus();
         readonly StatusPicture _picture = new StatusPicture();
-        readonly List<SprocketUnit> _found = new List<SprocketUnit>();
         readonly TextPanel _panel;
         readonly Action _heard;
+        readonly Action _ready;
 
         const int Turn = 3;
 
@@ -68,14 +72,17 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         Color _ground;
         float _padding;
         bool _blank;
+        bool _asked;
+        bool _answered;
 
         /// <summary>The status panel drawn on <paramref name="surface" /> of <paramref name="block" />, <paramref name="size" /> big.</summary>
         public StatusApp(IMyTextSurface surface, IngameBlock block, Vector2 size)
             : base(surface, block, size)
         {
             _panel = new TextPanel(surface) { Content = _picture.Root };
-            _status = _source.Status;
+            _status = _none;
             _heard = Heard;
+            _ready = delegate { _answered = true; };
         }
 
         /// <summary>Every hundred ticks, a second and a half.</summary>
@@ -91,6 +98,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public override void Run()
         {
             base.Run();
+            if (!OnGameThread())
+                return;
+
             _ran++;
             Safely(true);
         }
@@ -105,6 +115,23 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 SprocketSession.Unwatch(_watching, _heard);
 
             _panel.Dispose();
+        }
+
+        /// <summary>Whether the game's own thread has answered the panel, asking it where it has not been asked yet.</summary>
+        /// <remarks>The game's thread cannot answer while it is still building the block, so the answer comes a run or two later.</remarks>
+        bool OnGameThread()
+        {
+            if (_answered)
+                return true;
+
+            var utilities = MyAPIGateway.Utilities;
+            if (!_asked && utilities != null)
+            {
+                _asked = true;
+                utilities.InvokeOnGameThread(_ready);
+            }
+
+            return _answered;
         }
 
         /// <summary>The status this panel watches arriving from the server, which it draws at once rather than at its next turn.</summary>
@@ -305,23 +332,15 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return grid.GridSize * Math.Max(cells.X, Math.Max(cells.Y, cells.Z));
         }
 
-        /// <summary>Works out how the construct's automation stands where it runs here, and watches what the server says of it on a client.</summary>
+        /// <summary>Finds the construct the panel's block is on, and takes how its automation stands as the session's watch keeps it.</summary>
         void Look()
         {
-            if (SprocketSession.Runs)
-            {
-                SprocketSession.OnConstruct(Block, _found);
-                _source.Look(_found, Constructs.Name(_found), _ran);
-                _status = _source.Status;
-                return;
-            }
-
             var construct = SprocketSession.Construct(Block);
             if (construct != _watching && _watching != 0)
                 SprocketSession.Unwatch(_watching, _heard);
 
             _watching = construct;
-            _status = construct == 0 ? _source.Status : SprocketSession.Watch(construct, _heard);
+            _status = construct == 0 ? _none : SprocketSession.Watch(construct, _heard);
         }
 
         void Blank()

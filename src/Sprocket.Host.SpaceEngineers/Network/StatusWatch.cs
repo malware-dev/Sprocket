@@ -8,13 +8,13 @@ using Mal.MdkModMixin.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>
-    /// What the server tells a client of a construct's automation for its status panels: a client asks once for a construct
-    /// a panel shows, the server answers and then sends every change, and the client lets go once no panel has shown it for
-    /// five seconds.
+    /// How a construct's automation stands, worked out once on the server for every status panel showing it: a client asks
+    /// once for a construct a panel shows, the server answers and then sends every change, and the client lets go once no
+    /// panel has shown it for five seconds. On a host the panels take what the server works out, with nothing sent.
     /// </summary>
     /// <remarks>
     /// The same object on every machine. Looks at what it watches once in a hundred ticks, and only while anything is
-    /// watched; a construct whose automation does not change sends nothing.
+    /// watched; a construct whose automation does not change sends nothing and redraws nothing.
     /// </remarks>
     public sealed class StatusWatch
     {
@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         NetworkChannel _channel;
         bool _turning;
 
-        /// <summary>A construct the server tells clients about, and which clients.</summary>
+        /// <summary>A construct the server works out, and which other machines it tells.</summary>
         sealed class Served
         {
             public readonly StatusSource Source = new StatusSource();
@@ -42,12 +42,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
             public int Sent = -1;
         }
 
-        /// <summary>A construct a client watches, what it last heard, and the panels showing it.</summary>
+        /// <summary>A construct this machine's panels show, what they last heard of it, and the panels.</summary>
         sealed class Watched
         {
             public readonly ConstructStatus Status = new ConstructStatus();
             public readonly List<Action> Panels = new List<Action>();
             public int Seen;
+            public int Taken = -1;
         }
 
         /// <summary>
@@ -82,9 +83,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
         /// <summary>
         /// How the automation of <paramref name="construct" /> stands as the server last said, for a panel that redraws itself
-        /// with <paramref name="panel" /> when the server says more; asks the server where nothing watches it yet.
+        /// with <paramref name="panel" /> when the server says more; asks the server where nothing here watches it yet, and on
+        /// a host works it out at once.
         /// </summary>
-        /// <remarks>On a client. A panel asks every time it is drawn, which keeps the watch.</remarks>
+        /// <remarks>A panel asks every time it is drawn, which keeps the watch. Called on the game's thread only.</remarks>
         public ConstructStatus Watch(long construct, Action panel)
         {
             Watched watched;
@@ -92,7 +94,16 @@ namespace Sprocket.Host.SpaceEngineers.Network
             {
                 watched = new Watched();
                 _watched.Add(construct, watched);
-                _channel.SendToServer(new WatchRequest { Construct = construct, Watching = true }, true);
+                if (NetworkChannel.Network.IsServer)
+                {
+                    // The panel asking draws what this answers, so no panel is told to redraw.
+                    var served = Serve(construct);
+                    if (Look(construct, served))
+                        Take(watched, served);
+                }
+                else
+                    _channel.SendToServer(new WatchRequest { Construct = construct, Watching = true }, true);
+
                 Turning();
             }
 
@@ -130,18 +141,16 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return;
             }
 
-            if (!_served.TryGetValue(request.Construct, out served))
-            {
-                served = new Served();
-                _served.Add(request.Construct, served);
-            }
-
+            served = Serve(request.Construct);
             if (!served.Clients.Contains(sender))
                 served.Clients.Add(sender);
 
             // Answered at once, so a panel coming into view is not left waiting for the next look.
             if (Look(request.Construct, served))
-                _channel.Send(Report(request.Construct, served), sender, true);
+            {
+                served.Sent = served.Source.Status.Revision;
+                _channel.Send(Report(request.Construct, served.Source.Status), sender, true);
+            }
 
             Turning();
         }
@@ -154,14 +163,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return;
 
             watched.Status.Hear(report.Name, report.Systems, report.Normal, report.Items);
-            for (var i = 0; i < watched.Panels.Count; i++)
-                watched.Panels[i]();
+            Redraw(watched);
         }
 
         /// <summary>
-        /// Once in a hundred ticks while anything is watched: on the server, what changed is sent to those watching it and a
-        /// client that has gone is forgotten; on a client, a construct no panel has shown for <see cref="Unseen" /> ticks is
-        /// let go.
+        /// Once in a hundred ticks while anything is watched: on the server, what changed is sent to the clients watching it
+        /// and taken by a host's own panels, and a client that has gone is forgotten; on any machine, a construct no panel has
+        /// shown for <see cref="Unseen" /> ticks is let go.
         /// </summary>
         void Turn(int tick)
         {
@@ -175,16 +183,26 @@ namespace Sprocket.Host.SpaceEngineers.Network
                         served.Clients.RemoveAt(i);
                 }
 
-                if (served.Clients.Count == 0 || !Look(pair.Key, served))
+                Watched here;
+                _watched.TryGetValue(pair.Key, out here);
+                if ((served.Clients.Count == 0 && here == null) || !Look(pair.Key, served))
                 {
                     _done.Add(pair.Key);
                     continue;
                 }
 
-                if (served.Source.Status.Revision == served.Sent)
+                var status = served.Source.Status;
+                if (here != null && here.Taken != status.Revision)
+                {
+                    Take(here, served);
+                    Redraw(here);
+                }
+
+                if (served.Clients.Count == 0 || status.Revision == served.Sent)
                     continue;
 
-                var report = Report(pair.Key, served);
+                served.Sent = status.Revision;
+                var report = Report(pair.Key, status);
                 foreach (var client in served.Clients)
                     _channel.Send(report, client, true);
             }
@@ -202,7 +220,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
             foreach (var construct in _done)
             {
                 _watched.Remove(construct);
-                _channel.SendToServer(new WatchRequest { Construct = construct, Watching = false }, true);
+                if (!NetworkChannel.Network.IsServer)
+                    _channel.SendToServer(new WatchRequest { Construct = construct, Watching = false }, true);
             }
 
             if (_served.Count == 0 && _watched.Count == 0)
@@ -223,11 +242,38 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>A report of how <paramref name="construct" /> stands, which <paramref name="served" /> remembers sending.</summary>
-        static StatusReport Report(long construct, Served served)
+        /// <summary>The server's working out of <paramref name="construct" />, made where there is none yet.</summary>
+        Served Serve(long construct)
+        {
+            Served served;
+            if (!_served.TryGetValue(construct, out served))
+            {
+                served = new Served();
+                _served.Add(construct, served);
+            }
+
+            return served;
+        }
+
+        /// <summary>Gives a host's panels on <paramref name="watched" /> what <paramref name="served" /> worked out.</summary>
+        /// <remarks>Copies the installations, which happens only when they changed.</remarks>
+        static void Take(Watched watched, Served served)
         {
             var status = served.Source.Status;
-            served.Sent = status.Revision;
+            watched.Taken = status.Revision;
+            watched.Status.Hear(status.Construct, status.Systems, status.Normal, status.Copy());
+        }
+
+        /// <summary>Has every panel on <paramref name="watched" /> draw what it now holds.</summary>
+        static void Redraw(Watched watched)
+        {
+            for (var i = 0; i < watched.Panels.Count; i++)
+                watched.Panels[i]();
+        }
+
+        /// <summary>A report of how <paramref name="construct" /> stands, as <paramref name="status" /> says.</summary>
+        static StatusReport Report(long construct, ConstructStatus status)
+        {
             return new StatusReport
             {
                 Construct = construct,

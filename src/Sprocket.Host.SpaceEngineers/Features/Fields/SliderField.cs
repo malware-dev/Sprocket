@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             _format = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##";
 
             Base.Spacing = Gaps.Parts;
-            Children.Add(new Slider { Base = { TrackTint = Palette.Line, TrackHeight = 4f, Thumb = Palette.Ink }, Placement = Flex.Grow }.As(out _slider));
+            Children.Add(new Slider { Placement = Flex.Grow }.As(out _slider));
             Children.Add(new NumberField(field, submit, Box).As(out _number));
 
             _slider.ValueChanged += delegate

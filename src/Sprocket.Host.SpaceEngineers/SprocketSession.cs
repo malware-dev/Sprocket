@@ -130,18 +130,6 @@ namespace Sprocket.Host.SpaceEngineers
             return _current == null || block == null ? null : _current._roster.On(block);
         }
 
-        /// <summary>Whether this machine is the one running programs.</summary>
-        public static bool Runs => IsServer;
-
-        /// <summary>Every Sprocket mechanically connected to this block, in no particular order.</summary>
-        /// <remarks>Clears and fills <paramref name="into" />, allocating nothing.</remarks>
-        public static void OnConstruct(IMyCubeBlock block, List<SprocketUnit> into)
-        {
-            into.Clear();
-            if (_current != null)
-                _current._constructs.Members(block?.CubeGrid, into);
-        }
-
         /// <summary>
         /// The construct <paramref name="block" /> is on, by the entity id of the grid that stands for it: the oldest of its
         /// grids, the one with the lowest id, which every machine finds the same; or 0 where it is on none.
@@ -153,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>How the server last said the automation of <paramref name="construct" /> stands, for a panel that redraws itself with <paramref name="panel" /> when it says more.</summary>
-        /// <remarks>On a client, every time the panel is drawn.</remarks>
+        /// <remarks>Every time the panel is drawn, on the game's thread.</remarks>
         public static ConstructStatus Watch(long construct, Action panel)
         {
             return _current == null ? new ConstructStatus() : _current._watch.Watch(construct, panel);
