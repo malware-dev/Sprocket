@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var sources = SystemInstance.Through(through, moment.Sources);
                 var named = slotted ? moment.Sources : null;
                 if (when != null && !Watched(bindings, when, sources))
-                    return $"When {Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources, named)}";
+                    return $"When {Compared(bindings, when, sources, named)}";
 
                 var all = when != null && when.Quantifier == Quantifier.All;
                 var happening = Happening(bindings, Vocabulary.EventOf(program, bindings, system, moment, through), sources);
@@ -334,6 +334,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return texts.StoppedUnable;
             if (problem == SequenceProblem.Adrift)
                 return texts.StoppedAdrift;
+            if (problem == SequenceProblem.NothingToAverage)
+                return texts.StoppedNothingToAverage;
 
             return texts.StoppedFailed;
         }
@@ -402,6 +404,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return texts.ProblemUnable;
             if (problem == SequenceProblem.Stalled)
                 return texts.ProblemStalled;
+            if (problem == SequenceProblem.NothingToAverage)
+                return texts.ProblemNothingToAverage;
 
             return "";
         }
@@ -471,30 +475,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, targets));
             var given = SentenceText.Given(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation), test.Value }, fields, null,
                 ArgumentRole.Checked, shape.IsPlural));
-            return $"{shape.Says(value.IsStatus ? null : SentenceText.Value(value), blocks)} {given}";
+            return $"{shape.Says(value.IsStatus ? null : SentenceText.Value(value), blocks, Taking(value, test.Arguments))} {given}";
         }
 
         /// <summary>
-        /// A member compared on some blocks, as a sentence reads it: the blocks and the state they are read for, for one of
-        /// Sprocket's own, or the value on the blocks and what it is compared with.
+        /// What <paramref name="when" /> compares on the blocks <paramref name="targets" />, as a sentence reads it: the blocks
+        /// and the state they are read for, for one of Sprocket's own, or the value on the blocks and what it is compared with.
         /// </summary>
-        static string Compared(Bindings bindings, string provider, string id, Quantifier quantifier, Relation relation,
-            Literal compared, IList<string> targets, IList<string> slots)
+        static string Compared(Bindings bindings, WhenTrigger when, IList<string> targets, IList<string> slots)
         {
-            var blocks = Named(bindings, targets, quantifier != Quantifier.Any, slots);
-            if (provider == BlockKinds.Own)
+            var blocks = Named(bindings, targets, when.Quantifier != Quantifier.Any, slots);
+            if (when.Provider == BlockKinds.Own)
             {
                 bool inState;
-                var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), id, relation, compared, out inState);
+                var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), when.EventId, when.Relation, when.Value, out inState);
                 if (state != null)
                 {
                     var said = inState ? state.State : state.Unstate;
-                    return $"{blocks} {(quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said)}";
+                    return $"{blocks} {(when.Quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said)}";
                 }
             }
 
-            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), provider, id);
-            var shape = TestShape.Of(quantifier, true, slots != null || targets.Count > 1, slots != null);
+            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), when.Provider, when.EventId);
+            var shape = TestShape.Of(when.Quantifier, true, slots != null || targets.Count > 1, slots != null);
             var read = Named(bindings, targets, shape.JoinsAll, slots);
 
             if (value == null)
@@ -502,7 +505,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var fields = new List<Field>();
             value.Fields(fields);
-            return $"{shape.Says(SentenceText.Value(value), read)} {Compared(relation)} {SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null))}";
+            return $"{shape.Says(SentenceText.Value(value), read, Taking(value, when.Arguments))} {Compared(when.Relation)} {SentenceText.Given(new ArgumentsSlot(new[] { when.Value }, fields, null))}";
+        }
+
+        /// <summary>The <paramref name="arguments" /> <paramref name="value" /> is read with, as a sentence says them, or null where it takes none.</summary>
+        static string Taking(EntityAction value, IList<Literal> arguments)
+        {
+            var parameters = ComparisonQuestion.Parameters(value);
+            return parameters.Count == 0 ? null : SentenceText.Given(new ArgumentsSlot(arguments, parameters, null));
         }
 
         /// <summary>The blocks <paramref name="targets" />, or the slots <paramref name="slots" /> by their names where there are slots.</summary>

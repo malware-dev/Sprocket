@@ -303,6 +303,7 @@ when average Gearbox.fill on [ tank1, tank2 ] < 0.25 then run 7
   * `all`: The condition must hold across all specified blocks. Fires once when the final block satisfies the condition.
   * `sum`: Numeric values are summed across all blocks and compared once. Valid only on integers and reals.
   * `average`: Numeric values are averaged across all blocks and compared once. Valid only on integers and reals.
+  * **No blocks:** Over an empty set, `sum` is 0, `any` is false and `all` is true. `average` has no value, and the step fails.
 * **Polling Interval (`every`):** Sets the evaluation frequency. Defaults to `10t` if omitted. Hosts that provide push event updates for member changes may evaluate immediately, bypassing the poll timer.
 
 ### 10.3 State Watchers (`when`)

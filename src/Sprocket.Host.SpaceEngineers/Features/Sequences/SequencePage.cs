@@ -611,7 +611,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 Screens = Editor.SlotBlocks.Screens(_sequence.System, test.Targets, blocks)
             };
-            shape.Lay(row.Slots, reading, named, targets);
+            var parameters = ComparisonQuestion.Parameters(value);
+            var taking = parameters.Count == 0 ? null : new ArgumentsSlot(test.Arguments, parameters,
+                Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Arguments)), ArgumentRole.ReadWith);
+            shape.Lay(row.Slots, reading, named, targets, taking);
 
             if (value == null)
                 return;

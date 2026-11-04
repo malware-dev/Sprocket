@@ -49,6 +49,50 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return fields;
         }
 
+        /// <summary>
+        /// Everything a selector asks of a check on <paramref name="value" />: the arguments it is read with where it is a
+        /// function, then the relation and what it is compared with, or the relation alone where <paramref name="stated" />.
+        /// </summary>
+        public static List<Field> Asked(EntityAction value, IList<EntityEvent> events, bool stated)
+        {
+            var fields = Parameters(value);
+            fields.AddRange(stated ? StateFields() : Fields(value, events));
+            return fields;
+        }
+
+        /// <summary>The fields <paramref name="value" /> is read with, one per argument in order; empty for a value that takes none.</summary>
+        public static List<Field> Parameters(EntityAction value)
+        {
+            var fields = new List<Field>();
+            if (value?.OwnValue != null)
+                fields.AddRange(value.OwnValue.Parameters);
+
+            return fields;
+        }
+
+        /// <summary>How many of the literals a selector gives back for a check on <paramref name="value" /> are the arguments it is read with.</summary>
+        public static int Taken(EntityAction value)
+        {
+            var taken = 0;
+            foreach (var field in Parameters(value))
+                taken += field.Covers;
+
+            return taken;
+        }
+
+        /// <summary>
+        /// What a selector opens holding for a check read with <paramref name="arguments" />, comparing by
+        /// <paramref name="relation" /> with <paramref name="compared" />, or by the relation alone where that is null.
+        /// </summary>
+        public static Literal[] Opening(IList<Literal> arguments, Relation relation, Literal? compared)
+        {
+            var opening = new List<Literal>(arguments) { Of(relation) };
+            if (compared.HasValue)
+                opening.Add(compared.Value);
+
+            return opening.ToArray();
+        }
+
         /// <summary>The fields a check for one state of a status asks for: the relation alone, the state being chosen already.</summary>
         public static List<Field> StateFields()
         {

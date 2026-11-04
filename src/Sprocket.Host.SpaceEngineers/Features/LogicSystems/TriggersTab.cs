@@ -184,8 +184,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var slotted = _system.IsBlueprint;
             var shape = TestShape.Of(when.Quantifier, true, slotted || blocks.Count > 1, slotted);
             var reading = shape.IsRead ? Reading(when, shape, true) : null;
+            var parameters = ComparisonQuestion.Parameters(value);
+            var taking = parameters.Count == 0 ? null : new ArgumentsSlot(when.Arguments, parameters, Starts(when, OpeningColumn.Arguments), ArgumentRole.ReadWith);
             shape.Lay(row.Starts, reading, new ActionSlot(value, Starts(when, OpeningColumn.What)),
-                new EntitiesSlot(blocks, when.Sources, shape.JoinsAll, MarkText.OfSlots(_system, when.Sources), Starts(when, OpeningColumn.Blocks)));
+                new EntitiesSlot(blocks, when.Sources, shape.JoinsAll, MarkText.OfSlots(_system, when.Sources), Starts(when, OpeningColumn.Blocks)), taking);
             if (value == null)
                 return;
 

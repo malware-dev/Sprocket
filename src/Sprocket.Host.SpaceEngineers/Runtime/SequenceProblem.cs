@@ -89,6 +89,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>One of its steps does something to a screen, on a slot that holds blocks rather than screens.</summary>
         /// <remarks>A warning: the step still runs, and giving it a screen slot in the picker mends it.</remarks>
-        ScreenOnBlockSlot = 18
+        ScreenOnBlockSlot = 18,
+
+        /// <summary>One of its if steps takes the average of a set that holds no blocks, so it has no number to compare.</summary>
+        /// <remarks>The run ends there.</remarks>
+        NothingToAverage = 19
     }
 }

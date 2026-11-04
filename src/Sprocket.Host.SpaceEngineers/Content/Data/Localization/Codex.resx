@@ -348,6 +348,10 @@
     <value>Change the value to check for.</value>
     <comment>Tooltip on the value an if checks blocks for, in the if's sentence on a sequence's screen; pressing it opens the picker on that value.</comment>
   </data>
+  <data name="Sprocket.Sequence.ReadWithAbout" xml:space="preserve">
+    <value>Change what the value is read with.</value>
+    <comment>Tooltip on what a value is read with, such as the button whose label it reads, straight after the value in the sentence of an if on a sequence's screen or of a trigger on a logic system's screen; pressing it opens the picker on it.</comment>
+  </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
     <value>Change how long the delay is.</value>
     <comment>Tooltip on a wait step's length in its sentence on a sequence's screen; pressing it opens the panel where the length is given.</comment>

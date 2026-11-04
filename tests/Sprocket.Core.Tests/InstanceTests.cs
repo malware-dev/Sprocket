@@ -406,6 +406,30 @@ public class InstanceTests
         Assert.Equal(5, added.Number);
     }
 
+    /// <summary>A when over an optional slot left empty reads its sum as 0, and finds no average to compare.</summary>
+    [Theory]
+    [InlineData(Quantifier.Sum, true)]
+    [InlineData(Quantifier.Average, false)]
+    public void AWhenOverAnEmptySlotReadsTheSumAsZero(Quantifier quantifier, bool holds)
+    {
+        var ship = Build();
+        var tanks = ship.Airlock.PartFor("tanks");
+        tanks.Optional = true;
+        Front(ship).Fill("tanks", new string[0]);
+
+        var low = new WhenTrigger("fill") { Quantifier = quantifier, Relation = Relation.Below, Value = Literal.Of(1d) };
+        low.Sources.Add("tanks");
+        var close = new Act("close");
+        close.Targets.Add(ship.Ref(2));
+        low.Does = close;
+        ship.Airlock.AddTrigger(low);
+        ship.Program.Edited();
+
+        ship.Tick(30);
+
+        Assert.Equal(holds, ship.Runner.Watches.Poller(low, Front(ship))!.Live);
+    }
+
     /// <summary>
     /// An installation with a slot left empty stays switched on, watches nothing and starts nothing, and runs once the slot is
     /// filled.

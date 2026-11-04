@@ -2292,6 +2292,14 @@
     <value>There are no pending tasks to wait for here, because no step above it takes time.</value>
     <comment>Warning on an await (a wait for what is running) when no step since the previous await takes time to finish. Shown under the await's line on a sequence's screen and on the sequence's row on a logic system's screen.</comment>
   </data>
+  <data name="Sprocket.Problem.NothingToAverage" xml:space="preserve">
+    <value>This step has no blocks to take an average of.</value>
+    <comment>Problem when an if step takes the average of a value over a set that holds no blocks, such as an empty slot, so there is no number to compare and the run ended there. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Stopped.NothingToAverage" xml:space="preserve">
+    <value>it had no blocks to take an average of.</value>
+    <comment>Reason a run stopped: an if step took the average of a value over a set that holds no blocks, such as an empty slot. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
   <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
     <value>Advanced door</value>
     <comment>On a slot's page, the type of block the slot expects: the game's AdvancedDoor blocks, and every type the game builds on it; it covers gates and offset doors.</comment>

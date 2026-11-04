@@ -235,6 +235,36 @@ public class IfRunTests
         Assert.Equal(0, a.State.Fault.Step);
     }
 
+    /// <summary>An average over no blocks has no number to compare, so the run ends at the test and says why.</summary>
+    [Fact]
+    public void AnAverageOfNoBlocksEndsTheRun()
+    {
+        var a = new Airlock();
+        var test = new Comparison { MemberId = "OnOff", Provider = "", Quantifier = Quantifier.Average, Relation = Relation.Below, Value = Literal.Of(1d) };
+        a.Add(new If(test), a.Do("open", a.Inner), new EndIf(), new Await());
+
+        a.Start();
+        a.Tick(5);
+
+        Assert.DoesNotContain("Inner Door:open", a.Log);
+        Assert.Equal(SequenceProblem.NothingToAverage, a.State.Fault.Problem);
+        Assert.Equal(0, a.State.Fault.Step);
+    }
+
+    /// <summary>A sum over no blocks is 0, and is compared as 0.</summary>
+    [Fact]
+    public void ASumOfNoBlocksIsZero()
+    {
+        var a = new Airlock();
+        var test = new Comparison { MemberId = "OnOff", Provider = "", Quantifier = Quantifier.Sum, Relation = Relation.Below, Value = Literal.Of(1d) };
+        a.Add(new If(test), a.Do("open", a.Inner), new EndIf(), new Await());
+
+        a.Start();
+        a.Tick(5);
+
+        Assert.Contains("Inner Door:open", a.Log);
+    }
+
     /// <summary>A step that takes time, at the end of a branch, is waited for by an await after the if.</summary>
     [Fact]
     public void AnAwaitAfterTheIfWaitsForWhatItsBranchStarted()

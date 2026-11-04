@@ -79,13 +79,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (answer.Form == ReachKind.Value)
             {
                 var given = answer.Arguments;
+                var provider = Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, ReachKind.Value);
+                var taken = ComparisonQuestion.Taken(EntityAction.Value(Vocabulary.ActionsOf(_editor.World, answer.Targets), provider, answer.Chosen));
                 var when = new WhenTrigger(answer.Chosen)
                 {
-                    Provider = Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, ReachKind.Value),
+                    Provider = provider,
                     Quantifier = answer.Quantifier,
-                    Relation = given.Count > 0 ? ComparisonQuestion.Read(given[0]) : Relation.Is,
-                    Value = given.Count > 1 ? given[1] : Literal.Of(0)
+                    Relation = given.Count > taken ? ComparisonQuestion.Read(given[taken]) : Relation.Is,
+                    Value = given.Count > taken + 1 ? given[taken + 1] : Literal.Of(0)
                 };
+
+                for (var i = 0; i < taken && i < given.Count; i++)
+                    when.Arguments.Add(given[i]);
 
                 _editor.Picks.Name(system, answer, true, replacing, sources =>
                 {
@@ -484,7 +489,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         Claimed(system, was, made, answer, keeping, aim, origin);
                     });
                 },
-                true, when?.Quantifier ?? Quantifier.Any, compares ? new[] { ComparisonQuestion.Of(when.Relation), when.Value } : null,
+                true, when?.Quantifier ?? Quantifier.Any, compares ? ComparisonQuestion.Opening(when.Arguments, when.Relation, when.Value) : null,
                 opens: action ? OpeningColumn.Nothing : opens, aim: aim);
         }
 

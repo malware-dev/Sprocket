@@ -16,6 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         Compared,
 
         /// <summary>How an if reads its blocks, where it adds a value up over them: the sum of.</summary>
-        Read
+        Read,
+
+        /// <summary>What a value is read with, where it takes arguments: the button whose label it reads.</summary>
+        ReadWith
     }
 }

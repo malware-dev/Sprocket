@@ -263,6 +263,9 @@
   <data name="Sprocket.Sequence.CheckedAbout" xml:space="preserve">
     <value>Endre verdien det sjekkes etter.</value>
   </data>
+  <data name="Sprocket.Sequence.ReadWithAbout" xml:space="preserve">
+    <value>Endre hva verdien leses med.</value>
+  </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
     <value>Endre hvor lang forsinkelsen er.</value>
   </data>

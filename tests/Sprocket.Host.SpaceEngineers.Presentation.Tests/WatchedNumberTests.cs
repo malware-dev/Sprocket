@@ -102,6 +102,48 @@ public class WatchedNumberTests
         Assert.Equal("the sum of the", Said(rig.Editor.Triggers()[0])[1]);
     }
 
+    /// <summary>
+    /// A trigger on a value read with an option asks for the option before the comparison, and its row says it straight
+    /// after the value; pressing it opens the picker again holding it.
+    /// </summary>
+    [Fact]
+    public void ATriggerOnAValueReadWithAnOptionAsksForIt()
+    {
+        var rig = Simulation.Fresh();
+        var by = Field.Called("by");
+        by.Entry = FieldInput.Decimal;
+        rig.Editor.World.Entities.First(entity => entity.Name == "Airlock Light").Kind.WithValue("brighter", "brighter",
+            OwnValue.Number<Sandbox.ModAPI.IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by))
+            .Looked("A test value.");
+        rig.Editor.NewSystem("Airlock");
+        rig.Editor.PressStart(SentenceText.WhenWord);
+        rig.Editor.PressBlock("Airlock Light");
+        rig.Tick();
+
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "brighter" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
+        rig.Tick();
+        Assert.Equal("by", ((PickPage)rig.Editor.Current).Fields[0].Name);
+
+        rig.Editor.Typed("2 above 5");
+        rig.Tick();
+        if (rig.Editor.Current is not LogicSystemPage)
+            rig.Editor.Back();
+
+        rig.Tick();
+
+        var when = Assert.IsType<WhenTrigger>(rig.Editor.Program.Systems[0].Triggers[0]);
+        Assert.Equal(new[] { 2.0 }, when.Arguments.Select(argument => argument.Number).ToArray());
+        Assert.Equal(Relation.Above, when.Relation);
+        Assert.Equal(5.0, when.Value.Number);
+
+        var row = rig.Editor.Triggers()[0];
+        Assert.Equal(new[] { "When", "the", "brighter", "2", "on", "any in", "slot 1", "is above", "5" }, Said(row).Take(9));
+
+        row.Starts.OfType<ArgumentsSlot>().First().Opens!.Execute();
+        rig.Tick();
+        Assert.Equal("2.0 above 5.0", rig.Editor.Pick().Arguments!.Form.Answer);
+    }
+
     /// <summary>A new logic system's trigger picker, with both of the airlock's lights picked and read as <paramref name="reading" /> says.</summary>
     static Simulation Picking(string reading)
     {
@@ -123,7 +165,6 @@ public class WatchedNumberTests
         return rig;
     }
 
-    /// <summary>A logic system started when the average radius of the airlock's lights is below 5, made in the picker, on its page.</summary>
     /// <summary>Every part of what starts a trigger on a number says what pressing it does: how its blocks are read, the value, the blocks, the comparison and the number.</summary>
     [Fact]
     public void EveryPartOfANumberTriggerHasATooltip()
@@ -141,6 +182,7 @@ public class WatchedNumberTests
         Assert.Equal(texts.Codex.SequenceCheckedAbout, tips[4]);
     }
 
+    /// <summary>A logic system started when the average radius of the airlock's lights is below 5, made in the picker, on its page.</summary>
     static Simulation Made()
     {
         var rig = Picking("the average of");

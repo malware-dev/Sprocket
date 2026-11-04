@@ -251,6 +251,42 @@ public class CheckViewTests
     }
 
     /// <summary>Adds an if, and selects the airlock's outer door for it.</summary>
+    /// <summary>
+    /// A check on a value read with an option asks for the option before the comparison, and its line and row say it
+    /// straight after the value; changing the check opens on it.
+    /// </summary>
+    [Fact]
+    public void AValueReadWithAnOptionAsksForIt()
+    {
+        var rig = Airlock();
+        var sequence = rig.Editor.Program.Systems[0].Sequences[0];
+        rig.Editor.PressAdd(SentenceText.IfWord);
+        rig.Tick();
+        rig.Editor.PressBlock("Airlock Button");
+        rig.Tick();
+
+        What(rig).Entries().First(entry => entry.Text == "label of button" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
+        rig.Tick();
+        Assert.Equal("button", ((PickPage)rig.Editor.Current).Fields[0].Name);
+
+        rig.Editor.Typed("2 is Exit");
+        rig.Tick();
+
+        var opens = sequence.Steps.OfType<If>().Single();
+        var step = sequence.Steps.IndexOf(opens);
+        Assert.Equal(new[] { "2" }, opens.Compared.Arguments.Select(argument => argument.Said).ToArray());
+        Assert.Equal("Exit", opens.Compared.Value.Said);
+        Assert.Equal("if the label of button 2 on Airlock Button is Exit",
+            SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
+        Assert.Equal("if the label of button 2 on any in slot 2 is Exit", rig.Editor.Reads(step));
+
+        var taking = rig.Editor.StepRows()[step].Slots.OfType<ArgumentsSlot>().First();
+        Assert.Equal(rig.Texts.Codex.SequenceReadWithAbout, taking.About(rig.Texts));
+        taking.Opens!.Execute();
+        rig.Tick();
+        Assert.Equal("2", ((PickPage)rig.Editor.Current).Filled[0]);
+    }
+
     static void Open(Simulation rig)
     {
         rig.Editor.PressAdd(SentenceText.IfWord);

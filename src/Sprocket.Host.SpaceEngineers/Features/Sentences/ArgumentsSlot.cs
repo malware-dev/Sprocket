@@ -123,6 +123,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (_holds == ArgumentRole.Read)
                 return texts.Codex.SequenceReadAbout;
 
+            if (_holds == ArgumentRole.ReadWith)
+                return texts.Codex.SequenceReadWithAbout;
+
             return _holds == ArgumentRole.Checked ? texts.Codex.SequenceCheckedAbout : texts.Codex.SequenceOptionsAbout;
         }
     }

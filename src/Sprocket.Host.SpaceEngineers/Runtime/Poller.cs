@@ -379,11 +379,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Fires when the comparison comes to hold on the sum of what the blocks read, and not again until it stops holding.
         /// </summary>
-        /// <remarks>Every block is read, so a block the sum cannot read leaves it out of reach: it never holds.</remarks>
+        /// <remarks>
+        /// Every block is read, so a block the sum cannot read leaves it out of reach: it never holds. Over no blocks the sum
+        /// is 0 and the average never holds.
+        /// </remarks>
         bool SampleSum(WhenTrigger when)
         {
             var total = 0d;
-            var readable = _entities.Length > 0;
+            var readable = _entities.Length > 0 || when.Quantifier == Quantifier.Sum;
             string lost = null;
 
             for (var i = 0; i < _entities.Length; i++)

@@ -848,16 +848,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return _nothing;
 
             // A number watched to start something is compared as a check compares it.
-            if (_forEvents && _chosenForm == ReachKind.Value)
-                return ComparisonQuestion.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
-
-            if (!_forTests)
+            if (!_forTests && !(_forEvents && _chosenForm == ReachKind.Value))
                 return Editor.Fields(_selection, _chosen, _chosenForm);
 
-            string value, state;
-            return ComparisonQuestion.Split(_chosen, out value, out state)
-                ? ComparisonQuestion.StateFields()
-                : ComparisonQuestion.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
+            var value = _chosen;
+            string state;
+            var stated = _forTests && ComparisonQuestion.Split(_chosen, out value, out state);
+            return ComparisonQuestion.Asked(Valued(Vocabulary.ActionsOf(Editor.World, _selection), value), Vocabulary.EventsOf(Editor.World, _selection), stated);
         }
 
         /// <summary>

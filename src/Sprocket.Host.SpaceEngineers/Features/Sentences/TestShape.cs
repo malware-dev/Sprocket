@@ -56,10 +56,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// Puts the parts of the line in <paramref name="into" /> in the order they are said: <paramref name="reading" />, which
         /// is null where the line does not say how it reads, <paramref name="value" />, which is null where the blocks are the
-        /// subject, and <paramref name="blocks" />.
+        /// subject, the arguments <paramref name="taking" /> the value is read with straight after it, null where it takes none,
+        /// and <paramref name="blocks" />.
         /// </summary>
         /// <remarks>Each part is given the word that joins it to the one before, which a row draws between them.</remarks>
-        public void Lay(List<SentenceSlot> into, SentenceSlot reading, SentenceSlot value, SentenceSlot blocks)
+        public void Lay(List<SentenceSlot> into, SentenceSlot reading, SentenceSlot value, SentenceSlot blocks, SentenceSlot taking = null)
         {
             var named = value != null;
             var parts = new[] { reading, value, blocks };
@@ -68,14 +69,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var slot = parts[(int)part];
                 slot.Joined = Before(part, named);
                 into.Add(slot);
+                if (part != LinePart.Value || taking == null)
+                    continue;
+
+                taking.Joined = "";
+                into.Add(taking);
             }
         }
 
         /// <summary>
-        /// The line as words, up to what it compares with: <paramref name="value" /> on <paramref name="blocks" />, or the blocks
-        /// alone where <paramref name="value" /> is null; the same words, in the same order, as <see cref="Lay" /> gives a row.
+        /// The line as words, up to what it compares with: <paramref name="value" /> read with <paramref name="taking" />, null
+        /// where it takes nothing, on <paramref name="blocks" />, or the blocks alone where <paramref name="value" /> is null; the
+        /// same words, in the same order, as <see cref="Lay" /> gives a row.
         /// </summary>
-        public string Says(string value, string blocks)
+        public string Says(string value, string blocks, string taking = null)
         {
             var named = value != null;
             var said = new List<string>();
@@ -86,6 +93,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     said.Add(joined);
 
                 said.Add(part == LinePart.Reading ? Reading : part == LinePart.Value ? value : blocks);
+                if (part == LinePart.Value && taking != null)
+                    said.Add(taking);
             }
 
             return string.Join(" ", said);

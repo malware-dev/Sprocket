@@ -353,7 +353,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 stated ? ReachKind.Native : ReachKind.Value,
                 answer => Named(answer, test?.Targets, named => chosen(Test(answer, named, test))),
                 true, test?.Quantifier ?? Quantifier.Any,
-                test == null ? null : stated ? new[] { ComparisonQuestion.Of(test.Relation) } : new[] { ComparisonQuestion.Of(test.Relation), test.Value },
+                test == null ? null : ComparisonQuestion.Opening(test.Arguments, test.Relation, stated ? (Literal?)null : test.Value),
                 opens, forTests: true, facet: test == null ? "" : _editor.Picks.Facet(_sequence.System, test.Targets));
         }
 
@@ -369,12 +369,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             string id, state;
             var stated = ComparisonQuestion.Split(answer.Chosen, out id, out state);
             var value = Valued(Vocabulary.ActionsOf(_editor.World, answer.Targets), id);
-            var given = answer.Arguments;
+            var given = answer.Arguments ?? new List<Literal>();
+            var taken = ComparisonQuestion.Taken(value);
             test.MemberId = id;
             test.Provider = value != null && value.OwnValue != null ? BlockKinds.Own : "";
-            test.Relation = given != null && given.Count > 0 ? ComparisonQuestion.Read(given[0]) : Relation.Is;
-            test.Value = stated ? Stated(state) : given != null && given.Count > 1 ? given[1] : Literal.Of(true);
-            if (was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
+            test.Relation = given.Count > taken ? ComparisonQuestion.Read(given[taken]) : Relation.Is;
+            test.Value = stated ? Stated(state) : given.Count > taken + 1 ? given[taken + 1] : Literal.Of(true);
+            for (var i = 0; i < taken && i < given.Count; i++)
+                test.Arguments.Add(given[i]);
+
+            // A value the blocks picked lack keeps the arguments it had, since the selector asked for none.
+            if (value != null || was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
                 return test;
 
             for (var i = 0; i < was.Arguments.Count; i++)

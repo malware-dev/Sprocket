@@ -46,7 +46,7 @@ public class TestShapeTests
         Assert.Equal(plural, shape.IsPlural);
     }
 
-    /// <summary>A row's parts, with the words joining them, read exactly as the line's plain words do, for every shape.</summary>
+    /// <summary>A row's parts, with the words joining them, read exactly as the line's plain words do, for every shape, with and without arguments.</summary>
     [Fact]
     public void ARowAndItsWordsAlwaysAgree()
     {
@@ -54,13 +54,15 @@ public class TestShapeTests
         foreach (var namesValue in new[] { false, true })
         foreach (var many in new[] { false, true })
         foreach (var slotted in new[] { false, true })
+        foreach (var takes in new[] { false, true })
         {
             var shape = TestShape.Of(quantifier, namesValue, many, slotted);
             var reading = new ActionSlot(null!, null!);
             var value = namesValue ? new ActionSlot(null!, null!) : null;
             var blocks = new ActionSlot(null!, null!);
+            var taking = takes ? new ActionSlot(null!, null!) : null;
             var parts = new List<SentenceSlot>();
-            shape.Lay(parts, shape.IsRead ? reading : null, value, blocks);
+            shape.Lay(parts, shape.IsRead ? reading : null, value, blocks, taking);
 
             var row = new List<string>();
             foreach (var part in parts)
@@ -68,10 +70,10 @@ public class TestShapeTests
                 if (part.Joined.Length != 0)
                     row.Add(part.Joined);
 
-                row.Add(part == reading ? shape.Reading : part == value ? "radius" : "Lamp");
+                row.Add(part == reading ? shape.Reading : part == value ? "radius" : part == taking ? "2" : "Lamp");
             }
 
-            Assert.Equal(shape.Says(namesValue ? "radius" : null, "Lamp"), string.Join(" ", row));
+            Assert.Equal(shape.Says(namesValue ? "radius" : null, "Lamp", takes ? "2" : null), string.Join(" ", row));
         }
     }
 

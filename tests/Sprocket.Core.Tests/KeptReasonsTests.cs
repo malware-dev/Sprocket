@@ -66,7 +66,7 @@ public class KeptReasonsTests
         {
             "None", "MissingSource", "MissingTarget", "MissingGate", "Unoffered", "Unfilled", "Mistyped", "NeverTriggered",
             "NothingStarts", "EmptySlot", "Adrift", "Stuck", "Conflicted", "Circular", "Unable", "Stalled", "NothingToAwait",
-            "MissingFacet", "ScreenOnBlockSlot"
+            "MissingFacet", "ScreenOnBlockSlot", "NothingToAverage"
         };
 
         for (var i = 0; i < numbered.Length; i++)

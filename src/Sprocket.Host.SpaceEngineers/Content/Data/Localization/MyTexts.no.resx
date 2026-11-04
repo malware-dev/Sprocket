@@ -1735,6 +1735,12 @@
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
     <value>Her er det ingen ventende oppgaver å vente på, fordi ingen steg over tar tid.</value>
   </data>
+  <data name="Sprocket.Problem.NothingToAverage" xml:space="preserve">
+    <value>Dette steget har ingen blokker å ta gjennomsnittet av.</value>
+  </data>
+  <data name="Sprocket.Stopped.NothingToAverage" xml:space="preserve">
+    <value>det hadde ingen blokker å ta gjennomsnittet av.</value>
+  </data>
   <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
     <value>Avansert dør</value>
   </data>
