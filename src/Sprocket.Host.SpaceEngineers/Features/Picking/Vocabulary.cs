@@ -195,6 +195,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return ActionsOf(Blocks(world, entityIds));
         }
 
+        /// <summary>The value <paramref name="id" /> every one of the blocks <paramref name="entityIds" /> has, set or read, or null where they share none.</summary>
+        public static EntityAction ValueOf(GridWorld world, IList<long> entityIds, string id)
+        {
+            foreach (var action in ActionsOf(world, entityIds))
+            {
+                if (action.Id == id && (action.Sets || action.OwnValue != null))
+                    return action;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// What each value the action <paramref name="actionId" /> of these blocks wants asks for, one per value.
         /// </summary>
