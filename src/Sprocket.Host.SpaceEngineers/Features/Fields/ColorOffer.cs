@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
@@ -10,6 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
     /// <remarks>The colors last chosen and the way of giving one are the player's settings in this world, kept with the world.</remarks>
     public sealed class ColorOffer
     {
+        /// <summary>How many colors chosen last it offers: one row of the panel's swatches.</summary>
+        public const int RecentCount = 8;
+
         readonly PlayerMemory _player;
         readonly Action _changed;
 
@@ -19,55 +23,65 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// </summary>
         public ColorOffer(IList<Hsv> paint, PlayerMemory player, Action changed)
         {
-            Paint = paint;
             _player = player ?? new PlayerMemory();
             _changed = changed;
+
+            var colors = new List<Color>();
+            foreach (var each in paint)
+                colors.Add(each.Colour);
+            Paint = colors;
+
+            Recent = new ColorHistory(RecentCount);
+            Recent.SetColors(Kept(_player.RecentColors));
+            Recent.Changed += Remember;
         }
 
         /// <summary>The colors the player paints blocks with.</summary>
-        public IList<Hsv> Paint { get; }
+        public IReadOnlyList<Color> Paint { get; }
 
-        /// <summary>Which way a color is given, as the place of the picker's tab for it, counted from nought.</summary>
-        public int Tab
+        /// <summary>The colors last chosen, the newest first, which every picker given this offer shares.</summary>
+        public ColorHistory Recent { get; }
+
+        /// <summary>Which way a color is given: the tab shown in the picker for it.</summary>
+        public ColorEntry Entry
         {
-            get { return _player.ColorTab; }
+            get { return (ColorEntry)_player.ColorTab; }
             set
             {
-                if (_player.ColorTab == value)
+                if (_player.ColorTab == (int)value)
                     return;
 
-                _player.ColorTab = value;
+                _player.ColorTab = (int)value;
                 Changed();
             }
         }
 
-        /// <summary>The colors last chosen, the newest first, no more than <paramref name="count" />.</summary>
-        public void Recent(List<Color> into, int count)
+        /// <summary>The colors <paramref name="codes" /> write, each once and no more than <see cref="RecentCount" />, skipping any that is not one.</summary>
+        static List<Color> Kept(IList<string> codes)
         {
-            into.Clear();
-            foreach (var code in _player.RecentColors)
+            var colors = new List<Color>();
+            foreach (var code in codes)
             {
                 Color color;
                 byte alpha;
-                if (into.Count < count && ColorChannels.Colour(code, out color, out alpha))
-                    into.Add(color);
+                if (colors.Count >= RecentCount || !ColorChannels.Colour(code, out color, out alpha))
+                    continue;
+
+                color.A = alpha;
+                if (!colors.Contains(color))
+                    colors.Add(color);
             }
+
+            return colors;
         }
 
-        /// <summary>Puts the color written <paramref name="code" /> first among the colors last chosen, once, keeping no more than <paramref name="count" />.</summary>
-        public void Chose(string code, int count)
+        /// <summary>Writes the colors last chosen into the player's settings.</summary>
+        void Remember()
         {
-            var recent = _player.RecentColors;
-            var at = recent.FindIndex(each => string.Equals(each, code, StringComparison.OrdinalIgnoreCase));
-            if (at == 0)
-                return;
-
-            if (at > 0)
-                recent.RemoveAt(at);
-
-            recent.Insert(0, code);
-            if (recent.Count > count)
-                recent.RemoveRange(count, recent.Count - count);
+            var codes = _player.RecentColors;
+            codes.Clear();
+            foreach (var color in Recent.Colors)
+                codes.Add(ColorChannels.Code(color));
 
             Changed();
         }

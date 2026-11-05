@@ -41,9 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Taking one away.</summary>
         public const string Minus = "-";
 
-        /// <summary>Adding one.</summary>
-        public const string Plus = "+";
-
         /// <summary>A shaft with a head on it: what one thing led to.</summary>
         public const string Arrow = "a";
 

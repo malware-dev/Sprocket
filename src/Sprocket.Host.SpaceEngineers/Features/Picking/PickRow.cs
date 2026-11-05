@@ -120,9 +120,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // The room the row's style leaves out: the left edge where no box holds it, and above and below. A heading has more
             // above it and none under, so it stands apart from the group before and against the first row of its own.
             _content.Base.Padding = new Thickness((_mark.IsVisible ? 0f : MarkInset) + (Indented ? Sizes.Indent : 0f), IsHeading ? Gaps.Sections : Gaps.Parts, 0f, IsHeading ? 0f : Gaps.Parts);
-            _mark.Many = Many;
             _mark.IsChecked = IsChosen;
-            _mark.IsPressed = Many && pressable;
+            _mark.Style = Many && pressable ? Styles.PickBoxPressed : Styles.PickBox;
 
             _picture.IsVisible = HasPicture;
             if (_art != Icon)

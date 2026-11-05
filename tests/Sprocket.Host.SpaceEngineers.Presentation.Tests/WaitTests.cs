@@ -158,17 +158,45 @@ public class WaitTests
         var screen = Added();
         var panel = Panel(screen);
 
-        screen.Do("press", Symbols.Plus);
+        PressStep(screen, true);
         Assert.Equal("1.5", panel.Box.Text);
 
-        screen.Do("press", Symbols.Minus);
-        screen.Do("press", Symbols.Minus);
+        PressStep(screen, false);
+        PressStep(screen, false);
         Assert.Equal("0.5", panel.Box.Text);
 
         screen.Do("press", "10 s");
         Assert.Equal("10", panel.Box.Text);
         Assert.True(screen.Shows("= 600 ticks"));
     }
+
+    /// <summary>In a panel hanging from a sentence, with all the room it asks for, a wait's lengths to pick stand on one line.</summary>
+    [Fact]
+    public void TheLengthsToPickStandOnOneLine()
+    {
+        var panel = Panel(Added());
+
+        var lines = panel.Within().OfType<Button>().Where(button => button.IsVisible && button.Text.Length > 0 && button.Bounds.Width == 64f).Select(button => button.Bounds.Y).Distinct();
+
+        Assert.Single(lines);
+    }
+
+    /// <summary>The lengths to pick are the same lengths in either unit.</summary>
+    [Fact]
+    public void ThePicksMatchInBothUnits()
+    {
+        var panel = Panel(Added());
+
+        Assert.Equal(new[] { "0.5 s", "1 s", "5 s", "10 s", "30 s", "1 min" }, Picks(panel));
+
+        panel.Give("60", true);
+
+        Assert.Equal(new[] { "30 t", "60 t", "300 t", "600 t", "1800 t", "3600 t" }, Picks(panel));
+    }
+
+    /// <summary>What the lengths to pick say in the unit the panel shows.</summary>
+    static string[] Picks(DurationPanel panel) =>
+        panel.Within().OfType<Button>().Where(button => button.Bounds.Width == 64f).Select(button => button.Text).ToArray();
 
     /// <summary>A wait added after ticks were chosen starts at a second, in ticks, and its panel opens in ticks.</summary>
     [Fact]
@@ -282,6 +310,16 @@ public class WaitTests
     static SequencePage Page(Screen screen) => Assert.IsType<SequencePage>(screen.Editor.Current);
 
     static DurationPanel Panel(Screen screen) => Page(screen).Lengths ?? throw new Xunit.Sdk.XunitException("no panel is open");
+
+    /// <summary>Presses the plus where <paramref name="plus" /> is true, and the minus otherwise, where the panel draws it.</summary>
+    static void PressStep(Screen screen, bool plus)
+    {
+        var sign = Panel(screen).Within().OfType<StepSign>().Single(s => s.IsPlus == plus);
+        var button = sign.Parent!;
+        var middle = button.ToScreen(new VRageMath.Vector2(button.Bounds.X + button.Bounds.Width / 2f, button.Bounds.Y + button.Bounds.Height / 2f));
+        screen.Scene.Press(middle, 1);
+        screen.Run(2);
+    }
 
     /// <summary>Presses the length in the wait's sentence.</summary>
     static void PressLength(Screen screen)

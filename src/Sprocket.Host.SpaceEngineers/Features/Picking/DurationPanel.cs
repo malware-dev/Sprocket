@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using Lumel;
 using Lumel.Controls;
-using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -26,11 +25,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         const string SecondsFormat = "0.##";
         const int CostlyTicks = 10;
 
-        // The same in both units, so the two rows of seven line up: room for "0.5 s".
-        const float PickWidth = 68f;
+        // The same in both units, so the picks of either line up: room for "1800 t".
+        const float PickWidth = 64f;
 
-        static readonly double[] SecondsPicks = { 0.5, 1, 2, 5, 10, 30, 60 };
-        static readonly int[] TicksPicks = { 1, 10, 30, 60, 100, 300, 600 };
+        // In seconds, and offered in either unit, so the two rows say the same lengths.
+        static readonly double[] Picks = { 0.5, 1, 5, 10, 30, 60 };
 
         readonly Texts _texts;
         readonly InputRoot _input;
@@ -53,31 +52,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Base.Spacing = Gaps.Parts;
 
             var number = new HStack { Base = { Spacing = Gaps.Parts } };
-            number.Children.Add(new Glyph
+            var spin = new SpinBox
             {
-                Symbol = Symbols.Minus,
-                Style = Styles.Icon,
-                Placement = FixedSize.Size(32f, 32f),
-                Command = new RelayCommand(() => Step(-1)),
-                Tip = KeptTip.For(null, texts.Codex.WaitShorter)
-            });
-            number.Children.Add(new NumberBox
-            {
-                Style = Styles.Number,
-                Focusable = true,
-                Minimum = 0,
-                Widest = Widest,
-                Submit = new RelayCommand(() => Raise(Submitted)),
-                Tip = CodexTip.For(null, texts.Codex.SequenceWaitTypedAbout)
-            }.As(out _box));
-            number.Children.Add(new Glyph
-            {
-                Symbol = Symbols.Plus,
-                Style = Styles.Icon,
-                Placement = FixedSize.Size(32f, 32f),
-                Command = new RelayCommand(() => Step(1)),
-                Tip = KeptTip.For(null, texts.Codex.WaitLonger)
-            });
+                Style = Styles.Spin,
+                LessTip = KeptTip.For(null, texts.Codex.WaitShorter),
+                MoreTip = KeptTip.For(null, texts.Codex.WaitLonger)
+            };
+            _box = spin.Box;
+            _box.Focusable = true;
+            _box.Minimum = 0;
+            _box.Widest = Widest;
+            _box.Submit = new RelayCommand(() => Raise(Submitted));
+            _box.Tip = CodexTip.For(null, texts.Codex.SequenceWaitTypedAbout);
+            number.Children.Add(spin);
             // At the right end, across from the number it is the unit of.
             number.Children.Add(new HStack { Placement = Flex.Spacer });
             number.Children.Add(new Switch
@@ -93,11 +80,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Children.Add(new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _caution));
 
             _secondsPicks = new HStack { Base = { Spacing = Gaps.Parts } };
-            foreach (var seconds in SecondsPicks)
+            foreach (var seconds in Picks)
             {
                 _secondsPicks.Children.Add(new Button
                 {
-                    Style = Styles.Word,
+                    Style = Styles.LengthPick,
                     Placement = FixedSize.Width(PickWidth),
                     Text = seconds == 60 ? texts.WaitPickMinute : Template.Fill(texts.WaitPickSeconds, "count", Said(seconds)),
                     Command = new RelayCommand(() => Give(Said(seconds)))
@@ -105,18 +92,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _ticksPicks = new HStack { Base = { Spacing = Gaps.Parts } };
-            foreach (var ticks in TicksPicks)
+            foreach (var seconds in Picks)
             {
+                var ticks = Duration.OfSeconds(seconds).Ticks;
                 _ticksPicks.Children.Add(new Button
                 {
-                    Style = Styles.Word,
+                    Style = Styles.LengthPick,
                     Placement = FixedSize.Width(PickWidth),
                     Text = Template.Fill(texts.WaitPickTicks, "count", Said(ticks)),
                     Command = new RelayCommand(() => Give(Said(ticks)))
                 });
             }
 
-            // One over the other, so the panel is as wide as the wider of the two rows whichever unit shows.
+            // One over the other, so the panel holds its size whichever unit shows.
             Children.Add(new Deck { Children = { _secondsPicks, _ticksPicks } }.As(out _picks));
 
             // As tall as a button, so a Done the holder lays over its right end sits on its line: 6 + 20 + 6 = 32.
@@ -187,13 +175,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return true;
         }
 
-        /// <summary>Moves the number <paramref name="by" /> steps, the keyboard kept in the box.</summary>
-        void Step(int by)
-        {
-            Keep();
-            _box.StepBy(by);
-        }
-
         /// <summary>Gives the keyboard back to the box, which a press on anything else in the panel took from it.</summary>
         void Keep()
         {
@@ -253,7 +234,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var picks = _inSeconds ? _secondsPicks : _ticksPicks;
             for (var i = 0; i < picks.Children.Count; i++)
             {
-                var given = length.HasValue && (_inSeconds ? length.Value.Seconds == SecondsPicks[i] : length.Value.Ticks == TicksPicks[i]);
+                var given = length.HasValue && length.Value.Ticks == Duration.OfSeconds(Picks[i]).Ticks;
                 picks.Children[i].Set(LookStates.Chosen, given);
             }
         }

@@ -854,6 +854,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { TextAlignment = TextAlignment.Right }
         };
 
+        /// <summary>The minus or plus beside a number, quiet until the pointer is on it, as tall as the number box: 6 + 20 + 6 = 32.</summary>
+        public static readonly IStyle<Button> SpinStep = new ButtonStyle
+        {
+            Base = { FontSize = TextSizes.Small, Color = Palette.Muted, Padding = new Thickness(11f, 6f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
+            PointerOver = { Background = Palette.PanelHot, Color = Palette.Ink },
+            [State.FocusVisible] = { Background = Palette.PanelHot, Color = Palette.Ink },
+            Disabled = { Color = Palette.Dim }
+        };
+
+        /// <summary>A number in a form of values between a minus and a plus that step it.</summary>
+        public static readonly IStyle<SpinBox> Spin = new SpinBoxStyle
+        {
+            Base = { Spacing = Gaps.Parts, BoxStyle = Number, StepStyle = SpinStep }
+        };
+
         /// <summary>A dial an angle is turned on: faint marks, the quarters a step brighter, and the needle in the ink, lit while it is under the pointer or turned.</summary>
         public static readonly IStyle<Dial> Dial = new DialStyle
         {
@@ -894,6 +909,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             [LookStates.Chosen] = { Color = Palette.Ink, Background = Palette.Line }
         };
 
+        /// <summary>A length to pick in a row of them, its words given the row's narrow width.</summary>
+        public static readonly IStyle<Button> LengthPick = new ButtonStyle(Word)
+        {
+            Base = { Padding = new Thickness(4f) }
+        };
+
         /// <summary>The line a list hangs from, saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used.</summary>
         public static readonly IStyle<Stack> ListLine = new StackStyle
         {
@@ -901,12 +922,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
             [State.FocusVisible] = { Background = Palette.Panel, Border = Palette.Muted },
             [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
-        };
-
-        /// <summary>The line a list hangs from where it stands in a column's heading, as tall as the heading's words so nothing under it moves.</summary>
-        public static readonly IStyle<Stack> ListLineInHeading = new StackStyle(ListLine)
-        {
-            Base = { Padding = new Thickness(12f, 0f) }
         };
 
         /// <summary>Controls hanging from what opened them, on the ground a form's controls stand on, so they look as they do in a form.</summary>
@@ -943,6 +958,52 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             },
             Highlighted = { Background = Palette.Line },
             Disabled = { Color = Palette.Dim, Mark = Palette.Dim }
+        };
+
+        /// <summary>A drop-down saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used.</summary>
+        public static readonly IStyle<DropDown> ListBox = new DropDownStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink, HintColor = Palette.Ink, Arrow = Palette.Muted, ArrowSize = 12f,
+                ArrowSpacing = Gaps.Parts, ListStyle = Menu, Background = Palette.Well, Border = Palette.Line, Padding = new Thickness(12f, 8f),
+                HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
+            },
+            PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
+            [State.FocusVisible] = { Background = Palette.Panel, Border = Palette.Muted },
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
+        };
+
+        /// <summary>A drop-down standing in a column's heading, as tall as the heading's words so nothing under it moves.</summary>
+        public static readonly IStyle<DropDown> ListBoxInHeading = new DropDownStyle(ListBox)
+        {
+            Base = { Padding = new Thickness(12f, 0f) }
+        };
+
+        /// <summary>A color's panel hanging from the box that opened it, close under it.</summary>
+        public static readonly IStyle<Popup> ColorPopup = new PopupStyle(Popup)
+        {
+            Base = { Gap = Gaps.Within }
+        };
+
+        /// <summary>A box showing a color, a hairline round the color, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used.</summary>
+        public static readonly IStyle<ColorPicker> ColorBox = new ColorPickerStyle(GameTheme.ColorPicker)
+        {
+            Base =
+            {
+                SampleEdge = Palette.Line, Arrow = Palette.Muted, ArrowSpacing = Gaps.Parts, PopupStyle = ColorPopup, DoneStyle = Primary,
+                Background = Palette.Well, Border = Palette.Line, HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
+            },
+            PointerOver = { Background = Palette.Panel, Border = Palette.Muted, Arrow = Palette.Muted },
+            [ColorPicker.Expanded] = { Background = Palette.Panel, Border = Palette.Muted, Arrow = Palette.Muted },
+            [State.FocusVisible] = { Background = Palette.Panel, Border = Palette.Muted, Arrow = Palette.Muted },
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
+        };
+
+        /// <summary>The panel a color is made in, a color not yet given shown in the page's tone.</summary>
+        public static readonly IStyle<ColorPanel> ColorPanel = new ColorPanelStyle(GameTheme.ColorPanel)
+        {
+            Base = { EmptyFill = Palette.Page }
         };
 
         /// <summary>One entry of a menu, lit a step past the menu's own tone under the pointer; set in under its family where nested, and lit in the accent where it is the one chosen.</summary>
@@ -1081,28 +1142,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             [LookStates.Taken] = { Color = Palette.Ink }
         };
 
-        /// <summary>A mark saying something has not been chosen: a ring for one of several, a box for any of them.</summary>
-        public static readonly IStyle<Glyph> Mark = new GlyphStyle
+        /// <summary>A box saying whether something of any number to choose has been chosen: a faint edge, and edge and tick in the live color once chosen.</summary>
+        public static readonly IStyle<CheckBox> PickBox = new CheckBoxStyle
         {
-            Base = { Font = Symbols.Font, FontSize = TextSizes.Tiny, Tint = Palette.Faint }
+            Base = { Box = Palette.Faint, BoxThickness = 1f, BoxFill = Palette.None, Mark = Palette.Live, BoxSize = 16f },
+            [CheckBox.Checked] = { Box = Palette.Live }
         };
 
-        /// <summary>A mark saying something has not been chosen, where it is pressed by itself, lit under the pointer.</summary>
-        public static readonly IStyle<Glyph> MarkPressed = new GlyphStyle(Mark)
-        {
-            Base = { HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
-            PointerOver = { Background = Palette.PanelHot },
-            [State.FocusVisible] = { Background = Palette.PanelHot }
-        };
-
-        /// <summary>A mark saying something has been chosen.</summary>
-        public static readonly IStyle<Glyph> MarkOn = new GlyphStyle(Mark)
-        {
-            Base = { Tint = Palette.Live }
-        };
-
-        /// <summary>A mark saying something has been chosen, where it is pressed by itself.</summary>
-        public static readonly IStyle<Glyph> MarkOnPressed = new GlyphStyle(MarkOn)
+        /// <summary>A box saying whether something has been chosen, where it is pressed by itself, lit under the pointer.</summary>
+        public static readonly IStyle<CheckBox> PickBoxPressed = new CheckBoxStyle(PickBox)
         {
             Base = { HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.PanelHot },
@@ -1114,14 +1162,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Muted },
             [LookStates.Paused] = { Tint = Palette.Dim }
-        };
-
-        /// <summary>A choice about the picking itself, lit under the pointer.</summary>
-        public static readonly IStyle<Stack> Option = new StackStyle
-        {
-            Base = { Padding = new Thickness(12f, 4f) },
-            PointerOver = { Background = Palette.PanelHot },
-            [State.FocusVisible] = { Background = Palette.PanelHot }
         };
 
         /// <summary>The words of a choice about the picking itself; in the ink where it is chosen.</summary>

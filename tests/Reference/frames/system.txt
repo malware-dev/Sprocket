@@ -53,31 +53,32 @@ on screen     Airlock
 046  Sprite     Lumel_Fill            {X:423 Y:118 W:1 H:36}  #5B737BFF
 047  Sprite     Lumel_Fill            {X:551 Y:118 W:1 H:36}  #5B737BFF
 048  Text       at {X:435 Y:123.6399} scale 0.694  #DCF5FDFF  "Installation 1"
-049  Text       at {X:527.9537 Y:128.4932} scale 0.241  #A2C3CDFF  "v"
-050  Sprite     Lumel_Fill            {X:256 Y:178 W:352 H:36}  #5B737BFF
-051  Sprite     Lumel_Fill            {X:256 Y:178 W:352 H:1}  #5B737BFF
-052  Sprite     Lumel_Fill            {X:256 Y:213 W:352 H:1}  #5B737BFF
-053  Sprite     Lumel_Fill            {X:256 Y:178 W:1 H:36}  #5B737BFF
-054  Sprite     Lumel_Fill            {X:607 Y:178 W:1 H:36}  #5B737BFF
-055  Text       at {X:405.6917 Y:183.6399} scale 0.694  #DCF5FDFF  "Triggers"
-056  Sprite     Lumel_Fill            {X:608 Y:178 W:352 H:36}  #29363EFF
-057  Sprite     Lumel_Fill            {X:608 Y:178 W:352 H:1}  #5B737BFF
-058  Sprite     Lumel_Fill            {X:608 Y:213 W:352 H:1}  #5B737BFF
-059  Sprite     Lumel_Fill            {X:608 Y:178 W:1 H:36}  #5B737BFF
-060  Sprite     Lumel_Fill            {X:959 Y:178 W:1 H:36}  #5B737BFF
-061  Text       at {X:748.6117 Y:183.6399} scale 0.694  #A2C3CDFF  "Sequences"
-062  Sprite     Lumel_Fill            {X:960 Y:178 W:352 H:36}  #29363EFF
-063  Sprite     Lumel_Fill            {X:960 Y:178 W:352 H:1}  #5B737BFF
-064  Sprite     Lumel_Fill            {X:960 Y:213 W:352 H:1}  #5B737BFF
-065  Sprite     Lumel_Fill            {X:960 Y:178 W:1 H:36}  #5B737BFF
-066  Sprite     Lumel_Fill            {X:1311 Y:178 W:1 H:36}  #5B737BFF
-067  Text       at {X:1119.395 Y:183.6399} scale 0.694  #A2C3CDFF  "State"
-068  Sprite     Lumel_Fill            {X:1312 Y:178 W:352 H:36}  #29363EFF
-069  Sprite     Lumel_Fill            {X:1312 Y:178 W:352 H:1}  #5B737BFF
-070  Sprite     Lumel_Fill            {X:1312 Y:213 W:352 H:1}  #5B737BFF
-071  Sprite     Lumel_Fill            {X:1312 Y:178 W:1 H:36}  #5B737BFF
-072  Sprite     Lumel_Fill            {X:1663 Y:178 W:1 H:36}  #5B737BFF
-073  Text       at {X:1431.37 Y:183.6399} scale 0.694  #A2C3CDFF  "Installation panel"
-074  SetClip    {X:256 Y:230 W:1408 H:790}
-075  Text       at {X:272 Y:247.2255} scale 0.833  #A2C3CDFF  "+ trigger"
-076  ClearClip  
+049  Sprite     Lumel_Fill            {X:526 Y:134 W:10 H:3}  #A2C3CDFF
+050  Sprite     Lumel_Fill            {X:532 Y:134 W:10 H:3}  #A2C3CDFF
+051  Sprite     Lumel_Fill            {X:256 Y:178 W:352 H:36}  #5B737BFF
+052  Sprite     Lumel_Fill            {X:256 Y:178 W:352 H:1}  #5B737BFF
+053  Sprite     Lumel_Fill            {X:256 Y:213 W:352 H:1}  #5B737BFF
+054  Sprite     Lumel_Fill            {X:256 Y:178 W:1 H:36}  #5B737BFF
+055  Sprite     Lumel_Fill            {X:607 Y:178 W:1 H:36}  #5B737BFF
+056  Text       at {X:405.6917 Y:183.6399} scale 0.694  #DCF5FDFF  "Triggers"
+057  Sprite     Lumel_Fill            {X:608 Y:178 W:352 H:36}  #29363EFF
+058  Sprite     Lumel_Fill            {X:608 Y:178 W:352 H:1}  #5B737BFF
+059  Sprite     Lumel_Fill            {X:608 Y:213 W:352 H:1}  #5B737BFF
+060  Sprite     Lumel_Fill            {X:608 Y:178 W:1 H:36}  #5B737BFF
+061  Sprite     Lumel_Fill            {X:959 Y:178 W:1 H:36}  #5B737BFF
+062  Text       at {X:748.6117 Y:183.6399} scale 0.694  #A2C3CDFF  "Sequences"
+063  Sprite     Lumel_Fill            {X:960 Y:178 W:352 H:36}  #29363EFF
+064  Sprite     Lumel_Fill            {X:960 Y:178 W:352 H:1}  #5B737BFF
+065  Sprite     Lumel_Fill            {X:960 Y:213 W:352 H:1}  #5B737BFF
+066  Sprite     Lumel_Fill            {X:960 Y:178 W:1 H:36}  #5B737BFF
+067  Sprite     Lumel_Fill            {X:1311 Y:178 W:1 H:36}  #5B737BFF
+068  Text       at {X:1119.395 Y:183.6399} scale 0.694  #A2C3CDFF  "State"
+069  Sprite     Lumel_Fill            {X:1312 Y:178 W:352 H:36}  #29363EFF
+070  Sprite     Lumel_Fill            {X:1312 Y:178 W:352 H:1}  #5B737BFF
+071  Sprite     Lumel_Fill            {X:1312 Y:213 W:352 H:1}  #5B737BFF
+072  Sprite     Lumel_Fill            {X:1312 Y:178 W:1 H:36}  #5B737BFF
+073  Sprite     Lumel_Fill            {X:1663 Y:178 W:1 H:36}  #5B737BFF
+074  Text       at {X:1431.37 Y:183.6399} scale 0.694  #A2C3CDFF  "Installation panel"
+075  SetClip    {X:256 Y:230 W:1408 H:790}
+076  Text       at {X:272 Y:247.2255} scale 0.833  #A2C3CDFF  "+ trigger"
+077  ClearClip  

@@ -63,9 +63,6 @@ static class PaperTarget
             if (Some(stage.Subtitle))
                 paper.Append("  ").AppendLine(stage.Subtitle);
 
-            foreach (var option in stage.Choices())
-                paper.Append("  option ").AppendLine(option.Text);
-
             foreach (var entry in stage.Entries())
             {
                 paper.Append("  ").Append(entry.IsChosen ? "[x] " : "[ ] ").Append(entry.Text);

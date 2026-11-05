@@ -111,6 +111,16 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
+        /// <summary>
+        /// <paramref name="color" /> written as the language writes a color: six hex digits behind a hash, and two more for its
+        /// alpha where it is not solid.
+        /// </summary>
+        public static string Code(Color color)
+        {
+            var said = $"#{Hex(color.R)}{Hex(color.G)}{Hex(color.B)}";
+            return color.A == 255 ? said : said + Hex(color.A);
+        }
+
         static bool Part(string digits, int at, out byte value)
         {
             return byte.TryParse(digits.Substring(at * 2, 2), NumberStyles.HexNumber,

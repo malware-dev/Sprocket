@@ -505,14 +505,14 @@ public class ActionTests
         screen.Run(2);
         Assert.True(field.IsOpen);
 
-        // The third of the fourteen, after the color being made. They are the harness's stand-in for a player who has painted.
-        field.Picker.Within().OfType<Swatch>().ElementAt(3).Command!.Execute();
+        // The third of the fourteen paint colors, the harness's stand-in for a player who has painted.
+        ((ColorPalette)field.Panel.Palettes[0]).Children[2].Command!.Execute();
         screen.Run(2);
-        Assert.Equal("#386285", field.Picker.Text);
+        Assert.Equal("#386285", ColorChannels.Code(field.Panel.Color!.Value));
         Assert.NotEqual("#386285", field.Text);
 
         // Done gives it to the field.
-        field.Picker.Parent!.Parent!.Within().OfType<Button>().Single().Command!.Execute();
+        field.Panel.Submit!.Execute();
         screen.Run(2);
         Assert.Equal("#386285", Given(screen));
         Assert.Equal("#386285", field.Text);

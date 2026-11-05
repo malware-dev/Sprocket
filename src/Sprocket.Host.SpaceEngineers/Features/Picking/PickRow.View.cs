@@ -1,4 +1,5 @@
 using Lumel;
+using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
@@ -9,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     partial class PickRow
     {
-        ChoiceMark _mark;
+        CheckBox _mark;
         HStack _content;
         Image _picture;
         MemberName _name;
@@ -26,8 +27,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             // The box's control fills the strip at the row's head, down its whole height and out to its edge, so a press
             // anywhere near the box is the box's and never takes the row alone; its padding sets where the box is drawn.
-            Children.Add(new ChoiceMark
+            Children.Add(new CheckBox
             {
+                Style = Styles.PickBox,
                 Placement = FixedSize.Width(40f),
                 Align = Align.Tall,
                 Base = { Padding = new Thickness(MarkInset, 0f, 8f, 0f) },

@@ -1,9 +1,7 @@
-using Lumel;
 using Lumel.Controls;
-using Lumel.Input;
-using Lumel.Layout;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Memory;
 using VRageMath;
@@ -12,15 +10,14 @@ using Xunit;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// The color picker gives a color on a square of saturation and value beside a strip of hues, or typed by hue, saturation and
-/// value, by red, green and blue, or as a code; the field takes it on Done, and the picker offers the colors chosen in it
-/// before.
+/// A color field holds a color as the script writes one, takes a color from its panel only on Done, and keeps the colors
+/// chosen in it, and the tab used, with the player's settings in the world.
 /// </summary>
 public class ColorChoiceTests
 {
     static readonly Hsv[] Paint = { Hsv.Of(new Color(255, 0, 0)), Hsv.Of(new Color(0, 255, 0)) };
 
-    /// <summary>A color field offering <paramref name="offer" />, on a screen its picker can hang open over.</summary>
+    /// <summary>A color field offering <paramref name="offer" />, on a screen its panel can hang open over.</summary>
     static ColorField Field(ColorOffer offer)
     {
         var field = new ColorField(offer, new Texts());
@@ -28,84 +25,44 @@ public class ColorChoiceTests
         return field;
     }
 
-    /// <summary>A picker laid out alone, with the pointer to press it with.</summary>
-    static (ColorPicker Picker, InputRoot Input) Laid(ColorOffer offer)
+    /// <summary>A color written as the script writes one is the field's color, its alpha included, and is given back as written.</summary>
+    [Theory]
+    [InlineData("#FF8800", 255)]
+    [InlineData("#ff8800", 255)]
+    [InlineData("#FF880080", 128)]
+    public void AWrittenColorIsTheFieldsColor(string written, int alpha)
     {
-        var picker = Field(offer).Picker;
-        var root = new VStack { Children = { picker } };
-        _ = new Easel(root, 600f, 400f);
-        return (picker, new InputRoot(root));
+        var field = Field(new ColorOffer(new Hsv[0], null, null));
+        field.Text = written;
+
+        Assert.Equal(written, field.Text);
+        Assert.Equal(new Color(255, 136, 0, alpha), field.Color);
     }
 
-    /// <summary>Pressing the square gives the hue already chosen at the saturation across and the value up where it is pressed.</summary>
+    /// <summary>What does not read as a color is kept as written, with no color shown.</summary>
+    [Theory]
+    [InlineData("FF88")]
+    [InlineData("orange")]
+    [InlineData("")]
+    public void WhatIsNoColorIsKeptAsWritten(string written)
+    {
+        var field = Field(new ColorOffer(new Hsv[0], null, null));
+        field.Text = written;
+
+        Assert.Equal(written, field.Text);
+        Assert.Null(field.Color);
+    }
+
+    /// <summary>The panel offers the player's paint colors first.</summary>
     [Fact]
-    public void TheSquareGivesSaturationAndValue()
+    public void ThePaintColorsAreOffered()
     {
-        var (picker, input) = Laid(new ColorOffer(new Hsv[0], null, null));
-        picker.Text = "#FF0000";
-        var plane = picker.Within().OfType<ColorSpectrum>().Single();
+        var field = Field(new ColorOffer(Paint, null, null));
 
-        Press(input, plane, new Vector2(plane.ContentBounds.Right, plane.ContentBounds.Y));
-        Assert.Equal("#FF0000", picker.Text);
-
-        Press(input, plane, new Vector2(plane.ContentBounds.X, plane.ContentBounds.Y));
-        Assert.Equal("#FFFFFF", picker.Text);
-
-        Press(input, plane, new Vector2(plane.ContentBounds.Right, plane.ContentBounds.Bottom));
-        Assert.Equal("#000000", picker.Text);
+        Assert.Equal(new[] { new Color(255, 0, 0), new Color(0, 255, 0) }, field.Palette.ToArray());
     }
 
-    /// <summary>Pressing the strip gives the hue there at the saturation and value already chosen, and moves the square to that hue.</summary>
-    [Fact]
-    public void TheStripGivesAHue()
-    {
-        var (picker, input) = Laid(new ColorOffer(new Hsv[0], null, null));
-        picker.Text = "#FF0000";
-        var strip = picker.Within().OfType<HueSlider>().Single();
-
-        Press(input, strip, new Vector2(strip.ContentBounds.Center.X, strip.ContentBounds.Center.Y));
-
-        Assert.Equal("#00FFFF", picker.Text);
-        Assert.Equal(0.5f, picker.Within().OfType<ColorSpectrum>().Single().Hue, 2);
-    }
-
-    /// <summary>A channel typed in its box gives the color and stays as typed while the other boxes follow.</summary>
-    [Fact]
-    public void AChannelTypedInItsBoxGivesTheColor()
-    {
-        var (picker, input) = Laid(new ColorOffer(new Hsv[0], null, null) { Tab = 1 });
-        picker.Text = "#000000";
-
-        var boxes = picker.Within().OfType<Lumel.Text.NumberBox>().ToArray();
-        Assert.Equal(new[] { "0", "0", "0" }, boxes.Select(box => box.Text).ToArray());
-
-        input.Focus(boxes[0]);
-        foreach (var typed in "255")
-            ((IInputTarget)boxes[0]).Text(typed);
-
-        Assert.Equal("#FF0000", picker.Text);
-        Assert.Equal("255", boxes[0].Text);
-    }
-
-    /// <summary>The picker opens on the tab last used, and a tab chosen is kept with the player's settings in the world, and said.</summary>
-    [Fact]
-    public void TheTabUsedIsKept()
-    {
-        var player = new PlayerMemory();
-        var told = 0;
-        var picker = Field(new ColorOffer(new Hsv[0], player, () => told++)).Picker;
-        var modes = picker.Within().OfType<TabView>().Single();
-        Assert.Equal(0, modes.SelectedIndex);
-
-        modes.Tabs[1].Command!.Execute();
-
-        Assert.Equal(1, player.ColorTab);
-        Assert.Equal(1, told);
-        var again = Field(new ColorOffer(new Hsv[0], player, null)).Picker;
-        Assert.Equal(1, again.Within().OfType<TabView>().Single().SelectedIndex);
-    }
-
-    /// <summary>A color given in the picker reaches the field only on Done, and Done puts the picker away.</summary>
+    /// <summary>A color made in the panel reaches the field only on Done, written as the script writes one.</summary>
     [Fact]
     public void TheFieldTakesTheColorOnDone()
     {
@@ -115,122 +72,96 @@ public class ColorChoiceTests
         field.Edited += () => edited++;
 
         field.Command!.Execute();
-        PaintSwatches(field.Picker)[1].Command!.Execute();
+        field.Panel.Color = new Color(0, 255, 0);
         Assert.Equal("#123456", field.Text);
         Assert.Equal(0, edited);
 
-        Done(field).Command!.Execute();
+        field.Panel.Submit!.Execute();
 
         Assert.Equal("#00FF00", field.Text);
         Assert.Equal(1, edited);
         Assert.False(field.IsOpen);
     }
 
-    /// <summary>Enter in the picker is Done.</summary>
+    /// <summary>The panel put away without Done gives the field nothing and keeps nothing.</summary>
     [Fact]
-    public void EnterIsDone()
-    {
-        var field = Field(new ColorOffer(Paint, new PlayerMemory(), null));
-        field.Command!.Execute();
-        PaintSwatches(field.Picker)[0].Command!.Execute();
-
-        ((Lumel.Text.TextBox)field.Picker.Keyboard).Submit!.Execute();
-
-        Assert.Equal("#FF0000", field.Text);
-        Assert.False(field.IsOpen);
-    }
-
-    /// <summary>The picker put away without Done gives the field nothing and chooses nothing, and opens again on the field's color.</summary>
-    [Fact]
-    public void PuttingThePickerAwayGivesNothing()
+    public void PuttingThePanelAwayGivesNothing()
     {
         var player = new PlayerMemory();
         var field = Field(new ColorOffer(Paint, player, null));
         field.Text = "#123456";
 
         field.Command!.Execute();
-        PaintSwatches(field.Picker)[0].Command!.Execute();
+        field.Panel.Color = new Color(255, 0, 0);
         field.Command!.Execute();
 
         Assert.Equal("#123456", field.Text);
         Assert.Empty(player.RecentColors);
-
-        field.Command!.Execute();
-        Assert.Equal("#123456", field.Picker.Text);
     }
 
-    /// <summary>A color taken with Done goes first among the colors chosen before, once, and a picker opened afterwards shows them newest first, an edge alone that does nothing where none is yet.</summary>
+    /// <summary>A color taken with Done goes first among the colors kept with the player, once, and a field made afterwards offers them newest first.</summary>
     [Fact]
-    public void AColorChosenComesFirstOnce()
+    public void AColorChosenIsKeptWithThePlayer()
     {
         var player = new PlayerMemory();
-        var field = Field(new ColorOffer(Paint, player, null));
-        Choose(field, 0);
-        Choose(field, 1);
-        Choose(field, 0);
+        var told = 0;
+        var field = Field(new ColorOffer(Paint, player, () => told++));
+        Choose(field, new Color(255, 0, 0));
+        Choose(field, new Color(0, 255, 0));
+        Choose(field, new Color(255, 0, 0));
 
         Assert.Equal(new[] { "#FF0000", "#00FF00" }, player.RecentColors.ToArray());
+        Assert.Equal(3, told);
 
         var other = Field(new ColorOffer(Paint, player, null));
-        other.Command!.Execute();
-        var recent = Recent(other.Picker);
-        Assert.Equal(ColorPicker.RecentCount, recent.Length);
-        Assert.Equal(new Color(255, 0, 0), recent[0].Color);
-        Assert.Equal(new Color(0, 255, 0), recent[1].Color);
-        Assert.True(recent[1].IsEnabled);
-        Assert.False(recent[2].IsEnabled);
+        Assert.Equal(new[] { new Color(255, 0, 0), new Color(0, 255, 0) }, other.Recent.Colors.ToArray());
     }
 
-    /// <summary>Done on the color the field already holds chooses nothing.</summary>
+    /// <summary>Colors kept with the player that do not read, or are there twice, are left out of what is offered.</summary>
     [Fact]
-    public void DoneUnchangedChoosesNothing()
+    public void KeptColorsAreReadOnce()
     {
         var player = new PlayerMemory();
+        player.RecentColors.AddRange(new[] { "#20C0FF", "orange", "#20c0ff", "#20C0FF80" });
+
         var field = Field(new ColorOffer(Paint, player, null));
-        field.Text = "#123456";
 
-        field.Command!.Execute();
-        Done(field).Command!.Execute();
-
-        Assert.Empty(player.RecentColors);
+        Assert.Equal(new[] { new Color(32, 192, 255), new Color(32, 192, 255, 128) }, field.Recent.Colors.ToArray());
     }
 
-    /// <summary>Pressing a color chosen before gives it.</summary>
+    /// <summary>The panel opens on the tab last used, and a tab chosen is kept with the player's settings in the world, and said.</summary>
     [Fact]
-    public void PressingAColorChosenBeforeGivesIt()
+    public void TheTabUsedIsKept()
     {
         var player = new PlayerMemory();
-        player.RecentColors.Add("#20C0FF");
-        var field = Field(new ColorOffer(Paint, player, null));
-        field.Command!.Execute();
+        var told = 0;
+        var field = Field(new ColorOffer(new Hsv[0], player, () => told++));
+        Assert.Equal(ColorEntry.Hsv, field.Entry);
 
-        Recent(field.Picker)[0].Command!.Execute();
-        Done(field).Command!.Execute();
+        var modes = field.Panel.Within().OfType<TabView>().Single();
+        modes.Tabs[1].Command!.Execute();
 
-        Assert.Equal("#20C0FF", field.Text);
+        Assert.Equal(1, player.ColorTab);
+        Assert.Equal(1, told);
+        Assert.Equal(ColorEntry.Rgb, Field(new ColorOffer(new Hsv[0], player, null)).Entry);
     }
 
-    /// <summary>Presses <paramref name="element" /> at <paramref name="point" /> and lets go there.</summary>
-    static void Press(InputRoot input, Element element, Vector2 point)
+    /// <summary>A field holding what cannot be used is marked.</summary>
+    [Fact]
+    public void AWrongFieldIsMarked()
     {
-        input.PointerDown(element, point, PointerButton.Left, 1, false, false);
-        input.PointerUp(point, PointerButton.Left);
+        var field = Field(new ColorOffer(new Hsv[0], null, null));
+
+        field.IsWrong = true;
+
+        Assert.True(field.Is(LookStates.Wrong));
     }
 
-    /// <summary>Opens the field's picker, presses the paint color at <paramref name="paint" />, and presses Done.</summary>
-    static void Choose(ColorField field, int paint)
+    /// <summary>Opens the field's panel, makes <paramref name="color" /> in it, and gives it with Done.</summary>
+    static void Choose(ColorField field, Color color)
     {
         field.Command!.Execute();
-        PaintSwatches(field.Picker)[paint].Command!.Execute();
-        Done(field).Command!.Execute();
+        field.Panel.Color = color;
+        field.Panel.Submit!.Execute();
     }
-
-    /// <summary>The Done button under the field's picker.</summary>
-    static Button Done(ColorField field) => field.Picker.Parent!.Parent!.Within().OfType<Button>().Single();
-
-    /// <summary>The swatches of the paint colors: after the color being made.</summary>
-    static Swatch[] PaintSwatches(ColorPicker picker) => picker.Within().OfType<Swatch>().Skip(1).Take(Paint.Length).ToArray();
-
-    /// <summary>The swatches of the colors chosen before: the row after the paint colors.</summary>
-    static Swatch[] Recent(ColorPicker picker) => picker.Within().OfType<Swatch>().Skip(1 + Paint.Length).Take(ColorPicker.RecentCount).ToArray();
 }

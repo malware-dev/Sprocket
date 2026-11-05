@@ -48,6 +48,31 @@ public class RateTests
         Assert.Null(Caution(rate));
     }
 
+    /// <summary>Everything in the timer's panel stands inside its column, in either unit.</summary>
+    [Fact]
+    public void TheTimerPanelFitsItsColumn()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewSystem("Housekeeping");
+        screen.Editor.PressStart("every");
+        screen.Run(2);
+
+        var rate = screen.Editor.TimerRate();
+        AssertInsideItsColumn(rate);
+
+        rate.Give("100", true);
+        screen.Run(2);
+        AssertInsideItsColumn(rate);
+    }
+
+    static void AssertInsideItsColumn(DurationPanel rate)
+    {
+        var column = rate.Parent!;
+        var edge = column.ToScreen(new VRageMath.Vector2(column.Bounds.Right, 0f)).X;
+        foreach (var part in rate.Within().Where(part => part.IsVisible))
+            Assert.True(part.ToScreen(new VRageMath.Vector2(part.Bounds.Right, 0f)).X <= edge, part.GetType().Name + " stands past the column's edge");
+    }
+
     /// <summary>What the panel cautions, or null where it says nothing.</summary>
     static string? Caution(DurationPanel rate) =>
         rate.Within().OfType<Label>().Where(label => label.IsVisible && label.Text.Contains("times a second")).Select(label => label.Text).SingleOrDefault();

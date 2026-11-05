@@ -165,9 +165,6 @@ namespace Sprocket.Sim.Driving
         public static FacetChoice? Facets(this SprocketEditor editor) =>
             editor.Stages().SelectMany(column => column.Rows.OfType<FacetChoice>()).SingleOrDefault();
 
-        /// <summary>The choices about the picking a column offers, in the order they stand.</summary>
-        public static List<OptionRow> Choices(this StageColumn column) => column.Options.OfType<OptionRow>().ToList();
-
         /// <summary>The kinds a column can be narrowed to, in the order they stand.</summary>
         public static List<KindRow> Kinds(this StageColumn column) => column.Kinds.OfType<KindRow>().ToList();
 
@@ -303,7 +300,7 @@ namespace Sprocket.Sim.Driving
                 editor.Screen.Flip!.Execute();
         }
 
-        /// <summary>Presses whatever on the screen says <paramref name="text" />: an answer, a choice, or an option or block in a picker.</summary>
+        /// <summary>Presses whatever on the screen says <paramref name="text" />: an answer, a choice, or a block in a picker.</summary>
         /// <remarks>
         /// A question hanging over the screen is answered by pressing its words, which is the same act from
         /// where a test stands: something on screen said this, and it was pressed.
@@ -326,13 +323,6 @@ namespace Sprocket.Sim.Driving
 
             foreach (var pane in editor.Stages())
             {
-                var option = pane.Choices().FirstOrDefault(e => e.Text == text);
-                if (option != null)
-                {
-                    option.Command!.Execute();
-                    return;
-                }
-
                 // A switch is pressed only where it does not already say it: its first word is its on side.
                 var flip = pane.Options.OfType<Switch>().FirstOrDefault(s => s.Within().OfType<Label>().Any(word => word.Text == text));
                 if (flip != null)
@@ -367,11 +357,11 @@ namespace Sprocket.Sim.Driving
             entry.Pick(HeldModifier.Alone, 2);
         }
 
-        /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen: an answer, a choice, or an option or block in a picker.</summary>
+        /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen: an answer, a choice, or a block in a picker.</summary>
         public static bool HasChoice(this SprocketEditor editor, string text) =>
             editor.Screen.Answers.Any(e => e.Text == text)
             || editor.Choices().Any(r => r.Text == text)
-            || editor.Stages().Any(p => p.Choices().Any(e => e.Text == text) || p.Entries().Any(e => e.Text == text));
+            || editor.Stages().Any(p => p.Entries().Any(e => e.Text == text));
 
         /// <summary>The answers on a question's page, in the order they are offered, or none where the page asks nothing.</summary>
         /// <remarks>Asks the page for its view first, which is what makes it where nothing has drawn the page yet.</remarks>
