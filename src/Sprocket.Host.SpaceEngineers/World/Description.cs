@@ -106,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         static FieldEditor Drawn(string kind)
         {
-            return kind == "color" ? FieldEditor.Colour : FieldEditor.Typed;
+            return kind == "color" ? FieldEditor.Color : FieldEditor.Typed;
         }
 
         static Field Asks(Parameter one)

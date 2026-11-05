@@ -40,8 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             Color shade;
             byte alpha;
-            if (_fields.Count == 1 && _fields[0].Edits == FieldEditor.Colour
-                && ColorChannels.Colour(_filled[0], out shade, out alpha))
+            if (_fields.Count == 1 && _fields[0].Edits == FieldEditor.Color
+                && ColorChannels.TryRead(_filled[0], out shade, out alpha))
             {
                 _sample = shade;
             }

@@ -257,7 +257,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>A color, written <c>#RRGGBBAA</c>.</summary>
-        public ScriptWriter Colour(byte r, byte g, byte b, byte a)
+        public ScriptWriter Color(byte r, byte g, byte b, byte a)
         {
             Space();
             _text.Append('#');

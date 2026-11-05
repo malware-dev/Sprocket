@@ -254,7 +254,7 @@ public class ProgramTextTests
     /// <remarks>
     /// The program is the only record of what kind a value is. An action declares how many it wants
     /// and not one thing about them, and the block it is for may not be present when the program is
-    /// read - so a colour that came back as a number would be a step that quietly does something
+    /// read - so a color that came back as a number would be a step that quietly does something
     /// else.
     /// <para>
     /// Written in the words the language already has for it, which is how a value gets somewhere to
@@ -335,19 +335,19 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(lights, null);
 
-        var colour = new Act("SetColor") { Form = ReachKind.Action };
-        colour.Targets.Add("light");
-        colour.Arguments.Add(Literal.Of(255));
-        colour.Arguments.Add(Literal.Of(136));
-        colour.Arguments.Add(Literal.Of(0));
-        sequence.Steps.Add(colour);
+        var color = new Act("SetColor") { Form = ReachKind.Action };
+        color.Targets.Add("light");
+        color.Arguments.Add(Literal.Of(255));
+        color.Arguments.Add(Literal.Of(136));
+        color.Arguments.Add(Literal.Of(0));
+        sequence.Steps.Add(color);
 
         var each = new Act("SetEverything") { Form = ReachKind.Action };
         each.Targets.Add("light");
         each.Arguments.Add(Literal.Of("four and a half"));
         each.Arguments.Add(Literal.Of(4.5));
         each.Arguments.Add(Literal.Of(true));
-        each.Arguments.Add(Literal.Colour(255, 136, 0, 255));
+        each.Arguments.Add(Literal.Color(255, 136, 0, 255));
         sequence.Steps.Add(each);
 
         // The language's own words for it, rather than a spelling invented here.

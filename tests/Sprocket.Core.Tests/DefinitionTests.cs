@@ -98,7 +98,7 @@ public class DefinitionTests
     /// A group Sprocket can draw comes out as one field standing over all of its parameters.
     /// </summary>
     /// <remarks>
-    /// Which is the whole point of grouping them: three numbers are one colour to a person, and the
+    /// Which is the whole point of grouping them: three numbers are one color to a person, and the
     /// form shows the control for that rather than three boxes with nothing to tell them apart.
     /// </remarks>
     [Fact]
@@ -107,7 +107,7 @@ public class DefinitionTests
         var fields = Fields(2);
 
         Field whole = Assert.Single(fields);
-        Assert.Equal(FieldEditor.Colour, whole.Edits);
+        Assert.Equal(FieldEditor.Color, whole.Edits);
         Assert.Equal(3, whole.Covers);
     }
 

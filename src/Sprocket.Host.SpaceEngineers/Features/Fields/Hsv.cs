@@ -35,10 +35,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return Of(said.X, said.Y, said.Z);
         }
 
-        /// <summary><paramref name="colour" /> as hue, saturation and value, by the game's conversion.</summary>
-        public static Hsv Of(Color colour)
+        /// <summary><paramref name="color" /> as hue, saturation and value, by the game's conversion.</summary>
+        public static Hsv Of(Color color)
         {
-            return Of(colour.ColorToHSV());
+            return Of(color.ColorToHSV());
         }
 
         /// <summary>One of the colors a player paints with.</summary>
@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>This color as red, green and blue, by the game's conversion.</summary>
-        public Color Colour => new Vector3(Hue, Saturation, Value).HSVtoColor();
+        public Color Color => new Vector3(Hue, Saturation, Value).HSVtoColor();
 
         static float Held(float part)
         {

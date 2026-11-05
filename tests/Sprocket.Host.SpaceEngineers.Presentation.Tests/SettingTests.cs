@@ -32,11 +32,11 @@ public class SettingTests
         // The game hands out an action for a light's radius and none at all for its falloff, which
         // is the arbitrariness this exists to end.
         Assert.True(screen.Shows("falloff"), "the light does not offer its falloff");
-        Assert.True(screen.Shows("color"), "the light does not offer its colour");
+        Assert.True(screen.Shows("color"), "the light does not offer its color");
 
         // Said as setting them, since values and actions are listed together, and under a heading
         // saying what they are about.
-        Assert.True(screen.Shows("APPEARANCE"), "a light's colour is not grouped with how it looks");
+        Assert.True(screen.Shows("APPEARANCE"), "a light's color is not grouped with how it looks");
 
         // And the block's own division is what the terminal view groups by instead.
         What(screen).Views[1].Command!.Execute();

@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The colors this player keeps to paint with, copied out into <paramref name="into" />.
         /// </summary>
         /// <remarks>Adds none on a machine with no session. The game's getter hands back the live list, so it is copied.</remarks>
-        public static void Colours(IList<Hsv> into)
+        public static void Colors(IList<Hsv> into)
         {
             if (MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null)
                 return;

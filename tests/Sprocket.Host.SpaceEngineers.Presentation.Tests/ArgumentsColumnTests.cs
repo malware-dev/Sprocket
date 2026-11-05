@@ -17,7 +17,7 @@ public class ArgumentsColumnTests
     const string ALight = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step press task 200 485";
 
     const string SetRadius = "press radius";
-    const string SetColour = "press color";
+    const string SetColor = "press color";
     const string RadiusBox = "1348 232";
     const string Done = "1394 72";
 
@@ -107,7 +107,7 @@ public class ArgumentsColumnTests
     [Fact]
     public void GoingBackToAThingKeepsWhatWasEntered()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 7 " + SetColour + " " + SetRadius);
+        var screen = Open(SetRadius + " " + RadiusBox + " type 7 " + SetColor + " " + SetRadius);
 
         Assert.True(screen.Shows("7.0"), "the radius typed earlier was lost");
     }

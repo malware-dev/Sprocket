@@ -209,7 +209,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return new TypedOwnValue<T, object>(ValueKind.Color, None, false, Nothing, (block, options, seen) =>
             {
                 var read = color(block);
-                return Literal.Colour(read.R, read.G, read.B, read.A);
+                return Literal.Color(read.R, read.G, read.B, read.A);
             });
         }
 
@@ -236,7 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return new TypedOwnValue<T, TOptions>(ValueKind.Color, None, false, options, (block, given, seen) =>
             {
                 var read = color(block, given);
-                return Literal.Colour(read.R, read.G, read.B, read.A);
+                return Literal.Color(read.R, read.G, read.B, read.A);
             });
         }
 

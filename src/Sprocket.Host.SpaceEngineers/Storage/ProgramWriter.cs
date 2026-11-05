@@ -242,7 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 byte r, g, b, a;
                 values.TryColor(key.Kind, key.Value, out r, out g, out b, out a);
-                pen.Colour(r, g, b, a);
+                pen.Color(r, g, b, a);
                 return;
             }
 
@@ -944,7 +944,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            pen.Colour(value.Red, value.Green, value.Blue, value.Alpha);
+            pen.Color(value.Red, value.Green, value.Blue, value.Alpha);
         }
 
         static void WriteNames(ScriptWriter pen, IList<string> names)

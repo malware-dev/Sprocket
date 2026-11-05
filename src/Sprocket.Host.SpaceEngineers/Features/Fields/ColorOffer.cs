@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             var colors = new List<Color>();
             foreach (var each in paint)
-                colors.Add(each.Colour);
+                colors.Add(each.Color);
             Paint = colors;
 
             Recent = new ColorHistory(RecentCount);
@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             {
                 Color color;
                 byte alpha;
-                if (colors.Count >= RecentCount || !ColorChannels.Colour(code, out color, out alpha))
+                if (colors.Count >= RecentCount || !ColorChannels.TryRead(code, out color, out alpha))
                     continue;
 
                 color.A = alpha;

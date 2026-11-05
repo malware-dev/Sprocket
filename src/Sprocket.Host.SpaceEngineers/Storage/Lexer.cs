@@ -166,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _ptr++;
 
             if (!_ptr.IsOutOfBounds() && Hex(_ptr.Char) >= 0)
-                return Colour(start);
+                return Color(start);
 
             if (!_ptr.IsOutOfBounds() && _ptr.Char == '@')
             {
@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return new Token(TokenKind.Annotation, start.Index, Since(from));
         }
 
-        Token Colour(TextPtr start)
+        Token Color(TextPtr start)
         {
             long packed = 0;
             var digits = 0;

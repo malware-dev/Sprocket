@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 /// <remarks>
 /// The bounds come from whoever described the action, because nothing in the game carries them: a
-/// light's colour setter declares three values and never says that each is a byte. Without this a
+/// light's color setter declares three values and never says that each is a byte. Without this a
 /// 300 is typed, accepted, written into the program, and then thrown away by the block with nobody
 /// told - which is the failure this exists to stop happening in the one place somebody is looking.
 /// </remarks>

@@ -9,9 +9,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 /// <remarks>
 /// <b>Not as the kind the action's declaration carries.</b> A declaration says how many values an
-/// action takes and nothing trustworthy about what they are: the game's own colour setter declares
+/// action takes and nothing trustworthy about what they are: the game's own color setter declares
 /// three strings and then refuses anything that is not an integer. Converting to what was declared
-/// meant every value was discarded and the light never changed colour, which is the one failure
+/// meant every value was discarded and the light never changed color, which is the one failure
 /// nothing above this could see - the editor was right, the program was right, and nothing happened.
 /// </remarks>
 public class GivenTests
@@ -63,10 +63,10 @@ public class GivenTests
         Assert.Equal("doors open", GameSlots.Given(Literal.Of("doors open")).Value);
     }
 
-    /// <summary>A colour goes as the way it is written, the game having no value of its own for one.</summary>
+    /// <summary>A color goes as the way it is written, the game having no value of its own for one.</summary>
     [Fact]
-    public void AColourGoesAsHowItIsWritten()
+    public void AColorGoesAsHowItIsWritten()
     {
-        Assert.Equal("#FF8800", GameSlots.Given(Literal.Colour(255, 136, 0, 255)).Value);
+        Assert.Equal("#FF8800", GameSlots.Given(Literal.Color(255, 136, 0, 255)).Value);
     }
 }

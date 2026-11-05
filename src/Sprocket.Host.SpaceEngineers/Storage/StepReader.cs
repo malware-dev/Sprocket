@@ -400,7 +400,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (value.Form == ValueForm.Color)
             {
-                return Literal.Colour((byte)(value.Whole >> 24), (byte)(value.Whole >> 16),
+                return Literal.Color((byte)(value.Whole >> 24), (byte)(value.Whole >> 16),
                     (byte)(value.Whole >> 8), (byte)value.Whole);
             }
 

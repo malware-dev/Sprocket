@@ -313,7 +313,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>A color called <paramref name="name" />.</summary>
         static Field ColorCalled(string name)
         {
-            return Field.Holding(name, FieldEditor.Colour, 1);
+            return Field.Holding(name, FieldEditor.Color, 1);
         }
 
         /// <summary>A number with a fraction, called <paramref name="name" />, between <paramref name="least" /> and <paramref name="most" />.</summary>

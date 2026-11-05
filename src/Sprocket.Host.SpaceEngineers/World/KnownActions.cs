@@ -28,9 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             var said = new Descriptions();
 
             // The game takes a light's color as three numbers.
-            said.Actions.Add(Action("SetColor", Colour()));
-            said.Actions.Add(Action("SetColorMin", Colour()));
-            said.Actions.Add(Action("SetColorMax", Colour()));
+            said.Actions.Add(Action("SetColor", Color()));
+            said.Actions.Add(Action("SetColorMin", Color()));
+            said.Actions.Add(Action("SetColorMax", Color()));
 
             // The game's handlers take a number with a fraction as a float, the type of every such value it holds,
             // and a whole number as either width; int32 is what its own toolbar dialog sends.
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return said;
         }
 
-        static ParameterPiece Colour()
+        static ParameterPiece Color()
         {
             return Group("color", Channel("Red"), Channel("Green"), Channel("Blue"));
         }

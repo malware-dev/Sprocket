@@ -47,7 +47,7 @@ public class ValueTests
         Assert.Equal(OneId, back);
     }
 
-    /// <summary>A real survives sharing one field with whole numbers and colours.</summary>
+    /// <summary>A real survives sharing one field with whole numbers and colors.</summary>
     [Fact]
     public void ARealKeepsItsValue()
     {
@@ -100,7 +100,7 @@ public class ValueTests
     }
 
     [Fact]
-    public void AColourIsEqualInEveryComponent()
+    public void AColorIsEqualInEveryComponent()
     {
         var orange = EntityValue.Of(255, 136, 0, 255);
 
@@ -114,7 +114,7 @@ public class ValueTests
     /// turn a question nobody should have asked into a crash in the middle of somebody's airlock.
     /// </remarks>
     [Fact]
-    public void AnOrderingAskedOfAColourIsSimplyFalse()
+    public void AnOrderingAskedOfAColorIsSimplyFalse()
     {
         var orange = EntityValue.Of(255, 136, 0, 255);
         var black = EntityValue.Of(0, 0, 0, 255);

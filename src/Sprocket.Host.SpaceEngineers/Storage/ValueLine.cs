@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return Literal.Of(false);
 
             if (word.Length > 1 && word[0] == '#')
-                return Colour(word);
+                return Color(word);
 
             long whole;
             if (long.TryParse(word, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>Six hex digits, or eight where the last two are how solid it is.</summary>
-        static Literal Colour(string word)
+        static Literal Color(string word)
         {
             var digits = word.Substring(1);
             if (digits.Length != 6 && digits.Length != 8)
@@ -123,7 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 bytes[i] = value;
             }
 
-            return Literal.Colour(bytes[0], bytes[1], bytes[2], bytes[3]);
+            return Literal.Color(bytes[0], bytes[1], bytes[2], bytes[3]);
         }
     }
 }

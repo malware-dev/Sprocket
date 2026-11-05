@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Color shade;
             byte alpha;
-            if (!Colour(said, out shade, out alpha))
+            if (!TryRead(said, out shade, out alpha))
             {
                 for (var i = 0; i < count; i++)
                     into.Add("");
@@ -87,9 +87,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The color a written one says, and how solid it is, or nothing where it is not one yet.
         /// </summary>
         /// <remarks>A written color is six or eight hex digits behind a hash.</remarks>
-        public static bool Colour(string said, out Color colour, out byte alpha)
+        public static bool TryRead(string said, out Color color, out byte alpha)
         {
-            colour = Color.White;
+            color = Color.White;
             alpha = 255;
 
             if (said == null || said.Length < 7 || said[0] != '#')
@@ -106,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (digits.Length == 8 && !Part(digits, 3, out a))
                 return false;
 
-            colour = new Color(r, g, b);
+            color = new Color(r, g, b);
             alpha = a;
             return true;
         }

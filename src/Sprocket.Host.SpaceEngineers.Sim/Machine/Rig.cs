@@ -355,8 +355,8 @@ public sealed class Rig
     /// A light, which is the block the value work is proved against.
     /// </summary>
     /// <remarks>
-    /// A light declares its colour setter as three values, each of them text, with nothing saying
-    /// they are a colour's channels - which is what compatibility with the game's own actions
+    /// A light declares its color setter as three values, each of them text, with nothing saying
+    /// they are a color's channels - which is what compatibility with the game's own actions
     /// actually looks like.
     /// <para>
     /// Every light and not one of them, because a definition declares the same actions whichever

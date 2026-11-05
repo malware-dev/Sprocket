@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A color, by its red, green, blue and alpha.</summary>
-        public static Literal Colour(byte r, byte g, byte b, byte a)
+        public static Literal Color(byte r, byte g, byte b, byte a)
         {
             return new Literal(ValueKind.Color, EntityValue.Of(r, g, b, a), null);
         }

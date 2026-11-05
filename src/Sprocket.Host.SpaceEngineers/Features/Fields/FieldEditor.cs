@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         Typed,
 
         /// <summary>A color.</summary>
-        Colour,
+        Color,
 
         /// <summary>
         /// One of a listed few, chosen rather than typed.

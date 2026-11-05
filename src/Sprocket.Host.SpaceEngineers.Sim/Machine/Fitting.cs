@@ -362,7 +362,7 @@ public abstract class Fitting
     /// <summary>Gives this block one more of the game's own actions, which has to be given <paramref name="wants" /> values before it can do anything.</summary>
     /// <remarks>
     /// Most of the game's value-taking actions want text and parse it themselves - a radius, a
-    /// colour as three numbers. Sprocket leaves them out until a step can carry a value, and the
+    /// color as three numbers. Sprocket leaves them out until a step can carry a value, and the
     /// rig has to be able to declare one for that to be tested.
     /// </remarks>
     public Fitting Offering(string id, string text, int wants)
@@ -500,7 +500,7 @@ public abstract class Fitting
                 case ValueKind.Text:
                     return Literal.Of("");
                 case ValueKind.Color:
-                    return Literal.Colour(0, 0, 0, 0);
+                    return Literal.Color(0, 0, 0, 0);
             }
         }
 

@@ -386,7 +386,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 case ValueForm.Color:
                     byte r, g, b, a;
-                    key.Colour(out r, out g, out b, out a);
+                    key.Color(out r, out g, out b, out a);
                     into.Add(new EntityKey(ValueKind.Color, EntityValue.Of(r, g, b, a)));
                     return;
 

@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _texts.Clear();
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (_wanted[i].Edits == FieldEditor.Colour)
+                    if (_wanted[i].Edits == FieldEditor.Color)
                     {
                         ColorChannels.Spell(Asked(i) ? _fields[i].Text : "", _wanted[i].Covers, _parts);
                         while (_texts.Count < _parts.Count)
@@ -344,7 +344,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>The field a value is given in: a switch for on or off, a line of words for a few others, a list for more, a mixer, a dial, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
         IField Make(Field field, ColorOffer colors, Texts texts)
         {
-            if (field.Edits == FieldEditor.Colour)
+            if (field.Edits == FieldEditor.Color)
                 return new ColorField(colors, texts);
 
             if (field.Edits == FieldEditor.Angle)
@@ -383,7 +383,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         void Lay(int at, IField field)
         {
             var element = (Element)field;
-            var color = _wanted[at].Edits == FieldEditor.Colour;
+            var color = _wanted[at].Edits == FieldEditor.Color;
 
             var label = Label(at);
             var about = _wanted[at].About;

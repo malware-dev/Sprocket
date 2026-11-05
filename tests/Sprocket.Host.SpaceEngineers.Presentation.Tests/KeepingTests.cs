@@ -44,7 +44,7 @@ public class KeepingTests
     }
 
     /// <summary>
-    /// And on a colour, which is three values the question shows as one.
+    /// And on a color, which is three values the question shows as one.
     /// </summary>
     /// <remarks>
     /// The harder case, because what opens in the field is not what the program holds: the picker
@@ -52,7 +52,7 @@ public class KeepingTests
     /// about one value.
     /// </remarks>
     [Fact]
-    public void AndOnAColourItOpensOnTheColour()
+    public void AndOnAColorItOpensOnTheColor()
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");

@@ -605,7 +605,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     either.Edits = FieldEditor.Chosen;
                     return either;
                 case ValueKind.Color:
-                    return Field.Holding(named, FieldEditor.Colour, 1);
+                    return Field.Holding(named, FieldEditor.Color, 1);
             }
 
             var box = Field.Called(named);

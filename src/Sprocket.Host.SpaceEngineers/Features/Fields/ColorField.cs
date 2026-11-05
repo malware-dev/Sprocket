@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _text = value ?? "";
                 Color color;
                 byte alpha;
-                if (ColorChannels.Colour(_text, out color, out alpha))
+                if (ColorChannels.TryRead(_text, out color, out alpha))
                 {
                     color.A = alpha;
                     Color = color;

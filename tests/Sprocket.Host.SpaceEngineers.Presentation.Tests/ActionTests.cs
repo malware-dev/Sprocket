@@ -289,7 +289,7 @@ public class ActionTests
 
     /// <summary>Turns the picker to the block's own view, where the game's actions are listed as they are.</summary>
     /// <remarks>
-    /// Where a light's colour setter is offered: the organized view offers the colour itself, and a
+    /// Where a light's color setter is offered: the organized view offers the color itself, and a
     /// setter beside it would say the same thing twice.
     /// </remarks>
     static void ShowTerminal(SprocketEditor editor)
@@ -321,8 +321,8 @@ public class ActionTests
     /// An action that has to be given values asks for them, and then does them.
     /// </summary>
     /// <remarks>
-    /// The compatibility case, and a light's colour setter is the awkward one worth proving: three
-    /// values, each declared as text, with nothing saying they are a colour's channels. Nothing in
+    /// The compatibility case, and a light's color setter is the awkward one worth proving: three
+    /// values, each declared as text, with nothing saying they are a color's channels. Nothing in
     /// Sprocket mentions lights - the count comes off the action's own parameter list, so a modded
     /// block nobody anticipated behaves the same way.
     /// </remarks>
@@ -336,16 +336,16 @@ public class ActionTests
         ShowTerminal(screen.Editor);
         screen.Run(2);
 
-        Assert.True(screen.Shows("Set Color"), "the light does not offer its colour setter");
+        Assert.True(screen.Shows("Set Color"), "the light does not offer its color setter");
 
         screen.Editor.PressChoice("Set Color");
         screen.Run(2);
 
-        // One field over all three, because somebody described these three as one colour - which for
+        // One field over all three, because somebody described these three as one color - which for
         // a light is Sprocket itself, since these are the game's own blocks. The action still says
         // nothing about them, and a block nobody has described still gets a box for each.
         Field asked = Assert.Single(screen.Editor.Picking().Fields);
-        Assert.Equal(FieldEditor.Colour, asked.Edits);
+        Assert.Equal(FieldEditor.Color, asked.Edits);
         Assert.Equal(3, asked.Covers);
 
         screen.Editor.Typed("255 136 0");
@@ -360,12 +360,12 @@ public class ActionTests
     }
 
     /// <summary>
-    /// And the step shows what it was given as a colour, not as the numbers behind it.
+    /// And the step shows what it was given as a color, not as the numbers behind it.
     /// </summary>
     /// <remarks>
     /// The one slot in a sentence that is not words. "255 136 0" is three numbers somebody has to
     /// imagine, and the step is read far more often than it is written, so what it shows is the
-    /// colour itself.
+    /// color itself.
     /// </remarks>
     [Fact]
     public void TheStepShowsWhatItWasGiven()
@@ -383,7 +383,7 @@ public class ActionTests
         ArgumentsSlot given = step.Slots.OfType<ArgumentsSlot>().Single();
 
         Assert.Equal(new Color(255, 136, 0), given.Sample);
-        Assert.False(screen.Shows("255 136 0"), "the step still spells the colour out");
+        Assert.False(screen.Shows("255 136 0"), "the step still spells the color out");
 
         // One slot for all of them, in the order the action wanted them. Three chips with no names
         // on them would be three controls somebody cannot tell apart.
@@ -394,7 +394,7 @@ public class ActionTests
     /// And the values reach the block, in the order the action asked for them.
     /// </summary>
     /// <remarks>
-    /// The whole of the compatibility case in one test: a light's colour setter, chosen from what
+    /// The whole of the compatibility case in one test: a light's color setter, chosen from what
     /// the light declares, given three values by somebody typing them, saved, and performed by the
     /// game when a button is pressed. Nothing in Sprocket mentions lights.
     /// </remarks>
@@ -482,15 +482,15 @@ public class ActionTests
     }
 
     /// <summary>
-    /// One of the player's own colours is chosen by pressing it, and the hue slider by pressing it.
+    /// One of the player's own colors is chosen by pressing it, and the hue slider by pressing it.
     /// </summary>
     /// <remarks>
-    /// The two halves of the picker that are not typing. The colour that comes out is written the way
+    /// The two halves of the picker that are not typing. The color that comes out is written the way
     /// the language writes one, because the box is what the answer is read from - so what a press
     /// does and what somebody could have typed are the same thing.
     /// </remarks>
     [Fact]
-    public void AColourIsChosenByPressingOne()
+    public void AColorIsChosenByPressingOne()
     {
         var screen = WithASequence();
         screen.Editor.PressAdd("task");

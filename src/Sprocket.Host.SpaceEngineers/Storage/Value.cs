@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>A color's red, green, blue and alpha.</summary>
-        public void Colour(out byte r, out byte g, out byte b, out byte a)
+        public void Color(out byte r, out byte g, out byte b, out byte a)
         {
             r = (byte)((Whole >> 24) & 0xFF);
             g = (byte)((Whole >> 16) & 0xFF);

@@ -82,7 +82,7 @@ namespace Sprocket.Sim.Shell
             _surface.Focusable = true;
 
             // The same stand-in for the world the headless shot draws on, and for the same reason: the
-            // veil the screen is drawn behind cannot be judged against a flat colour.
+            // veil the screen is drawn behind cannot be judged against a flat color.
             var stage = new Grid();
             stage.Children.Add(new Backdrop());
             stage.Children.Add(_surface);

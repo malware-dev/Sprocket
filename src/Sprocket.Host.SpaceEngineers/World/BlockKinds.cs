@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             if (offer.Sets == ValueKind.Color)
-                return Field.Holding(said, FieldEditor.Colour, 1);
+                return Field.Holding(said, FieldEditor.Color, 1);
 
             var between = Field.Between(said, offer.Least, offer.Most);
             between.Entry = EntityAction.Entered(offer.Sets);

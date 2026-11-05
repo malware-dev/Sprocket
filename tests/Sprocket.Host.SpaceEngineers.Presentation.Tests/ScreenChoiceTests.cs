@@ -439,7 +439,7 @@ public class ScreenChoiceTests
         var act = Assert.IsType<Act>(screen.Editor.Program.Systems[0].Sequences[0].Steps[0]);
         Assert.Equal(ScreenType.SetUp, act.ActionId);
         Assert.Equal("", act.Arguments[1].Text);
-        Assert.Equal(Literal.Colour(255, 0, 0, 255).Said, act.Arguments[2].Said);
+        Assert.Equal(Literal.Color(255, 0, 0, 255).Said, act.Arguments[2].Said);
         Assert.Equal("", screen.Editor.StepRows()[0].Problem);
     }
 
@@ -488,7 +488,7 @@ public class ScreenChoiceTests
     /// <summary>The color <paramref name="said" /> spells.</summary>
     static Color Shade(string said)
     {
-        Assert.True(ColorChannels.Colour(said, out var color, out _), $"'{said}' is no color");
+        Assert.True(ColorChannels.TryRead(said, out var color, out _), $"'{said}' is no color");
         return color;
     }
 

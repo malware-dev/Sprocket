@@ -9,7 +9,7 @@ namespace Sprocket.Sim.Machine;
 /// </summary>
 /// <remarks>
 /// A switch and what it carries, like any plain block - and a light to the mod, so what the mod knows
-/// about lights applies to it as it does in the game: the colour and radius setters written beside the
+/// about lights applies to it as it does in the game: the color and radius setters written beside the
 /// light's own values are left to the terminal view.
 /// </remarks>
 public sealed class Lamp : Fitting

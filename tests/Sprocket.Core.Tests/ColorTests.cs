@@ -4,23 +4,23 @@ using Xunit;
 namespace Sprocket.Tests;
 
 /// <summary>
-/// The seam between a colour and the separate numbers an action takes it as.
+/// The seam between a color and the separate numbers an action takes it as.
 /// </summary>
 /// <remarks>
 /// Both halves of it, because they are only right together: what a step holds has to come back out
-/// of the picker as the same step. A colour that survived being shown and did not survive being put
+/// of the picker as the same step. A color that survived being shown and did not survive being put
 /// back would quietly rewrite every light somebody opened and did not change.
 /// </remarks>
-public class ColourTests
+public class ColorTests
 {
     [Fact]
-    public void ThreeNumbersAreShownAsTheColourTheyMake()
+    public void ThreeNumbersAreShownAsTheColorTheyMake()
     {
         Assert.Equal("#FF8800", ColorChannels.Said(Values(255, 136, 0), 0, 3));
     }
 
     [Fact]
-    public void AndTheColourGoesBackAsThoseThreeNumbers()
+    public void AndTheColorGoesBackAsThoseThreeNumbers()
     {
         var into = new List<string>();
         ColorChannels.Spell("#FF8800", 3, into);
@@ -29,7 +29,7 @@ public class ColourTests
     }
 
     /// <summary>
-    /// A written colour survives being shown and put back unchanged.
+    /// A written color survives being shown and put back unchanged.
     /// </summary>
     /// <remarks>
     /// The one thing that has to hold, because opening a step and pressing Continue without touching
@@ -44,13 +44,13 @@ public class ColourTests
         Assert.Equal(new[] { "18", "52", "86" }, into);
     }
 
-    /// <summary>Values nobody has filled in are no colour at all, rather than black.</summary>
+    /// <summary>Values nobody has filled in are no color at all, rather than black.</summary>
     /// <remarks>
     /// A step somebody has not finished writing has not chosen black. Opening its picker on black
     /// would be an answer it never gave, and pressing Continue would then write one.
     /// </remarks>
     [Fact]
-    public void ValuesThatWereNeverGivenAreNoColour()
+    public void ValuesThatWereNeverGivenAreNoColor()
     {
         Assert.Equal("", ColorChannels.Said(new List<Literal>(), 0, 3));
         Assert.Equal("", ColorChannels.Said(Values(255, 136, 0), 1, 3));
@@ -65,9 +65,9 @@ public class ColourTests
         Assert.Equal("", ColorChannels.Said(said, 0, 3));
     }
 
-    /// <summary>What is not a colour yet leaves the values alone rather than inventing them.</summary>
+    /// <summary>What is not a color yet leaves the values alone rather than inventing them.</summary>
     [Fact]
-    public void HalfATypedColourFillsNothingIn()
+    public void HalfATypedColorFillsNothingIn()
     {
         var into = new List<string>();
         ColorChannels.Spell("#FF88", 3, into);
@@ -88,16 +88,16 @@ public class ColourTests
     }
 
     /// <summary>
-    /// A colour that is one value stays one value, written the way the language writes one.
+    /// A color that is one value stays one value, written the way the language writes one.
     /// </summary>
     /// <remarks>
-    /// The case with no conversion in it at all. An action that takes a colour as a colour is handed
+    /// The case with no conversion in it at all. An action that takes a color as a color is handed
     /// what somebody chose, and the picker is the same picker.
     /// </remarks>
     [Fact]
-    public void AColourThatIsOneValueGoesStraightThrough()
+    public void AColorThatIsOneValueGoesStraightThrough()
     {
-        var kept = new List<Literal> { Literal.Colour(255, 136, 0, 255) };
+        var kept = new List<Literal> { Literal.Color(255, 136, 0, 255) };
         string said = ColorChannels.Said(kept, 0, 1);
 
         var into = new List<string>();

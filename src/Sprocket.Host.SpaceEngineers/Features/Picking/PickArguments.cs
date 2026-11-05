@@ -194,10 +194,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var colors = new List<Hsv>();
             for (var i = 0; i < fields.Count; i++)
             {
-                if (fields[i].Edits != FieldEditor.Colour)
+                if (fields[i].Edits != FieldEditor.Color)
                     continue;
 
-                Player.Colours(colors);
+                Player.Colors(colors);
                 break;
             }
 
@@ -297,7 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary><paramref name="value" /> as a step would give it: a color fully opaque, whatever the block reads back.</summary>
         static Literal Opaque(Literal value)
         {
-            return value.Kind == ValueKind.Color ? Literal.Colour(value.Red, value.Green, value.Blue, 255) : value;
+            return value.Kind == ValueKind.Color ? Literal.Color(value.Red, value.Green, value.Blue, 255) : value;
         }
     }
 }

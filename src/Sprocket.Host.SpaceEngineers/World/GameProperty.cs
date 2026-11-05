@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     return Literal.Of(_whole.GetValue(_block));
                 case ValueKind.Color:
                     var color = _color.GetValue(_block);
-                    return Literal.Colour(color.R, color.G, color.B, color.A);
+                    return Literal.Color(color.R, color.G, color.B, color.A);
             }
 
             return Literal.Of(_text.GetValue(_block).ToString());

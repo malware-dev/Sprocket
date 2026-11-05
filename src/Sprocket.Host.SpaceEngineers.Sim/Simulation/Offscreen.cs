@@ -149,7 +149,7 @@ namespace Sprocket.Sim.Simulation
             return text.ToString();
         }
 
-        /// <summary>A colour as eight hex digits, so a tint that changed shows up in a diff.</summary>
+        /// <summary>A color as eight hex digits, so a tint that changed shows up in a diff.</summary>
         private static string Ink(Color color)
         {
             return "#"
