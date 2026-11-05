@@ -960,6 +960,18 @@
     <value>This step has a value its action doesn't allow.</value>
     <comment>Problem on a step given a value its action cannot take, used where the value has no name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
   </data>
+  <data name="Sprocket.Problem.TriggerOptionMissing" xml:space="preserve">
+    <value>This trigger is missing its {name}.</value>
+    <comment>Problem on a trigger whose value takes something it wasn't given; {name} is what it takes, such as item. Shown on the sequence's row on a logic system's screen.</comment>
+  </data>
+  <data name="Sprocket.Problem.TriggerOptionWrong" xml:space="preserve">
+    <value>This trigger's {name} doesn't fit.</value>
+    <comment>Problem on a trigger given something its value can't take; {name} is what it takes, such as item. Shown on the sequence's row on a logic system's screen.</comment>
+  </data>
+  <data name="Sprocket.Problem.PassedOver" xml:space="preserve">
+    <value>{block} doesn't have that inventory, so it's left out.</value>
+    <comment>Warning on a step or trigger that reads an inventory one of its blocks doesn't have; {block} is that block's name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen.</comment>
+  </data>
   <data name="Sprocket.Problem.OptionMissing" xml:space="preserve">
     <value>This step is missing its {name}.</value>
     <comment>Problem on a step that lacks an option its action needs; {name} is the option, such as speed. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -53,6 +54,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         /// <summary>The id of the block's own value a new step's field opens holding, read off the block, or null where it opens on <see cref="Default" />.</summary>
         public string OpensOn;
+
+        /// <summary>Whether its words only name some of the values it takes, so a value they leave out is still taken.</summary>
+        public bool Open;
+
+        /// <summary>The name of the field whose answer decides this one's unit, or null where its unit is fixed.</summary>
+        public string UnitFollows;
+
+        /// <summary>The unit for an answer to the field <see cref="UnitFollows" /> names, for a count of one where the flag says so.</summary>
+        public Func<string, bool, string> UnitOf;
+
+        /// <summary>The unit said after a count of exactly one, or null for <see cref="Unit" />.</summary>
+        public string UnitOfOne;
+
+        /// <summary>Whether this value names a part of the block, such as its input: said after the value's other details, and joined to the blocks by the member's own word for a part.</summary>
+        public bool IsPart;
+
+        /// <summary>What a sentence says before a part given by its number, where blocks that name their parts differently are picked together: "in inventory" in "in inventory 2".</summary>
+        public string NumberedLead;
+
+        /// <summary>Whether the editor gives <see cref="Default" /> without asking, as a block with one inventory has only that one to name.</summary>
+        public bool Fixed;
 
         /// <summary>What a sentence says before this value, or null for nothing: "to" in "to 90°".</summary>
         public string Lead;
@@ -144,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return true;
 
             var words = Means ?? Words;
-            if (words != null && words.Count > 0 && !words.Contains(given.Said))
+            if (!Open && words != null && words.Count > 0 && !words.Contains(given.Said))
                 return false;
 
             var number = given.Kind == ValueKind.Integer || given.Kind == ValueKind.Real;
@@ -220,7 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return shown;
 
             if (Step > 0)
-                value = System.Math.Round(value / Step) * Step;
+                value = Math.Round(value / Step) * Step;
 
             return (value / (Scale == 0 ? 1 : Scale)).ToString("0.######", CultureInfo.InvariantCulture);
         }
@@ -248,6 +270,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             field.Least = least ?? "";
             field.Most = most ?? "";
             return field;
+        }
+
+        /// <summary>This part as a plain number, asked of every block picked, where the blocks don't agree on what to call it.</summary>
+        public Field Numbered()
+        {
+            var field = this;
+            field.Words = null;
+            field.Means = null;
+            field.Most = "";
+            field.Fixed = false;
+            field.Default = null;
+            field.Quiet = null;
+            field.Lead = NumberedLead;
+            return field;
+        }
+
+        /// <summary>Whether this part is asked and said as <paramref name="other" /> is on another block.</summary>
+        public bool Agrees(Field other)
+        {
+            return Fixed == other.Fixed && Lead == other.Lead;
+        }
+
+        /// <summary>Whether <paramref name="given" /> says more than a fixed field's only value, which a sentence leaves out.</summary>
+        public bool IsSaid(string given)
+        {
+            return !Fixed || given != Default;
         }
 
         /// <summary>A field that takes only one of <paramref name="words" />.</summary>

@@ -21,10 +21,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public const int TipDelay = 10;
 
         /// <summary>How thick the dotted line under a term is.</summary>
-        public const float TermLine = 1f;
+        public const float TermLine = 2f;
 
         /// <summary>How many ticks a tip stays open while the pointer crosses from what it explains onto it.</summary>
         public const int TipGrace = 15;
+
+        /// <summary>How many ticks the pointer rests on another term before its card replaces the one beside.</summary>
+        public const int TipReplace = 24;
 
         static readonly NineSlice Shade = new NineSlice(Materials.Shadow, 64, 24);
 
@@ -783,7 +786,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 StepStyle = Icon,
                 BackSymbol = Symbols.Left,
                 ForwardSymbol = Symbols.Right,
-                CloseDelay = TipGrace
+                CloseDelay = TipGrace,
+                ReplaceDelay = TipReplace
             }
         };
 
@@ -1069,6 +1073,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
 
         /// <summary>A box a list is narrowed by typing into.</summary>
         public static readonly IStyle<TextBox> Search = new TextBoxStyle(Value);
+
+        /// <summary>The box a long list is searched from: the words and a cross clearing them, as a selector's search has.</summary>
+        public static readonly IStyle<SearchBox> ListSearch = new SearchBoxStyle
+        {
+            Base = { BoxStyle = Search, ClearStyle = Icon, ClearSymbol = Symbols.Close, ClearSize = 28f, Spacing = Gaps.Within }
+        };
+
+        /// <summary>A drop-down too long to read through, searched from a box above its rows.</summary>
+        public static readonly IStyle<DropDown> ListBoxSearched = new DropDownStyle(ListBox)
+        {
+            Base = { SearchStyle = ListSearch }
+        };
 
         /// <summary>A line over a list saying what it is narrowed by, on a wash of its own.</summary>
         public static readonly IStyle<Label> Note = new LabelStyle

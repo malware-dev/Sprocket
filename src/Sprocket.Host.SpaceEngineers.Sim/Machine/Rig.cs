@@ -575,6 +575,18 @@ public sealed class Rig
         return remote;
     }
 
+    /// <summary>Welds on a cargo container called <paramref name="name" />, with one inventory.</summary>
+    public Stockroom Cargo(long id, string name)
+    {
+        return Weld(new Stockroom(id, name, Type<VRage.Game.MyObjectBuilder_CargoContainer>(), "LargeBlockLargeContainer", "Large Cargo Container", 1));
+    }
+
+    /// <summary>Welds on a refinery called <paramref name="name" />, with an input and an output.</summary>
+    public Stockroom Refinery(long id, string name)
+    {
+        return Weld(new Stockroom(id, name, Type<MyObjectBuilder_Refinery>(), "LargeRefinery", "Refinery", 2));
+    }
+
     /// <summary>An interior light, named, with the game's own type behind it.</summary>
     public Lamp Light(long id, string name)
     {

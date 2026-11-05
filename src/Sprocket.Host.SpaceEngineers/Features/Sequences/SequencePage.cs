@@ -596,7 +596,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             // A line naming slots says how it reads them whatever they hold; one naming blocks, only where it names several.
             var slotted = _sequence.System.IsBlueprint;
-            var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || blocks.Count > 1, slotted);
+            var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || blocks.Count > 1, slotted, ComparisonQuestion.Join(value, test.Arguments));
             var numeric = value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
             var said = shape.Reading;
             var reading = shape.IsRead
@@ -612,14 +612,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Screens = Editor.SlotBlocks.Screens(_sequence.System, test.Targets, blocks)
             };
             var parameters = ComparisonQuestion.Parameters(value);
-            var taking = parameters.Count == 0 ? null : new ArgumentsSlot(test.Arguments, parameters,
+            var taking = !ComparisonQuestion.SaysAny(parameters, test.Arguments) ? null : new ArgumentsSlot(test.Arguments, parameters,
                 Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Arguments)), ArgumentRole.ReadWith);
             shape.Lay(row.Slots, reading, named, targets, taking);
 
             if (value == null)
                 return;
 
-            var fields = ComparisonQuestion.Fields(value, Editor.SlotBlocks.Events(_sequence.System, test.Targets));
+            var fields = ComparisonQuestion.Fields(value, Editor.SlotBlocks.Events(_sequence.System, test.Targets), test.Arguments);
             var plural = shape.IsPlural;
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, fields.GetRange(0, 1),
                 Changes(CommandKind.StepSlot, () => _stepwork.Relate(step, test, fields[0], plural)), ArgumentRole.Compared, plural));

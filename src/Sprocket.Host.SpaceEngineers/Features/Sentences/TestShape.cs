@@ -9,8 +9,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// </summary>
     public sealed class TestShape
     {
-        TestShape(string reading, bool leads, bool joinsAll, bool isPlural, bool namesValue)
+        readonly string _join;
+
+        TestShape(string reading, bool leads, bool joinsAll, bool isPlural, bool namesValue, string join)
         {
+            _join = join ?? SentenceText.OnWord;
             Reading = reading;
             Leads = leads;
             JoinsAll = joinsAll;
@@ -39,18 +42,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// The shape of a line reading its blocks by <paramref name="quantifier" />, naming a value on them where
         /// <paramref name="namesValue" />, reading several where <paramref name="many" />, and naming slots where
-        /// <paramref name="slotted" />.
+        /// <paramref name="slotted" />, the blocks joined by <paramref name="join" />, or the usual word where that is null.
         /// </summary>
-        public static TestShape Of(Quantifier quantifier, bool namesValue, bool many, bool slotted)
+        public static TestShape Of(Quantifier quantifier, bool namesValue, bool many, bool slotted, string join = null)
         {
             var totals = SentenceText.Totals(quantifier);
             var reading = many ? Words(quantifier, namesValue, slotted) : "";
 
             if (namesValue)
-                return new TestShape(reading, many && totals, true, false, true);
+                return new TestShape(reading, many && totals, true, false, true, join);
 
             return new TestShape(reading, many && (totals || !slotted), quantifier != Quantifier.Any,
-                quantifier == Quantifier.All && many, false);
+                quantifier == Quantifier.All && many, false, join);
         }
 
         /// <summary>
@@ -127,9 +130,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Leads ? "" : SentenceText.TheWord;
 
             if (part == LinePart.Reading)
-                return Leads ? "" : SentenceText.OnWord;
+                return Leads ? "" : _join;
 
-            return Leads || !IsRead ? SentenceText.OnWord : "";
+            return Leads || !IsRead ? _join : "";
         }
 
         /// <summary>The parts of a line testing blocks, up to its comparison, each numbered by its place among Lay's arguments.</summary>

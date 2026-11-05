@@ -182,16 +182,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             // A line naming slots says how it reads them whatever they hold; one naming blocks, only where it names several.
             var slotted = _system.IsBlueprint;
-            var shape = TestShape.Of(when.Quantifier, true, slotted || blocks.Count > 1, slotted);
+            var shape = TestShape.Of(when.Quantifier, true, slotted || blocks.Count > 1, slotted, ComparisonQuestion.Join(value, when.Arguments));
             var reading = shape.IsRead ? Reading(when, shape, true) : null;
             var parameters = ComparisonQuestion.Parameters(value);
-            var taking = parameters.Count == 0 ? null : new ArgumentsSlot(when.Arguments, parameters, Starts(when, OpeningColumn.Arguments), ArgumentRole.ReadWith);
+            var taking = !ComparisonQuestion.SaysAny(parameters, when.Arguments) ? null : new ArgumentsSlot(when.Arguments, parameters, Starts(when, OpeningColumn.Arguments), ArgumentRole.ReadWith);
             shape.Lay(row.Starts, reading, new ActionSlot(value, Starts(when, OpeningColumn.What)),
                 new EntitiesSlot(blocks, when.Sources, shape.JoinsAll, MarkText.OfSlots(_system, when.Sources), Starts(when, OpeningColumn.Blocks)), taking);
             if (value == null)
                 return;
 
-            var fields = ComparisonQuestion.Fields(value, _editor.SlotBlocks.Events(_system, when.Sources));
+            var fields = ComparisonQuestion.Fields(value, _editor.SlotBlocks.Events(_system, when.Sources), when.Arguments);
             var plural = shape.IsPlural;
             row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(when.Relation) }, fields.GetRange(0, 1),
                 _changes(CommandKind.OpenTrigger, () => Relate(when, fields[0], plural)), ArgumentRole.Compared, plural));

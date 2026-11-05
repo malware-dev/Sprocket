@@ -418,12 +418,16 @@ namespace Sprocket.Sim
                 rig.Light(id, name);
             else if (kind == "door")
                 rig.Door(id, name);
+            else if (kind == "cargo")
+                rig.Cargo(id, name);
+            else if (kind == "refinery")
+                rig.Refinery(id, name);
             else if (kind == "billboard")
                 rig.Weld(new Billboard(id, name));
             else if (kind == "cockpit")
                 rig.ScreenedCockpit(id, name);
             else
-                throw new ArgumentException($"--shot cannot weld '{kind}'; it welds a panel, a light, a door, a billboard, a cockpit or a rotor.");
+                throw new ArgumentException($"--shot cannot weld '{kind}'; it welds a panel, a light, a door, cargo, a refinery, a billboard, a cockpit or a rotor.");
         }
 
         /// <summary>Whether a word begins a script step rather than naming a file.</summary>

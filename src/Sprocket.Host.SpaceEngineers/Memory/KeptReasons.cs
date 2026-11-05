@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
     public static class KeptReasons
     {
         // The last value of each, so a number a newer build kept reads as none.
-        const int LastProblem = (int)SequenceProblem.NothingToAverage;
+        const int LastProblem = (int)SequenceProblem.PassedOver;
         const int LastCause = (int)Cause.DoorToldToClose;
 
         /// <summary>The problem <paramref name="number" /> or <paramref name="spelled" /> holds, or none.</summary>

@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// The fields a check on <paramref name="value" /> asks for: the relation, then what it is compared with, in the state
         /// words <paramref name="events" /> say it in where they say any.
         /// </summary>
-        public static List<Field> Fields(EntityAction value, IList<EntityEvent> events)
+        public static List<Field> Fields(EntityAction value, IList<EntityEvent> events, IList<Literal> arguments = null)
         {
             var fields = new List<Field>();
             if (value == null)
@@ -43,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var compared = new List<Field>();
             value.Fields(compared);
+            Measure(value, compared, arguments);
             foreach (var field in compared)
                 fields.Add(value.Holds == ValueKind.Flag ? Stated(field, value, events) : field);
 
@@ -60,6 +61,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return fields;
         }
 
+        /// <summary>Gives <paramref name="fields" />, what <paramref name="value" /> compares with, the unit its <paramref name="arguments" /> decide, where they do.</summary>
+        public static void Measure(EntityAction value, IList<Field> fields, IList<Literal> arguments)
+        {
+            var own = value?.OwnValue;
+            if (own?.UnitOf == null)
+                return;
+
+            var answer = Answer(own, arguments);
+            for (var i = 0; i < fields.Count; i++)
+            {
+                var field = fields[i];
+                field.UnitFollows = own.UnitFollows;
+                field.UnitOf = own.UnitOf;
+                if (answer != null)
+                {
+                    field.Unit = own.UnitOf(answer, false);
+                    field.UnitOfOne = own.UnitOf(answer, true);
+                }
+
+                fields[i] = field;
+            }
+        }
+
+        static string Answer(OwnValue own, IList<Literal> arguments)
+        {
+            for (var i = 0; arguments != null && i < own.Parameters.Count && i < arguments.Count; i++)
+            {
+                if (own.Parameters[i].Name == own.UnitFollows)
+                    return arguments[i].Said;
+            }
+
+            return null;
+        }
+
         /// <summary>The fields <paramref name="value" /> is read with, one per argument in order; empty for a value that takes none.</summary>
         public static List<Field> Parameters(EntityAction value)
         {
@@ -68,6 +103,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 fields.AddRange(value.OwnValue.Parameters);
 
             return fields;
+        }
+
+        /// <summary>The word joining <paramref name="value" />, read with <paramref name="arguments" />, to its blocks, or null for the usual one.</summary>
+        public static string Join(EntityAction value, IList<Literal> arguments)
+        {
+            var own = value?.OwnValue;
+            if (own == null)
+                return null;
+
+            for (var i = 0; i < own.Parameters.Count && i < arguments.Count; i++)
+            {
+                if (own.Parameters[i].IsPart && own.Parameters[i].IsSaid(arguments[i].Said))
+                    return own.PartJoin ?? own.Join;
+            }
+
+            return own.Join;
+        }
+
+        /// <summary>Whether a sentence says anything of <paramref name="arguments" /> given to <paramref name="fields" />.</summary>
+        public static bool SaysAny(IList<Field> fields, IList<Literal> arguments)
+        {
+            for (var i = 0; i < fields.Count && i < arguments.Count; i++)
+            {
+                if (fields[i].IsSaid(arguments[i].Said))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>How many of the literals a selector gives back for a check on <paramref name="value" /> are the arguments it is read with.</summary>

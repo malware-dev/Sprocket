@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var probe = Probe.Of(entity, test.Provider, test.MemberId, test.Arguments,
                     test.Quantifier, test.Relation, test.Value, null, _owner.Clock, facet);
 
-                if (probe != null)
+                if (probe != null && !probe.PassedOver)
                     tested.Reads.Add(probe);
             }
 

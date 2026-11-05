@@ -21,7 +21,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Sprocket.Term.LogicSystem" xml:space="preserve">
-    <value>A ![](mark:logic-system)&amp;nbsp;**logic system** is the automation for one machine, like an airlock, with all the jobs that go with running it.</value>
+    <value>A ![](mark:logic-system)&amp;nbsp;**logic system** is the automation for one machine, like an airlock. It holds [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term), the lists of steps it runs, and [![](mark:trigger)&amp;nbsp;triggers](Term.Trigger class=term), which do a job when something happens.</value>
     <comment>Codex page on "Logic system", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Installation" xml:space="preserve">

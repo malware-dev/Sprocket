@@ -43,12 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 IsInteger = field.Entry == FieldInput.Whole,
                 Minimum = floored ? least : (double?)null,
                 Maximum = ceilinged ? most : (double?)null,
-                FormatString = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##"
+                FormatString = Formatted(field.Unit)
             }.As(out _box));
-
-            var unit = (field.Unit ?? "").Trim();
-            if (unit.Length > 0)
-                Children.Add(new Label { Style = Styles.ValueLabel, Text = unit });
 
             _box.Edited += delegate
             {
@@ -56,6 +52,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 if (edited != null)
                     edited();
             };
+        }
+
+        /// <summary>The unit shown in the box after the number, which leaves the number as it is.</summary>
+        public string Unit
+        {
+            set { _box.FormatString = Formatted(value); }
+        }
+
+        /// <summary>How the box writes a number of its field, with <paramref name="unit" /> after it.</summary>
+        string Formatted(string unit)
+        {
+            var number = _field.Entry == FieldInput.Whole ? "0" : _field.Entry == FieldInput.Decimal && _field.UnitOf == null ? "0.0#" : "0.##";
+            return string.IsNullOrEmpty(unit) ? number : $"{number}'{unit}'";
         }
 
         /// <inheritdoc />

@@ -265,7 +265,7 @@ public class CheckViewTests
         rig.Editor.PressBlock("Airlock Button");
         rig.Tick();
 
-        What(rig).Entries().First(entry => entry.Text == "label of button" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
+        What(rig).Entries().First(entry => entry.Text == "label" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
         Assert.Equal("button", ((PickPage)rig.Editor.Current).Fields[0].Name);
 

@@ -17,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
     /// <summary>The values something takes, one line each: what the value is, and where it is given.</summary>
     public class FieldSet : Form
     {
+        // Past this many a list gets a row of its own, since its longest names need the room.
+        const int Long = 20;
+
         const int Few = 3;
 
         readonly List<Field> _wanted = new List<Field>();
@@ -86,6 +89,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
                     // A member is given every argument, so an empty field is written as its default.
                     var text = Asked(i) ? _fields[i].Text : "";
+                    if (_wanted[i].Fixed)
+                        text = _wanted[i].Default;
+
                     if (string.IsNullOrEmpty(text) && Asked(i) && _wanted[i].Default != null)
                         text = _wanted[i].Default;
 
@@ -246,11 +252,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return false;
         }
 
+        /// <summary>Shows beside the number at <paramref name="at" /> the unit the field it follows decides, where it follows one.</summary>
+        void Measure(int at)
+        {
+            var wanted = _wanted[at];
+            var number = _fields[at] as NumberField;
+            if (wanted.UnitOf == null || number == null)
+                return;
+
+            for (var i = 0; i < _wanted.Count; i++)
+            {
+                if (_wanted[i].Name == wanted.UnitFollows)
+                    number.Unit = wanted.UnitOf(_wanted[i].Meaning(_fields[i].Text), false);
+            }
+        }
+
         /// <summary>Shows each value that is asked for as things stand, and hides the rest, keeping what they hold.</summary>
         void Follow()
         {
             for (var i = 0; i < _fields.Count; i++)
-                ((Element)_fields[i]).IsVisible = Asked(i);
+            {
+                ((Element)_fields[i]).IsVisible = Asked(i) && !_wanted[i].Fixed;
+                Measure(i);
+            }
         }
 
         /// <summary>Says the values it holds are what the block holds now, offered rather than given, until somebody changes one.</summary>
@@ -371,7 +395,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return new WordsField(words, _submit);
 
             if (words != null && words.Count > Few)
-                return new ListField(words);
+                return new ListField(words, words.Count > Long ? texts.PickSearch : null);
 
             if (SliderField.Takes(field))
                 return new SliderField(field, _submit);
@@ -380,6 +404,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>Puts a value's label and field in a row: a color alone across the whole width, text under its label, anything else beside it where it fits.</summary>
+        bool IsLong(int at, IField field)
+        {
+            return field is ListField && _wanted[at].Words.Count > Long;
+        }
+
         void Lay(int at, IField field)
         {
             var element = (Element)field;
@@ -403,7 +432,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 if (!string.IsNullOrEmpty(about))
                     named.Tip = CodexTip.For(named.Tip, about);
 
-                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
+                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField || IsLong(at, field) ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
                 return;
             }
 

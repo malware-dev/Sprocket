@@ -258,7 +258,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
-
         static List<EntityAction> ActionsOf(List<GridEntity> entities)
         {
             var result = new List<EntityAction>();
@@ -269,9 +268,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < candidates.Count; i++)
             {
                 if (AllHaveAction(entities, candidates[i], 1))
-                    result.Add(candidates[i]);
+                    result.Add(Agreed(entities, candidates[i]));
             }
             return result;
+        }
+
+        /// <summary><paramref name="action" /> as <paramref name="entities" /> can all say it: by number for a part they name differently, as a cargo container and a refinery do.</summary>
+        static EntityAction Agreed(List<GridEntity> entities, EntityAction action)
+        {
+            if (action.OwnValue == null)
+                return action;
+
+            var parameters = action.OwnValue.Parameters;
+            for (var i = 0; i < parameters.Count; i++)
+            {
+                if (!parameters[i].IsPart)
+                    continue;
+
+                for (var other = 1; other < entities.Count; other++)
+                {
+                    var theirs = EntityAction.Value(entities[other].Kind.Actions, BlockKinds.Own, action.Id)?.OwnValue;
+                    if (theirs != null && !parameters[i].Agrees(theirs.Parameters[i]))
+                        return action.WithPartsNumbered();
+                }
+            }
+
+            return action;
         }
 
         /// <summary>The blocks a test can read anything of: a state, or one of their values.</summary>

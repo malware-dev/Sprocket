@@ -28,6 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Seen = signal != null && signal.Flag.Remembers ? Remembered(kept, false, clock) : null;
         }
 
+        /// <summary>Whether the block can't answer what is asked of it, so a reading of several blocks leaves it out.</summary>
+        public bool PassedOver { get; private set; }
+
         /// <summary>The block read.</summary>
         public GridEntity Entity { get; private set; }
 
@@ -85,6 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             var kind = own?.Kind ?? ValueKind.Flag;
             Gauge gauge;
+            var passedOver = false;
             if (own == null)
             {
                 gauge = entity.Gauge(written);
@@ -97,6 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 var given = written.Type == null ? arguments : HostType.Arguments(facet, arguments);
                 gauge = own.Gauge(entity.Block, given, own.Remembers ? Remembered(kept, true, clock) : null);
+                passedOver = !own.Answers(entity.Block, given);
                 if (kind == ValueKind.Name)
                 {
                     var at = own.Position(operand.Text);
@@ -116,7 +121,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (totals)
                 operand = value;
 
-            return new Probe(entity, gauge, relation, operand, null, own == null ? null : written, kept, clock);
+            return new Probe(entity, gauge, relation, operand, null, own == null ? null : written, kept, clock) { PassedOver = passedOver };
         }
 
         /// <summary>

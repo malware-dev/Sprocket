@@ -95,11 +95,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             kind.WithValue("input-fill", "input fill", InputFill).Percent().Announced().In(Category.Stock)
                 .WithValue("output-fill", "output fill", OutputFill).Percent().Announced().In(Category.Stock);
-
-            // The amount of one item in either inventory waits for after the beta: no form asks which item, so neither could be
-            // filled in. Kept for the form that asks.
-            // kind.WithValue("amount-in-input", "amount in input", Holding(true)).Announced().In(Category.Stock)
-            //     .WithValue("amount-in-output", "amount in output", Holding(false)).Announced().In(Category.Stock);
         }
 
         /// <summary>Told as the block starts or stops producing, gets stuck or works again, or its inventories change; on an assembler also as its progress, state or mode changes.</summary>
@@ -195,15 +190,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             return assembler.Mode == MyAssemblerMode.Disassembly ? 1 : 0;
         }
-
-        // Read by the amounts above, which wait for after the beta.
-        // /// <summary>How much of an item one of the block's two inventories holds: in kilograms for ore and ingots, and in pieces for anything else.</summary>
-        // static OwnValue Holding(bool input)
-        // {
-        //     return OwnValue.Number<IMyProductionBlock, Item>(Item.First, (block, item) =>
-        //             item.Known ? (double)(input ? block.InputInventory : block.OutputInventory).GetItemAmount(item.Id) : 0.0)
-        //         .Taking(ItemIds.Asked("item"));
-        // }
 
         /// <summary>How many items an assembler has queued, all orders together.</summary>
         long Queued(IMyAssembler assembler)

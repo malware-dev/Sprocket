@@ -186,10 +186,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Template.Fill(texts.ProblemBlockStalled, "block", fault.Which);
 
             if (fault.Problem == SequenceProblem.Unfilled && !string.IsNullOrEmpty(fault.Which))
-                return Template.Fill(texts.ProblemOptionMissing, "name", fault.Which);
+                return Template.Fill(fault.Step == SequenceFault.Trigger ? texts.ProblemTriggerOptionMissing : texts.ProblemOptionMissing, "name", fault.Which);
 
             if (fault.Problem == SequenceProblem.Mistyped && !string.IsNullOrEmpty(fault.Which))
-                return Template.Fill(texts.ProblemOptionWrong, "name", fault.Which);
+                return Template.Fill(fault.Step == SequenceFault.Trigger ? texts.ProblemTriggerOptionWrong : texts.ProblemOptionWrong, "name", fault.Which);
+
+            if (fault.Problem == SequenceProblem.PassedOver)
+                return Template.Fill(texts.ProblemPassedOver, "block", fault.Which);
 
             if (fault.Problem == SequenceProblem.MissingFacet)
                 return Template.Fill(texts.ProblemMissingScreen, "block", fault.Which);
@@ -467,12 +470,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             var targets = SystemInstance.Through(through, test.Targets);
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Provider, test.MemberId);
-            var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || targets.Count > 1, slotted);
+            var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || targets.Count > 1, slotted, ComparisonQuestion.Join(value, test.Arguments));
             var blocks = Named(bindings, targets, shape.JoinsAll, slotted ? test.Targets : null);
             if (value == null)
                 return shape.Says(SentenceText.Empty, blocks);
 
-            var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, targets));
+            var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, targets), test.Arguments);
             var given = SentenceText.Given(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation), test.Value }, fields, null,
                 ArgumentRole.Checked, shape.IsPlural));
             return $"{shape.Says(value.IsStatus ? null : SentenceText.Value(value), blocks, Taking(value, test.Arguments))} {given}";
@@ -497,7 +500,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             }
 
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), when.Provider, when.EventId);
-            var shape = TestShape.Of(when.Quantifier, true, slots != null || targets.Count > 1, slots != null);
+            var shape = TestShape.Of(when.Quantifier, true, slots != null || targets.Count > 1, slots != null, ComparisonQuestion.Join(value, when.Arguments));
             var read = Named(bindings, targets, shape.JoinsAll, slots);
 
             if (value == null)
@@ -505,6 +508,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var fields = new List<Field>();
             value.Fields(fields);
+            ComparisonQuestion.Measure(value, fields, when.Arguments);
             return $"{shape.Says(SentenceText.Value(value), read, Taking(value, when.Arguments))} {Compared(when.Relation)} {SentenceText.Given(new ArgumentsSlot(new[] { when.Value }, fields, null))}";
         }
 
@@ -512,7 +516,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         static string Taking(EntityAction value, IList<Literal> arguments)
         {
             var parameters = ComparisonQuestion.Parameters(value);
-            return parameters.Count == 0 ? null : SentenceText.Given(new ArgumentsSlot(arguments, parameters, null));
+            return !ComparisonQuestion.SaysAny(parameters, arguments) ? null : SentenceText.Given(new ArgumentsSlot(arguments, parameters, null));
         }
 
         /// <summary>The blocks <paramref name="targets" />, or the slots <paramref name="slots" /> by their names where there are slots.</summary>

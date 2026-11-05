@@ -1,27 +1,34 @@
 using System;
+using System.Collections.Generic;
+using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     partial class Inventory
     {
-        /// <summary>An inventory being listened to, until disposed.</summary>
+        /// <summary>A block's inventories being listened to, until disposed.</summary>
         sealed class Listening : IDisposable
         {
-            readonly IMyInventory _inventory;
+            readonly List<IMyInventory> _inventories = new List<IMyInventory>();
             readonly Action _told;
 
-            public Listening(IMyInventory inventory, Action told)
+            public Listening(IMyTerminalBlock block, Action told)
             {
-                _inventory = inventory;
                 _told = told;
-                _inventory.OnVolumeChanged += Changed;
+                for (var i = 0; i < block.InventoryCount; i++)
+                {
+                    var inventory = block.GetInventory(i);
+                    inventory.OnVolumeChanged += Changed;
+                    _inventories.Add(inventory);
+                }
             }
 
             /// <inheritdoc />
             public void Dispose()
             {
-                _inventory.OnVolumeChanged -= Changed;
+                foreach (var inventory in _inventories)
+                    inventory.OnVolumeChanged -= Changed;
             }
 
             void Changed(IMyInventory inventory, float before, float after)

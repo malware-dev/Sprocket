@@ -71,6 +71,8 @@ public class ProductionTests
 
         public Sandbox.ModAPI.Ingame.MyAssemblerMode Mode { get; set; }
 
+        protected override int Inventories => 2;
+
         public bool Repeating { get; set; }
 
         public bool Producing { get; set; }
@@ -103,6 +105,7 @@ public class ProductionTests
             return stand
                 .Gives("IsProducing", () => Producing)
                 .Gives("IsQueueEmpty", () => QueueEmpty)
+                .Does("GetInventory", args => (int)args[0] == 0 ? input : output)
                 .Gives("InputInventory", () => input)
                 .Gives("OutputInventory", () => output)
                 .Does("add_StartedProducing", args => _producing.Add((Action)args[0]))
@@ -115,6 +118,7 @@ public class ProductionTests
         {
             return Pretend.To<IMyInventory>()
                 .Gives("VolumeFillFactor", () => fill())
+                .Does("GetAcceptedItems", () => null)
                 .Does("GetItemAmount", args => ((VRage.Game.ModAPI.Ingame.MyItemType)args[0]).SubtypeId == "Iron"
                     ? (MyFixedPoint)iron()
                     : 0)
@@ -449,31 +453,123 @@ public class ProductionTests
         Assert.Equal(40.0, fill.OwnValue.Gauge(assembler.Block, new Literal[0], null).Read().Real, 3);
     }
 
-    // The amount of one item in a production block's inventory waits for after the beta, with the value it tests.
-    // /// <summary>How much of an item an inventory holds is a function of the item, heard as the inventory changes.</summary>
-    // [Fact]
-    // public void TheAmountOfAnItemIsHeardAsTheInventoryChanges()
-    // {
-    //     var ship = new Ship();
-    //     var assembler = ship.Weld(new Factory(1, "Assembler", false));
-    //
-    //     var when = new WhenTrigger("amount-in-input")
-    //     {
-    //         Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.AtLeast, Value = Literal.Of(100L)
-    //     };
-    //     when.Arguments.Add(Literal.Of("Ingot/Iron"));
-    //     when.Sources.Add(ship.Name(assembler));
-    //     ship.Switching(when);
-    //     ship.Start();
-    //     ship.Tick(20);
-    //     Assert.Equal(0, ship.Fired);
-    //
-    //     assembler.Iron = 250;
-    //     assembler.Changed();
-    //     ship.Tick();
-    //
-    //     Assert.Equal(1, ship.Fired);
-    // }
+    /// <summary>How much of an item an inventory holds is read with the inventory's number and the item, and heard as the inventory changes.</summary>
+    [Fact]
+    public void TheAmountOfAnItemIsHeardAsTheInventoryChanges()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+
+        var when = new WhenTrigger("inventory_amount")
+        {
+            Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.AtLeast, Value = Literal.Of(100L)
+        };
+        when.Arguments.Add(Literal.Of(1L));
+        when.Arguments.Add(Literal.Of("Ingot/Iron"));
+        when.Sources.Add(ship.Name(assembler));
+        ship.Switching(when);
+        ship.Start();
+        ship.Tick(20);
+        Assert.Equal(0, ship.Fired);
+
+        assembler.Iron = 250;
+        assembler.Changed();
+        ship.Tick();
+
+        Assert.Equal(1, ship.Fired);
+    }
+
+    /// <summary>The second inventory is read by its number, and the first holding the item says nothing of it.</summary>
+    [Fact]
+    public void TheAmountIsReadFromTheInventoryNumbered()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+        assembler.Iron = 250;
+
+        var amount = ship.Rig.Entity(assembler.Id).Kind.FindAction("inventory_amount", ReachKind.Value)!;
+        var first = new[] { Literal.Of(1L), Literal.Of("Ingot/Iron") };
+        var second = new[] { Literal.Of(2L), Literal.Of("Ingot/Iron") };
+
+        Assert.Equal(250.0, amount.OwnValue.Gauge(assembler.Block, first, null).Read().Real, 3);
+        Assert.Equal(0.0, amount.OwnValue.Gauge(assembler.Block, second, null).Read().Real, 3);
+    }
+
+    /// <summary>A sum over blocks that all lack the inventory is 0, so it never reaches a level, and the block is named in a warning.</summary>
+    [Fact]
+    public void ABlockWithoutTheInventoryIsPassedOverAndNamed()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+        assembler.Iron = 250;
+
+        var when = new WhenTrigger("inventory_amount")
+        {
+            Provider = BlockKinds.Own, Quantifier = Quantifier.Sum, Relation = Relation.AtLeast, Value = Literal.Of(1L)
+        };
+        when.Arguments.Add(Literal.Of(3L));
+        when.Arguments.Add(Literal.Of("Ingot/Iron"));
+        when.Sources.Add(ship.Name(assembler));
+        ship.Switching(when);
+        ship.Start();
+        ship.Tick(20);
+        assembler.Changed();
+        ship.Tick();
+
+        Assert.Equal(0, ship.Fired);
+
+        var sequence = ship.Program.Systems[0].Sequences[0];
+        var test = new Comparison
+        {
+            MemberId = "inventory_amount", Provider = BlockKinds.Own, Quantifier = Quantifier.Sum, Relation = Relation.AtLeast,
+            Value = Literal.Of(1L)
+        };
+        test.Arguments.Add(Literal.Of(3L));
+        test.Arguments.Add(Literal.Of("Ingot/Iron"));
+        test.Targets.Add(ship.Name(assembler));
+        sequence.Steps.Add(new If(test));
+        sequence.Steps.Add(new EndIf());
+
+        var fault = SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, sequence, sequence.System.First);
+        Assert.Equal(SequenceProblem.PassedOver, fault.Problem);
+        Assert.True(fault.IsWarning);
+        Assert.Equal("Assembler", fault.Which);
+    }
+
+    /// <summary>An average over blocks that all lack the inventory has no number to give, so it never fires.</summary>
+    [Fact]
+    public void AnAverageOfPassedOverBlocksNeverHolds()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+
+        var when = new WhenTrigger("inventory_amount")
+        {
+            Provider = BlockKinds.Own, Quantifier = Quantifier.Average, Relation = Relation.AtLeast, Value = Literal.Of(0L)
+        };
+        when.Arguments.Add(Literal.Of(3L));
+        when.Arguments.Add(Literal.Of("Ingot/Iron"));
+        when.Sources.Add(ship.Name(assembler));
+        ship.Switching(when);
+        ship.Start();
+        ship.Tick(20);
+        assembler.Changed();
+        ship.Tick();
+
+        Assert.Equal(0, ship.Fired);
+    }
+
+    /// <summary>A block with no inventory of the number asked for can't answer.</summary>
+    [Fact]
+    public void ABlockWithoutTheInventoryCannotAnswer()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+        var amount = ship.Rig.Entity(assembler.Id).Kind.FindAction("inventory_amount", ReachKind.Value)!;
+
+        Assert.True(amount.OwnValue.Answers(assembler.Block, new[] { Literal.Of(2L), Literal.Of("Ingot/Iron") }));
+        Assert.False(amount.OwnValue.Answers(assembler.Block, new[] { Literal.Of(3L), Literal.Of("Ingot/Iron") }));
+    }
 
     /// <summary>An item is written as its type and subtype, and one the game has no type for names nothing.</summary>
     [Theory]
@@ -572,12 +668,12 @@ public class ProductionTests
         var ship = new Ship();
         var assembler = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
         Vetted(assembler, ReachKind.Native, "make", "clear-the-queue");
-        Vetted(assembler, ReachKind.Value, "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating",
+        Vetted(assembler, ReachKind.Value, "inventory_amount", "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating",
             "input-fill", "output-fill", "slaveMode", "UseConveyor");
         Vetted(assembler, ReachKind.Action, "slaveMode", "UseConveyor");
 
         var refinery = ship.Rig.Entity(ship.Weld(new Factory(2, "Refinery", true)).Id).Kind;
-        Vetted(refinery, ReachKind.Value, "refining", "stuck", "input-fill", "output-fill", "UseConveyor");
+        Vetted(refinery, ReachKind.Value, "inventory_amount", "refining", "stuck", "input-fill", "output-fill", "UseConveyor");
         Vetted(refinery, ReachKind.Action, "UseConveyor");
     }
 

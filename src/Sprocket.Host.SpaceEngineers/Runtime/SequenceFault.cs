@@ -68,6 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </summary>
         /// <remarks>A warning is not counted as wrong and never has the sequence parked.</remarks>
         public bool IsWarning => Problem == SequenceProblem.NothingStarts
+            || Problem == SequenceProblem.PassedOver
             || Problem == SequenceProblem.Conflicted
             || Problem == SequenceProblem.NothingToAwait
             || ProgramRepairs.Of(Problem) != null;

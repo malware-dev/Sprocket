@@ -531,15 +531,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             // One per field rather than one per value: a color's three numbers are one field.
             var said = "";
+            var after = "";
             for (var i = 0; i < slot.Filled.Count; i++)
             {
-                if (said.Length > 0)
-                    said += " ";
+                if (i < slot.Fields.Count && !slot.Fields[i].IsSaid(slot.Filled[i]))
+                    continue;
 
-                said += Around(slot.Fields, i, slot.Filled[i]);
+                var word = Around(slot.Fields, i, slot.Filled[i]);
+                if (i < slot.Fields.Count && slot.Fields[i].IsPart)
+                    after = word;
+                else
+                    said += (said.Length > 0 ? " " : "") + word;
             }
 
-            return said;
+            return after.Length == 0 ? said : said.Length == 0 ? after : $"{said} {after}";
         }
 
         /// <summary><paramref name="words" />, cut short with an ellipsis where they run longer than a sentence quotes.</summary>
@@ -564,7 +569,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return filled;
 
             var field = fields[at];
-            var said = field.Scaled(filled) + (field.Unit ?? "");
+            var scaled = field.Scaled(filled);
+            var said = scaled + ((scaled == "1" ? field.UnitOfOne : null) ?? field.Unit ?? "");
             return string.IsNullOrEmpty(field.Lead) ? said : $"{field.Lead} {said}";
         }
 

@@ -19,6 +19,36 @@ public class ScenarioTests
     /// <summary>Every scenario there is, so each is checked the same way.</summary>
     public static IEnumerable<object[]> All => Scenarios.All.Select(scenario => new object[] { scenario.Name });
 
+    /// <summary>Stock passing its level in the cargo container and in the refinery's input flashes the light, every time it is put in.</summary>
+    [Fact]
+    public void TheStockWatchFlashesEachTimeStockArrives()
+    {
+        VRage.ObjectBuilders.MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
+        var scenario = new StockWatch();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+
+        for (var round = 0; round < 2; round++)
+        {
+            scenario.Cargo.Holds("Iron", 200);
+            Run(sim);
+            scenario.Cargo.Holds("Iron", 0);
+            Run(sim);
+            scenario.Refinery.Holds("Iron", 200);
+            Run(sim);
+            scenario.Refinery.Holds("Iron", 0);
+            Run(sim);
+        }
+
+        Assert.Equal(4, sim.Machine.Log.Count(line => line == "Stock Light:on"));
+        Assert.Equal(4, sim.Machine.Log.Count(line => line == "Stock Light:off"));
+    }
+
+    static void Run(Simulation sim)
+    {
+        for (var i = 0; i < 400; i++)
+            sim.Tick();
+    }
+
     /// <summary>Each of the split twin's buttons runs its own doors through a whole cycle, every time it is pressed.</summary>
     [Fact]
     public void TheSplitTwinsButtonsEachCycleTheirOwnDoorsEveryTime()

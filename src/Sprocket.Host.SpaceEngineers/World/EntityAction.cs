@@ -264,6 +264,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             LookedBecause = reason;
         }
 
+        /// <summary>A copy of this value that asks for each part of its blocks by number.</summary>
+        public EntityAction WithPartsNumbered()
+        {
+            var copy = (EntityAction)MemberwiseClone();
+            copy.OwnValue = OwnValue.WithPartsNumbered();
+            return copy;
+        }
+
         /// <summary>Makes this one of Sprocket's own values, read by <paramref name="own" /> and shown by <paramref name="field" />.</summary>
         public EntityAction Reads(OwnValue own, Field field)
         {

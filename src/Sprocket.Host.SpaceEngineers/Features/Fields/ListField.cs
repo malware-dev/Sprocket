@@ -20,10 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         string _text = "";
 
-        /// <summary>A drop-down of <paramref name="words" />, giving none of them yet.</summary>
-        public ListField(IList<string> words)
+        /// <summary>A drop-down of <paramref name="words" />, giving none of them yet, searched from a box hinting <paramref name="searchHint" /> where it is given.</summary>
+        public ListField(IList<string> words, string searchHint = null)
         {
-            Style = Styles.ListBox;
+            Style = searchHint == null ? Styles.ListBox : Styles.ListBoxSearched;
+            IsSearchable = searchHint != null;
+            SearchHint = searchHint;
             Focusable = true;
 
             foreach (var word in words)

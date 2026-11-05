@@ -16,9 +16,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>The item the first of <paramref name="arguments" /> names.</summary>
         public static Item First(IList<Literal> arguments)
         {
+            return At(arguments, 0);
+        }
+
+        /// <summary>The item the argument at <paramref name="at" /> of <paramref name="arguments" /> names.</summary>
+        public static Item At(IList<Literal> arguments, int at)
+        {
             var item = new Item();
-            if (arguments != null && arguments.Count > 0)
-                item.Known = ItemIds.Read(arguments[0].Text, out item.Id);
+            if (arguments != null && arguments.Count > at)
+                item.Known = ItemIds.Read(arguments[at].Text, out item.Id);
 
             return item;
         }

@@ -310,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
 
                 var probe = _probes[i];
-                if (probe == null)
+                if (probe == null || probe.PassedOver)
                     continue;
 
                 Mark(probe, _reads[i].Ruling);
@@ -366,6 +366,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
+                if (probe.PassedOver)
+                    continue;
+
                 Mark(probe, _reads[i].Ruling);
                 if (!probe.Holds())
                     all = false;
@@ -386,6 +389,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool SampleSum(WhenTrigger when)
         {
             var total = 0d;
+            var read = 0;
             var readable = _entities.Length > 0 || when.Quantifier == Quantifier.Sum;
             string lost = null;
 
@@ -405,13 +409,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
+                if (probe.PassedOver)
+                    continue;
+
+                read++;
                 Mark(probe, _reads[i].Ruling);
                 total += probe.Number();
             }
 
-            // Every block is read where any of this is readable, so the average is over all of them.
-            if (when.Quantifier == Quantifier.Average && _entities.Length > 0)
-                total /= _entities.Length;
+            // Over the blocks that answered: none of them leaves no number to give.
+            if (when.Quantifier == Quantifier.Average)
+            {
+                readable = readable && read > 0;
+                if (read > 0)
+                    total /= read;
+            }
 
             var holds = readable && Relations.Holds(Literal.Of(total), when.Relation, when.Value);
             Live = holds;

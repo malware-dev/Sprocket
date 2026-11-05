@@ -17,7 +17,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Sprocket.Term.LogicSystem" xml:space="preserve">
-    <value>Et ![](mark:logic-system)&amp;nbsp;**logikksystem** er automasjonen for én maskin, som en luftsluse, med alle jobbene som hører til å drive den.</value>
+    <value>Et ![](mark:logic-system)&amp;nbsp;**logikksystem** er automasjonen for én maskin, som en luftsluse. Det rommer [![](mark:sequence)&amp;nbsp;sekvenser](Term.Sequence class=term), listene med steg det kjører, og [![](mark:trigger)&amp;nbsp;utløsere](Term.Trigger class=term), som gjør en jobb når noe skjer.</value>
   </data>
   <data name="Sprocket.Term.Installation" xml:space="preserve">
     <value>En ![](mark:installation)&amp;nbsp;**installasjon** er et sett med blokker og [![](mark:signal)&amp;nbsp;signaler](Term.Signal class=term) et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) virker på, som én luftsluse blant flere.</value>

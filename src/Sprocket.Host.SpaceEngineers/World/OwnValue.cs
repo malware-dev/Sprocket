@@ -9,9 +9,11 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>What one of Sprocket's own values reads off a block, and how a change in it is heard.</summary>
     public abstract class OwnValue
     {
+        Func<IMyTerminalBlock, IList<Literal>, bool> _answers;
+
         static readonly string[] None = Array.Empty<string>();
 
-        readonly List<Field> _parameters = new List<Field>();
+        List<Field> _parameters = new List<Field>();
 
         Action<IMyTerminalBlock, Literal> _write;
         IReadOnlyList<string> _said;
@@ -47,6 +49,65 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             _parameters.AddRange(parameters);
             return this;
+        }
+
+        /// <summary>The word joining this value to its blocks where no part of them is named, or null for the usual "on".</summary>
+        public string Join { get; private set; }
+
+        /// <summary>The word joining this value to its blocks where a part of them is named, or null for <see cref="Join" />.</summary>
+        public string PartJoin { get; private set; }
+
+        /// <summary>The name of the option whose answer decides this value's unit, or null where its unit is fixed.</summary>
+        public string UnitFollows { get; private set; }
+
+        /// <summary>This value's unit for an answer to the option <see cref="UnitFollows" /> names, for one where the flag says so.</summary>
+        public Func<string, bool, string> UnitOf { get; private set; }
+
+        /// <summary>Says this value's unit follows the answer to the option <paramref name="follows" />, by <paramref name="unitOf" />.</summary>
+        /// <remarks>Called only in the initializer that makes it.</remarks>
+        public OwnValue MeasuredBy(string follows, Func<string, bool, string> unitOf)
+        {
+            UnitFollows = follows;
+            UnitOf = unitOf;
+            return this;
+        }
+
+        /// <summary>A copy of this value that asks for each part of its blocks by number.</summary>
+        public OwnValue WithPartsNumbered()
+        {
+            var copy = (OwnValue)MemberwiseClone();
+            copy._parameters = new List<Field>(_parameters.Count);
+            foreach (var field in _parameters)
+                copy._parameters.Add(field.IsPart ? field.Numbered() : field);
+
+            return copy;
+        }
+
+        /// <summary>Says how a sentence joins this value to its blocks: <paramref name="join" />, or <paramref name="partJoin" /> where it names a part of them.</summary>
+        /// <remarks>Called only in the initializer that makes it.</remarks>
+        public OwnValue Joined(string join, string partJoin)
+        {
+            Join = join;
+            PartJoin = partJoin;
+            return this;
+        }
+
+        /// <summary>Says a block of a set may be unable to answer: one <paramref name="answers" /> says no of is passed over.</summary>
+        /// <remarks>Called only in the initializer that makes it.</remarks>
+        public OwnValue AnsweredBy<T>(Func<T, IList<Literal>, bool> answers) where T : class
+        {
+            _answers = (block, given) =>
+            {
+                var read = block as T;
+                return read != null && answers(read, given);
+            };
+            return this;
+        }
+
+        /// <summary>Whether <paramref name="block" /> can answer this value read with <paramref name="arguments" />.</summary>
+        public bool Answers(IMyTerminalBlock block, IList<Literal> arguments)
+        {
+            return _answers == null || _answers(block, arguments);
         }
 
         /// <summary>Says a person reads <paramref name="words" /> for the names, one each in order, where the program names things by id.</summary>

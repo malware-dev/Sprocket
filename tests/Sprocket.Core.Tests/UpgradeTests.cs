@@ -270,7 +270,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith("sprocket 1 alpha 19", written);
+        Assert.StartsWith("sprocket 1 alpha 20", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -316,7 +316,7 @@ public class UpgradeTests
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
-    [InlineData("sprocket 1 alpha 20")]
+    [InlineData("sprocket 1 alpha 21")]
     [InlineData("sprocket 2 alpha 14")]
     [InlineData("sprocket 1")]
     public void AnyOtherFormatIsRefused(string header)

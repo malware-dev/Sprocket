@@ -64,9 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             label.Entry = FieldInput.Text;
 
             kind.WithAction(Label, "label button", labels, Asked(buttons), label).In(Category.Screen)
-                .WithValue(LabelOf, "label of button", OwnValue.Text<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read,
+                .WithValue(LabelOf, "label", OwnValue.Text<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read,
                     (panel, labelled) => panel.GetButtonName(labelled.Button))
-                    .Taking(Asked(buttons))).Looked(Unheard).In(Category.Screen)
+                    .Taking(WhichButton(buttons)).Joined(null, "on")).Looked(Unheard).In(Category.Screen)
                 .WithValue(Assigned, "button has an action", OwnValue.Flag<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read,
                     (panel, labelled) => panel.IsButtonAssigned(labelled.Button))
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Automation);
@@ -102,6 +102,23 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var button = Field.Between("button", "1", buttons.ToString(CultureInfo.InvariantCulture));
             button.Entry = FieldInput.Whole;
             button.Needed = true;
+            return button;
+        }
+
+        /// <summary>Which button a label is read from, a part of the panel: never asked of a panel with one.</summary>
+        static Field WhichButton(int buttons)
+        {
+            var button = Asked(buttons);
+            button.IsPart = true;
+            button.NumberedLead = "of button";
+            button.Lead = button.NumberedLead;
+            if (buttons == 1)
+            {
+                button.Fixed = true;
+                button.Default = "1";
+                button.Quiet = "1";
+            }
+
             return button;
         }
 

@@ -736,6 +736,15 @@
   <data name="Sprocket.Problem.Mistyped" xml:space="preserve">
     <value>Dette steget har en verdi handlingen ikke tillater.</value>
   </data>
+  <data name="Sprocket.Problem.TriggerOptionMissing" xml:space="preserve">
+    <value>Denne utløseren mangler {name}.</value>
+  </data>
+  <data name="Sprocket.Problem.TriggerOptionWrong" xml:space="preserve">
+    <value>{name} i denne utløseren passer ikke.</value>
+  </data>
+  <data name="Sprocket.Problem.PassedOver" xml:space="preserve">
+    <value>{block} har ikke det inventaret, så den blir utelatt.</value>
+  </data>
   <data name="Sprocket.Problem.OptionMissing" xml:space="preserve">
     <value>Dette steget mangler {name}.</value>
   </data>

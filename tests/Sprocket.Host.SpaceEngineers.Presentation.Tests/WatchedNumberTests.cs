@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -142,6 +143,46 @@ public class WatchedNumberTests
         row.Starts.OfType<ArgumentsSlot>().First().Opens!.Execute();
         rig.Tick();
         Assert.Equal("2.0 above 5.0", rig.Editor.Pick().Arguments!.Form.Answer);
+    }
+
+    /// <summary>A trigger missing what its value is read with says so, naming it, and so does one given what it can't take.</summary>
+    [Fact]
+    public void ATriggerSaysWhichOptionIsMissingOrWrong()
+    {
+        var rig = Simulation.Fresh();
+        var by = Field.Called("by");
+        by.Entry = FieldInput.Whole;
+        rig.Editor.World.Entities.First(entity => entity.Name == "Airlock Light").Kind.WithValue("brighter", "brighter",
+                OwnValue.Number<Sandbox.ModAPI.IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by))
+            .Looked("A test value.");
+        rig.Editor.NewSystem("Airlock");
+        rig.Editor.PressStart(SentenceText.WhenWord);
+        rig.Editor.PressBlock("Airlock Light");
+        rig.Tick();
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "brighter" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
+        rig.Tick();
+        rig.Editor.Typed("2 above 5");
+        rig.Tick();
+        if (rig.Editor.Current is not LogicSystemPage)
+            rig.Editor.Back();
+
+        rig.Tick();
+
+        var system = rig.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        sequence.Steps.Add(new Wait(Duration.OfTicks(1)));
+        var when = Assert.IsType<WhenTrigger>(system.Triggers[0]);
+
+        when.Arguments.Clear();
+        var missing = SequenceSummary.Checked(rig.Editor.World, rig.Editor.Runner.Bindings, sequence, system.First);
+        Assert.Equal(SequenceProblem.Unfilled, missing.Problem);
+        Assert.Equal(SequenceFault.Trigger, missing.Step);
+        Assert.Equal("This trigger is missing its by.", SequenceText.Problem(rig.Editor.Texts, missing, sequence));
+
+        when.Arguments.Add(Literal.Of("three"));
+        var wrong = SequenceSummary.Checked(rig.Editor.World, rig.Editor.Runner.Bindings, sequence, system.First);
+        Assert.Equal(SequenceProblem.Mistyped, wrong.Problem);
+        Assert.Equal("This trigger's by doesn't fit.", SequenceText.Problem(rig.Editor.Texts, wrong, sequence));
     }
 
     /// <summary>A new logic system's trigger picker, with both of the airlock's lights picked and read as <paramref name="reading" /> says.</summary>

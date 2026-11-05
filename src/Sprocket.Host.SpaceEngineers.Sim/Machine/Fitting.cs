@@ -203,6 +203,9 @@ public abstract class Fitting
     /// <summary>The grid the block is on, or null before it is welded to one.</summary>
     public IMyCubeGrid Grid { get; set; }
 
+    /// <summary>How many inventories the block has.</summary>
+    protected virtual int Inventories => 0;
+
     /// <summary>Whether the block is shown in toolbar config, the game's setting that keeps a block out of toolbar lists.</summary>
     public bool InToolbars { get; set; } = true;
 
@@ -297,7 +300,7 @@ public abstract class Fitting
             .Gives("SlimBlock", () => Slim)
             .Gives("IsBeingHacked", () => false)
             .Gives("ResourceSink", () => null)
-            .Gives("InventoryCount", () => 0)
+            .Gives("InventoryCount", () => Inventories)
             .Gives("ShowInToolbarConfig", () => InToolbars)
             .Otherwise("UseGenericLcd", () => false)
             .Otherwise("SurfaceCount", () => 0)

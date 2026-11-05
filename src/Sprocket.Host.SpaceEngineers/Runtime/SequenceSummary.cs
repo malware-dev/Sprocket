@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (system == null)
                 return SequenceFault.None;
 
+            var passed = SequenceFault.None;
             var starts = 0;
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
@@ -119,9 +120,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 foreach (var source in watched)
                 {
                     GridEntity block = bindings.Entity(source);
+                    var asked = block == null ? null : when.Names(block.Kind.Actions)?.OwnValue;
+                    var left = asked?.Missing(when.Arguments.Count);
+                    if (left != null)
+                        return new SequenceFault(SequenceProblem.Unfilled, SequenceFault.Trigger, BlockTrouble.None, left);
+
+                    var refused = asked?.Refused(when.Arguments);
+                    if (refused != null)
+                        return new SequenceFault(SequenceProblem.Mistyped, SequenceFault.Trigger, BlockTrouble.None, refused);
+
                     if (block != null && Probe.Of(block, when.Provider, when.EventId, when.Arguments, when.Quantifier,
                             when.Relation, when.Value) == null)
                         return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
+
+                    if (asked != null && !asked.Answers(block.Block, when.Arguments) && !passed.Exists)
+                        passed = new SequenceFault(SequenceProblem.PassedOver, SequenceFault.Trigger, BlockTrouble.None, block.Name);
                 }
             }
 
@@ -134,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             if (world.Unstartable.CanStart(sequence, through))
-                return SequenceFault.None;
+                return passed;
 
             var why = world.Unstartable.Why(sequence, through);
             return why == null ? SequenceFault.Unstarted(Unwired.Unknown, null) : SequenceFault.Unstarted(why.Why, why.Block);
@@ -207,6 +220,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             SequenceFault start = StartTrouble(world, bindings, sequence, through);
             if (start.Exists && !start.IsWarning)
                 return start;
+
+            SequenceFault passedOver = PassedOver(bindings, sequence, through);
+            if (passedOver.Exists)
+                return passedOver;
 
             SequenceFault idle = Idle(bindings, sequence, through);
             if (idle.Exists)
@@ -506,6 +523,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return SequenceFault.None;
         }
 
+        /// <summary>The first step reading a block that can't answer what it asks, naming the block, or none.</summary>
+        static SequenceFault PassedOver(Bindings bindings, Sequence sequence, SystemInstance through)
+        {
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var test = TestOf(sequence.Steps[i]);
+                if (test == null)
+                    continue;
+
+                foreach (var target in SystemInstance.Through(through, test.Targets))
+                {
+                    GridEntity entity = bindings.Entity(target);
+                    var value = entity == null ? null : test.Names(entity.Kind.Actions);
+                    if (value?.OwnValue != null && !value.OwnValue.Answers(entity.Block, test.Arguments))
+                        return new SequenceFault(SequenceProblem.PassedOver, i, BlockTrouble.None, entity.Name);
+                }
+            }
+
+            return SequenceFault.None;
+        }
+
         /// <summary>The first step given a value its action takes as another kind, or none.</summary>
         static SequenceFault Mistyped(Bindings bindings, Sequence sequence, SystemInstance through)
         {
@@ -517,8 +555,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 {
                     compared.Clear();
                     compared.Add(test.Value);
-                    if (!TestTakes(bindings, test, through, compared))
-                        return new SequenceFault(SequenceProblem.Mistyped, i);
+                    var refused = TestRefused(bindings, test, through, compared);
+                    if (refused != null)
+                        return new SequenceFault(SequenceProblem.Mistyped, i, BlockTrouble.None, refused);
 
                     continue;
                 }
@@ -545,10 +584,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Whether every block a test reads a member on takes what it is compared with as the kind the member is, and can be
-        /// compared as the test compares it.
+        /// What a block a test reads a member on refuses of what the test gives it: the name of the argument at fault, empty where it
+        /// is what the member is compared with or how, or null where every block takes it.
         /// </summary>
-        static bool TestTakes(Bindings bindings, Comparison test, SystemInstance through, IList<Literal> compared)
+        static string TestRefused(Bindings bindings, Comparison test, SystemInstance through, IList<Literal> compared)
         {
             var targets = SystemInstance.Through(through, test.Targets);
             foreach (var target in targets)
@@ -559,18 +598,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 EntityAction value = test.Names(entity.Kind.Actions);
                 if (value != null && !value.Takes(compared))
-                    return false;
+                    return "";
 
-                if (value != null && value.OwnValue != null && value.OwnValue.Refused(test.Arguments) != null)
-                    return false;
+                var refused = value?.OwnValue?.Refused(test.Arguments);
+                if (refused != null)
+                    return refused;
 
                 var offered = value != null;
                 if (offered && Probe.Of(entity, test.Provider, test.MemberId, test.Arguments, test.Quantifier, test.Relation,
                         test.Value) == null)
-                    return false;
+                    return "";
             }
 
-            return true;
+            return null;
         }
 
         /// <summary>The first step with a block lacking the facet <paramref name="through" /> chose of it in a slot, naming that block; or none.</summary>

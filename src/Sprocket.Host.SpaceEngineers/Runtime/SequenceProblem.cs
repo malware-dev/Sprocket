@@ -93,6 +93,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>One of its if steps takes the average of a set that holds no blocks, so it has no number to compare.</summary>
         /// <remarks>The run ends there.</remarks>
-        NothingToAverage = 19
+        NothingToAverage = 19,
+
+        /// <summary>A block a step or a trigger reads can't answer what it is asked, so it is left out.</summary>
+        PassedOver = 20
     }
 }
