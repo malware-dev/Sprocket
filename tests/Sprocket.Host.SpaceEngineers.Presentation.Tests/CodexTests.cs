@@ -45,6 +45,29 @@ public class CodexTests
         Assert.Equal(description.EmphasisFont, page.EmphasisFont);
     }
 
+    /// <summary>A tip holds the pointer and lights its terms only while the pin key is held, in the same tip.</summary>
+    [Fact]
+    public void ATipIsPinnedOnlyWhileItsKeyIsHeld()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
+        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", Styles.TipDelay.ToString());
+        var tip = screen.Scene.CodexTip!;
+        Assert.True(screen.Scene.View.Codex.IsPinnedByKey);
+        Assert.False(tip.IsPinned);
+
+        var held = true;
+        // ReSharper disable once AccessToModifiedClosure - the key is let go further down.
+        screen.Scene.View.Codex.FnIsPinKeyHeld = () => held;
+        screen.Run(2);
+        Assert.Same(tip, screen.Scene.CodexTip);
+        Assert.True(tip.IsPinned);
+
+        held = false;
+        screen.Run(2);
+        Assert.False(tip.IsPinned);
+    }
+
     /// <summary>The editor's tips open a link's page in a tip beside them, casting the short shadow every hanging thing casts.</summary>
     [Fact]
     public void TheEditorsTipsNestAndCastAShadow()
@@ -293,6 +316,7 @@ public class CodexTests
     public void APressOnATipOutsideItsMenuKeepsTheMenu()
     {
         var screen = Screen.Fresh("tick", "3");
+        screen.Scene.View.Codex.FnIsPinKeyHeld = () => true;
         var editor = screen.Editor;
         editor.NewSystem("Airlock");
         screen.Run(2);

@@ -512,9 +512,6 @@
   <data name="Sprocket.State.Name" xml:space="preserve">
     <value>navn</value>
   </data>
-  <data name="Sprocket.Pick.StatesNone" xml:space="preserve">
-    <value>Dette logikksystemet har ingen tilstander. Legg dem til på fanen Tilstand.</value>
-  </data>
   <data name="Sprocket.State.Flag" xml:space="preserve">
     <value>på eller av</value>
   </data>
@@ -640,9 +637,6 @@
     <value>Alt som kjører nå, stopper der det er.</value>
   </data>
 
-  <data name="Sprocket.Prompt.Continue" xml:space="preserve">
-    <value>Fortsett</value>
-  </data>
   <data name="Sprocket.Sequence.Off" xml:space="preserve">
     <value>slått av</value>
   </data>
@@ -1095,12 +1089,6 @@
   </data>
   <data name="Sprocket.Time.HourAgo" xml:space="preserve">
     <value>for over en time siden</value>
-  </data>
-  <data name="Sprocket.Time.Minute" xml:space="preserve">
-    <value>ett minutt</value>
-  </data>
-  <data name="Sprocket.Time.Minutes" xml:space="preserve">
-    <value>{count} minutter</value>
   </data>
   <data name="Sprocket.Value.AtLeast" xml:space="preserve">
     <value>({least} eller mer)</value>

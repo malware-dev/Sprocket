@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             _rest = rest;
             Add("sequence", Symbols.Sequence);
             Add("signal", Symbols.Signal);
+            Add("state", Symbols.State);
             Add("trigger", Symbols.Trigger);
             Add("action", Symbols.Action);
             Add("awaited", Symbols.Lasting);

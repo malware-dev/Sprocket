@@ -8,7 +8,7 @@ on screen     slot 1
 001  Sprite     Lumel_Fill            {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 003  SetClip    {X:296 Y:53 W:1259 H:40}
-004  Text       at {X:296 Y:59.01406} scale 0.401  #85A1A9FF  "B"
+004  Text       at {X:296 Y:59.01406} scale 0.401  #A2C3CDFF  "B"
 005  Text       at {X:323.6875 Y:53.39666} scale 1.111  #DCF5FDFF  "slot 1"
 006  Text       at {X:395.6904 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 007  ClearClip  

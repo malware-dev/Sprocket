@@ -65,12 +65,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Where the <c>]</c> closing words that start at <paramref name="from" /> in <paramref name="markdown" /> is, past any escaped one, or -1 where none does.</summary>
         static int Closing(string markdown, int from)
         {
+            var inner = 0;
             for (var i = from; i < markdown.Length; i++)
             {
                 if (markdown[i] == '\\')
                     i++;
-                else if (markdown[i] == ']')
+                else if (markdown[i] == '[')
+                    inner++;
+                else if (markdown[i] == ']' && inner == 0)
                     return i;
+                else if (markdown[i] == ']')
+                    inner--;
             }
 
             return -1;

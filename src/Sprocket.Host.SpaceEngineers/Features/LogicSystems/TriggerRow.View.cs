@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             Base.Spacing = Gaps.Parts;
 
+            Children.Add(new Glyph { Style = Styles.Waits, Symbol = Symbols.Trigger, Align = Align.Center, Placement = FixedSize.Width(16f) });
             Children.Add(new VStack
             {
                 Base = { Spacing = Gaps.Within },

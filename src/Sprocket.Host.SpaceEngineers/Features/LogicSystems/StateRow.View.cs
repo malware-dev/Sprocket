@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 {
                     new HStack
                     {
-                        Base = { Spacing = Gaps.Within },
+                        
                         Children =
                         {
                             new Glyph { Style = Styles.Waits, Symbol = Symbols.State, Align = Align.Center },

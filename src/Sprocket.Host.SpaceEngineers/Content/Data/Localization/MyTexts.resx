@@ -638,7 +638,7 @@
   </data>
   <data name="Sprocket.Pick.StateFixedValue" xml:space="preserve">
     <value>a fixed value</value>
-    <comment>Label to the left of the buttons for the state's own values, above the label before the logic system's other states, in the column headed Set to, Check or Watch for of the selector that sets, tests or watches one of the logic system's states.</comment>
+    <comment>Label to the left of the buttons for the state's own values, over the label before the logic system's other states, in the column headed Set to, Check or Watch for of the selector that sets, tests or watches one of the logic system's states.</comment>
   </data>
   <data name="Sprocket.Pick.StateValueOf" xml:space="preserve">
     <value>the value of another state</value>
@@ -671,10 +671,6 @@
   <data name="Sprocket.State.Name" xml:space="preserve">
     <value>name</value>
     <comment>Label of the box a new state's name is typed in, in the picker that sets, tests or watches one of the logic system's states.</comment>
-  </data>
-  <data name="Sprocket.Pick.StatesNone" xml:space="preserve">
-    <value>This logic system has no states. Add them on its State tab.</value>
-    <comment>Said in the column of states where the logic system has none.</comment>
   </data>
   <data name="Sprocket.State.Flag" xml:space="preserve">
     <value>on or off</value>
@@ -782,7 +778,7 @@
   </data>
   <data name="Sprocket.Writing.Count" xml:space="preserve">
     <value>{count} of {most} characters</value>
-    <comment>Above the box on the page where a screen's text or a block's Custom Data is written. {count} is how many characters the text has now, a line break counting as one; {most} is how many the block holds, the most it can be.</comment>
+    <comment>Over the box on the page where a screen's text or a block's Custom Data is written. {count} is how many characters the text has now, a line break counting as one; {most} is how many the block holds, the most it can be.</comment>
   </data>
   <data name="Sprocket.Writing.Markup" xml:space="preserve">
     <value>Markup</value>
@@ -831,10 +827,6 @@
   <data name="Sprocket.Blueprint.SwitchOffRunning" xml:space="preserve">
     <value>Anything running now stops where it is.</value>
     <comment>Last line of the question dialog asked before switching off a logic system that has installations, shown while any of its installations is running.</comment>
-  </data>
-  <data name="Sprocket.Prompt.Continue" xml:space="preserve">
-    <value>Continue</value>
-    <comment>Not used on any screen. Meant as a button beside a box a name is typed into, that gives the name.</comment>
   </data>
   <data name="Sprocket.Sequence.Off" xml:space="preserve">
     <value>switched off</value>
@@ -1439,14 +1431,6 @@
   <data name="Sprocket.Time.HourAgo" xml:space="preserve">
     <value>over an hour ago</value>
     <comment>When a sequence last ran, shown on the sequence's row on a logic system's screen and in the status line at the top of the sequence's own screen, once an hour or more has passed since it ran.</comment>
-  </data>
-  <data name="Sprocket.Time.Minute" xml:space="preserve">
-    <value>a minute</value>
-    <comment>Not used on any screen. Meant as a length of a wait in words: one minute.</comment>
-  </data>
-  <data name="Sprocket.Time.Minutes" xml:space="preserve">
-    <value>{count} minutes</value>
-    <comment>Not used on any screen. Meant as a length of a wait in words; {count} is the number of minutes.</comment>
   </data>
   <data name="Sprocket.Value.AtLeast" xml:space="preserve">
     <value>({least} or more)</value>

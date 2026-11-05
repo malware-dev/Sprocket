@@ -42,8 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
 
             var measured = _perSize * size;
 
-            var ink = Palette.Muted;
-            var color = new Color(ink.R * tint.R / 255, ink.G * tint.G / 255, ink.B * tint.B / 255, ink.A * tint.A / 255);
+            // White is the tint of a mark outside any link; inside one it takes the link's own color.
+            var color = tint == Color.White ? Palette.Muted : tint;
             g.DrawText(Symbols.Font, _symbol, new Vector2(
                 destination.X + (destination.Width - measured.X) * 0.5f,
                 destination.Y + (destination.Height - measured.Y) * 0.5f), size, color);

@@ -20,85 +20,94 @@
     <value>Et ![](mark:logic-system)&amp;nbsp;**logikksystem** er automasjonen for én maskin, som en luftsluse, med alle jobbene som hører til å drive den.</value>
   </data>
   <data name="Sprocket.Term.Installation" xml:space="preserve">
-    <value>En ![](mark:installation)&amp;nbsp;**installasjon** er et sett med blokker og signaler et logikksystem virker på, som én luftsluse blant flere.</value>
+    <value>En ![](mark:installation)&amp;nbsp;**installasjon** er et sett med blokker og [![](mark:signal)&amp;nbsp;signaler](Term.Signal class=term) et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) virker på, som én luftsluse blant flere.</value>
   </data>
   <data name="Sprocket.Term.InstallationPanel" xml:space="preserve">
-    <value>**Installasjonspanelet** er der du setter opp en ![](mark:installation)&amp;nbsp;[installasjon](Term.Installation) og velger blokkene og signalene for hver av [plassene](Term.Slot) dens. Åpne det fra installasjonens rad på startskjermen. Logikksystemets fane `Installasjonspanel` er der du velger hva hvert panel viser.</value>
+    <value>**Installasjonspanelet** er der du setter opp en [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) og velger blokkene og [![](mark:signal)&amp;nbsp;signalene](Term.Signal class=term) for hver av [plassene](Term.Slot class=term) dens. Åpne det fra installasjonens rad på startskjermen. Fanen `Installasjonspanel` i [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) er der du velger hva hvert panel viser.</value>
   </data>
   <data name="Sprocket.Term.Category" xml:space="preserve">
-    <value>En **kategori** er en overskrift på [installasjonspanelet](Term.InstallationPanel) som samler [plassene](Term.Slot) som dras inn under den.</value>
+    <value>En **kategori** er en overskrift på [installasjonspanelet](Term.InstallationPanel class=term) som samler [plassene](Term.Slot class=term) som dras inn under den.</value>
   </data>
   <data name="Sprocket.Term.Slot" xml:space="preserve">
-    <value>En **plass** er et navngitt sted i et logikksystem, som den indre døra, som hver installasjon fyller med sine egne blokker eller sitt eget signal. En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel).</value>
+    <value>En **plass** er et navngitt sted i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term), som den indre døra, som hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) fyller med sine egne blokker eller sitt eget [![](mark:signal)&amp;nbsp;signal](Term.Signal class=term). En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel class=term).</value>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value>**Logikksystemets tilstander** er verdier det husker mellom kjøringer, hver installasjon sine egne, som hvilken side av luftslusen ingeniøren er på. Hver tilstand er på eller av, eller ett alternativ av en [tilstandstype](Term.Type).</value>
+    <value>![](mark:state)&amp;nbsp;**Tilstandene** i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) er det det husker mellom jobbene. Hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) har sine egne. En tilstand har én verdi om gangen. De fleste er på eller av, mens andre, som slusetilstanden i en luftsluse, har ett av alternativene i en egendefinert [tilstandstype](Term.Type class=term).</value>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
-    <value>En **tilstandstype** er en navngitt liste med alternativer, som *inne* og *ute*. En [tilstand](Term.LogicSystemStates) av den tilstandstypen har ett av alternativene.</value>
+    <value>En **tilstandstype** bestemmer hvilke verdier en [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term) kan ha. For eksempel kan slusetilstanden i en luftsluse være *inne*, *sluser inn*, *sluser ut* eller *ute*. Flere tilstander kan bruke samme tilstandstype.</value>
   </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
-    <value>![](mark:undo)&amp;nbsp;**Angre** tar tilbake den siste endringen, og ![](mark:redo)&amp;nbsp;**gjør om** gjør den igjen. Hvert logikksystem har sin egen historikk over endringer, på tvers av alle skjermene sine, og startskjermen har sin egen.</value>
+    <value>![](mark:undo)&amp;nbsp;**Angre** tar tilbake den siste endringen, og ![](mark:redo)&amp;nbsp;**gjør om** gjør den igjen. Hvert [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) har sin egen historikk over endringer, på tvers av alle skjermene sine, og startskjermen har sin egen.</value>
   </data>
   <data name="Sprocket.Term.Sequence" xml:space="preserve">
-    <value>En ![](mark:sequence)&amp;nbsp;**sekvens** er en liste med [steg](Term.Step) et logikksystem kjører ovenfra og ned. En installasjon kjører den én gang om gangen, så en ![](mark:trigger)&amp;nbsp;[utløser](Term.Trigger) som utløses mens den kjører, går tapt.</value>
+    <value>En ![](mark:sequence)&amp;nbsp;**sekvens** er en liste med [steg](Term.Step class=term) et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) kjører ovenfra og ned. I en [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) må den være ferdig før den kan starte igjen, så en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) som utløses mens den kjører, går tapt.</value>
   </data>
   <data name="Sprocket.Term.Step" xml:space="preserve">
-    <value>Et **steg** er én linje i en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence). Trykk på en av delene for å endre den i en [velger](Term.Selector) eller en meny.</value>
+    <value>Et **steg** er én linje i en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term). Trykk på en av delene for å endre den i en [velger](Term.Selector class=term) eller en meny.</value>
   </data>
   <data name="Sprocket.Term.Action" xml:space="preserve">
     <value>En ![](mark:action)&amp;nbsp;**handling** er noe en blokk kan gjøre, som å åpne en dør eller skyve ut et stempel.</value>
   </data>
+  <data name="Sprocket.Term.Option" xml:space="preserve">
+    <value>Et **valg** er en innstilling en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
+  </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
-    <value>En **oppgave** er én operasjon: å kjøre eller stoppe en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence), en ![](mark:action)&amp;nbsp;[handling](Term.Action) på blokker, eller å sette en av ![](mark:value)&amp;nbsp;[verdiene](Term.Value) deres.</value>
+    <value>En **oppgave** er én operasjon: å kjøre eller stoppe en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term), en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker, eller å sette en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>
   </data>
   <data name="Sprocket.Term.Value" xml:space="preserve">
-    <value>En ![](mark:value)&amp;nbsp;**verdi** er en egenskap ved en blokk, for eksempel fargen på et lys, og steg kan sette eller sjekke den.</value>
+    <value>En ![](mark:value)&amp;nbsp;**blokkverdi** er en egenskap ved en blokk, for eksempel fargen på et lys, og [steg](Term.Step class=term) kan sette eller sjekke den.</value>
   </data>
   <data name="Sprocket.Term.Awaitable" xml:space="preserve">
-    <value>En ![](mark:awaited)&amp;nbsp;**avventbar handling** er en ![](mark:action)&amp;nbsp;[handling](Term.Action) som fortsetter å virke i flere [tikk](Term.Tick), som en dør som lukkes, og som en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence) kan vente på. De fleste handlinger er ferdige med en gang, og av dem som fortsetter å virke, er det bare de avventbare det kan ventes på.</value>
+    <value>En ![](mark:awaited)&amp;nbsp;**avventbar handling** er en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) som fortsetter å virke i flere [tikk](Term.Tick class=term), som en dør som lukkes, og som en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) kan vente på. De fleste handlinger er ferdige med en gang, og av dem som fortsetter å virke, er det bare de avventbare det kan ventes på.</value>
   </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
-    <value>En **forsinkelse** er et steg som stanser sekvensen sin en fastsatt tid, i sekunder eller [tikk](Term.Tick), for eksempel for å gi en lyd tid til å spille ferdig.</value>
+    <value>En **forsinkelse** er et [steg](Term.Step class=term) som stanser [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) sin en fastsatt tid, i sekunder eller [tikk](Term.Tick class=term), for eksempel for å gi en lyd tid til å spille ferdig.</value>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
-    <value>Et **hvis**, også kjent som en *betinget setning*, er et steg som sjekker blokker, eller en av logikksystemets [tilstander](Term.LogicSystemStates), og kjører stegene under seg bare når betingelsen er oppfylt.</value>
+    <value>Et **hvis**, også kjent som en *betinget setning*, er et [steg](Term.Step class=term) som sjekker blokker, eller en av [![](mark:state)&amp;nbsp;tilstandene](Term.LogicSystemStates class=term) til [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), og kjører stegene under seg bare når [betingelsen](Term.Condition class=term) er oppfylt.</value>
+  </data>
+  <data name="Sprocket.Term.Condition" xml:space="preserve">
+    <value>En **betingelse** er det et [hvis](Term.If class=term) sjekker, som at en dør er lukket. Er den ikke oppfylt, blir [stegene](Term.Step class=term) under den hoppet over, og neste [gren](Term.Branch class=term), om det finnes en, får sin tur.</value>
   </data>
   <data name="Sprocket.Term.Branch" xml:space="preserve">
-    <value>En **gren** legger til flere steg i et [hvis](Term.If), som kjører når betingelsene over den ikke er oppfylt. En `otherwise if` sjekker en egen betingelse, og en `otherwise` kjører når ingen over er oppfylt.</value>
+    <value>En **gren** legger til flere [steg](Term.Step class=term) i et [hvis](Term.If class=term), som kjører når [betingelsene](Term.Condition class=term) over den ikke er oppfylt. En `otherwise if` sjekker en egen betingelse, og en `otherwise` kjører når ingen over er oppfylt.</value>
   </data>
   <data name="Sprocket.Term.RunAndStop" xml:space="preserve">
-    <value>**Kjør** og **stopp** er steg som starter eller stopper en annen sekvens i det samme logikksystemet, i den samme installasjonen. En sekvens som allerede kjører, startes ikke en gang til.</value>
+    <value>**Kjør** og **stopp** er [steg](Term.Step class=term) som starter eller stopper en annen [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) i det samme [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), i den samme [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term). En sekvens som allerede kjører, startes ikke en gang til.</value>
   </data>
   <data name="Sprocket.Term.Tick" xml:space="preserve">
     <value>Et **tikk** er det minste tidssteget, seksti i sekundet.</value>
   </data>
   <data name="Sprocket.Term.Selector" xml:space="preserve">
-    <value>En **velger** er skjermen der du velger hva et steg, et hvis eller en utløser arbeider med, som blokkene og hva som skal gjøres med dem.</value>
+    <value>En **velger** er skjermen der du velger hva et [steg](Term.Step class=term), et [hvis](Term.If class=term) eller en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) arbeider med, som blokkene og hva som skal gjøres med dem.</value>
   </data>
   <data name="Sprocket.Term.Trigger" xml:space="preserve">
-    <value>En ![](mark:trigger)&amp;nbsp;**utløser** kjører eller stopper en sekvens når noe skjer, som at en knapp trykkes. Den utløses bare mens logikksystemet og installasjonen er slått på.</value>
+    <value>En ![](mark:trigger)&amp;nbsp;**utløser** kjører eller stopper en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) når noe skjer, som at en knapp trykkes. Den utløses bare mens [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) og [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) er slått på.</value>
   </data>
   <data name="Sprocket.Term.Signal" xml:space="preserve">
-    <value>Et ![](mark:signal)&amp;nbsp;**signal** er det en blokk sender for å få en utløser til å utløses, fra en plass på verktøylinja eller fra en endring i selve blokken.</value>
+    <value>Et ![](mark:signal)&amp;nbsp;**signal** er det en blokk sender for å få en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) til å utløses, fra en plass på verktøylinja eller fra en endring i selve blokken.</value>
   </data>
   <data name="Sprocket.Term.Library" xml:space="preserve">
-    <value>**Biblioteket** inneholder ![](mark:blueprint)&amp;nbsp;[plantegningene](Term.Blueprint) dine, sammen med logikksystemene på denne [konstruksjonen](Term.Construct) og [sikkerhetskopier](Term.Backup) av konstruksjoner som mistet automasjonen sin.</value>
+    <value>**Biblioteket** inneholder [![](mark:blueprint)&amp;nbsp;plantegningene](Term.Blueprint class=term) dine, sammen med [![](mark:logic-system)&amp;nbsp;logikksystemene](Term.LogicSystem class=term) på denne [konstruksjonen](Term.Construct class=term) og [sikkerhetskopier](Term.Backup class=term) av konstruksjoner som mistet automasjonen sin.</value>
   </data>
   <data name="Sprocket.Term.Backup" xml:space="preserve">
-    <value>Når en [konstruksjon](Term.Construct) mister sin siste programmerbare blokk, lagres hvert av logikksystemene dens som ikke har noen ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint) i biblioteket, der som en **sikkerhetskopi**. Velg den i biblioteket og trykk `Legg til på denne konstruksjonen` for å få den tilbake.</value>
+    <value>Når en [konstruksjon](Term.Construct class=term) mister sin siste programmerbare blokk, blir hvert [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) den har uten [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term) i [biblioteket](Term.Library class=term), lagret der som en **sikkerhetskopi**. Velg den i biblioteket og trykk `Legg til på denne konstruksjonen` for å få den tilbake.</value>
   </data>
   <data name="Sprocket.Term.Blueprint" xml:space="preserve">
-    <value>En ![](mark:blueprint)&amp;nbsp;**plantegning** er en kopi av et logikksystem som er lagret i [biblioteket](Term.Library), klar til å settes på en annen konstruksjon. Den har ingen egne blokker: hver konstruksjon fyller [plassene](Term.Slot) med sine egne blokker.</value>
+    <value>En ![](mark:blueprint)&amp;nbsp;**plantegning** er en kopi av et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) som er lagret i [biblioteket](Term.Library class=term), klar til å settes på en annen [konstruksjon](Term.Construct class=term). Den har ingen egne blokker: hver konstruksjon fyller [plassene](Term.Slot class=term) med sine egne blokker.</value>
   </data>
   <data name="Sprocket.Term.Construct" xml:space="preserve">
-    <value>En **konstruksjon** er et rutenett og alt som stempler, rotorer og hengsler fester til det. Et skip som er koblet til en stasjon med en kontakt eller landingsstell, er en egen konstruksjon: det er ikke en del av stasjonen, og blokkene dets kan ikke fylle stasjonens [plasser](Term.Slot).</value>
+    <value>En **konstruksjon** er et rutenett og alt som stempler, rotorer og hengsler fester til det. Et skip som er koblet til en stasjon med en kontakt eller landingsstell, er en egen konstruksjon: det er ikke en del av stasjonen, og blokkene dets kan ikke fylle stasjonens [plasser](Term.Slot class=term).</value>
   </data>
   <data name="Sprocket.Chrome.Back" xml:space="preserve">
     <value>Tilbake</value>
   </data>
   <data name="Sprocket.Chrome.Close" xml:space="preserve">
     <value>Lukk editoren</value>
+  </data>
+  <data name="Sprocket.Chrome.PinHint" xml:space="preserve">
+    <value>Hold Alt for å utforske</value>
   </data>
   <data name="Sprocket.Chrome.Tips" xml:space="preserve">
     <value>Vis færre tips.</value>
@@ -107,12 +116,12 @@
     <value>Vis alle tips.</value>
   </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
-    <value>![](mark:undo)&amp;nbsp;[Angre](Term.Undo)
+    <value>[![](mark:undo)&amp;nbsp;Angre](Term.Undo class=term)
 
 {action}</value>
   </data>
   <data name="Sprocket.Chrome.Redo" xml:space="preserve">
-    <value>![](mark:redo)&amp;nbsp;[Gjør om](Term.Undo)
+    <value>[![](mark:redo)&amp;nbsp;Gjør om](Term.Undo class=term)
 
 {action}</value>
   </data>
@@ -129,85 +138,85 @@
     <value>Slå på denne installasjonen</value>
   </data>
   <data name="Sprocket.Row.SwitchOff" xml:space="preserve">
-    <value>Slå av denne installasjonen og stopp kjørende sekvenser.</value>
+    <value>Slå av denne installasjonen og stopp kjørende [![](mark:sequence)&amp;nbsp;sekvenser](Term.Sequence class=term).</value>
   </data>
   <data name="Sprocket.Row.SwitchSystemOn" xml:space="preserve">
     <value>Slå på dette logikksystemet og lås det for endringer.</value>
   </data>
   <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
-    <value>Slå av dette logikksystemet, slik at sekvensene stopper og det låses opp for endringer.</value>
+    <value>Slå av dette logikksystemet, slik at [![](mark:sequence)&amp;nbsp;sekvensene](Term.Sequence class=term) stopper og det låses opp for endringer.</value>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
-    <value>Slå på alle installasjonene av dette logikksystemet</value>
+    <value>Slå på alle [![](mark:installation)&amp;nbsp;installasjonene](Term.Installation class=term) av dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term)</value>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintFirst" xml:space="preserve">
-    <value>Logikksystemet må slås på først.</value>
+    <value>[![](mark:logic-system)&amp;nbsp;Logikksystemet](Term.LogicSystem class=term) må slås på først.</value>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
-    <value>Slå av alle installasjonene av dette logikksystemet</value>
+    <value>Slå av alle [![](mark:installation)&amp;nbsp;installasjonene](Term.Installation class=term) av dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term)</value>
   </data>
   <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
-    <value>Navnet på denne [konstruksjonen](Term.Construct), hentet fra det største rutenettet. Når du gir den nytt navn, får det rutenettet nytt navn.</value>
+    <value>Navnet på denne [konstruksjonen](Term.Construct class=term), hentet fra det største rutenettet. Når du gir den nytt navn, får det rutenettet nytt navn.</value>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
-    <value>Start et nytt logikksystem på denne [konstruksjonen](Term.Construct).</value>
+    <value>Start et nytt [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) på denne [konstruksjonen](Term.Construct class=term).</value>
   </data>
   <data name="Sprocket.Systems.OpenInstanceAbout" xml:space="preserve">
-    <value>Åpne [installasjonspanelet](Term.InstallationPanel) for **{name}**.</value>
+    <value>Åpne [installasjonspanelet](Term.InstallationPanel class=term) for **{name}**.</value>
   </data>
   <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
-    <value>Ta vare på en kopi av dette logikksystemet i biblioteket som en ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint).</value>
+    <value>Ta vare på en kopi av dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) i [biblioteket](Term.Library class=term) som en [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term).</value>
   </data>
   <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
-    <value>To [konstruksjoner](Term.Construct) ble satt sammen, hver med sin egen versjon av {name}. Begge forblir slått av til du velger én.</value>
+    <value>To [konstruksjoner](Term.Construct class=term) ble satt sammen, hver med sin egen versjon av {name}. Begge forblir slått av til du velger én.</value>
   </data>
   <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
-    <value>![](mark:blueprint)&amp;nbsp;[Plantegningen](Term.Blueprint) i biblioteket har nyere endringer. Oppdater logikksystemet på denne konstruksjonen.</value>
+    <value>[![](mark:blueprint)&amp;nbsp;Plantegningen](Term.Blueprint class=term) i [biblioteket](Term.Library class=term) har nyere endringer. Oppdater [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) på denne [konstruksjonen](Term.Construct class=term).</value>
   </data>
   <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
-    <value>Oppdater ![](mark:blueprint)&amp;nbsp;[plantegningen](Term.Blueprint) fra logikksystemet på denne konstruksjonen.</value>
+    <value>Oppdater [![](mark:blueprint)&amp;nbsp;plantegningen](Term.Blueprint class=term) fra [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) på denne [konstruksjonen](Term.Construct class=term).</value>
   </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
-    <value>Åpner editoren for logikksystemet **{name}**.</value>
+    <value>Åpner editoren for [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) **{name}**.</value>
   </data>
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
-    <value>Installer logikksystemet **{name}** på et annet sett med blokker.</value>
+    <value>Installer [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) **{name}** på et annet sett med blokker.</value>
   </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
-    <value>Gi [plassen](Term.Slot) et navn, og si hva den er til.</value>
+    <value>Gi plassen et navn, og si hva den er til.</value>
   </data>
   <data name="Sprocket.System.NameAbout" xml:space="preserve">
     <value>Navnet på dette logikksystemet.</value>
   </data>
   <data name="Sprocket.System.Delete" xml:space="preserve">
-    <value>Slett dette logikksystemet og alle installasjonene av det</value>
+    <value>Slett dette logikksystemet og alle [![](mark:installation)&amp;nbsp;installasjonene](Term.Installation class=term) av det</value>
   </data>
   <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
     <value>Slett denne installasjonen</value>
   </data>
   <data name="Sprocket.System.UsingAbout" xml:space="preserve">
-    <value>Velg ![](mark:installation)&amp;nbsp;[installasjonen](Term.Installation) som denne skjermen viser blokkene til. Blokker du velger for et steg eller en utløser, fyller [plassene](Term.Slot) dens.</value>
+    <value>Velg [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) som denne skjermen viser blokkene til. Blokker du velger for et [steg](Term.Step class=term) eller en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term), fyller [plassene](Term.Slot class=term) dens.</value>
   </data>
   <data name="Sprocket.System.TabFlagged" xml:space="preserve">
     <value>Noe på denne fanen trenger oppmerksomhet. Raden med problemet sier hva.</value>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Utfør en [oppgave](Term.Task) når en blokk sender et ![](mark:signal)&amp;nbsp;[signal](Term.Signal) eller kommer i en ønsket tilstand.</value>
+    <value>Utfør en [oppgave](Term.Task class=term) når en blokk sender et [![](mark:signal)&amp;nbsp;signal](Term.Signal class=term) eller kommer i en ønsket tilstand.</value>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
-    <value>Gjenta en [oppgave](Term.Task) med et fast intervall.</value>
+    <value>Gjenta en [oppgave](Term.Task class=term) med et fast intervall.</value>
   </data>
   <data name="Sprocket.Trigger.StateAbout" xml:space="preserve">
-    <value>Velg en annen tilstand, eller en annen verdi for den.</value>
+    <value>Velg en annen [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term), eller en annen verdi for den.</value>
   </data>
   <data name="Sprocket.System.Copy" xml:space="preserve">
-    <value>Kopier denne sekvensen. Kopien starter avslått og uten ![](mark:trigger)&amp;nbsp;[utløsere](Term.Trigger).</value>
+    <value>Kopier denne sekvensen. Kopien starter avslått og uten [![](mark:trigger)&amp;nbsp;utløsere](Term.Trigger class=term).</value>
   </data>
   <data name="Sprocket.System.CopyUnstarted" xml:space="preserve">
     <value>Kopier denne sekvensen. Kopien starter avslått.</value>
   </data>
   <data name="Sprocket.System.OpenSequence" xml:space="preserve">
-    <value>Åpne **{name}** for å se og endre stegene.</value>
+    <value>Åpne **{name}** for å se og endre [stegene](Term.Step class=term).</value>
   </data>
   <data name="Sprocket.Trigger.Delete" xml:space="preserve">
     <value>Slett denne utløseren</value>
@@ -216,22 +225,22 @@
     <value>Dupliser denne utløseren.</value>
   </data>
   <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
-    <value>Velg blokken som får denne utløseren til å utløses.</value>
+    <value>Velg blokken som får denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) til å utløses.</value>
   </data>
   <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
-    <value>Velg hva denne utløseren gjør.</value>
+    <value>Velg hva denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) gjør.</value>
   </data>
   <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
     <value>Endre hvor ofte den skal kjøre.</value>
   </data>
   <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
-    <value>Velg hvilke blokker denne utløseren virker på.</value>
+    <value>Velg hvilke blokker denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) virker på.</value>
   </data>
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
     <value>Navnet på denne sekvensen.</value>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
-    <value>Utfør en ![](mark:action)&amp;nbsp;[handling](Term.Action) på blokker eller sett en av ![](mark:value)&amp;nbsp;[verdiene](Term.Value) deres.</value>
+    <value>Utfør en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker eller sett en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>
   </data>
   <data name="Sprocket.Sequence.Delete" xml:space="preserve">
     <value>Slett denne sekvensen</value>
@@ -243,13 +252,13 @@
     <value>Dupliser dette steget.</value>
   </data>
   <data name="Sprocket.Sequence.ActionAbout" xml:space="preserve">
-    <value>Velg hva dette steget gjør.</value>
+    <value>Velg hva dette [steget](Term.Step class=term) gjør.</value>
   </data>
   <data name="Sprocket.Sequence.BlocksAbout" xml:space="preserve">
-    <value>Velg hvilke blokker dette steget virker på.</value>
+    <value>Velg hvilke blokker dette [steget](Term.Step class=term) virker på.</value>
   </data>
   <data name="Sprocket.Sequence.OptionsAbout" xml:space="preserve">
-    <value>Endre handlingens valg.</value>
+    <value>Endre [valgene](Term.Option class=term) for [![](mark:action)&amp;nbsp;handlingen](Term.Action class=term).</value>
   </data>
   <data name="Sprocket.Sequence.NewValueAbout" xml:space="preserve">
     <value>Endre verdien som skal settes.</value>
@@ -264,7 +273,7 @@
     <value>Endre verdien det sjekkes etter.</value>
   </data>
   <data name="Sprocket.Sequence.ReadWithAbout" xml:space="preserve">
-    <value>Endre hva verdien leses med.</value>
+    <value>Endre hva [![](mark:value)&amp;nbsp;blokkverdien](Term.Value class=term) leses med.</value>
   </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
     <value>Endre hvor lang forsinkelsen er.</value>
@@ -273,43 +282,43 @@
     <value>Dra for å flytte dette steget.</value>
   </data>
   <data name="Sprocket.Sequence.PauseStep" xml:space="preserve">
-    <value>Sett dette steget på pause. Sekvensen hopper over det til det gjenopptas.</value>
+    <value>Sett dette steget på pause. [![](mark:sequence)&amp;nbsp;Sekvensen](Term.Sequence class=term) hopper over det til det gjenopptas.</value>
   </data>
   <data name="Sprocket.Sequence.UnpauseStep" xml:space="preserve">
-    <value>På pause: sekvensen hopper over dette steget. Trykk for å gjenoppta det.</value>
+    <value>På pause: [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) hopper over dette steget. Trykk for å gjenoppta det.</value>
   </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
     <value>60 tikk er ett sekund.</value>
   </data>
   <data name="Sprocket.Part.RunsAbout" xml:space="preserve">
-    <value>Velg hvilken sekvens dette steget kjører.</value>
+    <value>Velg hvilken [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) dette [steget](Term.Step class=term) kjører.</value>
   </data>
   <data name="Sprocket.Part.StopsAbout" xml:space="preserve">
-    <value>Velg hvilken sekvens dette steget stopper.</value>
+    <value>Velg hvilken [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) dette [steget](Term.Step class=term) stopper.</value>
   </data>
   <data name="Sprocket.Part.WatchedAbout" xml:space="preserve">
-    <value>Velg hvilken ![](mark:value)&amp;nbsp;[verdi](Term.Value) denne utløseren følger med på.</value>
+    <value>Velg hvilken [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term) denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) følger med på.</value>
   </data>
   <data name="Sprocket.Part.FillsAbout" xml:space="preserve">
-    <value>Velg hva som fyller denne [plassen](Term.Slot).</value>
+    <value>Velg hva som fyller denne [plassen](Term.Slot class=term).</value>
   </data>
   <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
-    <value>Blokker dette steget virker på:</value>
+    <value>Blokker dette [steget](Term.Step class=term) virker på:</value>
   </data>
   <data name="Sprocket.Part.TriggerBlocks" xml:space="preserve">
-    <value>Blokker som får denne utløseren til å utløses:</value>
+    <value>Blokker som får denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) til å utløses:</value>
   </data>
   <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
-    <value>Blokker denne utløseren virker på:</value>
+    <value>Blokker denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) virker på:</value>
   </data>
   <data name="Sprocket.Part.FromSlot" xml:space="preserve">
-    <value>Fra plassen {slots}.</value>
+    <value>Fra [plassen](Term.Slot class=term) {slots}.</value>
   </data>
   <data name="Sprocket.Part.SlotEmpty" xml:space="preserve">
-    <value>Den er tom i denne installasjonen.</value>
+    <value>Den er tom i denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term).</value>
   </data>
   <data name="Sprocket.Part.FromSlots" xml:space="preserve">
-    <value>Fra plassene {slots}.</value>
+    <value>Fra [plassene](Term.Slot class=term) {slots}.</value>
   </data>
   <data name="Sprocket.Part.ScreenOf" xml:space="preserve">
     <value>{block}: {screen}</value>
@@ -342,16 +351,16 @@
     <value>Vis bare én sort blokk.</value>
   </data>
   <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Velg hva steget, hvis-steget eller utløseren arbeider med. `Eksisterende plass` bruker en [plass](Term.Slot) logikksystemet har fra før.</value>
+    <value>Velg hva [steget](Term.Step class=term), [hvis-steget](Term.If class=term) eller [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) arbeider med. `Eksisterende plass` bruker en [plass](Term.Slot class=term) [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) har fra før.</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
-    <value>Dette er ![](mark:awaited)&amp;nbsp;[avventbart](Term.Awaitable). Sekvensen går rett videre mens det virker, og et `wait for pending tasks`-steg nedenfor venter til det er ferdig.</value>
+    <value>Dette er [![](mark:awaited)&amp;nbsp;avventbart](Term.Awaitable class=term). [![](mark:sequence)&amp;nbsp;Sekvensen](Term.Sequence class=term) går rett videre mens det virker, og et `wait for pending tasks`-[steg](Term.Step class=term) nedenfor venter til det er ferdig.</value>
   </data>
   <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
-    <value>Start sekvensen som er valgt nedenfor</value>
+    <value>Start [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) som er valgt nedenfor</value>
   </data>
   <data name="Sprocket.Pick.StopAbout" xml:space="preserve">
-    <value>Stopp sekvensen som er valgt nedenfor</value>
+    <value>Stopp [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) som er valgt nedenfor</value>
   </data>
   <data name="Sprocket.Pick.StateFixedValueAbout" xml:space="preserve">
     <value>Bruk en av disse verdiene.</value>
@@ -369,13 +378,13 @@
     <value>Fjern tilstandstypen</value>
   </data>
   <data name="Sprocket.State.TypeKept" xml:space="preserve">
-    <value>En tilstand bruker denne tilstandstypen, så den kan ikke fjernes.</value>
+    <value>En [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term) bruker denne [tilstandstypen](Term.Type class=term), så den kan ikke fjernes.</value>
   </data>
   <data name="Sprocket.State.StateRemove" xml:space="preserve">
     <value>Fjern tilstanden</value>
   </data>
   <data name="Sprocket.State.StateKept" xml:space="preserve">
-    <value>Et steg eller en utløser bruker denne tilstanden, så den kan ikke fjernes.</value>
+    <value>Et [steg](Term.Step class=term) eller en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) bruker denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term), så den kan ikke fjernes.</value>
   </data>
   <data name="Sprocket.State.TypeDrag" xml:space="preserve">
     <value>Dra for å flytte tilstandstypen.</value>
@@ -384,49 +393,49 @@
     <value>Dra for å flytte tilstanden.</value>
   </data>
   <data name="Sprocket.State.HoldsAbout" xml:space="preserve">
-    <value>Bytt typen til denne tilstanden. Startverdien blir den første verdien i den nye typen.</value>
+    <value>Bytt [tilstandstypen](Term.Type class=term) til denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term). Startverdien blir den første verdien i den nye.</value>
   </data>
   <data name="Sprocket.State.StartsAbout" xml:space="preserve">
-    <value>Verdien tilstanden har når logikksystemet starter.</value>
+    <value>Verdien [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term) har når [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) starter.</value>
   </data>
   <data name="Sprocket.Pick.StateNameAbout" xml:space="preserve">
-    <value>Hver plass, tilstandstype og tilstand i et logikksystem må ha sitt eget navn.</value>
+    <value>Hver [plass](Term.Slot class=term), [tilstandstype](Term.Type class=term) og [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term) i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) må ha sitt eget navn.</value>
   </data>
   <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
-    <value>[Tilstandstypen](Term.Type) avgjør hvilke verdier den nye tilstanden kan ha.</value>
+    <value>[Tilstandstypen](Term.Type class=term) avgjør hvilke verdier den nye [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term) kan ha.</value>
   </data>
   <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
-    <value>Hver plass, tilstandstype og tilstand i et logikksystem må ha sitt eget navn.</value>
+    <value>Hver [plass](Term.Slot class=term), [tilstandstype](Term.Type class=term) og [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term) i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) må ha sitt eget navn.</value>
   </data>
   <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">
-    <value>Bruk den verdien en annen tilstand har når dette kjører.</value>
+    <value>Bruk den verdien en annen [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term) har når dette kjører.</value>
   </data>
   <data name="Sprocket.Pick.SlotMatched" xml:space="preserve">
-    <value>Dette bruker [plasser](Term.Slot) logikksystemet har fra før. Gi dem nye navn på fanen `Installasjonspanel`.</value>
+    <value>Dette bruker [plasser](Term.Slot class=term) [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) har fra før. Gi dem nye navn på fanen `Installasjonspanel`.</value>
   </data>
   <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
-    <value>Blokkene som er valgt, erstatter blokkene i denne [plassen](Term.Slot) i installasjonen som vises. Navnet blir det samme.</value>
+    <value>Blokkene som er valgt, erstatter blokkene i denne [plassen](Term.Slot class=term) i [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) som vises. Navnet blir det samme.</value>
   </data>
   <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
-    <value>Blokkene som er valgt, lager en ny [plass](Term.Slot) med dette navnet. Trykk på navnet for å endre det.</value>
+    <value>Blokkene som er valgt, lager en ny [plass](Term.Slot class=term) med dette navnet. Trykk på navnet for å endre det.</value>
   </data>
   <data name="Sprocket.Pick.LimitAbout" xml:space="preserve">
-    <value>Denne plassen tar blokker av sorten {kind}.</value>
+    <value>Denne [plassen](Term.Slot class=term) tar blokker av sorten {kind}.</value>
   </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
-    <value>Et steg, et hvis eller en utløser bruker denne tilstanden, så typen kan ikke byttes.</value>
+    <value>Et [steg](Term.Step class=term), et [hvis](Term.If class=term) eller en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) bruker denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term), så [tilstandstypen](Term.Type class=term) kan ikke byttes.</value>
   </data>
   <data name="Sprocket.State.NowAbout" xml:space="preserve">
-    <value>Verdien denne tilstanden har akkurat nå i installasjonen som vises.</value>
+    <value>Verdien denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term) har akkurat nå i [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) som vises.</value>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
     <value>Navnet på denne installasjonen.</value>
   </data>
   <data name="Sprocket.Blueprint.NameBoxAbout" xml:space="preserve">
-    <value>Navnet på plassen, slik alle som fyller ut dette logikksystemet ser det.</value>
+    <value>Navnet på plassen, slik alle som fyller ut dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) ser det.</value>
   </data>
   <data name="Sprocket.Blueprint.RequiredAbout" xml:space="preserve">
-    <value>Angi om en installasjon av dette logikksystemet kan la denne plassen stå tom.</value>
+    <value>Angi om en [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) av dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) kan la denne [plassen](Term.Slot class=term) stå tom.</value>
   </data>
   <data name="Sprocket.Writing.OpenAbout" xml:space="preserve">
     <value>Skriv hele teksten på en egen side.</value>
@@ -450,7 +459,7 @@
     <value>Skriv inn en farge som #RRGGBB, eller #RRGGBBAA for å ta med opasiteten.</value>
   </data>
   <data name="Sprocket.System.TurnOffToEdit" xml:space="preserve">
-    <value>Systemet må slås av før endringer kan gjøres trygt.</value>
+    <value>[![](mark:logic-system)&amp;nbsp;Logikksystemet](Term.LogicSystem class=term) må slås av før endringer kan gjøres trygt.</value>
   </data>
   <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
     <value>Kjør denne sekvensen manuelt nå</value>
@@ -471,7 +480,7 @@
     <value>*Å velge ammunisjon her er ikke tilgjengelig ennå. Still den inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Withheld.Unread" xml:space="preserve">
-    <value>*Spillet lar ikke mods lese valgene for denne verdien. Still den inn i terminalen.*</value>
+    <value>*Spillet lar ikke mods lese valgene for denne [![](mark:value)&amp;nbsp;blokkverdien](Term.Value class=term). Still den inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Wait.Shorter" xml:space="preserve">
     <value>Kortere</value>
@@ -480,7 +489,7 @@
     <value>Lengre</value>
   </data>
   <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
-    <value>Etiketten som vises på hver knapp og verktøylinjeplass som sender dette signalet. Står den tom, viser de plassens navn.</value>
+    <value>Etiketten som vises på hver knapp og verktøylinjeplass som sender dette [![](mark:signal)&amp;nbsp;signalet](Term.Signal class=term). Står den tom, viser de navnet på [plassen](Term.Slot class=term).</value>
   </data>
   <data name="Sprocket.Library.ForgetBackup" xml:space="preserve">
     <value>Glem denne sikkerhetskopien</value>
@@ -489,49 +498,49 @@
     <value>Slett den fra lageret</value>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
-    <value>Legg til på denne konstruksjonen som et logikksystem, med en tom installasjon å fylle.</value>
+    <value>Legg til på denne [konstruksjonen](Term.Construct class=term) som et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term), med en tom [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) å fylle.</value>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
-    <value>Ta dette logikksystemet og installasjonene av det bort fra denne konstruksjonen.</value>
+    <value>Ta dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) og [![](mark:installation)&amp;nbsp;installasjonene](Term.Installation class=term) dets bort fra denne [konstruksjonen](Term.Construct class=term).</value>
   </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
-    <value>Plantegningen i biblioteket er den samme som dette logikksystemet.</value>
+    <value>[![](mark:blueprint)&amp;nbsp;Plantegningen](Term.Blueprint class=term) i [biblioteket](Term.Library class=term) er den samme som dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term).</value>
   </data>
   <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
-    <value>Et logikksystem trenger minst én installasjon.</value>
+    <value>Et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) trenger minst én [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term).</value>
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
-    <value>Dupliser logikksystemet på denne konstruksjonen.</value>
+    <value>Dupliser logikksystemet på denne [konstruksjonen](Term.Construct class=term).</value>
   </data>
   <data name="Sprocket.Library.PromoteAbout" xml:space="preserve">
-    <value>Gjør denne [sikkerhetskopien](Term.Backup) til en ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint).</value>
+    <value>Gjør denne [sikkerhetskopien](Term.Backup class=term) til en [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term).</value>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
-    <value>Slett dette logikksystemet, med installasjonene. Det har ingen plantegning i biblioteket, så dette er den eneste kopien.</value>
+    <value>Slett dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), med [![](mark:installation)&amp;nbsp;installasjonene](Term.Installation class=term). Det har ingen [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term) i [biblioteket](Term.Library class=term), så dette er den eneste kopien.</value>
   </data>
   <data name="Sprocket.Library.ResetAbout" xml:space="preserve">
-    <value>Tilbakestill dette logikksystemet til plantegningen i biblioteket. Installasjonene beholder blokkene sine.</value>
+    <value>Tilbakestill dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) til [![](mark:blueprint)&amp;nbsp;plantegningen](Term.Blueprint class=term) i [biblioteket](Term.Library class=term). [![](mark:installation)&amp;nbsp;Installasjonene](Term.Installation class=term) beholder blokkene sine.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
-    <value>Sjekk en annen betingelse når ingen av dem over er oppfylt.</value>
+    <value>Sjekk en annen [betingelse](Term.Condition class=term) når ingen av dem over er oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
-    <value>Kjør dette når ingen av betingelsene over er oppfylt.</value>
+    <value>Kjør dette når ingen av [betingelsene](Term.Condition class=term) over er oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.BranchAbout" xml:space="preserve">
-    <value>Legg til en [gren](Term.Branch) i dette hvis-steget.</value>
+    <value>Legg til en [gren](Term.Branch class=term) i dette [hvis-steget](Term.If class=term).</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
-    <value>Legg til en betingelse for denne grenen.</value>
+    <value>Legg til en [betingelse](Term.Condition class=term) for denne [grenen](Term.Branch class=term).</value>
   </data>
   <data name="Sprocket.Sequence.StateAbout" xml:space="preserve">
-    <value>Velg betingelsen som må være oppfylt.</value>
+    <value>Velg [betingelsen](Term.Condition class=term) som må være oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.SetStateAbout" xml:space="preserve">
-    <value>Gi en av logikksystemets [tilstander](Term.LogicSystemStates) en ny verdi.</value>
+    <value>Gi en av [![](mark:state)&amp;nbsp;tilstandene](Term.LogicSystemStates class=term) i dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) en ny verdi.</value>
   </data>
   <data name="Sprocket.Sequence.SystemStateAbout" xml:space="preserve">
-    <value>Velg en annen tilstand, eller en annen verdi for den.</value>
+    <value>Velg en annen [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term), eller en annen verdi for den.</value>
   </data>
   <data name="Sprocket.Admin.EveryWorldAbout" xml:space="preserve">
     <value>Alle verdener følger disse innstillingene der den egne står på `Standard`. På en dedikert server gjelder de verdenene den kjører, og i ditt eget spill alle verdener du spiller eller er vert for.</value>
@@ -540,31 +549,31 @@
     <value>Bruk verdien som er satt under Alle verdener, og følg den om den endres senere.</value>
   </data>
   <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
-    <value>Vent til alle ![](mark:awaited)&amp;nbsp;[avventbare handlinger](Term.Awaitable) som er startet over, er ferdige.</value>
+    <value>Vent til alle [![](mark:awaited)&amp;nbsp;avventbare handlinger](Term.Awaitable class=term) som er startet over, er ferdige.</value>
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
-    <value>De ![](mark:awaited)&amp;nbsp;[avventbare handlingene](Term.Awaitable) som er startet siden forrige `wait for pending tasks`, kjører samtidig, og sekvensen venter her til alle er ferdige.</value>
+    <value>De [![](mark:awaited)&amp;nbsp;avventbare handlingene](Term.Awaitable class=term) som er startet siden forrige `wait for pending tasks`, kjører samtidig, og [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) venter her til alle er ferdige.</value>
   </data>
   <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
     <value>Gi kategorien nytt navn</value>
   </data>
   <data name="Sprocket.Category.Remove" xml:space="preserve">
-    <value>Fjern kategorien. Plassene blir, uten kategori.</value>
+    <value>Fjern kategorien. [Plassene](Term.Slot class=term) blir, uten kategori.</value>
   </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
-    <value>Reduser plassene til så få som stegene og utløserne trenger.</value>
+    <value>Reduser [plassene](Term.Slot class=term) til så få som [stegene](Term.Step class=term) og [![](mark:trigger)&amp;nbsp;utløserne](Term.Trigger class=term) trenger.</value>
   </data>
   <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
     <value>Fjern denne ubrukte plassen.</value>
   </data>
   <data name="Sprocket.Category.Drag" xml:space="preserve">
-    <value>Dra for å flytte kategorien med plassene sine.</value>
+    <value>Dra for å flytte kategorien med [plassene](Term.Slot class=term) sine.</value>
   </data>
   <data name="Sprocket.Slot.Drag" xml:space="preserve">
-    <value>Dra for å flytte plassen. Nederst i en kategori drar du til høyre for å legge den inn, eller til venstre for å holde den utenfor.</value>
+    <value>Dra for å flytte plassen. Nederst i en [kategori](Term.Category class=term) drar du til høyre for å legge den inn, eller til venstre for å holde den utenfor.</value>
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
-    <value>Hvilken sort blokk som kan fylle denne plassen. Trykk for å velge en annen.</value>
+    <value>Hvilken sort blokk som kan fylle denne [plassen](Term.Slot class=term). Trykk for å velge en annen.</value>
   </data>
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
     <value>Vis veiledningen for å skrive formatert tekst.</value>

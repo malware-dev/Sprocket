@@ -24,6 +24,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly RelayCommand _copies;
         readonly RelayCommand _offers;
         readonly RelayCommand _bins;
+        // As wide as a symbol is drawn, so the gap beside a marked row's name is the row's own.
+        const float MarkWidth = 20f;
+
         readonly Glyph _light;
         readonly Label _summary;
         readonly Label _status;
@@ -241,6 +244,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _summary.Style = Depth > 0 ? Styles.InnerName : Styles.Name;
             _light.Symbol = Mark ?? Symbols.Disc;
             _light.Style = Mark == null ? Styles.Light : Styles.Marked;
+            _light.Placement = Mark == null ? FixedSize.Size(16f, 16f) : FixedSize.Size(MarkWidth, 16f);
 
             Placement = ThingHeight;
 
@@ -275,7 +279,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 ? Palette.Problem
                 : JustRan
                     ? Palette.Live
-                    : Palette.Dim;
+                    : Mark == null ? Palette.Dim : Palette.Muted;
 
             _light.Tip = wrong
                 ? KeptTip.For(_light.Tip, texts.Codex.RowBroken)

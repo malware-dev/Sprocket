@@ -1033,12 +1033,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }.Open();
         }
 
+        /// <summary>Raised when every word the editor shows has been read again in the language now spoken.</summary>
+        public event Action Reworded;
+
         /// <summary>Has every word the editor shows read again in the language now spoken, the codex's included.</summary>
         public void Reword()
         {
             Codex.Reword();
             Guide?.Show(Texts);
             Invalidate();
+            Reworded?.Invoke();
         }
 
         /// <summary>Opens the guide to rich text beside whatever screen is showing.</summary>

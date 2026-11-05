@@ -61,7 +61,7 @@ dotnet build src/Sprocket.Host.SpaceEngineers    # builds AND deploys the mod
 dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 ```
 
-- `dotnet test` does not deploy. Nothing is ready to look at in the game until the mod's build has run.
+- Anything that builds the mod deploys it, `dotnet test` and the harness included, unless built with `-p:MdkBuildConfiguration=none`.
 - Saves, mods and logs are at `E:\Data\sesaves`, never under `AppData`.
 
 ## Guards
@@ -81,7 +81,7 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 ```
 
 - A script is screen actions in order: `press <text>`, `move x y`, `drag x y x y`, `scroll x y n`,
-  `tick n`, `type "words"`, `clear`, `enter`, `escape`. A kept script presses by name, never by
+  `tick n`, `type "words"`, `clear`, `enter`, `escape`, `alt` (the Alt key held from there on). A kept script presses by name, never by
   position. Shots default to 1920x1080.
 - `--profile` is the parser's guard and is run in Release only. The column that matters is cost per
   statement across the headroom table; flat means linear. It runs whenever the language grows and

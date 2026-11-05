@@ -15,7 +15,7 @@ namespace Sprocket.Localization.Generator
     ///     A text is read through the property the generator writes for it, so every property of the class never
     ///     referenced is a text nobody sees, unless the game reads its key itself: a definition in the mod's
     ///     <c>.sbc</c> files that names it as a <c>LocalizationId</c>, such as an LCD image's name. A link in a text,
-    ///     <c>[words](Term.Slot)</c>, names another text by its key without the prefix, which reads it as well, and
+    ///     <c>[words](Term.Slot class=term)</c>, names another text by its key without the prefix, which reads it as well, and
     ///     must name one there is.
     ///     <para>
     ///         Only a reference counts. A text read only by code nothing calls counts as used; finding that is the
@@ -28,7 +28,7 @@ namespace Sprocket.Localization.Generator
         static readonly Regex Named = new Regex(@"<LocalizationId>\s*([^<\s]+)\s*</LocalizationId>", RegexOptions.CultureInvariant);
 
         // A markdown-lite link whose target is a key without its prefix: words and dots, no scheme or path.
-        static readonly Regex Linked = new Regex(@"(?<!!)\[[^\]]*\]\(([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\)", RegexOptions.CultureInvariant);
+        static readonly Regex Linked = new Regex(@"(?<!!)\[(?:!\[[^\]]*\]\([^)]*\)|[^\]])*\]\(([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)(?: class=[A-Za-z0-9_-]+)?\)", RegexOptions.CultureInvariant);
 
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Problems.Unused, Problems.Nowhere);

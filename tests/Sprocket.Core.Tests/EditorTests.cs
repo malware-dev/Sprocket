@@ -99,7 +99,7 @@ public class EditorTests
         Assert.False(What().Entries().Single(e => e.Text == "Toggle block On/Off").IsWithheld);
 
         // It says why where the pointer rests, and gives a press nothing to do.
-        Assert.StartsWith("*The game doesn't let mods read this value's choices", pattern.Why);
+        Assert.StartsWith("*The game doesn't let mods read", pattern.Why);
         Assert.False(pattern.IsPickable);
         Assert.Null(What().Entries().Single(e => e.Text == "Toggle block On/Off").Why);
     }

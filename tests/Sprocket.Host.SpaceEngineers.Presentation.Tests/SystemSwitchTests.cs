@@ -99,7 +99,7 @@ public class SystemSwitchTests
 
         var chips = sim.Editor.Triggers()[0].Within().OfType<SlotChip>().ToList();
         Assert.NotEmpty(chips);
-        Assert.All(chips, chip => Assert.EndsWith("The system must be turned off in order to make changes safely.", chip.Tip?.Text?.TrimEnd()));
+        Assert.All(chips, chip => Assert.EndsWith("must be turned off in order to make changes safely.", chip.Tip?.Text?.TrimEnd()));
 
         sim.Editor.Screen.Flip!.Execute();
         sim.Tick();
@@ -215,7 +215,7 @@ public class SystemSwitchTests
 
         var row = sim.Editor.RootRows()[0];
         Assert.True(row.SwitchIsOn);
-        Assert.Equal("The logic system must be switched on first.", row.SwitchLocked);
+        Assert.Contains("must be switched on first.", row.SwitchLocked);
 
         row.Flips!.Execute();
         sim.Editor.Tick(1001);

@@ -60,6 +60,12 @@ namespace Sprocket.Sim.Simulation
                     continue;
                 }
 
+                if (word == "alt")
+                {
+                    script.Add(Step.Alt);
+                    continue;
+                }
+
                 if (word == "enter" || word == "escape" || word == "clear")
                 {
                     script.Add(word == "enter" ? Step.Enter : word == "escape" ? Step.Escape : Step.Clear);
@@ -287,6 +293,13 @@ namespace Sprocket.Sim.Simulation
             if (step.Kind == Step.Enter)
             {
                 scene.Enter();
+                drawn();
+                return;
+            }
+
+            if (step.Kind == Step.Alt)
+            {
+                scene.View.Codex.FnIsPinKeyHeld = () => true;
                 drawn();
                 return;
             }

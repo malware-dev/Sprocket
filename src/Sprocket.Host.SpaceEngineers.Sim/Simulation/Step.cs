@@ -33,6 +33,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Everything typed in the box holding the keyboard taken away.</summary>
         public const int Clear = 8;
 
+        /// <summary>The Alt key held from here on, which pins a tip.</summary>
+        public const int Alt = 16;
+
         /// <summary>Reads a program into the construct, as loading a save does.</summary>
         public const int Load = 9;
 

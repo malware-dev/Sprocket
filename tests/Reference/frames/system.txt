@@ -31,7 +31,7 @@ on screen     Airlock
 024  Sprite     Sprocket_Stripes      {X:1648 Y:45 W:32 H:56}  #2E230AFF
 025  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 026  SetClip    {X:296 Y:53 W:1063 H:40}
-027  Text       at {X:296 Y:59.01406} scale 0.401  #85A1A9FF  "y"
+027  Text       at {X:296 Y:59.01406} scale 0.401  #A2C3CDFF  "y"
 028  Text       at {X:323.6875 Y:53.39666} scale 1.111  #DCF5FDFF  "Airlock"
 029  Text       at {X:410.5504 Y:59.01406} scale 0.401  #85A1A9FF  "p"
 030  ClearClip  

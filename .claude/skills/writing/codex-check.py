@@ -19,7 +19,7 @@ import xml.etree.ElementTree as ET
 FOLDER = os.path.join("src", "Sprocket.Host.SpaceEngineers", "Content", "Data", "Localization")
 FILES = {"en": "Codex.resx", "no": "Codex.no.resx"}
 NAME = re.compile(r"sprocket", re.I)
-LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\)")
+LINK = re.compile(r"(?<!!)\[(?:!\[[^\]]*\]\([^)]*\)|[^\]])*\]\(([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)(?: class=[A-Za-z0-9_-]+)?\)")
 QUOTED = re.compile(r"`[^`]*`")
 SPACED = re.compile(r"\]\(mark:[a-z-]+\)[ \t]+\S")
 # Pages the name may stand on: the home page names the product by design.

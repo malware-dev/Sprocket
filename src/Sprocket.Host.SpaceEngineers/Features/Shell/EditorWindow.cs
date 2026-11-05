@@ -7,6 +7,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
+using Sandbox.ModAPI;
 using VRage.Input;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -175,12 +176,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _codex = new Lumel.Codex
             {
                 OpensNestedTips = true,
+                IsPinnedByKey = true,
+                FnIsPinKeyHeld = () => MyAPIGateway.Input?.IsAnyAltKeyPressed() == true,
                 FnResolvePage = _editor.Codex.Find
             };
+            SayPinHint();
+            _editor.Reworded += SayPinHint;
 
             _editor.Input = Input;
             _editor.Windows = _workspace.Windows;
             _editor.Renamer = Rename;
+        }
+
+        void SayPinHint()
+        {
+            _codex.PinHint = Markdown.Parse(_editor.Texts.Codex.ChromePinHint);
         }
 
         /// <summary>The workspace's input root, which the editor's pages and popups share.</summary>
@@ -213,6 +223,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <inheritdoc />
         protected override void OnClosed(CloseReason reason)
         {
+            _editor.Reworded -= SayPinHint;
             EndRename();
             Input.FocusChanged -= Refocused;
             Input.PreviewPointerDown -= PressReaching;

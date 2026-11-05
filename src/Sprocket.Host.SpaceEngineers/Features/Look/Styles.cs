@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     public static class Styles
     {
         /// <summary>How many ticks the pointer rests on something before its tip opens.</summary>
-        public const int TipDelay = 30;
+        public const int TipDelay = 10;
 
         /// <summary>How thick the dotted line under a term is.</summary>
         public const float TermLine = 1f;
@@ -544,7 +544,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A row's light drawn as a symbol of what the row is, large enough to be read rather than only seen.</summary>
         public static readonly IStyle<Glyph> Marked = new GlyphStyle(Light)
         {
-            Base = { FontSize = TextSizes.Small }
+            Base = { FontSize = TextSizes.Small, Tint = Palette.Muted }
         };
 
         /// <summary>A mark beside a name, whose color the view sets from what it marks.</summary>
@@ -749,6 +749,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Tint = Palette.Dim }
         };
 
+        /// <summary>The words of a codex page in a tip: its terms brighter than the words around them, lit and hovered while the tip is pinned.</summary>
+        public static readonly IStyle<RichText> TipPage = new RichTextStyle(Tip)
+        {
+            Base = { LinkColor = Palette.Ink, Links = { [CodexPages.TermClass] = { Underline = UnderlineStyle.Dotted, UnderlineThickness = 0f, Presses = false } } },
+            [Lumel.CodexTip.Pinned] = { LinkColor = Palette.Link, Links = { [CodexPages.TermClass] = { UnderlineThickness = TermLine } } }
+        };
+
         /// <summary>A tip by the pointer: the chrome's color, edged, with room inside the edge, casting a short shadow, its words quiet, opening once the pointer has rested for <see cref="TipDelay" />.</summary>
         public static readonly IStyle<Tip> Tooltip = new TipStyle
         {
@@ -769,6 +776,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base =
             {
+                BodyStyle = TipPage,
+                Stagger = Gaps.Parts,
                 MaxHeight = Sizes.TipHigh,
                 Spacing = Gaps.Parts,
                 StepStyle = Icon,

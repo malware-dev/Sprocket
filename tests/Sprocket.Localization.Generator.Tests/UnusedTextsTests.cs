@@ -65,7 +65,7 @@ public class UnusedTextsTests
                 <comment>A page.</comment>
               </data>
               <data name="Mod.Term.Page" xml:space="preserve">
-                <value>![](mark:slot) See [slot](Term.Slot) and [gone](Term.Gone).</value>
+                <value>![](mark:slot) See [slot](Term.Slot class=term) and [gone](Term.Gone).</value>
                 <comment>A page.</comment>
               </data>
             </root>

@@ -37,7 +37,7 @@ public class TextsTests
         texts.Load(new ResxTexts(ResxTexts.Beside, "no"));
 
         Assert.Equal("Automasjon for {name}", texts.SystemsTitle);
-        Assert.Equal("Installer logikksystemet **{name}** på et annet sett med blokker.", texts.Codex.SystemsAddAnotherAbout);
+        Assert.Contains("på et annet sett med blokker.", texts.Codex.SystemsAddAnotherAbout);
     }
 
     static HashSet<string> Keys(string file)

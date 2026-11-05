@@ -31,7 +31,7 @@ public class PartTipsTests
         Assert.Contains("- Lamp 01\n", tip);
         Assert.Contains($"- Lamp {HeldBlocks.Most - 1:00}\n", tip);
         Assert.DoesNotContain($"Lamp {HeldBlocks.Most:00}", tip);
-        Assert.StartsWith("From the slot **", tip);
+        Assert.StartsWith("From the [slot](Term.Slot class=term) **", tip);
         Assert.Contains("\n" + screen.Editor.Texts.Codex.PartStepBlocks + "\n- Lamp 01\n", tip);
         Assert.EndsWith("- and 3 more\n", tip);
         Assert.DoesNotContain(screen.Editor.Texts.Codex.SequenceBlocksAbout, tip);

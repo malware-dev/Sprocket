@@ -20,7 +20,7 @@ texts together, and the text generator writes the class `Codex` from the file, o
 `texts.Codex`, so a page the code names and the file lacks fails the build.
 
 A page is markdown-lite, and the tip shows the whole of it, with no title. A link names the page it leads to by its
-key without `Sprocket.`, as in `[slot](Term.Slot)`, and `CodexPages` finds the page for it. Every link in every page,
+key without `Sprocket.`, as in `[slot](Term.Slot class=term)`, and `CodexPages` finds the page for it. Every link in every page,
 in every language, has to lead to a page: the build fails on a link to a key no file of texts has (LOC021), and counts
 a page a link leads to as read. The presentation tests hold that every mark and box a page asks for is one the editor
 has.

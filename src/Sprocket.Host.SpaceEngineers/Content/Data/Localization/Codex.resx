@@ -2,7 +2,7 @@
 <!--
     The codex, in English, which is the language the others are translated from: every page a tip shows, one text
     each. A page is markdown-lite, as the texts in MyTexts.resx are. A first line starting "# " is the page's title,
-    and a link names the page it leads to by its key without "Sprocket.", as in [slot](Term.Slot).
+    and a link names the page it leads to by its key without "Sprocket.", as in [slot](Term.Slot class=term).
 
     A translation is a copy of this file named for its language, such as Codex.no.resx, holding the pages it
     translates. Whatever it leaves out is said in English.
@@ -25,71 +25,79 @@
     <comment>Codex page on "Logic system", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Installation" xml:space="preserve">
-    <value>An ![](mark:installation)&amp;nbsp;**installation** is a set of blocks and signals a logic system works on, like one airlock among several.</value>
+    <value>An ![](mark:installation)&amp;nbsp;**installation** is a set of blocks and [![](mark:signal)&amp;nbsp;signals](Term.Signal class=term) a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) works on, like one airlock among several.</value>
     <comment>Codex page on "Installation", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.InstallationPanel" xml:space="preserve">
-    <value>The **installation panel** is where you set up an ![](mark:installation)&amp;nbsp;[installation](Term.Installation), selecting the blocks and signals for each of its [slots](Term.Slot). Open it from the installation's row on the home screen. The logic system's `Installation panel` tab is where you choose what every panel shows.</value>
+    <value>The **installation panel** is where you set up an [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term), selecting the blocks and [![](mark:signal)&amp;nbsp;signals](Term.Signal class=term) for each of its [slots](Term.Slot class=term). Open it from the installation's row on the home screen. The [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s `Installation panel` tab is where you choose what every panel shows.</value>
     <comment>Codex page on "Installation panel", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Category" xml:space="preserve">
-    <value>A **category** is a heading on the [installation panel](Term.InstallationPanel) that groups the [slots](Term.Slot) dragged under it.</value>
+    <value>A **category** is a heading on the [installation panel](Term.InstallationPanel class=term) that groups the [slots](Term.Slot class=term) dragged under it.</value>
     <comment>Codex page on "Category", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Slot" xml:space="preserve">
-    <value>A **slot** is a named place in a logic system, like the inner door, that each installation fills with its own blocks or signal. A required slot that is empty, or whose blocks were lost, is filled again on the [installation panel](Term.InstallationPanel).</value>
+    <value>A **slot** is a named place in a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term), like the inner door, that each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) fills with its own blocks or [![](mark:signal)&amp;nbsp;signal](Term.Signal class=term). A required slot that is empty, or whose blocks were lost, is filled again on the [installation panel](Term.InstallationPanel class=term).</value>
     <comment>Codex page on "Slot", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value>The **logic system's states** are values it remembers between runs, each installation its own, like which side of the airlock its engineer is on. Each state is on or off, or one choice of a [state type](Term.Type).</value>
+    <value>A [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s ![](mark:state)&amp;nbsp;**states** are what it remembers between jobs. Each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) keeps its own. A state holds one value at a time. Most are on or off, and others, like an airlock's cycle state, hold a choice from a custom [state type](Term.Type class=term).</value>
     <comment>Codex page on "Logic system states", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
-    <value>A **state type** is a named list of choices, like *inside* and *outside*. A [state](Term.LogicSystemStates) of that state type has one of its choices.</value>
+    <value>A **state type** defines the values a [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) can have. For example, an airlock's "cycle" state might be *inside*, *cycling in*, *cycling out* or *outside*. Several states can use the same state type.</value>
     <comment>Codex page on "State type", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
-    <value>![](mark:undo)&amp;nbsp;**Undo** takes back the last change, and ![](mark:redo)&amp;nbsp;**redo** makes it again. Each logic system has its own history of changes, across all its screens, and the home screen has its own.</value>
+    <value>![](mark:undo)&amp;nbsp;**Undo** takes back the last change, and ![](mark:redo)&amp;nbsp;**redo** makes it again. Each [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) has its own history of changes, across all its screens, and the home screen has its own.</value>
     <comment>Codex page on "Undo", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Sequence" xml:space="preserve">
-    <value>A ![](mark:sequence)&amp;nbsp;**sequence** is a list of [steps](Term.Step) a logic system runs from top to bottom. An installation runs it once at a time, so a ![](mark:trigger)&amp;nbsp;[trigger](Term.Trigger) that fires while it is running is missed.</value>
+    <value>A ![](mark:sequence)&amp;nbsp;**sequence** is a list of [steps](Term.Step class=term) a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) runs from top to bottom. In an [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) it has to end before it can start again, so a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) that fires while it is running is missed.</value>
     <comment>Codex page on "Sequence", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Step" xml:space="preserve">
-    <value>A **step** is one line of a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence). Press one of its parts to change it in a [selector](Term.Selector) or a menu.</value>
+    <value>A **step** is one line of a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term). Press one of its parts to change it in a [selector](Term.Selector class=term) or a menu.</value>
     <comment>Codex page on "Step", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Action" xml:space="preserve">
     <value>An ![](mark:action)&amp;nbsp;**action** is something a block can do, like opening a door or extending a piston.</value>
     <comment>Codex page on "Action", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
+  <data name="Sprocket.Term.Option" xml:space="preserve">
+    <value>An **option** is a setting an [![](mark:action)&amp;nbsp;action](Term.Action class=term) takes, like a piston's position and speed.</value>
+    <comment>Codex page on "Option", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
+  </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
-    <value>A **task** is one operation: running or stopping a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence), an ![](mark:action)&amp;nbsp;[action](Term.Action) on blocks, or setting one of their ![](mark:value)&amp;nbsp;[values](Term.Value).</value>
+    <value>A **task** is one operation: running or stopping a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term), an [![](mark:action)&amp;nbsp;action](Term.Action class=term) on blocks, or setting a [![](mark:value)&amp;nbsp;block value](Term.Value class=term).</value>
     <comment>Codex page on "Task", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Value" xml:space="preserve">
-    <value>A ![](mark:value)&amp;nbsp;**value** is a block's property, like a light's color, which steps can set or check.</value>
+    <value>A ![](mark:value)&amp;nbsp;**block value** is a property of a block, like a light's color, which [steps](Term.Step class=term) can set or check.</value>
     <comment>Codex page on "Value", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Awaitable" xml:space="preserve">
-    <value>An ![](mark:awaited)&amp;nbsp;**awaitable** is an ![](mark:action)&amp;nbsp;[action](Term.Action) that keeps working for several [ticks](Term.Tick), like a door closing, and that a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence) can wait for. Most actions are done at once, and of those that keep working, only the awaitables can be waited for.</value>
+    <value>An ![](mark:awaited)&amp;nbsp;**awaitable** is an [![](mark:action)&amp;nbsp;action](Term.Action class=term) that keeps working for several [ticks](Term.Tick class=term), like a door closing, and that a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) can wait for. Most actions are done at once, and of those that keep working, only the awaitables can be waited for.</value>
     <comment>Codex page on "Awaitable", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
-    <value>A **delay** is a step that pauses its sequence for a set time, in seconds or [ticks](Term.Tick), like giving a sound time to play to its end.</value>
+    <value>A **delay** is a [step](Term.Step class=term) that pauses its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) for a set time, in seconds or [ticks](Term.Tick class=term), like giving a sound time to play to its end.</value>
     <comment>Codex page on "Delay", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
-    <value>An **if**, also known as a *conditional*, is a step that checks blocks, or one of the logic system's [states](Term.LogicSystemStates), and runs the steps under it only when its condition passes.</value>
+    <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, or one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
     <comment>Codex page on "If", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
+  <data name="Sprocket.Term.Condition" xml:space="preserve">
+    <value>A **condition** is what an [if](Term.If class=term) checks, like a door being closed. If it fails, the [steps](Term.Step class=term) under it are skipped and the next [branch](Term.Branch class=term), if there is one, gets its turn.</value>
+    <comment>Codex page on "Condition", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
+  </data>
   <data name="Sprocket.Term.Branch" xml:space="preserve">
-    <value>A **branch** adds more steps to an [if](Term.If), run when the conditions above it fail. An `otherwise if` checks a condition of its own, and an `otherwise` runs when none above passed.</value>
+    <value>A **branch** adds more [steps](Term.Step class=term) to an [if](Term.If class=term), run when the [conditions](Term.Condition class=term) above it fail. An `otherwise if` checks a condition of its own, and an `otherwise` runs when none above passed.</value>
     <comment>Codex page on "Branch", shown in a tip. It says what the term is, naming it in bold with its mark where it has one. "otherwise if" and "otherwise" are the words of the branches on the screen, which stay English.</comment>
   </data>
   <data name="Sprocket.Term.RunAndStop" xml:space="preserve">
-    <value>**Run** and **stop** are steps that start or stop another sequence of the same logic system, in the same installation. A sequence that is already running isn't started a second time.</value>
+    <value>**Run** and **stop** are [steps](Term.Step class=term) that start or stop another [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) of the same [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term), in the same [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term). A sequence that is already running isn't started a second time.</value>
     <comment>Codex page on "Run and stop", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Tick" xml:space="preserve">
@@ -97,31 +105,31 @@
     <comment>Codex page on "Tick", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Selector" xml:space="preserve">
-    <value>A **selector** is the screen where you select what a step, an if or a trigger works with, like its blocks and what to do with them.</value>
+    <value>A **selector** is the screen where you select what a [step](Term.Step class=term), an [if](Term.If class=term) or a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) works with, like its blocks and what to do with them.</value>
     <comment>Codex page on "Selector", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Trigger" xml:space="preserve">
-    <value>A ![](mark:trigger)&amp;nbsp;**trigger** runs or stops a sequence when something happens, like a button being pressed. It fires only while its logic system and installation are switched on.</value>
+    <value>A ![](mark:trigger)&amp;nbsp;**trigger** runs or stops a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) when something happens, like a button being pressed. It fires only while its [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) and [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) are switched on.</value>
     <comment>Codex page on "Trigger", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Signal" xml:space="preserve">
-    <value>A ![](mark:signal)&amp;nbsp;**signal** is what a block sends to fire a trigger, from a slot on its toolbar or from a change in the block itself.</value>
+    <value>A ![](mark:signal)&amp;nbsp;**signal** is what a block sends to fire a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term), from a slot on its toolbar or from a change in the block itself.</value>
     <comment>Codex page on "Signal", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Library" xml:space="preserve">
-    <value>The **library** contains your ![](mark:blueprint)&amp;nbsp;[blueprints](Term.Blueprint), along with the logic systems on this [construct](Term.Construct) and [backups](Term.Backup) of constructs that lost their automation.</value>
+    <value>The **library** contains your [![](mark:blueprint)&amp;nbsp;blueprints](Term.Blueprint class=term), along with the [![](mark:logic-system)&amp;nbsp;logic systems](Term.LogicSystem class=term) on this [construct](Term.Construct class=term) and [backups](Term.Backup class=term) of constructs that lost their automation.</value>
     <comment>Codex page on "Library", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Backup" xml:space="preserve">
-    <value>When a [construct](Term.Construct) loses its last programmable block, each of its logic systems with no ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) in the library is saved there as a **backup**. Select it in the library and press `Add to this construct` to have it back.</value>
+    <value>When a [construct](Term.Construct class=term) loses its last programmable block, each of its [![](mark:logic-system)&amp;nbsp;logic systems](Term.LogicSystem class=term) with no [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term) is saved there as a **backup**. Select it in the library and press `Add to this construct` to have it back.</value>
     <comment>Codex page on "Backup", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Blueprint" xml:space="preserve">
-    <value>A ![](mark:blueprint)&amp;nbsp;**blueprint** is a copy of a logic system kept in the [library](Term.Library), ready to put on another construct. It has no blocks of its own: each construct fills its [slots](Term.Slot) with its own blocks.</value>
+    <value>A ![](mark:blueprint)&amp;nbsp;**blueprint** is a copy of a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) kept in the [library](Term.Library class=term), ready to put on another [construct](Term.Construct class=term). It has no blocks of its own: each construct fills its [slots](Term.Slot class=term) with its own blocks.</value>
     <comment>Codex page on "Blueprint", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Construct" xml:space="preserve">
-    <value>A **construct** is a grid and everything pistons, rotors and hinges attach to it. A ship docked to a station by a connector or landing gear is a construct of its own: it isn't part of the station, and its blocks can't fill the station's [slots](Term.Slot).</value>
+    <value>A **construct** is a grid and everything pistons, rotors and hinges attach to it. A ship docked to a station by a connector or landing gear is a construct of its own: it isn't part of the station, and its blocks can't fill the station's [slots](Term.Slot class=term).</value>
     <comment>Codex page on "Construct", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Chrome.Back" xml:space="preserve">
@@ -132,6 +140,10 @@
     <value>Close the editor</value>
     <comment>Tooltip on the close cross at the far right of the editor's heading bar, shown only on the home screen, where there is no screen to go back to. Pressing it closes the editor.</comment>
   </data>
+  <data name="Sprocket.Chrome.PinHint" xml:space="preserve">
+    <value>Hold Alt to explore</value>
+    <comment>The line at the bottom of a tip that has terms in it. Holding the Alt key keeps the tip open and lights its terms, so the pointer can rest on one to open its tip.</comment>
+  </data>
   <data name="Sprocket.Chrome.Tips" xml:space="preserve">
     <value>Show fewer tips.</value>
     <comment>Tooltip on the question mark in the editor's heading bar, shown while tips are on. Pressing it turns tips off, and the look of terms with them, in every world this player plays; the tips that stay are those on buttons that show only a mark and those saying why something cannot be pressed.</comment>
@@ -141,13 +153,13 @@
     <comment>Tooltip on the question mark in the editor's heading bar, shown while tips are off. Pressing it turns every tip back on, in every world this player plays.</comment>
   </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
-    <value>![](mark:undo)&amp;nbsp;[Undo](Term.Undo)
+    <value>[![](mark:undo)&amp;nbsp;Undo](Term.Undo class=term)
 
 {action}</value>
     <comment>Tooltip on the undo arrow in the editor's heading bar, shown while there is a change to undo. {action} is one of the Sprocket.Change texts, filled in, such as Deleted step 3 in Cycle, &quot;open Outer Door&quot;, and stands on its own line after the word Undo, or by Sprocket.Undo.Also holding that text where the undo takes changes on other screens along.</comment>
   </data>
   <data name="Sprocket.Chrome.Redo" xml:space="preserve">
-    <value>![](mark:redo)&amp;nbsp;[Redo](Term.Undo)
+    <value>[![](mark:redo)&amp;nbsp;Redo](Term.Undo class=term)
 
 {action}</value>
     <comment>Tooltip on the redo arrow in the editor's heading bar, shown while there is an undone change to make again. {action} is one of the Sprocket.Change texts, filled in, such as Deleted step 3 in Cycle, &quot;open Outer Door&quot;, and stands on its own line after the word Redo, or by Sprocket.Undo.Also holding that text where the redo makes changes on other screens again with it.</comment>
@@ -169,7 +181,7 @@
     <comment>Tooltip on an installation's on/off switch while the switch is off, on the installation's row on the home screen and in the heading bar of the installation panel. Shown only while the installation's logic system is switched on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchOff" xml:space="preserve">
-    <value>Switch this installation off and stop any running sequences.</value>
+    <value>Switch this installation off and stop any running [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term).</value>
     <comment>Tooltip on an installation's on/off switch while the switch is on, on the installation's row on the home screen and in the heading bar of the installation panel. Shown only while the installation's logic system is switched on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchSystemOn" xml:space="preserve">
@@ -177,59 +189,59 @@
     <comment>Tooltip on the on/off switch of a logic system that has no installations, while it is off: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens.</comment>
   </data>
   <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
-    <value>Switch this logic system off, stopping its sequences and unlocking it for changes.</value>
+    <value>Switch this logic system off, stopping its [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term) and unlocking it for changes.</value>
     <comment>Tooltip on the on/off switch of a logic system that has no installations, while it is on: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
-    <value>Switch on every installation of this logic system</value>
+    <value>Switch on every [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) of this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)</value>
     <comment>Tooltip on the on/off switch of a logic system that has installations, while it is off: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens. Each installation then runs where its own switch is on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintFirst" xml:space="preserve">
-    <value>The logic system must be switched on first.</value>
+    <value>The [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) must be switched on first.</value>
     <comment>Tooltip on an installation's on/off switch while its logic system is switched off and the installation's switch is dimmed and cannot be pressed: on the installation's row on the home screen and in the heading bar of the installation panel.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
-    <value>Switch off every installation of this logic system</value>
+    <value>Switch off every [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) of this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)</value>
     <comment>Tooltip on the on/off switch of a logic system that has installations, while it is on: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens.</comment>
   </data>
   <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
-    <value>The name of this [construct](Term.Construct), taken from its largest grid. Renaming it renames that grid.</value>
+    <value>The name of this [construct](Term.Construct class=term), taken from its largest grid. Renaming it renames that grid.</value>
     <comment>Tooltip on the construct's name in the home screen's heading: the name of its largest grid, the one with the most blocks. Pressing the name renames that grid.</comment>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
-    <value>Start a new logic system on this [construct](Term.Construct).</value>
+    <value>Start a new [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) on this [construct](Term.Construct class=term).</value>
     <comment>Tooltip on the home screen's button that adds a new logic system to the construct.</comment>
   </data>
   <data name="Sprocket.Systems.OpenInstanceAbout" xml:space="preserve">
-    <value>Open the [installation panel](Term.InstallationPanel) for **{name}**.</value>
+    <value>Open the [installation panel](Term.InstallationPanel class=term) for **{name}**.</value>
     <comment>Tooltip on an installation's row on the home screen, under its logic system; pressing the row opens that installation's installation panel. {name} is filled with the installation's name.</comment>
   </data>
   <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
-    <value>Keep a copy of this logic system in the library as a ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint).</value>
+    <value>Keep a copy of this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) in the [library](Term.Library class=term) as a [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term).</value>
     <comment>Tooltip on the button that makes a blueprint of a logic system, on its heading row on the home screen, and in the library on the right-pointing arrow in the strip between its panes, shown while the library holds no blueprint of the chosen logic system or backup.</comment>
   </data>
   <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
-    <value>Two [constructs](Term.Construct) joined, each with its own version of {name}. Both stay switched off until you select one.</value>
+    <value>Two [constructs](Term.Construct class=term) joined, each with its own version of {name}. Both stay switched off until you select one.</value>
     <comment>Tooltip on the Choose a version button on a logic system's heading row on the home screen. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
-    <value>The ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) in the library has more recent changes. Update the logic system on this construct.</value>
+    <value>The [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term) has more recent changes. Update the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) on this [construct](Term.Construct class=term).</value>
     <comment>Tooltip on the button on a logic system's heading row on the home screen, and in the library on the left-pointing arrow in the strip between its panes, that puts the library's newer blueprint in the logic system's place; shown where the blueprint was changed after the logic system.</comment>
   </data>
   <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
-    <value>Update the ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) from this construct's logic system.</value>
+    <value>Update the [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) from the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) on this [construct](Term.Construct class=term).</value>
     <comment>Tooltip on the button on a logic system's heading row on the home screen, and in the library on the right-pointing arrow in the strip between its panes, that brings the library's blueprint up to date from the logic system; shown once the library holds a blueprint and the logic system was changed after it.</comment>
   </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
-    <value>Opens the **{name}** logic system editor.</value>
+    <value>Opens the editor for the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) **{name}**.</value>
     <comment>Tooltip on a logic system's heading row on the home screen, and on the logic system's name in the editor's heading bar on the installation panel; pressing either opens the logic system's screen. {name} is filled with the logic system's name.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
-    <value>Install the **{name}** logic system on another set of blocks.</value>
+    <value>Install the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) **{name}** on another set of blocks.</value>
     <comment>Tooltip on the home screen's button under a logic system's installations that adds another installation. {name} is filled with the logic system's name.</comment>
   </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
-    <value>Name this [slot](Term.Slot) and say what it is for.</value>
+    <value>Name this slot and say what it is for.</value>
     <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's page, where it is named and described.</comment>
   </data>
   <data name="Sprocket.System.NameAbout" xml:space="preserve">
@@ -237,7 +249,7 @@
     <comment>Tooltip on a logic system's name in the editor's heading bar on its own screen, where pressing the name renames the logic system.</comment>
   </data>
   <data name="Sprocket.System.Delete" xml:space="preserve">
-    <value>Delete this logic system, and every installation of it</value>
+    <value>Delete this logic system, and every [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) of it</value>
     <comment>Tooltip on the bin in the editor's heading bar on a logic system's screen, which deletes the logic system together with every installation of it.</comment>
   </data>
   <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
@@ -245,7 +257,7 @@
     <comment>Tooltip on the bin of an installation's row on the home screen, which deletes that installation.</comment>
   </data>
   <data name="Sprocket.System.UsingAbout" xml:space="preserve">
-    <value>Select the ![](mark:installation)&amp;nbsp;[installation](Term.Installation) whose blocks this screen shows. Blocks you select for a step or a trigger fill its [slots](Term.Slot).</value>
+    <value>Select the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) whose blocks this screen shows. Blocks you select for a [step](Term.Step class=term) or a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) fill its [slots](Term.Slot class=term).</value>
     <comment>Tooltip on the list of a logic system's installations at the top of its screen; the installation picked there fills the slots named in the screen's sentences.</comment>
   </data>
   <data name="Sprocket.System.TabFlagged" xml:space="preserve">
@@ -253,19 +265,19 @@
     <comment>Tooltip on the warning mark beside the name of a logic system's Triggers tab or Sequences tab, shown while something on that tab has a problem (red) or a warning (amber); the row it concerns says what is wrong.</comment>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Perform a [task](Term.Task) when a block sends a ![](mark:signal)&amp;nbsp;[signal](Term.Signal) or reaches a requested state.</value>
+    <value>Perform a [task](Term.Task class=term) when a block sends a [![](mark:signal)&amp;nbsp;signal](Term.Signal class=term) or reaches a requested state.</value>
     <comment>Tooltip on the choice in the add-trigger menu on a logic system's screen that adds a trigger started by a block's signal or state.</comment>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
-    <value>Repeat a [task](Term.Task) at a set interval.</value>
+    <value>Repeat a [task](Term.Task class=term) at a set interval.</value>
     <comment>Tooltip on the choice in the add-trigger menu on a logic system's screen that adds a trigger started on a timer.</comment>
   </data>
   <data name="Sprocket.Trigger.StateAbout" xml:space="preserve">
-    <value>Select another state, or another value for it.</value>
+    <value>Select another [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term), or another value for it.</value>
     <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names one of the logic system's states; pressing it opens the picker the trigger was made with.</comment>
   </data>
   <data name="Sprocket.System.Copy" xml:space="preserve">
-    <value>Copy this sequence. The copy starts switched off and without ![](mark:trigger)&amp;nbsp;[triggers](Term.Trigger).</value>
+    <value>Copy this sequence. The copy starts switched off and without [![](mark:trigger)&amp;nbsp;triggers](Term.Trigger class=term).</value>
     <comment>Tooltip on the copy mark of a sequence's row on a logic system's screen, for a sequence that a trigger starts.</comment>
   </data>
   <data name="Sprocket.System.CopyUnstarted" xml:space="preserve">
@@ -273,7 +285,7 @@
     <comment>Tooltip on the copy mark of a sequence's row on a logic system's screen, for a sequence that no trigger starts.</comment>
   </data>
   <data name="Sprocket.System.OpenSequence" xml:space="preserve">
-    <value>Open **{name}** to see and change its steps.</value>
+    <value>Open **{name}** to see and change its [steps](Term.Step class=term).</value>
     <comment>Tooltip on a sequence's row on a logic system's screen; pressing the row opens the sequence's screen. {name} is filled with the sequence's name.</comment>
   </data>
   <data name="Sprocket.Trigger.Delete" xml:space="preserve">
@@ -285,11 +297,11 @@
     <comment>Tooltip on the copy mark near the end of a trigger's row on a logic system's screen, while the trigger can be copied.</comment>
   </data>
   <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
-    <value>Select the block that fires this trigger.</value>
+    <value>Select the block that fires this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term).</value>
     <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the block that starts it. Pressing the part changes the block.</comment>
   </data>
   <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
-    <value>Select what this trigger does.</value>
+    <value>Select what this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) does.</value>
     <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the sequence it starts or the action it does. Pressing the part changes it.</comment>
   </data>
   <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
@@ -297,7 +309,7 @@
     <comment>Tooltip on the length in an Every trigger's sentence on a logic system's screen, which says how often the trigger runs. Pressing it opens the length panel.</comment>
   </data>
   <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
-    <value>Select which blocks this trigger acts on.</value>
+    <value>Select which blocks this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) acts on.</value>
     <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the blocks the trigger's own action acts on. Pressing the part changes them.</comment>
   </data>
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
@@ -305,7 +317,7 @@
     <comment>Tooltip on a sequence's name in the editor's heading bar on its own screen, where pressing the name renames the sequence.</comment>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
-    <value>Perform an ![](mark:action)&amp;nbsp;[action](Term.Action) on blocks or set one of their ![](mark:value)&amp;nbsp;[values](Term.Value).</value>
+    <value>Perform an [![](mark:action)&amp;nbsp;action](Term.Action class=term) on blocks or set a [![](mark:value)&amp;nbsp;block value](Term.Value class=term).</value>
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a task: an action on blocks, or setting one of their values.</comment>
   </data>
   <data name="Sprocket.Sequence.Delete" xml:space="preserve">
@@ -321,15 +333,15 @@
     <comment>Tooltip on the copy mark of a step's row on a sequence's screen. An if is copied with the steps in it.</comment>
   </data>
   <data name="Sprocket.Sequence.ActionAbout" xml:space="preserve">
-    <value>Select what this step does.</value>
+    <value>Select what this [step](Term.Step class=term) does.</value>
     <comment>Tooltip on the action named in a step's sentence on a sequence's screen; pressing it opens the picker to choose what the step does.</comment>
   </data>
   <data name="Sprocket.Sequence.BlocksAbout" xml:space="preserve">
-    <value>Select which blocks this step acts on.</value>
+    <value>Select which blocks this [step](Term.Step class=term) acts on.</value>
     <comment>Tooltip on the blocks named in a step's sentence on a sequence's screen; pressing them opens the picker to choose which blocks the step acts on.</comment>
   </data>
   <data name="Sprocket.Sequence.OptionsAbout" xml:space="preserve">
-    <value>Change the action's options.</value>
+    <value>Change the [![](mark:action)&amp;nbsp;action](Term.Action class=term)'s [options](Term.Option class=term).</value>
     <comment>Tooltip on the options of an action, such as a piston's position and speed, in a step's sentence on a sequence's screen and in a trigger's sentence on a logic system's screen; pressing them opens the picker on the action's options.</comment>
   </data>
   <data name="Sprocket.Sequence.NewValueAbout" xml:space="preserve">
@@ -338,7 +350,7 @@
   </data>
   <data name="Sprocket.Sequence.ComparedAbout" xml:space="preserve">
     <value>Choose how it is compared.</value>
-    <comment>Tooltip on the comparison in an if's sentence on a sequence's screen, such as "is" or "is below"; pressing it opens a menu of the comparisons the value can be checked with.</comment>
+    <comment>Tooltip on the comparison in an if's sentence on a sequence's screen, such as "is" or "is at least"; pressing it opens a menu of the comparisons the value can be checked with.</comment>
   </data>
   <data name="Sprocket.Sequence.ReadAbout" xml:space="preserve">
     <value>Choose whether any or all of the blocks must pass, or whether their sum or average is checked.</value>
@@ -349,7 +361,7 @@
     <comment>Tooltip on the value an if checks blocks for, in the if's sentence on a sequence's screen; pressing it opens the picker on that value.</comment>
   </data>
   <data name="Sprocket.Sequence.ReadWithAbout" xml:space="preserve">
-    <value>Change what the value is read with.</value>
+    <value>Change what the [![](mark:value)&amp;nbsp;block value](Term.Value class=term) is read with.</value>
     <comment>Tooltip on what a value is read with, such as the button whose label it reads, straight after the value in the sentence of an if on a sequence's screen or of a trigger on a logic system's screen; pressing it opens the picker on it.</comment>
   </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
@@ -361,11 +373,11 @@
     <comment>Tooltip on the drag handle of a step's row on a sequence's screen.</comment>
   </data>
   <data name="Sprocket.Sequence.PauseStep" xml:space="preserve">
-    <value>Pause this step. The sequence skips it until it is resumed.</value>
+    <value>Pause this step. The [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) skips it until it is resumed.</value>
     <comment>Tooltip on the pause mark of a step's row on a sequence's screen, while the step is not paused; pressing it pauses the step.</comment>
   </data>
   <data name="Sprocket.Sequence.UnpauseStep" xml:space="preserve">
-    <value>Paused: the sequence skips this step. Press to resume it.</value>
+    <value>Paused: the [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) skips this step. Press to resume it.</value>
     <comment>Tooltip on the pause mark of a step's row on a sequence's screen, lit while the step is paused; pressing it resumes the step.</comment>
   </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
@@ -373,44 +385,44 @@
     <comment>Tooltip on the number box where a length of time is typed: in the panel for a wait's length on a sequence's screen, the panel for a timer trigger's interval on a logic system's screen, and the column choosing how often a new timer trigger fires.</comment>
   </data>
   <data name="Sprocket.Part.RunsAbout" xml:space="preserve">
-    <value>Select which sequence this step runs.</value>
+    <value>Select which [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) this [step](Term.Step class=term) runs.</value>
     <comment>Tooltip on the sequence a run step names, on a sequence's screen, such as Cycle Out in "run Cycle Out". Pressing it opens the list of sequences to choose another.</comment>
   </data>
   <data name="Sprocket.Part.StopsAbout" xml:space="preserve">
-    <value>Select which sequence this step stops.</value>
+    <value>Select which [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) this [step](Term.Step class=term) stops.</value>
     <comment>Tooltip on the sequence a stop step names, on a sequence's screen, such as Cycle Out in "stop Cycle Out". Pressing it opens the list of sequences to choose another.</comment>
   </data>
   <data name="Sprocket.Part.WatchedAbout" xml:space="preserve">
-    <value>Select which ![](mark:value)&amp;nbsp;[value](Term.Value) this trigger watches.</value>
+    <value>Select which [![](mark:value)&amp;nbsp;block value](Term.Value class=term) this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) watches.</value>
     <comment>Tooltip on the value a trigger on a number watches, on a logic system's screen, such as power in "when any power of Battery &lt; 20". Pressing it opens the trigger's picker on the value.</comment>
   </data>
   <data name="Sprocket.Part.FillsAbout" xml:space="preserve">
-    <value>Select what fills this [slot](Term.Slot).</value>
+    <value>Select what fills this [slot](Term.Slot class=term).</value>
     <comment>Tooltip on a slot's blocks, and on the signal beside them, on an installation panel. Pressing either opens the picker the slot is filled with.</comment>
   </data>
   <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
-    <value>Blocks this step acts on:</value>
+    <value>Blocks this [step](Term.Step class=term) acts on:</value>
     <comment>First line of the tooltip on the blocks of a step or an if on a sequence's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
   </data>
   <data name="Sprocket.Part.TriggerBlocks" xml:space="preserve">
-    <value>Blocks that fire this trigger:</value>
+    <value>Blocks that fire this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term):</value>
     <comment>First line of the tooltip on the blocks a trigger watches, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
   </data>
   <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
-    <value>Blocks this trigger acts on:</value>
+    <value>Blocks this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) acts on:</value>
     <comment>First line of the tooltip on the blocks a trigger's own action acts on, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
   </data>
   <data name="Sprocket.Part.FromSlot" xml:space="preserve">
-    <value>From the slot {slots}.</value>
-    <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks: the slot of the logic system the blocks fill. {slots} is the slot's name, in bold.</comment>
+    <value>From the [slot](Term.Slot class=term) {slots}.</value>
+    <comment>In the tooltip on the blocks of a step or a trigger, over the line that heads the list of the blocks: the slot of the logic system the blocks fill. {slots} is the slot's name, in bold.</comment>
   </data>
   <data name="Sprocket.Part.SlotEmpty" xml:space="preserve">
-    <value>It is empty in this installation.</value>
+    <value>It is empty in this [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term).</value>
     <comment>In the tooltip on the slot a step or a trigger names, under the line naming the slot, where the installation shown has no block in it.</comment>
   </data>
   <data name="Sprocket.Part.FromSlots" xml:space="preserve">
-    <value>From the slots {slots}.</value>
-    <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks, where they come from more than one slot. {slots} is the slots' names, in bold, separated by commas.</comment>
+    <value>From the [slots](Term.Slot class=term) {slots}.</value>
+    <comment>In the tooltip on the blocks of a step or a trigger, over the line that heads the list of the blocks, where they come from more than one slot. {slots} is the slots' names, in bold, separated by commas.</comment>
   </data>
   <data name="Sprocket.Part.ScreenOf" xml:space="preserve">
     <value>{block}: {screen}</value>
@@ -453,19 +465,19 @@
     <comment>Tooltip on the line in the picker's column of blocks that opens the list of kinds of block.</comment>
   </data>
   <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Select what this step, if or trigger works with. `Existing slot` uses a [slot](Term.Slot) the logic system has already.</value>
+    <value>Select what this [step](Term.Step class=term), [if](Term.If class=term) or [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) works with. `Existing slot` uses a [slot](Term.Slot class=term) the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) has already.</value>
     <comment>Tooltip on the Source box heading the first column of the selector a step, an if, an otherwise if or a when is made with, which chooses what it works with: blocks, a slot the logic system already has (the choice Existing slot, quoted here as the box shows it), or, for all but a step, one of the logic system's states.</comment>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
-    <value>This is ![](mark:awaited)&amp;nbsp;[awaitable](Term.Awaitable). The sequence goes straight on while it works, and a `wait for pending tasks` step below waits for it to finish.</value>
+    <value>This is [![](mark:awaited)&amp;nbsp;awaitable](Term.Awaitable class=term). The [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) goes straight on while it works, and a `wait for pending tasks` [step](Term.Step class=term) below waits for it to finish.</value>
     <comment>Tooltip on an awaitable action, one marked with the clock that works over several ticks: on its row in the selector and on its part of a sentence. Also the tooltip on a step's sentence on a sequence's screen when the step starts such an action and goes straight on. "wait for pending tasks" is the words of the step that waits, which stay English.</comment>
   </data>
   <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
-    <value>Start the sequence selected below</value>
+    <value>Start the [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) selected below</value>
     <comment>Tooltip on the choice at the top of the picker's column choosing what a trigger does that makes the trigger start the sequence chosen in that column.</comment>
   </data>
   <data name="Sprocket.Pick.StopAbout" xml:space="preserve">
-    <value>Stop the sequence selected below</value>
+    <value>Stop the [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) selected below</value>
     <comment>Tooltip on the choice at the top of the picker's column choosing what a trigger does that makes the trigger stop the sequence chosen in that column.</comment>
   </data>
   <data name="Sprocket.Pick.StateFixedValueAbout" xml:space="preserve">
@@ -489,7 +501,7 @@
     <comment>Tooltip on the bin beside a state type on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.TypeKept" xml:space="preserve">
-    <value>A state uses this state type, so it cannot be removed.</value>
+    <value>A [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) uses this [state type](Term.Type class=term), so it cannot be removed.</value>
     <comment>Tooltip on the dimmed bin beside a state type on a logic system's State tab, where a state holds one of its choices.</comment>
   </data>
   <data name="Sprocket.State.StateRemove" xml:space="preserve">
@@ -497,7 +509,7 @@
     <comment>Tooltip on the bin beside a state on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.StateKept" xml:space="preserve">
-    <value>A step or trigger uses this state, so it cannot be removed.</value>
+    <value>A [step](Term.Step class=term) or [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) uses this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term), so it cannot be removed.</value>
     <comment>Tooltip on the dimmed bin beside a state on a logic system's State tab, where a step sets it or something tests or watches it.</comment>
   </data>
   <data name="Sprocket.State.TypeDrag" xml:space="preserve">
@@ -509,51 +521,51 @@
     <comment>Tooltip on the grip beside a state on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.HoldsAbout" xml:space="preserve">
-    <value>Change this state's type. Its starting value becomes the first value of the new type.</value>
+    <value>Change the [state type](Term.Type class=term) of this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term). Its starting value becomes the first value of the new one.</value>
     <comment>Said where the pointer rests on what a state holds, after its name on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.StartsAbout" xml:space="preserve">
-    <value>The value the state has when the logic system starts.</value>
+    <value>The value the [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) has when the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) starts.</value>
     <comment>Said where the pointer rests on the words before a state's starting value, on the State tab and in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.StateNameAbout" xml:space="preserve">
-    <value>Every slot, state type and state in a logic system needs its own name.</value>
+    <value>Every [slot](Term.Slot class=term), [state type](Term.Type class=term) and [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) in a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) needs its own name.</value>
     <comment>Said where the pointer rests on the name of a new state in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
-    <value>The [state type](Term.Type) decides which values the new state can have.</value>
+    <value>The [state type](Term.Type class=term) decides which values the new [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) can have.</value>
     <comment>Said where the pointer rests on the state type of a new state in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
-    <value>Every slot, state type and state in a logic system needs its own name.</value>
+    <value>Every [slot](Term.Slot class=term), [state type](Term.Type class=term) and [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) in a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) needs its own name.</value>
     <comment>Said where the pointer rests on the name of a new state type in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">
-    <value>Use whatever value another state has when this runs.</value>
+    <value>Use whatever value another [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) has when this runs.</value>
     <comment>Said where the pointer rests on the other states whose value can be taken, in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.SlotMatched" xml:space="preserve">
-    <value>This uses [slots](Term.Slot) the logic system has already. Rename them on its `Installation panel` tab.</value>
+    <value>This uses [slots](Term.Slot class=term) the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) has already. Rename them on its `Installation panel` tab.</value>
     <comment>Tooltip on the picker's heading while it shows, in italics, the names of slots the logic system already has: either the blocks picked fill them exactly, or they were picked by name with the Existing slot source. These names cannot be changed here.</comment>
   </data>
   <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
-    <value>The blocks selected replace this [slot](Term.Slot)'s blocks in the installation shown. Its name stays the same.</value>
+    <value>The blocks selected replace this [slot](Term.Slot class=term)'s blocks in the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) shown. Its name stays the same.</value>
     <comment>Tooltip on the picker's heading while it shows the name of the slot a step or a trigger names, which the blocks picked will change because no slot holds them already. Where other steps or triggers use the slot too, Done asks whether to change it for all of them.</comment>
   </data>
   <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
-    <value>The blocks selected make a new [slot](Term.Slot) with this name. Press the name to change it.</value>
+    <value>The blocks selected make a new [slot](Term.Slot class=term) with this name. Press the name to change it.</value>
     <comment>Tooltip on the picker's heading while it shows the name of the slot the blocks picked will make, which no slot the logic system has fills exactly. Pressing it renames the slot before it is made; the name starts as the next numbered slot name.</comment>
   </data>
   <data name="Sprocket.Pick.LimitAbout" xml:space="preserve">
-    <value>This slot takes {kind} blocks.</value>
+    <value>This [slot](Term.Slot class=term) takes {kind} blocks.</value>
     <comment>Tooltip on the top entry of the list of kinds of block in the picker's column of blocks, while the picker fills a slot of one kind on the installation panel; the entry stands where Anything stands otherwise. {kind} is the name of the kind the slot takes, such as Piston.</comment>
   </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
-    <value>A step, if or trigger uses this state, so its type cannot be changed.</value>
+    <value>A [step](Term.Step class=term), [if](Term.If class=term) or [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) uses this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term), so its [state type](Term.Type class=term) cannot be changed.</value>
     <comment>Said where the pointer rests on what a state holds, on its row on a logic system's State tab, while a step or a trigger uses the state, so its state type cannot be changed.</comment>
   </data>
   <data name="Sprocket.State.NowAbout" xml:space="preserve">
-    <value>The value this state has right now in the installation shown.</value>
+    <value>The value this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) has right now in the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) shown.</value>
     <comment>Tooltip on what the installation shown holds in a state, on its row on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
@@ -561,11 +573,11 @@
     <comment>Tooltip on the installation's name in the editor's heading bar on the installation panel. Pressing the name renames the installation.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameBoxAbout" xml:space="preserve">
-    <value>The slot's name, as everyone filling in this logic system sees it.</value>
+    <value>The slot's name, as everyone filling in this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) sees it.</value>
     <comment>Tooltip on the slot's name in the editor's heading bar on a slot's page. Pressing the name renames the slot.</comment>
   </data>
   <data name="Sprocket.Blueprint.RequiredAbout" xml:space="preserve">
-    <value>Set whether an installation of this logic system may leave this slot empty.</value>
+    <value>Set whether an [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) of this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) may leave this [slot](Term.Slot class=term) empty.</value>
     <comment>Tooltip on the required/optional switch on a slot's page.</comment>
   </data>
   <data name="Sprocket.Writing.OpenAbout" xml:space="preserve">
@@ -597,7 +609,7 @@
     <comment>Tooltip on the box under the sliders of the color picker, in the picker's values column, where a color code is typed.</comment>
   </data>
   <data name="Sprocket.System.TurnOffToEdit" xml:space="preserve">
-    <value>The system must be turned off in order to make changes safely.</value>
+    <value>The [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) must be turned off in order to make changes safely.</value>
     <comment>Tooltip on a part or button that cannot be pressed while its logic system is switched on: the copy marks and bins of trigger and sequence rows and the slot rows on a logic system's screen, and the parts of steps on a sequence's screen.</comment>
   </data>
   <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
@@ -625,7 +637,7 @@
     <comment>Tooltip on a dimmed member in the selector, one that chooses ammunition, which the automation cannot choose yet; it is set in the block's terminal.</comment>
   </data>
   <data name="Sprocket.Withheld.Unread" xml:space="preserve">
-    <value>*The game doesn't let mods read this value's choices. Set it in the terminal.*</value>
+    <value>*The game doesn't let mods read the choices for this [![](mark:value)&amp;nbsp;block value](Term.Value class=term). Set it in the terminal.*</value>
     <comment>Tooltip on a dimmed member in the picker that cannot be chosen yet, because its values cannot be read yet.</comment>
   </data>
   <data name="Sprocket.Wait.Shorter" xml:space="preserve">
@@ -637,7 +649,7 @@
     <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the tooltip on the plus button right of the number, which makes the length longer.</comment>
   </data>
   <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
-    <value>The label shown on each button and toolbar slot that sends this signal. Left empty, they show the slot's name.</value>
+    <value>The label shown on each button and toolbar slot that sends this [![](mark:signal)&amp;nbsp;signal](Term.Signal class=term). Left empty, they show the [slot](Term.Slot class=term)'s name.</value>
     <comment>Tooltip on the short name box on a signal slot's screen, under the Short name heading.</comment>
   </data>
   <data name="Sprocket.Library.ForgetBackup" xml:space="preserve">
@@ -649,63 +661,63 @@
     <comment>In the library, the tooltip on the bin at the end of a blueprint's row in the section of blueprints kept in storage.</comment>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
-    <value>Add to this construct as a logic system, with an empty installation to fill.</value>
+    <value>Add to this [construct](Term.Construct class=term) as a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term), with an empty [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) to fill.</value>
     <comment>In the library, the tooltip on the left-pointing arrow in the strip between its panes while a blueprint or backup is chosen: pressing it puts that one on the construct the editor was opened on as a logic system with one empty installation.</comment>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
-    <value>Take this logic system and its installations off this construct.</value>
+    <value>Take this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) and its [![](mark:installation)&amp;nbsp;installations](Term.Installation class=term) off this [construct](Term.Construct class=term).</value>
     <comment>On the home screen, the tooltip on the minus in a logic system's heading row, shown where the logic system's blueprint is in the library.</comment>
   </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
-    <value>The blueprint in the library is the same as this logic system.</value>
+    <value>The [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term) is the same as this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term).</value>
     <comment>In the library, the tooltip on the right-pointing arrow in the strip between its panes, which makes or updates a blueprint, while it cannot be pressed because the chosen logic system and its blueprint in the library are the same.</comment>
   </data>
   <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
-    <value>A logic system needs at least one installation.</value>
+    <value>A [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) needs at least one [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term).</value>
     <comment>Tooltip on the dimmed bin of an installation's row on the home screen, shown when it is the logic system's only installation and so cannot be deleted.</comment>
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
-    <value>Duplicate this logic system on this construct.</value>
+    <value>Duplicate this logic system on this [construct](Term.Construct class=term).</value>
     <comment>In the library, the tooltip on the copy mark in the strip between its panes: it puts a copy of the chosen logic system on this construct as a separate logic system. It can be pressed only while a logic system on this construct is chosen.</comment>
   </data>
   <data name="Sprocket.Library.PromoteAbout" xml:space="preserve">
-    <value>Make this [backup](Term.Backup) a ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint).</value>
+    <value>Make this [backup](Term.Backup class=term) a [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term).</value>
     <comment>In the library, the tooltip on the right-pointing arrow in the strip between its panes while a backup is chosen: pressing it makes the backup a blueprint in storage, no longer marked as a backup.</comment>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
-    <value>Delete this logic system, with its installations. It has no blueprint in the library, so this is its only copy.</value>
+    <value>Delete this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term), with its [![](mark:installation)&amp;nbsp;installations](Term.Installation class=term). It has no [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term), so this is its only copy.</value>
     <comment>On the home screen, the tooltip on the bin in a logic system's heading row, shown where the logic system has no blueprint in the library.</comment>
   </data>
   <data name="Sprocket.Library.ResetAbout" xml:space="preserve">
-    <value>Reset this logic system to its blueprint in the library. Installations keep their blocks.</value>
+    <value>Reset this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) to its [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term). [![](mark:installation)&amp;nbsp;Installations](Term.Installation class=term) keep their blocks.</value>
     <comment>In the library, the tooltip on the left-pointing arrow in the strip between its panes, which puts the chosen logic system's blueprint back in its place, shown while the logic system has changed since that blueprint.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
-    <value>Check another condition when none above passed.</value>
+    <value>Check another [condition](Term.Condition class=term) when none above passed.</value>
     <comment>Tooltip on the choice in the add-branch menu on the row closing an if, on a sequence's screen, that adds an otherwise if branch.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
-    <value>Run this when none of the conditions above pass.</value>
+    <value>Run this when none of the [conditions](Term.Condition class=term) above pass.</value>
     <comment>Tooltip on the choice in the add-branch menu on the row closing an if, on a sequence's screen, that adds an otherwise branch.</comment>
   </data>
   <data name="Sprocket.Sequence.BranchAbout" xml:space="preserve">
-    <value>Add a [branch](Term.Branch) to this if.</value>
+    <value>Add a [branch](Term.Branch class=term) to this [if](Term.If class=term).</value>
     <comment>Tooltip on the plus button on the row closing an if on a sequence's screen, which opens the menu of branches to add to the if.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
-    <value>Add a condition to this branch.</value>
+    <value>Add a [condition](Term.Condition class=term) to this [branch](Term.Branch class=term).</value>
     <comment>Tooltip on the button on an if's otherwise line on a sequence's screen that gives the branch something to check, which makes it an otherwise if.</comment>
   </data>
   <data name="Sprocket.Sequence.StateAbout" xml:space="preserve">
-    <value>Select the condition that must pass.</value>
+    <value>Select the [condition](Term.Condition class=term) that must pass.</value>
     <comment>Tooltip on the part of an if's sentence on a sequence's screen that says what it checks of its blocks, such as "is closed"; pressing it chooses another check.</comment>
   </data>
   <data name="Sprocket.Sequence.SetStateAbout" xml:space="preserve">
-    <value>Give one of this logic system's [states](Term.LogicSystemStates) a new value.</value>
+    <value>Give one of this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term) a new value.</value>
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a step setting one of the logic system's states.</comment>
   </data>
   <data name="Sprocket.Sequence.SystemStateAbout" xml:space="preserve">
-    <value>Select another state, or another value for it.</value>
+    <value>Select another [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term), or another value for it.</value>
     <comment>Tooltip on the part of a step's sentence on a sequence's screen that names one of the logic system's states; pressing it opens the picker the step was made with.</comment>
   </data>
   <data name="Sprocket.Admin.EveryWorldAbout" xml:space="preserve">
@@ -717,11 +729,11 @@
     <comment>In the admin settings, the tooltip on the first choice in each setting's list on the tab for this world, the choice that follows the value set on the tab for every world. Every world in the text is that tab's name.</comment>
   </data>
   <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
-    <value>Wait until every ![](mark:awaited)&amp;nbsp;[awaitable](Term.Awaitable) started above has finished.</value>
+    <value>Wait until every [![](mark:awaited)&amp;nbsp;awaitable](Term.Awaitable class=term) started above has finished.</value>
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a row waiting for every awaitable action started before it. ![](mark:awaited) draws the clock mark an awaitable action carries.</comment>
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
-    <value>The ![](mark:awaited)&amp;nbsp;[awaitables](Term.Awaitable) started since the last `wait for pending tasks` run together, and the sequence waits here until all of them have finished.</value>
+    <value>The [![](mark:awaited)&amp;nbsp;awaitables](Term.Awaitable class=term) started since the last `wait for pending tasks` run together, and the [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) waits here until all of them have finished.</value>
     <comment>Tooltip on the words of a row waiting for every awaitable action started before it, on a sequence's screen. The row reads "wait for pending tasks", which stays English; ![](mark:awaited) draws the clock mark an awaitable action carries.</comment>
   </data>
   <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
@@ -729,11 +741,11 @@
     <comment>Tooltip on a category's name, with its pencil, a heading among the slots on a logic system's Installation panel tab. Pressing it lets the name be typed.</comment>
   </data>
   <data name="Sprocket.Category.Remove" xml:space="preserve">
-    <value>Remove this category. Its slots stay, under no category.</value>
+    <value>Remove this category. Its [slots](Term.Slot class=term) stay, under no category.</value>
     <comment>Tooltip on the bin beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
   </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
-    <value>Reduce the slots to as few as the steps and triggers need.</value>
+    <value>Reduce the [slots](Term.Slot class=term) to as few as the [steps](Term.Step class=term) and [![](mark:trigger)&amp;nbsp;triggers](Term.Trigger class=term) need.</value>
     <comment>Tooltip on the Optimize slots button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading, while the logic system is switched off and the slots can be changed.</comment>
   </data>
   <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
@@ -741,15 +753,15 @@
     <comment>Tooltip on the bin beside a slot no step, if or trigger names, on the installation panel and on the Installation panel tab of a logic system's screen, while the logic system is switched off. Pressing it removes the slot, with every installation's blocks in it.</comment>
   </data>
   <data name="Sprocket.Category.Drag" xml:space="preserve">
-    <value>Drag to move the category with its slots.</value>
+    <value>Drag to move the category with its [slots](Term.Slot class=term).</value>
     <comment>Tooltip on the grip beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
   </data>
   <data name="Sprocket.Slot.Drag" xml:space="preserve">
-    <value>Drag to move the slot. At the bottom of a category, drag right to put it in or left to leave it out.</value>
+    <value>Drag to move the slot. At the bottom of a [category](Term.Category class=term), drag right to put it in or left to leave it out.</value>
     <comment>Tooltip on the grip beside a slot's name on a logic system's Installation panel tab.</comment>
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
-    <value>The kind of block that can fill this slot. Press it to choose another.</value>
+    <value>The kind of block that can fill this [slot](Term.Slot class=term). Press it to choose another.</value>
     <comment>Tooltip on the type of block a block slot takes, under the Expects heading on the slot's page. Pressing it opens a picker listing the types the slot can take, wider or narrower, down to one kind of block; only those offering everything the slot's steps and triggers do with it.</comment>
   </data>
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
