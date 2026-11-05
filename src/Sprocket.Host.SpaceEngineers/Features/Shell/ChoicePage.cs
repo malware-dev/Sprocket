@@ -23,14 +23,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public override bool Asks => true;
 
         /// <summary>What the question is about, shown under the title for as long as the page is up.</summary>
-        public override string Subtitle => Caption ?? "";
+        public override string Subtitle => "";
 
         /// <summary>Shown where the answers would be when there is nothing to choose from yet.</summary>
         public string EmptyText { get; set; }
-
-        /// <summary>What the question is about, when the title cannot carry it.</summary>
-        /// <remarks>Set before the page is shown and never after: the header keeps its size for the life of a screen.</remarks>
-        public string Caption { get; set; }
 
         /// <summary>The answers, in the order they are offered, for whoever reads them back.</summary>
         public IReadOnlyList<ChoiceRow> Answers => _rows;

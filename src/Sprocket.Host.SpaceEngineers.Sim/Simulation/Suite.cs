@@ -22,6 +22,7 @@ namespace Sprocket.Sim.Simulation
         private const float Width = 1920f;
         private const float Height = 1080f;
 
+        /// <summary>Shoots every state in the list at <paramref name="listPath" /> into the folder <paramref name="into" />, and returns what it wrote.</summary>
         public static string Run(string listPath, string into)
         {
             Directory.CreateDirectory(into);

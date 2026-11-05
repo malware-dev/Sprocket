@@ -46,7 +46,7 @@
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
     <value>A **state type** is a named list of choices, like *inside* and *outside*. A [state](Term.LogicSystemStates) of that state type has one of its choices.</value>
-    <comment>Codex page on "Type", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
+    <comment>Codex page on "State type", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
     <value>![](mark:undo)&amp;nbsp;**Undo** takes back the last change, and ![](mark:redo)&amp;nbsp;**redo** makes it again. Each logic system has its own history of changes, across all its screens, and the home screen has its own.</value>
@@ -474,11 +474,11 @@
   </data>
   <data name="Sprocket.State.TypeRenameAbout" xml:space="preserve">
     <value>Rename this state type</value>
-    <comment>Tooltip on a type's name on a logic system's State tab, with its pencil. Pressing it lets the name be typed.</comment>
+    <comment>Tooltip on a state type's name on a logic system's State tab, with its pencil. Pressing it lets the name be typed.</comment>
   </data>
   <data name="Sprocket.State.ChoiceAbout" xml:space="preserve">
     <value>Rename or remove this choice</value>
-    <comment>Tooltip on one of a type's choices on a logic system's State tab. Pressing it opens a menu offering to rename or remove it.</comment>
+    <comment>Tooltip on one of a state type's choices on a logic system's State tab. Pressing it opens a menu offering to rename or remove it.</comment>
   </data>
   <data name="Sprocket.State.StateRenameAbout" xml:space="preserve">
     <value>Rename this state</value>
@@ -486,11 +486,11 @@
   </data>
   <data name="Sprocket.State.TypeRemove" xml:space="preserve">
     <value>Remove this state type</value>
-    <comment>Tooltip on the bin beside a type on a logic system's State tab.</comment>
+    <comment>Tooltip on the bin beside a state type on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.TypeKept" xml:space="preserve">
     <value>A state uses this state type, so it cannot be removed.</value>
-    <comment>Tooltip on the dimmed bin beside a type on a logic system's State tab, where a state holds one of its choices.</comment>
+    <comment>Tooltip on the dimmed bin beside a state type on a logic system's State tab, where a state holds one of its choices.</comment>
   </data>
   <data name="Sprocket.State.StateRemove" xml:space="preserve">
     <value>Remove this state</value>
@@ -502,7 +502,7 @@
   </data>
   <data name="Sprocket.State.TypeDrag" xml:space="preserve">
     <value>Drag to move the state type.</value>
-    <comment>Tooltip on the grip beside a type on a logic system's State tab.</comment>
+    <comment>Tooltip on the grip beside a state type on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.StateDrag" xml:space="preserve">
     <value>Drag to move the state.</value>
@@ -522,11 +522,11 @@
   </data>
   <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
     <value>The [state type](Term.Type) decides which values the new state can have.</value>
-    <comment>Said where the pointer rests on the type of a new state in the picker that sets, tests or watches a state.</comment>
+    <comment>Said where the pointer rests on the state type of a new state in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
     <value>Every slot, state type and state in a logic system needs its own name.</value>
-    <comment>Said where the pointer rests on the name of a new type in the picker that sets, tests or watches a state.</comment>
+    <comment>Said where the pointer rests on the name of a new state type in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">
     <value>Use whatever value another state has when this runs.</value>
@@ -550,7 +550,7 @@
   </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
     <value>A step, if or trigger uses this state, so its type cannot be changed.</value>
-    <comment>Said where the pointer rests on what a state holds, on its row on a logic system's State tab, while a step or a trigger uses the state, so its type cannot be changed.</comment>
+    <comment>Said where the pointer rests on what a state holds, on its row on a logic system's State tab, while a step or a trigger uses the state, so its state type cannot be changed.</comment>
   </data>
   <data name="Sprocket.State.NowAbout" xml:space="preserve">
     <value>The value this state has right now in the installation shown.</value>

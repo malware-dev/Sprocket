@@ -14,6 +14,7 @@ public sealed class TimerBlock : Fitting
     /// <summary>The slots a timer block's toolbar has.</summary>
     const int Slots = 9;
 
+    /// <summary>A timer block known by <paramref name="id" /> and called <paramref name="name" />, of the game's <paramref name="type" /> and <paramref name="subtype" />, shown as <paramref name="display" />.</summary>
     public TimerBlock(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {

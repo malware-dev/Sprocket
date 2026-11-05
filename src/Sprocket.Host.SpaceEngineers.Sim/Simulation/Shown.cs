@@ -13,11 +13,13 @@ namespace Sprocket.Sim.Simulation
     /// </remarks>
     public static class Shown
     {
+        /// <summary><paramref name="value" /> as a reference frame spells it.</summary>
         public static string Say(Vector2 value)
         {
             return "{X:" + Say(value.X) + " Y:" + Say(value.Y) + "}";
         }
 
+        /// <summary><paramref name="value" /> as a reference frame spells it.</summary>
         public static string Say(Rectangle value)
         {
             return "{X:" + value.X.ToString(CultureInfo.InvariantCulture)
@@ -26,6 +28,7 @@ namespace Sprocket.Sim.Simulation
                 + " H:" + value.Height.ToString(CultureInfo.InvariantCulture) + "}";
         }
 
+        /// <summary><paramref name="value" /> as a reference frame spells it.</summary>
         public static string Say(RectangleF value)
         {
             return "{X:" + Say(value.X) + " Y:" + Say(value.Y)

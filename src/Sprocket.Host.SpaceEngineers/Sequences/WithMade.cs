@@ -2,28 +2,33 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>A state added to a logic system, with the type made for it where one was, together with the change that first uses it, as one edit.</summary>
-    public sealed class WithNewState : SystemEdit
+    /// <summary>Something added to a logic system, together with the change that first uses it, as one edit.</summary>
+    public sealed class WithMade : SystemEdit
     {
-        readonly AddType _types;
-        readonly AddState _adds;
+        readonly SystemEdit _made;
         readonly SystemEdit _then;
+
+        /// <summary>Makes <paramref name="made" />, then <paramref name="then" />, which names and decides the edit.</summary>
+        public WithMade(SystemEdit made, SystemEdit then)
+        {
+            _made = made;
+            _then = then;
+        }
 
         /// <summary>
         /// Adds <paramref name="type" /> after the system's types where it is not null, and <paramref name="state" /> after its
         /// states, then makes <paramref name="then" />, as one edit.
         /// </summary>
-        public WithNewState(AutomationSystem system, State state, DeclaredType type, SystemEdit then)
+        public static SystemEdit State(AutomationSystem system, State state, DeclaredType type, SystemEdit then)
         {
-            _types = type == null ? null : new AddType(type, system.Types.Count);
-            _adds = new AddState(state, system.States.Count);
-            _then = then;
+            var added = new WithMade(new AddState(state, system.States.Count), then);
+            return type == null ? added : new WithMade(new AddType(type, system.Types.Count), added);
         }
 
         /// <inheritdoc />
         public override ChangeKind Change => _then.Change;
 
-        /// <summary>What the change made with the new state was made to.</summary>
+        /// <inheritdoc />
         public override void Name(AutomationSystem system, bool done, ChangeName name)
         {
             _then.Name(system, done, name);
@@ -38,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return (_types == null || _types.Redoable(system)) && _adds.Redoable(system) && _then.Redoable(system);
+            return _made.Redoable(system) && _then.Redoable(system);
         }
 
         /// <inheritdoc />
@@ -63,8 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
-            _types?.Apply(system);
-            _adds.Apply(system);
+            _made.Apply(system);
             _then.Apply(system);
         }
 
@@ -72,8 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override void Undo(AutomationSystem system)
         {
             _then.Undo(system);
-            _adds.Undo(system);
-            _types?.Undo(system);
+            _made.Undo(system);
         }
     }
 }

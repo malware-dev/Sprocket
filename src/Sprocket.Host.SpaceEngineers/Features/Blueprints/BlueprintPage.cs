@@ -95,9 +95,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The logic system whose blocks fill the slots, or null before there is one.</summary>
         SystemInstance Blockset => Editor.StandIn(_system);
 
-        /// <summary>Whether the slots themselves may be changed now: not while the logic system may run, and not while somebody else holds the editor.</summary>
-        bool Editable => !_system.Enabled && Editor.Holder == null;
-
         /// <inheritdoc />
         public override bool IsAbout(AutomationSystem system)
         {

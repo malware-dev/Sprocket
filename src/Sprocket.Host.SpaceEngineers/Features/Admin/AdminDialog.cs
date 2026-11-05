@@ -134,7 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             foreach (var choice in _choices)
             {
                 var standing = choice.Standing(settings);
-                var given = choice.World ? choice.Given(settings.World) : -1;
+                var given = choice.World ? choice.GivenAt(settings.World) : -1;
                 if (choice.Defaults == null || !choice.World)
                 {
                     choice.Field.Text = choice.Words[given < 0 ? standing : given];
@@ -176,7 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                 Field = field;
                 Words = words;
                 Defaults = defaults;
-                Given = given;
+                GivenAt = given;
                 Standing = standing;
                 Giving = giving;
             }
@@ -194,7 +194,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             public string[] Defaults { get; }
 
             /// <summary>Where the value a level gives stands among <see cref="Words" />, or -1 where the level leaves it.</summary>
-            public Func<SettingsLayer, int> Given { get; }
+            public Func<SettingsLayer, int> GivenAt { get; }
 
             /// <summary>Where the value a world that leaves the setting takes stands among <see cref="Words" />.</summary>
             public Func<Settings, int> Standing { get; }

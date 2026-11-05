@@ -212,7 +212,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var texts = _editor.Texts;
             var type = TypeEditing.New(texts, _system.Types.Count, _system.TakesInAnyCase);
             var start = StateValueQuestion.Starts(texts, _system, type.Name, type)[0];
-            _editor.Do(_system, new WithNewType(_system, type, new ChangeStart(_system, state, start.Value, start.Type)));
+            _editor.Do(_system, new WithMade(new AddType(type, _system.Types.Count), new ChangeStart(_system, state, start.Value, start.Type)));
         }
 
         void AddType()

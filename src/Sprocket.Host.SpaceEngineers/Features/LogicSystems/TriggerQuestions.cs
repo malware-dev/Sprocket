@@ -403,7 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (watch != null)
                 {
                     var change = new SetWatch(watch, watch.Test, test);
-                    var start = made != null ? new WithNewState(system, made.State, made.Type, change) : change.Changes ? (SystemEdit)change : null;
+                    var start = made != null ? WithMade.State(system, made.State, made.Type, change) : change.Changes ? (SystemEdit)change : null;
                     Aimed(system, watch, aim, origin, false, start);
                     return;
                 }
@@ -411,7 +411,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 _copies.Remove(was);
                 var now = new StateTrigger(test);
                 var swap = new ChangeTrigger(was, now);
-                Aimed(system, now, aim, origin, false, made != null ? new WithNewState(system, made.State, made.Type, swap) : (SystemEdit)swap);
+                Aimed(system, now, aim, origin, false, made != null ? WithMade.State(system, made.State, made.Type, swap) : swap);
             });
         }
 

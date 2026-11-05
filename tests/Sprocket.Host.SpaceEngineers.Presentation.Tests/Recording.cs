@@ -7,11 +7,9 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>A graphics that measures every character as half its size wide, and keeps where it was asked to fill.</summary>
+/// <summary>A graphics that measures every character as half its size wide.</summary>
 sealed class Recording(RectangleF area) : IGraphics
 {
-    public List<RectangleF> Fills { get; } = new List<RectangleF>();
-
     /// <summary>Every picture drawn from a part of a texture, with where it was drawn, in order.</summary>
     public List<(MyStringId Material, RectangleF Destination)> Pieces { get; } = new List<(MyStringId, RectangleF)>();
 
@@ -34,7 +32,7 @@ sealed class Recording(RectangleF area) : IGraphics
 
     public Vector2 MeasureText(string font, StringBuilder text, float size) => new Vector2(text.Length * size * 0.5f, size);
 
-    public void Fill(RectangleF destination, Color color, float rotation = 0f) => Fills.Add(destination);
+    public void Fill(RectangleF destination, Color color, float rotation = 0f) { }
 
     /// <summary>How many clips were pushed.</summary>
     public int Clips { get; private set; }

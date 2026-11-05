@@ -278,7 +278,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             var system = _sequence.System;
-            _editor.Do(system, new WithNewState(system, made.State, made.Type, new OnSequence(_sequence, edit)));
+            _editor.Do(system, WithMade.State(system, made.State, made.Type, new OnSequence(_sequence, edit)));
         }
 
         /// <summary>Asks what to check, and adds an otherwise if checking it to the if closed at <paramref name="end" />: last, or above its otherwise, which comes last.</summary>

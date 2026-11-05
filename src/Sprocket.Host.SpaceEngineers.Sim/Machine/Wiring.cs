@@ -25,6 +25,7 @@ public static class Wiring
     /// <summary>This store's own key, which is the harness's business and never Sprocket's.</summary>
     public static readonly Guid Key = new Guid("A7E3C1D0-9B42-4F58-8E16-3C7D5A2B9F04");
 
+    /// <summary><paramref name="rig" /> written out as this store keeps it.</summary>
     public static string Save(Rig rig)
     {
         var text = new StringBuilder();

@@ -14,6 +14,7 @@ namespace Sprocket.Sim.Machine;
 /// </remarks>
 public sealed class Lamp : Fitting
 {
+    /// <summary>A lamp known by <paramref name="id" /> and called <paramref name="name" />, of the game's <paramref name="type" /> and <paramref name="subtype" />, shown as <paramref name="display" />.</summary>
     public Lamp(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {

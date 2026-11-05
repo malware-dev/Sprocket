@@ -37,6 +37,7 @@ public static class BindingReport
 
     const int Windows = 7;
 
+    /// <summary>The report, as text.</summary>
     public static string Render()
     {
         var report = new StringBuilder();
