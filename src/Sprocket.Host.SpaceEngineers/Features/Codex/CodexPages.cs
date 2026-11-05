@@ -74,15 +74,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             return page;
         }
 
-        /// <summary>The markdown-lite for <paramref name="words" /> as a link to the page <paramref name="id" />.</summary>
-        public static string Link(string words, string id)
+        /// <summary>The class of link a term is: hovered for its page, and never pressed.</summary>
+        public const string TermClass = "term";
+
+        /// <summary>The markdown-lite for <paramref name="words" /> as a term whose tip is the page <paramref name="id" />.</summary>
+        public static string Term(string words, string id)
         {
-            return $"[{Markdown.Escape(words)}]({id})";
+            return $"[{Markdown.Escape(words)}]({id} class={TermClass})";
         }
 
         /// <summary>
         /// The markdown-lite for a heading in capitals: <paramref name="template" /> with its slot <paramref name="slot" /> filled by
-        /// <paramref name="term" />, the term alone a link to the page <paramref name="id" />, so a heading such as "On your
+        /// <paramref name="term" />, the term alone marked as the term for the page <paramref name="id" />, so a heading such as "On your
         /// constructs" shows only the term in the link's look.
         /// </summary>
         public static string Within(string template, string slot, string term, string id)
@@ -94,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 
             var before = template.Substring(0, at).ToUpperInvariant();
             var after = template.Substring(at + mark.Length).ToUpperInvariant();
-            return Markdown.Escape(before) + Link(term.ToUpperInvariant(), id) + Markdown.Escape(after);
+            return Markdown.Escape(before) + Term(term.ToUpperInvariant(), id) + Markdown.Escape(after);
         }
 
         /// <summary>Whether the terms on the screens look like terms and explain themselves; while not, they are words like any other.</summary>

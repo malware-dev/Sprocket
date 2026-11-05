@@ -154,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>Gives the heading over the installations its words, the term the codex explains where <see cref="LinksTerm" /> says so.</summary>
         void HeadInstallations()
         {
-            _installations.Markdown = _linksTerm ? CodexPages.Link(_installationsWord, CodexPages.Installation) : Markdown.Escape(_installationsWord);
+            _installations.Markdown = _linksTerm ? CodexPages.Term(_installationsWord, CodexPages.Installation) : Markdown.Escape(_installationsWord);
         }
 
         /// <summary>

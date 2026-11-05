@@ -155,7 +155,7 @@ public class LibraryTests
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
         Assert.NotNull(page.View);
         var lines = page.Rows.Select(row => row is RichText heading ? heading.Markdown : (row as Label)?.Text).Where(text => text != null).ToList();
-        Assert.Single(lines.Skip(lines.IndexOf(CodexPages.Link(rig.Texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup)) + 1), l => l == "Test Rig");
+        Assert.Single(lines.Skip(lines.IndexOf(CodexPages.Term(rig.Texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup)) + 1), l => l == "Test Rig");
 
         var backed = page.Rows.OfType<StatusRow>().Where(r => r.Status != null && r.Status.StartsWith("Lost ")).ToList();
         Assert.Equal(new[] { "Airlock", "Airlock", "Hangar" }, backed.Select(r => r.Summary));
@@ -233,7 +233,7 @@ public class LibraryTests
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
         Assert.NotNull(page.View);
         var lines = page.Rows.Select(row => row is RichText heading ? heading.Markdown : (row as Label)?.Text).Where(text => text != null).ToList();
-        var at = lines.IndexOf(CodexPages.Link(rig.Texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup));
+        var at = lines.IndexOf(CodexPages.Term(rig.Texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup));
         Assert.True(at >= 0, "there is no backups heading");
         Assert.Equal(new[] { "Lost Ship", "Test Rig" }, lines.Skip(at + 1).Take(2));
         Assert.Equal(new[] { "Airlock", "Hangar", "Hangar", "Airlock" }, page.Rows.OfType<StatusRow>().Select(r => r.Summary));

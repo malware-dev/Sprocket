@@ -157,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (backups == null || backups.All.Count == 0)
                 return;
 
-            var lost = Part(TermHeading(CodexPages.Link(texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup)), Gaps.Sections);
+            var lost = Part(TermHeading(CodexPages.Term(texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup)), Gaps.Sections);
             _listed.Clear();
 
             var all = backups.All;

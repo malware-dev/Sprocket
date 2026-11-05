@@ -68,13 +68,13 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
-    <!-- The mod's own LCD images and materials and their pictures, which the harness draws as the game does. -->
+    <!-- The LCD images, materials and pictures packed into the mod, its own and Lumel's, which the harness draws as the game does. -->
     <ItemGroup>
-        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\LCDTextures*.sbc;..\Sprocket.Host.SpaceEngineers\Content\Data\TransparentMaterials*.sbc">
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\LCDTextures*.sbc;..\Sprocket.Host.SpaceEngineers\Content\Data\TransparentMaterials*.sbc;..\Lumel\Content\Data\*TransparentMaterials*.sbc">
             <Link>Content\Mods\Sprocket\Data\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Textures\**\*.dds">
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Textures\**\*.dds;..\Lumel\Content\Textures\**\*.dds">
             <Link>Content\Mods\Sprocket\Textures\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

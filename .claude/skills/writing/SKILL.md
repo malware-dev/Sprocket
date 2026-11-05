@@ -84,6 +84,7 @@ Each term in one line, with its Norwegian word.
 - **Signal** (signal): what a block sends to start a trigger.
 - **Slot** (plass): a named place in a logic system, such as the inner door, that each installation fills with
   its own blocks or signal.
+- **State type** (tilstandstype): a named list of choices, like inside and outside, which a state holds one of (Mal, 2026-11-05). The script's word is `type`.
 - **Task** (oppgave): one operation: run, stop, an action, or setting a value.
 - **Tick** (tikk): the smallest step of time, sixty to a second.
 - **Trigger** (utløser): a line that runs or stops a sequence when a signal arrives, blocks

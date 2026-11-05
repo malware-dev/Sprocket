@@ -169,7 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _led = Kind;
                 _ledTerm = LeadTerm;
                 var lead = SentenceText.Lead(Kind);
-                _lead.Markdown = LeadTerm == null ? Markdown.Escape(lead) : CodexPages.Link(lead, LeadTerm);
+                _lead.Markdown = LeadTerm == null ? Markdown.Escape(lead) : CodexPages.Term(lead, LeadTerm);
                 _lead.IsVisible = lead.Length != 0;
                 _leadWaits.IsVisible = Kind == StepKind.Run || Kind == StepKind.Await;
                 // A run is waited for, as an action that takes time is, and carries that mark; a wait carries the clock it waits by.

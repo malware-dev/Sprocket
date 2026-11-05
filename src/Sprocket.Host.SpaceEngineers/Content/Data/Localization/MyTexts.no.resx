@@ -220,7 +220,7 @@
     <value>Tilstand</value>
   </data>
   <data name="Sprocket.System.NoState" xml:space="preserve">
-    <value>Ingen typer eller tilstander ennå.</value>
+    <value>Ingen tilstandstyper eller tilstander ennå.</value>
   </data>
   <data name="Sprocket.System.NoPanel" xml:space="preserve">
     <value>Ingen plasser ennå.</value>
@@ -477,10 +477,10 @@
     <value>En ny tilstand</value>
   </data>
   <data name="Sprocket.Pick.NewType" xml:space="preserve">
-    <value>En ny type</value>
+    <value>En ny tilstandstype</value>
   </data>
   <data name="Sprocket.Pick.TypeNameTaken" xml:space="preserve">
-    <value>Gi typen et navn som ingen plass, type eller tilstand i dette logikksystemet har.</value>
+    <value>Gi tilstandstypen et navn som ingen plass, tilstandstype eller tilstand i dette logikksystemet har.</value>
   </data>
   <data name="Sprocket.Pick.StateSetTo" xml:space="preserve">
     <value>Sett til</value>
@@ -498,16 +498,16 @@
     <value>Vent på</value>
   </data>
   <data name="Sprocket.Pick.TypeName" xml:space="preserve">
-    <value>typenavn</value>
+    <value>navn på tilstandstype</value>
   </data>
   <data name="Sprocket.Pick.StateType" xml:space="preserve">
-    <value>type</value>
+    <value>tilstandstype</value>
   </data>
   <data name="Sprocket.Pick.ChoiceOfType" xml:space="preserve">
     <value>{choice} ({type})</value>
   </data>
   <data name="Sprocket.Pick.StateNameTaken" xml:space="preserve">
-    <value>Gi tilstanden et navn som ingen plass, type eller tilstand i dette logikksystemet har.</value>
+    <value>Gi tilstanden et navn som ingen plass, tilstandstype eller tilstand i dette logikksystemet har.</value>
   </data>
   <data name="Sprocket.State.Name" xml:space="preserve">
     <value>navn</value>
@@ -519,13 +519,13 @@
     <value>på eller av</value>
   </data>
   <data name="Sprocket.State.Types" xml:space="preserve">
-    <value>Typer</value>
+    <value>Tilstandstyper</value>
   </data>
   <data name="Sprocket.State.States" xml:space="preserve">
     <value>Tilstander</value>
   </data>
   <data name="Sprocket.State.TypeAdd" xml:space="preserve">
-    <value>type</value>
+    <value>tilstandstype</value>
   </data>
   <data name="Sprocket.State.ChoiceAdd" xml:space="preserve">
     <value>alternativ</value>
@@ -534,7 +534,7 @@
     <value>tilstand</value>
   </data>
   <data name="Sprocket.State.TypeNumbered" xml:space="preserve">
-    <value>type {number}</value>
+    <value>tilstandstype {number}</value>
   </data>
   <data name="Sprocket.State.ChoiceNumbered" xml:space="preserve">
     <value>alternativ {number}</value>
@@ -2412,16 +2412,16 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
     <value>Fjernet kategorien &quot;{thing}&quot;</value>
   </data>
   <data name="Sprocket.Change.AddType" xml:space="preserve">
-    <value>La til typen &quot;{thing}&quot;</value>
+    <value>La til tilstandstypen &quot;{thing}&quot;</value>
   </data>
   <data name="Sprocket.Change.RenameType" xml:space="preserve">
-    <value>Omdøpte typen &quot;{was}&quot; til &quot;{now}&quot;</value>
+    <value>Omdøpte tilstandstypen &quot;{was}&quot; til &quot;{now}&quot;</value>
   </data>
   <data name="Sprocket.Change.RemoveType" xml:space="preserve">
-    <value>Fjernet typen &quot;{thing}&quot;</value>
+    <value>Fjernet tilstandstypen &quot;{thing}&quot;</value>
   </data>
   <data name="Sprocket.Change.MoveType" xml:space="preserve">
-    <value>Flyttet typen &quot;{thing}&quot;</value>
+    <value>Flyttet tilstandstypen &quot;{thing}&quot;</value>
   </data>
   <data name="Sprocket.Change.AddChoice" xml:space="preserve">
     <value>La til alternativet &quot;{thing}&quot; i {place}</value>

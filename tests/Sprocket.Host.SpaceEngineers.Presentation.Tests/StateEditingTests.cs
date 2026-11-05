@@ -306,29 +306,46 @@ public class StateEditingTests
         editor.PressAdd(editor.Texts.StateStateAdd);
         screen.Run(1);
 
-        Assert.Equal("type 2", system.Types[1].Name);
+        Assert.Equal("state type 2", system.Types[1].Name);
         Assert.Equal(new[] { "choice 1", "choice 2" }, system.Types[1].Choices.ToArray());
         Assert.Equal("state 4", system.States[3].Name);
         Assert.True(system.States[3].IsFlag);
     }
 
-    /// <summary>
-    /// The page on types shows on the heading over the types, and on the button adding a type only while there is no type for
-    /// that heading to stand over.
-    /// </summary>
+    /// <summary>The page on states is on the heading over the states, beside the tab's own tip.</summary>
     [Fact]
-    public void TheTypePageIsOnTheAddTypeButtonOnlyWhileNoTypeIsListed()
+    public void TheStatesHeadingIsATerm()
+    {
+        var screen = OnSystem(Untyped, out _);
+        var view = screen.Editor.PressTab(screen.Editor.Texts.SystemState);
+        screen.Run(1);
+
+        var at = Links.First(view, CodexPages.LogicSystemStates, out var heading);
+
+        Assert.Same(screen.Editor.Codex.Find(CodexPages.LogicSystemStates), heading.TipAt(at));
+    }
+
+    /// <summary>An empty list leaves no gap between its heading and its add button.</summary>
+    [Fact]
+    public void AnEmptyListTakesNoRoom()
+    {
+        var screen = OnSystem(Untyped, out _);
+        var tab = screen.Editor.PressTab(screen.Editor.Texts.SystemState);
+        screen.Run(1);
+
+        Assert.False(Target.Within(tab).OfType<StatePanel>().Single().Types.IsVisible, "an empty list still takes a gap");
+    }
+
+    /// <summary>The type page is on the heading over the types, which stands over its add button while no type is listed.</summary>
+    [Fact]
+    public void TheTypePageIsOnTheHeadingWhileNoTypeIsListed()
     {
         var screen = OnSystem(Untyped, out _);
         var editor = screen.Editor;
         var view = editor.PressTab(editor.Texts.SystemState);
         screen.Run(1);
+
         var add = Target.Within(view).OfType<Button>().Single(button => button.Text == StatusRow.Plus + editor.Texts.StateTypeAdd);
-        Assert.Equal(editor.Texts.Codex.TermType, add.Tip?.Text);
-
-        editor.PressAdd(editor.Texts.StateTypeAdd);
-        screen.Run(1);
-
         Assert.Null(add.Tip);
         var at = Links.First(view, CodexPages.Type, out var heading);
         Assert.Same(editor.Codex.Find(CodexPages.Type), heading.TipAt(at));
@@ -381,13 +398,39 @@ public class StateEditingTests
 
         Target.Within(view).OfType<StateRow>().Last().TypeButton.Command!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { editor.Texts.StateFlag, "side" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { editor.Texts.StateFlag, "side", StatusRow.Plus + editor.Texts.PickNewType }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
 
         editor.PressAnswer("side");
         screen.Run(1);
         var cycling = system.FindState("cycling")!;
         Assert.Equal("side", cycling.Type);
         Assert.Equal("inside", cycling.Start.Text);
+    }
+
+    /// <summary>A state's box makes a type for it, and the state and the type go back together as one undo step.</summary>
+    [Fact]
+    public void AStatesBoxMakesANewTypeForIt()
+    {
+        var screen = OnSystem(Untyped, out var system);
+        var editor = screen.Editor;
+        var view = editor.PressTab(editor.Texts.SystemState);
+        screen.Run(1);
+
+        Target.Within(view).OfType<StateRow>().Single().TypeButton.Command!.Execute();
+        screen.Run(1);
+        editor.PressAnswer(StatusRow.Plus + editor.Texts.PickNewType);
+        screen.Run(1);
+
+        var cycling = system.FindState("cycling")!;
+        var type = Assert.Single(system.Types);
+        Assert.Equal(type.Name, cycling.Type);
+        Assert.Equal(type.Choices[0], cycling.Start.Text);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(1);
+
+        Assert.Empty(system.Types);
+        Assert.True(cycling.IsFlag);
     }
 
     /// <summary>
@@ -472,22 +515,22 @@ public class StateEditingTests
 
         var page = Page(screen);
         Assert.Equal(StatusRow.Plus + editor.Texts.PickNewType, page.Head.Fields[1].Text);
-        Assert.Equal("type 2", page.Head.Fields[2].Text);
+        Assert.Equal("state type 2", page.Head.Fields[2].Text);
         Assert.Equal("choice 1", page.Starts.Fields[0].Text);
         page.AddChoice.Command!.Execute();
         screen.Run(1);
         Assert.Equal(new[] { "choice 1", "choice 2", "choice 3" }, StateValueQuestion.Fields(editor.Texts, system,
-            new State("x", "type 2", Literal.Name("choice 1")), false, new DeclaredType("type 2") { Choices = { "choice 1", "choice 2", "choice 3" } })[0].Words.ToArray());
+            new State("x", "state type 2", Literal.Name("choice 1")), false, new DeclaredType("state type 2") { Choices = { "choice 1", "choice 2", "choice 3" } })[0].Words.ToArray());
 
         Give(screen, "choice 3");
         Assert.Equal("Set state 4 to choice 3", editor.Screen.Title());
         editor.PressPrimary();
         screen.Run(1);
 
-        var type = system.FindType("type 2")!;
+        var type = system.FindType("state type 2")!;
         Assert.Equal(new[] { "choice 1", "choice 2", "choice 3" }, type.Choices.ToArray());
         var state = system.FindState("state 4")!;
-        Assert.Equal("type 2", state.Type);
+        Assert.Equal("state type 2", state.Type);
         Assert.Equal("choice 1", state.Start.Text);
         Assert.Equal("choice 3", Assert.IsType<SetState>(Assert.Single(sequence.Steps)).Value.Text);
 
@@ -495,7 +538,7 @@ public class StateEditingTests
         screen.Run(1);
         Assert.Empty(sequence.Steps);
         Assert.Null(system.FindState("state 4"));
-        Assert.Null(system.FindType("type 2"));
+        Assert.Null(system.FindType("state type 2"));
     }
 
     /// <summary>A new state may not take a name the logic system already has, and the pick waits until it has one of its own.</summary>
@@ -631,7 +674,7 @@ public class StateEditingTests
 
         var view = Page(screen).View;
         var at = Links.First(view, CodexPages.LogicSystemStates, out var heading);
-        Assert.Equal(CodexPages.Link(editor.Texts.PickStates.ToUpperInvariant(), CodexPages.LogicSystemStates), heading.Markdown);
+        Assert.Equal(CodexPages.Term(editor.Texts.PickStates.ToUpperInvariant(), CodexPages.LogicSystemStates), heading.Markdown);
         Assert.Same(editor.Codex.Find(CodexPages.LogicSystemStates), heading.TipAt(at));
         var bounds = heading.Bounds;
         var said = Page(screen).View.TipOwnerAt(new VRageMath.Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));

@@ -9,6 +9,7 @@ using Lumel.Menus;
 using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Look
@@ -18,6 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     {
         /// <summary>How many ticks the pointer rests on something before its tip opens.</summary>
         public const int TipDelay = 30;
+
+        /// <summary>How thick the dotted line under a term is.</summary>
+        public const float TermLine = 1f;
 
         /// <summary>How many ticks a tip stays open while the pointer crosses from what it explains onto it.</summary>
         public const int TipGrace = 15;
@@ -297,9 +301,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Color = Palette.Faint,
                 StrongColor = Palette.Ink,
                 EmphasisColor = Palette.Ink,
-                LinkColor = Palette.Link
+                LinkColor = Palette.Link,
+                Links = { [CodexPages.TermClass] = { Underline = UnderlineStyle.Dotted, UnderlineThickness = TermLine, Presses = false } }
             },
-            [LookStates.Plain] = { LinkColor = Palette.Faint }
+            [LookStates.Plain] = { LinkColor = Palette.Faint, Links = { [CodexPages.TermClass] = { UnderlineThickness = 0f } } }
         };
 
         /// <summary>The name of a section inside one of a page's sections or inside a tab, a size down, where the name is a term in the codex.</summary>
@@ -409,8 +414,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The words a sentence opens with, where they may be a term in the codex; the term in the words' own color while tips are off, and all of it dim on a paused step.</summary>
         public static readonly IStyle<RichText> PhraseTerm = new RichTextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Muted, LinkColor = Palette.Link, CodeBackground = CodeWash, CodePadding = CodeRoom },
-            [LookStates.Plain] = { LinkColor = Palette.Muted },
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Muted, LinkColor = Palette.Link, CodeBackground = CodeWash, CodePadding = CodeRoom, Links = { [CodexPages.TermClass] = { Underline = UnderlineStyle.Dotted, UnderlineThickness = TermLine, Presses = false } } },
+            [LookStates.Plain] = { LinkColor = Palette.Muted, Links = { [CodexPages.TermClass] = { UnderlineThickness = 0f } } },
             [LookStates.Paused] = { Color = Palette.Dim, LinkColor = Palette.Dim }
         };
 

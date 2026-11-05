@@ -41,11 +41,11 @@
     <comment>Codex page on "Slot", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value>The **logic system's states** are values it remembers between runs, each installation its own, like which side of the airlock its engineer is on. Each state is on or off, or one choice of a [type](Term.Type).</value>
+    <value>The **logic system's states** are values it remembers between runs, each installation its own, like which side of the airlock its engineer is on. Each state is on or off, or one choice of a [state type](Term.Type).</value>
     <comment>Codex page on "Logic system states", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
-    <value>A **type** is a named list of choices, like *inside* and *outside*. A [state](Term.LogicSystemStates) of that type has one of its choices.</value>
+    <value>A **state type** is a named list of choices, like *inside* and *outside*. A [state](Term.LogicSystemStates) of that state type has one of its choices.</value>
     <comment>Codex page on "Type", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
@@ -473,7 +473,7 @@
     <comment>Said where the pointer rests on the label before the buttons for the state's own values, in the selector that sets, tests or watches one of the logic system's states.</comment>
   </data>
   <data name="Sprocket.State.TypeRenameAbout" xml:space="preserve">
-    <value>Rename this type</value>
+    <value>Rename this state type</value>
     <comment>Tooltip on a type's name on a logic system's State tab, with its pencil. Pressing it lets the name be typed.</comment>
   </data>
   <data name="Sprocket.State.ChoiceAbout" xml:space="preserve">
@@ -485,11 +485,11 @@
     <comment>Tooltip on a state's name on a logic system's State tab, with its pencil. Pressing it lets the name be typed.</comment>
   </data>
   <data name="Sprocket.State.TypeRemove" xml:space="preserve">
-    <value>Remove this type</value>
+    <value>Remove this state type</value>
     <comment>Tooltip on the bin beside a type on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.TypeKept" xml:space="preserve">
-    <value>A state uses this type, so it cannot be removed.</value>
+    <value>A state uses this state type, so it cannot be removed.</value>
     <comment>Tooltip on the dimmed bin beside a type on a logic system's State tab, where a state holds one of its choices.</comment>
   </data>
   <data name="Sprocket.State.StateRemove" xml:space="preserve">
@@ -501,7 +501,7 @@
     <comment>Tooltip on the dimmed bin beside a state on a logic system's State tab, where a step sets it or something tests or watches it.</comment>
   </data>
   <data name="Sprocket.State.TypeDrag" xml:space="preserve">
-    <value>Drag to move the type.</value>
+    <value>Drag to move the state type.</value>
     <comment>Tooltip on the grip beside a type on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.StateDrag" xml:space="preserve">
@@ -517,15 +517,15 @@
     <comment>Said where the pointer rests on the words before a state's starting value, on the State tab and in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.StateNameAbout" xml:space="preserve">
-    <value>Every slot, type and state in a logic system needs its own name.</value>
+    <value>Every slot, state type and state in a logic system needs its own name.</value>
     <comment>Said where the pointer rests on the name of a new state in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
-    <value>The [type](Term.Type) decides which values the new state can have.</value>
+    <value>The [state type](Term.Type) decides which values the new state can have.</value>
     <comment>Said where the pointer rests on the type of a new state in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
-    <value>Every slot, type and state in a logic system needs its own name.</value>
+    <value>Every slot, state type and state in a logic system needs its own name.</value>
     <comment>Said where the pointer rests on the name of a new type in the picker that sets, tests or watches a state.</comment>
   </data>
   <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">

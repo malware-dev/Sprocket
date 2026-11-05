@@ -230,7 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var chosen = Blockset;
             _shape = Shape(chosen);
 
-            _partsHeading.Markdown = CodexPages.Link(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
+            _partsHeading.Markdown = CodexPages.Term(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
             Describe();
 
             Collect();

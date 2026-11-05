@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             _groups.Show(_systems);
 
-            _heading.Markdown = CodexPages.Link(texts.SystemsHeading.ToUpperInvariant(), CodexPages.LogicSystem);
+            _heading.Markdown = CodexPages.Term(texts.SystemsHeading.ToUpperInvariant(), CodexPages.LogicSystem);
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
             _search.Hint = texts.PickSearch;

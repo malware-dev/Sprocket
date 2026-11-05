@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Writes the title's words, as a link to its term's page where it has one.</summary>
         void Retitle()
         {
-            _title.Markdown = _titleTerm == null ? Markdown.Escape(_titleWords) : CodexPages.Link(_titleWords, _titleTerm);
+            _title.Markdown = _titleTerm == null ? Markdown.Escape(_titleWords) : CodexPages.Term(_titleWords, _titleTerm);
         }
 
         /// <summary>A quiet line under what the column asks, such as how many are picked, or empty.</summary>

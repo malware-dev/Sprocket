@@ -32,10 +32,10 @@
     <value>En **plass** er et navngitt sted i et logikksystem, som den indre døra, som hver installasjon fyller med sine egne blokker eller sitt eget signal. En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel).</value>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value>**Logikksystemets tilstander** er verdier det husker mellom kjøringer, hver installasjon sine egne, som hvilken side av luftslusen ingeniøren er på. Hver tilstand er på eller av, eller ett alternativ av en [type](Term.Type).</value>
+    <value>**Logikksystemets tilstander** er verdier det husker mellom kjøringer, hver installasjon sine egne, som hvilken side av luftslusen ingeniøren er på. Hver tilstand er på eller av, eller ett alternativ av en [tilstandstype](Term.Type).</value>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
-    <value>En **type** er en navngitt liste med alternativer, som *inne* og *ute*. En [tilstand](Term.LogicSystemStates) av den typen har ett av alternativene.</value>
+    <value>En **tilstandstype** er en navngitt liste med alternativer, som *inne* og *ute*. En [tilstand](Term.LogicSystemStates) av den tilstandstypen har ett av alternativene.</value>
   </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
     <value>![](mark:undo)&amp;nbsp;**Angre** tar tilbake den siste endringen, og ![](mark:redo)&amp;nbsp;**gjør om** gjør den igjen. Hvert logikksystem har sin egen historikk over endringer, på tvers av alle skjermene sine, og startskjermen har sin egen.</value>
@@ -357,7 +357,7 @@
     <value>Bruk en av disse verdiene.</value>
   </data>
   <data name="Sprocket.State.TypeRenameAbout" xml:space="preserve">
-    <value>Gi typen nytt navn</value>
+    <value>Gi tilstandstypen nytt navn</value>
   </data>
   <data name="Sprocket.State.ChoiceAbout" xml:space="preserve">
     <value>Gi alternativet nytt navn, eller fjern det</value>
@@ -366,10 +366,10 @@
     <value>Gi tilstanden nytt navn</value>
   </data>
   <data name="Sprocket.State.TypeRemove" xml:space="preserve">
-    <value>Fjern typen</value>
+    <value>Fjern tilstandstypen</value>
   </data>
   <data name="Sprocket.State.TypeKept" xml:space="preserve">
-    <value>En tilstand bruker denne typen, så den kan ikke fjernes.</value>
+    <value>En tilstand bruker denne tilstandstypen, så den kan ikke fjernes.</value>
   </data>
   <data name="Sprocket.State.StateRemove" xml:space="preserve">
     <value>Fjern tilstanden</value>
@@ -378,7 +378,7 @@
     <value>Et steg eller en utløser bruker denne tilstanden, så den kan ikke fjernes.</value>
   </data>
   <data name="Sprocket.State.TypeDrag" xml:space="preserve">
-    <value>Dra for å flytte typen.</value>
+    <value>Dra for å flytte tilstandstypen.</value>
   </data>
   <data name="Sprocket.State.StateDrag" xml:space="preserve">
     <value>Dra for å flytte tilstanden.</value>
@@ -390,13 +390,13 @@
     <value>Verdien tilstanden har når logikksystemet starter.</value>
   </data>
   <data name="Sprocket.Pick.StateNameAbout" xml:space="preserve">
-    <value>Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
+    <value>Hver plass, tilstandstype og tilstand i et logikksystem må ha sitt eget navn.</value>
   </data>
   <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
-    <value>[Typen](Term.Type) avgjør hvilke verdier den nye tilstanden kan ha.</value>
+    <value>[Tilstandstypen](Term.Type) avgjør hvilke verdier den nye tilstanden kan ha.</value>
   </data>
   <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
-    <value>Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
+    <value>Hver plass, tilstandstype og tilstand i et logikksystem må ha sitt eget navn.</value>
   </data>
   <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">
     <value>Bruk den verdien en annen tilstand har når dette kjører.</value>

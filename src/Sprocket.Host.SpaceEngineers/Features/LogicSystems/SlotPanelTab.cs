@@ -158,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var add = _panel.AddCategory;
             var optimize = _panel.Optimize;
             _panel.Slotting.IsVisible = _parts.Count > 0;
-            _panel.SlotsHeading.Markdown = CodexPages.Link(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
+            _panel.SlotsHeading.Markdown = CodexPages.Term(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
             add.IsVisible = editable;
             add.Text = StatusRow.Plus + texts.CategoryAdd;
             // A category just added opens its name for typing once its row stands.

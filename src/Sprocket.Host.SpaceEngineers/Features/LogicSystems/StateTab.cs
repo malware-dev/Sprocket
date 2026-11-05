@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -45,6 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _typeRows = new KeyedChildren<DeclaredType, TypeRow>(panel.Types.Children, TypeRowFor);
             _stateRows = new KeyedChildren<State, StateRow>(panel.StateList.Children, StateRowFor);
             editor.Codex.Explain(panel.TypesHeading);
+            editor.Codex.Explain(panel.StatesHeading);
 
             panel.Types.Reordered += moved => Move(CommandKind.MoveType, () => _editor.Do(_system, new MoveType(_types[moved.From], moved.From, moved.To)));
             panel.StateList.Reordered += moved => Move(CommandKind.MoveState, () => _editor.Do(_system, new MoveState(_states[moved.From], moved.From, moved.To)));
@@ -64,16 +64,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             // Where types and states can be added, the ways to add them say it all.
             _panel.Empty = _types.Count == 0 && _states.Count == 0 && !editable ? texts.SystemNoState : "";
-            _panel.TypesHeading.Markdown = CodexPages.Link(texts.StateTypes.ToUpperInvariant(), CodexPages.Type);
-            _panel.StatesHeading.Text = texts.StateStates.ToUpperInvariant();
-            _panel.TypesHeading.IsVisible = _types.Count != 0;
-            _panel.StatesHeading.IsVisible = _states.Count != 0;
+            _panel.TypesHeading.Markdown = CodexPages.Term(texts.StateTypes.ToUpperInvariant(), CodexPages.Type);
+            _panel.StatesHeading.Markdown = CodexPages.Term(texts.StateStates.ToUpperInvariant(), CodexPages.LogicSystemStates);
+            _panel.TypesHeading.IsVisible = _types.Count != 0 || editable;
+            _panel.StatesHeading.IsVisible = _states.Count != 0 || editable;
+            _panel.Types.IsVisible = _types.Count != 0;
+            _panel.StateList.IsVisible = _states.Count != 0;
             _panel.Adds = editable;
 
             _panel.AddType.Text = StatusRow.Plus + texts.StateTypeAdd;
             _panel.AddType.Command = _changes(CommandKind.AddType, AddType);
-            // The type page shows on the heading over the types, and on the button only while that heading is hidden.
-            _panel.AddType.Tip = CodexTip.For(_panel.AddType.Tip, _panel.TypesHeading.IsVisible ? null : texts.Codex.TermType);
             _panel.AddState.Text = StatusRow.Plus + texts.StateStateAdd;
             _panel.AddState.Command = _changes(CommandKind.AddState, AddState);
 
@@ -181,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
-        /// <summary>Offers on or off and each type for <paramref name="state" /> to hold, the one it holds marked; another starts the state as its first value, or off.</summary>
+        /// <summary>Offers on or off, each type and a new type for <paramref name="state" /> to hold, the one it holds marked; another starts the state as its first value, or off.</summary>
         void Types(State state)
         {
             var texts = _editor.Texts;
@@ -192,6 +192,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var named = type.Name;
                 _editor.Answer(named, () => Retype(state, named), state.Type == named);
             }
+
+            _editor.Answer(StatusRow.Plus + texts.PickNewType, () => RetypeToNew(state), false);
         }
 
         /// <summary>Makes <paramref name="state" /> hold the type <paramref name="type" />, empty for on or off, starting as its first value, or off.</summary>
@@ -202,6 +204,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var start = type.Length == 0 ? StateValueQuestion.Off : StateValueQuestion.Starts(_editor.Texts, _system, type)[0];
             _editor.Do(_system, new ChangeStart(_system, state, start.Value, start.Type));
+        }
+
+        /// <summary>Makes a new type and makes <paramref name="state" /> hold it, starting as its first choice, as one change.</summary>
+        void RetypeToNew(State state)
+        {
+            var texts = _editor.Texts;
+            var type = TypeEditing.New(texts, _system.Types.Count, _system.TakesInAnyCase);
+            var start = StateValueQuestion.Starts(texts, _system, type.Name, type)[0];
+            _editor.Do(_system, new WithNewType(_system, type, new ChangeStart(_system, state, start.Value, start.Type)));
         }
 
         void AddType()

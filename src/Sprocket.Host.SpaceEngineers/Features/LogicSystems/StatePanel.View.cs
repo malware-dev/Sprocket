@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         ReorderList _types;
         HStack _addTypes;
         Button _addType;
-        Label _statesHeading;
+        RichText _statesHeading;
         ReorderList _states;
         HStack _addStates;
         Button _addState;
@@ -28,14 +28,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 Children =
                 {
-                    new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _typesHeading),
+                    new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _statesHeading),
                     new VStack
                     {
                         Base = { Spacing = Gaps.Items },
                         Children =
                         {
-                            new ReorderList { Base = { Spacing = Gaps.Items } }.As(out _types),
-                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes)
+                            new ReorderList { Base = { Spacing = Gaps.Items } }.As(out _states),
+                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _addState) } }.As(out _addStates)
                         }
                     }
                 }
@@ -44,14 +44,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 Children =
                 {
-                    new Label { Style = Styles.H2 }.As(out _statesHeading),
+                    new RichText { Style = Styles.H2Term, Align = Align.Left }.As(out _typesHeading),
                     new VStack
                     {
                         Base = { Spacing = Gaps.Items },
                         Children =
                         {
-                            new ReorderList { Base = { Spacing = Gaps.Items } }.As(out _states),
-                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _addState) } }.As(out _addStates)
+                            new ReorderList { Base = { Spacing = Gaps.Items } }.As(out _types),
+                            new HStack { Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes)
                         }
                     }
                 }

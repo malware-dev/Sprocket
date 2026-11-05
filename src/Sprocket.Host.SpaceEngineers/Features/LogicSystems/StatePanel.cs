@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public Button AddType => _addType;
 
         /// <summary>The heading over the states.</summary>
-        public Label StatesHeading => _statesHeading;
+        public RichText StatesHeading => _statesHeading;
 
         /// <summary>The states, one row each, in order.</summary>
         public ReorderList StateList => _states;

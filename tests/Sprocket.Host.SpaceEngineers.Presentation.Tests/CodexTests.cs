@@ -249,9 +249,9 @@ public class CodexTests
 
     /// <summary>A heading holding a term is in capitals with the term alone a link, wherever in the heading its slot stands.</summary>
     [Theory]
-    [InlineData("On your {constructs}", "ON YOUR [CONSTRUCTS](Term.Construct)")]
-    [InlineData("{constructs} of yours", "[CONSTRUCTS](Term.Construct) OF YOURS")]
-    [InlineData("All {constructs} here", "ALL [CONSTRUCTS](Term.Construct) HERE")]
+    [InlineData("On your {constructs}", "ON YOUR [CONSTRUCTS](Term.Construct class=term)")]
+    [InlineData("{constructs} of yours", "[CONSTRUCTS](Term.Construct class=term) OF YOURS")]
+    [InlineData("All {constructs} here", "ALL [CONSTRUCTS](Term.Construct class=term) HERE")]
     public void AHeadingLinksOnlyItsTerm(string template, string markdown)
     {
         Assert.Equal(markdown, CodexPages.Within(template, "constructs", "constructs", CodexPages.Construct));

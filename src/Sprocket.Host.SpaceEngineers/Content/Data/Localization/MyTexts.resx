@@ -289,7 +289,7 @@
     <comment>The name of the tab on a logic system's screen for what the logic system keeps between runs.</comment>
   </data>
   <data name="Sprocket.System.NoState" xml:space="preserve">
-    <value>No types or states yet.</value>
+    <value>No state types or states yet.</value>
     <comment>Shown on the State tab of a logic system's screen while the logic system has no types and no states and cannot be changed.</comment>
   </data>
   <data name="Sprocket.System.NoPanel" xml:space="preserve">
@@ -625,11 +625,11 @@
     <comment>Choice at the end of the column of states in the picker that sets, tests or watches one of the logic system's states: the step or trigger uses a new state made here. Also the heading over the new state's name and starting value, shown in capitals.</comment>
   </data>
   <data name="Sprocket.Pick.NewType" xml:space="preserve">
-    <value>A new type</value>
+    <value>A new state type</value>
     <comment>The last choice in the list of values a new state starts at, after a plus sign meaning add, in the selector that sets, tests or watches one of the logic system's states: it makes a new type for the state, shown under the list as the State tab shows a type.</comment>
   </data>
   <data name="Sprocket.Pick.TypeNameTaken" xml:space="preserve">
-    <value>Give the type a name that no slot, type or state of this logic system has.</value>
+    <value>Give the state type a name that no slot, state type or state of this logic system has.</value>
     <comment>Said over a new state's fields in the selector that sets, tests or watches one of the logic system's states, while the name of the type made for it is empty or already taken.</comment>
   </data>
   <data name="Sprocket.Pick.StateSetTo" xml:space="preserve">
@@ -653,11 +653,11 @@
     <comment>Heading, shown in capitals, over the value a when trigger waits for one of the logic system's states to come to hold, in the picker that watches one.</comment>
   </data>
   <data name="Sprocket.Pick.TypeName" xml:space="preserve">
-    <value>type name</value>
+    <value>state type name</value>
     <comment>Label before the name of a new type being made for a new state, in the picker that sets, tests or watches one of the logic system's states.</comment>
   </data>
   <data name="Sprocket.Pick.StateType" xml:space="preserve">
-    <value>type</value>
+    <value>state type</value>
     <comment>Label before the type a new state holds, in the picker that sets, tests or watches one of the logic system's states: on or off, one of the logic system's types, or a new type.</comment>
   </data>
   <data name="Sprocket.Pick.ChoiceOfType" xml:space="preserve">
@@ -665,7 +665,7 @@
     <comment>A value a new state can start at, where another value is spelled the same: the choice with the type it belongs to. {choice} is the choice, {type} the type's name.</comment>
   </data>
   <data name="Sprocket.Pick.StateNameTaken" xml:space="preserve">
-    <value>Give the state a name that no slot, type or state of this logic system has.</value>
+    <value>Give the state a name that no slot, state type or state of this logic system has.</value>
     <comment>Said over a new state's name in the picker that sets, tests or watches one of the logic system's states, while the name is empty or already taken.</comment>
   </data>
   <data name="Sprocket.State.Name" xml:space="preserve">
@@ -681,7 +681,7 @@
     <comment>What a state that holds a flag holds, said under its name where states are listed.</comment>
   </data>
   <data name="Sprocket.State.Types" xml:space="preserve">
-    <value>Types</value>
+    <value>State types</value>
     <comment>Heading over the types on a logic system's State tab: each a named set of choices a state can hold. Shown in capitals.</comment>
   </data>
   <data name="Sprocket.State.States" xml:space="preserve">
@@ -689,7 +689,7 @@
     <comment>Heading over the states on a logic system's State tab: each a value every installation of the logic system keeps between runs. Shown in capitals.</comment>
   </data>
   <data name="Sprocket.State.TypeAdd" xml:space="preserve">
-    <value>type</value>
+    <value>state type</value>
     <comment>Button under the types on a logic system's State tab, after a plus sign meaning add, that adds a type.</comment>
   </data>
   <data name="Sprocket.State.ChoiceAdd" xml:space="preserve">
@@ -701,7 +701,7 @@
     <comment>Button under the states on a logic system's State tab, after a plus sign meaning add, that adds a state.</comment>
   </data>
   <data name="Sprocket.State.TypeNumbered" xml:space="preserve">
-    <value>type {number}</value>
+    <value>state type {number}</value>
     <comment>The name a new type is given on a logic system's State tab, numbered on from how many types there are. {number} is that number.</comment>
   </data>
   <data name="Sprocket.State.ChoiceNumbered" xml:space="preserve">
@@ -3154,19 +3154,19 @@ A backslash before a mark shows the mark as it is typed.
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a category of slots on the logic system's Installation panel tab, which leaves its slots under no category. {thing} is the category's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.AddType" xml:space="preserve">
-    <value>Added the type &quot;{thing}&quot;</value>
+    <value>Added the state type &quot;{thing}&quot;</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a type, a named set of choices, to the logic system. {thing} is the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.RenameType" xml:space="preserve">
-    <value>Renamed the type &quot;{was}&quot; to &quot;{now}&quot;</value>
+    <value>Renamed the state type &quot;{was}&quot; to &quot;{now}&quot;</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming one of the logic system's types. {was} is the type's name before, {now} after. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.RemoveType" xml:space="preserve">
-    <value>Removed the type &quot;{thing}&quot;</value>
+    <value>Removed the state type &quot;{thing}&quot;</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing one of the logic system's types. {thing} is the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.MoveType" xml:space="preserve">
-    <value>Moved the type &quot;{thing}&quot;</value>
+    <value>Moved the state type &quot;{thing}&quot;</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a type to another place on the logic system's State tab. {thing} is the type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.AddChoice" xml:space="preserve">

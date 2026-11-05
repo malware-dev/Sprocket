@@ -72,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (!shown)
                 return;
 
-            heading.Markdown = CodexPages.Link(title.ToUpperInvariant(), term);
+            heading.Markdown = CodexPages.Term(title.ToUpperInvariant(), term);
             var joined = new StringBuilder();
             for (var i = 0; i < names.Count; i++)
             {
