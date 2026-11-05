@@ -63,9 +63,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
-            system.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.LastSequence, ScriptAttributes.Categories);
+            system.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.LastSequence, ScriptAttributes.Categories, ScriptAttributes.ListedOn);
             system.IsBlueprint = blueprint;
             LastSequence(statement, system, trouble);
+            ListedOn(statement, system, trouble);
 
             // The header's clauses, each on a line of its own, in either order and each at most once.
             var at = first + 3;
@@ -141,6 +142,21 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// is never handed out again.
         /// </summary>
         /// <remarks>Whichever is higher wins, this or the highest sequence in the block.</remarks>
+        static void ListedOn(Statement statement, AutomationSystem system, ScriptTrouble trouble)
+        {
+            ScriptAttribute attribute;
+            if (!ScriptAttributes.Find(statement, ScriptAttributes.ListedOn, out attribute))
+                return;
+
+            if (attribute.Value.Form != ValueForm.Text)
+            {
+                trouble.Say(statement, $"expected text for the attribute {ScriptAttributes.ListedOn}.");
+                return;
+            }
+
+            system.ListedOn = attribute.Value.Word;
+        }
+
         static void LastSequence(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             ScriptAttribute attribute;

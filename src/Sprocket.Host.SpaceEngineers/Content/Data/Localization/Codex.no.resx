@@ -53,16 +53,22 @@
     <value>Et **valg** er en innstilling en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
-    <value>En **oppgave** er én operasjon: å kjøre eller stoppe en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term), en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker, eller å sette en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>
+    <value>En **oppgave** er én operasjon: å kjøre eller stoppe en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term), en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker, eller å [sette](Term.Set class=term) en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>
   </data>
   <data name="Sprocket.Term.Value" xml:space="preserve">
     <value>En ![](mark:value)&amp;nbsp;**blokkverdi** er en egenskap ved en blokk, for eksempel fargen på et lys, og [steg](Term.Step class=term) kan sette eller sjekke den.</value>
   </data>
   <data name="Sprocket.Term.Awaitable" xml:space="preserve">
-    <value>En ![](mark:awaited)&amp;nbsp;**avventbar handling** er en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) som fortsetter å virke i flere [tikk](Term.Tick class=term), som en dør som lukkes, og som en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) kan vente på. De fleste handlinger er ferdige med en gang, og av dem som fortsetter å virke, er det bare de avventbare det kan ventes på.</value>
+    <value>En ![](mark:awaited)&amp;nbsp;**avventbar handling** er en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) som fortsetter å virke i flere [tikk](Term.Tick class=term), som en dør som lukkes, og som en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) kan [vente på](Term.Await class=term). De fleste handlinger er ferdige med en gang, og av dem som fortsetter å virke, er det bare de avventbare det kan ventes på.</value>
   </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
     <value>En **forsinkelse** er et [steg](Term.Step class=term) som stanser [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) sin en fastsatt tid, i sekunder eller [tikk](Term.Tick class=term), for eksempel for å gi en lyd tid til å spille ferdig.</value>
+  </data>
+  <data name="Sprocket.Term.Set" xml:space="preserve">
+    <value>Å **sette** er et [steg](Term.Step class=term) som gir en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term) hos noen blokker en ny verdi, for eksempel å slå på strømmen til et lys. Det er en [oppgave](Term.Task class=term).</value>
+  </data>
+  <data name="Sprocket.Term.Await" xml:space="preserve">
+    <value>Et **avvent**, som står som `wait for pending tasks`, er et [steg](Term.Step class=term) som holder [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) tilbake til de [![](mark:awaited)&amp;nbsp;avventbare handlingene](Term.Awaitable class=term) over er ferdige, som en dør som lukkes.</value>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
     <value>Et **hvis**, også kjent som en *betinget setning*, er et [steg](Term.Step class=term) som sjekker blokker, eller en av [![](mark:state)&amp;nbsp;tilstandene](Term.LogicSystemStates class=term) til [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), og kjører stegene under seg bare når [betingelsen](Term.Condition class=term) er oppfylt.</value>
@@ -413,8 +419,11 @@
   <data name="Sprocket.Pick.SlotMatched" xml:space="preserve">
     <value>Dette bruker [plasser](Term.Slot class=term) [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) har fra før. Gi dem nye navn på fanen `Installasjonspanel`.</value>
   </data>
+  <data name="Sprocket.Pick.SlotMatchedOne" xml:space="preserve">
+    <value>Dette bruker en [plass](Term.Slot class=term) [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) har fra før. Trykk på navnet for å gi den nytt navn overalt i logikksystemet.</value>
+  </data>
   <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
-    <value>Blokkene som er valgt, erstatter blokkene i denne [plassen](Term.Slot class=term) i [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) som vises. Navnet blir det samme.</value>
+    <value>Blokkene som er valgt, erstatter blokkene i denne [plassen](Term.Slot class=term) i [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) som vises. Trykk på navnet for å gi plassen nytt navn overalt i [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term).</value>
   </data>
   <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
     <value>Blokkene som er valgt, lager en ny [plass](Term.Slot class=term) med dette navnet. Trykk på navnet for å endre det.</value>

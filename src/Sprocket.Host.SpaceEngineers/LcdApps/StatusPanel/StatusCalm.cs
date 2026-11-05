@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public bool Show(IGraphics graphics, StatusLook look, ConstructStatus status, float high, float wide)
         {
             var size = look.Size;
-            var any = status.Systems > 0;
+            var any = status.SystemsOn(look.ViewedFrom) > 0;
 
             _check.Style = size.Check;
             _check.Base.Tint = look.Ink;
@@ -41,9 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
             _count.Style = size.Label;
             _count.Base.Color = look.Quiet;
-            _count.Text = status.Systems == 1
+            _count.Text = status.SystemsOn(look.ViewedFrom) == 1
                 ? look.Texts.PanelSystemsOne
-                : Template.Fill(look.Texts.PanelSystems, "count", status.Systems.ToString(CultureInfo.InvariantCulture));
+                : Template.Fill(look.Texts.PanelSystems, "count", status.SystemsOn(look.ViewedFrom).ToString(CultureInfo.InvariantCulture));
             _count.IsVisible = any;
 
             _fix.Style = size.Label;

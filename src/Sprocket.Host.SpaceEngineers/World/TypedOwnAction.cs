@@ -12,7 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>An action that reads its options with <paramref name="options" />, acts with <paramref name="does" />, and is done when <paramref name="done" /> says so or <paramref name="until" /> holds.</summary>
         public TypedOwnAction(Func<IList<Literal>, TOptions> options, Action<T, TOptions, ReaderMemory> does, Reading until,
             Func<T, TOptions, ReaderMemory, bool> done, Func<T, TOptions, ReaderMemory, BlockTrouble> trouble, Action<T> stop,
-            Func<T, TOptions, int> expected)
+            Func<T, TOptions, int> expected,
+            Func<TOptions, bool> forced = null)
         {
             _options = options;
             _until = until;
@@ -21,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Troubled = trouble;
             Stops = stop;
             Takes = expected;
+            Forced = forced;
         }
 
         /// <summary>What the action does to a block.</summary>
@@ -34,6 +36,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>What stops the action on a block part way, or null where stopping does nothing.</summary>
         public Action<T> Stops { get; private set; }
+
+        /// <summary>Whether the action is forced by its options, or null where it never is.</summary>
+        public Func<TOptions, bool> Forced { get; private set; }
 
         /// <summary>How many ticks the action is expected to take on a block, or null where it cannot say.</summary>
         public Func<T, TOptions, int> Takes { get; private set; }

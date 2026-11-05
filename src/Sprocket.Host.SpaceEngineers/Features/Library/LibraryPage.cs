@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
@@ -83,6 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _search.Edited += Narrow;
             _hereSearch.Hint = Editor.Texts.PickSearch;
             _hereSearch.Edited += Narrow;
+            Editor.Sharing?.Look();
             List();
         }
 
@@ -101,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var systems = Editor.Program.Systems;
             for (var i = 0; i < systems.Count; i++)
             {
-                if (!systems[i].IsBlueprint)
+                if (!systems[i].IsBlueprint || !Editor.Lists(systems[i]))
                     continue;
 
                 here++;
@@ -115,6 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Line(texts.LibraryNoneHere, Styles.InnerEmpty, held);
 
             ListKept(texts);
+            ListShared(texts);
             ListBackups(texts);
 
             LibraryListing again = null;
@@ -257,6 +260,51 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             if (_volumes.Count == 0)
                 Line(texts.LibraryNoneSaved, Styles.InnerEmpty, kept);
+        }
+
+        /// <summary>Lists the blueprints other players share with this one, and the players this one has blocked.</summary>
+        void ListShared(Texts texts)
+        {
+            var board = Editor.Sharing;
+            if (board == null)
+                return;
+
+            var shared = Part(new Label { Style = Styles.H2, Text = texts.LibrarySharedHeading.ToUpperInvariant() }, Gaps.Items);
+            foreach (var line in board.Reaching)
+            {
+                var entry = new LibraryListing { Section = LibrarySection.Shared, Share = line };
+                entry.Trouble = ProgramReader.Lone(line.Blueprint, Editor.World.Values, out entry.Read);
+                if (entry.Read != null)
+                    entry.Identity = entry.Read.Identity;
+
+                var row = new StatusRow
+                {
+                    Mark = Symbols.Blueprint,
+                    Summary = line.Name,
+                    Depth = 1,
+                    Status = Template.Fill(line.IsNew ? texts.LibrarySharedNew : texts.LibrarySharedBy, "name", line.SharerName)
+                };
+
+                Add(entry, row, shared);
+            }
+
+            if (board.Reaching.Count == 0)
+                Line(texts.LibraryNoneShared, Styles.InnerEmpty, shared);
+
+            foreach (var player in board.Known)
+            {
+                if (!player.IsBlocked)
+                    continue;
+
+                var identity = player.Identity;
+                shared.Children.Add(new Button
+                {
+                    Style = Styles.Button,
+                    Text = Template.Fill(texts.LibraryUnblock, "name", player.Name),
+                    Align = Align.Left,
+                    Command = Editor.Act(CommandKind.Expand, () => board.Unblock(identity))
+                });
+            }
         }
 
         /// <summary>Puts <paramref name="row" /> in the list for <paramref name="entry" />, pressed to choose it.</summary>

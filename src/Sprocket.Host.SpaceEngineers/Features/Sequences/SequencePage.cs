@@ -487,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var fault = SequenceSummary.Fault(Editor.Runner.Get(_sequence, through));
 
             var said = fault.Exists ? SequenceText.Problem(Editor.Texts, fault, _sequence) : "";
-            var level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
+            var level = SequenceText.Level(fault);
 
             var at = -1;
             for (var i = 0; i < _keys.Count; i++)
@@ -668,6 +668,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     break;
                 case StepKind.Wait:
                     page = CodexPages.Delay;
+                    break;
+                case StepKind.Set:
+                    page = CodexPages.Set;
+                    break;
+                case StepKind.Await:
+                    page = CodexPages.Await;
                     break;
                 case StepKind.Run:
                 case StepKind.Stop:

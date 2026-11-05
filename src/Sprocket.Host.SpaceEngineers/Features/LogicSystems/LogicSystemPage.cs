@@ -278,7 +278,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     row.Problem = own || IsStarting(fault) && Concerns(_triggers[i], fault)
                         ? SequenceText.Problem(texts, fault, _runs[i])
                         : "";
-                    row.Level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
+                    row.Level = SequenceText.Level(fault);
 
                     if (Editor.Starts.Copied(_triggers[i]))
                     {
@@ -409,6 +409,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _addTriggers.IsVisible = editable;
             _addSequence.IsVisible = editable;
+            _keepHere.IsVisible = editable && Editor.OpenedFrom != 0 && Editor.DeveloperMode;
+            if (_keepHere.IsVisible)
+            {
+                var kept = _system.ListedOn.Length > 0;
+                _keepHere.Text = kept ? Editor.Texts.SystemsListEverywhere : Editor.Texts.SystemsKeepHere;
+                _keepHere.Tip = CodexTip.For(_keepHere.Tip, Editor.Texts.SystemsKeepHereAbout);
+                _keepHere.Command = Changes(CommandKind.Expand, () => Editor.Do(_system, new ListSystemOn(_system.ListedOn,
+                    kept ? "" : Editor.Program.Declare(Editor.World, Editor.World.FindEntity(Editor.OpenedFrom)).Name)));
+            }
 
             _locked.IsVisible = !editable;
             _lockedText.Text = LockedText;
@@ -528,7 +537,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var starting = IsStarting(fault);
 
             row.Problem = starting ? "" : SequenceText.Problem(texts, fault, sequence);
-            row.Level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
+            row.Level = SequenceText.Level(fault);
             row.Problems = !starting && fault.Exists && !fault.IsWarning ? 1 : 0;
         }
 

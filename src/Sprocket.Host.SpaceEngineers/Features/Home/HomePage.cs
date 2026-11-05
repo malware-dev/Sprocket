@@ -357,7 +357,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _systems.Clear();
             var systems = Editor.Program.Systems;
             for (var i = 0; i < systems.Count; i++)
-                _systems.Add(systems[i]);
+            {
+                if (Editor.Lists(systems[i]))
+                    _systems.Add(systems[i]);
+            }
         }
     }
 }

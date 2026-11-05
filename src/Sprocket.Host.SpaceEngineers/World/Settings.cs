@@ -57,6 +57,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether every run writes what it does to the game's log, for finding out why one went wrong; off unless somebody asked for it.</summary>
         public bool DebugLog => World.DebugLog ?? DefaultDebugLog;
 
+        /// <summary>How many blueprints each player may share in this world; none closes sharing.</summary>
+        public int ShareLimit => World.ShareLimit ?? DefaultShareLimit;
+
         /// <summary>Whether developer mode is on in a world that leaves it: what every world says, or off.</summary>
         public bool DefaultDeveloperMode => Global.DeveloperMode ?? false;
 
@@ -65,6 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The fastest update of a world that leaves it: what every world says, or every tick.</summary>
         public int DefaultFastestUpdate => Global.FastestUpdate ?? 1;
+
+        /// <summary>How many blueprints each player may share in a world that leaves it, a hundred where every world's level leaves it too.</summary>
+        public int DefaultShareLimit => Global.ShareLimit ?? 100;
 
         /// <summary>These settings with every world saying what <paramref name="global" /> says.</summary>
         public Settings WithGlobal(SettingsLayer global)

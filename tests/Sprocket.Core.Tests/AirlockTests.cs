@@ -228,6 +228,113 @@ public class AirlockTests
             SequenceText.Problem(new Texts(), fault, a.LetMeOut));
     }
 
+    /// <summary>A forced door reversed by something else is told again, and the cycle goes on when it arrives.</summary>
+    [Fact]
+    public void AForcedDoorOpenedWhileItClosesIsToldAgain()
+    {
+        var a = Build();
+        Force(a);
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        a.Tick(5);
+        Assert.Equal(DoorStatus.Closing, a.Inner.Status);
+
+        a.Inner.Perform("Open_On", new List<Literal>());
+        a.Tick(15);
+        Assert.Equal(DoorStatus.Closing, a.Inner.Status);
+        Assert.False(SequenceSummary.Fault(a.State).Exists);
+
+        a.Tick(100);
+        Assert.Equal(DoorStatus.Closed, a.Inner.Status);
+        Assert.Contains("Airlock Vent:depressurize", a.Log);
+    }
+
+    /// <summary>A forced door goes on being held after the sequence that told it has ended, with no wait after it, and only until it arrives.</summary>
+    [Fact]
+    public void AForcedDoorIsHeldWithNoWaitAfterIt()
+    {
+        var a = Build();
+        Force(a);
+        var steps = a.LetMeOut.Steps;
+        while (steps.Count > 1)
+            steps.RemoveAt(steps.Count - 1);
+
+        a.Automation.Edited();
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        a.Tick(5);
+        Assert.False(a.State.IsRunning);
+
+        a.Inner.Perform("Open_On", new List<Literal>());
+        a.Tick(15);
+        Assert.Equal(DoorStatus.Closing, a.Inner.Status);
+
+        a.Tick(100);
+        Assert.Equal(DoorStatus.Closed, a.Inner.Status);
+        Assert.Equal(0, a.Runner.Forced.Count);
+
+        a.Inner.Perform("Open_On", new List<Literal>());
+        a.Tick(30);
+        Assert.NotEqual(DoorStatus.Closing, a.Inner.Status);
+    }
+
+    /// <summary>A forced door is left alone once the run is stopped.</summary>
+    [Fact]
+    public void AForcedDoorIsLetGoWhenTheRunStops()
+    {
+        var a = Build();
+        Force(a);
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        a.Tick(5);
+        a.State.Stop();
+        a.Tick(2);
+        a.Inner.Perform("Open_On", new List<Literal>());
+        a.Tick(30);
+
+        Assert.NotEqual(DoorStatus.Closing, a.Inner.Status);
+    }
+
+    /// <summary>A forced door switched off is let go, and stays let go when it comes back.</summary>
+    [Fact]
+    public void AForcedDoorSwitchedOffIsLetGo()
+    {
+        var a = Build();
+        Force(a);
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        a.Tick(5);
+        a.Inner.Perform("Open_On", new List<Literal>());
+        a.Inner.Enabled = false;
+        var told = a.Log.Count(line => line == "Inner Door:close");
+        a.Tick(20);
+        a.Inner.Enabled = true;
+        a.Tick(40);
+
+        Assert.Equal(told, a.Log.Count(line => line == "Inner Door:close"));
+        Assert.Equal(0, a.Runner.Forced.Count);
+    }
+
+    /// <summary>Forces every close and open the cycle's steps give.</summary>
+    static void Force(Airlock airlock)
+    {
+        foreach (var step in airlock.LetMeOut.Steps.OfType<Act>())
+        {
+            if (step.ActionId == "close" || step.ActionId == "open")
+                step.Arguments.Add(Literal.Of(true));
+        }
+
+        airlock.Automation.Edited();
+    }
+
     /// <summary>A door closed by something else while the cycle waits for it to open ends the run in the same way.</summary>
     [Fact]
     public void ADoorClosedWhileItOpensEndsTheRunAndSaysSo()

@@ -1,11 +1,16 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
+using Lumel;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Memory;
+using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Shares;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
@@ -31,7 +36,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var live = chosen.LiveIn(_editor.Program);
             var system = chosen.Section == LibrarySection.OnConstruct ? live : chosen.Read;
 
-            var trouble = refusal.Length > 0 ? refusal : system == null ? chosen.Trouble : "";
+            ShowSharing(chosen, system);
+            var refused = refusal.Length > 0 ? refusal : Refused(texts);
+            var trouble = refused.Length > 0 ? refused : system == null ? chosen.Trouble : "";
             _trouble.Text = trouble;
             _trouble.IsVisible = trouble.Length > 0;
 
@@ -62,6 +69,82 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 _names.Add(SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, live, live.Instances[i]));
 
             Say(_secondSection, _secondHeading, _second, texts.LibraryInstallationsHeading, CodexPages.Installation, _names);
+        }
+
+        /// <summary>Offers what can be done about sharing <paramref name="chosen" />, holding <paramref name="system" />.</summary>
+        void ShowSharing(LibraryListing chosen, AutomationSystem system)
+        {
+            var texts = _editor.Texts;
+            var board = _editor.Sharing;
+            var volume = board != null && chosen.Section == LibrarySection.Kept ? _editor.Shelf?.Find(chosen.Identity) : null;
+            var mine = volume == null ? null : board.MineOf(volume.Identity);
+            var line = chosen.Share;
+
+            var shares = volume != null && system != null && !board.IsBarred && board.Limit > 0;
+            _share.IsVisible = shares;
+            if (shares)
+            {
+                _share.Text = mine == null ? texts.LibraryShare : texts.LibraryShareChange;
+                _share.Command = _editor.Act(CommandKind.Expand, () => _editor.Windows?.Open(new ShareDialog(_editor, volume.Name, volume.Text, mine)));
+            }
+
+            _withdraw.IsVisible = mine != null;
+            if (mine != null)
+            {
+                _withdraw.Text = texts.LibraryShareWithdraw;
+                _withdraw.Command = _editor.Act(CommandKind.Expand, () => board.Withdraw(mine.Sharer, volume.Identity));
+            }
+
+            _reach.IsVisible = mine != null;
+            if (mine != null)
+                _reach.Text = Reach(texts, mine);
+
+            _keep.IsVisible = line != null && _editor.Shelf != null && chosen.Read != null;
+            _block.IsVisible = line != null;
+            if (line != null)
+            {
+                _keep.Text = texts.LibraryKeepCopy;
+                _keep.Tip = CodexTip.For(null, Template.Fill(texts.LibraryKeepCopyAbout, "sharer", line.SharerName));
+                _keep.Command = _editor.Act(CommandKind.Shelve, () => _editor.Holdings.KeepCopy(line));
+                _block.Text = Template.Fill(texts.LibraryBlock, "name", line.SharerName);
+                _block.Tip = CodexTip.For(null, Template.Fill(texts.LibraryBlockAbout, "name", line.SharerName));
+                _block.Command = _editor.Act(CommandKind.Expand, () => board.Block(line.Sharer));
+            }
+
+            _shares.IsVisible = _share.IsVisible || _withdraw.IsVisible || _keep.IsVisible;
+        }
+
+        /// <summary>Why the server last turned down a blueprint offered for sharing, or empty.</summary>
+        string Refused(Texts texts)
+        {
+            switch (_editor.Sharing?.Answer)
+            {
+                case ShareAnswer.Closed:
+                    return texts.LibraryShareClosed;
+                case ShareAnswer.Barred:
+                    return texts.LibraryShareBarred;
+                case ShareAnswer.AtLimit:
+                    return Template.Fill(texts.LibraryShareAtLimit, "count", _editor.Sharing.Limit.ToString(CultureInfo.InvariantCulture));
+                case ShareAnswer.Unreadable:
+                    return texts.LibraryShareUnreadable;
+                default:
+                    return "";
+            }
+        }
+
+        /// <summary>Who <paramref name="share" /> is for, as a line says it.</summary>
+        static string Reach(Texts texts, ShareLine share)
+        {
+            switch (share.Reach)
+            {
+                case ShareReach.Faction:
+                    return texts.LibrarySharedFaction;
+                case ShareReach.Players:
+                    var count = share.Players.Split(' ').Length;
+                    return count == 1 ? texts.LibrarySharedPlayer : Template.Fill(texts.LibrarySharedPlayers, "count", count.ToString(CultureInfo.InvariantCulture));
+                default:
+                    return texts.LibrarySharedEveryone;
+            }
         }
 
         /// <summary>Shows <paramref name="names" /> under <paramref name="title" />, the term whose codex page is <paramref name="term" />, or neither where there are none.</summary>

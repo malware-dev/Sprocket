@@ -69,7 +69,7 @@
     <comment>Codex page on "Option", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
-    <value>A **task** is one operation: running or stopping a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term), an [![](mark:action)&amp;nbsp;action](Term.Action class=term) on blocks, or setting a [![](mark:value)&amp;nbsp;block value](Term.Value class=term).</value>
+    <value>A **task** is one operation: running or stopping a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term), an [![](mark:action)&amp;nbsp;action](Term.Action class=term) on blocks, or [setting](Term.Set class=term) a [![](mark:value)&amp;nbsp;block value](Term.Value class=term).</value>
     <comment>Codex page on "Task", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Value" xml:space="preserve">
@@ -77,12 +77,20 @@
     <comment>Codex page on "Value", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Awaitable" xml:space="preserve">
-    <value>An ![](mark:awaited)&amp;nbsp;**awaitable** is an [![](mark:action)&amp;nbsp;action](Term.Action class=term) that keeps working for several [ticks](Term.Tick class=term), like a door closing, and that a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) can wait for. Most actions are done at once, and of those that keep working, only the awaitables can be waited for.</value>
+    <value>An ![](mark:awaited)&amp;nbsp;**awaitable** is an [![](mark:action)&amp;nbsp;action](Term.Action class=term) that keeps working for several [ticks](Term.Tick class=term), like a door closing, and that a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) can [wait for](Term.Await class=term). Most actions are done at once, and of those that keep working, only the awaitables can be waited for.</value>
     <comment>Codex page on "Awaitable", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
     <value>A **delay** is a [step](Term.Step class=term) that pauses its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) for a set time, in seconds or [ticks](Term.Tick class=term), like giving a sound time to play to its end.</value>
     <comment>Codex page on "Delay", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
+  </data>
+  <data name="Sprocket.Term.Set" xml:space="preserve">
+    <value>**Set** is a [step](Term.Step class=term) that gives a [![](mark:value)&amp;nbsp;block value](Term.Value class=term) of some blocks a new value, like turning a light's power on. It is a [task](Term.Task class=term).</value>
+    <comment>Codex page on "Set", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
+  </data>
+  <data name="Sprocket.Term.Await" xml:space="preserve">
+    <value>A **wait for pending tasks** is a [step](Term.Step class=term) that holds its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) until the [![](mark:awaited)&amp;nbsp;awaitables](Term.Awaitable class=term) above it have finished, like a door closing.</value>
+    <comment>Codex page on "Await", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
     <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, or one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
@@ -548,8 +556,12 @@
     <value>This uses [slots](Term.Slot class=term) the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) has already. Rename them on its `Installation panel` tab.</value>
     <comment>Tooltip on the picker's heading while it shows, in italics, the names of slots the logic system already has: either the blocks picked fill them exactly, or they were picked by name with the Existing slot source. These names cannot be changed here.</comment>
   </data>
+  <data name="Sprocket.Pick.SlotMatchedOne" xml:space="preserve">
+    <value>This uses a [slot](Term.Slot class=term) the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) already has. Press its name to rename it everywhere in the logic system.</value>
+    <comment>Tooltip on the picker heading while it shows, in italics, the name of the one slot the logic system already has that the blocks picked fill exactly, or that was picked by name with the Existing slot source. Pressing the name renames the slot everywhere.</comment>
+  </data>
   <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
-    <value>The blocks selected replace this [slot](Term.Slot class=term)'s blocks in the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) shown. Its name stays the same.</value>
+    <value>The blocks selected replace this [slot](Term.Slot class=term)'s blocks in the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) shown. Press its name to rename the slot everywhere in the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term).</value>
     <comment>Tooltip on the picker's heading while it shows the name of the slot a step or a trigger names, which the blocks picked will change because no slot holds them already. Where other steps or triggers use the slot too, Done asks whether to change it for all of them.</comment>
   </data>
   <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">

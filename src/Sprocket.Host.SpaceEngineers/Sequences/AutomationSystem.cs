@@ -132,6 +132,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </summary>
         public string Annotation { get; set; }
 
+        /// <summary>The name of the block it lists on alone, or empty where it lists on every block.</summary>
+        /// <remarks>Decides only what the editor lists; the system runs as usual wherever it is listed.</remarks>
+        public string ListedOn { get; set; } = "";
+
         /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
         public KeptAttributes Attributes { get; set; }
 

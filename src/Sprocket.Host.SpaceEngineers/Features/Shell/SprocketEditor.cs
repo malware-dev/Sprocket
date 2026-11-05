@@ -8,6 +8,7 @@ using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Shares;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Ownership;
@@ -173,6 +174,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Whether the admin's button belongs on the screen now: the player may change the world's settings.</summary>
         public bool MayAdminister => Administers != null && WorldSettings != null && ChangeSettings != null && Administers();
+
+        /// <summary>What this player knows of blueprints shared in this world, or null in single player, where nobody is there to share with.</summary>
+        public ShareBoard Sharing { get; set; }
+
+        /// <summary>The id of the block the editor was opened from, or 0 where nothing says.</summary>
+        public long OpenedFrom { get; set; }
+
+        /// <summary>
+        /// Whether <paramref name="system" /> is listed from the block the editor was opened on: always, unless it is kept to
+        /// another block that is surely there and it is working.
+        /// </summary>
+        public bool Lists(AutomationSystem system)
+        {
+            var kept = SystemSummary.KeptTo(Runner, system);
+            return kept == 0 || OpenedFrom == 0 || kept == OpenedFrom;
+        }
 
         /// <summary>Where a change of the unit the player gives lengths of time in is told on, or null where <see cref="Viewer" /> is the world's own.</summary>
         /// <remarks>Set on a copy a client is editing, which tells the server.</remarks>

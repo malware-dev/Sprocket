@@ -13,6 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         const string Debug = "debugLog";
 
+        const string Shares = "shareLimit";
+
         // A key settings files may still hold, read by no build: it is taken out wherever a level is written.
         const string Tips = "tipKeeping";
 
@@ -22,12 +24,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The fastest updates there are to choose: every tick, every ten and every hundred, the rota's own periods.</summary>
         public static readonly int[] Updates = { 1, 10, 100 };
 
+        /// <summary>The limits there are to choose on how many blueprints each player may share, nothing closing sharing.</summary>
+        public static readonly int[] ShareLimits = { 0, 10, 25, 50, 100, 250 };
+
         /// <summary>A level giving the values that are not null, and leaving the rest to the level below.</summary>
-        public SettingsLayer(bool? developerMode, int? fastestUpdate, bool? debugLog = null)
+        public SettingsLayer(bool? developerMode, int? fastestUpdate, bool? debugLog = null, int? shareLimit = null)
         {
             DeveloperMode = developerMode;
             FastestUpdate = fastestUpdate.HasValue ? Nearest(fastestUpdate.Value) : (int?)null;
             DebugLog = debugLog;
+            ShareLimit = shareLimit.HasValue ? NearestLimit(shareLimit.Value) : (int?)null;
         }
 
         /// <summary>Whether the developer tools are on, or null where this level leaves it.</summary>
@@ -39,28 +45,50 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether every run writes what it does to the game's log, or null where this level leaves it.</summary>
         public bool? DebugLog { get; }
 
+        /// <summary>How many blueprints each player may share, or null where this level leaves it.</summary>
+        public int? ShareLimit { get; }
+
         /// <summary>This level with developer mode given as <paramref name="on" />, or left where it is null.</summary>
         public SettingsLayer WithDeveloperMode(bool? on)
         {
-            return new SettingsLayer(on, FastestUpdate, DebugLog);
+            return new SettingsLayer(on, FastestUpdate, DebugLog, ShareLimit);
         }
 
         /// <summary>This level with the fastest update given as <paramref name="ticks" />, or left where it is null.</summary>
         public SettingsLayer WithFastestUpdate(int? ticks)
         {
-            return new SettingsLayer(DeveloperMode, ticks, DebugLog);
+            return new SettingsLayer(DeveloperMode, ticks, DebugLog, ShareLimit);
         }
 
         /// <summary>This level with the debug log given as <paramref name="on" />, or left where it is null.</summary>
         public SettingsLayer WithDebugLog(bool? on)
         {
-            return new SettingsLayer(DeveloperMode, FastestUpdate, on);
+            return new SettingsLayer(DeveloperMode, FastestUpdate, on, ShareLimit);
+        }
+
+        /// <summary>This level with the share limit given as <paramref name="limit" />, or left where it is null.</summary>
+        public SettingsLayer WithShareLimit(int? limit)
+        {
+            return new SettingsLayer(DeveloperMode, FastestUpdate, DebugLog, limit);
         }
 
         /// <summary>Whether this level says the same as <paramref name="other" /> about every setting.</summary>
         public bool Same(SettingsLayer other)
         {
-            return other != null && DeveloperMode == other.DeveloperMode && FastestUpdate == other.FastestUpdate && DebugLog == other.DebugLog;
+            return other != null && DeveloperMode == other.DeveloperMode && FastestUpdate == other.FastestUpdate && DebugLog == other.DebugLog && ShareLimit == other.ShareLimit;
+        }
+
+        /// <summary>The largest of the limits there are to choose that is no more than <paramref name="limit" />.</summary>
+        public static int NearestLimit(int limit)
+        {
+            var best = ShareLimits[0];
+            foreach (var one in ShareLimits)
+            {
+                if (one <= limit)
+                    best = one;
+            }
+
+            return best;
         }
 
         /// <summary>The one of 1, 10 and 100 nearest <paramref name="ticks" />, the smaller where two are as near.</summary>
@@ -100,7 +128,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             bool debug;
             bool? debugLog = ini.Get(section, Debug).TryGetBoolean(out debug) ? debug : (bool?)null;
 
-            return new SettingsLayer(developerMode, fastestUpdate, debugLog);
+            int limit;
+            int? shareLimit = ini.Get(section, Shares).TryGetInt32(out limit) ? limit : (int?)null;
+
+            return new SettingsLayer(developerMode, fastestUpdate, debugLog, shareLimit);
         }
 
         /// <summary>Writes this level into <paramref name="section" /> of <paramref name="ini" />: each value it gives, and none for each it leaves.</summary>
@@ -120,6 +151,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 ini.Set(section, Debug, DebugLog.Value);
             else
                 ini.Delete(section, Debug);
+
+            if (ShareLimit.HasValue)
+                ini.Set(section, Shares, ShareLimit.Value);
+            else
+                ini.Delete(section, Shares);
 
             ini.Delete(section, Tips);
         }

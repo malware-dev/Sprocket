@@ -73,8 +73,8 @@ public class ConstructStatusTests
         spare.Name = "Seal up";
         var shut = new Act("close");
         shut.Targets.Add(ship.Ref(2));
-        spare.Steps.Add(shut);
         spare.Steps.Add(new Await());
+        spare.Steps.Add(shut);
     }
 
     static ConstructStatus Look(Ship ship, ConstructStatus? status = null, int now = 0)
@@ -161,10 +161,27 @@ public class ConstructStatusTests
         Assert.False(status.Items[0].Blueprint);
         Assert.Equal(0, status.Items[0].Position);
         Assert.Equal(StatusLevel.Warning, status.Items[0].Level);
-        Assert.Equal(SequenceProblem.NothingStarts, status.Items[0].Fault.Problem);
+        Assert.Equal(SequenceProblem.NothingToAwait, status.Items[0].Fault.Problem);
         Assert.True(status.Items[1].Blueprint);
         Assert.Equal(2, status.Items[1].Position);
         Assert.Equal(StatusLevel.Off, status.Items[1].Level);
+    }
+
+    /// <summary>A system kept to one block counts on that block's screen alone.</summary>
+    [Fact]
+    public void AKeptSystemCountsOnlyOnItsBlock()
+    {
+        var ship = Build();
+        AutomationSystem airlock = System(ship, "Airlock", 2, 2);
+        System(ship, "Hangar", 1, 1);
+        airlock.ListedOn = ship.Ref(2);
+        ship.Tick(3);
+
+        var status = Look(ship);
+
+        Assert.Equal(1, status.Systems);
+        Assert.Equal(1, status.SystemsOn(99));
+        Assert.Equal(2, status.SystemsOn(2));
     }
 
     /// <summary>A logic system switched off because it could not work is a problem, and says why.</summary>

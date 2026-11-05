@@ -148,6 +148,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 return;
             }
 
+            if (entry.Share != null)
+            {
+                var shared = entry.Share;
+                Run(CommandKind.PutOn, () => _editor.Holdings.AskPutOn(shared.Name, () => Refusal = _editor.Holdings.PutOnShared(shared)));
+                return;
+            }
+
             var volume = _editor.Shelf?.Find(entry.Identity);
             if (volume != null)
                 Run(CommandKind.PutOn, () => _editor.Holdings.AskPutOn(volume.Name, () => Refusal = _editor.Holdings.PutOn(volume)));

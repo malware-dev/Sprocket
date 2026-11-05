@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var inset = edge + 4f;
             var half = (room.X - inset * 2f) / 2f;
             var troubled = status.Heard && status.Troubled;
-            var says = status.Systems > 0 ? look.Texts.PanelAllNormal : look.Texts.PanelNothing;
+            var says = status.SystemsOn(look.ViewedFrom) > 0 ? look.Texts.PanelAllNormal : look.Texts.PanelNothing;
 
             Base.Padding = new Thickness(inset);
             Placement = FixedSize.Size(room.X, room.Y);
@@ -53,9 +53,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _warnings.Show(look, size, status.Warnings, true, troubled);
             _check.Style = size.BannerMark;
             _check.Base.Tint = look.Ink;
-            _check.IsVisible = status.Heard && !troubled && status.Systems > 0;
+            _check.IsVisible = status.Heard && !troubled && status.SystemsOn(look.ViewedFrom) > 0;
             _says.Style = size.Banner;
-            _says.Base.Color = status.Systems > 0 ? look.Ink : look.Quiet;
+            _says.Base.Color = status.SystemsOn(look.ViewedFrom) > 0 ? look.Ink : look.Quiet;
             _says.Text = says;
             _says.IsVisible = status.Heard && !troubled && Right(graphics, look, status, false, says, size) <= half;
         }
@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 return 0f;
 
             if (!troubled)
-                return status.Systems > 0 ? size.Body + size.Between + look.Width(graphics, says, size.Body) : look.Width(graphics, says, size.Body);
+                return status.SystemsOn(look.ViewedFrom) > 0 ? size.Body + size.Between + look.Width(graphics, says, size.Body) : look.Width(graphics, says, size.Body);
 
             var wide = 0f;
             if (status.Problems > 0)

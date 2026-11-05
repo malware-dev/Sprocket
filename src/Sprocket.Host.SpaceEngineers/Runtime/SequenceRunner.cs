@@ -511,6 +511,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             Called();
             Finish();
+            _owner.Forced.Release(this);
         }
 
         /// <summary>
@@ -1051,6 +1052,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 // Done again, so what its blocks said of the last time is no answer for this one.
                 acted.Done = false;
 
+                _owner.Forced.Told(acted, this);
                 if (act.Form != ReachKind.Native)
                 {
                     if (acted.Order != null)

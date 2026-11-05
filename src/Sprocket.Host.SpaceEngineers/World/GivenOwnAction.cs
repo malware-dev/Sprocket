@@ -19,6 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         public override bool Acts => _doing.Does != null;
 
         /// <inheritdoc />
+        public override bool IsForced => _doing.Forced != null && _doing.Forced(_options);
+
+        /// <inheritdoc />
         public override void Do(IMyTerminalBlock block, ReaderMemory seen)
         {
             if (_doing.Does != null)
@@ -33,6 +36,17 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <inheritdoc />
         public override BlockTrouble Trouble(IMyTerminalBlock block, ReaderMemory seen)
+        {
+            return IsForced ? BlockTrouble.None : Said(block, seen);
+        }
+
+        /// <inheritdoc />
+        public override bool Strays(IMyTerminalBlock block, ReaderMemory seen)
+        {
+            return Said(block, seen).Exists;
+        }
+
+        BlockTrouble Said(IMyTerminalBlock block, ReaderMemory seen)
         {
             return _doing.Troubled?.Invoke((T)block, _options, seen) ?? BlockTrouble.None;
         }

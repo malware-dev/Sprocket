@@ -2450,4 +2450,135 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   <data name="Sprocket.Change.RemoveSlot" xml:space="preserve">
     <value>Fjernet plassen &quot;{thing}&quot;</value>
   </data>
+  <data name="Sprocket.Library.SharedHeading" xml:space="preserve">
+    <value>Delt med deg</value>
+  </data>
+  <data name="Sprocket.Library.SharedBy" xml:space="preserve">
+    <value>Delt av {name}</value>
+  </data>
+  <data name="Sprocket.Library.NoneShared" xml:space="preserve">
+    <value>Ingenting er delt med deg.</value>
+  </data>
+  <data name="Sprocket.Library.Share" xml:space="preserve">
+    <value>Del...</value>
+  </data>
+  <data name="Sprocket.Library.ShareChange" xml:space="preserve">
+    <value>Endre deling...</value>
+  </data>
+  <data name="Sprocket.Library.ShareWithdraw" xml:space="preserve">
+    <value>Slutt å dele</value>
+  </data>
+  <data name="Sprocket.Library.SharedEveryone" xml:space="preserve">
+    <value>Delt med alle</value>
+  </data>
+  <data name="Sprocket.Library.SharedFaction" xml:space="preserve">
+    <value>Delt med fraksjonen din</value>
+  </data>
+  <data name="Sprocket.Library.SharedPlayers" xml:space="preserve">
+    <value>Delt med {count} spillere</value>
+  </data>
+  <data name="Sprocket.Library.KeepCopy" xml:space="preserve">
+    <value>Behold en kopi</value>
+  </data>
+  <data name="Sprocket.Library.KeepCopyAbout" xml:space="preserve">
+    <value>Legger din egen kopi i biblioteket ditt, til bruk i alle verdener.
+
+Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
+  </data>
+  <data name="Sprocket.Library.Block" xml:space="preserve">
+    <value>Skjul {name}</value>
+  </data>
+  <data name="Sprocket.Library.BlockAbout" xml:space="preserve">
+    <value>Skjuler alt {name} deler med deg. {name} får ikke beskjed.</value>
+  </data>
+  <data name="Sprocket.Library.Unblock" xml:space="preserve">
+    <value>Vis {name}</value>
+  </data>
+  <data name="Sprocket.Library.ShareClosed" xml:space="preserve">
+    <value>Denne verdenen tillater ikke deling.</value>
+  </data>
+  <data name="Sprocket.Library.ShareBarred" xml:space="preserve">
+    <value>Du har ikke lov til å dele.</value>
+  </data>
+  <data name="Sprocket.Library.ShareAtLimit" xml:space="preserve">
+    <value>Du deler allerede {count} plantegninger, så mange som denne verdenen tillater.</value>
+  </data>
+  <data name="Sprocket.Library.ShareUnreadable" xml:space="preserve">
+    <value>Denne plantegningen kan ikke leses, eller den er for lang til å deles.</value>
+  </data>
+  <data name="Sprocket.Share.Title" xml:space="preserve">
+    <value>Del {name}</value>
+  </data>
+  <data name="Sprocket.Share.Who" xml:space="preserve">
+    <value>Hvem er den for?</value>
+  </data>
+  <data name="Sprocket.Share.Everyone" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Sprocket.Share.Faction" xml:space="preserve">
+    <value>Fraksjonen min</value>
+  </data>
+  <data name="Sprocket.Share.Players" xml:space="preserve">
+    <value>Valgte spillere</value>
+  </data>
+  <data name="Sprocket.Share.Confirm" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="Sprocket.Share.Cancel" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="Sprocket.Admin.ShareLimit" xml:space="preserve">
+    <value>Delte plantegninger per spiller</value>
+  </data>
+  <data name="Sprocket.Admin.ShareLimitAbout" xml:space="preserve">
+    <value>Hvor mange plantegninger hver spiller kan dele i denne verdenen. Med Av kan ingen dele.</value>
+  </data>
+  <data name="Sprocket.Admin.DefaultLimit" xml:space="preserve">
+    <value>Standard ({value})</value>
+  </data>
+  <data name="Sprocket.Admin.Sharing" xml:space="preserve">
+    <value>Deling</value>
+  </data>
+  <data name="Sprocket.Admin.NoShares" xml:space="preserve">
+    <value>Ingenting er delt i denne verdenen.</value>
+  </data>
+  <data name="Sprocket.Admin.ShareLine" xml:space="preserve">
+    <value>{name} av {sharer}</value>
+  </data>
+  <data name="Sprocket.Admin.Remove" xml:space="preserve">
+    <value>Fjern</value>
+  </data>
+  <data name="Sprocket.Admin.Bar" xml:space="preserve">
+    <value>Stopp deling fra {name}</value>
+  </data>
+  <data name="Sprocket.Admin.Unbar" xml:space="preserve">
+    <value>La {name} dele</value>
+  </data>
+  <data name="Sprocket.Share.Arrived" xml:space="preserve">
+    <value>{sharer} delte logikksystem-plantegningen {name} med deg.</value>
+  </data>
+  <data name="Sprocket.Share.Updated" xml:space="preserve">
+    <value>{sharer} oppdaterte logikksystem-plantegningen {name}.</value>
+  </data>
+  <data name="Sprocket.Share.Waiting" xml:space="preserve">
+    <value>Nye eller oppdaterte logikksystem-plantegninger er delt med deg.</value>
+  </data>
+  <data name="Sprocket.Library.SharedNew" xml:space="preserve">
+    <value>Ny, delt av {name}</value>
+  </data>
+  <data name="Sprocket.Library.SharedPlayer" xml:space="preserve">
+    <value>Delt med 1 spiller</value>
+  </data>
+  <data name="Sprocket.Change.ListedOn" xml:space="preserve">
+    <value>Hold på én blokk</value>
+  </data>
+  <data name="Sprocket.Systems.KeepHere" xml:space="preserve">
+    <value>Vis bare på denne blokken</value>
+  </data>
+  <data name="Sprocket.Systems.ListEverywhere" xml:space="preserve">
+    <value>Vis på alle blokker</value>
+  </data>
+  <data name="Sprocket.Systems.KeepHereAbout" xml:space="preserve">
+    <value>Viser dette logikksystemet bare når redigereren åpnes fra denne blokken. Det kjører som vanlig, og vises overalt hvis det svikter eller blokken forsvinner.</value>
+  </data>
 </root>

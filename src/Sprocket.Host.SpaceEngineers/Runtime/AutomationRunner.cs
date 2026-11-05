@@ -53,6 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _automation = automation;
             _world = world;
             _rota = rota;
+            Forced = new ForcedActs(rota, () => FastestUpdate);
             _runs = new Runners(this, automation);
             _watches = new Pollers(this, automation);
             _states = new StateValues(automation);
@@ -100,6 +101,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// timed wait keep their own moment.
         /// </remarks>
         public int FastestUpdate { get; set; } = 1;
+
+        /// <summary>The blocks being kept at what they were told by force.</summary>
+        public ForcedActs Forced { get; }
 
         /// <summary>Where every run of this program writes what it does, or null, which is what the world's debug log being off means.</summary>
         /// <remarks>Set by whatever owns the runner, from the world's settings. Each place a run would write a line costs it one null check while this is null.</remarks>
@@ -153,6 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Takes everything this program put on the rota off it, when its Sprocket goes away.</summary>
         public void Retire()
         {
+            Forced.Retire();
             _runs.Retire();
             _watches.Retire();
         }

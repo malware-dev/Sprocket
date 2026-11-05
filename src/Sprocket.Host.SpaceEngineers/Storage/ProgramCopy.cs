@@ -78,6 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             var copy = into.Restore(system.Identity, system.Namespace, system.Name);
             copy.Annotation = system.Annotation;
+            copy.ListedOn = system.ListedOn;
             copy.Attributes = Kept(system.Attributes);
             copy.IsBlueprint = system.IsBlueprint;
             copy.Used(system.LastSequenceNumber);

@@ -25,9 +25,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // The game's ratio is nought to one; the terminal and a sentence say a percentage.
         static readonly OwnValue Ratio = OwnValue.Number<IMyDoor>(door => door.OpenRatio * 100.0);
 
-        static readonly OwnAction Opens = OwnAction.Of<IMyDoor>(door => door.OpenDoor(), Opened, Closing);
+        static readonly OwnAction Opens = OwnAction.Of<IMyDoor, DoorOrder>(DoorOrder.Read, (door, order, seen) => door.OpenDoor(), Opened,
+            trouble: (door, order, seen) => Closing(door), forced: order => order.IsForced);
 
-        static readonly OwnAction Closes = OwnAction.Of<IMyDoor>(door => door.CloseDoor(), Shut, Opening);
+        static readonly OwnAction Closes = OwnAction.Of<IMyDoor, DoorOrder>(DoorOrder.Read, (door, order, seen) => door.CloseDoor(), Shut,
+            trouble: (door, order, seen) => Opening(door), forced: order => order.IsForced);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -59,8 +61,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // between starting to open and having closed.
             kind.WithValue("how-far-open", "how far open", Ratio).Percent().RuledOutBy(Shut);
 
-            kind.WithAction("open", "open", Opens, "Open_On").LastingAnnounced()
-                .WithAction("close", "close", Closes, "Open_Off").LastingAnnounced()
+            kind.WithAction("open", "open", Opens, "Open_On").LastingAnnounced().Asking(DoorOrder.Asked())
+                .WithAction("close", "close", Closes, "Open_Off").LastingAnnounced().Asking(DoorOrder.Asked())
                 .Renaming("Open", false, "reverse")
                 .Renaming("AnyoneCanUse", true, "anyone can use")
                 .Renaming("AnyoneCanUse", false, "toggle anyone can use")

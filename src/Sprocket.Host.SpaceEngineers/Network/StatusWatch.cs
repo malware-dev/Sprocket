@@ -162,7 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (NetworkChannel.Network.IsServer || !_watched.TryGetValue(report.Construct, out watched))
                 return;
 
-            watched.Status.Hear(report.Name, report.Systems, report.Normal, report.Items);
+            watched.Status.Hear(report.Name, report.Systems, report.Normal, report.Items, report.KeptBlocks, report.KeptCounts);
             Redraw(watched);
         }
 
@@ -261,7 +261,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var status = served.Source.Status;
             watched.Taken = status.Revision;
-            watched.Status.Hear(status.Construct, status.Systems, status.Normal, status.Copy());
+            var kept = status.KeptBlocks();
+            watched.Status.Hear(status.Construct, status.Systems, status.Normal, status.Copy(), kept, status.KeptCounts(kept));
         }
 
         /// <summary>Has every panel on <paramref name="watched" /> draw what it now holds.</summary>
@@ -274,8 +275,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>A report of how <paramref name="construct" /> stands, as <paramref name="status" /> says.</summary>
         static StatusReport Report(long construct, ConstructStatus status)
         {
+            var kept = status.KeptBlocks();
             return new StatusReport
             {
+                KeptBlocks = kept,
+                KeptCounts = status.KeptCounts(kept),
                 Construct = construct,
                 Name = status.Construct,
                 Systems = status.Systems,

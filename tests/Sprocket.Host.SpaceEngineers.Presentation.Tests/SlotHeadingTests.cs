@@ -136,7 +136,7 @@ public class SlotHeadingTests
         Assert.False(editor.Screen.Heading[0].Emphasized);
     }
 
-    /// <summary>Other blocks picked for a step that is all that uses its slot name that slot, which keeps its name and is not given a new one.</summary>
+    /// <summary>Other blocks picked for a step that is all that uses its slot name that slot, which keeps its name until it is renamed there.</summary>
     [Fact]
     public void AStepsOwnSlotKeepsItsNameInTheHeading()
     {
@@ -153,7 +153,7 @@ public class SlotHeadingTests
         var heading = editor.Screen.Heading[0];
         Assert.Equal(inner, heading.Text);
         Assert.False(heading.Emphasized);
-        Assert.False(heading.CanRename);
+        Assert.True(heading.CanRename);
     }
 
     /// <summary>A slot already made is picked by its name, shows in italics, and is the slot the step names.</summary>

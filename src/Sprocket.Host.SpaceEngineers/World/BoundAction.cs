@@ -20,6 +20,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>Asked of a block a run is held waiting on, on a cadence and never on a tick.</remarks>
         public abstract BlockTrouble Trouble(IMyTerminalBlock block, ReaderMemory seen);
 
+        /// <summary>Whether this is forced: the block is kept at it until it gets there, and going the wrong way is no trouble to a run.</summary>
+        public virtual bool IsForced => false;
+
+        /// <summary>Whether <paramref name="block" />, told this by force, has been sent another way.</summary>
+        public virtual bool Strays(IMyTerminalBlock block, ReaderMemory seen)
+        {
+            return false;
+        }
+
         /// <summary>Calls off what this started on <paramref name="block" />.</summary>
         public abstract void Stop(IMyTerminalBlock block);
 

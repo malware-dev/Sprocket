@@ -1,6 +1,7 @@
 using System;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 
@@ -28,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _editor.Stamp(true);
             var twin = _editor.Backups?.Keeping(system, _editor.World.Values);
             var kept = _editor.Shelf.Keep(system);
+            _editor.Sharing?.Renew(kept.Identity, kept.Text);
             if (twin != null)
                 _editor.Backups.Forget(twin);
 
@@ -135,6 +137,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _editor.Do(new MakeSystem(made, ChangeKind.CopyBlueprint));
             _editor.Invalidate();
             return made;
+        }
+
+        /// <summary>Puts the blueprint of <paramref name="shared" /> on the construct as a logic system of its own, which stays as it is when its sharer changes theirs, answering what was wrong, or empty.</summary>
+        public string PutOnShared(ShareLine shared)
+        {
+            AutomationSystem system;
+            var trouble = ProgramReader.Lone(shared.Blueprint, _editor.World.Values, out system);
+            if (trouble.Length > 0)
+                return trouble;
+
+            system.Identity = Guid.NewGuid();
+            return PutOn(ProgramWriter.Blueprint(system), system.Identity);
+        }
+
+        /// <summary>Adds a copy of the blueprint of <paramref name="shared" /> to the player's library, with an identity of its own and its maker's name.</summary>
+        public void KeepCopy(ShareLine shared)
+        {
+            AutomationSystem system;
+            if (_editor.Shelf == null || ProgramReader.Lone(shared.Blueprint, _editor.World.Values, out system).Length > 0)
+                return;
+
+            system.Identity = Guid.NewGuid();
+            var kept = _editor.Shelf.Keep(system);
+            (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
+            _editor.Invalidate();
         }
 
         /// <summary><paramref name="name" /> with the first number from 2 that no system here and no blueprint in the library is called.</summary>

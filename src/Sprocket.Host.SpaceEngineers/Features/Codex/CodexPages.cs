@@ -43,6 +43,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The name links give the page on delays.</summary>
         public const string Delay = "Term.Delay";
 
+        /// <summary>The term page of the step that sets a block value.</summary>
+        public const string Set = "Term.Set";
+
+        /// <summary>The term page of the step that waits for pending tasks.</summary>
+        public const string Await = "Term.Await";
+
         /// <summary>The name links give the page on the steps running and stopping a sequence.</summary>
         public const string RunAndStop = "Term.RunAndStop";
 

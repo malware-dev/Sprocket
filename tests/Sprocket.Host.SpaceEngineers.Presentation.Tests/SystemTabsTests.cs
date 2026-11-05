@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class SystemTabsTests
 {
     /// <summary>A logic system with a sequence nothing starts, which is a warning, back on the logic system's screen.</summary>
-    static Screen WithAnUnstartedSequence()
+    static Screen WithAWarnedSequence()
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Airlock");
@@ -21,6 +21,8 @@ public class SystemTabsTests
         screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
+        screen.Editor.Program.Sequences[screen.Editor.Program.Sequences.Count - 1].Steps.Insert(0, new Sequences.Await());
+        screen.Editor.Program.Edited();
         screen.Editor.BackKeeping();
         return screen.Run(120);
     }
@@ -31,7 +33,7 @@ public class SystemTabsTests
     [Fact]
     public void TheScreenHasFourTabs()
     {
-        var screen = WithAnUnstartedSequence();
+        var screen = WithAWarnedSequence();
         var texts = screen.Editor.Texts;
 
         Assert.Equal(new[] { texts.SystemTriggers, texts.SystemSequences, texts.SystemState, texts.SystemInstallationPanel },
@@ -42,7 +44,7 @@ public class SystemTabsTests
     [Fact]
     public void EachTabExplainsItsTerm()
     {
-        var screen = WithAnUnstartedSequence();
+        var screen = WithAWarnedSequence();
         var codex = screen.Editor.Texts.Codex;
 
         Assert.Equal(new[] { codex.TermTrigger, codex.TermSequence, codex.TermLogicSystemStates, codex.TermInstallationPanel },
@@ -53,7 +55,7 @@ public class SystemTabsTests
     [Fact]
     public void ATabsMarkSaysWhereToLook()
     {
-        var screen = WithAnUnstartedSequence();
+        var screen = WithAWarnedSequence();
 
         var sequences = Assert.IsType<Glyph>(Tabs(screen)[1].Badge);
         Assert.True(sequences.IsVisible);
@@ -64,7 +66,7 @@ public class SystemTabsTests
     [Fact]
     public void AFlaggedTabLiesOnStripesAndTheScreenStandsByIt()
     {
-        var screen = WithAnUnstartedSequence();
+        var screen = WithAWarnedSequence();
         var tabs = Tabs(screen);
         var mark = Assert.IsType<Glyph>(tabs[1].Badge);
         var warned = mark.Tint == Palette.Notice;
@@ -81,7 +83,7 @@ public class SystemTabsTests
     [Fact]
     public void TheTabLastOpenIsOpenedAgain()
     {
-        var screen = WithAnUnstartedSequence();
+        var screen = WithAWarnedSequence();
         screen.Editor.PressTab(screen.Editor.Texts.SystemState);
         screen.Run(2);
 
@@ -102,11 +104,11 @@ public class SystemTabsTests
     [Fact]
     public void AWarningMarksItsTab()
     {
-        var screen = WithAnUnstartedSequence();
+        var screen = WithAWarnedSequence();
         var tabs = Tabs(screen);
 
         var sequences = Assert.IsType<Glyph>(tabs[1].Badge);
-        Assert.True(sequences.IsVisible, "the Sequences tab carries no mark for a sequence nothing starts");
+        Assert.True(sequences.IsVisible, "the Sequences tab carries no mark for a sequence with a warning");
         Assert.Equal(Palette.Notice, sequences.Tint);
         Assert.False(tabs[0].Badge!.IsVisible);
 

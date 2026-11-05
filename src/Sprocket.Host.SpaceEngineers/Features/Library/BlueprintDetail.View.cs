@@ -1,4 +1,5 @@
 using Lumel;
+using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -17,6 +18,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         Section _secondSection;
         RichText _secondHeading;
         Label _second;
+        HStack _shares;
+        Button _share;
+        Button _withdraw;
+        Button _keep;
+        Button _block;
+        Label _reach;
 
         /// <summary>Makes the lines about it, and the sections naming its slots and installations.</summary>
         void CreateView()
@@ -31,6 +38,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     new Label { Style = Styles.Detail }.As(out _line),
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _about),
                     new Label { Style = Styles.Diagnostic, TextWrapping = TextWrapping.Wrap }.As(out _trouble)
+                }
+            });
+            Children.Add(new VStack
+            {
+                Base = { Spacing = Gaps.Within },
+                Children =
+                {
+                    new Label { Style = Styles.Detail, IsVisible = false }.As(out _reach),
+                    new HStack
+                    {
+                        Base = { Spacing = Gaps.Parts },
+                        Children =
+                        {
+                            new Button { Style = Styles.Button }.As(out _share),
+                            new Button { Style = Styles.Button }.As(out _withdraw),
+                            new Button { Style = Styles.Button }.As(out _keep),
+                            new Button { Style = Styles.Button }.As(out _block)
+                        }
+                    }.As(out _shares)
                 }
             });
             Children.Add(new Section

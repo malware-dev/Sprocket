@@ -120,6 +120,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return running ? texts.SystemsRunning : "";
         }
 
+        /// <summary>
+        /// The id of the block <paramref name="system" /> lists on alone, or 0 where it lists everywhere: it is kept to no block,
+        /// that block isn't surely there, or the system is failing.
+        /// </summary>
+        public static long KeptTo(AutomationRunner runner, AutomationSystem system)
+        {
+            if (system.ListedOn.Length == 0)
+                return 0;
+
+            var bindings = runner.Bindings;
+            var block = bindings.Entity(system.ListedOn);
+            if (block == null || bindings.State(system.ListedOn) != RefState.Bound)
+                return 0;
+
+            SequenceFault fault;
+            return SystemFailing(runner, system, out fault) != null ? 0 : block.Id;
+        }
+
         /// <summary>The first of a system's sequences, or of its triggers' own acts, with something wrong with it on <paramref name="instance" />, and what, or null where none has.</summary>
         /// <remarks>Of a blueprint, only what is wrong in that installation; what is wrong in the logic system itself is <see cref="SystemFailing" />. Costs a lookup per run.</remarks>
         public static Sequence Failing(AutomationRunner runner, AutomationSystem system, SystemInstance instance,
@@ -185,7 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </summary>
         static bool Counts(AutomationSystem system, SequenceFault fault, bool ofSystem, bool warning)
         {
-            if (!fault.Exists || fault.IsWarning != warning)
+            if (!fault.Exists || fault.IsNote || fault.IsWarning != warning)
                 return false;
 
             return system.IsBlueprint ? fault.IsAboutSystem == ofSystem : !ofSystem;

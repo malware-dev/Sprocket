@@ -20,7 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly AutomationSystem _system;
         readonly string _title;
         readonly bool _forEvents;
-        readonly string _keeps;
+        readonly Action<string, string> _renamed;
+        string _keeps;
         readonly IList<string> _replacing;
         readonly List<long> _stated = new List<long>();
         readonly List<string> _statedSlots = new List<string>();
@@ -36,13 +37,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         HeadingPart _part;
         Func<string, bool> _accepts;
         Action<string> _renames;
+        Part _existing;
+        Func<string, bool> _existingAccepts;
+        Action<string> _existingRenames;
 
         /// <summary>
         /// The heading of a pick in <paramref name="editor" /> naming slots of <paramref name="system" />, called
         /// <paramref name="title" /> where it names none yet; of what starts something where <paramref name="forEvents" />, in place
         /// of the list <paramref name="replacing" /> or null for a new one, and of the trigger's signal slot <paramref name="keeps" />.
         /// </summary>
-        public SlotHeading(SprocketEditor editor, AutomationSystem system, string title, bool forEvents, string keeps, IList<string> replacing)
+        public SlotHeading(SprocketEditor editor, AutomationSystem system, string title, bool forEvents, string keeps, IList<string> replacing,
+            Action<string, string> renamed)
         {
             _editor = editor;
             _system = system;
@@ -50,6 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _forEvents = forEvents;
             _keeps = keeps ?? "";
             _replacing = replacing;
+            _renamed = renamed;
         }
 
         /// <summary>What the heading says.</summary>
@@ -127,14 +133,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             if (_fills != null)
             {
-                Fixed(_fillsText, true, texts.Codex.PickSlotMatched);
+                var only = _fills.Count == 1 ? _system.FindPart(_fills[0]) : null;
+                if (only != null)
+                    Existing(only, true, texts.Codex.PickSlotMatchedOne);
+                else
+                    Fixed(_fillsText, true, texts.Codex.PickSlotMatched);
+
                 return;
             }
 
-            // The slot the picks change keeps its name, so the heading names it as it is.
             if (_forecast?.Changes != null)
             {
-                Fixed(_forecast.Changes.Id, false, texts.Codex.PickSlotChanges);
+                Existing(_forecast.Changes, false, texts.Codex.PickSlotChanges);
                 return;
             }
 
@@ -163,6 +173,58 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _part.NamedOnArrival = true;
             _arriving = false;
+        }
+
+        /// <summary>Has the heading name <paramref name="slot" />, the one slot the picks come to, renamed in place, in italics where <paramref name="emphasized" />.</summary>
+        void Existing(Part slot, bool emphasized, string about)
+        {
+            // Made once for a slot, so the heading read again on its cadence finds nothing changed.
+            if (_existing != slot)
+            {
+                _existing = slot;
+                _existingAccepts = name =>
+                {
+                    var wanted = NameRules.Clean(name);
+                    return wanted.Length > 0 && (_system.FindPartInAnyCase(wanted) == slot || !_system.TakesInAnyCase(wanted));
+                };
+                _existingRenames = _editor.Renaming(name => Rename(slot, NameRules.Clean(name)), _existingAccepts);
+            }
+
+            _part.Text = slot.Id;
+            _part.Name = slot.Id;
+            _part.After = "";
+            _part.Emphasized = emphasized;
+            _part.About = about;
+            _part.Accepts = _existingAccepts;
+            _part.Renames = _existingRenames;
+        }
+
+        /// <summary>Calls <paramref name="slot" /> <paramref name="wanted" /> wherever its logic system names it, and in what this heading holds of the picks.</summary>
+        void Rename(Part slot, string wanted)
+        {
+            var was = slot.Id;
+            if (wanted == was)
+                return;
+
+            _editor.Do(_system, new RenamePart(slot, wanted));
+            if (_keeps == was)
+                _keeps = wanted;
+
+            Respell(_replacing, was, wanted);
+            Respell(_fills, was, wanted);
+            Respell(_statedSlots, was, wanted);
+            _fillsText = _fills == null ? null : SentenceText.Slots(_fills);
+            _renamed(was, wanted);
+            Reword();
+        }
+
+        static void Respell(IList<string> names, string was, string now)
+        {
+            for (var i = 0; names != null && i < names.Count; i++)
+            {
+                if (names[i] == was)
+                    names[i] = now;
+            }
         }
 
         /// <summary>Has the heading say <paramref name="text" />, in italics where <paramref name="emphasized" />, with nothing to rename and <paramref name="about" /> as its note.</summary>

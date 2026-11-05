@@ -136,8 +136,8 @@ public class ProblemTests
         warn.Name = "Warn";
         var shut = new Act("close");
         shut.Targets.Add(ship.Automation.Declare(ship.World, ship.World.FindEntity(2)!).Name);
-        warn.Steps.Add(shut);
         warn.Steps.Add(new Await());
+        warn.Steps.Add(shut);
 
         // Long enough for the screens to have marked what they mark, and for Sprocket to have parked
         // anything it parks.
@@ -151,7 +151,6 @@ public class ProblemTests
         ship.Editor.Tick(1200);
 
         var row = ship.Editor.Rows()[1];
-        Assert.Equal("This sequence has no trigger, and no sequence runs it.", row.Problem);
         Assert.Equal(NoticeLevel.Warning, row.Level);
         Assert.Equal(0, row.Problems);
 
@@ -160,9 +159,9 @@ public class ProblemTests
         ship.Runner.Tick(1800);
         ship.Editor.Tick(1800);
 
-        var sentence = ship.Editor.Sentence();
-        Assert.Equal("This sequence has no trigger, and no sequence runs it.", sentence.Bar.Problem);
-        Assert.Equal(NoticeLevel.Warning, sentence.Bar.Level);
+        var step = ship.Editor.StepRows()[0];
+        Assert.Equal("There are no pending tasks to wait for here, because no step above it takes time.", step.Problem);
+        Assert.Equal(NoticeLevel.Warning, step.Level);
     }
 
     /// <summary>

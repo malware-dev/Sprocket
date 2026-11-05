@@ -341,7 +341,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < _wanted.Count; i++)
             {
                 covered += _wanted[i].Covers;
-                if (given < covered)
+                if (given < covered && !_wanted[i].MayBeLeftOut)
                     return _wanted[i].Name ?? "";
             }
 

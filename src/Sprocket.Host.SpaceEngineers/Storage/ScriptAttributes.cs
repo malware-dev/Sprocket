@@ -8,6 +8,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>A system's highest sequence number handed out, a whole number: <c>#@ lastSequence: 7</c>.</summary>
         public const string LastSequence = "lastSequence";
 
+        /// <summary>The block a system lists on alone, text naming a declared block: <c>#@ listedOn: "Back Office PB"</c>.</summary>
+        public const string ListedOn = "listedOn";
+
         /// <summary>A signal slot's few words shown with each toolbar slot that answers it, text: <c>#@ short: "Call"</c>.</summary>
         public const string Short = "short";
 

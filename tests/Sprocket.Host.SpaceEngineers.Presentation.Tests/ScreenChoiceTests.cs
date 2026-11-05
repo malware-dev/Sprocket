@@ -200,7 +200,7 @@ public class ScreenChoiceTests
 
         var heading = screen.Editor.Screen.Heading[0];
         Assert.Equal(slot, heading.Text);
-        Assert.False(heading.CanRename);
+        Assert.True(heading.CanRename);
     }
 
     /// <summary>

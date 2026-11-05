@@ -246,6 +246,8 @@ public class StatusWatchTests : IDisposable
             Name = "Mining Barge",
             Systems = 5,
             Normal = 2,
+            KeptBlocks = new[] { 7L },
+            KeptCounts = new[] { 2 },
             Items =
             [
                 new StatusItem
@@ -272,6 +274,8 @@ public class StatusWatchTests : IDisposable
         Assert.Equal(report.Name, read.Name);
         Assert.Equal(report.Systems, read.Systems);
         Assert.Equal(report.Normal, read.Normal);
+        Assert.Equal(7L, Assert.Single(read.KeptBlocks));
+        Assert.Equal(2, Assert.Single(read.KeptCounts));
         Assert.Equal(2, read.Items.Length);
         Assert.True(read.Items[0].Same(report.Items[0]));
         Assert.True(read.Items[1].Same(report.Items[1]));

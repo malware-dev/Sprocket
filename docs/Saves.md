@@ -26,7 +26,7 @@ A program is stored as a script in Sprocket's language ([Language](Language.md))
 read by `ProgramReader.Load` through the `Lexer` and `Parser` in `Storage/`. Its first line says which format wrote it:
 
 ```
-sprocket 1 alpha 20
+sprocket 1 alpha 21
 ```
 
 `ScriptFormat.Version` and `ScriptFormat.Draft` hold the numbers this build writes.
@@ -54,7 +54,8 @@ order they arrived. A program is written in the current format at its next save.
 ## What the world remembers
 
 `Memory/` is the world's memory: protobuf, through the game's own serializer, as base 64 (`Memory/GameBinary.cs`).
-`WorldMemory` is the root, holding the clock, the constructs and the players. Its member 4 is retired.
+`WorldMemory` is the root, holding the clock, the constructs, the players, the blueprints shared in the world and the
+players barred from sharing. Its member 4 is retired.
 
 **A member's number is the format.** The memory carries no version: a `ProtoMember` number, once used, is never used
 again and never given another type, and a member dropped leaves its number unused. Reasons and causes are stored as the

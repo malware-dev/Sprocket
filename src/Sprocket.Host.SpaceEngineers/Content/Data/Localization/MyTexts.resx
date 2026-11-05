@@ -3205,4 +3205,178 @@ A backslash before a mark shows the mark as it is typed.
     <value>Removed the slot &quot;{thing}&quot;</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is removing a slot nothing used, with its bin on the installation panel or the Installation panel tab. {thing} is the slot's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
+  <data name="Sprocket.Library.SharedHeading" xml:space="preserve">
+    <value>Shared with you</value>
+    <comment>Heading of the section in the library listing that holds blueprints other players have shared with this player.</comment>
+  </data>
+  <data name="Sprocket.Library.SharedBy" xml:space="preserve">
+    <value>Shared by {name}</value>
+    <comment>Line under a shared blueprint in the library listing and its detail. {name} is the player who shared it.</comment>
+  </data>
+  <data name="Sprocket.Library.NoneShared" xml:space="preserve">
+    <value>Nothing is shared with you.</value>
+    <comment>Shown in the library listing under the shared section when no blueprint is shared with this player.</comment>
+  </data>
+  <data name="Sprocket.Library.Share" xml:space="preserve">
+    <value>Share...</value>
+    <comment>Button in the library blueprint detail that opens the dialog for sharing the blueprint with other players.</comment>
+  </data>
+  <data name="Sprocket.Library.ShareChange" xml:space="preserve">
+    <value>Change sharing...</value>
+    <comment>Button in the library blueprint detail, shown instead of Share when the blueprint is already shared; opens the dialog for changing who it is shared with.</comment>
+  </data>
+  <data name="Sprocket.Library.ShareWithdraw" xml:space="preserve">
+    <value>Stop sharing</value>
+    <comment>Button in the library blueprint detail that stops sharing a blueprint the player has shared.</comment>
+  </data>
+  <data name="Sprocket.Library.SharedEveryone" xml:space="preserve">
+    <value>Shared with everyone</value>
+    <comment>Line in the library blueprint detail saying the player has shared this blueprint with every player.</comment>
+  </data>
+  <data name="Sprocket.Library.SharedFaction" xml:space="preserve">
+    <value>Shared with your faction</value>
+    <comment>Line in the library blueprint detail saying the player has shared this blueprint with the player's faction.</comment>
+  </data>
+  <data name="Sprocket.Library.SharedPlayers" xml:space="preserve">
+    <value>Shared with {count} players</value>
+    <comment>Line in the library blueprint detail saying the player has shared this blueprint with chosen players. {count} is how many.</comment>
+  </data>
+  <data name="Sprocket.Library.KeepCopy" xml:space="preserve">
+    <value>Keep a copy</value>
+    <comment>Button in the detail of a blueprint shared with the player; puts a copy of it in the player's own library.</comment>
+  </data>
+  <data name="Sprocket.Library.KeepCopyAbout" xml:space="preserve">
+    <value>Adds your own copy to your library, for use in any world.
+
+Warning: Your own copy will not update with {sharer}'s changes.</value>
+    <comment>Tooltip of the Keep a copy button in the detail of a blueprint shared with the player. {sharer} is the name of the player who shared it.</comment>
+  </data>
+  <data name="Sprocket.Library.Block" xml:space="preserve">
+    <value>Hide {name}</value>
+    <comment>Button in the detail of a blueprint shared with the player; hides everything that player shares. {name} is the sharing player.</comment>
+  </data>
+  <data name="Sprocket.Library.BlockAbout" xml:space="preserve">
+    <value>Hides everything {name} shares with you. {name} isn't told.</value>
+    <comment>Tooltip of the button that hides a sharing player's blueprints, in the detail of a blueprint shared with the player. {name} is the sharing player.</comment>
+  </data>
+  <data name="Sprocket.Library.Unblock" xml:space="preserve">
+    <value>Show {name}</value>
+    <comment>Button in the library listing that shows a hidden sharing player's blueprints again. {name} is that player.</comment>
+  </data>
+  <data name="Sprocket.Library.ShareClosed" xml:space="preserve">
+    <value>This world doesn't allow sharing.</value>
+    <comment>Shown in the library blueprint detail in place of the Share button when sharing is not allowed in this world.</comment>
+  </data>
+  <data name="Sprocket.Library.ShareBarred" xml:space="preserve">
+    <value>You aren't allowed to share.</value>
+    <comment>Shown in the library blueprint detail in place of the Share button when an admin has stopped this player from sharing.</comment>
+  </data>
+  <data name="Sprocket.Library.ShareAtLimit" xml:space="preserve">
+    <value>You already share {count} blueprints, the most this world allows.</value>
+    <comment>Shown in the library blueprint detail in place of the Share button when the player already shares as many blueprints as the world allows. {count} is that number.</comment>
+  </data>
+  <data name="Sprocket.Library.ShareUnreadable" xml:space="preserve">
+    <value>This blueprint can't be read, or it's too long to share.</value>
+    <comment>Shown in the library blueprint detail in place of the Share button when the blueprint cannot be read or is too long to send.</comment>
+  </data>
+  <data name="Sprocket.Share.Title" xml:space="preserve">
+    <value>Share {name}</value>
+    <comment>Title of the dialog for sharing a blueprint. {name} is the blueprint.</comment>
+  </data>
+  <data name="Sprocket.Share.Who" xml:space="preserve">
+    <value>Who is it for?</value>
+    <comment>Question in the sharing dialog, over the choices of who a blueprint is shared with.</comment>
+  </data>
+  <data name="Sprocket.Share.Everyone" xml:space="preserve">
+    <value>Everyone</value>
+    <comment>Choice in the sharing dialog: share the blueprint with every player.</comment>
+  </data>
+  <data name="Sprocket.Share.Faction" xml:space="preserve">
+    <value>My faction</value>
+    <comment>Choice in the sharing dialog: share the blueprint with the player's own faction.</comment>
+  </data>
+  <data name="Sprocket.Share.Players" xml:space="preserve">
+    <value>Chosen players</value>
+    <comment>Choice in the sharing dialog: share the blueprint only with players picked from a list.</comment>
+  </data>
+  <data name="Sprocket.Share.Confirm" xml:space="preserve">
+    <value>Share</value>
+    <comment>Button in the sharing dialog that shares the blueprint as chosen.</comment>
+  </data>
+  <data name="Sprocket.Share.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Button in the sharing dialog that closes it without sharing.</comment>
+  </data>
+  <data name="Sprocket.Admin.ShareLimit" xml:space="preserve">
+    <value>Shared blueprints per player</value>
+    <comment>Label of the setting in the admin dialog for how many blueprints each player may share.</comment>
+  </data>
+  <data name="Sprocket.Admin.ShareLimitAbout" xml:space="preserve">
+    <value>How many blueprints each player may share in this world. With Off, nobody can share.</value>
+    <comment>Tooltip of the setting in the admin dialog for how many blueprints each player may share.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultLimit" xml:space="preserve">
+    <value>Default ({value})</value>
+    <comment>Choice in the admin dialog for the share limit that follows the default. {value} is the default limit.</comment>
+  </data>
+  <data name="Sprocket.Admin.Sharing" xml:space="preserve">
+    <value>Sharing</value>
+    <comment>Heading of the section in the admin dialog that lists shared blueprints and players who may share.</comment>
+  </data>
+  <data name="Sprocket.Admin.NoShares" xml:space="preserve">
+    <value>Nothing is shared in this world.</value>
+    <comment>Shown in the admin dialog sharing section when no blueprint is shared in this world.</comment>
+  </data>
+  <data name="Sprocket.Admin.ShareLine" xml:space="preserve">
+    <value>{name} by {sharer}</value>
+    <comment>Line in the admin dialog sharing section for one shared blueprint. {name} is the blueprint and {sharer} the player who shared it.</comment>
+  </data>
+  <data name="Sprocket.Admin.Remove" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Button in the admin dialog sharing section that removes one shared blueprint.</comment>
+  </data>
+  <data name="Sprocket.Admin.Bar" xml:space="preserve">
+    <value>Stop {name} sharing</value>
+    <comment>Button in the admin dialog sharing section that stops a player from sharing. {name} is the player.</comment>
+  </data>
+  <data name="Sprocket.Admin.Unbar" xml:space="preserve">
+    <value>Let {name} share</value>
+    <comment>Button in the admin dialog sharing section that lets a stopped player share again. {name} is the player.</comment>
+  </data>
+  <data name="Sprocket.Share.Arrived" xml:space="preserve">
+    <value>{sharer} shared the logic system blueprint {name} with you.</value>
+    <comment>A game notification when a blueprint is shared with this player. {sharer} is the player who shared it, {name} is the blueprint.</comment>
+  </data>
+  <data name="Sprocket.Share.Updated" xml:space="preserve">
+    <value>{sharer} updated the logic system blueprint {name}.</value>
+    <comment>A game notification when a blueprint shared with this player changes. {sharer} is the player who shared it, {name} is the blueprint.</comment>
+  </data>
+  <data name="Sprocket.Share.Waiting" xml:space="preserve">
+    <value>New or updated logic system blueprints are shared with you.</value>
+    <comment>What changed in shared blueprints while this player was away.</comment>
+  </data>
+  <data name="Sprocket.Library.SharedNew" xml:space="preserve">
+    <value>New, shared by {name}</value>
+    <comment>Line under a shared blueprint in the library listing when it is new or changed since the player last looked. {name} is the player who shared it.</comment>
+  </data>
+  <data name="Sprocket.Library.SharedPlayer" xml:space="preserve">
+    <value>Shared with 1 player</value>
+    <comment>Under a blueprint in the library that this player shares with one chosen player.</comment>
+  </data>
+  <data name="Sprocket.Change.ListedOn" xml:space="preserve">
+    <value>Keep to one block</value>
+    <comment>Keeping a logic system to one programmable block's list.</comment>
+  </data>
+  <data name="Sprocket.Systems.KeepHere" xml:space="preserve">
+    <value>List only on this block</value>
+    <comment>Keeping a logic system to one programmable block's list.</comment>
+  </data>
+  <data name="Sprocket.Systems.ListEverywhere" xml:space="preserve">
+    <value>List on every block</value>
+    <comment>Keeping a logic system to one programmable block's list.</comment>
+  </data>
+  <data name="Sprocket.Systems.KeepHereAbout" xml:space="preserve">
+    <value>Lists this logic system only when the editor is opened from this block. It runs as usual, and shows everywhere if it fails or the block is lost.</value>
+    <comment>Keeping a logic system to one programmable block's list.</comment>
+  </data>
 </root>

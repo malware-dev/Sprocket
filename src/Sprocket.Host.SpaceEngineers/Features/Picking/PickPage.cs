@@ -265,7 +265,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             if (_slotHeading == null)
-                _slotHeading = new SlotHeading(Editor, Slotted, _title, _forEvents, Keeps, Replacing);
+                _slotHeading = new SlotHeading(Editor, Slotted, _title, _forEvents, Keeps, Replacing, SlotRenamed);
 
             Restate();
             _slotHeading.Head(parts);
@@ -469,6 +469,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Works out again which slots the picks name; whether the heading changes with it.</summary>
+        /// <summary>Follows the slot called <paramref name="was" /> being renamed <paramref name="now" /> from the heading, in what this page holds of it.</summary>
+        void SlotRenamed(string was, string now)
+        {
+            if (Keeps == was)
+                Keeps = now;
+
+            var picked = PickedSlots;
+            for (var i = 0; i < picked.Count; i++)
+            {
+                if (picked[i] == was)
+                    picked[i] = now;
+            }
+        }
+
         bool Restate() => _slotHeading.Restate(_picked.Blocks, _picked.Member, Facet, _picked.Slot ?? ToolbarSlot.Of(_picked.Member),
             PickedSlots, ListsSlots);
 

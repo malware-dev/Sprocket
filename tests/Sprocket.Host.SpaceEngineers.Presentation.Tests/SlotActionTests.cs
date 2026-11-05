@@ -61,6 +61,37 @@ public class SlotActionTests
         Assert.Contains(editor.Texts.Codex.PartSlotEmpty, tip);
     }
 
+    /// <summary>A step's one slot is renamed in the picker's heading, wherever its system names it, and the pick goes on with the new name.</summary>
+    [Fact]
+    public void TheOneSlotAPickComesToIsRenamedInTheHeading()
+    {
+        var screen = Screen.On(Rig.Demo());
+        var editor = screen.Editor;
+        editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        editor.PressAdd("task");
+        screen.Run(2);
+        editor.PressBlock("Airlock Inner Door");
+        editor.PressChoice("open");
+        editor.PressPrimary();
+        screen.Run(2);
+        var act = editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First();
+
+        editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single().Opens!.Execute();
+        screen.Run(3);
+        editor.Screen.Heading[0].Renames!("Inner door");
+        screen.Run(3);
+
+        Assert.Equal("Inner door", editor.Screen.Heading[0].Text);
+        Assert.Equal("Inner door", Assert.Single(act.Targets));
+
+        editor.PressPrimary();
+        screen.Run(3);
+        var after = editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First();
+        Assert.Equal("Inner door", Assert.Single(after.Targets));
+        Assert.Equal(new[] { "slot 1", "Inner door" }, editor.Program.Systems[0].Parts.Select(part => part.Id).ToArray());
+    }
+
     /// <summary>A type of block takes a slot only where it offers what the slot's steps do with it, which is named where it does not.</summary>
     [Fact]
     public void ATypeMustOfferWhatTheSlotIsUsedFor()

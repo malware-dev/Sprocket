@@ -55,6 +55,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>The id of the block's own value a new step's field opens holding, read off the block, or null where it opens on <see cref="Default" />.</summary>
         public string OpensOn;
 
+        /// <summary>Whether a step may leave this value out altogether, as one written before the field existed does.</summary>
+        public bool MayBeLeftOut;
+
         /// <summary>Whether its words only name some of the values it takes, so a value they leave out is still taken.</summary>
         public bool Open;
 

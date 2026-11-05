@@ -8,6 +8,7 @@ using VRage.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.LcdApps;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Host.SpaceEngineers.Network;
+using Sprocket.Host.SpaceEngineers.Shares;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -68,6 +69,14 @@ namespace Sprocket.Host.SpaceEngineers
         NetworkChannel _channel;
 
         Handover _handover;
+        // How long a notification of a shared blueprint stays on screen, in milliseconds.
+        const int Telling = 5000;
+
+        // How long after loading a player is told of what changed while they were away, in ticks: they have just arrived before then.
+        const int Greeting = 600;
+
+        ShareCourier _shares;
+        ShareDesk _desk;
 
         StatusWatch _watch;
 
@@ -95,6 +104,8 @@ namespace Sprocket.Host.SpaceEngineers
 
         // Due every Reclaiming ticks on the rota, only while the server has lent a Sprocket to somebody.
         Shift _reclaim;
+        Shift _greet;
+        bool _greeting;
 
         // While the world's debug log is on, on the machine that runs the world; null otherwise.
         TickTiming _timing;
@@ -287,11 +298,16 @@ namespace Sprocket.Host.SpaceEngineers
             _constructs = new Constructs(_roster);
             _motion = new ScreenMotion(_rota);
             _watch = new StatusWatch(_rota, Frame, _constructs.Of, Connected);
-            _channel = StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
+            _channel = ShareCourier.Carry(StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType())))).Build();
             _handover.Listen(_channel);
             _watch.Listen(_channel);
+            _shares = new ShareCourier(Desk, Told);
+            _shares.Listen(_channel);
+            _shares.Board.Changed += SharesChanged;
 
             _reclaim = new Shift(_rota.Join(), Reclaim);
+            _greet = new Shift(_rota.Join(), Greet);
+            _rota.At(_greet, _rota.Now + Greeting);
             _handover.Lent += () =>
             {
                 if (!_reclaim.Listed)
@@ -491,6 +507,90 @@ namespace Sprocket.Host.SpaceEngineers
                 _copy.Apply(_settings);
         }
 
+        /// <summary>The server's desk for shared blueprints, made once the world's memory is read, or null before then.</summary>
+        ShareDesk Desk()
+        {
+            if (_desk == null && _carries)
+            {
+                var shares = new BlueprintShares(_memories.Shares, _memories.Barred, _memories.Player, SameFaction, new Values(), () => _memories.Now(GameFrame()));
+                _desk = new ShareDesk(shares, () => Asked.ShareLimit, Named, Players, _memories.Player, Online, _shares.Tell);
+            }
+
+            return _desk;
+        }
+
+        /// <summary>Asks the server, once after loading, whether anything changed while this machine's player was away.</summary>
+        void Greet(int tick)
+        {
+            if (MyAPIGateway.Multiplayer == null || !MyAPIGateway.Multiplayer.MultiplayerActive || MyAPIGateway.Session?.Player == null)
+                return;
+
+            _greeting = true;
+            _shares.Board.Ask();
+        }
+
+        void SharesChanged()
+        {
+            _shown?.Editor.Invalidate();
+            if (!_greeting)
+                return;
+
+            _greeting = false;
+            if (_shares.Board.HasNew)
+                MyAPIGateway.Utilities?.ShowNotification(_texts.ShareWaiting, Telling);
+        }
+
+        /// <summary>Shows this machine's player <paramref name="tiding" />, and refreshes what the library shows where the editor is open.</summary>
+        void Told(ShareTiding tiding)
+        {
+            var said = Template.Fill(Template.Fill(tiding.IsUpdate ? _texts.ShareUpdated : _texts.ShareArrived, "name", tiding.Name), "sharer", tiding.Sharer);
+            MyAPIGateway.Utilities?.ShowNotification(said, Telling);
+            if (_shown != null)
+                _shares.Board.Ask();
+        }
+
+        /// <summary>The identities of the people playing in this world now.</summary>
+        static List<long> Online()
+        {
+            var found = new List<long>();
+            if (MyAPIGateway.Players == null)
+                return found;
+
+            var players = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(players);
+            foreach (var player in players)
+                found.Add(player.IdentityId);
+
+            return found;
+        }
+
+        /// <summary>Whether the players <paramref name="one" /> and <paramref name="other" /> are in the same faction now.</summary>
+        static bool SameFaction(long one, long other)
+        {
+            var factions = MyAPIGateway.Session?.Factions;
+            var theirs = factions?.TryGetPlayerFaction(one);
+            var mine = factions?.TryGetPlayerFaction(other);
+            return theirs != null && mine != null && theirs.FactionId == mine.FactionId;
+        }
+
+        /// <summary>The identities of this world's people, leaving out the game's own characters, which have no Steam account.</summary>
+        static List<long> Players()
+        {
+            var found = new List<long>();
+            if (MyAPIGateway.Players == null)
+                return found;
+
+            var identities = new List<IMyIdentity>();
+            MyAPIGateway.Players.GetAllIdentites(identities);
+            foreach (var known in identities)
+            {
+                if (MyAPIGateway.Players.TryGetSteamId(known.IdentityId) != 0)
+                    found.Add(known.IdentityId);
+            }
+
+            return found;
+        }
+
         /// <summary>The settings in this world of the player with <paramref name="identity" />, or on a client its own player's.</summary>
         PlayerMemory Player(long identity)
         {
@@ -655,6 +755,8 @@ namespace Sprocket.Host.SpaceEngineers
         {
             unit.Shelf = _shelf;
             unit.Editor.PlayerName = Named;
+            unit.Editor.OpenedFrom = block.EntityId;
+            unit.Editor.Sharing = MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive ? _shares.Board : null;
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);
             unit.Editor.TipsShown = Choices.Tips;

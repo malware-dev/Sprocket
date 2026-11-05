@@ -123,6 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case ChangeKind.RemoveStep: return texts.ChangeRemoveStep;
                 case ChangeKind.Rename: return texts.ChangeRename;
                 case ChangeKind.RenameSlot: return texts.ChangeRenameSlot;
+                case ChangeKind.ListedOn: return texts.ChangeListedOn;
                 case ChangeKind.Trigger: return texts.ChangeTrigger;
                 case ChangeKind.Cadence: return texts.ChangeCadence;
                 case ChangeKind.Optional: return texts.ChangeOptional;

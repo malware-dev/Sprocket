@@ -24,6 +24,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
         readonly StringBuilder _measuring = new StringBuilder();
 
+        /// <summary>The id of the block whose screen this is.</summary>
+        public long ViewedFrom { get; set; }
+
         /// <summary>The words the panel speaks in.</summary>
         public Texts Texts { get; private set; }
 

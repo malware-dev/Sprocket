@@ -263,6 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         void Lay(int from)
         {
             _panel.Graphics.Begin();
+            _picture.ViewedFrom = Block.EntityId;
             _picture.Lay(_panel.Graphics, _status, SprocketSession.Texts, _ink, _ground, _padding, Metres(), _turn, from);
             _laid = true;
             _unsent = true;

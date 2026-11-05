@@ -10,6 +10,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         BackedUp,
 
         /// <summary>A blueprint the player keeps for every world.</summary>
-        Kept
+        Kept,
+
+        /// <summary>A blueprint another player has shared with this one.</summary>
+        Shared
     }
 }

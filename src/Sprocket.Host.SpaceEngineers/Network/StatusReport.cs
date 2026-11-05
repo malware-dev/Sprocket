@@ -23,10 +23,16 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>The installations that want looking at, most wanting first.</summary>
         public StatusItem[] Items;
 
+        /// <summary>The blocks that logic systems left out of <see cref="Systems" /> are kept to.</summary>
+        public long[] KeptBlocks;
+
+        /// <summary>How many logic systems are kept to each of <see cref="KeptBlocks" />.</summary>
+        public int[] KeptCounts;
+
         /// <summary>How many bytes <paramref name="report" /> takes on the wire.</summary>
         public static int SizeOf(ref StatusReport report)
         {
-            var size = sizeof(long) + ByteData.SizeOfString(report.Name ?? "") + sizeof(int) * 3;
+            var size = sizeof(long) + ByteData.SizeOfString(report.Name ?? "") + sizeof(int) * 4 + report.KeptBlocks.Length * (sizeof(long) + sizeof(int));
             foreach (var item in report.Items)
             {
                 size += sizeof(int) * 11 + ByteData.SizeOfString(item.Logic ?? "") + ByteData.SizeOfString(item.Installation ?? "")
@@ -45,6 +51,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
             ByteData.WriteString(report.Name ?? "", data, ref offset);
             ByteData.Write(report.Systems, data, ref offset);
             ByteData.Write(report.Normal, data, ref offset);
+            ByteData.Write(report.KeptBlocks.Length, data, ref offset);
+            for (var i = 0; i < report.KeptBlocks.Length; i++)
+            {
+                ByteData.Write(report.KeptBlocks[i], data, ref offset);
+                ByteData.Write(report.KeptCounts[i], data, ref offset);
+            }
+
             ByteData.Write(report.Items.Length, data, ref offset);
             foreach (var item in report.Items)
             {
@@ -79,6 +92,16 @@ namespace Sprocket.Host.SpaceEngineers.Network
             ByteData.TryReadString(data, ref offset, out report.Name);
             ByteData.TryReadInt32(data, ref offset, out report.Systems);
             ByteData.TryReadInt32(data, ref offset, out report.Normal);
+            int kept;
+            ByteData.TryReadInt32(data, ref offset, out kept);
+            report.KeptBlocks = new long[kept < 0 ? 0 : kept];
+            report.KeptCounts = new int[report.KeptBlocks.Length];
+            for (var i = 0; i < report.KeptBlocks.Length; i++)
+            {
+                ByteData.TryReadInt64(data, ref offset, out report.KeptBlocks[i]);
+                ByteData.TryReadInt32(data, ref offset, out report.KeptCounts[i]);
+            }
+
             ByteData.TryReadInt32(data, ref offset, out count);
             report.Items = new StatusItem[count < 0 ? 0 : count];
             for (var i = 0; i < report.Items.Length; i++)

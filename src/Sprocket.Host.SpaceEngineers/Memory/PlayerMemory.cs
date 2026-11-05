@@ -26,5 +26,13 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// <summary>Whether the pickers list the blocks hidden from toolbars: their eye open.</summary>
         [ProtoMember(5)]
         public bool ShowsHidden { get; set; }
+
+        /// <summary>The identities of the players whose shared blueprints this player has chosen not to see.</summary>
+        [ProtoMember(6)]
+        public List<long> Blocked { get; set; } = new List<long>();
+
+        /// <summary>Sprocket's clock when the player last opened the library.</summary>
+        [ProtoMember(7)]
+        public int SawShares { get; set; }
     }
 }

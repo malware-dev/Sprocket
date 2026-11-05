@@ -19,5 +19,13 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// <summary>Each player's settings.</summary>
         [ProtoMember(3)]
         public List<PlayerMemory> Players { get; set; } = new List<PlayerMemory>();
+
+        /// <summary>The blueprints shared in this world.</summary>
+        [ProtoMember(5)]
+        public List<SharedBlueprint> Shares { get; set; } = new List<SharedBlueprint>();
+
+        /// <summary>The identities of the players an admin has stopped sharing.</summary>
+        [ProtoMember(6)]
+        public List<long> Barred { get; set; } = new List<long>();
     }
 }

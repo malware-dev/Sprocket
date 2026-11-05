@@ -37,6 +37,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Renaming a slot.</summary>
         RenameSlot,
 
+        /// <summary>A logic system kept to one block's list, or let list on every block.</summary>
+        ListedOn,
+
         /// <summary>Changing the trigger.</summary>
         Trigger,
 

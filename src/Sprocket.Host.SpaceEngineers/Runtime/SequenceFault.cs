@@ -63,6 +63,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Whether there is anything wrong at all.</summary>
         public bool Exists => Problem != SequenceProblem.None;
 
+        /// <summary>Whether this only says how the sequence is set up, which is fine as it is: shown on it, and counted nowhere.</summary>
+        public bool IsNote => Problem == SequenceProblem.NothingStarts;
+
         /// <summary>
         /// Whether this is worth saying quietly rather than marking as broken.
         /// </summary>

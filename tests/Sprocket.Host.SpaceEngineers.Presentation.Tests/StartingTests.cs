@@ -57,7 +57,7 @@ public class StartingTests
 
         var sentence = screen.Editor.Sentence();
         Assert.Equal("This sequence has no trigger, and no sequence runs it.", sentence.Bar.Problem);
-        Assert.Equal(NoticeLevel.Warning, sentence.Bar.Level);
+        Assert.Equal(NoticeLevel.Info, sentence.Bar.Level);
 
         // And nothing on this screen offers to mend it, because what starts a sequence is not here.
         Assert.False(screen.Shows("+ say what starts this"));

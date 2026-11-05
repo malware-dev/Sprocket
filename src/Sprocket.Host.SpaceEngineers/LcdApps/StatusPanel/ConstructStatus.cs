@@ -13,6 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
     /// </remarks>
     public sealed class ConstructStatus
     {
+        Dictionary<long, int> _kept = new Dictionary<long, int>();
+        Dictionary<long, int> _keptFound = new Dictionary<long, int>();
         List<StatusItem> _items = new List<StatusItem>();
         List<StatusItem> _found = new List<StatusItem>();
         int _now;
@@ -66,6 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public void Begin(int now)
         {
             _found.Clear();
+            _keptFound.Clear();
             _now = now;
             _systems = 0;
             _troubled = 0;
@@ -75,20 +78,22 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <remarks>Costs a lookup per sequence on each installation, so it is asked only when the automation has changed.</remarks>
         public void Include(Automation program, AutomationRunner runner)
         {
-            _systems += program.Systems.Count;
-
             if (program.Paused)
                 Found(Stopped(StatusLevel.Paused));
 
-            if (program.Paused)
-            {
-                _troubled += program.Systems.Count;
-                return;
-            }
-
             foreach (AutomationSystem system in program.Systems)
             {
-                if (Look(runner, system))
+                var kept = SystemSummary.KeptTo(runner, system);
+                if (kept != 0)
+                {
+                    int on;
+                    _keptFound.TryGetValue(kept, out on);
+                    _keptFound[kept] = on + 1;
+                    continue;
+                }
+
+                _systems++;
+                if (program.Paused || Look(runner, system))
                     _troubled++;
             }
         }
@@ -99,11 +104,41 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return _items.ToArray();
         }
 
+        /// <summary>How many logic systems the screen of the block <paramref name="block" /> counts: every one, and those kept to that block.</summary>
+        public int SystemsOn(long block)
+        {
+            int kept;
+            _kept.TryGetValue(block, out kept);
+            return Systems + kept;
+        }
+
+        /// <summary>The blocks that logic systems are kept to, for a report to a client.</summary>
+        public long[] KeptBlocks()
+        {
+            var blocks = new long[_kept.Count];
+            _kept.Keys.CopyTo(blocks, 0);
+            return blocks;
+        }
+
+        /// <summary>How many logic systems are kept to each of <paramref name="blocks" />, for a report to a client.</summary>
+        public int[] KeptCounts(long[] blocks)
+        {
+            var counts = new int[blocks.Length];
+            for (var i = 0; i < blocks.Length; i++)
+                counts[i] = _kept[blocks[i]];
+
+            return counts;
+        }
+
         /// <summary>Takes what the server says of the construct called <paramref name="construct" />: <paramref name="systems" /> logic systems, <paramref name="normal" /> of them normal, and <paramref name="items" />.</summary>
-        public void Hear(string construct, int systems, int normal, StatusItem[] items)
+        public void Hear(string construct, int systems, int normal, StatusItem[] items, long[] keptBlocks, int[] keptCounts)
         {
             _found.Clear();
             _found.AddRange(items);
+            _keptFound.Clear();
+            for (var i = 0; i < keptBlocks.Length; i++)
+                _keptFound[keptBlocks[i]] = keptCounts[i];
+
             _systems = systems;
             _troubled = systems - normal;
             End(construct);
@@ -113,7 +148,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public void End(string construct)
         {
             construct = construct ?? "";
-            var changed = !Heard || Construct != construct || Systems != _systems || Normal != _systems - _troubled || !Alike();
+            var changed = !Heard || Construct != construct || Systems != _systems || Normal != _systems - _troubled || !Alike() || !KeptAlike();
 
             Heard = true;
             Construct = construct;
@@ -123,6 +158,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var kept = _items;
             _items = _found;
             _found = kept;
+            var keptOn = _kept;
+            _kept = _keptFound;
+            _keptFound = keptOn;
             Count();
 
             if (changed)
@@ -259,6 +297,21 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         }
 
         /// <summary>Whether what was found is what was there, item for item.</summary>
+        bool KeptAlike()
+        {
+            if (_keptFound.Count != _kept.Count)
+                return false;
+
+            foreach (var pair in _keptFound)
+            {
+                int count;
+                if (!_kept.TryGetValue(pair.Key, out count) || count != pair.Value)
+                    return false;
+            }
+
+            return true;
+        }
+
         bool Alike()
         {
             if (_found.Count != _items.Count)

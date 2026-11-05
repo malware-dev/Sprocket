@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         PlusMenu _addTrigger;
         VStack _triggerList;
         VStack _addSequence;
+        Button _keepHere;
         Button _newSequence;
         Label _noSequences;
         VStack _head;
@@ -56,7 +57,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                 Children =
                                 {
                                     new Label { Style = Styles.Phrase }.As(out _usingLead),
-                                    new HStack { Placement = Flex.Grow }.As(out _usingChoice)
+                                    new HStack { Placement = Flex.Grow }.As(out _usingChoice),
+                                    new Button { Style = Styles.Button }.As(out _keepHere)
                                 }
                             }.As(out _using),
 

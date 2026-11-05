@@ -256,6 +256,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return Template.Fill(texts.ProblemUnset, "block", block);
         }
 
+        /// <summary>How <paramref name="fault" /> is marked where it is shown.</summary>
+        public static NoticeLevel Level(SequenceFault fault)
+        {
+            return fault.IsNote ? NoticeLevel.Info : fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
+        }
+
         /// <summary>Whether <paramref name="halt" /> stopped a run because a block was lost.</summary>
         public static bool Lost(Halt halt)
         {

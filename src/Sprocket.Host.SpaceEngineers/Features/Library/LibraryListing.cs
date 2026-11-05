@@ -1,5 +1,6 @@
 using System;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 
@@ -16,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         /// <summary>The backup it stands for, or null where it is not one.</summary>
         public Backup Backup;
+
+        /// <summary>The share it stands for, or null where it is not one.</summary>
+        public ShareLine Share;
 
         /// <summary>The blueprint as read from its backup or the library, or null until it has been read, or where it would not read.</summary>
         public AutomationSystem Read;

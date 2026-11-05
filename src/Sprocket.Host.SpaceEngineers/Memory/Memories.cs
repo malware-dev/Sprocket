@@ -39,11 +39,19 @@ namespace Sprocket.Host.SpaceEngineers.Memory
             return frame + _offset;
         }
 
+        /// <summary>The blueprints shared in this world.</summary>
+        public List<SharedBlueprint> Shares { get; } = new List<SharedBlueprint>();
+
+        /// <summary>The identities of the players an admin has stopped sharing.</summary>
+        public List<long> Barred { get; } = new List<long>();
+
         /// <summary>Takes up what the world kept, <paramref name="packed" />, on the game's <paramref name="frame" />; nothing kept is a world new to Sprocket.</summary>
         public void Read(string packed, int frame)
         {
             _unclaimed.Clear();
             _players.Clear();
+            Shares.Clear();
+            Barred.Clear();
             _offset = 0;
             Trouble = "";
             if (string.IsNullOrEmpty(packed))
@@ -66,6 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.Memory
 
             foreach (var player in memory.Players)
                 _players[player.Player] = player;
+
+            Shares.AddRange(memory.Shares);
+            Barred.AddRange(memory.Barred);
         }
 
         /// <summary>The settings of the player with <paramref name="identity" />, made the first time they are asked for.</summary>
@@ -105,6 +116,8 @@ namespace Sprocket.Host.SpaceEngineers.Memory
                 memory.Constructs.Add(unclaimed);
 
             memory.Players.AddRange(_players.Values);
+            memory.Shares.AddRange(Shares);
+            memory.Barred.AddRange(Barred);
 
             return _binary.Pack(memory);
         }
