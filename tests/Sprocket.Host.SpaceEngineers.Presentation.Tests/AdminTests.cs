@@ -49,6 +49,20 @@ public class AdminTests
         Assert.True(screen.Shows("Default (off)"));
     }
 
+    /// <summary>Where nothing can be shared the two tabs left share the strip, with nothing kept open between them.</summary>
+    [Fact]
+    public void TabsLeaveNoRoomForOneNotOffered()
+    {
+        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
+        screen.Do("press", "Every world").Run(2);
+
+        var apart = screen.Text("Every world").At.X - screen.Text("This world").At.X;
+        var strip = screen.Text("Admin settings").At.X;
+
+        Assert.False(screen.Shows("Sharing"));
+        Assert.True(apart < (screen.Text("Every world").At.X - strip) * 0.75f, $"the tabs stand {apart} apart");
+    }
+
     /// <summary>A choice under this world is this world's alone, and the world runs by it at once.</summary>
     [Fact]
     public void AChangeAppliesAtOnce()

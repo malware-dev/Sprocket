@@ -1,3 +1,4 @@
+using System;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Layout;
@@ -29,6 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly Glyph _light;
         readonly Label _summary;
+        readonly HStack _title;
+        NamePlate _plate;
         readonly Label _status;
         readonly Glyph _run;
         readonly Label _lastRun;
@@ -82,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                             new Label { Style = Styles.Name, TextWrapping = TextWrapping.Trim }.As(out _summary),
                                             new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = FixedSize.Size(32f, 32f) }.As(out _below)
                                         }
-                                    },
+                                    }.As(out _title),
                                     new HStack
                                     {
                                         Base = { Spacing = Gaps.Parts },
@@ -134,6 +137,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
+
+        /// <summary>
+        /// What pressing the name does while the row is chosen, made for the name plate it is shown on, which renames what the
+        /// row stands for; null where that cannot be renamed here.
+        /// </summary>
+        public Func<NamePlate, ICommand> Renames { get; set; }
+
+        /// <summary>What the name is, said on it where the row can be renamed.</summary>
+        public string RenameText { get; set; }
 
         /// <summary>How deep it stands under the row it belongs to: none, or one level.</summary>
         /// <remarks>Whatever holds it sets it in; a row is as wide as it is given.</remarks>
@@ -237,6 +249,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 : texts.Codex.RowSwitchSystemOn;
         }
 
+        // The name stands on a plate only on a chosen row that can be renamed, so no other row carries one.
+        void ShowPlate()
+        {
+            var renames = Chosen && Renames != null;
+            _summary.IsVisible = !renames;
+            if (!renames)
+            {
+                if (_plate != null)
+                    _plate.IsVisible = false;
+
+                return;
+            }
+
+            if (_plate == null)
+            {
+                _plate = new NamePlate(false) { Base = { Spacing = Gaps.Parts }, Words = Styles.InnerName, CanRename = true };
+                _title.Children.Insert(0, _plate);
+            }
+
+            _plate.IsVisible = true;
+            _plate.Text = Summary;
+            _plate.About = RenameText;
+            _plate.Command = Renames(_plate);
+        }
+
         /// <summary>Shows what it has been told, saying its fixed words in <paramref name="texts" />.</summary>
         /// <remarks>Runs on every refresh of the list, so it joins no string that has not changed.</remarks>
         public void Show(Texts texts)
@@ -274,6 +311,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _said = Summary;
                 _summary.Text = Summary;
             }
+
+            ShowPlate();
 
             _light.Base.Tint = wrong
                 ? Palette.Problem

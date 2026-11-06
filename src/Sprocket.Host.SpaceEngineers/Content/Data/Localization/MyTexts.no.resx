@@ -285,6 +285,10 @@
   <data name="Sprocket.MemberAudit.Title" xml:space="preserve">
     <value>Sjekk medlemstekster</value>
   </data>
+  <data name="Sprocket.MemberAudit.Clean" xml:space="preserve">
+    <value>Alle medlemmene på denne konstruksjonen har tekst.</value>
+    <comment>Said in a dialog after the developer button that checks member texts is pressed, when every member has a description.</comment>
+  </data>
   <data name="Sprocket.MemberAudit.Done" xml:space="preserve">
     <value>{count} medlemmer mangler tekst. De står i spillets logg.</value>
   </data>

@@ -37,6 +37,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _editor.Invalidate();
         }
 
+        /// <summary>Calls <paramref name="blueprint" />, read from the library's <paramref name="volume" />, <paramref name="name" />, and keeps it there so.</summary>
+        public void Rename(AutomationSystem blueprint, LibraryEntry volume, string name)
+        {
+            var wanted = NameRules.Clean(name);
+            if (wanted.Length == 0)
+                return;
+
+            blueprint.Name = wanted;
+            blueprint.Origin = volume.Identity;
+            var kept = _editor.Shelf.Keep(blueprint);
+            _editor.Sharing?.Renew(kept.Identity, kept.Text);
+            (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
+            _editor.Invalidate();
+        }
+
         /// <summary>Asks before deleting <paramref name="volume" /> from the library.</summary>
         public void Unshelve(LibraryEntry volume)
         {

@@ -195,6 +195,10 @@
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Gi plassen et navn, og si hva den er til.</value>
   </data>
+  <data name="Sprocket.Library.NameAbout" xml:space="preserve">
+    <value>Navnet på denne plantegningen.</value>
+    <comment>Tip on a blueprint's name in the library, which it can be renamed on.</comment>
+  </data>
   <data name="Sprocket.System.NameAbout" xml:space="preserve">
     <value>Navnet på dette logikksystemet.</value>
   </data>
@@ -859,11 +863,11 @@
     <value>Teksten som ligger i blokkens custom data.</value>
     <comment>Codex entry on the block member "custom data" of Terminal, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.Terminal.ShowOnHud" xml:space="preserve">
+  <data name="Sprocket.Member.Terminal.ShowOnHUD" xml:space="preserve">
     <value>Når den er på, er blokken merket på HUD-en.</value>
     <comment>Codex entry on the block member "show on hud" of Terminal, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.Terminal.ToggleShowOnHud" xml:space="preserve">
+  <data name="Sprocket.Member.Terminal.ToggleShowOnHUD" xml:space="preserve">
     <value>Slår `show on HUD` på når den er av, og av når den er på.</value>
     <comment>Codex entry on the block member "toggle show on hud" of Terminal, shown in the picker when it is chosen.</comment>
   </data>
@@ -3391,67 +3395,67 @@
     <value>Hvor langt unna musikken kan høres, i meter.</value>
     <comment>Codex entry on the block member "range" of Jukebox, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.ShowText" xml:space="preserve">
+  <data name="Sprocket.Member.ShowText" xml:space="preserve">
     <value>Bytter ut teksten på skjermen. Dette endrer ikke hva `content` på skjermen er.</value>
     <comment>Codex entry on the block member "show text" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.SetUpScreen" xml:space="preserve">
+  <data name="Sprocket.Member.SetUpScreen" xml:space="preserve">
     <value>Endrer hvordan skjermen ser ut og hva den viser. Innstillinger som står tomme, blir som de er.</value>
     <comment>Codex entry on the block member "set up screen" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.ShowImage" xml:space="preserve">
+  <data name="Sprocket.Member.ShowImage" xml:space="preserve">
     <value>Viser ett valgt bilde på skjermen i stedet for de den viser, og setter `content` til `text and images`.</value>
     <comment>Codex entry on the block member "show image" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.Text" xml:space="preserve">
+  <data name="Sprocket.Member.Text" xml:space="preserve">
     <value>Teksten som står skrevet på skjermen.</value>
     <comment>Codex entry on the block member "text" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.Content" xml:space="preserve">
+  <data name="Sprocket.Member.Content" xml:space="preserve">
     <value>Hva skjermen viser: `nothing`, `text and images` eller `app`.</value>
     <comment>Codex entry on the block member "content" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.App" xml:space="preserve">
+  <data name="Sprocket.Member.App" xml:space="preserve">
     <value>Appen som er satt på skjermen, eller `none` hvis den ikke har noen. Den kjører bare mens `content` er `app`.</value>
     <comment>Codex entry on the block member "app" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.TextColor" xml:space="preserve">
+  <data name="Sprocket.Member.TextColor" xml:space="preserve">
     <value>Fargen på teksten på skjermen.</value>
     <comment>Codex entry on the block member "text color" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.BackgroundColor" xml:space="preserve">
+  <data name="Sprocket.Member.BackgroundColor" xml:space="preserve">
     <value>Fargen bak teksten på skjermen.</value>
     <comment>Codex entry on the block member "background color" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.Font" xml:space="preserve">
+  <data name="Sprocket.Member.Font" xml:space="preserve">
     <value>Skrifttypen teksten er skrevet i.</value>
     <comment>Codex entry on the block member "font" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.FontSize" xml:space="preserve">
+  <data name="Sprocket.Member.FontSize" xml:space="preserve">
     <value>Hvor stor teksten er.</value>
     <comment>Codex entry on the block member "font size" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.Alignment" xml:space="preserve">
+  <data name="Sprocket.Member.Alignment" xml:space="preserve">
     <value>Hvordan teksten står på skjermen: `left`, `center` eller `right`.</value>
     <comment>Codex entry on the block member "alignment" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.Padding" xml:space="preserve">
+  <data name="Sprocket.Member.Padding" xml:space="preserve">
     <value>Rommet rundt teksten, i prosent.</value>
     <comment>Codex entry on the block member "padding" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.AppColor" xml:space="preserve">
+  <data name="Sprocket.Member.AppColor" xml:space="preserve">
     <value>Fargen en app tegner i.</value>
     <comment>Codex entry on the block member "app color" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.AppBackgroundColor" xml:space="preserve">
+  <data name="Sprocket.Member.AppBackgroundColor" xml:space="preserve">
     <value>Fargen bak en app.</value>
     <comment>Codex entry on the block member "app background color" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.ImageInterval" xml:space="preserve">
+  <data name="Sprocket.Member.ImageInterval" xml:space="preserve">
     <value>Hvor lenge hvert bilde vises før det neste, i sekunder.</value>
     <comment>Codex entry on the block member "image interval" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.ScreenType.KeepAspectRatio" xml:space="preserve">
+  <data name="Sprocket.Member.KeepAspectRatio" xml:space="preserve">
     <value>Når den er på, beholder et bilde proporsjonene sine.</value>
     <comment>Codex entry on the block member "keep aspect ratio" of ScreenType, shown in the picker when it is chosen.</comment>
   </data>

@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <inheritdoc />
         protected override Element CreateView()
         {
-            new Gutter(Sizes.Indent, Gaps.Items) { Body = { Children = { new BlueprintDetail(Editor).As(out _detail) } } }.As(out _opened);
+            new Gutter(Sizes.Indent, Gaps.Items) { Spans = true, Body = { Children = { new BlueprintDetail(Editor).As(out _detail) } } }.As(out _opened);
 
             return new HStack
             {

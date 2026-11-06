@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Say(_firstSection, _firstHeading, _first, texts.BlueprintParts, CodexPages.Slot, _names);
 
             _names.Clear();
-            for (var i = 0; live != null && i < live.Instances.Count; i++)
+            for (var i = 0; chosen.Section == LibrarySection.OnConstruct && live != null && i < live.Instances.Count; i++)
                 _names.Add(SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, live, live.Instances[i]));
 
             Say(_secondSection, _secondHeading, _second, texts.LibraryInstallationsHeading, CodexPages.Installation, _names);
@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 _keep.Command = _editor.Act(CommandKind.Shelve, () => _editor.Holdings.KeepCopy(line));
                 _block.Text = Template.Fill(texts.LibraryBlock, "name", line.SharerName);
                 _block.Tip = CodexTip.For(null, Template.Fill(texts.LibraryBlockAbout, "name", line.SharerName));
-                _block.Command = _editor.Act(CommandKind.Expand, () => board.Block(line.Sharer));
+                _block.Command = _editor.Act(CommandKind.Expand, () => board?.Block(line.Sharer));
             }
 
             _shares.IsVisible = _share.IsVisible || _withdraw.IsVisible || _keep.IsVisible;

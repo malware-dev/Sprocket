@@ -3,11 +3,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>Keeps a logic system to one block's list, or lets it list on every block again.</summary>
     public sealed class ListSystemOn : SystemEdit
     {
-        readonly string _was;
-        readonly string _now;
+        readonly long _was;
+        readonly long _now;
 
-        /// <summary>Changes the block a logic system lists on from <paramref name="was" /> to <paramref name="now" />, empty for every block.</summary>
-        public ListSystemOn(string was, string now)
+        /// <summary>Changes the block a logic system lists on from <paramref name="was" /> to <paramref name="now" />, entity ids with 0 for every block.</summary>
+        public ListSystemOn(long was, long now)
         {
             _was = was;
             _now = now;

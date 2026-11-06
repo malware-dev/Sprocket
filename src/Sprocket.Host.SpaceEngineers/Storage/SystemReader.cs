@@ -154,7 +154,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            system.ListedOn = attribute.Value.Word;
+            long block;
+            if (long.TryParse(attribute.Value.Word, NumberStyles.None, CultureInfo.InvariantCulture, out block))
+                system.ListedOn = block;
         }
 
         static void LastSequence(Statement statement, AutomationSystem system, ScriptTrouble trouble)

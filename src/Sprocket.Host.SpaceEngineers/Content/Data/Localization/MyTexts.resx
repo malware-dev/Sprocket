@@ -370,9 +370,13 @@
     <value>Check member texts</value>
     <comment>Button shown only in developer mode: looks for block members on this construct that have no description in the codex.</comment>
   </data>
+  <data name="Sprocket.MemberAudit.Clean" xml:space="preserve">
+    <value>Every member on this construct has a text.</value>
+    <comment>Said in a dialog after the developer button that checks member texts is pressed, when every member has a description.</comment>
+  </data>
   <data name="Sprocket.MemberAudit.Done" xml:space="preserve">
     <value>{count} members have no text. They are listed in the game's log.</value>
-    <comment>A chat line after the developer button that checks member texts. {count} is how many have no description.</comment>
+    <comment>Said in a dialog after the developer button that checks member texts is pressed. {count} is how many have no description.</comment>
   </data>
   <data name="Sprocket.Script.Title" xml:space="preserve">
     <value>Script</value>

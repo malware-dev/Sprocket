@@ -98,7 +98,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _here.Children.Clear();
             _list.Children.Clear();
 
-            var held = Construct(_here, Editor.World.Name);
+            var held = new VStack { Base = { Spacing = Gaps.Items } };
+            _here.Children.Add(new Section { Children = { new Label { Style = Styles.InnerName, Text = Editor.World.Name }, held } });
             var here = 0;
             var systems = Editor.Program.Systems;
             for (var i = 0; i < systems.Count; i++)
@@ -110,6 +111,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 var system = systems[i];
                 var row = new StatusRow { Mark = Symbols.LogicSystem, Summary = system.Name, Depth = 1 };
                 row.Status = Installations(texts, system.Instances.Count);
+                row.Renames = plate => Editor.Act(CommandKind.Rename, () => Editor.Rename(plate, new Naming
+                {
+                    Name = system.Name,
+                    NameRequired = true,
+                    Accepts = wanted => Free(system, wanted),
+                    Renames = wanted => Rename(system, wanted)
+                }));
+                row.RenameText = texts.Codex.SystemNameAbout;
                 Add(new LibraryListing { Section = LibrarySection.OnConstruct, Identity = system.Identity }, row, held);
             }
 
@@ -254,6 +263,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     row.Problem = Unkept(volume, texts);
                     row.Problems = 1;
                 }
+                else
+                {
+                    var blueprint = entry.Read;
+                    row.Renames = plate => Editor.Act(CommandKind.Rename, () => Editor.Rename(plate, new Naming
+                    {
+                        Name = volume.Name,
+                        NameRequired = true,
+                        Renames = wanted => Editor.Holdings.Rename(blueprint, volume, wanted)
+                    }));
+                    row.RenameText = texts.Codex.LibraryNameAbout;
+                }
 
                 Add(entry, row, kept);
             }
@@ -323,6 +343,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var heading = new RichText { Style = Styles.H2Term, Align = Align.Left, Markdown = markdown };
             Editor.Codex.Explain(heading);
             return heading;
+        }
+
+        bool Free(AutomationSystem system, string name)
+        {
+            var other = Editor.Program.FindSystem(system.Namespace, NameRules.Clean(name));
+            return other == null || other == system;
+        }
+
+        void Rename(AutomationSystem system, string name)
+        {
+            var wanted = NameRules.Clean(name);
+            if (wanted.Length != 0 && Free(system, wanted))
+                Editor.Do(system, new RenameSystem(system.Name, wanted));
         }
 
         /// <summary>Adds a part of the list under <paramref name="heading" />, and gives back where what it heads goes, <paramref name="apart" /> from each other.</summary>

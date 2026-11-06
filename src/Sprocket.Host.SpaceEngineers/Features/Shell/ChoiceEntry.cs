@@ -21,5 +21,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>What choosing it does, or null where the editor refuses it.</summary>
         public ICommand Command { get; private set; }
+
+        /// <summary>The tip on an action at the foot of the screen, or empty for none.</summary>
+        public string About { get; set; } = "";
     }
 }

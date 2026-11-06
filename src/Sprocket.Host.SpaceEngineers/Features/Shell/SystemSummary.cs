@@ -126,16 +126,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </summary>
         public static long KeptTo(AutomationRunner runner, AutomationSystem system)
         {
-            if (system.ListedOn.Length == 0)
-                return 0;
-
-            var bindings = runner.Bindings;
-            var block = bindings.Entity(system.ListedOn);
-            if (block == null || bindings.State(system.ListedOn) != RefState.Bound)
+            if (system.ListedOn == 0 || runner.World.FindEntity(system.ListedOn) == null)
                 return 0;
 
             SequenceFault fault;
-            return SystemFailing(runner, system, out fault) != null ? 0 : block.Id;
+            return SystemFailing(runner, system, out fault) != null ? 0 : system.ListedOn;
         }
 
         /// <summary>The first of a system's sequences, or of its triggers' own acts, with something wrong with it on <paramref name="instance" />, and what, or null where none has.</summary>

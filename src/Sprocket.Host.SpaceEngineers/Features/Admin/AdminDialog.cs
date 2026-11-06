@@ -38,6 +38,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             CancelCommand = close;
             AcceptCommand = close;
 
+            var tabs = new TabView
+            {
+                Tabs =
+                {
+                    new Tab { Style = Styles.Tab, Header = texts.AdminThisWorld, Content = Page(texts, true) },
+                    new Tab { Style = Styles.Tab, Header = texts.AdminEveryWorld, Tip = CodexTip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
+                }
+            };
+
+            if (editor.Sharing != null)
+                tabs.Tabs.Insert(1, new Tab { Style = Styles.Tab, Header = texts.AdminSharing, Content = _shares });
+
             Content = new VStack
             {
                 Base = { Spacing = Gaps.Items },
@@ -45,15 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                 {
                     new Label { Style = Styles.Phrase, Text = texts.AdminTitle },
                     new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Wrap, Text = texts.AdminLine },
-                    new TabView
-                    {
-                        Tabs =
-                        {
-                            new Tab { Style = Styles.Tab, Header = texts.AdminThisWorld, Content = Page(texts, true) },
-                            new Tab { Style = Styles.Tab, Header = texts.AdminSharing, IsVisible = editor.Sharing != null, Content = _shares },
-                            new Tab { Style = Styles.Tab, Header = texts.AdminEveryWorld, Tip = CodexTip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
-                        }
-                    },
+                    tabs,
                     new Button { Style = Styles.Primary, Text = texts.AdminClose, Align = Align.Right, Command = close }
                 }
             };

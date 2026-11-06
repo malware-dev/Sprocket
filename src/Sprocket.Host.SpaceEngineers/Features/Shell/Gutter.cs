@@ -28,11 +28,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The things set in, top to bottom.</summary>
         public VStack Body => _body;
 
+        /// <summary>Whether the spine turns in at the bottom of the last thing shown, for one tall thing, rather than at its middle.</summary>
+        public bool Spans { get; set; }
+
         /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
             base.ArrangeContent(bounds);
             _spine.Ends = Last();
+            _spine.TurnsAtBottom = Spans;
         }
 
         Element Last()

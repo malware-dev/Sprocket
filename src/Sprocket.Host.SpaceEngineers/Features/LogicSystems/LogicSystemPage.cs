@@ -409,16 +409,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _addTriggers.IsVisible = editable;
             _addSequence.IsVisible = editable;
-            _keepHere.IsVisible = editable && Editor.OpenedFrom != 0 && Editor.DeveloperMode;
-            if (_keepHere.IsVisible)
-            {
-                var kept = _system.ListedOn.Length > 0;
-                _keepHere.Text = kept ? Editor.Texts.SystemsListEverywhere : Editor.Texts.SystemsKeepHere;
-                _keepHere.Tip = CodexTip.For(_keepHere.Tip, Editor.Texts.SystemsKeepHereAbout);
-                _keepHere.Command = Changes(CommandKind.Expand, () => Editor.Do(_system, new ListSystemOn(_system.ListedOn,
-                    kept ? "" : Editor.Program.Declare(Editor.World, Editor.World.FindEntity(Editor.OpenedFrom)).Name)));
-            }
-
             _locked.IsVisible = !editable;
             _lockedText.Text = LockedText;
         }
@@ -451,6 +441,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 : Editor.Holder != null
                     ? Template.Fill(Editor.Texts.SequenceHeld, "holder", Editor.Holder)
                     : Editor.Texts.Codex.SystemTurnOffToEdit;
+        }
+
+        /// <summary>The action keeping this logic system to the block the editor was opened from, or taking it back, or null where somebody else holds the construct or no block opened the editor.</summary>
+        public ChoiceEntry KeepHere
+        {
+            get
+            {
+                if (Editor.Holder != null || Editor.OpenedFrom == 0)
+                    return null;
+
+                var kept = _system.ListedOn != 0;
+                var text = kept ? Editor.Texts.SystemsListEverywhere : Editor.Texts.SystemsKeepHere;
+                var command = Editor.Act(CommandKind.Expand, () => Editor.Do(_system, new ListSystemOn(_system.ListedOn, kept ? 0L : Editor.OpenedFrom)));
+                return new ChoiceEntry(text, false, command) { About = Editor.Texts.SystemsKeepHereAbout };
+            }
         }
 
         /// <summary>A command made only while the system may be changed, and null while it may not.</summary>

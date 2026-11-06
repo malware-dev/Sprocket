@@ -589,6 +589,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var entry = actions[i];
                 _actionsShown.Add(entry);
                 var action = new Button { Style = Styles.Plain, Text = Caps(entry.Text), Command = entry.Command };
+                if (entry.About.Length != 0)
+                    action.Tip = CodexTip.For(null, entry.About);
+
                 action.Set(LookStates.Chosen, entry.IsCurrent);
                 _actions.Children.Add(action);
             }

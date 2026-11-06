@@ -179,6 +179,49 @@ public class LibraryTests
         Assert.False(Live(ToConstruct(page)));
     }
 
+    /// <summary>What a chosen row opens is held by its spine from its top to its last line.</summary>
+    [Fact]
+    public void TheSpineHoldsAllAChosenRowOpens()
+    {
+        var screen = Screen.Fresh("press", "+ logic system", "type", "Airlock", "enter", "press", "Done", "press", "Library", "tick", "5");
+        var page = (LibraryPage)screen.Editor.Current;
+        var row = page.Rows.OfType<StatusRow>().First();
+        var opened = ((Lumel.Panel)row.Parent).Children.OfType<Gutter>().Single();
+
+        Assert.True(opened.Children.OfType<Lumel.Controls.TreeLine>().Single().TurnsAtBottom);
+    }
+
+    /// <summary>Installations are this construct's, so the left side lists them and storage never does.</summary>
+    [Fact]
+    public void OnlyTheConstructsSideListsInstallations()
+    {
+        var script = new[] { "press", "+ logic system", "type", "Airlock", "enter", "press", "Done", "press", "Library", "tick", "5" };
+        var here = Screen.Fresh(script);
+        Assert.True(here.Shows("INSTALLATIONS"), "the construct's side did not list its installations");
+
+        var kept = Screen.Fresh(script.Concat(new[] { "720", "520", "tick", "5", "press", "Make blueprint", "tick", "10" }).ToArray());
+        Assert.True(kept.Shows("IN STORAGE"));
+        Assert.False(kept.Shows("INSTALLATIONS"), "storage listed the construct's installations");
+    }
+
+    /// <summary>A blueprint renamed in the library is kept under its new name, by the same identity.</summary>
+    [Fact]
+    public void ABlueprintIsRenamedInTheLibrary()
+    {
+        var rig = Blueprinted();
+        rig.Editor.Stamp(true);
+        var volume = rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        var identity = volume.Identity;
+        var read = new Automation();
+        Assert.Equal("", ProgramReader.Load(volume.Text, read, new Values()));
+
+        rig.Editor.Holdings.Rename(read.Systems[0], volume, "Side Airlock");
+
+        Assert.Single(rig.Shelf.All);
+        Assert.Equal("Side Airlock", rig.Shelf.Find(identity)!.Name);
+        Assert.Contains("Side Airlock", rig.Shelf.Find(identity)!.Text);
+    }
+
     /// <summary>A lost construct whose every logic system has its equal in the library leaves no backup: the library has it all.</summary>
     [Fact]
     public void ALostConstructTheLibraryHoldsLeavesNoBackup()

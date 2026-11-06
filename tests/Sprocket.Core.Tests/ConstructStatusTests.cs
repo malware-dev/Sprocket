@@ -174,7 +174,7 @@ public class ConstructStatusTests
         var ship = Build();
         AutomationSystem airlock = System(ship, "Airlock", 2, 2);
         System(ship, "Hangar", 1, 1);
-        airlock.ListedOn = ship.Ref(2);
+        airlock.ListedOn = 2;
         ship.Tick(3);
 
         var status = Look(ship);

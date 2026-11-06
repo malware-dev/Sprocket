@@ -1029,6 +1029,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _actionBar.Add(new ChoiceEntry(Texts.ScriptTitle, Current is ScriptPage,
                     Act(CommandKind.ShowScript, ShowScript)));
                 _actionBar.Add(new ChoiceEntry(Texts.MemberAuditTitle, false, Act(CommandKind.CheckMembers, CheckMembers)));
+
+                var keepHere = (Current as LogicSystemPage)?.KeepHere;
+                if (keepHere != null)
+                    _actionBar.Add(keepHere);
             }
 
             _screen.ShowActions(_actionBar);
@@ -1091,7 +1095,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             foreach (var row in missing)
                 GameLog.Say($"No member text: {row}");
 
-            Sandbox.ModAPI.MyAPIGateway.Utilities?.ShowMessage(Texts.MemberAuditTitle, Template.Fill(Texts.MemberAuditDone, "count", missing.Count.ToString()));
+            Windows?.Open(new MemberAuditDialog(Texts, missing.Count == 0 ? Texts.MemberAuditClean : Template.Fill(Texts.MemberAuditDone, "count", missing.Count.ToString())));
         }
 
         /// <summary>Opens the library: the world's backups, and the blueprints.</summary>
