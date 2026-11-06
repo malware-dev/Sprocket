@@ -10,8 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly OwnValue Connections = OwnValue.Whole<IMyUpgradeModule>(module => module.Connections);
 
-        static readonly OwnValue Upgrades = OwnValue.Whole<IMyUpgradeModule>(module => module.UpgradeCount);
-
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
         {
@@ -21,9 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            // How many kinds of boost a module gives is fixed by its definition, so it never changes and there is nothing to announce.
-            kind.WithValue("connections", "connections", Connections).Looked(Unheard).In(Category.State)
-                .WithValue("upgrade-count", "upgrade count", Upgrades).Announced().In(Category.State);
+            kind.WithValue("connections", "connections", Connections).Looked(Unheard).In(Category.State);
         }
     }
 }

@@ -139,10 +139,10 @@ public class SensingTests
         var kind = entity.Kind;
 
         Assert.Equal("goes off", kind.FindEvent("toolbar-1-0-0")!.Text);
-        Assert.True(kind.FindAction("counting-down", ReachKind.Value)!.LookedBecause.Length > 0);
-        Assert.False(Read(entity, "counting-down").Flag);
+        Assert.True(kind.FindAction("counting_down", ReachKind.Value)!.LookedBecause.Length > 0);
+        Assert.False(Read(entity, "counting_down").Flag);
         counting = true;
-        Assert.True(Read(entity, "counting-down").Flag);
+        Assert.True(Read(entity, "counting_down").Flag);
 
         Assert.Equal("start", kind.FindAction("Start", ReachKind.Action)!.Text);
         Assert.Equal("stop", kind.FindAction("Stop", ReachKind.Action)!.Text);
@@ -220,10 +220,10 @@ public class SensingTests
         var entity = ship.Entity(block.Id);
         var kind = entity.Kind;
 
-        Assert.True(kind.FindAction("has-compile-errors", ReachKind.Value)!.LookedBecause.Length > 0);
-        Assert.True(Read(entity, "has-compile-errors").Flag);
+        Assert.True(kind.FindAction("has_compile_errors", ReachKind.Value)!.LookedBecause.Length > 0);
+        Assert.True(Read(entity, "has_compile_errors").Flag);
         broken = false;
-        Assert.False(Read(entity, "has-compile-errors").Flag);
+        Assert.False(Read(entity, "has_compile_errors").Flag);
 
         Assert.False(kind.FindAction("ConsoleCommand", ReachKind.Value)!.Vetted);
     }
@@ -247,6 +247,31 @@ public class SensingTests
         Ran.Step(ship, block, ProgrammableBlock.Run, Literal.Of(""));
 
         Assert.Equal(new[] { "dock", "" }, ran);
+    }
+
+    /// <summary>A script that throws as it is run ends the run at its step, as one that would not run does.</summary>
+    [Fact]
+    public void AScriptThatThrowsEndsTheRun()
+    {
+        var ship = new Rigged();
+        var block = Weld<IMyProgrammableBlock>(ship, 1, "Script Block", typeof(MyObjectBuilder_MyProgrammableBlock),
+            stand => stand.Does("TryRun", _ => throw new InvalidOperationException("over its instruction limit")));
+
+        var automation = new Automation();
+        var sequence = automation.AddSequence((Trigger)null!);
+        var run = new Act(ProgrammableBlock.Run);
+        run.Targets.Add(automation.Declare(ship.World, ship.Entity(block.Id)).Name);
+        run.Arguments.Add(Literal.Of(""));
+        sequence.Steps.Add(run);
+
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+        runner.Call(sequence);
+        ship.Tick();
+        runner.Tick(2);
+
+        Assert.Equal(SequenceProblem.Stuck, runner.Get(sequence)!.Fault.Problem);
     }
 
     /// <summary>A script that does not run ends the run at its step, saying why and which block.</summary>
@@ -339,12 +364,12 @@ public class SensingTests
         Assert.Equal("out-of-range", Said(entity, "link"));
 
         Assert.NotNull(kind.FindAction("link", ReachKind.Value)!.RuledOutBy);
-        foreach (var id in new[] { "starts-connecting", "connects", "disconnects" })
+        foreach (var id in new[] { "starts_connecting", "connects", "disconnects" })
             Assert.NotNull(kind.FindEvent(id)!.RuledOutBy);
 
         // Leaving idle is starting to connect, and leaving connected is disconnecting.
         status = MyLaserAntennaStatus.SearchingTargetForAntenna;
-        Assert.True(entity.In(kind.FindEvent("starts-connecting")!, new ReaderMemory()));
+        Assert.True(entity.In(kind.FindEvent("starts_connecting")!, new ReaderMemory()));
         status = MyLaserAntennaStatus.Connected;
         Assert.True(entity.In(kind.FindEvent("connects")!, new ReaderMemory()));
         Assert.False(entity.In(kind.FindEvent("disconnects")!, new ReaderMemory()));
@@ -505,7 +530,7 @@ public class SensingTests
             .Offering("DecreaseTriggerDelay", "Decrease Delay");
         var kind = ship.Entity(timer.Id).Kind;
 
-        Vetted(kind, ReachKind.Value, "counting-down", "TriggerDelay", "Silent");
+        Vetted(kind, ReachKind.Value, "counting_down", "TriggerDelay", "Silent");
         Vetted(kind, ReachKind.Action, "Start", "Stop", "TriggerNow", "Silent");
         NotVetted(kind, ReachKind.Action, "IncreaseTriggerDelay", "DecreaseTriggerDelay");
     }
@@ -524,7 +549,7 @@ public class SensingTests
             .Offering("RunWithDefaultArgument", "Run with default argument");
         var kind = ship.Entity(block.Id).Kind;
 
-        Vetted(kind, ReachKind.Value, "has-compile-errors");
+        Vetted(kind, ReachKind.Value, "has_compile_errors");
         NotVetted(kind, ReachKind.Value, "ConsoleCommand");
         NotVetted(kind, ReachKind.Action, "Run", "RunWithDefaultArgument");
     }

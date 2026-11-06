@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage.Upgrades
         // The members of a block's screens as alpha 18 programs persist them.
         static readonly string[] ScreenMembers =
         {
-            ScreenType.ShowText, ScreenType.SetUp, "content", "text-color", "background-color", "font", "font-size", "alignment",
+            "show-text", "set-up-screen", "content", "text-color", "background-color", "font", "font-size", "alignment",
             "padding", "app-color", "app-background-color", "image-interval", "keep-aspect-ratio"
         };
 

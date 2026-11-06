@@ -23,16 +23,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed partial class ScreenType : HostType
     {
         /// <summary>The action that writes text on a screen.</summary>
-        public const string ShowText = "show-text";
+        public const string ShowText = "show_text";
 
         /// <summary>Setting up how a screen shows what it shows, which is Sprocket's own.</summary>
-        public const string SetUp = "set-up-screen";
+        public const string SetUp = "set_up_screen";
 
         /// <summary>Showing a chosen image on a screen, which is Sprocket's own.</summary>
-        public const string ShowImage = "show-image";
+        public const string ShowImage = "show_image";
 
         /// <summary>The text a screen shows, which is Sprocket's own.</summary>
-        public const string TextShown = "text-shown";
+        public const string TextShown = "text_shown";
 
         /// <summary>The app a screen runs, which is Sprocket's own.</summary>
         public const string App = "app";
@@ -307,7 +307,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>The id of the screen's setting called <paramref name="said" />.</summary>
         static string Setting(string said)
         {
-            return said.Replace(' ', '-');
+            return said.Replace(' ', '_');
         }
 
         /// <summary>A color called <paramref name="name" />.</summary>

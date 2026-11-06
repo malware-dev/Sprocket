@@ -25,9 +25,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("targeting", "targeting", Targeting).Status().Announced()
-                .WithChange("finds-a-target", "finds a target", "targeting", Literal.Of(true)).Announced()
+                .WithChange("finds_a_target", "finds a target", "targeting", Literal.Of(true)).Announced()
                 .Reading("is targeting", "is not targeting")
-                .WithChange("loses-its-target", "loses its target", "targeting", Literal.Of(false)).Announced()
+                .WithChange("loses_its_target", "loses its target", "targeting", Literal.Of(false)).Announced()
                 .Reading("is not targeting", "is targeting")
                 .Renaming("TargetLock", true, block is IMyDefensiveCombatBlock ? "defend against" : "attack target")
                 .Renaming("TargetingGroup", true, "aims at")

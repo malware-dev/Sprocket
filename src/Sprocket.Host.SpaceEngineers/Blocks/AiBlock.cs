@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("ai-running", "running", Running).Status().Announced()
+            kind.WithValue("ai_running", "running", Running).Status().Announced()
                 .Renaming("ActivateBehavior_On", false, "start the AI")
                 .Renaming("ActivateBehavior_Off", false, "stop the AI")
                 .Renaming("ActivateBehavior", false, "toggle the AI");

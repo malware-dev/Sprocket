@@ -225,7 +225,7 @@ public class ProgramCopyTests
         shut.Does = new Run(3);
         system.AddTrigger(shut);
 
-        var finished = SignalTrigger.Written(BlockKinds.Own, "finishes-closing");
+        var finished = SignalTrigger.Written(BlockKinds.Own, "finishes_closing");
         finished.Sources.Add("inner");
         finished.Does = new SetState { State = "where", Value = Literal.Name("inside") };
         system.AddTrigger(finished);

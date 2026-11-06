@@ -24,9 +24,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithAction("flee", "flee", Flees).In(Category.Automation)
                 .WithValue("fleeing", "fleeing", Fleeing).Status().Announced()
-                .WithChange("starts-fleeing", "starts fleeing", "fleeing", Literal.Of(true)).Announced()
+                .WithChange("starts_fleeing", "starts fleeing", "fleeing", Literal.Of(true)).Announced()
                 .Reading("is fleeing", "is not fleeing")
-                .WithChange("stops-fleeing", "stops fleeing", "fleeing", Literal.Of(false)).Announced()
+                .WithChange("stops_fleeing", "stops fleeing", "fleeing", Literal.Of(false)).Announced()
                 .Reading("is not fleeing", "is fleeing")
                 .Renaming("Flee", true, "flees when")
                 .Renaming("FleeMode", true, "flee destination")
@@ -38,9 +38,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("LockTarget", false, "toggle lock target")
                 .Renaming("EvasiveManeuvers", true, "evasive maneuvers")
                 .Renaming("EvasiveManeuvers", false, "toggle evasive maneuvers")
-                .Renaming("EvasiveManeuverAngle", true, "evasive angle")
+                .Renaming("EvasiveManeuverAngle", true, "random deviation angle")
                 .Measuring("EvasiveManeuverAngle", "°")
-                .Renaming("EvasiveManeuverIntervalRange", true, "evasive interval")
+                .Renaming("EvasiveManeuverIntervalRange", true, "random deviation interval")
                 .Measuring("EvasiveManeuverIntervalRange", " s");
         }
 

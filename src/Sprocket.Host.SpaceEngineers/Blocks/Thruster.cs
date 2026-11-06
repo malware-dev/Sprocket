@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (Aired(block))
                 kind.WithValue("effectiveness", "effectiveness", Effectiveness).Percent().Looked(Unaired).In(Category.Flight);
 
-            kind.WithValue("maximum-thrust", "maximum thrust", MostThrust).Measured(" N").Announced().In(Category.Flight)
+            kind.WithValue("maximum_thrust", "maximum thrust", MostThrust).Measured(" N").Announced().In(Category.Flight)
                 .Hiding("Override", "SetOverride", "IncreaseOverride", "DecreaseOverride");
         }
 

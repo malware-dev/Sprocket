@@ -39,7 +39,7 @@ public class ChangingTests
         screen.Run(2);
 
         var trigger = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
-        Assert.Equal("finishes-closing", trigger.EventId);
+        Assert.Equal("finishes_closing", trigger.EventId);
         Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(0));
 
         // The one it replaced is gone rather than left beside it.
@@ -512,7 +512,7 @@ public class ChangingTests
         screen.Editor.Steps().Redo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("finishes-closing", Assert.IsType<SignalTrigger>(System(screen).Triggers[0]).EventId);
+        Assert.Equal("finishes_closing", Assert.IsType<SignalTrigger>(System(screen).Triggers[0]).EventId);
     }
 
     /// <summary>

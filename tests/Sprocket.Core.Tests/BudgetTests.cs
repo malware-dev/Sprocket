@@ -42,7 +42,7 @@ public class BudgetTests
         var automation = new Automation();
         var door = ship.Door(1, "Door");
         var lamp = ship.Light(2, "Lamp");
-        Watch(ship, automation, "finishes-opening", door.Id, lamp.Id);
+        Watch(ship, automation, "finishes_opening", door.Id, lamp.Id);
 
         var runner = new AutomationRunner(automation, ship.World);
         var frame = Settle(ship, runner);
@@ -67,7 +67,7 @@ public class BudgetTests
         var automation = new Automation();
         var vent = ship.Vent(1, "Vent");
         var lamp = ship.Light(2, "Lamp");
-        Watch(ship, automation, "finishes-filling", vent.Id, lamp.Id);
+        Watch(ship, automation, "finishes_filling", vent.Id, lamp.Id);
 
         var runner = new AutomationRunner(automation, ship.World);
         var frame = Settle(ship, runner);

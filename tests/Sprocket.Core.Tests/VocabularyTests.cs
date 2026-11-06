@@ -80,7 +80,7 @@ public class VocabularyTests
     [Fact]
     public void EveryShapeReadsAndIsWrittenBackAsItWas()
     {
-        const string written = "sprocket 1 alpha 21\n\n"
+        const string written = "sprocket 1 alpha 22\n\n"
             + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n"
             + "let light = block 'InteriorLight/SmallLight' [ 2 ]\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
@@ -88,7 +88,7 @@ public class VocabularyTests
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Airlock\n{\n"
             + "    whenever button then run 1\n\n"
-            + "    whenever ext.'finishes-closing' on [ door1 ] then run 1\n\n"
+            + "    whenever ext.finishes_closing on [ door1 ] then run 1\n\n"
             + "    whenever ext.toolbar(1, 1, 2) on [ panel2 ] then run 1\n\n"
             + "    when all ext.status on [ door1 ] != closed then run 1\n\n"
             + "    when sum Radius on [ light ] >= 2.5 then call SetColor(255, 136, 0) on [ light ]\n\n"
@@ -128,7 +128,7 @@ public class VocabularyTests
     public void AComparisonReadsWhateverItsSpacing(string line)
     {
         var program = new Automation();
-        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 21\n\nlet light = block 'InteriorLight/SmallLight' [ 2 ]\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 22\n\nlet light = block 'InteriorLight/SmallLight' [ 2 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Lamp\n{\n    sequence 1 {\n        " + line + "\n        }\n    }\n}\n",
             program, new Values()));
 
@@ -448,7 +448,7 @@ public class VocabularyTests
     [Fact]
     public void ASetOfAnOwnValueReadsAndIsWrittenBack()
     {
-        var written = "sprocket 1 alpha 21\n\n"
+        var written = "sprocket 1 alpha 22\n\n"
             + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Airlock\n{\n"
             + "    sequence 1 {\n"
@@ -655,12 +655,12 @@ public class VocabularyTests
         var ship = new Ship();
         var events = new List<EntityEvent>(ship.Rig.Entity(ship.Door.Id).Kind.Events);
 
-        var any = Assert.IsType<SignalTrigger>(Vocabulary.Starter(events, "finishes-closing", false));
+        var any = Assert.IsType<SignalTrigger>(Vocabulary.Starter(events, "finishes_closing", false));
         Assert.True(any.IsWatched);
         Assert.Equal(BlockKinds.Own, any.Provider);
-        Assert.Equal("finishes-closing", any.EventId);
+        Assert.Equal("finishes_closing", any.EventId);
 
-        var all = Assert.IsType<WhenTrigger>(Vocabulary.Starter(events, "finishes-closing", true));
+        var all = Assert.IsType<WhenTrigger>(Vocabulary.Starter(events, "finishes_closing", true));
         Assert.Equal("status", all.EventId);
         Assert.Equal(BlockKinds.Own, all.Provider);
         Assert.Equal(Quantifier.All, all.Quantifier);
@@ -673,7 +673,7 @@ public class VocabularyTests
     public void ASignalWrittenInPlaceIsAnsweredOnItsBlocks()
     {
         var program = new Automation();
-        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 21\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 22\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Bell\n{\n    whenever ext.toolbar(1, 2, 3) on [ panel2 ] then run 1\n\n"
@@ -736,7 +736,7 @@ public class VocabularyTests
     public void ASignalOnTwoBlocksIsAnsweredOnBoth()
     {
         var program = new Automation();
-        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 21\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 22\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
@@ -756,7 +756,7 @@ public class VocabularyTests
     public void ASignalPickedOnOneBlockIsNotOneOnSeveral()
     {
         var program = new Automation();
-        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 21\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 22\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n",
@@ -773,7 +773,7 @@ public class VocabularyTests
     [Fact]
     public void ASignalVariableIsWrittenOnlyWhereAllOfItAnswers()
     {
-        const string head = "sprocket 1 alpha 21\n\n"
+        const string head = "sprocket 1 alpha 22\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"

@@ -38,6 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case CommandKind.PageOn:
                 case CommandKind.PageBack:
                 case CommandKind.ShowScript:
+                case CommandKind.CheckMembers:
                 case CommandKind.OpenGuide:
                 case CommandKind.Shelve:
                 case CommandKind.Unshelve:
@@ -80,6 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case CommandKind.OpenTrigger:
                 case CommandKind.LoadSystem:
                 case CommandKind.ShowScript:
+                case CommandKind.CheckMembers:
                 case CommandKind.OpenGuide:
                 case CommandKind.RunNow:
                 case CommandKind.StopNow:

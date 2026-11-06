@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly string[] Targeted =
         {
-            "neutrals", "enemies", "friends", "characters", "small ships", "large ships", "stations", "meteors", "missiles"
+            "neutrals", "enemies", "friends", "characters", "small ships", "large ships", "stations", "meteors", "rockets"
         };
 
         /// <inheritdoc />
@@ -45,8 +45,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var turret = block is IMyLargeTurretBase;
             kind.WithValue("targeting", "targeting", turret ? TurretTargeting : ControllerTargeting).Status().Looked(Unaimed)
-                .WithValue("on-target", "on target", turret ? TurretOnTarget : ControllerOnTarget).Looked(Unaimed)
-                .WithValue("controlled-by-a-person", "controlled by a person", turret ? TurretControlled : ControllerControlled)
+                .WithValue("on_target", "on target", turret ? TurretOnTarget : ControllerOnTarget).Looked(Unaimed)
+                .WithValue("manually_controlled", "controlled by a person", turret ? TurretControlled : ControllerControlled)
                 .Announced().In(Category.Usage);
 
             kind.Renaming("Range", true, "AI aiming radius")

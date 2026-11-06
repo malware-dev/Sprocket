@@ -278,7 +278,7 @@ public class EditorTests
 
         var closed = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[1].Trigger);
         Assert.True(closed.IsWatched);
-        Assert.Equal("finishes-closing", closed.EventId);
+        Assert.Equal("finishes_closing", closed.EventId);
     }
 
     /// <summary>

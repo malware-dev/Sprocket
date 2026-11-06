@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithSignal(new ToolbarSlot(1, 0, 0), "goes off")
-                .WithValue("counting-down", "counting down", Counting)
+                .WithValue("counting_down", "counting down", Counting)
                 .Looked("A timer raises no event of its own.").In(Category.Automation)
                 .Renaming("Start", false, "start")
                 .Renaming("Stop", false, "stop")

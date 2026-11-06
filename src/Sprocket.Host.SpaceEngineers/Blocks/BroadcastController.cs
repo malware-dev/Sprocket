@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public const string Say = "say";
 
         /// <summary>Posting one of the messages saved in the controller's terminal, which is Sprocket's own.</summary>
-        public const string SendSaved = "send-a-saved-message";
+        public const string SendSaved = "transmit_message";
 
         // The game's controller saves eight messages, numbered from 1.
         const int Saved = 8;
@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(Say, "say", Says, AskedText()).In(Category.Signals)
-                .WithAction(SendSaved, "send a saved message", Sends, AskedMessage()).In(Category.Signals)
+                .WithAction(SendSaved, "transmit message", Sends, AskedMessage()).In(Category.Signals)
                 .Renaming("TransmitRandomMessage", false, "send random message")
                 .Renaming("SendGps", false, "send GPS")
                 .Renaming("BroadcastTarget", true, "broadcast target")

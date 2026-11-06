@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             if (block is IMyGravityGenerator)
             {
-                kind.WithAction("fit-to-the-grid", "fit to the grid", Fits, (string)null).In(Category.Other)
+                kind.WithAction("fit_to_the_grid", "fit to the grid", Fits, (string)null).In(Category.Other)
                     .Renaming("Width", true, "width")
                     .Measuring("Width", " m")
                     .Renaming("Height", true, "height")

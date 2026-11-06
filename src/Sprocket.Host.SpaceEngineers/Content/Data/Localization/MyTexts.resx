@@ -358,6 +358,14 @@
     <value>Edit the text</value>
     <comment>Button on the banner saying the block's program has an error in it: opens the program's text, where the error can be fixed.</comment>
   </data>
+  <data name="Sprocket.MemberAudit.Title" xml:space="preserve">
+    <value>Check member texts</value>
+    <comment>Button shown only in developer mode: looks for block members on this construct that have no description in the codex.</comment>
+  </data>
+  <data name="Sprocket.MemberAudit.Done" xml:space="preserve">
+    <value>{count} members have no text. They are listed in the game's log.</value>
+    <comment>A chat line after the developer button that checks member texts. {count} is how many have no description.</comment>
+  </data>
   <data name="Sprocket.Script.Title" xml:space="preserve">
     <value>Script</value>
     <comment>The heading of the script page in developer mode, which shows the program as text to edit by hand, and the entry along the bottom of the editor that opens that page, shown only in developer mode.</comment>

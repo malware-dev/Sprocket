@@ -1028,6 +1028,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 _actionBar.Add(new ChoiceEntry(Texts.ScriptTitle, Current is ScriptPage,
                     Act(CommandKind.ShowScript, ShowScript)));
+                _actionBar.Add(new ChoiceEntry(Texts.MemberAuditTitle, false, Act(CommandKind.CheckMembers, CheckMembers)));
             }
 
             _screen.ShowActions(_actionBar);
@@ -1081,6 +1082,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             Push(new ScriptPage(this));
+        }
+
+        /// <summary>Writes each block member on this construct that the codex has no text for to the game's log, and says how many.</summary>
+        public void CheckMembers()
+        {
+            var missing = new MemberAudit(this).Undescribed();
+            foreach (var row in missing)
+                GameLog.Say($"No member text: {row}");
+
+            Sandbox.ModAPI.MyAPIGateway.Utilities?.ShowMessage(Texts.MemberAuditTitle, Template.Fill(Texts.MemberAuditDone, "count", missing.Count.ToString()));
         }
 
         /// <summary>Opens the library: the world's backups, and the blueprints.</summary>

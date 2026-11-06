@@ -40,6 +40,12 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return new Sprite(MyStringId.GetOrCompute(IconSprite), new Vector2(512f, 512f));
         }
 
+        /// <summary>The id of the block whose screen this is.</summary>
+        public long ViewedFrom
+        {
+            set { _look.ViewedFrom = value; }
+        }
+
         /// <summary>
         /// Lays <paramref name="status" /> out for <paramref name="graphics" />'s screen in <paramref name="texts" />, in
         /// <paramref name="ink" /> on <paramref name="ground" />, kept <paramref name="padding" /> hundredths of the screen in
@@ -48,12 +54,6 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// slide from, as far slid as <see cref="StatusLook.Slid" /> says.
         /// </summary>
         /// <remarks><paramref name="graphics" /> is begun for the frame, so its size is the screen's.</remarks>
-        /// <summary>The id of the block whose screen this is.</summary>
-        public long ViewedFrom
-        {
-            set { _look.ViewedFrom = value; }
-        }
-
         public void Lay(IGraphics graphics, ConstructStatus status, Texts texts, Color ink, Color ground, float padding, float metres,
             int turn, int from)
         {

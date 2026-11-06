@@ -29,8 +29,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             field.Default = Normal;
             field.Quiet = Normal;
             field.MayBeLeftOut = true;
-            field.About = "**Normal** stops the step with a problem if something reverses the door.\n\n"
-                + "**Forced** tells the door again each time something reverses it, until it arrives or stops being able to move.";
 
             return field;
         }

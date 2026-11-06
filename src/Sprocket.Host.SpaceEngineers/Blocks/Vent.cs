@@ -78,8 +78,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly OwnValue OutOf = OwnValue.Number<IMyAirVent>(vent => vent.GasOutputPerSecond);
 
-        static readonly OwnValue Airtightness = OwnValue.Flag(Reading.Of<IMyAirVent>(vent => vent.PressurizationEnabled));
-
         static readonly OwnAction Fills = OwnAction.Of<IMyAirVent, Stuck>(Stuck.Read,
             (vent, stuck, seen) => vent.Depressurize = false, Air,
             (vent, stuck, seen) => vent.IsWorking && Passes(Filling(vent, seen), stuck, Cause.VentNoOxygen),
@@ -99,27 +97,19 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("room-status", "room status", Room).Status().Looked(Unheard).In(Category.Air)
-                .WithChange("finishes-filling", "finishes filling", "room-status", Literal.Name("full"))
+            kind.WithValue("room_status", "room status", Room).Status().Looked(Unheard).In(Category.Air)
+                .WithChange("finishes_filling", "finishes filling", "room_status", Literal.Name("full"))
                 .Reading("has air", "has no air").Looked(Unheard)
-                .WithChange("finishes-emptying", "finishes emptying", "room-status", Literal.Name("empty"))
+                .WithChange("finishes_emptying", "finishes emptying", "room_status", Literal.Name("empty"))
                 .Reading("is empty", "is not empty").Looked(Unheard)
                 .WithValue("airtight", "airtight", Airtight).Looked(Unheard).In(Category.Air)
-                .WithValue("oxygen-level", "oxygen level", Level).Percent().Looked(Unheard).In(Category.Air)
-                .WithValue("flow-into-the-room", "flow into the room", Into).Measured(" L/s").Looked(Unheard).In(Category.Air)
-                .WithValue("flow-out-of-the-room", "flow out of the room", OutOf).Measured(" L/s").Looked(Unheard).In(Category.Air)
-                .WithValue("in-a-world-with-airtightness", "in a world with airtightness", Airtightness)
-                .Looked("The world's airtightness is set before it starts, and nothing announces it.").In(Category.Air)
+                .WithValue("oxygen_level", "oxygen level", Level).Percent().Looked(Unheard).In(Category.Air)
+                .WithValue("flow_into_the_room", "flow into the room", Into).Measured(" L/s").Looked(Unheard).In(Category.Air)
+                .WithValue("flow_out_of_the_room", "flow out of the room", OutOf).Measured(" L/s").Looked(Unheard).In(Category.Air)
                 .Renaming("Depressurize", true, "depressurizing").Stating("Depressurize")
                 .Renaming("Depressurize", false, "toggle depressurizing")
-                .WithAction(Pressurize, "pressurize", Fills, "Depressurize_Off").Lasting().Asking(Asked(
-                    "**Hold** waits until the room is full. Where there is no more oxygen to give, as when the tanks are "
-                    + "empty, that wait never ends.\n\n**Move on** carries on once the room will fill no further, with what "
-                    + "air it has. A room that is not airtight always holds: carrying on would open it to the leak."))
-                .WithAction(Depressurize, "depressurize", Empties, "Depressurize_On").Lasting().Asking(Asked(
-                    "**Hold** waits until the room is empty. Where its air has nowhere to go, as when the tanks are full, "
-                    + "that wait never ends.\n\n**Move on** carries on once the room will empty no further, and what comes "
-                    + "next, such as an outer door opening, lets the rest of the air out."));
+                .WithAction(Pressurize, "pressurize", Fills, "Depressurize_Off").Lasting().Asking(Asked())
+                .WithAction(Depressurize, "depressurize", Empties, "Depressurize_On").Lasting().Asking(Asked());
         }
 
         /// <inheritdoc />
@@ -154,15 +144,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 && (vent.Status == VentStatus.Pressurizing || vent.Status == VentStatus.Depressurizing);
         }
 
-        /// <summary>What a room told to fill or empty does when it is stuck, hold or move on; <paramref name="about" /> says which is which for the action.</summary>
-        static Field Asked(string about)
+        /// <summary>What a room told to fill or empty does when it is stuck, hold or move on.</summary>
+        static Field Asked()
         {
             var field = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { Literal.Of(MoveOn).Said, Literal.Of(Hold).Said });
             field.Entry = FieldInput.Whole;
             field.Default = "hold";
             field.Quiet = "hold";
             field.Lead = "or";
-            field.About = about;
             return field;
         }
 

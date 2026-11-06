@@ -16,12 +16,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly OwnValue Waypoint = OwnValue.Text<IMyRemoteControl>(remote => remote.CurrentWaypoint.Name);
 
-        // The flight switches the game's terminal shows on a remote control, each a value and the toggle that flips it.
-        static readonly string[] Switches =
-        {
-            "HandBrake", "Park", "DampenersOverride", "ControlThrusters", "ControlWheels", "ControlGyros", "HorizonIndicator"
-        };
-
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
         {
@@ -32,9 +26,21 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("autopilot", "flying the route", Flying).Status().Looked(Unswitched)
-                .WithValue("current-waypoint", "current waypoint", Waypoint).Announced().In(Category.Flight)
-                .Vetting(true, Switches)
-                .Vetting(false, Switches)
+                .WithValue("current_waypoint", "current waypoint", Waypoint).Announced().In(Category.Flight)
+                .Renaming("HandBrake", true, "handbrake")
+                .Renaming("HandBrake", false, "toggle handbrake")
+                .Renaming("Park", true, "parking brake")
+                .Renaming("Park", false, "toggle parking brake")
+                .Renaming("DampenersOverride", true, "dampeners")
+                .Renaming("DampenersOverride", false, "toggle dampeners")
+                .Renaming("ControlThrusters", true, "control thrusters")
+                .Renaming("ControlThrusters", false, "toggle control thrusters")
+                .Renaming("ControlWheels", true, "control wheels")
+                .Renaming("ControlWheels", false, "toggle control wheels")
+                .Renaming("ControlGyros", true, "control gyros")
+                .Renaming("ControlGyros", false, "toggle control gyros")
+                .Renaming("HorizonIndicator", true, "show horizon and altitude")
+                .Renaming("HorizonIndicator", false, "toggle show horizon and altitude")
                 .Renaming("AutoPilot_On", false, "fly the route")
                 .Renaming("AutoPilot_Off", false, "stop the autopilot")
                 .Renaming("AutoPilot", false, "toggle the autopilot")

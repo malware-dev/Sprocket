@@ -22,8 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("power", "power", SwitchedOn).In(Category.Power).Announced()
-                .WithChange("turns-on", "turns on", "power", Literal.Of(true)).Reading("is on", "is off").Announced()
-                .WithChange("turns-off", "turns off", "power", Literal.Of(false)).Reading("is off", "is on").Announced()
+                .WithChange("turns_on", "turns on", "power", Literal.Of(true)).Reading("is on", "is off").Announced()
+                .WithChange("turns_off", "turns off", "power", Literal.Of(false)).Reading("is off", "is on").Announced()
                 .Renaming("OnOff", false, "toggle on/off")
                 .Flipping("power", "OnOff")
                 .Hiding("OnOff_On", "OnOff_Off");

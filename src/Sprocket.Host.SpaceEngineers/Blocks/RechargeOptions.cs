@@ -32,8 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             field.Default = Wait;
             field.Quiet = Wait;
             field.Lead = "and";
-            field.About = "**Wait** holds the sequence at the next await until the block is charged.\n\n"
-                + "**Move on** sets it recharging and lets the sequence carry on.";
 
             return field;
         }

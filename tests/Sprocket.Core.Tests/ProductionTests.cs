@@ -118,7 +118,7 @@ public class ProductionTests
         {
             return Pretend.To<IMyInventory>()
                 .Gives("VolumeFillFactor", () => fill())
-                .Does("GetAcceptedItems", () => null)
+                .Does("GetAcceptedItems", () => null!)
                 .Does("GetItemAmount", args => ((VRage.Game.ModAPI.Ingame.MyItemType)args[0]).SubtypeId == "Iron"
                     ? (MyFixedPoint)iron()
                     : 0)
@@ -307,11 +307,11 @@ public class ProductionTests
         var kind = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
 
         Assert.NotNull(kind.FindAction("make", ReachKind.Native));
-        Assert.NotNull(kind.FindAction("clear-the-queue", ReachKind.Native));
+        Assert.NotNull(kind.FindAction("clear_the_queue", ReachKind.Native));
         foreach (var value in new[]
                  {
-                     "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating", "input-fill",
-                     "output-fill"
+                     "items_queued", "progress", "producing", "stuck", "mode", "able_to_disassemble", "repeating", "input_fill",
+                     "output_fill"
                  })
         {
             var own = kind.FindAction(value, ReachKind.Value);
@@ -319,8 +319,8 @@ public class ProductionTests
             Assert.True(own.Announced || own.LookedBecause.Length > 0, value);
         }
 
-        Assert.True(kind.FindEvent("starts-producing")!.Announced);
-        Assert.True(kind.FindEvent("stops-producing")!.Announced);
+        Assert.True(kind.FindEvent("starts_producing")!.Announced);
+        Assert.True(kind.FindEvent("stops_producing")!.Announced);
         Assert.Null(kind.FindAction("refining", ReachKind.Value));
     }
 
@@ -363,12 +363,12 @@ public class ProductionTests
         var kind = ship.Rig.Entity(ship.Weld(new Factory(1, "Refinery", true)).Id).Kind;
 
         Assert.NotNull(kind.FindAction("refining", ReachKind.Value));
-        Assert.NotNull(kind.FindEvent("starts-refining"));
-        Assert.NotNull(kind.FindEvent("stops-refining"));
+        Assert.NotNull(kind.FindEvent("starts_refining"));
+        Assert.NotNull(kind.FindEvent("stops_refining"));
         Assert.Null(kind.FindAction("producing", ReachKind.Value));
         Assert.Null(kind.FindAction("make", ReachKind.Native));
-        Assert.Null(kind.FindAction("items-queued", ReachKind.Value));
-        Assert.NotNull(kind.FindAction("input-fill", ReachKind.Value));
+        Assert.Null(kind.FindAction("items_queued", ReachKind.Value));
+        Assert.NotNull(kind.FindAction("input_fill", ReachKind.Value));
     }
 
     /// <summary>
@@ -449,7 +449,7 @@ public class ProductionTests
         var assembler = ship.Weld(new Factory(1, "Assembler", false));
         assembler.InputFill = 0.4f;
 
-        var fill = ship.Rig.Entity(assembler.Id).Kind.FindAction("input-fill", ReachKind.Value)!;
+        var fill = ship.Rig.Entity(assembler.Id).Kind.FindAction("input_fill", ReachKind.Value)!;
         Assert.Equal(40.0, fill.OwnValue.Gauge(assembler.Block, new Literal[0], null).Read().Real, 3);
     }
 
@@ -623,7 +623,7 @@ public class ProductionTests
         var printer = ship.Weld(new Printer(1, "Printer"));
         printer.Left = 12;
 
-        var finished = SignalTrigger.Written(BlockKinds.Own, "finishes-building");
+        var finished = SignalTrigger.Written(BlockKinds.Own, "finishes_building");
         finished.Sources.Add(ship.Name(printer));
         ship.Switching(finished);
         ship.Start();
@@ -667,13 +667,13 @@ public class ProductionTests
     {
         var ship = new Ship();
         var assembler = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
-        Vetted(assembler, ReachKind.Native, "make", "clear-the-queue");
-        Vetted(assembler, ReachKind.Value, "inventory_amount", "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating",
-            "input-fill", "output-fill", "slaveMode", "UseConveyor");
+        Vetted(assembler, ReachKind.Native, "make", "clear_the_queue");
+        Vetted(assembler, ReachKind.Value, "inventory_amount", "items_queued", "progress", "producing", "stuck", "mode", "able_to_disassemble", "repeating",
+            "input_fill", "output_fill", "slaveMode", "UseConveyor");
         Vetted(assembler, ReachKind.Action, "slaveMode", "UseConveyor");
 
         var refinery = ship.Rig.Entity(ship.Weld(new Factory(2, "Refinery", true)).Id).Kind;
-        Vetted(refinery, ReachKind.Value, "inventory_amount", "refining", "stuck", "input-fill", "output-fill", "UseConveyor");
+        Vetted(refinery, ReachKind.Value, "inventory_amount", "refining", "stuck", "input_fill", "output_fill", "UseConveyor");
         Vetted(refinery, ReachKind.Action, "UseConveyor");
     }
 
@@ -716,8 +716,8 @@ public class ProductionTests
         var ship = new Ship();
         var projector = ship.Rig.Entity(ship.Weld(new Printer(1, "Printer")).Id).Kind;
 
-        Vetted(projector, ReachKind.Native, "remove-the-blueprint");
-        Vetted(projector, ReachKind.Value, "projecting", "blocks-left", "armor-blocks-left", "total-blocks", "blocks-ready-to-weld",
+        Vetted(projector, ReachKind.Native, "remove_the_blueprint");
+        Vetted(projector, ReachKind.Value, "projecting", "blocks_left", "armor_blocks_left", "total_blocks", "blocks_ready_to_weld",
             "KeepProjection", "X", "Y", "Z", "RotX", "RotY", "RotZ", "Scale", "ShowOnlyBuildable", "MarkMissingBlocks",
             "MarkUnfinishedBlocks");
         Vetted(projector, ReachKind.Action, "KeepProjection");
@@ -742,7 +742,7 @@ public class ProductionTests
         machine.Offering("AnyoneCanUse", "Anyone Can Use On/Off").Offering("Searchable", "Searchable On/Off");
         machine.Carrying("AnyoneCanUse", "Anyone Can Use", ValueKind.Flag).Carrying("Searchable", "Searchable", ValueKind.Flag);
         var vending = ship.Rig.Entity(ship.Weld(machine).Id).Kind;
-        Vetted(vending, ReachKind.Native, "show-next-item", "show-previous-item");
+        Vetted(vending, ReachKind.Native, "show_next_item", "show_previous_item");
         Vetted(vending, ReachKind.Value, "AnyoneCanUse", "Searchable");
         Vetted(vending, ReachKind.Action, "AnyoneCanUse", "Searchable");
 
@@ -776,22 +776,22 @@ public class ProductionTests
             Vetted(kind, ReachKind.Value, "UseConveyor");
             Vetted(kind, ReachKind.Action, "UseConveyor");
             if (!(tool.Block is IMyCollector))
-                Vetted(kind, ReachKind.Value, "run-by-a-pilot");
+                Vetted(kind, ReachKind.Value, "activated");
         }
 
         var module = ship.Weld(new Stood<IMyUpgradeModule>(4, "Module", typeof(MyObjectBuilder_UpgradeModule), "LargeProductivityModule",
             "Productivity Module"));
-        Vetted(ship.Rig.Entity(module.Id).Kind, ReachKind.Value, "connections", "upgrade-count");
+        Vetted(ship.Rig.Entity(module.Id).Kind, ReachKind.Value, "connections");
     }
 
-    /// <summary>An assembler's mode is set by a step, to making or taking apart, and to nothing else.</summary>
+    /// <summary>An assembler's mode is set by a step, to assembling or disassembling, and to nothing else.</summary>
     [Fact]
     public void AStepSetsAnAssemblersMode()
     {
         var ship = new Ship();
         var assembler = ship.Weld(new Factory(1, "Assembler", false));
 
-        Assert.Equal(SequenceProblem.None, ship.Set(assembler, "mode", Literal.Name("taking-apart")));
+        Assert.Equal(SequenceProblem.None, ship.Set(assembler, "mode", Literal.Name("disassembling")));
         Assert.Equal(Sandbox.ModAPI.Ingame.MyAssemblerMode.Disassembly, assembler.Mode);
 
         Assert.Equal(SequenceProblem.None, ship.Set(assembler, "mode", Literal.Name("assembling")));

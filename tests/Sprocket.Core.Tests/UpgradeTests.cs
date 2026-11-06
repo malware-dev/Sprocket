@@ -36,6 +36,65 @@ public class UpgradeTests
         + "    }\n"
         + "}\n";
 
+    /// <summary>An alpha 21 blueprint that runs, checks and watches members by their hyphened ids, in a slot with a hyphen of its own.</summary>
+    const string Hyphened = "sprocket 1 alpha 21\n\n"
+        + "system blueprint \"7a1c3e5d-2b4f-4c6e-8a90-1d3f5b7c9e21\" as MalTek.Door {\n"
+        + "    required slot 'air-lock' expects Door\n\n"
+        + "    whenever ext.'finishes-opening' on [ 'air-lock' ] then run 1\n"
+        + "    when any ext.'how-far-open' on [ 'air-lock' ] >= 50 then run 1\n\n"
+        + "    sequence 1 as Cycle {\n"
+        + "        set ext.'custom-data' on [ 'air-lock' ] to \"a-b\"\n"
+        + "        set ext.'label-of-button' on [ 'air-lock' ] to \"b\"\n"
+        + "        if any ext.'how-far-open' on [ 'air-lock' ] >= 50 then {\n"
+        + "        }\n"
+        + "    }\n"
+        + "}\n";
+
+    /// <summary>An assembler's mode, set, checked and watched as alpha 21 called it, says disassembling.</summary>
+    [Fact]
+    public void AnAssemblersOldModeSaysDisassembling()
+    {
+        const string text = "sprocket 1 alpha 21\n\n"
+            + "system blueprint \"8b2d4f6a-3c5e-4d7f-9ba1-2e4f6a8c0d32\" as MalTek.Works {\n"
+            + "    required slot works expects Assembler\n\n"
+            + "    when any ext.mode on [ works ] == 'taking-apart' then run 1\n\n"
+            + "    sequence 1 as Switch {\n"
+            + "        set ext.mode on [ works ] to 'taking-apart'\n"
+            + "        if any ext.mode on [ works ] == 'taking-apart' then {\n"
+            + "        }\n"
+            + "    }\n"
+            + "}\n";
+
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(text, program, new Values()));
+        var system = program.Systems[0];
+
+        Assert.Equal("disassembling", ((WhenTrigger)system.Triggers[0]).Value.Text);
+        Assert.Equal("disassembling", ((Act)system.Sequences[0].Steps[0]).Arguments[0].Text);
+        Assert.Equal("disassembling", ((Comparison)((Branch)system.Sequences[0].Steps[1]).Test).Value.Text);
+    }
+
+    /// <summary>A member's hyphens become underscores wherever a program uses one, and every other hyphen stays.</summary>
+    [Fact]
+    public void AMembersHyphensBecomeUnderscores()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(Hyphened, program, new Values()));
+        var system = program.Systems[0];
+        var signal = (SignalTrigger)system.Triggers[0];
+        var watched = (WhenTrigger)system.Triggers[1];
+        var set = (Act)system.Sequences[0].Steps[0];
+        var test = (Comparison)((Branch)system.Sequences[0].Steps[2]).Test;
+
+        Assert.Equal("finishes_opening", signal.EventId);
+        Assert.Equal("how_far_open", watched.EventId);
+        Assert.Equal("custom_data", set.ActionId);
+        Assert.Equal("how_far_open", test.MemberId);
+        Assert.Equal("button_label", ((Act)system.Sequences[0].Steps[1]).ActionId);
+        Assert.Equal("air-lock", set.Targets[0]);
+        Assert.Equal("a-b", set.Arguments[0].Text);
+    }
+
     /// <summary>An alpha 15 blueprint that shows text on a billboard's back screen, naming the screen as its first argument.</summary>
     static string Screened(string screen) => "sprocket 1 alpha 15\n\n"
         + "let board = block 'LCDPanelsBlock/LargeBlockBillboard' [ 1, [ (1 0 0) ], \"Billboard\" ]\n\n"
@@ -270,7 +329,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith("sprocket 1 alpha 21", written);
+        Assert.StartsWith("sprocket 1 alpha 22", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -316,7 +375,7 @@ public class UpgradeTests
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
-    [InlineData("sprocket 1 alpha 22")]
+    [InlineData("sprocket 1 alpha 23")]
     [InlineData("sprocket 2 alpha 14")]
     [InlineData("sprocket 1")]
     public void AnyOtherFormatIsRefused(string header)

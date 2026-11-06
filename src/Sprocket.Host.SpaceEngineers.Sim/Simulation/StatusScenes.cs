@@ -108,7 +108,7 @@ public static class StatusScenes
         system.Name = name;
         system.Enabled = true;
 
-        var opened = SignalTrigger.Written("ext", "finishes-opening");
+        var opened = SignalTrigger.Written("ext", "finishes_opening");
         opened.Sources.Add(Ref(sim, watches));
 
         var sequence = program.AddSequence(system, opened);

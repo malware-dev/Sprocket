@@ -80,6 +80,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
+        /// <summary>What the codex says of what is chosen in the organized list, or empty where it says nothing.</summary>
+        public string ChosenAbout
+        {
+            get
+            {
+                var at = _offers.At(_picked.Member, _picked.Form);
+                var block = _picked.Blocks.Count == 0 ? null : _editor.World.FindEntity(_picked.Blocks[0]);
+                if (at < 0 || block == null || _editor.ShowsTerminal)
+                    return "";
+
+                return _editor.Codex.Member(block.Kind, _offers.Names[at], _offers.IsStatusWord(at));
+            }
+        }
+
         /// <summary>Makes the column, <paramref name="width" /> wide, whose second press in quick succession on a row does <paramref name="moveOn" />.</summary>
         public StageColumn Make(float width, Action moveOn)
         {

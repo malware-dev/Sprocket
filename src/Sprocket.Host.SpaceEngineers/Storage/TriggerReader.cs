@@ -128,7 +128,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>whenever ext.'finishes-closing' on [ inner ] then</c> or <c>whenever ext.toolbar(1, 1, 4) on [ panel1 ] then</c>: a signal
+        /// <c>whenever ext.finishes_closing on [ inner ] then</c> or <c>whenever ext.toolbar(1, 1, 4) on [ panel1 ] then</c>: a signal
         /// written in place, a block's own change or a slot on the blocks' toolbars; or null and trouble where it is neither.
         /// </summary>
         static Trigger Written(Statement statement, ScriptTrouble trouble)
@@ -136,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var member = statement.Parts(0);
             if (member.Count != 2 || member[0].Word.Length == 0 || member[1].Word.Length == 0)
             {
-                trouble.Say(statement, "expected a signal qualified by its namespace, like ext.'finishes-closing' on [ inner ].");
+                trouble.Say(statement, "expected a signal qualified by its namespace, like ext.finishes_closing on [ inner ].");
                 return null;
             }
 

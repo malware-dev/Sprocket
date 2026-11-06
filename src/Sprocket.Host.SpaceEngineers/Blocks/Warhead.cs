@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("counting-down", "counting down", Counting).Looked(Uncounted)
+            kind.WithValue("counting_down", "counting down", Counting).Looked(Uncounted)
                 .Renaming("StartCountdown", false, "start countdown")
                 .Renaming("StopCountdown", false, "stop countdown")
                 .Renaming("Detonate", false, "detonate")

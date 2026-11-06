@@ -34,10 +34,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             kind.WithValue("uranium", "uranium", _fuel).Measured(" kg").Announced().In(Category.Fuel)
-                .WithChange("runs-out-of-uranium", "runs out of uranium", "uranium", Literal.Of(0.0)).Announced()
+                .WithChange("runs_out_of_uranium", "runs out of uranium", "uranium", Literal.Of(0.0)).Announced()
                 .Reading("has no uranium", "has uranium")
                 .WithValue("output", "output", Output).Measured(" MW").Announced().In(Category.Power)
-                .WithValue("maximum-output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power)
+                .WithValue("maximum_output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power)
                 .Renaming("UseConveyor", true, "automatic push and pull")
                 .Renaming("UseConveyor", false, "toggle automatic push and pull");
         }

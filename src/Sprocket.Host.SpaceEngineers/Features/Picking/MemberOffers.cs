@@ -53,6 +53,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>What each offer is called, in the view now showing.</summary>
         public List<string> Names => _names;
 
+        /// <summary>Whether the offer at <paramref name="at" /> is a status word of the block.</summary>
+        public bool IsStatusWord(int at)
+        {
+            return _groups[at] == Statuses;
+        }
+
         /// <summary>The id of each offer.</summary>
         public List<string> Ids => _ids;
 

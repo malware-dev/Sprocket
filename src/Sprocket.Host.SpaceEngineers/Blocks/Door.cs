@@ -46,20 +46,20 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithValue("status", "status", State).Status();
             Watched(kind, hangar);
 
-            kind.WithChange("finishes-opening", "finishes opening", "status", Literal.Name("open")).Announced()
+            kind.WithChange("finishes_opening", "finishes opening", "status", Literal.Name("open")).Announced()
                 .Reading("is open", "is not open")
-                .WithChange("finishes-closing", "finishes closing", "status", Literal.Name("closed")).Announced()
+                .WithChange("finishes_closing", "finishes closing", "status", Literal.Name("closed")).Announced()
                 .Reading("is closed", "is not closed")
-                .WithChange("starts-opening", "starts opening", "status", Literal.Name("opening")).Announced()
+                .WithChange("starts_opening", "starts opening", "status", Literal.Name("opening")).Announced()
                 .Reading("is opening", "is not opening")
-                .WithChange("starts-closing", "starts closing", "status", Literal.Name("closing"))
+                .WithChange("starts_closing", "starts closing", "status", Literal.Name("closing"))
                 .Reading("is closing", "is not closing");
 
             Watched(kind, hangar);
 
             // How far open changes only while the door moves, which raises nothing, so it is looked at on the when's cadence
             // between starting to open and having closed.
-            kind.WithValue("how-far-open", "how far open", Ratio).Percent().RuledOutBy(Shut);
+            kind.WithValue("how_far_open", "how far open", Ratio).Percent().RuledOutBy(Shut);
 
             kind.WithAction("open", "open", Opens, "Open_On").LastingAnnounced().Asking(DoorOrder.Asked())
                 .WithAction("close", "close", Closes, "Open_Off").LastingAnnounced().Asking(DoorOrder.Asked())

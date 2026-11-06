@@ -58,10 +58,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Recharge", false, "toggle recharging")
                 .WithValue("status", "status", Status).Status().Looked(Unjumped).In(Category.Flight)
                 .WithValue("charge", "charge", Charge).Percent().Announced().In(Category.Power)
-                .WithValue("stored-power", "stored power", Stored).Measured(" MWh").Announced().In(Category.Power)
+                .WithValue("stored_power", "stored power", Stored).Measured(" MWh").Announced().In(Category.Power)
                 .WithValue("capacity", "capacity", Capacity).Measured(" MWh").Announced().In(Category.Power)
-                .WithValue("minimum-jump-distance", "minimum jump distance", Shortest).Measured(" km").Announced().In(Category.Flight)
-                .WithValue("maximum-jump-distance", "maximum jump distance", Longest).Measured(" km").Looked(Unweighed).In(Category.Flight)
+                .WithValue("minimum_jump_distance", "minimum jump distance", Shortest).Measured(" km").Announced().In(Category.Flight)
+                .WithValue("maximum_jump_distance", "maximum jump distance", Longest).Measured(" km").Looked(Unweighed).In(Category.Flight)
                 .Hiding("Jump", "SearchField", "SelectedTarget", "BeaconList", "JumpDistance", "SetGravityAcceleration",
                     "IncreaseJumpDistance", "DecreaseJumpDistance");
         }

@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             foreach (var extent in Extents)
-                kind.Renaming(extent, true, $"{extent.ToLowerInvariant()} extent");
+                kind.Renaming(extent, true, $"{extent.ToLowerInvariant()} extent").Measuring(extent, " m");
         }
 
         /// <summary>Told as the sensor starts or stops detecting, which it raises on the server and on every client.</summary>

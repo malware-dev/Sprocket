@@ -41,20 +41,20 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue(Occupied, "occupied", Seated).Status().Announced()
-                .WithChange("becomes-occupied", "becomes occupied", Occupied, Literal.Of(true))
+                .WithChange("becomes_occupied", "becomes occupied", Occupied, Literal.Of(true))
                 .Reading("is occupied", "is empty").Announced()
-                .WithChange("becomes-empty", "becomes empty", Occupied, Literal.Of(false))
+                .WithChange("becomes_empty", "becomes empty", Occupied, Literal.Of(false))
                 .Reading("is empty", "is occupied").Announced()
-                .WithValue("occupant-name", "occupant name", Occupant).Announced().In(Category.Usage)
-                .WithValue("under-control", "under control", Controlled).Looked(Unheard).In(Category.Usage);
+                .WithValue("occupant_name", "occupant name", Occupant).Announced().In(Category.Usage)
+                .WithValue("under_control", "under control", Controlled).Looked(Unheard).In(Category.Usage);
 
             var cockpit = block as IMyCockpit;
             if (cockpit != null && cockpit.OxygenCapacity > 0f)
-                kind.WithValue("oxygen-level", "oxygen level", Air).Percent().Looked(Unheard).In(Category.LifeSupport);
+                kind.WithValue("oxygen_level", "oxygen level", Air).Percent().Looked(Unheard).In(Category.LifeSupport);
 
-            kind.WithValue("natural-gravity", "natural gravity", Natural).Measured(" g").Looked(Unheard).In(Category.Detection)
-                .WithValue("artificial-gravity", "artificial gravity", Artificial).Measured(" g").Looked(Unheard).In(Category.Detection)
-                .WithValue("ship-mass", "ship mass", Mass).Measured(" kg").Looked(Unheard).In(Category.State)
+            kind.WithValue("natural_gravity", "natural gravity", Natural).Measured(" g").Looked(Unheard).In(Category.Detection)
+                .WithValue("artificial_gravity", "artificial gravity", Artificial).Measured(" g").Looked(Unheard).In(Category.Detection)
+                .WithValue("ship_mass", "ship mass", Mass).Measured(" kg").Looked(Unheard).In(Category.State)
                 .Renaming("HandBrake", true, "handbrake")
                 .Renaming("HandBrake", false, "toggle handbrake")
                 .Renaming("Park", true, "parking brake")

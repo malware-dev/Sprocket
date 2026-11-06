@@ -289,6 +289,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Choice,
 
         /// <summary>Showing the tools for working on Sprocket itself, registered only in developer mode.</summary>
-        ShowScript
+        ShowScript,
+
+        /// <summary>Checking that the codex has a text for every member on the construct, registered only in developer mode.</summary>
+        CheckMembers
     }
 }

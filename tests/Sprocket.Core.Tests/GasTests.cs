@@ -23,18 +23,17 @@ public class GasTests
         var ship = new Rigged();
         var vent = ship.Vent(1, "Vent");
 
-        Assert.Equal(100.0, Read(ship, vent, "oxygen-level").Real, 3);
+        Assert.Equal(100.0, Read(ship, vent, "oxygen_level").Real, 3);
         Assert.True(Read(ship, vent, "airtight").Flag);
-        Assert.True(Read(ship, vent, "in-a-world-with-airtightness").Flag);
-        Assert.Equal(0.0, Read(ship, vent, "flow-out-of-the-room").Real, 3);
+        Assert.Equal(0.0, Read(ship, vent, "flow_out_of_the_room").Real, 3);
 
         vent.Perform("Depressurize_On");
         for (var i = 0; i < 10; i++)
             ship.Tick();
 
-        Assert.InRange(Read(ship, vent, "oxygen-level").Real, 0.0, 99.0);
-        Assert.Equal(300.0, Read(ship, vent, "flow-out-of-the-room").Real, 3);
-        Assert.Equal(0.0, Read(ship, vent, "flow-into-the-room").Real, 3);
+        Assert.InRange(Read(ship, vent, "oxygen_level").Real, 0.0, 99.0);
+        Assert.Equal(300.0, Read(ship, vent, "flow_out_of_the_room").Real, 3);
+        Assert.Equal(0.0, Read(ship, vent, "flow_into_the_room").Real, 3);
 
         vent.Leaking = true;
         Assert.False(Read(ship, vent, "airtight").Flag);
@@ -47,7 +46,7 @@ public class GasTests
         var ship = new Rigged();
         var vent = ship.Vent(1, "Vent");
         var lamp = ship.Light(2, "Lamp");
-        var when = new WhenTrigger("oxygen-level") { Provider = BlockKinds.Own, Relation = Relation.Below, Value = Literal.Of(50.0) };
+        var when = new WhenTrigger("oxygen_level") { Provider = BlockKinds.Own, Relation = Relation.Below, Value = Literal.Of(50.0) };
 
         var frames = Fired(ship, vent, lamp, when, () => vent.Perform("Depressurize_On"));
 
@@ -63,11 +62,11 @@ public class GasTests
         tank.Filled = 0.25;
         var kind = ship.Entity(tank.Id).Kind;
 
-        var level = kind.FindAction("hydrogen-level", ReachKind.Value)!;
+        var level = kind.FindAction("hydrogen_level", ReachKind.Value)!;
         Assert.Equal("Hydrogen level", level.Named);
         Assert.Equal(Category.Gas, level.Category);
-        Assert.Null(kind.FindAction("oxygen-level", ReachKind.Value));
-        Assert.Equal(25.0, Read(ship, tank, "hydrogen-level").Real, 3);
+        Assert.Null(kind.FindAction("oxygen_level", ReachKind.Value));
+        Assert.Equal(25.0, Read(ship, tank, "hydrogen_level").Real, 3);
         Assert.Equal(tank.Capacity, Read(ship, tank, "capacity").Real, 3);
     }
 
@@ -80,7 +79,7 @@ public class GasTests
         var lamp = ship.Light(2, "Lamp");
         tank.Filled = 0.5;
 
-        var frames = Fired(ship, tank, lamp, SignalTrigger.Written(BlockKinds.Own, "fills-up"), () => tank.Perform("Stockpile_On"));
+        var frames = Fired(ship, tank, lamp, SignalTrigger.Written(BlockKinds.Own, "fills_up"), () => tank.Perform("Stockpile_On"));
 
         Assert.InRange(frames, 55, 75);
     }
@@ -98,7 +97,7 @@ public class GasTests
         var lamp = ship.Light(2, "Lamp");
         tank.Filled = 0.5;
 
-        var frames = Fired(ship, tank, lamp, SignalTrigger.Written(BlockKinds.Own, "runs-dry"), () => tank.Filled = 0.0);
+        var frames = Fired(ship, tank, lamp, SignalTrigger.Written(BlockKinds.Own, "runs_dry"), () => tank.Filled = 0.0);
 
         Assert.InRange(frames, 1, 100);
     }
@@ -222,8 +221,7 @@ public class GasTests
 
         foreach (var id in new[]
                  {
-                     "room-status", "airtight", "oxygen-level", "flow-into-the-room", "flow-out-of-the-room",
-                     "in-a-world-with-airtightness", "Depressurize"
+                     "room_status", "airtight", "oxygen_level", "flow_into_the_room", "flow_out_of_the_room", "Depressurize"
                  })
             Assert.True(Vetted(kind, id, ReachKind.Value), id);
 
@@ -245,7 +243,7 @@ public class GasTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Tank(1, "Tank").Id).Kind;
 
-        foreach (var id in new[] { "hydrogen-level", "capacity", "Stockpile", "Auto-Refill" })
+        foreach (var id in new[] { "hydrogen_level", "capacity", "Stockpile", "Auto-Refill" })
             Assert.True(Vetted(kind, id, ReachKind.Value), id);
 
         Assert.True(Vetted(kind, Blocks.Tank.Stockpile, ReachKind.Native));
@@ -274,7 +272,7 @@ public class GasTests
 
         var kind = ship.Entity(chamber.Id).Kind;
 
-        foreach (var id in new[] { "occupied", "occupant-name", "oxygen-level", "speed" })
+        foreach (var id in new[] { "occupied", "occupant_name", "oxygen_level", "speed" })
             Assert.True(Vetted(kind, id, ReachKind.Value), id);
 
         foreach (var id in new[] { "DampenersOverride", "HandBrake", "Park", "MainCockpit" })

@@ -65,7 +65,7 @@ public class ValueSentenceTests
         var panel = rig.Panel(40, "Button Panel 1", 4);
         var test = new Comparison
         {
-            MemberId = "label-of-button", Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.Is,
+            MemberId = "button_label", Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.Is,
             Value = Literal.Of("Exit")
         };
         test.Arguments.Add(Literal.Of(2L));
@@ -79,7 +79,7 @@ public class ValueSentenceTests
         var panel = rig.Panel(40, "Button Panel 1");
         var test = new Comparison
         {
-            MemberId = "label-of-button", Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.Is,
+            MemberId = "button_label", Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.Is,
             Value = Literal.Of("Exit")
         };
         test.Arguments.Add(Literal.Of(1L));

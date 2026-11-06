@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithValue("sunlight", "sunlight", Sunlight).Percent().Announced().In(Category.Power)
                 .WithValue("output", "output", Output).Measured(" MW").Announced().In(Category.Power)
-                .WithValue("maximum-output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power);
+                .WithValue("maximum_output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power);
         }
 
         /// <summary>Told as the panel's output changes.</summary>

@@ -29,11 +29,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             // A ship renamed while docked is not told, and is seen at the next look.
             kind.WithValue("status", "status", State).Status().Announced().In(Category.Locking)
-                .WithChange("becomes-ready-to-lock", "becomes ready to lock", "status", Literal.Name("ready-to-lock"))
+                .WithChange("becomes_ready_to_lock", "becomes ready to lock", "status", Literal.Name("ready-to-lock"))
                 .Announced().Reading("is ready to lock", "is not ready to lock")
                 .WithChange("locks", "locks", "status", Literal.Name("locked")).Announced()
                 .Reading("is locked", "is not locked")
-                .WithValue("docked-ship", "docked ship", Docked).Announced().In(Category.Locking)
+                .WithValue("docked_ship", "docked ship", Docked).Announced().In(Category.Locking)
                 .Renaming("Lock", false, "lock")
                 .Renaming("Unlock", false, "unlock")
                 .Renaming("SwitchLock", false, "toggle lock")

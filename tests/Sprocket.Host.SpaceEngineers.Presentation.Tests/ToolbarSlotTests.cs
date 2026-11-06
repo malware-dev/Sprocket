@@ -15,8 +15,8 @@ public class ToolbarSlotTests
     {
         var sim = Picking("Cockpit");
 
-        Assert.True(sim.Editor.HasChoice("hotbar slot is pressed"));
-        Assert.False(sim.Editor.HasChoice("hotbar page 1, slot 1 is pressed"));
+        Assert.True(sim.Editor.HasChoice("toolbar slot is pressed"));
+        Assert.False(sim.Editor.HasChoice("toolbar page 1, slot 1 is pressed"));
         Assert.Null(sim.Editor.Slots());
     }
 
@@ -29,7 +29,7 @@ public class ToolbarSlotTests
             .Set(1, MyToolbarItemInfo.BlockAction(1, "Open"))
             .Apply());
 
-        sim.Editor.PressChoice("hotbar slot is pressed");
+        sim.Editor.PressChoice("toolbar slot is pressed");
         sim.Tick();
 
         var slots = sim.Editor.Slots()!;
@@ -42,7 +42,7 @@ public class ToolbarSlotTests
     {
         var sim = Picking("Cockpit", seat => seat.Toolbar.Changing().Set(0, MyToolbarItemInfo.BlockAction(10, "OnOff")).Apply());
 
-        sim.Editor.PressChoice("hotbar slot is pressed");
+        sim.Editor.PressChoice("toolbar slot is pressed");
         sim.Tick();
 
         var held = sim.Editor.Slots()!.HeldAt(1, 1);
@@ -58,7 +58,7 @@ public class ToolbarSlotTests
     {
         var sim = Picking("Cockpit");
 
-        sim.Editor.PressChoice("hotbar slot is pressed");
+        sim.Editor.PressChoice("toolbar slot is pressed");
         sim.Tick();
         var slots = sim.Editor.Slots()!;
         slots.Turn(2);
@@ -73,7 +73,7 @@ public class ToolbarSlotTests
         sim.Editor.Back();
         Settle(sim);
 
-        Assert.Equal("When slot 1 hotbar page 2, slot 4 is pressed", sim.Editor.Says(0));
+        Assert.Equal("When slot 1 toolbar page 2, slot 4 is pressed", sim.Editor.Says(0));
     }
 
     /// <summary>Opened again, the trigger's picker opens on its toolbar's line with the slot it was given.</summary>
@@ -81,7 +81,7 @@ public class ToolbarSlotTests
     public void OpenedAgainItOpensOnItsSlot()
     {
         var sim = Picking("Cockpit");
-        sim.Editor.PressChoice("hotbar page 3, slot 7 is pressed");
+        sim.Editor.PressChoice("toolbar page 3, slot 7 is pressed");
         sim.Tick();
         sim.Editor.PressPrimary();
         Settle(sim);
@@ -100,7 +100,7 @@ public class ToolbarSlotTests
     public void ASlotATriggerAnswersSaysWhichOne()
     {
         var sim = Picking("Cockpit");
-        sim.Editor.PressChoice("hotbar page 1, slot 1 is pressed");
+        sim.Editor.PressChoice("toolbar page 1, slot 1 is pressed");
         sim.Tick();
         sim.Editor.PressPrimary();
         Settle(sim);
@@ -110,7 +110,7 @@ public class ToolbarSlotTests
         Settle(sim);
         sim.Editor.PressStart(SentenceText.WhenWord);
         sim.Editor.PressBlock("Cockpit");
-        sim.Editor.PressChoice("hotbar slot is pressed");
+        sim.Editor.PressChoice("toolbar slot is pressed");
         sim.Tick();
 
         var held = sim.Editor.Slots()!.HeldAt(1, 1);
@@ -124,7 +124,7 @@ public class ToolbarSlotTests
     public void ASlotAnsweringOnAnyBlockPickedAnswers()
     {
         var sim = Picking("Cockpit");
-        sim.Editor.PressChoice("hotbar page 1, slot 1 is pressed");
+        sim.Editor.PressChoice("toolbar page 1, slot 1 is pressed");
         sim.Tick();
         sim.Editor.PressPrimary();
         Settle(sim);
@@ -137,7 +137,7 @@ public class ToolbarSlotTests
         sim.Editor.PressStart(SentenceText.WhenWord);
         sim.Editor.PressBlock("Cockpit");
         sim.Editor.TickBlock("Copilot Seat");
-        sim.Editor.PressChoice("hotbar slot is pressed");
+        sim.Editor.PressChoice("toolbar slot is pressed");
         sim.Tick();
 
         var held = sim.Editor.Slots()!.HeldAt(1, 1);
@@ -160,7 +160,7 @@ public class ToolbarSlotTests
         sim.Editor.TickBlock("Copilot Seat");
         sim.Tick();
 
-        sim.Editor.PressChoice("hotbar slot is pressed");
+        sim.Editor.PressChoice("toolbar slot is pressed");
         sim.Tick();
 
         var held = sim.Editor.Slots()!.HeldAt(1, 1);
@@ -185,7 +185,7 @@ public class ToolbarSlotTests
         sim.Editor.PressStart(SentenceText.WhenWord);
         sim.Editor.PressBlock("Cockpit");
         sim.Editor.TickBlock("Copilot Seat");
-        sim.Editor.PressChoice("hotbar slot is pressed");
+        sim.Editor.PressChoice("toolbar slot is pressed");
         sim.Tick();
 
         var slots = sim.Editor.Slots()!;
@@ -236,7 +236,7 @@ public class ToolbarSlotTests
         screen.Editor.PressBlock("Cockpit");
         screen.Run(1);
 
-        screen.Editor.PressChoice("hotbar slot is pressed");
+        screen.Editor.PressChoice("toolbar slot is pressed");
         screen.Run(2);
         Assert.True(screen.Editor.Slots()!.Progress < 1f, "the slots were open at once");
 

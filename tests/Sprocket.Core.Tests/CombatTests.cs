@@ -111,10 +111,10 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Turret);
 
-        foreach (var id in new[] { "firing", "targeting", "on-target", "controlled-by-a-person" })
+        foreach (var id in new[] { "firing", "targeting", "on_target", "manually_controlled" })
             Assert.NotNull(Probe.Value(kind, BlockKinds.Own, id));
 
-        Assert.Null(Probe.Value(kind, BlockKinds.Own, "rounds-left"));
+        Assert.Null(Probe.Value(kind, BlockKinds.Own, "rounds_left"));
     }
 
     /// <summary>Whether a gun is firing is a state of the gun, read as the gun itself beside its order to open or cease fire.</summary>
@@ -132,18 +132,18 @@ public class CombatTests
     [Theory]
     [InlineData("targeting", true)]
     [InlineData("targeting", false)]
-    [InlineData("on-target", true)]
-    [InlineData("on-target", false)]
-    [InlineData("controlled-by-a-person", true)]
-    [InlineData("controlled-by-a-person", false)]
+    [InlineData("on_target", true)]
+    [InlineData("on_target", false)]
+    [InlineData("manually_controlled", true)]
+    [InlineData("manually_controlled", false)]
     [InlineData("firing", true)]
     [InlineData("firing", false)]
     public void AnIfReadsEachOfATurretsFlags(string id, bool holds)
     {
         var ship = new Ship();
         ship.Turret.Targeting = id == "targeting" && holds;
-        ship.Turret.OnTarget = id == "on-target" && holds;
-        ship.Turret.Controlled = id == "controlled-by-a-person" && holds;
+        ship.Turret.OnTarget = id == "on_target" && holds;
+        ship.Turret.Controlled = id == "manually_controlled" && holds;
         ship.Turret.Firing = id == "firing" && holds;
         var cycle = ship.Program.AddSequence((Trigger)null!);
         var test = new Comparison { Provider = BlockKinds.Own, MemberId = id, Relation = Relation.Is, Value = Literal.Of(true) };
@@ -182,7 +182,7 @@ public class CombatTests
     {
         var ship = new Ship();
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var reset = new Act("reset-targeting") { Form = ReachKind.Native };
+        var reset = new Act("reset_targeting") { Form = ReachKind.Native };
         reset.Targets.Add(ship.Name(ship.Turret));
         cycle.Steps.Add(reset);
 
@@ -221,7 +221,7 @@ public class CombatTests
         var ship = new Ship();
         ship.Warhead.CountingDown = counting;
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var test = new Comparison { Provider = BlockKinds.Own, MemberId = "counting-down", Relation = Relation.Is, Value = Literal.Of(true) };
+        var test = new Comparison { Provider = BlockKinds.Own, MemberId = "counting_down", Relation = Relation.Is, Value = Literal.Of(true) };
         test.Targets.Add(ship.Name(ship.Warhead));
         cycle.Steps.Add(new If(test));
         cycle.Steps.Add(ship.Off());
@@ -264,9 +264,9 @@ public class CombatTests
         var kind = ship.Kind(ship.Turret);
 
         Vouched(kind, ReachKind.Action, "Shoot_On", "Shoot_Off", "Shoot", "ShootOnce", "UseConveyor", "TargetNeutrals");
-        Vouched(kind, ReachKind.Value, "UseConveyor", "TargetNeutrals", "Range", "firing", "targeting", "on-target",
-            "controlled-by-a-person");
-        Vouched(kind, ReachKind.Native, "reset-targeting");
+        Vouched(kind, ReachKind.Value, "UseConveyor", "TargetNeutrals", "Range", "firing", "targeting", "on_target",
+            "manually_controlled");
+        Vouched(kind, ReachKind.Native, "reset_targeting");
 
         Unvouched(kind, ReachKind.Action, "TargetNeutrals_On", "TargetNeutrals_Off", "FocusLockedTarget");
         Unvouched(kind, ReachKind.Value, "Shoot");
@@ -280,7 +280,7 @@ public class CombatTests
         var kind = ship.Kind(ship.Warhead);
 
         Vouched(kind, ReachKind.Action, "StartCountdown", "StopCountdown", "Detonate", "Safety_On", "Safety_Off");
-        Vouched(kind, ReachKind.Value, "armed", "DetonationTime", "counting-down");
+        Vouched(kind, ReachKind.Value, "armed", "DetonationTime", "counting_down");
 
         Unvouched(kind, ReachKind.Action, "IncreaseDetonationTime", "DecreaseDetonationTime");
     }
@@ -304,7 +304,7 @@ public class CombatTests
         Vouched(kind, ReachKind.Action, "AutoPilot_On", "AutoPilot_Off", "AutoPilot", "Reset");
         Vouched(kind, ReachKind.Action, switches);
         Vouched(kind, ReachKind.Value, switches);
-        Vouched(kind, ReachKind.Value, "SpeedLimit", "FlightMode", "autopilot", "current-waypoint", "speed");
+        Vouched(kind, ReachKind.Value, "SpeedLimit", "FlightMode", "autopilot", "current_waypoint", "speed");
 
         Unvouched(kind, ReachKind.Action, "CollisionAvoidance_On", "CollisionAvoidance_Off", "HandBrake_On", "HandBrake_Off", "Park_On",
             "Park_Off", "DampenersOverride_On", "DampenersOverride_Off", "IncreaseSpeedLimit", "DecreaseSpeedLimit",

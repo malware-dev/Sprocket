@@ -60,7 +60,7 @@ public class BlueprintTestTests
         Pick(rig, "how far open", "is 50");
 
         var test = Assert.IsType<If>(sequence.Steps[0]).Compared!;
-        Assert.Equal("how-far-open", test.MemberId);
+        Assert.Equal("how_far_open", test.MemberId);
         Assert.Equal(BlockKinds.Own, test.Provider);
     }
 

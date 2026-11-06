@@ -79,7 +79,7 @@ public class UnitTests
     {
         var sim = Simulation.Fresh();
         var door = sim.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door").Kind;
-        var open = door.Actions.First(action => action.Id == "how-far-open");
+        var open = door.Actions.First(action => action.Id == "how_far_open");
 
         var fields = ComparisonQuestion.Fields(open, door.Events);
         var compared = fields[1];

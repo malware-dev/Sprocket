@@ -167,9 +167,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// puts the values beside the stages once something that can be finished is chosen. <paramref name="what" /> is the
         /// column of what is done, or null where it is not made; <paramref name="does" /> the column of what a trigger does, or
         /// null. <paramref name="chosenName" /> is what the chosen thing is listed as, <paramref name="title" /> heads the page
-        /// long text is written on, and <paramref name="finish" /> finishes the pick.
+        /// long text is written on, <paramref name="about" /> says what it is, and <paramref name="finish" /> finishes the pick.
         /// </summary>
-        public void Fill(PickStrip strip, StageColumn what, StageColumn does, string chosenName, Func<string> title, ICommand finish)
+        public void Fill(PickStrip strip, StageColumn what, StageColumn does, string chosenName, string about, Func<string> title, ICommand finish)
         {
             strip.ArgumentsIn = _forEvents ? does ?? what : null;
 
@@ -179,6 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // The fields are compared too, since they change with the blocks: a hinge picked beside a rotor turns without a
             // direction.
             var fields = Wanted();
+            Explained(fields);
 
             // Values that open on what the block holds are each facet's own, read off the one chosen.
             if (shown.Length != 0 && _picked.Facet.Length != 0 && OpensOnTheBlock(fields))
@@ -205,8 +206,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var arguments = strip.Restate(shown, chosenName, fields, Filled, new ColorOffer(colors, _editor.Viewer, _editor.Preferred));
             if (_offering)
                 arguments.Form.Offer();
+            arguments.Describe(about);
             if (made)
             {
+                _editor.Codex.Explain(arguments.About);
                 arguments.Form.Edited += delegate
                 {
                     if (_editor.Current != _page)
@@ -236,6 +239,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 _openedArguments = true;
                 arguments.Form.Take(_editor.Input);
+            }
+        }
+
+        // The codex's own words for each option of the first block picked.
+        void Explained(List<Field> fields)
+        {
+            var block = _picked.Blocks.Count == 0 ? null : _editor.World.FindEntity(_picked.Blocks[0]);
+            if (block == null)
+                return;
+
+            for (var i = 0; i < fields.Count; i++)
+            {
+                var field = fields[i];
+                field.About = _editor.Codex.Option(block.Kind, field.Name);
+                fields[i] = field;
             }
         }
 

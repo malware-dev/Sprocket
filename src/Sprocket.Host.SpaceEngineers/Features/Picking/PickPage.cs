@@ -405,11 +405,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             else if (!does)
                 DropDoes();
 
-            // A moment takes nothing; a number watched asks how it compares, and with what, over what the trigger does.
-            if (_forEvents && _picked.Form != ReachKind.Value || _memberOnly)
+            if (_does != null)
+                _does.Title = string.IsNullOrEmpty(_members.ChosenName) ? Editor.Texts.PickWhatItDoes : _members.ChosenName;
+
+            // A moment is described and takes nothing; a number watched asks how it compares, and with what, over what the trigger does.
+            if (_memberOnly)
                 _strip.ShowsArguments = false;
             else
-                _arguments.Fill(_strip, _members.Column, _does, _members.ChosenName, () => Title, _finish);
+                _arguments.Fill(_strip, _members.Column, _does, _members.ChosenName, _members.ChosenAbout, () => Title, _finish);
 
             if (_does != null && _aim != null)
                 _aim.Fill(_does);

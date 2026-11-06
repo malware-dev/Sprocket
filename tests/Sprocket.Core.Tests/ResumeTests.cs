@@ -253,7 +253,7 @@ public class ResumeTests
     public void AWhenRemembersWhatItReadAcrossAReload()
     {
         var a = Build();
-        var opened = SignalTrigger.Written("ext", "finishes-opening");
+        var opened = SignalTrigger.Written("ext", "finishes_opening");
         opened.Sources.Add(a.Name(a.Outer));
         var close = new Act("close");
         close.Targets.Add(a.Name(a.Inner));
@@ -278,7 +278,7 @@ public class ResumeTests
     public void WhatAWhenReadOfEachBlockIsReadBack()
     {
         var a = Build();
-        var opened = SignalTrigger.Written("ext", "finishes-opening");
+        var opened = SignalTrigger.Written("ext", "finishes_opening");
         opened.Sources.Add(a.Name(a.Outer));
         opened.Sources.Add(a.Name(a.Inner));
         var close = new Act("close");

@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage.Upgrades
             new FromBlueprint(),
             new HeaderLines(),
             new OneScreenSlots(),
+            new MemberSpelling(),
         };
 
         /// <summary>Whether a program written for <paramref name="draft" /> of version <paramref name="version" /> is upgraded rather than refused.</summary>

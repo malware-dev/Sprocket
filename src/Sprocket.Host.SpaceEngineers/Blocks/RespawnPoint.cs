@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("SpawnName", true, "respawn name");
+            kind.Renaming("SpawnName", true, "spawn name");
         }
     }
 }

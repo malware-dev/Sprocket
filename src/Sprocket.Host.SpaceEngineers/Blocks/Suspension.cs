@@ -25,8 +25,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("steering-angle", "steering angle", Turned).Measured("°").Looked(Steered).In(Category.Movement)
-                .WithValue("wheel-attached", "wheel attached", Attached).Announced().In(Category.Repair)
+            kind.WithValue("steering_angle", "steering angle", Turned).Measured("°").Looked(Steered).In(Category.Movement)
+                .WithValue("wheel_attached", "wheel attached", Attached).Announced().In(Category.Repair)
                 .Hiding("ResetMaxSteerAngle", "ResetHeight", "ResetSpeed Limit", "ResetPropulsion override",
                     "ResetSteer override")
                 .Renaming("Propulsion override", true, "propulsion override")

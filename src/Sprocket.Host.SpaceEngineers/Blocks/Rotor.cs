@@ -19,10 +19,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed partial class Rotor : Capability
     {
         /// <summary>Turning to an angle, which is Sprocket's own and waits until it gets there.</summary>
-        public const string RotateTo = "rotate-to";
+        public const string RotateTo = "rotate_to";
 
         /// <summary>Adding a head, which is the game's own, in one of the sizes the block offers.</summary>
-        public const string AddHead = "add-head";
+        public const string AddHead = "add_head";
 
         const float Hair = 0.0001f;
 

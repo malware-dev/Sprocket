@@ -58,14 +58,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Discharge", false, "toggle discharge")
                 .Renaming("ChargeMode", true, "charge mode")
                 .WithValue("charge", "charge", Charge).Percent().Announced().In(Category.Power)
-                .WithValue("stored-power", "stored power", Stored).Measured(" MWh").Announced().In(Category.Power)
+                .WithValue("stored_power", "stored power", Stored).Measured(" MWh").Announced().In(Category.Power)
                 .WithValue("capacity", "capacity", Capacity).Measured(" MWh").Announced().In(Category.Power)
                 .WithValue("charging", "charging", Charging).Status().Looked(Unheard).In(Category.Power)
                 .WithValue("charged", "charged", Topped).Status().Announced().In(Category.Power)
                 .WithValue("input", "input", Input).Measured(" MW").Looked(Unheard).In(Category.Power)
-                .WithValue("maximum-input", "maximum input", MostIn).Measured(" MW").Looked(Unheard).In(Category.Power)
+                .WithValue("maximum_input", "maximum input", MostIn).Measured(" MW").Looked(Unheard).In(Category.Power)
                 .WithValue("output", "output", Output).Measured(" MW").Announced().In(Category.Power)
-                .WithValue("maximum-output", "maximum output", MostOut).Measured(" MW").Looked(Unheard).In(Category.Power);
+                .WithValue("maximum_output", "maximum output", MostOut).Measured(" MW").Looked(Unheard).In(Category.Power);
         }
 
         /// <summary>Told as the battery's charge moves and as its output changes, both of which it announces.</summary>

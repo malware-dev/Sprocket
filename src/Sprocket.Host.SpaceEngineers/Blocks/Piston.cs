@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed partial class Piston : Capability
     {
         /// <summary>Moving to a position, which is Sprocket's own and waits until it gets there.</summary>
-        public const string MoveTo = "move-to";
+        public const string MoveTo = "move_to";
 
         /// <summary>The action that extends the piston all the way.</summary>
         public const string Extend = "extend";
@@ -82,9 +82,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // reaches either end.
             kind.WithValue("position", "position", Travelled).Measured(" m").Looked(Moving).In(Category.Movement)
                 .WithValue("status", "status", State).Status().Looked(Moving).In(Category.Movement)
-                .WithChange("finishes-extending", "finishes extending", "status", Literal.Name("extended")).Announced()
+                .WithChange("finishes_extending", "finishes extending", "status", Literal.Name("extended")).Announced()
                 .Reading("is extended", "is not extended")
-                .WithChange("finishes-retracting", "finishes retracting", "status", Literal.Name("retracted")).Announced()
+                .WithChange("finishes_retracting", "finishes retracting", "status", Literal.Name("retracted")).Announced()
                 .Reading("is retracted", "is not retracted");
         }
 

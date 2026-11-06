@@ -114,7 +114,7 @@ Every member exposed by a host on a block is an **action**, a **value**, a **fun
 #### Member Semantics and Validation
 * Invoking a non-existent member, or using a member as the wrong kind (e.g., calling `call` on a value, or `set` on a function), is an error.
 * An action and a value on the same block may share the same ID. The statement head (`call` vs. `set`/read) disambiguates them.
-* **Arguments:** Supplied in comma-separated parentheses immediately following the member identifier: `Gearbox.'rotate-to'(0, 90, 2)`.
+* **Arguments:** Supplied in comma-separated parentheses immediately following the member identifier: `Gearbox.rotate_to(0, 90, 2)`.
   * Parentheses are written **only** when arguments are present. Writing empty parentheses `()` is a syntax error.
   * Argument counts and types must match the member's parameter signature. Supplying incompatible types or an integer exceeding parameter limits is an error.
 * **Return Types:** Values and functions return a flag, integer, real, text, color, or a host choice name.
@@ -135,7 +135,7 @@ A host may provide non-block object types associated with a block (such as an LC
 
 Every block member resides in a namespace:
 * **Root Namespace:** Members are written bare (e.g., `Reverse`, `Radius`).
-* **Named Namespaces:** Members are written qualified with a dot (e.g., `Gearbox.close`, `Gearbox.'rotate-to'`).
+* **Named Namespaces:** Members are written qualified with a dot (e.g., `Gearbox.close`, `Gearbox.rotate_to`).
 * Each part of a qualified name is judged on its own, so any part spelled like a keyword is quoted: `Gearbox.'on'`.
 * A host may have a root namespace, named namespaces, or both. A host with no root namespace has every member written qualified.
 * Referencing a member in a non-existent namespace is an error.

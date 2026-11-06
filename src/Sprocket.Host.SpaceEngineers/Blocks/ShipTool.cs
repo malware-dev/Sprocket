@@ -3,12 +3,12 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A grinder or a welder: whether a pilot is working it by hand from a seat.</summary>
+    /// <summary>A grinder or a welder: whether it is at work.</summary>
     public sealed class ShipTool : Capability
     {
-        const string Unheard = "Nothing says when a pilot takes up a tool's trigger.";
+        const string Unheard = "Nothing says when a tool starts or stops working.";
 
-        static readonly OwnValue Piloted = OwnValue.Flag(Reading.Of<IMyShipToolBase>(tool => tool.IsActivated));
+        static readonly OwnValue AtWork = OwnValue.Flag(Reading.Of<IMyShipToolBase>(tool => tool.IsActivated));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("run-by-a-pilot", "run by a pilot", Piloted).Looked(Unheard).In(Category.Production);
+            kind.WithValue("activated", "at work", AtWork).Looked(Unheard).In(Category.Production);
         }
     }
 }

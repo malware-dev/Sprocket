@@ -73,7 +73,7 @@ public class WatchingTests
         var lamp = ship.Light(2, "Lamp");
         door.Enabled = false;
 
-        var on = SignalTrigger.Written("ext", "turns-on");
+        var on = SignalTrigger.Written("ext", "turns_on");
         on.Sources.Add(automation.Declare(ship.World, ship.Entity(door.Id)).Name);
         var sequence = automation.AddSequence(on);
         var act = Given.Power(true);
@@ -112,7 +112,7 @@ public class WatchingTests
         var lamp = ship.Light(2, "Lamp");
         hangar.ForceOpen();
 
-        var closing = SignalTrigger.Written("ext", "starts-closing");
+        var closing = SignalTrigger.Written("ext", "starts_closing");
         closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
         var sequence = automation.AddSequence(closing);
         var act = Given.Power(true);
@@ -147,7 +147,7 @@ public class WatchingTests
         var hangar = ship.HangarDoor(1, "Hangar");
         var lamp = ship.Light(2, "Lamp");
 
-        var closing = SignalTrigger.Written("ext", "starts-closing");
+        var closing = SignalTrigger.Written("ext", "starts_closing");
         closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
         var sequence = automation.AddSequence(closing);
         var act = Given.Power(true);

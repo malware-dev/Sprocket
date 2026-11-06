@@ -70,7 +70,7 @@ public class ScreensTests
         Assert.Same(screen, kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Type);
         Assert.True(kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Vetted);
         Assert.True(kind.FindAction(ScreenType.SetUp, ReachKind.Native)!.Vetted);
-        foreach (var id in new[] { "content", "app", "text-color", "font-size", "alignment", "keep-aspect-ratio" })
+        foreach (var id in new[] { "content", "app", "text_color", "font_size", "alignment", "keep_aspect_ratio" })
         {
             Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
             Assert.Same(screen, kind.FindAction(id, ReachKind.Value)!.Type);
@@ -290,8 +290,8 @@ public class ScreensTests
         ship.Tick();
         var entity = ship.Entity(board.Id);
 
-        Assert.True(Probe.Of(entity, BlockKinds.Own, "font-size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(3.0), facet: 2)!.Holds());
-        Assert.True(Probe.Of(entity, BlockKinds.Own, "font-size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(1.0), facet: 1)!.Holds());
+        Assert.True(Probe.Of(entity, BlockKinds.Own, "font_size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(3.0), facet: 2)!.Holds());
+        Assert.True(Probe.Of(entity, BlockKinds.Own, "font_size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(1.0), facet: 1)!.Holds());
         Assert.True(Probe.Of(entity, BlockKinds.Own, "alignment", new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("right"), facet: 2)!.Holds());
     }
 

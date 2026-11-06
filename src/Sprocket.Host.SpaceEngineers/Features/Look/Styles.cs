@@ -1099,6 +1099,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
         };
 
+        /// <summary>What says what a chosen block member is, on a wash of its own at the top of the column.</summary>
+        public static readonly IStyle<RichText> MemberAbout = new RichTextStyle(Description)
+        {
+            Base =
+            {
+                FontSize = TextSizes.Small,
+                Color = Palette.Muted,
+                Background = Palette.SlotFill,
+                Padding = new Thickness(16f, 8f)
+            }
+        };
+
         /// <summary>What a list says where it has nothing in it.</summary>
         public static readonly IStyle<Label> Nothing = new LabelStyle
         {

@@ -32,8 +32,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.Renaming("Searchable", true, "searchable").Renaming("Searchable", false, "toggle searchable");
 
             if (block is IMyVendingMachine)
-                kind.WithAction("show-next-item", "show next item", Next).In(Category.Screen)
-                    .WithAction("show-previous-item", "show previous item", Previous).In(Category.Screen);
+                kind.WithAction("show_next_item", "show next item", Next).In(Category.Screen)
+                    .WithAction("show_previous_item", "show previous item", Previous).In(Category.Screen);
         }
 
         /// <summary>Whether <paramref name="block" /> is one of the blocks these words are for.</summary>

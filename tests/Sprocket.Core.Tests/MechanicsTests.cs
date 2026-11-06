@@ -92,9 +92,9 @@ public class MechanicsTests
     {
         var ship = new Ship();
         var door = ship.Rig.Door(1, "Door");
-        ship.When("how-far-open", Relation.AtLeast, Literal.Of(50.0), door);
+        ship.When("how_far_open", Relation.AtLeast, Literal.Of(50.0), door);
         ship.Start();
-        Assert.Equal(0.0, ship.Read("how-far-open", door).Real);
+        Assert.Equal(0.0, ship.Read("how_far_open", door).Real);
 
         door.Perform("Open_On", null!);
         ship.Tick(10);
@@ -104,7 +104,7 @@ public class MechanicsTests
         Assert.Equal(1, ship.Fired);
 
         ship.Tick(20);
-        Assert.Equal(100.0, ship.Read("how-far-open", door).Real, 3);
+        Assert.Equal(100.0, ship.Read("how_far_open", door).Real, 3);
     }
 
     /// <summary>A shut door rules out its moving, so how far it is open is looked at only once it starts to open.</summary>
@@ -112,7 +112,7 @@ public class MechanicsTests
     public void HowFarADoorIsOpenIsRuledOutWhileItIsShut()
     {
         var ship = new Ship();
-        var value = ship.Rig.Entity(ship.Rig.Door(1, "Door").Id).Kind.FindAction("how-far-open", ReachKind.Value)!;
+        var value = ship.Rig.Entity(ship.Rig.Door(1, "Door").Id).Kind.FindAction("how_far_open", ReachKind.Value)!;
 
         Assert.NotNull(value.RuledOutBy);
         Assert.False(value.Announced);
@@ -135,8 +135,8 @@ public class MechanicsTests
 
     /// <summary>A piston reaching the end of its travel is seen on the tick after, since the piston raises it.</summary>
     [Theory]
-    [InlineData("finishes-extending", 9.9f, "Extend")]
-    [InlineData("finishes-retracting", 0.1f, "Retract")]
+    [InlineData("finishes_extending", 9.9f, "Extend")]
+    [InlineData("finishes_retracting", 0.1f, "Retract")]
     public void APistonReachingAnEndIsSeenOnTheTickAfter(string signal, float from, string toward)
     {
         var ship = new Ship();
@@ -244,7 +244,7 @@ public class MechanicsTests
 
         var kind = rig.Entity(door.Id).Kind;
         Vetted(kind, ReachKind.Native, "open", "close");
-        Vetted(kind, ReachKind.Value, "status", "how-far-open", "AnyoneCanUse", "Sprocket_AutoClose");
+        Vetted(kind, ReachKind.Value, "status", "how_far_open", "AnyoneCanUse", "Sprocket_AutoClose");
         Vetted(kind, ReachKind.Action, "Open", "AnyoneCanUse");
 
         Unvetted(kind, ReachKind.Action, "Open_On", "Open_Off");

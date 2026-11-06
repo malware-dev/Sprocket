@@ -274,6 +274,12 @@
     <value>Rediger teksten</value>
   </data>
 
+  <data name="Sprocket.MemberAudit.Title" xml:space="preserve">
+    <value>Sjekk medlemstekster</value>
+  </data>
+  <data name="Sprocket.MemberAudit.Done" xml:space="preserve">
+    <value>{count} medlemmer mangler tekst. De står i spillets logg.</value>
+  </data>
   <data name="Sprocket.Script.Title" xml:space="preserve">
     <value>Skript</value>
   </data>

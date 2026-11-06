@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly VStack _head;
         readonly Label _title;
         readonly Label _why;
+        readonly RichText _about;
         readonly FieldSet _form;
         readonly VStack _rest;
 
@@ -39,6 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     new Label { Style = Styles.ColumnNote }
                 }
             }.As(out _head));
+            Children.Add(new RichText { Style = Styles.MemberAbout, IsVisible = false }.As(out _about));
             Children.Add(new FieldSet().As(out _form));
             Children.Add(new Label { Style = Styles.Refusal, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _why));
 
@@ -86,6 +88,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             get { return _title.Text; }
             set { _title.Text = (value ?? "").ToUpperInvariant(); }
+        }
+
+        /// <summary>What says what the chosen thing is.</summary>
+        public RichText About => _about;
+
+        /// <summary>Says what the chosen thing is in <paramref name="text" />, or nothing where that is empty.</summary>
+        public void Describe(string text)
+        {
+            _about.Markdown = text ?? "";
+            _about.IsVisible = _about.Markdown.Length != 0;
         }
 
         /// <summary>Where the arguments are given.</summary>

@@ -41,7 +41,7 @@ public class PlacementTests
         var kind = ship.Entity(timer.Id).Kind;
 
         Assert.Equal(Category.Automation, kind.FindAction("TriggerDelay", ReachKind.Value)!.Category);
-        Assert.Equal(Category.Automation, kind.FindAction("counting-down", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Automation, kind.FindAction("counting_down", ReachKind.Value)!.Category);
     }
 
     /// <summary>A survival kit's respawn name is its name, as a medical room's is; the kit is known by its capability.</summary>
@@ -79,7 +79,7 @@ public class PlacementTests
 
         Assert.Equal(Category.Repair, kind.FindAction("integrity", ReachKind.Value)!.Category);
         Assert.Equal(Category.Repair, kind.FindAction("damaged", ReachKind.Value)!.Category);
-        Assert.Equal(Category.Repair, kind.FindAction("build-level", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Repair, kind.FindAction("build_level", ReachKind.Value)!.Category);
     }
 
     /// <summary>Who sits in a cockpit, and whether they control it, read under Usage.</summary>
@@ -89,20 +89,19 @@ public class PlacementTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Rig.Cockpit(1, "Cockpit").Id).Kind;
 
-        Assert.Equal(Category.Usage, kind.FindAction("occupant-name", ReachKind.Value)!.Category);
-        Assert.Equal(Category.Usage, kind.FindAction("under-control", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Usage, kind.FindAction("occupant_name", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Usage, kind.FindAction("under_control", ReachKind.Value)!.Category);
     }
 
     /// <summary>What is fitted to an upgrade module, counted, reads under State.</summary>
     [Fact]
-    public void AnUpgradeModulesCountsAreState()
+    public void AnUpgradeModulesConnectionsAreState()
     {
         var ship = new Rigged();
         var module = ship.Rig.Weld(new Standing<IMyUpgradeModule>(1, "Module", typeof(MyObjectBuilder_UpgradeModule), "Module"));
         var kind = ship.Entity(module.Id).Kind;
 
         Assert.Equal(Category.State, kind.FindAction("connections", ReachKind.Value)!.Category);
-        Assert.Equal(Category.State, kind.FindAction("upgrade-count", ReachKind.Value)!.Category);
     }
 
     /// <summary>The text a panel's screen shows, said as text, and the app it runs stand under Screen.</summary>

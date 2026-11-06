@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage.Upgrades
         // its screen first; a block with one screen took them without the name.
         static readonly string[] ScreenMembers =
         {
-            ScreenType.ShowText, ScreenType.SetUp, "content", "text-color", "background-color", "font", "font-size", "alignment",
+            "show-text", "set-up-screen", "content", "text-color", "background-color", "font", "font-size", "alignment",
             "padding", "app-color", "app-background-color", "image-interval", "keep-aspect-ratio"
         };
 
@@ -91,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage.Upgrades
             arguments.RemoveAt(0);
 
             // Setting a screen up asks which app it runs since, after its content: left empty, so the app is left as it is.
-            if (member == ScreenType.SetUp)
+            if (member == "set-up-screen")
                 arguments.Insert(1, Literal.Of(""));
 
             if (!system.IsBlueprint)

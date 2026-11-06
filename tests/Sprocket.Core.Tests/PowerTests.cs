@@ -49,7 +49,7 @@ public class PowerTests
 
         foreach (var id in new[]
                  {
-                     "charge", "stored-power", "capacity", "charging", "input", "maximum-input", "output", "maximum-output"
+                     "charge", "stored_power", "capacity", "charging", "input", "maximum_input", "output", "maximum_output"
                  })
         {
             var value = kind.FindAction(id, ReachKind.Value)!;
@@ -59,7 +59,7 @@ public class PowerTests
         }
 
         Assert.Equal(25.0, Read(ship, battery, "charge"), 3);
-        Assert.Equal(0.75, Read(ship, battery, "stored-power"), 3);
+        Assert.Equal(0.75, Read(ship, battery, "stored_power"), 3);
         Assert.Equal(3.0, Read(ship, battery, "capacity"), 3);
     }
 
@@ -163,8 +163,8 @@ public class PowerTests
 
         Vetted(kind, ReachKind.Native, Blocks.Battery.Recharge);
         Vetted(kind, ReachKind.Action, "Recharge", "Discharge");
-        Vetted(kind, ReachKind.Value, "ChargeMode", "charge", "stored-power", "capacity", "charging", "input", "maximum-input",
-            "output", "maximum-output");
+        Vetted(kind, ReachKind.Value, "ChargeMode", "charge", "stored_power", "capacity", "charging", "input", "maximum_input",
+            "output", "maximum_output");
         Unvetted(kind, ReachKind.Action, "Recharge_On", "Recharge_Off", "Discharge_On", "Discharge_Off", "Auto");
     }
 
@@ -178,7 +178,7 @@ public class PowerTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Thruster(1, "Thruster").Id).Kind;
 
-        Vetted(kind, ReachKind.Value, "override", "thrust", "maximum-thrust");
+        Vetted(kind, ReachKind.Value, "override", "thrust", "maximum_thrust");
         Unvetted(kind, ReachKind.Value, "Override");
         Unvetted(kind, ReachKind.Action, "SetOverride", "IncreaseOverride", "DecreaseOverride");
 
@@ -199,8 +199,8 @@ public class PowerTests
 
         Vetted(kind, ReachKind.Native, Blocks.JumpDrive.Recharge);
         Vetted(kind, ReachKind.Action, "Recharge");
-        Vetted(kind, ReachKind.Value, "Recharge", "status", "charge", "stored-power", "capacity",
-            "minimum-jump-distance", "maximum-jump-distance");
+        Vetted(kind, ReachKind.Value, "Recharge", "status", "charge", "stored_power", "capacity",
+            "minimum_jump_distance", "maximum_jump_distance");
         Unvetted(kind, ReachKind.Value, "JumpDistance");
         Unvetted(kind, ReachKind.Action, "Recharge_On", "Recharge_Off", "Jump", "IncreaseJumpDistance", "DecreaseJumpDistance",
             "SetGravityAcceleration");

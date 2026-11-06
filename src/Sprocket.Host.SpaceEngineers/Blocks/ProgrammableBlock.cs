@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -27,15 +28,30 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(Run, "run", Runs, Asked()).In(Category.Automation)
-                .WithValue("has-compile-errors", "has compile errors", Broken)
+                .WithValue("has_compile_errors", "has compile errors", Broken)
                 .Looked("A programmable block raises no event when its script is compiled.").In(Category.Automation);
         }
 
         /// <summary>Runs the script with <paramref name="argument" />, keeping in <paramref name="seen" /> whether it ran.</summary>
         static void Ran(IMyProgrammableBlock block, Argument argument, ReaderMemory seen)
         {
-            seen.Number = block.TryRun(argument.Text) ? 1 : 0;
+            seen.Number = Started(block, argument.Text) ? 1 : 0;
             seen.Frame = 0;
+        }
+
+        // The game's run throws where a player's script overruns its instruction limit, and an exception that leaves a mod's
+        // update ends the session.
+        static bool Started(IMyProgrammableBlock block, string argument)
+        {
+            try
+            {
+                return block.TryRun(argument);
+            }
+            catch (Exception trouble)
+            {
+                GameLog.Say($"The script of {block.CustomName} would not run: {trouble.Message}");
+                return false;
+            }
         }
 
         /// <summary>Why the script did not run, which ends the run there, or nothing where it ran.</summary>

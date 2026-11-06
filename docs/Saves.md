@@ -26,7 +26,7 @@ A program is stored as a script in Sprocket's language ([Language](Language.md))
 read by `ProgramReader.Load` through the `Lexer` and `Parser` in `Storage/`. Its first line says which format wrote it:
 
 ```
-sprocket 1 alpha 21
+sprocket 1 alpha 22
 ```
 
 `ScriptFormat.Version` and `ScriptFormat.Draft` hold the numbers this build writes.

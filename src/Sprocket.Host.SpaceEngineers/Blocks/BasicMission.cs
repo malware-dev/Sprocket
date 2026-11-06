@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("SelectMission", true, "task")
+            kind.Renaming("SelectMission", true, "objective")
                 .Renaming("ID_MODE_SELECTOR_COMBOBOX", true, "route mode")
                 .Renaming("SetCurrentGridPositionHome", false, "set home position")
                 .Renaming("FollowHomeMinRange", true, "minimum range from home")

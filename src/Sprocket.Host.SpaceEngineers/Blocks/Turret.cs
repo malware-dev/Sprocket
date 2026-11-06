@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction("reset-targeting", "reset targeting", Resets).In(Category.Weapons)
+            kind.WithAction("reset_targeting", "reset targeting", Resets).In(Category.Weapons)
                 .Renaming("ViewRotation", true, "view rotation");
         }
     }

@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithValue("ice", "ice", Held).Measured(" kg")
                 .Looked("A generator announces what it holds every time it burns ice, which saves no look while it works.")
                 .In(Category.Gas)
-                .WithChange("runs-out-of-ice", "runs out of ice", "ice", Literal.Of(0.0)).Reading("has no ice", "has ice").Announced()
+                .WithChange("runs_out_of_ice", "runs out of ice", "ice", Literal.Of(0.0)).Reading("has no ice", "has ice").Announced()
                 .WithValue("producing", "producing", Producing)
                 .Looked("A generator makes gas only while something draws on it, and announces neither.").In(Category.Gas)
                 .Renaming("Refill", false, "refill bottles")

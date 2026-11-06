@@ -299,7 +299,7 @@ public class ProgramTextTests
 
         var saved = Save(program);
         Assert.Contains("call Reverse on [ rotor ]", saved);
-        Assert.Contains("call ext.'rotate-to'(90, 2.5) on [ rotor ]", saved);
+        Assert.Contains("call ext.rotate_to(90, 2.5) on [ rotor ]", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
 
         var after = new Automation();

@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public const string Play = "play";
 
         /// <summary>The sound the block holds ready, which is Sprocket's own.</summary>
-        public const string Selected = "selected-sound";
+        public const string Selected = "selected_sound";
 
         const string Unheard = "A sound block raises no event when its sound is chosen.";
 

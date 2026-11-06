@@ -31,7 +31,7 @@ public class CommonMembersTests
         screen.Run(2);
 
         var trigger = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
-        Assert.Equal("stops-working", trigger.EventId);
+        Assert.Equal("stops_working", trigger.EventId);
         Assert.Equal("When slot 2 stops working", screen.Editor.Says(0));
     }
 }

@@ -18,7 +18,7 @@ public class ArgumentsColumnTests
 
     const string SetRadius = "press radius";
     const string SetColor = "press color";
-    const string RadiusBox = "1348 232";
+    const string RadiusBox = "1348 276";
     const string Done = "1394 72";
 
     // The values part of the step's line, after the slot it names.

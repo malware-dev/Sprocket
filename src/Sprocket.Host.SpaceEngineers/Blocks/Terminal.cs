@@ -31,14 +31,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("working", "working", Working).Status().In(Category.Power).Announced()
-                .WithChange("starts-working", "starts working", "working", Literal.Of(true))
+                .WithChange("starts_working", "starts working", "working", Literal.Of(true))
                 .Reading("is working", "is not working").Announced()
-                .WithChange("stops-working", "stops working", "working", Literal.Of(false))
+                .WithChange("stops_working", "stops working", "working", Literal.Of(false))
                 .Reading("is not working", "is working").Announced();
 
-            kind.WithValue("being-hacked", "being hacked", Hacked).Looked(Unheard).In(Category.Access);
+            kind.WithValue("being_hacked", "being hacked", Hacked).Looked(Unheard).In(Category.Access);
 
-            kind.WithValue("custom-data", "custom data", Data).In(Category.Other).Announced().Lines(DataLongest);
+            kind.WithValue("custom_data", "custom data", Data).In(Category.Other).Announced().Lines(DataLongest);
 
             kind.Renaming("ShowOnHUD", false, "toggle show on HUD")
                 .Renaming("ShowOnHUD", true, "show on HUD");

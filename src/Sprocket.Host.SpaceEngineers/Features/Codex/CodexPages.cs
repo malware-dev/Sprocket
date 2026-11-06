@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Lumel;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -52,6 +53,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The name links give the page on the steps running and stopping a sequence.</summary>
         public const string RunAndStop = "Term.RunAndStop";
 
+        /// <summary>What the name of every member's text starts with, after <see cref="Prefix" />.</summary>
+        public const string MemberPages = "Member.";
+
+        /// <summary>What the name of every option's text starts with, after <see cref="Prefix" />.</summary>
+        public const string OptionPages = "Member.Option.";
+
         readonly Texts _texts;
         readonly Dictionary<string, Tip> _read = new Dictionary<string, Tip>(StringComparer.Ordinal);
 
@@ -78,6 +85,67 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             page = new CodexTip(text);
             _read[id] = page;
             return page;
+        }
+
+        /// <summary>
+        /// What the codex says of the member listed as <paramref name="name" /> on a block of <paramref name="kind" />, or empty where
+        /// it says nothing. A status word, where <paramref name="isStatus" />, is one of the block's statuses, read apart from an
+        /// action of the same name.
+        /// </summary>
+        public string Member(EntityKind kind, string name, bool isStatus)
+        {
+            var word = Joined(name);
+            foreach (var capability in kind.Capabilities)
+            {
+                var text = Said($"{MemberPages}{capability.GetType().Name}.{word}", isStatus);
+                if (text != null)
+                    return text;
+            }
+
+            return Said(MemberPages + word, isStatus) ?? "";
+        }
+
+        /// <summary>
+        /// What the codex says of the option called <paramref name="name" /> on a block of <paramref name="kind" />, or null where it says
+        /// nothing.
+        /// </summary>
+        public string Option(EntityKind kind, string name)
+        {
+            var word = Joined(name);
+            foreach (var capability in kind.Capabilities)
+            {
+                var text = _texts.Codex.Find($"{Prefix}{OptionPages}{capability.GetType().Name}.{word}");
+                if (text != null)
+                    return text;
+            }
+
+            return _texts.Codex.Find(Prefix + OptionPages + word);
+        }
+
+        string Said(string id, bool isStatus)
+        {
+            var said = isStatus ? _texts.Codex.Find($"{Prefix}{id}.Status") : null;
+            return said ?? _texts.Codex.Find(Prefix + id);
+        }
+
+        /// <summary><paramref name="name" /> as one word that a key can hold, each of its words capitalized.</summary>
+        public static string Joined(string name)
+        {
+            var joined = new System.Text.StringBuilder(name.Length);
+            var starts = true;
+            foreach (var letter in name)
+            {
+                if (!char.IsLetterOrDigit(letter))
+                {
+                    starts = true;
+                    continue;
+                }
+
+                joined.Append(starts ? char.ToUpperInvariant(letter) : letter);
+                starts = false;
+            }
+
+            return joined.ToString();
         }
 
         /// <summary>The class of link a term is: hovered for its page, and never pressed.</summary>

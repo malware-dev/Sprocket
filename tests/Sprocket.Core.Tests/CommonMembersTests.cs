@@ -90,10 +90,10 @@ public class CommonMembersTests
         var ship = new Ship();
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
 
-        foreach (var id in new[] { "working", "being-hacked", "custom-data", "integrity", "damaged", "build-level" })
+        foreach (var id in new[] { "working", "being_hacked", "custom_data", "integrity", "damaged", "build_level" })
             Assert.NotNull(kind.FindAction(id, ReachKind.Value));
 
-        foreach (var id in new[] { "starts-working", "stops-working" })
+        foreach (var id in new[] { "starts_working", "stops_working" })
             Assert.NotNull(kind.FindEvent(id));
 
         foreach (var id in new[] { "powered", "broken" })
@@ -103,9 +103,9 @@ public class CommonMembersTests
             Assert.Null(kind.FindEvent(id));
 
         Assert.True(kind.FindAction("working", ReachKind.Value)!.Announced);
-        Assert.True(kind.FindAction("custom-data", ReachKind.Value)!.Announced);
+        Assert.True(kind.FindAction("custom_data", ReachKind.Value)!.Announced);
         Assert.True(kind.FindAction("integrity", ReachKind.Value)!.Announced);
-        Assert.NotEqual("", kind.FindAction("being-hacked", ReachKind.Value)!.LookedBecause);
+        Assert.NotEqual("", kind.FindAction("being_hacked", ReachKind.Value)!.LookedBecause);
     }
 
     /// <summary>A block the harness gives no inventory, power or screen offers none of what those bring.</summary>
@@ -115,10 +115,10 @@ public class CommonMembersTests
         var ship = new Ship();
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
 
-        foreach (var id in new[] { "inventory-fill", "inventory-mass", "power-use" })
+        foreach (var id in new[] { "inventory_fill", "inventory_mass", "power_use" })
             Assert.Null(kind.FindAction(id, ReachKind.Value));
 
-        Assert.Null(kind.FindAction("show-text", ReachKind.Native));
+        Assert.Null(kind.FindAction("show_text", ReachKind.Native));
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class CommonMembersTests
     {
         var ship = new Ship();
         ship.Lamp.Enabled = false;
-        ship.On("starts-working");
+        ship.On("starts_working");
         ship.Start();
         Assert.Equal(0, ship.Fired);
 
@@ -159,7 +159,7 @@ public class CommonMembersTests
     public void ABlockStoppingWorkFiresStopsWorking()
     {
         var ship = new Ship();
-        ship.On("starts-working");
+        ship.On("starts_working");
         ship.Start();
 
         ship.Lamp.Enabled = false;
@@ -167,7 +167,7 @@ public class CommonMembersTests
         Assert.Equal(0, ship.Fired);
 
         var stops = new Ship();
-        stops.On("stops-working");
+        stops.On("stops_working");
         stops.Start();
 
         stops.Lamp.Enabled = false;
@@ -180,7 +180,7 @@ public class CommonMembersTests
     public void CustomDataWrittenIsSeenOnTheTickAfter()
     {
         var ship = new Ship();
-        ship.When("custom-data", Literal.Of("go"));
+        ship.When("custom_data", Literal.Of("go"));
         ship.Start();
         Assert.Equal(0, ship.Fired);
 
@@ -233,7 +233,7 @@ public class CommonMembersTests
             .Offering("ShowOnHUD_Off", "Show on HUD Off");
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
 
-        foreach (var id in new[] { "working", "being-hacked", "custom-data", "integrity", "damaged", "build-level", "power", "ShowOnHUD" })
+        foreach (var id in new[] { "working", "being_hacked", "custom_data", "integrity", "damaged", "build_level", "power", "ShowOnHUD" })
             Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in new[] { "OnOff", "ShowOnHUD" })
@@ -368,7 +368,7 @@ public class CommonMembersTests
     public void TheAutomationsOwnBlockOffersCustomDataToSet()
     {
         var ship = new Ship();
-        var data = ship.Rig.Entity(ship.Rig.Rig.Sprocket.Id).Kind.FindAction("custom-data", ReachKind.Value)!;
+        var data = ship.Rig.Entity(ship.Rig.Rig.Sprocket.Id).Kind.FindAction("custom_data", ReachKind.Value)!;
 
         Assert.True(data.Sets);
         Assert.True(data.Vetted);
@@ -383,7 +383,7 @@ public class CommonMembersTests
     /// <summary>A step setting the lamp's Custom Data to <paramref name="value" />.</summary>
     static Act SetCustomData(Ship ship, Literal value)
     {
-        var set = new Act("custom-data") { Form = ReachKind.Value, Provider = BlockKinds.Own };
+        var set = new Act("custom_data") { Form = ReachKind.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Lamp));
         set.Arguments.Add(value);
         return set;

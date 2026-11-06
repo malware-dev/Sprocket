@@ -85,8 +85,8 @@ public class ScreenBlockTests
         Assert.True(kind.FindAction("Title", ReachKind.Value)!.Hidden);
         Assert.True(kind.FindAction("FontColor", ReachKind.Value)!.Hidden);
         Assert.True(kind.FindAction("ScriptForegroundColor", ReachKind.Value)!.Hidden);
-        Assert.Same(screen, kind.FindAction("text-color", ReachKind.Value)!.Type);
-        Assert.Same(screen, kind.FindAction("app-color", ReachKind.Value)!.Type);
+        Assert.Same(screen, kind.FindAction("text_color", ReachKind.Value)!.Type);
+        Assert.Same(screen, kind.FindAction("app_color", ReachKind.Value)!.Type);
         Assert.Same(screen, kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Type);
         Assert.Single(kind.Facets(screen!));
     }
@@ -123,7 +123,7 @@ public class ScreenBlockTests
         Assert.True(kind.FindAction(ScreenType.App, ReachKind.Value)!.Vetted);
         Assert.True(kind.FindAction("Rotate", ReachKind.Value)!.Vetted);
         Assert.True(kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Vetted);
-        foreach (var id in new[] { "text-color", "background-color", "app-color", "content", "font", "font-size", "alignment", "padding" })
+        foreach (var id in new[] { "text_color", "background_color", "app_color", "content", "font", "font_size", "alignment", "padding" })
             Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in colors.Concat(layout).Append("PreserveAspectRatio").Where(id => id != "Rotate"))

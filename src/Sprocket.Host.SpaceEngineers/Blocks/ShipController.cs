@@ -44,8 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             IMyToolbar hotbar = Toolbars.Of(block, 1);
             if (hotbar != null && hotbar.PageCount > 0 && hotbar.SlotCount > 0)
-                kind.WithPressed(1, "hotbar slot is pressed", hotbar.PageCount, hotbar.SlotCount,
-                    at => $"hotbar page {at.Page}, slot {at.Slot} is pressed");
+                kind.WithPressed(1, "toolbar slot is pressed", hotbar.PageCount, hotbar.SlotCount,
+                    at => $"toolbar page {at.Page}, slot {at.Slot} is pressed");
 
             if (Toolbars.Of(block, 3) == null)
                 return;

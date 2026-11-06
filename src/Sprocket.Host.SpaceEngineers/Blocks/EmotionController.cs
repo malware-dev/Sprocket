@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed class EmotionController : Capability
     {
         /// <summary>Showing a chosen face, which is Sprocket's own and runs the game's action for that face.</summary>
-        public const string ShowFace = "show-face";
+        public const string ShowFace = "show_face";
 
         // The folder every face's texture is in, which tells a face's action from any other: the game's emotion controller
         // component makes one action for each such texture.

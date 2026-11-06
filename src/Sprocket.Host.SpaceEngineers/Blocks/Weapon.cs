@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             // A modded gun that is not one of the game's gun objects has no count to give.
             if (block is IMyGunObject<MyGunBase>)
-                kind.WithValue("rounds-left", "rounds left", Rounds).Announced().In(Category.Weapons);
+                kind.WithValue("rounds_left", "rounds left", Rounds).Announced().In(Category.Weapons);
 
             kind.Renaming("Shoot_On", false, "open fire")
                 .Renaming("Shoot_Off", false, "cease fire")

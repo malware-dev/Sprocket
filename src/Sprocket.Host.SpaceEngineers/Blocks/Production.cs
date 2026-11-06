@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const string Repeat = "Repeat is set in the production screen, which raises nothing.";
 
-        static readonly string[] Modes = { "assembling", "taking-apart" };
+        static readonly string[] Modes = { "assembling", "disassembling" };
 
         static readonly Reading Making = Reading.Of<IMyProductionBlock>(block => block.IsProducing);
 
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             .Writing<IMyAssembler>((assembler, mode) =>
                 assembler.Mode = mode.Whole == 1 ? MyAssemblerMode.Disassembly : MyAssemblerMode.Assembly);
 
-        // The mode of an assembler whose definition keeps it from taking apart, which its production screen offers no
+        // The mode of an assembler whose definition keeps it from disassembling, which its production screen offers no
         // choice of.
         static readonly OwnValue Locked = OwnValue.OneOf<IMyAssembler>(Modes, Position);
 
@@ -84,17 +84,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var doing = assembler == null ? "refining" : "producing";
             kind.WithValue(doing, doing, Producing).Announced().In(Category.Production)
-                .WithChange($"starts-{doing}", $"starts {doing}", doing, Literal.Of(true))
+                .WithChange($"starts_{doing}", $"starts {doing}", doing, Literal.Of(true))
                 .Reading($"is {doing}", $"is not {doing}").Announced()
-                .WithChange($"stops-{doing}", $"stops {doing}", doing, Literal.Of(false))
+                .WithChange($"stops_{doing}", $"stops {doing}", doing, Literal.Of(false))
                 .Reading($"is not {doing}", $"is {doing}").Announced()
                 .WithValue("stuck", "stuck", Stuck).Announced().In(Category.Production);
 
             if (assembler != null)
                 Setup(kind, block);
 
-            kind.WithValue("input-fill", "input fill", InputFill).Percent().Announced().In(Category.Stock)
-                .WithValue("output-fill", "output fill", OutputFill).Percent().Announced().In(Category.Stock);
+            kind.WithValue("input_fill", "input fill", InputFill).Percent().Announced().In(Category.Stock)
+                .WithValue("output_fill", "output fill", OutputFill).Percent().Announced().In(Category.Stock);
         }
 
         /// <summary>Told as the block starts or stops producing, gets stuck or works again, or its inventories change; on an assembler also as its progress, state or mode changes.</summary>
@@ -133,18 +133,18 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 });
 
             kind.WithAction("make", "make", makes, ItemIds.Choosing("item", words, means), amount).In(Category.Production)
-                .WithAction("clear-the-queue", "clear the queue", Clears).In(Category.Production)
-                .WithValue("items-queued", "items queued", _queued).Looked(Queue).In(Category.Production)
+                .WithAction("clear_the_queue", "clear the queue", Clears).In(Category.Production)
+                .WithValue("items_queued", "items queued", _queued).Looked(Queue).In(Category.Production)
                 .WithValue("progress", "progress", Progress).Percent().Announced().In(Category.Production);
         }
 
-        /// <summary>How an assembler is set to work: making or taking apart, and over again.</summary>
+        /// <summary>How an assembler is set to work: assembling or disassembling, and over again.</summary>
         static void Setup(EntityKind kind, IMyTerminalBlock block)
         {
-            // Whether an assembler can take apart is fixed by its definition, so it never changes and there is nothing to announce.
-            var able = TakesApart(block);
+            // Whether an assembler can disassemble is fixed by its definition, so it never changes and there is nothing to announce.
+            var able = Disassembles(block);
             kind.WithValue("mode", "mode", able ? Mode : Locked).Announced().In(Category.Production)
-                .WithValue("able-to-take-apart", "able to take apart", OwnValue.Flag(Reading.Of<IMyAssembler>(assembler => able)))
+                .WithValue("able_to_disassemble", "able to disassemble", OwnValue.Flag(Reading.Of<IMyAssembler>(assembler => able)))
                 .Announced().In(Category.Production)
                 .WithValue("repeating", "repeating", Repeating).Looked(Repeat).In(Category.Production);
         }
@@ -176,8 +176,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
         }
 
-        /// <summary>Whether an assembler of <paramref name="block" />'s definition can be set to take apart, or true where no definitions are loaded, as the game's own default.</summary>
-        static bool TakesApart(IMyTerminalBlock block)
+        /// <summary>Whether an assembler of <paramref name="block" />'s definition can be set to disassemble, or true where no definitions are loaded, as the game's own default.</summary>
+        static bool Disassembles(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;
             var definition = definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyAssemblerDefinition;
@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return definition == null || definition.EnableDisassembly;
         }
 
-        /// <summary>Where an assembler's mode stands among the modes: making, or taking apart.</summary>
+        /// <summary>Where an assembler's mode stands among the modes: assembling, or disassembling.</summary>
         static int Position(IMyAssembler assembler)
         {
             return assembler.Mode == MyAssemblerMode.Disassembly ? 1 : 0;

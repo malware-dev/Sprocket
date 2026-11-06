@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // The same switches in Sprocket's words, in the order of Followed.
         static readonly string[] Called =
         {
-            "meteors", "missiles", "small ships", "large ships", "characters", "stations", "neutrals", "friends", "enemies"
+            "meteors", "rockets", "small ships", "large ships", "characters", "stations", "neutrals", "friends", "enemies"
         };
 
         readonly List<Offer> _offered = new List<Offer>();

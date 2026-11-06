@@ -25,6 +25,9 @@ namespace Sprocket.Localization.Generator
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class UnusedTexts : DiagnosticAnalyzer
     {
+        // Texts on block members, found by the name of the member chosen, so nothing refers to them by their property.
+        const string ReadByName = "Member.";
+
         static readonly Regex Named = new Regex(@"<LocalizationId>\s*([^<\s]+)\s*</LocalizationId>", RegexOptions.CultureInvariant);
 
         // A markdown-lite link whose target is a key without its prefix: words and dots, no scheme or path.
@@ -133,6 +136,9 @@ namespace Sprocket.Localization.Generator
             {
                 if (original)
                     keys.Add(entry.Key);
+
+                if (entry.Key.StartsWith(prefix + ReadByName, StringComparison.Ordinal))
+                    named.Add(entry.Key);
 
                 foreach (Match match in Linked.Matches(entry.Value ?? ""))
                 {

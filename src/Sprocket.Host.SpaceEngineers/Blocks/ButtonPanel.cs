@@ -15,13 +15,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed class ButtonPanel : Capability
     {
         /// <summary>Writing a label on a button, which is Sprocket's own.</summary>
-        public const string Label = "label-button";
+        public const string Label = "label_button";
 
         /// <summary>What a button's label reads, which is Sprocket's own and takes the button.</summary>
-        public const string LabelOf = "label-of-button";
+        public const string LabelOf = "button_label";
 
         /// <summary>Whether a button has anything on its slot, which is Sprocket's own and takes the button.</summary>
-        public const string Assigned = "button-has-an-action";
+        public const string Assigned = "button_has_an_action";
 
         const string Unheard = "A button panel raises no event when a label or a slot changes.";
 

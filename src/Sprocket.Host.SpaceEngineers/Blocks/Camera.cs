@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed class Camera : Capability
     {
         /// <summary>Whether somebody is looking through it, which is Sprocket's own.</summary>
-        public const string InUse = "in-use";
+        public const string InUse = "in_use";
 
         const string Unheard = "A camera raises no event when somebody starts or stops looking through it.";
 

@@ -12,8 +12,8 @@ public class CockpitTests
 {
     /// <summary>Somebody sitting down is heard on the tick after, since a cockpit announces it, and so is getting up.</summary>
     [Theory]
-    [InlineData("becomes-occupied", true)]
-    [InlineData("becomes-empty", false)]
+    [InlineData("becomes_occupied", true)]
+    [InlineData("becomes_empty", false)]
     public void SittingDownAndGettingUpAreHeardOnTheTickAfter(string signal, bool sits)
     {
         var ship = new Rigged();
@@ -61,11 +61,11 @@ public class CockpitTests
         var seat = ship.Rig.Cockpit(1, "Cockpit");
 
         Assert.Equal(Literal.Of(false), Ran.Read(ship, seat, Cockpit.Occupied));
-        Assert.Equal("", Ran.Read(ship, seat, "occupant-name").Text);
+        Assert.Equal("", Ran.Read(ship, seat, "occupant_name").Text);
 
         seat.Sit("Mal");
         Assert.Equal(Literal.Of(true), Ran.Read(ship, seat, Cockpit.Occupied));
-        Assert.Equal("Mal", Ran.Read(ship, seat, "occupant-name").Text);
+        Assert.Equal("Mal", Ran.Read(ship, seat, "occupant_name").Text);
     }
 
     /// <summary>An enclosed cockpit's air is read in percent, and an open seat, which has none, offers none.</summary>
@@ -77,8 +77,8 @@ public class CockpitTests
         var open = ship.Rig.Cockpit(2, "Seat", false);
         enclosed.Air = 0.25f;
 
-        Assert.Equal(25.0, Ran.Read(ship, enclosed, "oxygen-level").Real, 3);
-        Assert.Null(ship.Entity(open.Id).Kind.FindAction("oxygen-level", ReachKind.Value));
+        Assert.Equal(25.0, Ran.Read(ship, enclosed, "oxygen_level").Real, 3);
+        Assert.Null(ship.Entity(open.Id).Kind.FindAction("oxygen_level", ReachKind.Value));
     }
 
     /// <summary>The ship's speed is in metres a second, its gravity in g, and its mass in kilograms.</summary>
@@ -93,9 +93,9 @@ public class CockpitTests
         seat.Mass = 40000f;
 
         Assert.Equal(12.5, Ran.Read(ship, seat, "speed").Real, 3);
-        Assert.Equal(0.5, Ran.Read(ship, seat, "natural-gravity").Real, 3);
-        Assert.Equal(2.0, Ran.Read(ship, seat, "artificial-gravity").Real, 3);
-        Assert.Equal(40000.0, Ran.Read(ship, seat, "ship-mass").Real, 3);
+        Assert.Equal(0.5, Ran.Read(ship, seat, "natural_gravity").Real, 3);
+        Assert.Equal(2.0, Ran.Read(ship, seat, "artificial_gravity").Real, 3);
+        Assert.Equal(40000.0, Ran.Read(ship, seat, "ship_mass").Real, 3);
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ public class CockpitTests
         seat.Offering("Control", "Control");
         var kind = ship.Entity(seat.Id).Kind;
 
-        foreach (var id in new[] { "occupied", "occupant-name", "under-control", "oxygen-level", "natural-gravity", "artificial-gravity", "ship-mass", "speed" })
+        foreach (var id in new[] { "occupied", "occupant_name", "under_control", "oxygen_level", "natural_gravity", "artificial_gravity", "ship_mass", "speed" })
             Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in switches)
