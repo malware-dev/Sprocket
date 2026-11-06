@@ -222,6 +222,14 @@
     <value>{installation}: changed, fill it again</value>
     <comment>On a logic system's screen, under a slot's blocks, for another installation holding a block in the slot that no longer fits the kind the slot takes. {installation} is that installation's name; several such notes are joined by semicolons.</comment>
   </data>
+  <data name="Sprocket.Slot.MarkReplaced" xml:space="preserve">
+    <value>{installation}: a block may have been replaced</value>
+    <comment>On a logic system's screen, under a slot's blocks, for another installation where one of the slot's blocks was found by its name alone, so it may be a different block. {installation} is that installation's name.</comment>
+  </data>
+  <data name="Sprocket.Slot.UseBlock" xml:space="preserve">
+    <value>Use this block</value>
+    <comment>Button on a slot on the installation panel, beside a line saying the slot's block may have been replaced: pressing it takes the block found as the slot's own.</comment>
+  </data>
   <data name="Sprocket.Slot.MarkLost" xml:space="preserve">
     <value>{installation}: lost a block</value>
     <comment>On a logic system's screen, under a slot's blocks, for another installation that has lost one of its blocks for the slot from the construct. {installation} is that installation's name; several such notes are joined by semicolons.</comment>

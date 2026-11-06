@@ -13,6 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Changed,
 
         /// <summary>A block it filled the slot with is gone from the construct.</summary>
-        Lost
+        Lost,
+
+        /// <summary>A block it filled the slot with was found by its name alone, so it may be another block.</summary>
+        Replaced
     }
 }

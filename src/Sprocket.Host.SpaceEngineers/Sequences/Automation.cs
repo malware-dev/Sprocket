@@ -197,13 +197,36 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 int matched;
                 var found = world.Keys.Match(entityRef.Keys, out matched);
                 if (found != null && found.Id == entity.Id && entityRef.KindId == entity.Kind.Id)
+                {
+                    // Chosen by somebody, so a block only its name found is the block meant.
+                    if (matched != 0)
+                        Identify(world, entity, entityRef);
+
                     return entityRef;
+                }
             }
 
             var called = NameRules.Clean(entity.Name);
             var declared = new EntityRef(Free(called.Length > 0 ? called : entity.Kind.DisplayName), entity.Kind.Id);
             world.Keys.Identify(entity, declared.Keys);
             return Restore(declared);
+        }
+
+        /// <summary>Makes <paramref name="keys" /> what <paramref name="declared" /> finds its block by.</summary>
+        public void Rekey(EntityRef declared, IList<EntityKey> keys)
+        {
+            var kept = new List<EntityKey>(keys);
+            declared.Keys.Clear();
+            declared.Keys.AddRange(kept);
+            Revision++;
+            Rewire();
+        }
+
+        void Identify(GridWorld world, GridEntity entity, EntityRef declared)
+        {
+            var keys = new List<EntityKey>();
+            world.Keys.Identify(entity, keys);
+            Rekey(declared, keys);
         }
 
         /// <summary>Puts back a declaration read from storage.</summary>

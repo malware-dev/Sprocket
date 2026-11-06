@@ -248,6 +248,10 @@
     <value>Install the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) **{name}** on another set of blocks.</value>
     <comment>Tooltip on the home screen's button under a logic system's installations that adds another installation. {name} is filled with the logic system's name.</comment>
   </data>
+  <data name="Sprocket.Slot.UseBlockAbout" xml:space="preserve">
+    <value>The block this slot held is gone, and this one has the same name. Using it makes it the slot's block.</value>
+    <comment>Tip on the button that takes a block found by its name alone as the slot's own.</comment>
+  </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Name this slot and say what it is for.</value>
     <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's page, where it is named and described.</comment>

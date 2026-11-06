@@ -20,6 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     return SlotMark.Lost;
             }
 
+            for (var i = 0; i < filled.Count; i++)
+            {
+                if (bindings.State(filled[i]) == RefState.Adrift)
+                    return SlotMark.Replaced;
+            }
+
             return Misfits(bindings, instance, part) ? SlotMark.Changed : SlotMark.None;
         }
 

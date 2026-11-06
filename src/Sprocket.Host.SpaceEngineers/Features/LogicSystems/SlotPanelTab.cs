@@ -11,6 +11,7 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
@@ -198,8 +199,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var unused = !_used.Contains(part.Id);
                 row.Marks = unused ? null : Marked(texts, part, shown);
                 row.Take(_editor.Runner.Bindings, shown.FilledWith(part.Id), part.IsSignal ? shown.Positions(part.Id) : null);
-                row.Problem = unused ? texts.SlotUnused : null;
+                var replaced = unused ? null : Replaced(shown, part);
+                row.Problem = unused
+                    ? texts.SlotUnused
+                    : replaced == null ? null : Template.Fill(texts.StoppedBlockReplaced, "block", replaced[0].Name);
                 row.Level = NoticeLevel.Warning;
+                row.Accepts(replaced == null ? null : _changes(CommandKind.FillPart, () => Accept(shown, part, replaced)));
                 row.Removable = unused;
                 row.Removes = unused ? _changes(CommandKind.RemoveSlot, () => _editor.Do(_system, ChangeSlots.Removing(_system, shown, part))) : null;
                 row.RemovesAbout = editable ? texts.Codex.SlotRemoveAbout : locked;
@@ -209,6 +214,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 else
                     row.Say(SentenceText.Empty, !part.Optional && !unused);
             }
+        }
+
+        /// <summary>The declarations of <paramref name="part" /> in <paramref name="shown" /> found by name alone, or null where it has none.</summary>
+        List<EntityRef> Replaced(SystemInstance shown, Part part)
+        {
+            var filled = shown.FilledWith(part.Id);
+            List<EntityRef> found = null;
+            for (var i = 0; filled != null && i < filled.Count; i++)
+            {
+                if (_editor.Runner.Bindings.State(filled[i]) != RefState.Adrift)
+                    continue;
+
+                found = found ?? new List<EntityRef>();
+                found.Add(_editor.Program.FindRef(filled[i]));
+            }
+
+            return found;
+        }
+
+        void Accept(SystemInstance shown, Part part, List<EntityRef> refs)
+        {
+            var blocks = new List<GridEntity>();
+            foreach (var declared in refs)
+                blocks.Add(_editor.Runner.Bindings.Entity(declared.Name));
+
+            _editor.Do(new AcceptBlocks(shown, part.Id, refs, blocks, _editor.World));
         }
 
         /// <summary>A row for <paramref name="key" /> of the installation panel: a slot's, or a category's.</summary>
@@ -263,7 +294,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (mark == SlotMark.None)
                     continue;
 
-                var said = mark == SlotMark.Changed ? texts.SlotMarkChanged : mark == SlotMark.Lost ? texts.SlotMarkLost : texts.SlotMarkNew;
+                var said = mark == SlotMark.Changed ? texts.SlotMarkChanged
+                    : mark == SlotMark.Lost ? texts.SlotMarkLost
+                    : mark == SlotMark.Replaced ? texts.SlotMarkReplaced : texts.SlotMarkNew;
                 _marks.Add(Template.Fill(said, "installation", SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, _system, instances[i])));
             }
 

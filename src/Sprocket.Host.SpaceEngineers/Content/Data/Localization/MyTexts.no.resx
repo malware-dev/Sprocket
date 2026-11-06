@@ -169,6 +169,14 @@
   <data name="Sprocket.Slot.MarkChanged" xml:space="preserve">
     <value>{installation}: endret, fyll den på nytt</value>
   </data>
+  <data name="Sprocket.Slot.MarkReplaced" xml:space="preserve">
+    <value>{installation}: en blokk kan være byttet ut</value>
+    <comment>On a logic system's screen, under a slot's blocks, for another installation where one of the slot's blocks was found by its name alone, so it may be a different block. {installation} is that installation's name.</comment>
+  </data>
+  <data name="Sprocket.Slot.UseBlock" xml:space="preserve">
+    <value>Bruk denne blokken</value>
+    <comment>Button on a slot on the installation panel, beside a line saying the slot's block may have been replaced: pressing it takes the block found as the slot's own.</comment>
+  </data>
   <data name="Sprocket.Slot.MarkLost" xml:space="preserve">
     <value>{installation}: mistet en blokk</value>
   </data>

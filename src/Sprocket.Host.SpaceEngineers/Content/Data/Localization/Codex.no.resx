@@ -188,6 +188,10 @@
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
     <value>Installer [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) **{name}** på et annet sett med blokker.</value>
   </data>
+  <data name="Sprocket.Slot.UseBlockAbout" xml:space="preserve">
+    <value>Blokken denne plassen hadde, er borte, og denne har samme navn. Velger du den, blir den plassens blokk.</value>
+    <comment>Tip on the button that takes a block found by its name alone as the slot's own.</comment>
+  </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Gi plassen et navn, og si hva den er til.</value>
   </data>

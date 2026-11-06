@@ -20,6 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         SlotChip _blocks;
         SlotChip _signals;
         Label _problem;
+        Button _accept;
         Glyph _remove;
         Label _marks;
 
@@ -78,6 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new SlotChip(false) { Spacing = Gaps.Within }.As(out _blocks),
                             new SlotChip { IsVisible = false, Align = Align.Top }.As(out _signals),
                             new Label { Style = Styles.ProblemLine, IsVisible = false }.As(out _problem),
+                            new Button { Style = Styles.Button, IsVisible = false, Align = Align.Center }.As(out _accept),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)
                         }
                     },

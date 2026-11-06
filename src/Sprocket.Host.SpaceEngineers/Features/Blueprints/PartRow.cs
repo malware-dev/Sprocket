@@ -125,6 +125,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }
         }
 
+        /// <summary>Offers to take the blocks only their names found as the slot's own, by <paramref name="command" />, or nothing where that is null.</summary>
+        public void Accepts(ICommand command)
+        {
+            _accept.IsVisible = command != null;
+            _accept.Command = command;
+            if (command == null)
+                return;
+
+            _accept.Text = _texts.SlotUseBlock;
+            _accept.Tip = CodexTip.For(_accept.Tip, _texts.Codex.SlotUseBlockAbout);
+        }
+
         /// <summary>How much <see cref="Problem" /> matters: a problem, a warning or a note.</summary>
         public NoticeLevel Level
         {
