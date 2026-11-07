@@ -26,6 +26,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         int _shape;
 
+        int _listing;
+        long _listedFrom;
+        Automation _listedProgram;
+        AutomationRunner _listedRunner;
+
         string _searched = "";
 
         KeyedChildren<AutomationSystem, SystemGroup> _groups;
@@ -115,6 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             Editor.Runner.Look();
             Installed();
+            Relisted();
             Collect();
             _shape = Shape();
             Show(true);
@@ -127,6 +133,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// </remarks>
         public override void Refresh()
         {
+            if (!Relisted())
+            {
+                Show(false);
+                return;
+            }
+
             Collect();
 
             var shape = Shape();
@@ -352,8 +364,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             return shape;
         }
 
+        /// <summary>How many times the page has gathered the logic systems it lists.</summary>
+        public int Listings { get; private set; }
+
+        /// <summary>
+        /// True where what decides which logic systems are listed may have changed since the page last asked: the program,
+        /// its runs, the blocks on the construct, or the block the editor is opened from.
+        /// </summary>
+        /// <remarks>Every tick the page is showing. Each counter only counts up, so their sum moves whenever any of them does.</remarks>
+        bool Relisted()
+        {
+            var program = Editor.Program;
+            var runner = Editor.Runner;
+            var listing = program.Edits + program.Revision + program.Starts + runner.Revision + runner.World.Revision;
+            if (listing == _listing && Editor.OpenedFrom == _listedFrom && program == _listedProgram && runner == _listedRunner)
+                return false;
+
+            _listing = listing;
+            _listedFrom = Editor.OpenedFrom;
+            _listedProgram = program;
+            _listedRunner = runner;
+            return true;
+        }
+
         void Collect()
         {
+            Listings++;
             _systems.Clear();
             var systems = Editor.Program.Systems;
             for (var i = 0; i < systems.Count; i++)

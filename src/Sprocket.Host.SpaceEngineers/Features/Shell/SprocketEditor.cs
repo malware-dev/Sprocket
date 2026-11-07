@@ -466,8 +466,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>How the player likes the screens to look in every world; null on a machine that keeps none.</summary>
-
         /// <summary>How somebody is working in this editor, as against what they are building in it: which list of what to do they read, and where they keep the codex.</summary>
         /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
         public EditorHabits Habits

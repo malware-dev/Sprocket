@@ -2762,39 +2762,39 @@
   </data>
   <data name="Sprocket.Panel.AllNormal" xml:space="preserve">
     <value>All systems nominal</value>
-    <comment>Large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", and beside the check on a corner screen, shown when every logic system on the construct is switched on and nothing wants looking at.</comment>
+    <comment>Large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation", and beside the check on a corner screen, shown when every logic system on the construct is switched on and nothing wants looking at.</comment>
   </data>
   <data name="Sprocket.Panel.Nothing" xml:space="preserve">
     <value>This construct has no automation.</value>
-    <comment>Line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown when the construct it is on holds no logic system.</comment>
+    <comment>Line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation", shown when the construct it is on holds no logic system.</comment>
   </data>
   <data name="Sprocket.Panel.NothingFix" xml:space="preserve">
     <value>Press Automation in the control panel of a programmable block on this construct, and make a logic system or add one from the library.</value>
-    <comment>Small line under "This construct has no automation." in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown only where the screen has room for it: on a corner screen the panel shows the error alone. Says how to give the construct automation: press the "Automation" button in the terminal of a programmable block on the construct, which opens the automation editor (the block must be owned by one of the players owning most of the construct's blocks, or shared with the player), then make a logic system there or add one from the library.</comment>
+    <comment>Small line under "This construct has no automation." in the middle of the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation", shown only where the screen has room for it: on a corner screen the panel shows the error alone. Says how to give the construct automation: press the "Automation" button in the terminal of a programmable block on the construct, which opens the automation editor (the block must be owned by one of the players owning most of the construct's blocks, or shared with the player), then make a logic system there or add one from the library.</comment>
   </data>
   <data name="Sprocket.Panel.Systems" xml:space="preserve">
     <value>{count} logic systems</value>
-    <comment>Small line under the large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation" when nothing wants looking at, saying how many logic systems the construct holds; {count} is the number, from 2.</comment>
+    <comment>Small line under the large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation" when nothing wants looking at, saying how many logic systems the construct holds; {count} is the number, from 2.</comment>
   </data>
   <data name="Sprocket.Panel.SystemsOne" xml:space="preserve">
     <value>1 logic system</value>
-    <comment>Small line under the large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation" when nothing wants looking at, when the construct holds exactly one logic system.</comment>
+    <comment>Small line under the large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation" when nothing wants looking at, when the construct holds exactly one logic system.</comment>
   </data>
   <data name="Sprocket.Panel.Failed" xml:space="preserve">
     <value>This screen could not be drawn: {reason}</value>
-    <comment>Shown on the automation panel, the app a text panel or cockpit screen offers as "Automation" when drawing it failed; {reason} is the error, in English.</comment>
+    <comment>Shown on the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation" when drawing it failed; {reason} is the error, in English.</comment>
   </data>
   <data name="Sprocket.Panel.Heading" xml:space="preserve">
     <value>Sprocket</value>
-    <comment>Small heading at the top left of the automation panel, the app a text panel or cockpit screen offers as "Automation", beside the icon, on every screen it shows. The name of the mod, shown here by exception, and kept as it is in every language.</comment>
+    <comment>Small heading at the top left of the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation", beside the icon, on every screen it shows. The name of the mod, shown here by exception, and kept as it is in every language.</comment>
   </data>
   <data name="Sprocket.Panel.SwitchedOff" xml:space="preserve">
     <value>Switched off</value>
-    <comment>Line under the name of a logic system or installation a player switched off, on the automation panel, the app a text panel or cockpit screen offers as "Automation", when it is shown in turn with those that want looking at.</comment>
+    <comment>Line under the name of a logic system or installation a player switched off, on the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation", when it is shown in turn with those that want looking at.</comment>
   </data>
   <data name="Sprocket.Panel.Page" xml:space="preserve">
     <value>{at} of {count}</value>
-    <comment>At the bottom of the automation panel, the app a text panel or cockpit screen offers as "Automation", while it shows the installations that want looking at a page at a time and there are too many pages for a dot each; {at} is which page is shown, {count} how many there are.</comment>
+    <comment>At the bottom of the automation panel, the app a text panel or cockpit screen offers as "Sprocket Automation", while it shows the installations that want looking at a page at a time and there are too many pages for a dot each; {at} is which page is shown, {count} how many there are.</comment>
   </data>
   <data name="Sprocket.Category.Add" xml:space="preserve">
     <value>category</value>

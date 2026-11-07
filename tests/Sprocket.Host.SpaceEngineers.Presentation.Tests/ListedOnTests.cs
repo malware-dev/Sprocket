@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -153,6 +154,52 @@ public class ListedOnTests
 
         Assert.True(system.Enabled);
         Assert.Equal(Office, system.ListedOn);
+    }
+
+    /// <summary>The home screen, open and idle on a construct with a kept system, gathers its list no more.</summary>
+    [Fact]
+    public void AnIdleHomeScreenListsOnce()
+    {
+        var screen = HomeOn(Bay, out _, out _);
+        var home = (HomePage)screen.Editor.Current;
+        var before = home.Listings;
+
+        screen.Run(600);
+
+        Assert.Same(home, screen.Editor.Current);
+        Assert.Equal(before, home.Listings);
+    }
+
+    /// <summary>The home screen lists a kept system again as soon as the block it is kept to is ground off.</summary>
+    [Fact]
+    public void TheHomeScreenSeesTheBlockGo()
+    {
+        var screen = HomeOn(Bay, out var made, out var office);
+        Assert.False(screen.Shows("Airlock"), screen.Dump);
+
+        made.Grind(office);
+        screen.Run(2);
+
+        Assert.True(screen.Shows("Airlock"), screen.Dump);
+    }
+
+    /// <summary>The home screen, opened from <paramref name="from" />, on a construct with a logic system kept to the office block.</summary>
+    static Screen HomeOn(long from, out Rig made, out Programmable office)
+    {
+        made = Rig.Demo();
+        office = made.Programmable(Office, "Back Office PB");
+        made.Programmable(Bay, "Bay PB");
+        var screen = Screen.On(made);
+        screen.Editor.OpenedFrom = from;
+        screen.Editor.NewSystem("Airlock");
+        screen.Run(2);
+
+        var program = screen.Editor.Program;
+        program.Systems[0].ListedOn = Office;
+        program.Edited();
+        screen.Editor.GoToRoot();
+        screen.Run(10);
+        return screen;
     }
 
     /// <summary>A rig with two programmable blocks and one logic system, kept to the first.</summary>

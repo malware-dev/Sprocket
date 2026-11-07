@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
     /// there.
     /// </para>
     /// </remarks>
-    [MyTextSurfaceScript(Id, "Automation")]
+    [MyTextSurfaceScript(Id, "Sprocket Automation")]
     public class StatusApp : MyTextSurfaceScriptBase, ILiveSurface
     {
         /// <summary>What the game calls this script, in a slot and in the list a player picks from.</summary>
