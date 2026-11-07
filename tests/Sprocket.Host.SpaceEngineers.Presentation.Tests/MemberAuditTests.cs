@@ -50,6 +50,19 @@ public class MemberAuditTests
         Assert.NotEqual("", screen.Editor.Codex.Member(kind, "toggle show on HUD", false));
     }
 
+    /// <summary>Members the Gallery found no text for, whose keys hold their names' capitals, and a rotor with no head.</summary>
+    [Theory]
+    [InlineData("Member.AiBlock.StartTheAI")]
+    [InlineData("Member.AiBlock.StopTheAI")]
+    [InlineData("Member.AiBlock.ToggleTheAI")]
+    [InlineData("Member.PathRecorder.ShowPathOnHUD")]
+    [InlineData("Member.PathRecorder.ToggleShowPathOnHUD")]
+    [InlineData("Member.Rotor.Detached")]
+    public void TheGalleryRowsHaveTheirTexts(string key)
+    {
+        Assert.NotNull(Screen.Fresh().Editor.Texts.Codex.Find("Sprocket." + key));
+    }
+
     /// <summary>The audit leaves the list as it found it.</summary>
     [Fact]
     public void TheAuditLeavesTheTerminalListOn()

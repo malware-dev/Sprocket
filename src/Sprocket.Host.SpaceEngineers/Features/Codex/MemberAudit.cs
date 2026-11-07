@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -62,7 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                 foreach (var field in _editor.Fields(selection, offers.Ids[at], offers.Forms[at]))
                 {
                     // A value's box for its new value goes under the value's own name, and the value's text covers it.
-                    if (field.Name != name && _editor.Codex.Option(kind, field.Name) == null)
+                    if (!string.Equals(field.Name, name, StringComparison.OrdinalIgnoreCase) && _editor.Codex.Option(kind, field.Name) == null)
                         missing.Add($"{kind.DisplayName}: option {field.Name} of {name}");
                 }
             }

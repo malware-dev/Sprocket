@@ -819,6 +819,10 @@
     <value>Oppfylt mens et hode er festet til rotoren.</value>
     <comment>Codex entry on the block member "attached" of a rotor, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.Rotor.Detached" xml:space="preserve">
+    <value>Oppfylt mens ikke noe hode er festet til rotoren.</value>
+    <comment>Codex entry on the block member "detached" of a rotor, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.Rotor.Attaches" xml:space="preserve">
     <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når et hode festes til rotoren.</value>
     <comment>Codex entry on the block member "attaches" of a rotor, shown in the picker when it is chosen.</comment>
@@ -1991,11 +1995,11 @@
     <value>Hvor langt skipet flytter seg før neste veipunkt legges til, i meter. `record interval` må også ha gått.</value>
     <comment>Codex entry on the block member "minimal distance" of PathRecorder, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.PathRecorder.ShowPathOnHud" xml:space="preserve">
+  <data name="Sprocket.Member.PathRecorder.ShowPathOnHUD" xml:space="preserve">
     <value>Når den er på, vises den innspilte ruta på HUD-en.</value>
     <comment>Codex entry on the block member "show path on hud" of PathRecorder, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.PathRecorder.ToggleShowPathOnHud" xml:space="preserve">
+  <data name="Sprocket.Member.PathRecorder.ToggleShowPathOnHUD" xml:space="preserve">
     <value>Slår `show path on HUD` på når den er av, og av når den er på.</value>
     <comment>Codex entry on the block member "toggle show path on hud" of PathRecorder, shown in the picker when it is chosen.</comment>
   </data>
@@ -2047,15 +2051,15 @@
     <value>Oppfylt mens AI-en i blokken kjører.</value>
     <comment>Codex entry on the block member "running" of AiBlock, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.AiBlock.StartTheAi" xml:space="preserve">
+  <data name="Sprocket.Member.AiBlock.StartTheAI" xml:space="preserve">
     <value>Starter AI-en i blokken, og stopper AI-en i andre blokker av samme slag.</value>
     <comment>Codex entry on the block member "start the ai" of AiBlock, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.AiBlock.StopTheAi" xml:space="preserve">
+  <data name="Sprocket.Member.AiBlock.StopTheAI" xml:space="preserve">
     <value>Stopper AI-en i blokken.</value>
     <comment>Codex entry on the block member "stop the ai" of AiBlock, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.AiBlock.ToggleTheAi" xml:space="preserve">
+  <data name="Sprocket.Member.AiBlock.ToggleTheAI" xml:space="preserve">
     <value>Starter AI-en når den er stoppet, og stopper den når den kjører.</value>
     <comment>Codex entry on the block member "toggle the ai" of AiBlock, shown in the picker when it is chosen.</comment>
   </data>
