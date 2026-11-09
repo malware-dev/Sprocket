@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -324,11 +325,29 @@ public class MoveItemsScreenTests
     [Fact]
     public void ATriggersTaskNamesItsTargetTheSameWay()
     {
+        var row = TriggerMoving(out var screen);
+
+        var target = row.Does.OfType<EntitiesSlot>().Single(slot => slot.IsOption);
+        Assert.Equal("to", target.Joined);
+        Assert.Equal(new[] { Symbols.Inventory }, target.Marks);
+
+        target.Opens!.Execute();
+        screen.Run(3);
+        Assert.Equal(target.Slots[0], screen.Editor.Screen.Title());
+
+        screen.Editor.Back();
+        screen.Run(4);
+        Assert.Equal("Stock", screen.Editor.Screen.Title());
+    }
+
+    /// <summary>A trigger on a clock that moves items, and its row.</summary>
+    static TriggerRow TriggerMoving(out Screen screen)
+    {
         var rig = Rig.Demo();
         rig.Refinery(40, "Refinery 1");
         rig.Cargo(41, "Cargo 1");
-        var screen = Screen.On(rig);
-                screen.Editor.NewButtonSystem("Stock");
+        screen = Screen.On(rig);
+        screen.Editor.NewButtonSystem("Stock");
         screen.Editor.Back();
         screen.Run(2);
         screen.Editor.PressStart("every");
@@ -342,19 +361,36 @@ public class MoveItemsScreenTests
         SelectTarget(screen);
         screen.Editor.PressPrimary();
         screen.Run(4);
+        return screen.Editor.Triggers().Last();
+    }
 
-        var row = screen.Editor.Triggers().Last();
-        var target = row.Does.OfType<EntitiesSlot>().Single(slot => slot.IsOption);
-        Assert.Equal("to", target.Joined);
-        Assert.Equal(new[] { Symbols.Inventory }, target.Marks);
+    /// <summary>Opened on what it does and left with nothing changed, a trigger's move goes back without asking.</summary>
+    [Fact]
+    public void LeavingATriggersMoveUnchangedAsksNothing()
+    {
+        var row = TriggerMoving(out var screen);
 
-        target.Opens!.Execute();
+        row.Does.OfType<EntitiesSlot>().Single(slot => !slot.IsOption).Opens!.Execute();
         screen.Run(3);
-        Assert.Equal(target.Slots[0], screen.Editor.Screen.Title());
-
         screen.Editor.Back();
         screen.Run(4);
+
         Assert.Equal("Stock", screen.Editor.Screen.Title());
+    }
+
+    /// <summary>A step's move opened on its blocks and left with nothing changed goes back without asking.</summary>
+    [Fact]
+    public void LeavingAStepsMoveUnchangedAsksNothing()
+    {
+        Finished(out var screen, out _);
+
+        screen.Editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single(slot => !slot.IsOption).Opens!.Execute();
+        screen.Run(3);
+        screen.Editor.Back();
+        screen.Run(4);
+
+        Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
+        Assert.Equal(new[] { "inventory slot 2" }, Target(screen).Slots);
     }
 
     /// <summary>The line reads as a sentence: what moves, from where, to where.</summary>

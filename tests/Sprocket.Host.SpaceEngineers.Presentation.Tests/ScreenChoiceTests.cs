@@ -526,6 +526,36 @@ public class ScreenChoiceTests
         Assert.Equal(new[] { 1 }, system.First.Facets(slot));
     }
 
+    /// <summary>A trigger's task on a screen, opened on what it does and left with nothing changed, goes back without asking.</summary>
+    [Fact]
+    public void LeavingATriggersScreenTaskUnchangedAsksNothing()
+    {
+        var rig = Rig.Demo();
+        rig.TextPanel(40, "Status Panel");
+        var screen = Screen.On(rig);
+        screen.Editor.NewButtonSystem("Stock");
+        screen.Editor.Back();
+        screen.Run(2);
+        screen.Editor.PressStart("every");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
+        screen.Editor.PressChoice("A task on blocks…");
+        screen.Editor.PressBlock("Status Panel");
+        screen.Run(2);
+        screen.Editor.PressChoice("show text");
+        screen.Run(2);
+        screen.Editor.Pick().Arguments!.Form.Fields.First(field => field is LinesField).Text = "Docked";
+        screen.Editor.PressPrimary();
+        screen.Run(4);
+
+        screen.Editor.Triggers().Last().Does.OfType<EntitiesSlot>().First().Opens!.Execute();
+        screen.Run(3);
+        screen.Editor.Back();
+        screen.Run(4);
+
+        Assert.Equal("Stock", screen.Editor.Screen.Title());
+    }
+
     static (Screen Screen, Billboard Board) Picking()
     {
         var rig = Rig.Demo();

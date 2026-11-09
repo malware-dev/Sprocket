@@ -287,7 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 {
                     aim.Following = new PickPage(_editor, _editor.Texts.PickSingleTask, false, _editor.Blocks(system, only.Targets),
                         only.ActionId, only.Form, answer => aim.Finish(answer),
-                        arguments: only.Arguments, opens: aim.Opens, after: aim.Pick) { Slotted = system, Replacing = only.Targets };
+                        arguments: only.Arguments, opens: aim.Opens, after: aim.Pick, facet: _editor.Picks.Facet(system, only.Targets)) { Slotted = system, Replacing = only.Targets };
                 }
 
                 aim.Following.Arrived(aim.Straight);
