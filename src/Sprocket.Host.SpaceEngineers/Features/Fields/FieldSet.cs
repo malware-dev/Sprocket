@@ -6,6 +6,7 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Input;
@@ -53,6 +54,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         /// <summary>Raised when Enter is pressed in a field, which is finishing the form.</summary>
         public event Action Submitted;
+
+        /// <summary>Raised with the field when the slots a value names are to be chosen on a selector.</summary>
+        public event Action<SlotsField> Selects;
 
         /// <summary>Raised with the field when text written over several lines is to be written on a page of its own.</summary>
         public event Action<LinesField> Opens;
@@ -387,15 +391,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return lines;
             }
 
+            if (field.TakesSlots)
+            {
+                var slots = new SlotsField(texts.PickSelectSlots, MarkText.OfSlot(false, HostTypes.Named(field.SlotsHold))) { Label = field.Name ?? "" };
+                slots.Selecting += selecting => Selects?.Invoke(selecting);
+                return slots;
+            }
+
             var words = field.Edits == FieldEditor.Chosen ? field.Words : null;
             if (field.IsOnOff)
                 return new SwitchField(field.Words[0], field.Words[1], _submit);
+
+            if (words != null && words.Count > 0 && (field.Searched || words.Count > Long))
+                return new ListField(words, texts.PickSearch);
 
             if (words != null && words.Count > 0 && words.Count <= Few)
                 return new WordsField(words, _submit);
 
             if (words != null && words.Count > Few)
-                return new ListField(words, words.Count > Long ? texts.PickSearch : null);
+                return new ListField(words);
 
             if (SliderField.Takes(field))
                 return new SliderField(field, _submit);
@@ -406,7 +420,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Puts a value's label and field in a row: a color alone across the whole width, text under its label, anything else beside it where it fits.</summary>
         bool IsLong(int at, IField field)
         {
-            return field is ListField && _wanted[at].Words.Count > Long;
+            return field is ListField && (_wanted[at].Searched || _wanted[at].Words.Count > Long);
         }
 
         void Lay(int at, IField field)

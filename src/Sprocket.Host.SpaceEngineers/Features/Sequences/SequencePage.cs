@@ -569,23 +569,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             row.Slots.Add(new ActionSlot(chosen, Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.What))));
             var blocks = Editor.Blocks(_sequence.System, act.Targets);
-            row.Slots.Add(new EntitiesSlot(blocks, act.Targets, true, MarkText.OfSlots(_sequence.System, act.Targets),
+            var entities = new EntitiesSlot(blocks, act.Targets, true, MarkText.OfSlots(_sequence.System, act.Targets),
                 Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Blocks)))
             {
                 Screens = Editor.SlotBlocks.Screens(_sequence.System, act.Targets, blocks)
-            });
-            if (verb.Length != 0)
+            };
+            if (verb.Length != 0 || chosen == null || chosen.Wants == 0)
+            {
+                row.Slots.Add(entities);
                 return;
-
-            if (chosen == null || chosen.Wants == 0)
-                return;
+            }
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ArgumentsSlot(act.Arguments, fields, Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Arguments)),
-                act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options);
-            if (!given.Quiet)
-                row.Slots.Add(given);
+            ArgumentsSlot.Lay(row.Slots, entities, chosen.Join, act.Arguments, fields,
+                Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Arguments)),
+                act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options,
+                names => new EntitiesSlot(Editor.Blocks(_sequence.System, names), names, true, MarkText.OfSlots(_sequence.System, names),
+                    Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Target))));
         }
 
         /// <summary>Gives the row of an if, or of a branch that tests, the parts of its test.</summary>

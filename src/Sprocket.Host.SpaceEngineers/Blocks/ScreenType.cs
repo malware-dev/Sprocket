@@ -220,6 +220,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             var image = Field.Among("image", words, means);
+            image.Searched = true;
             image.Entry = FieldInput.Text;
             image.Needed = true;
             return image;
@@ -263,6 +264,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field[] Asked(IList<string> fonts, IList<string> apps)
         {
             var font = fonts.Count > 0 ? Field.Among("font", fonts, fonts) : Field.Called("font");
+            font.Searched = true;
             font.Entry = FieldInput.Text;
 
             // No app is a choice of its own: a screen set to show an app and running none is drawn on by a script.
@@ -275,6 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             var app = Field.Among("app", named, ids);
+            app.Searched = true;
             app.Entry = FieldInput.Text;
 
             // Content first, and each setting asked for while the content it applies to is chosen, as the terminal shows it.

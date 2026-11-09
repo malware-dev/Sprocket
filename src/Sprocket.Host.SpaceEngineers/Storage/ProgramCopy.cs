@@ -193,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     copy.Targets.Add(target);
 
                 foreach (var argument in act.Arguments)
-                    copy.Arguments.Add(argument);
+                    copy.Arguments.Add(argument.Copied);
 
                 return copy;
             }

@@ -15,6 +15,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 case Cause.VentNowhere: return texts.TroubleVentNowhere;
                 case Cause.VentNotAirtight: return texts.TroubleVentNotAirtight;
                 case Cause.VentNoOxygen: return texts.TroubleVentNoOxygen;
+                case Cause.ItemsNotConnected: return texts.TroubleItemsNotConnected;
+                case Cause.ItemsNoRoom: return texts.TroubleItemsNoRoom;
+                case Cause.ItemsNoStock: return texts.TroubleItemsNoStock;
+                case Cause.ItemsNotAccepted: return texts.TroubleItemsNotAccepted;
+                case Cause.ItemsAlreadyThere: return texts.TroubleItemsAlreadyThere;
                 case Cause.VentToldToFill: return texts.TroubleVentToldToFill;
                 case Cause.VentToldToEmpty: return texts.TroubleVentToldToEmpty;
                 case Cause.BatteryToldToDischarge: return texts.TroubleBatteryToldToDischarge;

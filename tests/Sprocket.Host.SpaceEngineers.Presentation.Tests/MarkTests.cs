@@ -123,7 +123,7 @@ public class MarkTests
         var screen = Slots();
 
         var rows = screen.Editor.SystemSlots();
-        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3" }, rows.Select(row => row.Name));
+        Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2" }, rows.Select(row => row.Name));
         Assert.Equal(new[] { Symbols.Signal, Symbols.Block, Symbols.Block }, rows.Select(row => row.Mark));
     }
 
@@ -143,12 +143,12 @@ public class MarkTests
         editor.PressChoice(editor.Texts.PickKeepThem);
         screen.Run(5);
 
-        Assert.Equal(new[] { "slot 1", "Aft Door", "slot 3" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "signal slot 1", "Aft Door", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
 
-        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>Going back from a slot's page after changing it asks whether to keep the changes, and discarding takes them all back.</summary>
@@ -167,7 +167,7 @@ public class MarkTests
         editor.PressChoice(editor.Texts.PickDiscardThem);
         screen.Run(5);
 
-        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>Done on a slot's page keeps its changes without asking.</summary>
@@ -185,7 +185,7 @@ public class MarkTests
         screen.Run(5);
 
         Assert.False(screen.Scene.IsQuestioning, "Done asked whether to keep the changes");
-        Assert.Equal(new[] { "slot 1", "Aft Door", "slot 3" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "signal slot 1", "Aft Door", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>The row of the what column offering <paramref name="text" />.</summary>

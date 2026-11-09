@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
@@ -35,6 +36,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             // The question that fills a step words its fields here too, so both say the same.
             ColorChannels.Shown(_arguments, _fields, _filled);
+            for (var i = 0; i < _filled.Count && i < _fields.Count; i++)
+            {
+                // A field that opens on a word for "nothing given" shows that word here too, and a sentence says its own.
+                if (_fields[i].SaidEmpty != null && (_filled[i].Length == 0 || _filled[i] == _fields[i].Default))
+                    _filled[i] = _fields[i].SaidEmpty;
+            }
+
             if (plural && _filled.Count > 0)
                 _filled[0] = SentenceText.Plural(_filled[0]);
 
@@ -48,6 +56,106 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         readonly Color? _sample;
+
+        /// <summary>
+        /// Puts into <paramref name="ahead" /> the values a sentence says ahead of the blocks, in the order said, with their
+        /// fields, and into <paramref name="after" /> the rest, in the order given.
+        /// </summary>
+        /// <remarks>Where nothing is said ahead, <paramref name="after" /> holds everything as it was given.</remarks>
+        public static void Split(IList<Literal> arguments, IList<Field> fields, List<Literal> ahead, List<Field> aheadFields,
+            List<Literal> after, List<Field> afterFields)
+        {
+            var places = 0;
+            for (var f = 0; f < fields.Count; f++)
+                places = fields[f].SaidAhead > places ? fields[f].SaidAhead : places;
+
+            for (var place = 1; place <= places; place++)
+            {
+                for (var f = 0; f < fields.Count; f++)
+                {
+                    if (fields[f].SaidAhead != place)
+                        continue;
+
+                    ahead.Add(f < arguments.Count ? arguments[f] : Literal.Of(""));
+                    aheadFields.Add(WithUnit(fields[f], arguments, fields, f));
+                }
+            }
+
+            if (places == 0)
+            {
+                after.AddRange(arguments);
+                afterFields.AddRange(fields);
+                return;
+            }
+
+            for (var f = 0; f < fields.Count; f++)
+            {
+                if (fields[f].SaidAhead != 0)
+                    continue;
+
+                after.Add(f < arguments.Count ? arguments[f] : Literal.Of(""));
+                afterFields.Add(fields[f]);
+            }
+        }
+
+        /// <summary><paramref name="field" />, the one at <paramref name="at" />, with the unit the answer to the field it follows gives it, where it holds a value to say it with.</summary>
+        static Field WithUnit(Field field, IList<Literal> arguments, IList<Field> fields, int at)
+        {
+            if (field.UnitOf == null || at >= arguments.Count || arguments[at].Said.Length == 0)
+                return field;
+
+            for (var f = 0; f < fields.Count; f++)
+            {
+                if (fields[f].Name != field.UnitFollows)
+                    continue;
+
+                var said = f < arguments.Count ? arguments[f].Said : "";
+                field.Unit = field.UnitOf(said, false);
+                field.UnitOfOne = field.UnitOf(said, true);
+            }
+
+            return field;
+        }
+
+        /// <summary>
+        /// Lays out on <paramref name="line" /> what a step gives its action around <paramref name="blocks" />, which
+        /// <paramref name="join" /> joins to what comes before them; each part opens with <paramref name="opens" />, and an option
+        /// naming slots stands as a part of its own, joined by its own word, as <paramref name="named" /> makes it.
+        /// </summary>
+        public static void Lay(IList<SentenceSlot> line, EntitiesSlot blocks, string join, IList<Literal> arguments, IList<Field> fields,
+            ICommand opens, ArgumentRole holds, Func<IList<string>, EntitiesSlot> named)
+        {
+            var ahead = new List<Literal>();
+            var aheadFields = new List<Field>();
+            var after = new List<Literal>();
+            var afterFields = new List<Field>();
+            Split(arguments, fields, ahead, aheadFields, after, afterFields);
+
+            if (aheadFields.Count > 0)
+                line.Add(new ArgumentsSlot(ahead, aheadFields, opens, holds));
+
+            blocks.Joined = join;
+            line.Add(blocks);
+
+            for (var f = afterFields.Count - 1; f >= 0; f--)
+            {
+                if (!afterFields[f].TakesSlots)
+                    continue;
+
+                var slots = named(f < after.Count && after[f].Kind == ValueKind.Slots ? after[f].Names : new string[0]);
+                slots.IsOption = true;
+                slots.Joined = afterFields[f].Lead;
+                line.Add(slots);
+                if (f < after.Count)
+                    after.RemoveAt(f);
+
+                afterFields.RemoveAt(f);
+            }
+
+            var given = new ArgumentsSlot(after, afterFields, opens, holds);
+            if (afterFields.Count > 0 && !given.Quiet)
+                line.Add(given);
+        }
 
         /// <summary>The verb of a step enabling or disabling a state, <paramref name="verb" />, pressed to <paramref name="opens" />, which opens on its new value.</summary>
         public static ArgumentsSlot Switching(string verb, ICommand opens)

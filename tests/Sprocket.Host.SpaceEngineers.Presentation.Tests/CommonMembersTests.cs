@@ -32,6 +32,6 @@ public class CommonMembersTests
 
         var trigger = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
         Assert.Equal("stops_working", trigger.EventId);
-        Assert.Equal("When slot 2 stops working", screen.Editor.Says(0));
+        Assert.Equal("When block slot 1 stops working", screen.Editor.Says(0));
     }
 }

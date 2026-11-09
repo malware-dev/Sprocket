@@ -129,7 +129,7 @@ public class CheckViewTests
         var through = rig.Editor.StandIn(sequence.System);
         const string any = "if the power on any of Airlock Inner Door and Airlock Outer Door is on";
         Assert.Equal(any, SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
-        Assert.Equal("if the power on any in slot 2 is on", rig.Editor.Reads(step));
+        Assert.Equal("if the power on any in block slot 1 is on", rig.Editor.Reads(step));
 
         var reading = rig.Editor.StepRows()[step].Slots.OfType<ArgumentsSlot>().First();
         reading.Opens!.Execute();
@@ -140,7 +140,7 @@ public class CheckViewTests
         rig.Tick();
         const string each = "if the power on each of Airlock Inner Door and Airlock Outer Door is on";
         Assert.Equal(each, SequenceText.Step(rig.Editor.Runner.Bindings, sequence, sequence.Steps.OfType<If>().Single(), through));
-        Assert.Equal("if the power on each in slot 2 is on", rig.Editor.Reads(step));
+        Assert.Equal("if the power on each in block slot 1 is on", rig.Editor.Reads(step));
     }
 
     /// <summary>Any other value is named in the check, and a number is offered more than sameness.</summary>
@@ -278,7 +278,7 @@ public class CheckViewTests
         Assert.Equal("Exit", opens.Compared.Value.Said);
         Assert.Equal("if the label of button 2 on Airlock Button is Exit",
             SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
-        Assert.Equal("if the label of button 2 on any in slot 2 is Exit", rig.Editor.Reads(step));
+        Assert.Equal("if the label of button 2 on any in block slot 1 is Exit", rig.Editor.Reads(step));
 
         var taking = rig.Editor.StepRows()[step].Slots.OfType<ArgumentsSlot>().First();
         Assert.Equal(rig.Texts.Codex.SequenceReadWithAbout, taking.About(rig.Texts));

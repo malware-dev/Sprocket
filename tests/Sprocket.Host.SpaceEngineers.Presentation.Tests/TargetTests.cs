@@ -178,7 +178,7 @@ public class TargetTests
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Triggers().Count);
-        Assert.Equal("then close slot 3", screen.Editor.Doing(1));
+        Assert.Equal("then close block slot 2", screen.Editor.Doing(1));
         Assert.NotNull(screen.Editor.Program.Systems[0].Triggers[1].Acts);
 
         Assert.Single(screen.Editor.Program.Sequences);
@@ -202,7 +202,7 @@ public class TargetTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("then close slot 3", screen.Editor.Doing(1));
+        Assert.Equal("then close block slot 2", screen.Editor.Doing(1));
 
         screen.Editor.Triggers()[1].Deletes!.Execute();
         screen.Run(2);

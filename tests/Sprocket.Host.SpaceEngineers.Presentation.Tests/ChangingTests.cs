@@ -40,7 +40,7 @@ public class ChangingTests
 
         var trigger = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
         Assert.Equal("finishes_closing", trigger.EventId);
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(0));
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(0));
 
         // The one it replaced is gone rather than left beside it.
         Assert.Single(System(screen).Triggers);
@@ -133,7 +133,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Same(was, System(screen).Triggers[0]);
-        Assert.Equal("then close slot 2", screen.Editor.Doing(0));
+        Assert.Equal("then close block slot 1", screen.Editor.Doing(0));
         Assert.NotNull(was.Acts);
 
         // What it used to run stands on its own, so it stays behind; the act is the trigger's own and
@@ -179,7 +179,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Single(screen.Editor.Program.Sequences);
-        Assert.Equal("then close slot 3", screen.Editor.Doing(1));
+        Assert.Equal("then close block slot 2", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -202,7 +202,7 @@ public class ChangingTests
         Trigger was = System(screen).Triggers[0];
         screen.Editor.PressDoes(0);
 
-        Assert.Equal("slot 1", screen.Editor.Screen.Title());
+        Assert.Equal("signal slot 1", screen.Editor.Screen.Title());
         Assert.Equal("", screen.Editor.Screen.Question);
 
         var does = screen.Editor.Pick().Stages[2];
@@ -239,13 +239,13 @@ public class ChangingTests
         screen.Editor.PressChoice("A task on blocks…");
         screen.Run(2);
 
-        Assert.Equal("slot 3", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 2", screen.Editor.Screen.Title());
         Assert.Equal(3, screen.Editor.Pick().Page);
 
         screen.Editor.BackKeeping();
         screen.Run(2);
 
-        Assert.Equal("slot 2", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 1", screen.Editor.Screen.Title());
         var pick = screen.Editor.Pick();
         Assert.Equal(0, pick.Page);
         Assert.Equal(3, pick.Stages.Count);
@@ -262,13 +262,13 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(0));
-        Assert.Equal("then close slot 3", screen.Editor.Doing(0));
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(0));
+        Assert.Equal("then close block slot 2", screen.Editor.Doing(0));
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
+        Assert.Equal("When signal slot 1 button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
     }
 
@@ -327,7 +327,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("then open slot 3", screen.Editor.Doing(1));
+        Assert.Equal("then open block slot 2", screen.Editor.Doing(1));
         Assert.Equal(sequences, screen.Editor.Program.Sequences.Count);
     }
 
@@ -355,14 +355,14 @@ public class ChangingTests
         screen.Run(2);
 
         var pick = screen.Editor.Pick();
-        Assert.Equal("slot 2", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 1", screen.Editor.Screen.Title());
         Assert.NotNull(pick.Onward);
 
         pick.Onward!.Execute();
         screen.Run(2);
 
         pick = screen.Editor.Pick();
-        Assert.Equal("slot 3", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 2", screen.Editor.Screen.Title());
         Assert.Contains(pick.Stages[pick.Page].Entries(), e => e.Text == "Airlock Outer Door" && e.IsChosen);
     }
 
@@ -417,19 +417,19 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(0));
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(0));
         Assert.Equal("then run Seal up", screen.Editor.Doing(0));
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
+        Assert.Equal("When signal slot 1 button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
 
         screen.Editor.Steps().Redo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(0));
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(0));
         Assert.Equal("then run Seal up", screen.Editor.Doing(0));
     }
 
@@ -462,7 +462,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("then close slot 2", screen.Editor.Doing(1));
+        Assert.Equal("then close block slot 1", screen.Editor.Doing(1));
 
         // And it walks back from here, because the act it changed has nowhere else to offer it.
         Assert.Equal(Filled.With(screen.Editor.Texts.ChangeTarget, "thing", SentenceText.Short(screen.Editor.Says(1))), screen.Editor.Steps().UndoText);
@@ -470,7 +470,7 @@ public class ChangingTests
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("then close slot 3", screen.Editor.Doing(1));
+        Assert.Equal("then close block slot 2", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -505,7 +505,7 @@ public class ChangingTests
 
         var back = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
         Assert.Equal(1, Assert.Single(Pressed.Where(screen.Editor.Program, System(screen), back.Part)!).Slot);
-        Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
+        Assert.Equal("When signal slot 1 button 1 is pressed", screen.Editor.Says(0));
 
         // And forward again, into the same change rather than a rebuilt one that reads the same.
         Assert.Equal(changed, screen.Editor.Steps().RedoText);
@@ -552,7 +552,7 @@ public class ChangingTests
         // Back where it was, with what it did, and in the place it had among the others.
         Assert.Equal(2, screen.Editor.Triggers().Count);
         Assert.Single(screen.Editor.Program.Sequences);
-        Assert.Equal("then close slot 3", screen.Editor.Doing(1));
+        Assert.Equal("then close block slot 2", screen.Editor.Doing(1));
     }
 
     /// <summary>
@@ -642,7 +642,7 @@ public class ChangingTests
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
         var took = Assert.IsType<SignalTrigger>(Assert.Single(System(screen).Triggers));
         Assert.True(took.IsAbout(screen.Editor.Program.Sequences[1]));
-        Assert.Equal("slot 1", took.Part);
+        Assert.Equal("signal slot 1", took.Part);
         Assert.Single(System(screen).Parts, part => part.IsSignal);
     }
 
@@ -678,8 +678,8 @@ public class ChangingTests
         screen.Run(2);
 
         // Untouched: it still waits for the door it was given, and no slot was made for the button.
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(1));
-        Assert.DoesNotContain(System(screen).Parts, part => part.IsSignal && part.Id != "slot 1");
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(1));
+        Assert.DoesNotContain(System(screen).Parts, part => part.IsSignal && part.Id != "signal slot 1");
     }
 
     /// <summary>Changing a trigger onto a button another trigger has is one step back, which brings the other back with it.</summary>
@@ -710,8 +710,8 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal(2, System(screen).Triggers.Count);
-        Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(1));
+        Assert.Equal("When signal slot 1 button 1 is pressed", screen.Editor.Says(0));
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(1));
     }
 
     /// <summary>
@@ -744,7 +744,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Single(System(screen).Triggers);
-        Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
+        Assert.Equal("When signal slot 1 button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal(Filled.With(screen.Editor.Texts.ChangeTakeOver, "thing", SentenceText.Short(screen.Editor.Says(0)), "place", "Airlock"),
             screen.Editor.Steps().UndoText);
 
@@ -752,8 +752,8 @@ public class ChangingTests
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(1));
+        Assert.Equal("When signal slot 1 button 1 is pressed", screen.Editor.Says(0));
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(1));
     }
 
     /// <summary>
@@ -773,7 +773,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal("", screen.Editor.Screen.Question);
-        Assert.Equal("When slot 1 button 1 is pressed", screen.Editor.Says(0));
+        Assert.Equal("When signal slot 1 button 1 is pressed", screen.Editor.Says(0));
     }
 
     /// <summary>
@@ -799,7 +799,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("When slot 2 finishes closing", screen.Editor.Says(0));
+        Assert.Equal("When block slot 1 finishes closing", screen.Editor.Says(0));
     }
 
     /// <summary>

@@ -26,7 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             switch (plan)
             {
-                case PlannedMember.MovingItems: return texts.PlanMovingItems;
                 case PlannedMember.SorterList: return texts.PlanSorterList;
                 default: return plan.ToString();
             }

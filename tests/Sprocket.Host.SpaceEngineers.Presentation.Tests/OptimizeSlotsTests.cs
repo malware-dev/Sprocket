@@ -108,17 +108,17 @@ public class OptimizeSlotsTests
         Assert.Equal(2, parts.Count);
         Remove(screen, 1);
         Remove(screen, 0);
-        var number = system.Parts.Count + 1;
+        var number = system.Parts.Count(part => !part.IsSignal) + 1;
         Panel(screen, system);
 
         Press(screen);
-        var makes = Filled.With(screen.Editor.Texts.SlotOptimizeMakes, "slot", "slot " + number);
+        var makes = Filled.With(screen.Editor.Texts.SlotOptimizeMakes, "slot", "block slot " + number);
         Assert.Contains("- " + makes.Substring(0, makes.IndexOf("{blocks}", StringComparison.Ordinal)), screen.Editor.Question());
         screen.Editor.PressAnswer(screen.Editor.Texts.SlotOptimizeApply);
         screen.Run(2);
 
         var slot = Assert.Single(Targets(system, 0));
-        Assert.Equal("slot " + number, slot);
+        Assert.Equal("block slot " + number, slot);
         Assert.Equal(3, system.First!.FilledWith(slot)!.Count);
         Assert.All(parts, part => Assert.Null(system.FindPart(part)));
     }

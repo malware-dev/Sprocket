@@ -38,7 +38,7 @@ public class NewInstallationTests
         Assert.Null(port.Halt);
         SystemSummary.Failing(sim.Editor.Runner, system, port, out var waiting);
         Assert.Equal(SequenceProblem.EmptySlot, waiting.Problem);
-        Assert.Contains(Labels(sim), label => label.Text == "Sequence 1: The slot 1 slot is empty. Fill it on the installation panel.");
+        Assert.Contains(Labels(sim), label => label.Text == "Sequence 1: The slot signal slot 1 is empty. Fill it on the installation panel.");
 
         sim.Editor.Parts()[0].Fills!.Execute();
         sim.Tick();

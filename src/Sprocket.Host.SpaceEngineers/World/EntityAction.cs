@@ -68,6 +68,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             ArrivalAnnounced = true;
         }
 
+        /// <summary>Whether this is offered only for a slot of its type, where the block has its own member saying the same.</summary>
+        public bool InSlotsOnly { get; set; }
+
+        /// <summary>The word a sentence says between this and the blocks it acts on, or empty for none: "from".</summary>
+        public string Join { get; set; } = "";
+
         /// <summary>Stable identifier, referenced by saved sequences.</summary>
         public string Id { get; private set; }
 

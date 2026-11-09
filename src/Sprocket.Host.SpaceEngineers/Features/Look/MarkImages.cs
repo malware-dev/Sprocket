@@ -28,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Add("value", Symbols.Value);
             Add("block", Symbols.Block);
             Add("screen", Symbols.Screen);
+            Add("inventory", Symbols.Inventory);
             Add("blueprint", Symbols.Blueprint);
             Add("logic-system", Symbols.LogicSystem);
             Add("installation", Symbols.Installation);

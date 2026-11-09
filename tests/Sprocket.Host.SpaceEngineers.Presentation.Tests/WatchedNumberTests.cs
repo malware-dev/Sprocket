@@ -55,7 +55,7 @@ public class WatchedNumberTests
         Assert.Equal(5.0, when.Value.Number);
 
         var row = rig.Editor.Triggers()[0];
-        Assert.Equal(new[] { "When", "the average of the", "radius", "on", "slot 1", "is below", "5 m", "then run", "Sequence 1" },
+        Assert.Equal(new[] { "When", "the average of the", "radius", "on", "block slot 1", "is below", "5 m", "then run", "Sequence 1" },
             Said(row).Take(9));
 
         rig.Editor.Triggers()[0].Starts[1].Opens!.Execute();
@@ -138,7 +138,7 @@ public class WatchedNumberTests
         Assert.Equal(5.0, when.Value.Number);
 
         var row = rig.Editor.Triggers()[0];
-        Assert.Equal(new[] { "When", "the", "brighter", "2", "on", "any in", "slot 1", "is above", "5" }, Said(row).Take(9));
+        Assert.Equal(new[] { "When", "the", "brighter", "2", "on", "any in", "block slot 1", "is above", "5" }, Said(row).Take(9));
 
         row.Starts.OfType<ArgumentsSlot>().First().Opens!.Execute();
         rig.Tick();

@@ -629,7 +629,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 for (var i = 0; i < act.Targets.Count; i++)
                     copy.Targets.Add(act.Targets[i]);
                 for (var i = 0; i < act.Arguments.Count; i++)
-                    copy.Arguments.Add(act.Arguments[i]);
+                    copy.Arguments.Add(act.Arguments[i].Copied);
                 return Annotated(copy, step);
             }
 
@@ -688,7 +688,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 copy.Targets.Add(test.Targets[i]);
 
             for (var i = 0; i < test.Arguments.Count; i++)
-                copy.Arguments.Add(test.Arguments[i]);
+                copy.Arguments.Add(test.Arguments[i].Copied);
 
             return copy;
         }

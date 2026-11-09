@@ -27,7 +27,7 @@ public class SlotHeadingTests
         screen.Run(2);
 
         var heading = Assert.Single(editor.Screen.Heading);
-        Assert.Equal("slot 2", heading.Text);
+        Assert.Equal("block slot 1", heading.Text);
         Assert.True(heading.CanRename);
         Assert.False(heading.Emphasized);
         Assert.True(heading.NamedOnArrival);
@@ -84,7 +84,7 @@ public class SlotHeadingTests
         screen.Run(2);
 
         var heading = editor.Screen.Heading[0];
-        Assert.False(heading.Takes("SLOT 1"));
+        Assert.False(heading.Takes("SIGNAL SLOT 1"));
         Assert.False(heading.Takes("cycling"));
         Assert.True(heading.Takes("inner"));
     }

@@ -917,6 +917,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Writes <paramref name="value" /> back as the kind it is.</summary>
         static void Written(ScriptWriter pen, Literal value)
         {
+            if (value.Kind == ValueKind.Slots)
+            {
+                WriteNames(pen, value.Names);
+                return;
+            }
+
             if (value.Kind == ValueKind.Text)
             {
                 pen.Text(value.Text);

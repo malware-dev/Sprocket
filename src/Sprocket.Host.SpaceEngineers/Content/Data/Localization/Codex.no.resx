@@ -271,6 +271,9 @@
   <data name="Sprocket.Sequence.BlocksAbout" xml:space="preserve">
     <value>Velg hvilke blokker dette [steget](Term.Step class=term) virker på.</value>
   </data>
+  <data name="Sprocket.Sequence.OptionSlotsAbout" xml:space="preserve">
+    <value>Velg målet for [![](mark:action)&amp;nbsp;handlingen](Term.Action class=term).</value>
+  </data>
   <data name="Sprocket.Sequence.OptionsAbout" xml:space="preserve">
     <value>Endre [valgene](Term.Option class=term) for [![](mark:action)&amp;nbsp;handlingen](Term.Action class=term).</value>
   </data>
@@ -890,6 +893,12 @@
   <data name="Sprocket.Member.Inventory.Amount" xml:space="preserve">
     <value>Hvor mye av en gjenstand blokken har i ett av inventarene sine, i kilo for malm og barrer og i stykker for resten.</value>
     <comment>Codex entry on the block member "amount" of Inventory, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Inventory.Fill" xml:space="preserve">
+    <value>Hvor fullt dette inventaret er, i prosent.</value>
+  </data>
+  <data name="Sprocket.Member.Inventory.Mass" xml:space="preserve">
+    <value>Hvor mye gjenstandene i dette inventaret veier, i kilo.</value>
   </data>
   <data name="Sprocket.Member.Inventory.InventoryFill" xml:space="preserve">
     <value>Hvor fullt inventaret i blokken er, i prosent.</value>
@@ -3534,6 +3543,21 @@
   <data name="Sprocket.Member.CryoChamber.Empty" xml:space="preserve">
     <value>Oppfylt mens ingen ligger i kammeret.</value>
     <comment>Codex entry on the block member "empty" of CryoChamber, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.MoveItems" xml:space="preserve">
+    <value>Flytter gjenstander ut av dette inventaret til målet, og fyller én før den neste. Transportsystemet må koble dem sammen.</value>
+  </data>
+  <data name="Sprocket.Member.Option.To" xml:space="preserve">
+    <value>Hvor gjenstandene skal: blokkene eller plassene som er valgt, hver installasjon med sine egne.</value>
+  </data>
+  <data name="Sprocket.Member.Option.Items" xml:space="preserve">
+    <value>Gjenstanden som skal flyttes, eller alle gjenstander.</value>
+  </data>
+  <data name="Sprocket.Member.Option.HowMuch" xml:space="preserve">
+    <value>Hvor mye som skal flyttes. Står den tom, flyttes alt.</value>
+  </data>
+  <data name="Sprocket.Member.Option.WhenStuck" xml:space="preserve">
+    <value>`hold` venter til gjenstandene kan flyttes. `move on` går videre med det som er flyttet.</value>
   </data>
   <data name="Sprocket.Member.Option.Door.Force" xml:space="preserve">
     <value>`normal` stopper steget med et problem hvis noe snur døra. `forced` gir døra beskjed på nytt hver gang noe snur den, til den er framme eller ikke lenger kan bevege seg.</value>

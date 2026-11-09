@@ -26,6 +26,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The mark of each of the slots, in their order, where the part says them by name; null where it says the blocks.</summary>
         public List<string> Marks { get; private set; }
 
+        /// <summary>Whether an option of the action names these, as the target of moving items, rather than the action being done to them.</summary>
+        public bool IsOption { get; set; }
+
         /// <summary>Whether the part says the slots by their names, as a blueprint's lines do, rather than the blocks.</summary>
         public bool SaysSlots => Marks != null;
 

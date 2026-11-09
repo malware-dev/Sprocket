@@ -336,9 +336,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 var step = sequence.Steps[i];
                 var problem = step is Act ? SequenceProblem.MissingTarget : SequenceProblem.MissingGate;
-                var lost = Lost(bindings, system, through, step.Targets, problem, i, ref adrift);
-                if (lost.Exists)
-                    return lost;
+                var lists = new List<IList<string>>();
+                step.NameLists(lists);
+                foreach (var names in lists)
+                {
+                    var lost = Lost(bindings, system, through, names, problem, i, ref adrift);
+                    if (lost.Exists)
+                        return lost;
+                }
             }
 
             // Only once nothing is outright missing, because being gone is the worse news and a line can only say one thing.
@@ -406,9 +411,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
-                var slot = EmptyOf(system, through, sequence.Steps[i].Targets);
-                if (slot != null)
-                    return new SequenceFault(SequenceProblem.EmptySlot, i, BlockTrouble.None, slot);
+                var lists = new List<IList<string>>();
+                sequence.Steps[i].NameLists(lists);
+                foreach (var names in lists)
+                {
+                    var slot = EmptyOf(system, through, names);
+                    if (slot != null)
+                        return new SequenceFault(SequenceProblem.EmptySlot, i, BlockTrouble.None, slot);
+                }
             }
 
             return SequenceFault.None;

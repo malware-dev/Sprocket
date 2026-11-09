@@ -271,7 +271,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     AddNames(bindings, SystemInstance.Through(system.First, moment.Sources), result);
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
-                    AddNames(bindings, SystemInstance.Through(system.First, sequence.Steps[s].Targets), result);
+                {
+                    var lists = new List<IList<string>>();
+                    sequence.Steps[s].NameLists(lists);
+                    foreach (var names in lists)
+                        AddNames(bindings, SystemInstance.Through(system.First, names), result);
+                }
             }
         }
 

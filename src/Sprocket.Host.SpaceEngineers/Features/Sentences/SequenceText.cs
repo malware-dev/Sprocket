@@ -569,7 +569,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var fields = new List<Field>();
             named.Fields(fields);
-            var slot = new ArgumentsSlot(step.Arguments, fields, null);
+            var ahead = new List<Literal>();
+            var aheadFields = new List<Field>();
+            var after = new List<Literal>();
+            var afterFields = new List<Field>();
+            ArgumentsSlot.Split(step.Arguments, fields, ahead, aheadFields, after, afterFields);
+            var slot = new ArgumentsSlot(after, afterFields, null);
             var given = SentenceText.Given(slot);
 
             var verb = step.Sets ? SentenceText.Switching(named, step.Arguments) : "";
@@ -579,7 +584,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (step.Sets)
                 return SentenceText.Setting(SentenceText.Value(named), blocks, given);
 
-            return step.Arguments.Count == 0 || slot.Quiet ? $"{named.Text} {blocks}" : $"{named.Text} {blocks} {given}";
+            var leads = aheadFields.Count == 0 ? named.Text : $"{named.Text} {SentenceText.Given(new ArgumentsSlot(ahead, aheadFields, null))}";
+            if (named.Join.Length != 0)
+                leads = $"{leads} {named.Join}";
+
+            return step.Arguments.Count == 0 || slot.Quiet ? $"{leads} {blocks}" : $"{leads} {blocks} {given}";
         }
     }
 }

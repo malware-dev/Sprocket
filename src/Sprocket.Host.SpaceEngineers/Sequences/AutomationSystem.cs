@@ -351,20 +351,29 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (moment != null)
                     Rename(moment.Sources, was, name);
 
-                var own = trigger.Acts;
-                if (own != null)
-                    Rename(own.Targets, was, name);
+                RenameIn(trigger.Acts, was, name);
             }
 
             foreach (var sequence in _sequences)
             {
                 var steps = sequence.Steps;
                 for (var i = 0; i < steps.Count; i++)
-                    Rename(steps[i].Targets, was, name);
+                    RenameIn(steps[i], was, name);
             }
 
             foreach (var instance in _instances)
                 instance.RenameSlot(was, name);
+        }
+
+        static void RenameIn(Step step, string was, string now)
+        {
+            if (step == null)
+                return;
+
+            var lists = new List<IList<string>>();
+            step.NameLists(lists);
+            foreach (var names in lists)
+                Rename(names, was, now);
         }
 
         static void Rename(IList<string> names, string was, string now)
@@ -453,17 +462,42 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (moment != null)
                     uses += Count(moment.Sources, slot);
 
-                var own = trigger.Acts;
-                if (own != null)
-                    uses += Count(own.Targets, slot);
+                uses += CountIn(trigger.Acts, slot);
             }
 
             foreach (var sequence in _sequences)
             {
                 var steps = sequence.Steps;
                 for (var s = 0; s < steps.Count; s++)
-                    uses += Count(steps[s].Targets, slot);
+                    uses += CountIn(steps[s], slot);
             }
+
+            return uses;
+        }
+
+        /// <summary>How many of its slots are filled by a signal where <paramref name="signal" />, and otherwise hold the host type <paramref name="holds" />, or blocks for empty.</summary>
+        public int SlotsAlike(bool signal, string holds)
+        {
+            var count = 0;
+            foreach (var part in Parts)
+            {
+                if (part.IsSignal == signal && (part.Holds ?? "") == holds)
+                    count++;
+            }
+
+            return count;
+        }
+
+        static int CountIn(Step step, string slot)
+        {
+            if (step == null)
+                return 0;
+
+            var uses = 0;
+            var lists = new List<IList<string>>();
+            step.NameLists(lists);
+            foreach (var names in lists)
+                uses += Count(names, slot);
 
             return uses;
         }
@@ -515,15 +549,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (moment != null)
                     Gather(moment.Sources, into);
 
-                var own = trigger.Acts;
-                if (own != null)
-                    Gather(own.Targets, into);
+                GatherFrom(trigger.Acts, into);
             }
 
             foreach (var sequence in _sequences)
             {
                 for (var s = 0; s < sequence.Steps.Count; s++)
-                    Gather(sequence.Steps[s].Targets, into);
+                    GatherFrom(sequence.Steps[s], into);
             }
         }
 
@@ -538,20 +570,26 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (moment != null && moment.Sources.Count > 0)
                     into.Add(moment.Sources);
 
-                var own = trigger.Acts;
-                if (own != null && own.Targets.Count > 0)
-                    into.Add(own.Targets);
+                trigger.Acts?.NameLists(into);
             }
 
             foreach (var sequence in _sequences)
             {
                 var steps = sequence.Steps;
                 for (var s = 0; s < steps.Count; s++)
-                {
-                    if (steps[s].Targets.Count > 0)
-                        into.Add(steps[s].Targets);
-                }
+                    steps[s].NameLists(into);
             }
+        }
+
+        static void GatherFrom(Step step, List<string> into)
+        {
+            if (step == null)
+                return;
+
+            var lists = new List<IList<string>>();
+            step.NameLists(lists);
+            foreach (var names in lists)
+                Gather(names, into);
         }
 
         static void Gather(IList<string> ids, List<string> into)

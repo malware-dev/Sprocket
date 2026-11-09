@@ -117,6 +117,7 @@ Every member exposed by a host on a block is an **action**, a **value**, a **fun
 * **Arguments:** Supplied in comma-separated parentheses immediately following the member identifier: `Gearbox.rotate_to(0, 90, 2)`.
   * Parentheses are written **only** when arguments are present. Writing empty parentheses `()` is a syntax error.
   * Argument counts and types must match the member's parameter signature. Supplying incompatible types or an integer exceeding parameter limits is an error.
+  * A parameter may take slots. Its argument is a list of slot names in square brackets: `call Gearbox.move_items([ cargo ], "Ingot/Iron", 100) on [ output ]`. The parameter's signature says what the slots must hold, blocks or things of a host type.
 * **Return Types:** Values and functions return a flag, integer, real, text, color, or a host choice name.
 
 ### 5.2 Host Types
@@ -218,7 +219,7 @@ optional slot generic
   * **Game Type:** A game type id with the `MyObjectBuilder_` prefix dropped (e.g., `LightingBlock`, `Door`). Takes every block of that type and of every type the game builds on it, so `LightingBlock` takes interior lights and spotlights alike.
   * **Exact Subtype:** A quoted name `'Type/Subtype'`, taking that one exact block.
   * **`signal`:** For slots bound to functions returning signals.
-  * **Host Type:** A qualified host type identifier (e.g., `Gearbox.screen`), for slots answered by functions that return one.
+  * **Host Type:** A qualified host type identifier (e.g., `Gearbox.screen`), for slots answered by functions that return one. `optional slot output expects Gearbox.inventory`, answered by `Gearbox.inventory(2) on [ refinery ]`, holds that inventory of the block.
   * **Omitted:** A slot declared with no `expects` clause accepts any block.
 * When a slot is populated from multiple blocks, it expects the nearest common ancestor type shared by all assigned blocks.
 
@@ -360,8 +361,8 @@ sequence 1 as Cycle {
 ### 11.3 Block Targets (`[ <names> ]`)
 
 * The bracketed list after a member indicates variable names or slot names.
-* Target names are resolved and deduplicated into a unique set of physical blocks.
-* The operation is performed on every block in the set once, regardless of how many names refer to a given block.
+* Target names are resolved and deduplicated into a unique set of the things they hold: physical blocks, or things of a host type, so two screens of one block are two things.
+* The operation is performed on every thing in the set once, regardless of how many names refer to it.
 
 ### 11.4 Step Disabling (`//`)
 

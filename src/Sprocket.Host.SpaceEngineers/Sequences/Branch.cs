@@ -19,5 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override IList<string> Targets => Test == null ? base.Targets : Test.Targets;
+
+        /// <inheritdoc />
+        public override IList<World.Literal> Arguments => Compared == null ? base.Arguments : Compared.Arguments;
     }
 }

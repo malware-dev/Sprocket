@@ -73,7 +73,7 @@ public class ToolbarSlotTests
         sim.Editor.Back();
         Settle(sim);
 
-        Assert.Equal("When slot 1 toolbar page 2, slot 4 is pressed", sim.Editor.Says(0));
+        Assert.Equal("When signal slot 1 toolbar page 2, slot 4 is pressed", sim.Editor.Says(0));
     }
 
     /// <summary>Opened again, the trigger's picker opens on its toolbar's line with the slot it was given.</summary>

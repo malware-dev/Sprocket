@@ -164,7 +164,7 @@ public class ButtonWiringTests
         Tick(sim);
         Assert.EndsWith("/2/1", KeyIn(port));
 
-        Assert.Equal(Filled.With(sim.Texts.ChangeFillSlot, "thing", "slot 1", "place", "Installation 2", "now", "Port Button"), sim.Editor.Screen.UndoText);
+        Assert.Equal(Filled.With(sim.Texts.ChangeFillSlot, "thing", "signal slot 1", "place", "Installation 2", "now", "Port Button"), sim.Editor.Screen.UndoText);
         sim.Editor.Screen.Undo!.Execute();
         Tick(sim);
 

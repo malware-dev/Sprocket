@@ -22,10 +22,10 @@ public class ArgumentsColumnTests
     const string Done = "1394 72";
 
     // The values part of the step's line, after the slot it names.
-    const string Values = "420 192";
+    const string Values = "500 192";
 
     // The slot the step makes, after the button trigger's, which the picker's heading names.
-    const string Slot = "slot 2";
+    const string Slot = "block slot 2";
 
     /// <summary>Presses twice on the words <paramref name="text" /> where they are drawn.</summary>
     static void DoubleOn(Screen screen, string text)
@@ -176,7 +176,7 @@ public class ArgumentsColumnTests
     /// Leaving asks about any change: a value, or what is done, as well as the blocks.
     /// </summary>
     [Theory]
-    [InlineData("420 192 type 7 escape")]
+    [InlineData("500 192 type 7 escape")]
     [InlineData("208 182 press color")]
     public void LeavingAsksAboutAnyChange(string change)
     {

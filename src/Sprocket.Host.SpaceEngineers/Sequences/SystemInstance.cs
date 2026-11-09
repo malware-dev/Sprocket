@@ -279,6 +279,25 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
+        /// <summary>Puts into <paramref name="into" /> the number of every facet of <paramref name="block" /> the slots <paramref name="slots" /> hold, each once; none where they hold the block itself.</summary>
+        public void FacetsOf(IList<string> slots, string block, List<int> into)
+        {
+            into.Clear();
+            for (var i = 0; i < slots.Count; i++)
+            {
+                List<int> held;
+                List<string> chosen;
+                if (!_facets.TryGetValue(slots[i], out held) || !_fills.TryGetValue(slots[i], out chosen))
+                    continue;
+
+                for (var at = 0; at < chosen.Count && at < held.Count; at++)
+                {
+                    if (chosen[at] == block && !into.Contains(held[at]))
+                        into.Add(held[at]);
+                }
+            }
+        }
+
         /// <summary>
         /// The number of the facet of <paramref name="block" /> the first slot among <paramref name="slots" /> that holds a
         /// host type and holds the block holds, from 1; 0 where none of them does.

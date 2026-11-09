@@ -29,7 +29,7 @@ public class SetSlotTests
 
         var slot = Assert.Single(Targets(screen, 0));
         Assert.Equal(4, system.First!.FilledWith(slot)!.Count);
-        Assert.Equal("slot 2", slot);
+        Assert.Equal("block slot 1", slot);
     }
 
     /// <summary>A slot of one block is numbered as any other slot is.</summary>
@@ -39,7 +39,7 @@ public class SetSlotTests
         var screen = Built(out _);
         Off(screen, Light);
 
-        Assert.Equal("slot 2", Assert.Single(Targets(screen, 0)));
+        Assert.Equal("block slot 1", Assert.Single(Targets(screen, 0)));
     }
 
     /// <summary>The number skips a name taken in any case, by a slot, a state or a type.</summary>
@@ -51,7 +51,7 @@ public class SetSlotTests
 
         Off(screen, Light);
 
-        Assert.Equal("slot 3", Assert.Single(Targets(screen, 0)));
+        Assert.Equal("block slot 1", Assert.Single(Targets(screen, 0)));
     }
 
     /// <summary>The same set picked again, in any order, is the same slot.</summary>

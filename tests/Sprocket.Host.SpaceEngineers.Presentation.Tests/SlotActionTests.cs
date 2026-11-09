@@ -89,7 +89,7 @@ public class SlotActionTests
         screen.Run(3);
         var after = editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First();
         Assert.Equal("Inner door", Assert.Single(after.Targets));
-        Assert.Equal(new[] { "slot 1", "Inner door" }, editor.Program.Systems[0].Parts.Select(part => part.Id).ToArray());
+        Assert.Equal(new[] { "signal slot 1", "Inner door" }, editor.Program.Systems[0].Parts.Select(part => part.Id).ToArray());
     }
 
     /// <summary>A type of block takes a slot only where it offers what the slot's steps do with it, which is named where it does not.</summary>

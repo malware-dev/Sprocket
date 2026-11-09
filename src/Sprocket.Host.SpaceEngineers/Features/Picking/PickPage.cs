@@ -34,6 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         bool _goesOn;
         bool _straight;
+        bool _selectedTarget;
 
         // Where the pick names slots of a blueprint: its heading.
         SlotHeading _slotHeading;
@@ -103,6 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (flipped != null)
                 _arguments.Arrive(Literal.Of(EntityAction.Toggle));
 
+            _arguments.Target.SourceName = () => _slotHeading?.NewName ?? "";
             _members = new MemberStage(editor, _picked, forEvents, forTests, signalsOnly);
             _blocks = new BlockStage(editor, _picked, editor.Opener, admits, forEvents, forTests, asksAll, signalsOnly);
         }
@@ -136,7 +138,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// slots already made that the picks fill, or the new slot they make, named in place; for any other system, and where
         /// this is null, the heading is the picker's own name. Set before the page is shown.
         /// </summary>
-        public AutomationSystem Slotted { get; set; }
+        public AutomationSystem Slotted
+        {
+            get { return _arguments.Target.System; }
+            set { _arguments.Target.System = value; }
+        }
 
         /// <summary>
         /// The signal slot of the trigger being changed, which a pick of what a toolbar sends changes where it matches no signal
@@ -149,6 +155,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>The list of slots the pick goes in place of, a step's or a trigger's, or null for a new one. Set before the page is shown.</summary>
         public IList<string> Replacing { get; set; }
+
+        /// <summary>A name the slot the picks make is kept from, as another about to be made has it, or empty. Set before the page is shown.</summary>
+        public string Avoiding { get; set; } = "";
 
         /// <inheritdoc />
         public override bool Asks => true;
@@ -265,7 +274,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             if (_slotHeading == null)
-                _slotHeading = new SlotHeading(Editor, Slotted, _title, _forEvents, Keeps, Replacing, SlotRenamed);
+                _slotHeading = new SlotHeading(Editor, Slotted, _title, _forEvents, Keeps, Replacing, SlotRenamed) { Avoiding = Avoiding };
 
             Restate();
             _slotHeading.Head(parts);
@@ -423,11 +432,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _strip.Show();
             _strip.Arrive(Opens, Editor.Input);
 
+            if (_opens == OpeningColumn.Target)
+                SelectTarget();
+
             if (!_goesOn)
                 return;
 
             _goesOn = false;
             Primary();
+        }
+
+        /// <summary>Opens the selector of the target the page was opened for; back from it with nothing selected, this page goes too, having never been looked at.</summary>
+        void SelectTarget()
+        {
+            if (!_selectedTarget)
+            {
+                _selectedTarget = _arguments.Target.SelectFirst(_strip, _finish);
+                return;
+            }
+
+            if (_arguments.Target.IsChosen)
+                return;
+
+            Editor.Pop();
+            if (_straight)
+                Editor.Pop();
         }
 
         /// <summary>Moves the strip's page turning on a tick.</summary>

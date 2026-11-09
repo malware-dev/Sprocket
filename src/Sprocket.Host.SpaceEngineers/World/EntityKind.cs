@@ -308,6 +308,20 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Offers the member added last only for a slot of its type.</summary>
+        public EntityKind InSlotsOnly()
+        {
+            _actions[_actions.Count - 1].InSlotsOnly = true;
+            return this;
+        }
+
+        /// <summary>Gives the action added last the word a sentence says between it and its blocks.</summary>
+        public EntityKind Joining(string join)
+        {
+            _actions[_actions.Count - 1].Join = join;
+            return this;
+        }
+
         /// <summary>Says what the member added last is about, for one the game did not name.</summary>
         public EntityKind In(Category category)
         {

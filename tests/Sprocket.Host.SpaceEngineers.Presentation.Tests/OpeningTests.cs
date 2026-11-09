@@ -80,7 +80,7 @@ public class OpeningTests
         screen.Run(2);
         screen.Do("type", "pre");
 
-        Assert.Equal("slot 1", screen.Editor.Screen.Title());
+        Assert.Equal("signal slot 1", screen.Editor.Screen.Title());
         Assert.Equal("pre", Stage(screen, 1).NarrowText);
     }
 
@@ -108,7 +108,7 @@ public class OpeningTests
         screen.Run(2);
 
         var pick = screen.Editor.Pick();
-        Assert.Equal("slot 3", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 2", screen.Editor.Screen.Title());
         Assert.True(pick.Page > 0, "the picker opened on the trigger's own page");
         Assert.Contains(Stage(screen, 0).Entries(), e => e.Text == "Airlock Outer Door" && e.IsChosen);
 
@@ -146,15 +146,15 @@ public class OpeningTests
 
         screen.Editor.Pick().Returns!.Execute();
         screen.Run(2);
-        Assert.Equal("slot 2", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 1", screen.Editor.Screen.Title());
 
         screen.Editor.Pick().Onward!.Execute();
         screen.Run(2);
-        Assert.Equal("slot 3", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 2", screen.Editor.Screen.Title());
 
         screen.Editor.Back();
         screen.Run(2);
-        Assert.Equal("slot 2", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 1", screen.Editor.Screen.Title());
     }
 
     /// <summary>And a repeat's single action opens the repeat's own picker, on the action's page.</summary>
@@ -172,13 +172,13 @@ public class OpeningTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("close slot 2", screen.Editor.Doing(1));
+        Assert.Equal("close block slot 1", screen.Editor.Doing(1));
 
         screen.Editor.Triggers()[1].Does[1].Opens!.Execute();
         screen.Run(2);
         screen.Do("type", "Air");
 
-        Assert.Equal("slot 2", screen.Editor.Screen.Title());
+        Assert.Equal("block slot 1", screen.Editor.Screen.Title());
         Assert.Equal(2, screen.Editor.Pick().Page);
         Assert.Equal("Air", Stage(screen, 0).NarrowText);
 

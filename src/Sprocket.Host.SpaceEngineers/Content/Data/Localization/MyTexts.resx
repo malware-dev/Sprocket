@@ -111,8 +111,20 @@
     <comment>Name shown for a logic system that has no name of its own and whose blocks' names share no leading words, such as in the editor's heading bar on its screen. {number} is filled with the logic system's number.</comment>
   </data>
   <data name="Sprocket.Slot.Numbered" xml:space="preserve">
-    <value>slot {number}</value>
-    <comment>Name given to every new slot: the slot the blocks or buttons picked for a step or a trigger make, the signal slot of a copied button trigger. Shown in the picker's heading to be renamed there, on the lines of a sequence and a logic system, and on the installation panel. {number} is the first number not already used, counting on from how many slots the logic system has. Written as the game names its blocks, in the player's language.</comment>
+    <value>block slot {number}</value>
+    <comment>Name given to a new slot holding blocks, the slot the blocks picked for a step or a trigger make. Shown in the picker's heading to be renamed there, on the lines of a sequence and a logic system, and on the installation panel. {number} is the first number not already used, counting on from how many slots of the logic system hold blocks. Written as the game names its blocks, in the player's language.</comment>
+  </data>
+  <data name="Sprocket.Slot.NumberedSignal" xml:space="preserve">
+    <value>signal slot {number}</value>
+    <comment>Name given to a new slot a signal fills, the slot the buttons picked for a trigger make, or the slot of a copied button trigger. Shown in the picker's heading to be renamed there, on the lines of a sequence and a logic system, and on the installation panel. {number} is the first number not already used, counting on from how many of the logic system's slots a signal fills. Written as the game names its blocks, in the player's language.</comment>
+  </data>
+  <data name="Sprocket.Slot.NumberedScreen" xml:space="preserve">
+    <value>screen slot {number}</value>
+    <comment>Name given to a new slot holding a block's screen, the slot made when a screen's member is picked for a step. Shown in the picker's heading to be renamed there, on the lines of a sequence and a logic system, and on the installation panel. {number} is the first number not already used, counting on from how many slots of the logic system hold screens. Written as the game names its blocks, in the player's language.</comment>
+  </data>
+  <data name="Sprocket.Slot.NumberedInventory" xml:space="preserve">
+    <value>inventory slot {number}</value>
+    <comment>Name given to a new slot holding a block's inventory, the slot made when items are moved out of or into a block. Shown in the picker's heading to be renamed there, on the lines of a sequence and a logic system, and on the installation panel. {number} is the first number not already used, counting on from how many slots of the logic system hold inventories. Written as the game names its blocks, in the player's language.</comment>
   </data>
   <data name="Sprocket.Slot.Optimize" xml:space="preserve">
     <value>Optimize slots</value>
@@ -572,10 +584,6 @@
     <value>{note} {shared}.</value>
     <comment>Note at the top of the picker's column of what can be done to the chosen blocks when two notes apply at once. {note} is filled with either the terminal list's banner or the note naming what is not built yet, and {shared} with the note saying the list shows only what the picked blocks share.</comment>
   </data>
-  <data name="Sprocket.Plan.MovingItems" xml:space="preserve">
-    <value>moving items</value>
-    <comment>One item in the picker's "Still to come" note over what the chosen blocks offer, naming something not built yet for blocks with an inventory.</comment>
-  </data>
   <data name="Sprocket.Plan.SorterList" xml:space="preserve">
     <value>setting the sorter's list</value>
     <comment>One item in the picker's "Still to come" note over what the chosen blocks offer, naming something not built yet for a conveyor sorter.</comment>
@@ -889,7 +897,7 @@
     <comment>Name of a sequence nobody has named, shown on its row on a logic system's screen and in the editor's heading bar on its own screen; also the name a new sequence is given. {number} is filled with the sequence's number.</comment>
   </data>
   <data name="Sprocket.Problem.EmptySlot" xml:space="preserve">
-    <value>The {slot} slot is empty. Fill it on the installation panel.</value>
+    <value>The slot {slot} is empty. Fill it on the installation panel.</value>
     <comment>Problem when a slot of a blueprint that a step or trigger needs has no block in this installation; {slot} is the slot's name as the blueprint's author gave it. Shown under the step's line on a sequence's screen (on the bar at the top for a trigger's slot), on the sequence's or trigger's row on a logic system's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Problem.MissingScreen" xml:space="preserve">
@@ -1041,7 +1049,7 @@
     <comment>Says why Sprocket switched off a logic system (or one of its installations), at a step of a named sequence; {step} is the step's number on the sequence's screen, {sequence} the sequence's name and {reason} the reason, such as "a block it acts on was lost.". Shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.EmptySlot" xml:space="preserve">
-    <value>the {slot} slot was empty.</value>
+    <value>the slot {slot} was empty.</value>
     <comment>Reason a run stopped: a slot of the blueprint had no block; {slot} is the slot's name as the blueprint's author gave it. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.ButtonFailed" xml:space="preserve">
@@ -1127,6 +1135,30 @@
   <data name="Sprocket.Trouble.VentNotAirtight" xml:space="preserve">
     <value>cannot fill because the room is not airtight</value>
     <comment>Said as a sequence's problem while a step waits on an air vent that cannot fill the room because it leaks. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Pick.SelectSlots" xml:space="preserve">
+    <value>Select</value>
+    <comment>Button on the selector, beside the option "to" of a step that moves items, until what they go to is chosen. Pressing it opens a block selector for the blocks or slots the items go to; once chosen, the button shows their names instead.</comment>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNotConnected" xml:space="preserve">
+    <value>cannot move the items because no conveyor connects it to where they go</value>
+    <comment>Said as a sequence's problem while a step waits to move items out of a block whose inventory has no conveyor connection able to carry that item to where the step sends it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNoRoom" xml:space="preserve">
+    <value>cannot move the items because there is no room where they go</value>
+    <comment>Said as a sequence's problem while a step waits to move items out of a block and every inventory they could go to is full. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNotAccepted" xml:space="preserve">
+    <value>cannot move the items because where they go does not take them</value>
+    <comment>Said as a sequence's problem while a step waits to move items out of a block and every inventory they could go to refuses that kind of item, as a refinery's input takes only ore. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Trouble.ItemsAlreadyThere" xml:space="preserve">
+    <value>cannot move the items because they are already where they go</value>
+    <comment>Said as a sequence's problem while a step waits to move items out of an inventory when the only place it sends them is that same inventory. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNoStock" xml:space="preserve">
+    <value>has none of the items to move</value>
+    <comment>Said as a sequence's problem while a step waits to move a set amount of items out of a block whose inventory holds none of them. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen.</comment>
   </data>
   <data name="Sprocket.Trouble.VentNoOxygen" xml:space="preserve">
     <value>cannot fill because there is no oxygen to fill it with</value>

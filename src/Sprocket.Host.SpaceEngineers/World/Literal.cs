@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -46,6 +47,22 @@ namespace Sprocket.Host.SpaceEngineers.World
             return new Literal(ValueKind.Name, new EntityValue(0), name);
         }
 
+        /// <summary>The slots <paramref name="names" /> name, kept as that list, for a parameter that takes slots.</summary>
+        public static Literal Slots(IList<string> names)
+        {
+            var slots = new Literal(ValueKind.Slots, new EntityValue(0), null);
+            slots.Names = names;
+            return slots;
+        }
+
+        /// <summary>The slots <paramref name="names" /> name, kept as that list, with what they hold in a step that has been worked out: <paramref name="held" />.</summary>
+        public static Literal Reaching(IList<string> names, IList<HeldThing> held)
+        {
+            var slots = Slots(names);
+            slots.Held = held;
+            return slots;
+        }
+
         /// <summary>A color, by its red, green, blue and alpha.</summary>
         public static Literal Color(byte r, byte g, byte b, byte a)
         {
@@ -60,6 +77,15 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The text, for <see cref="ValueKind.Text" />, or the name, for <see cref="ValueKind.Name" />, and empty for the rest.</summary>
         public string Text { get; private set; }
+
+        /// <summary>The names, for <see cref="ValueKind.Slots" />, and null for the rest.</summary>
+        public IList<string> Names { get; private set; }
+
+        /// <summary>What the slots hold, for <see cref="ValueKind.Slots" /> in a step that has been worked out, and null otherwise.</summary>
+        public IList<HeldThing> Held { get; private set; }
+
+        /// <summary>This again, with a list of names of its own where it has one, so editing the copy cannot reach it.</summary>
+        public Literal Copied => Kind == ValueKind.Slots ? Slots(new List<string>(Names)) : this;
 
         /// <summary>It as a flag, for <see cref="ValueKind.Flag" />.</summary>
         public bool Flag => Value.Bits != 0;
@@ -105,6 +131,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 if (Kind == ValueKind.Text || Kind == ValueKind.Name)
                     return Text;
+
+                if (Kind == ValueKind.Slots)
+                    return string.Join(", ", Names);
 
                 if (Kind == ValueKind.Flag)
                     return Flag ? "on" : "off";

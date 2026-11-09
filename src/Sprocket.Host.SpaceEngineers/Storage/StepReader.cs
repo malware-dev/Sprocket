@@ -81,6 +81,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var given = statement.Arguments(index);
             for (var i = 0; i < given.Count; i++)
             {
+                if (given[i].Form == ValueForm.List)
+                {
+                    var slots = new List<string>();
+                    if (!Names(statement.Within(given[i]), slots, statement, trouble))
+                        return false;
+
+                    arguments.Add(Literal.Slots(slots));
+                    continue;
+                }
+
                 if (!Argument(statement, given[i], trouble))
                     return false;
 

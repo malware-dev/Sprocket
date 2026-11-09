@@ -66,6 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var field = words.Count == 0 ? Field.Called(name) : Field.Among(name, words, means);
             field.Entry = FieldInput.Text;
             field.Needed = true;
+            field.Searched = true;
             return field;
         }
 

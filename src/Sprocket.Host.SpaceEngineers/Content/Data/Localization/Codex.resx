@@ -356,6 +356,10 @@
     <value>Select which blocks this [step](Term.Step class=term) acts on.</value>
     <comment>Tooltip on the blocks named in a step's sentence on a sequence's screen; pressing them opens the picker to choose which blocks the step acts on.</comment>
   </data>
+  <data name="Sprocket.Sequence.OptionSlotsAbout" xml:space="preserve">
+    <value>Select the target of this [![](mark:action)&amp;nbsp;action](Term.Action class=term).</value>
+    <comment>Tooltip on the slots an action's option names in a sentence, such as where moving items takes them, on a sequence's screen and a logic system's screen; pressing them opens the selector of the target.</comment>
+  </data>
   <data name="Sprocket.Sequence.OptionsAbout" xml:space="preserve">
     <value>Change the [![](mark:action)&amp;nbsp;action](Term.Action class=term)'s [options](Term.Option class=term).</value>
     <comment>Tooltip on the options of an action, such as a piston's position and speed, in a step's sentence on a sequence's screen and in a trigger's sentence on a logic system's screen; pressing them opens the picker on the action's options.</comment>
@@ -1083,6 +1087,14 @@
   <data name="Sprocket.Member.Inventory.Amount" xml:space="preserve">
     <value>How much of an item the block holds in one of its inventories, in kilograms for ore and ingots and in pieces for the rest.</value>
     <comment>Codex entry on the block member "amount" of Inventory, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Inventory.Fill" xml:space="preserve">
+    <value>How full this inventory is, in percent.</value>
+    <comment>Codex entry on the member "fill" of the inventory a slot holds, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Inventory.Mass" xml:space="preserve">
+    <value>How much the items in this inventory weigh, in kilograms.</value>
+    <comment>Codex entry on the member "mass" of the inventory a slot holds, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Inventory.InventoryFill" xml:space="preserve">
     <value>How full the block's inventory is, in percent.</value>
@@ -3727,6 +3739,26 @@
   <data name="Sprocket.Member.CryoChamber.Empty" xml:space="preserve">
     <value>Met while nobody is in the chamber.</value>
     <comment>Codex entry on the block member "empty" of CryoChamber, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.MoveItems" xml:space="preserve">
+    <value>Moves items out of this inventory to the target, filling one and then the next. A conveyor has to connect them.</value>
+    <comment>Codex entry on the block member "move items" of an inventory, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Option.To" xml:space="preserve">
+    <value>Where the items go: the blocks or slots selected, each installation with its own.</value>
+    <comment>Codex entry on the option "to" of move items, shown as its tooltip in the picker.</comment>
+  </data>
+  <data name="Sprocket.Member.Option.Items" xml:space="preserve">
+    <value>The item to move, or all items.</value>
+    <comment>Codex entry on the option "items" of move items, shown as its tooltip in the picker.</comment>
+  </data>
+  <data name="Sprocket.Member.Option.HowMuch" xml:space="preserve">
+    <value>How much to move. Left empty, all of it moves.</value>
+    <comment>Codex entry on the option "how much" of move items, shown as its tooltip in the picker.</comment>
+  </data>
+  <data name="Sprocket.Member.Option.WhenStuck" xml:space="preserve">
+    <value>`hold` waits until the items can move. `move on` carries on with what has moved.</value>
+    <comment>Codex entry on the option "when stuck" of move items, shown as its tooltip in the picker.</comment>
   </data>
   <data name="Sprocket.Member.Option.Door.Force" xml:space="preserve">
     <value>`normal` stops the step with a problem if something reverses the door. `forced` tells the door again each time something reverses it, until it arrives or can no longer move.</value>

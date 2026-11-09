@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static string OfSlot(Part part) => part == null ? Symbols.Block : OfSlot(part.IsSignal, HostTypes.Named(part.Holds));
 
         /// <summary>The mark of a slot that a signal fills where <paramref name="signal" />, and otherwise one holding <paramref name="holds" />, a type the host provides, or blocks for null.</summary>
-        public static string OfSlot(bool signal, HostType holds) => signal ? Symbols.Signal : holds is ScreenType ? Symbols.Screen : Symbols.Block;
+        public static string OfSlot(bool signal, HostType holds) => signal ? Symbols.Signal : holds is ScreenType ? Symbols.Screen : holds is InventoryType ? Symbols.Inventory : Symbols.Block;
 
         /// <summary>The mark of each slot of the blueprint <paramref name="system" /> these names are, for a line naming them; null where the system names blocks.</summary>
         public static List<string> OfSlots(AutomationSystem system, IList<string> names)

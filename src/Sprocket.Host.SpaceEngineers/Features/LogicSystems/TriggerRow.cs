@@ -166,8 +166,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (part is SequenceSlot || part is ActionSlot)
                 return texts.Codex.TriggerDoesAbout;
 
-            if (part is EntitiesSlot)
-                return texts.Codex.TriggerTargetsAbout;
+            var blocks = part as EntitiesSlot;
+            if (blocks != null)
+                return blocks.IsOption ? texts.Codex.SequenceOptionSlotsAbout : texts.Codex.TriggerTargetsAbout;
 
             var given = part as ArgumentsSlot;
             return given?.About(texts);

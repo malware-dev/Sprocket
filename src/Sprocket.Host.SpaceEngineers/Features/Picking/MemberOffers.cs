@@ -36,6 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Readiness> _ready = new List<Readiness>();
         readonly List<string> _why = new List<string>();
         readonly List<HostType> _types = new List<HostType>();
+        readonly List<bool> _slotted = new List<bool>();
 
         /// <summary>
         /// The offers of a pick in <paramref name="editor" />: of what starts something where <paramref name="forEvents" />, of
@@ -83,6 +84,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>The type the host provides each offer is a member of, such as a screen, or null where it is the block's.</summary>
         public List<HostType> Types => _types;
 
+        /// <summary>Whether each offer is listed only for a slot of its type.</summary>
+        public List<bool> InSlotsOnly => _slotted;
+
         /// <summary>
         /// Lists what <paramref name="selection" /> offers, numbers alone where <paramref name="totals" /> asks for a sum or an
         /// average, and only the member <paramref name="only" /> where that is not null.
@@ -98,6 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _ready.Clear();
             _why.Clear();
             _types.Clear();
+            _slotted.Clear();
 
             if (_forTests)
             {
@@ -122,6 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     _ready.Add(Readiness.Ready);
                     _why.Add(null);
                     _types.Add(null);
+                    _slotted.Add(false);
                 }
 
                 // A number on the blocks can start something as it comes to compare as asked: the states already come as
@@ -208,6 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _ready.Add(status.Readiness);
                 _why.Add(ReadinessText.Why(_editor.Texts, status.Why));
                 _types.Add(null);
+                _slotted.Add(false);
             }
         }
 
@@ -223,6 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _ready.Add(one.Readiness);
             _why.Add(ReadinessText.Why(_editor.Texts, one.Why));
             _types.Add(one.Type);
+            _slotted.Add(one.InSlotsOnly);
         }
 
         /// <summary>Everything the blocks offer, values first and each group in its own order.</summary>
@@ -257,6 +265,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _ready.Add(one.Readiness);
                 _why.Add(ReadinessText.Why(_editor.Texts, one.Why));
                 _types.Add(one.Type);
+                _slotted.Add(one.InSlotsOnly);
             }
         }
 

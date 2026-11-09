@@ -295,21 +295,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             row.Does.Add(new ActionSlot(chosen, Does(trigger, OpeningColumn.What)));
             var blocks = _editor.Blocks(_system, act.Targets);
-            row.Does.Add(new EntitiesSlot(blocks, act.Targets, true, MarkText.OfSlots(_system, act.Targets), Does(trigger, OpeningColumn.Blocks))
+            var entities = new EntitiesSlot(blocks, act.Targets, true, MarkText.OfSlots(_system, act.Targets), Does(trigger, OpeningColumn.Blocks))
             {
                 Screens = _editor.SlotBlocks.Screens(_system, act.Targets, blocks)
-            });
-            if (verb.Length != 0)
+            };
+            if (verb.Length != 0 || chosen == null || chosen.Wants == 0)
+            {
+                row.Does.Add(entities);
                 return;
-
-            if (chosen == null || chosen.Wants == 0)
-                return;
+            }
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ArgumentsSlot(act.Arguments, fields, Does(trigger, OpeningColumn.Arguments), act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options);
-            if (!given.Quiet)
-                row.Does.Add(given);
+            ArgumentsSlot.Lay(row.Does, entities, chosen.Join, act.Arguments, fields, Does(trigger, OpeningColumn.Arguments),
+                act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options,
+                names => new EntitiesSlot(_editor.Blocks(_system, names), names, true, MarkText.OfSlots(_system, names), Does(trigger, OpeningColumn.Target)));
         }
 
         /// <summary>Opens what <paramref name="trigger" /> does at <paramref name="opens" />, while the system may be changed.</summary>

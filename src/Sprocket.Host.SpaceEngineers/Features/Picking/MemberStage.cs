@@ -178,7 +178,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < _offers.Names.Count; i++)
             {
                 // A slot of a type the host provides offers that type's members alone, on the facet the slot holds.
-                if (slotType != null && _offers.Types[i] != slotType)
+                if (slotType != null && _offers.Types[i] != slotType || slotType == null && _offers.InSlotsOnly[i])
                     continue;
 
                 // What is chosen stays listed whatever the search, as a chosen block does, so a search never hides the

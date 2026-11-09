@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _forEvents = forEvents;
             _forTests = forTests;
             _opensHere = opensHere;
+            Target = new TargetSelection(editor, page, picked);
             if (arguments == null)
                 return;
 
@@ -63,6 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _arrivedValues.Clear();
             _arrivedValues.Add(value);
         }
+
+        /// <summary>The slots a field that takes slots names, chosen on a selector of their own.</summary>
+        public TargetSelection Target { get; }
 
         /// <summary>What each value the chosen action takes wants, one field each, and empty where it takes none.</summary>
         public List<Field> Wanted()
@@ -153,7 +157,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var at = 0;
             for (var f = 0; f < fields.Count && at < arguments.Count; f++)
             {
-                if (fields[f].Entry == FieldInput.Name && arguments[at].Kind == ValueKind.Text)
+                if (fields[f].TakesSlots)
+                    arguments[at] = Literal.Slots(Target.Slots(arguments[at].Said));
+                else if (fields[f].Entry == FieldInput.Name && arguments[at].Kind == ValueKind.Text)
                     arguments[at] = Literal.Name(arguments[at].Text);
 
                 at += fields[f].Covers;
@@ -225,6 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         finish.Execute();
                 };
 
+                arguments.Form.Selects += field => Target.Select(field, null);
                 arguments.Form.Opens += lines =>
                 {
                     if (_editor.Current == _page)
@@ -306,6 +313,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         static bool Same(Literal a, Literal b)
         {
+            if (a.Kind == ValueKind.Slots || b.Kind == ValueKind.Slots)
+                return a.Said == b.Said;
+
             var numbers = (a.Kind == ValueKind.Integer || a.Kind == ValueKind.Real)
                 && (b.Kind == ValueKind.Integer || b.Kind == ValueKind.Real);
 

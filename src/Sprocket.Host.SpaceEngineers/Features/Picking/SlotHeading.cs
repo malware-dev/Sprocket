@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
@@ -32,6 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _fillsText;
         string _slotName = "";
         string _newName;
+        string _newKind;
+        HostType _holds;
+        readonly List<string> _offered = new List<string>();
         bool _named;
         bool _arriving;
         HeadingPart _part;
@@ -57,6 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _replacing = replacing;
             _renamed = renamed;
         }
+
+        /// <summary>A name the new slot is kept from, as another about to be made has it, or empty.</summary>
+        public string Avoiding { get; set; } = "";
 
         /// <summary>What the heading says.</summary>
         public string Text => _part != null ? _part.Text : _title;
@@ -95,8 +102,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var signal = _forEvents && Signals(selection, chosen);
             var forecast = _editor.Picks.Forecast(_system, selection, chosen, facet, _forEvents, at, signal, _replacing, _keeps);
             var matched = byName ? new List<string>(picked) : forecast.Matched;
-            if (forecast.Makes && _newName == null)
-                _newName = _editor.Picks.NewSlotName(_system);
+            // Named for what it will hold, which a pick can change until somebody names it themselves.
+            // A forecast knows a type only once a facet is chosen, which the page does after asking.
+            _holds = forecast.Type ?? (_forEvents || chosen.Length == 0 ? null : Vocabulary.TypeOf(_editor.World, selection, chosen));
+            var kind = forecast.Signal ? "signal" : _holds?.Id ?? "";
+            var renamed = false;
+            if (forecast.Makes && (_newName == null || kind != _newKind))
+            {
+                renamed = _newName != null;
+                _newName = _editor.Picks.NewSlotName(_system, "", forecast.Signal, _holds, Avoiding);
+                _offered.Add(_newName);
+                _newKind = kind;
+            }
 
             // The name is in hand to be given the first time the picks come to make a slot of their own.
             if (!byName && forecast.Makes && selection.Count > 0 && !_named)
@@ -105,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _arriving = true;
             }
 
-            var changed = _arriving || _forecast == null || forecast.Signal != _forecast.Signal || forecast.Changes != _forecast.Changes
+            var changed = renamed || _arriving || _forecast == null || forecast.Signal != _forecast.Signal || forecast.Changes != _forecast.Changes
                 || !ListComparison.Same(matched, _fills);
             _forecast = forecast;
             _fills = matched;
@@ -129,7 +146,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
             }
 
-            _part.Mark = _forecast == null ? Symbols.Block : MarkText.OfSlot(_forecast.Signal, _forecast.Type);
+            _part.Mark = _forecast == null ? Symbols.Block : MarkText.OfSlot(_forecast.Signal, _holds);
 
             if (_fills != null)
             {
@@ -154,7 +171,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _accepts = name => NameRules.Clean(name).Length == 0 || _editor.Picks.Frees(_system, name);
                 _renames = _editor.Renaming(name =>
                 {
-                    _slotName = NameRules.Clean(name);
+                    // A numbered name this offered, handed back as it stood, is not a name somebody gave.
+                    var given = NameRules.Clean(name);
+                    _slotName = _offered.Contains(given) ? "" : given;
                     Reword();
                 }, _accepts);
             }

@@ -173,8 +173,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </summary>
         public static string Joining(IList<SentenceSlot> slots, int slot, bool tests)
         {
-            // A test's parts carry the words joining them, given by the shape that laid them out (TestShape.Lay).
-            if (tests)
+            // A test's parts carry the words joining them, given by the shape that laid them out (TestShape.Lay); an
+            // action's blocks carry the word the action declares.
+            if (tests || !string.IsNullOrEmpty(slots[slot].Joined))
                 return slots[slot].Joined;
 
             // A step setting one of the system's states says what it is set to after it.
@@ -535,6 +536,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             for (var i = 0; i < slot.Filled.Count; i++)
             {
                 if (i < slot.Fields.Count && !slot.Fields[i].IsSaid(slot.Filled[i]))
+                    continue;
+
+                if (string.IsNullOrEmpty(slot.Filled[i]) || i < slot.Fields.Count && slot.Fields[i].Quiet == slot.Filled[i])
                     continue;
 
                 var word = Around(slot.Fields, i, slot.Filled[i]);

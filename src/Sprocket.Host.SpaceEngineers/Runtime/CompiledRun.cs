@@ -62,6 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var act = (Act)_sequence.Steps[step];
             compiled = new CompiledAct();
             compiled.Problem = Needed(act.Targets, SequenceProblem.MissingTarget, out compiled.Which, bindings);
+            var given = Reached(act.Arguments, compiled, bindings);
             var acting = ActedOn(act.Targets, bindings);
             foreach (var name in acting)
             {
@@ -73,27 +74,31 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (action == null)
                     continue;
 
-                // A block lacking the facet its slot holds is left out, and the fault names it.
-                var type = action.Type;
-                var facet = type == null ? 0 : FacetOf(act.Targets, name);
-                if (type != null && facet > 0 && type.Find(entity.Kind, facet) == null)
-                    continue;
-
-                var shared = Shared(compiled, action, act.Arguments, facet);
-                if (shared == null)
-                    continue;
-
-                compiled.Acts.Add(new ActTarget
+                // Each thing a block is held as is acted on once: two screens of one block are two things.
+                FacetsHeld(action.Type, act.Targets, name);
+                for (var f = 0; f < _facetsHeld.Count; f++)
                 {
-                    Entity = entity,
-                    Action = action,
-                    Facet = facet,
-                    Arguments = shared.Arguments,
-                    Bound = shared.Bound,
-                    Order = entity.Prepare(action, shared.Bound, shared.Arguments),
-                    Kept = Kept(step, compiled.Acts.Count, action.OwnAction != null),
-                    Heard = action.ArrivalAnnounced && Listen(entity)
-                });
+                    // A block lacking the facet its slot holds is left out, and the fault names it.
+                    var facet = _facetsHeld[f];
+                    if (action.Type != null && facet > 0 && action.Type.Find(entity.Kind, facet) == null)
+                        continue;
+
+                    var shared = Shared(compiled, action, given, facet);
+                    if (shared == null)
+                        continue;
+
+                    compiled.Acts.Add(new ActTarget
+                    {
+                        Entity = entity,
+                        Action = action,
+                        Facet = facet,
+                        Arguments = shared.Arguments,
+                        Bound = shared.Bound,
+                        Order = entity.Prepare(action, shared.Bound, shared.Arguments),
+                        Kept = Kept(step, compiled.Acts.Count, action.OwnAction != null),
+                        Heard = action.ArrivalAnnounced && Listen(entity)
+                    });
+                }
             }
 
             _steps[step] = compiled;
@@ -122,15 +127,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 // A block lacking the facet its slot holds is left out, and the fault names it.
                 var entity = bindings.Entity(name);
                 var member = entity == null ? null : test.Names(entity.Kind.Actions);
-                var facet = FacetOf(test.Targets, name);
-                if (facet > 0 && member?.Type != null && member.Type.Find(entity.Kind, facet) == null)
-                    continue;
+                FacetsHeld(member?.Type, test.Targets, name);
+                for (var f = 0; f < _facetsHeld.Count; f++)
+                {
+                    var facet = _facetsHeld[f];
+                    if (facet > 0 && member?.Type != null && member.Type.Find(entity.Kind, facet) == null)
+                        continue;
 
-                var probe = Probe.Of(entity, test.Provider, test.MemberId, test.Arguments,
-                    test.Quantifier, test.Relation, test.Value, null, _owner.Clock, facet);
+                    var probe = Probe.Of(entity, test.Provider, test.MemberId, test.Arguments,
+                        test.Quantifier, test.Relation, test.Value, null, _owner.Clock, facet);
 
-                if (probe != null && !probe.PassedOver)
-                    tested.Reads.Add(probe);
+                    if (probe != null && !probe.PassedOver)
+                        tested.Reads.Add(probe);
+                }
             }
 
             _tests[step] = tested;
@@ -224,10 +233,70 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             };
         }
 
-        /// <summary>The number of the facet of <paramref name="block" /> the slots <paramref name="targets" /> hold, from 1, or 0 where they hold none.</summary>
-        int FacetOf(IList<string> targets, string block)
+        /// <summary>Fills what the facets held are for the member of <paramref name="type" /> on <paramref name="block" /> in <paramref name="targets" />: one 0 where it is the block itself that is held.</summary>
+        void FacetsHeld(HostType type, IList<string> targets, string block)
         {
-            return _instance == null ? 0 : _instance.FacetOf(targets, block);
+            _facetsHeld.Clear();
+            if (type != null)
+                _instance?.FacetsOf(targets, block, _facetsHeld);
+
+            if (_facetsHeld.Count == 0)
+                _facetsHeld.Add(0);
+        }
+
+        /// <summary>
+        /// <paramref name="given" /> with each list of slots holding what those slots hold now, and any slot a step needs and cannot have said on
+        /// <paramref name="compiled" />, where it has no problem already.
+        /// </summary>
+        IList<Literal> Reached(IList<Literal> given, CompiledAct compiled, Bindings bindings)
+        {
+            List<Literal> reached = null;
+            for (var i = 0; i < given.Count; i++)
+            {
+                if (given[i].Kind != ValueKind.Slots)
+                    continue;
+
+                if (reached == null)
+                    reached = new List<Literal>(given);
+
+                if (compiled.Problem == SequenceProblem.None)
+                    compiled.Problem = Needed(given[i].Names, SequenceProblem.MissingTarget, out compiled.Which, bindings);
+
+                reached[i] = Literal.Reaching(given[i].Names, Things(given[i].Names, bindings));
+            }
+
+            return reached ?? given;
+        }
+
+        /// <summary>Everything the slots <paramref name="slots" /> hold, each thing once, in the order they hold them.</summary>
+        List<HeldThing> Things(IList<string> slots, Bindings bindings)
+        {
+            var things = new List<HeldThing>();
+            var names = new List<string>();
+            if (_instance == null)
+                names.AddRange(slots);
+            else
+                _instance.Resolve(slots, names);
+
+            bindings.Distinct(names);
+            var facets = new List<int>();
+            foreach (var name in names)
+            {
+                var entity = bindings.Entity(name);
+                if (entity == null)
+                    continue;
+
+                _instance?.FacetsOf(slots, name, facets);
+                if (facets.Count == 0)
+                    things.Add(new HeldThing { Block = entity.Block });
+
+                foreach (var facet in facets)
+                    things.Add(new HeldThing { Block = entity.Block, Facet = facet });
+
+                facets.Clear();
+            }
+
+            return things;
         }
 
         /// <summary>Listens to <paramref name="entity" />, which announces getting where it was told, and answers whether it can.</summary>
@@ -260,6 +329,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     compiled.Acts[t].Done = false;
             }
         }
+
+        readonly List<int> _facetsHeld = new List<int>();
 
         List<string> ActedOn(IList<string> slots, Bindings bindings)
         {

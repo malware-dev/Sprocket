@@ -40,6 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 SelectsAll = true,
                 Submit = submit,
                 Placement = FixedSize.Width(wide),
+                Hint = field.SaidEmpty ?? "",
                 IsInteger = field.Entry == FieldInput.Whole,
                 Minimum = floored ? least : (double?)null,
                 Maximum = ceilinged ? most : (double?)null,

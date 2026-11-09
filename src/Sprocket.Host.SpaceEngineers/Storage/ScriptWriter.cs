@@ -25,6 +25,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         bool _firstArgument;
 
+        int _argumentLists;
+
         /// <summary>
         /// A blank line, unless one would be the first thing inside a block or in the file.
         /// </summary>
@@ -199,6 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public ScriptWriter Open()
         {
             _text.Append('(');
+            _argumentLists = _lists;
             _arguments = true;
             _firstArgument = true;
             return this;
@@ -361,7 +364,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         void Space()
         {
-            if (_arguments)
+            if (_arguments && _lists == _argumentLists)
             {
                 if (!_firstArgument)
                     _text.Append(", ");

@@ -287,8 +287,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (part is ActionSlot)
                 return texts.Codex.SequenceActionAbout;
 
-            if (part is EntitiesSlot)
-                return texts.Codex.SequenceBlocksAbout;
+            var blocks = part as EntitiesSlot;
+            if (blocks != null)
+                return blocks.IsOption ? texts.Codex.SequenceOptionSlotsAbout : texts.Codex.SequenceBlocksAbout;
 
             var given = part as ArgumentsSlot;
             if (given != null)

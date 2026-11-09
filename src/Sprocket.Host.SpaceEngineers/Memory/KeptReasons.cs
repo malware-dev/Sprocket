@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
     {
         // The last value of each, so a number a newer build kept reads as none.
         const int LastProblem = (int)SequenceProblem.PassedOver;
-        const int LastCause = (int)Cause.DoorToldToClose;
+        const int LastCause = (int)Cause.ItemsAlreadyThere;
 
         /// <summary>The problem <paramref name="number" /> or <paramref name="spelled" /> holds, or none.</summary>
         public static SequenceProblem Problem(int number, string spelled)

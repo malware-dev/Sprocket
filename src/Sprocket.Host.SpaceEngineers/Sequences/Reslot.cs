@@ -120,12 +120,25 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 var steps = sequences[s].Steps;
                 for (var i = 0; i < steps.Count; i++)
                 {
-                    if (ReferenceEquals(steps[i].Targets, names))
+                    if (Holds(steps[i], names))
                         return sequences[s];
                 }
             }
 
             return System;
+        }
+
+        static bool Holds(Step step, IList<string> names)
+        {
+            var lists = new List<IList<string>>();
+            step.NameLists(lists);
+            foreach (var list in lists)
+            {
+                if (ReferenceEquals(list, names))
+                    return true;
+            }
+
+            return false;
         }
 
         static void Touch(IList<object> screens, object screen)

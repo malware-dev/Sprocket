@@ -228,7 +228,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The name for a new slot: the first numbered name free in any case, counting on from the slots there are and those made here.</summary>
         string Numbered()
         {
-            for (var n = _system.Parts.Count + _made + 1; ; n++)
+            for (var n = _system.SlotsAlike(false, "") + _made + 1; ; n++)
             {
                 var name = _numbered(n);
                 if (!_system.TakesInAnyCase(name) && !Taken(name))

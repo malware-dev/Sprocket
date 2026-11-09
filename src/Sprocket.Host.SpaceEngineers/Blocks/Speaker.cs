@@ -36,6 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             Sounds(block, words, means);
 
             var sound = Field.Among("sound", words, means);
+            sound.Searched = true;
             sound.Entry = FieldInput.Text;
             sound.Needed = true;
 

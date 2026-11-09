@@ -445,8 +445,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Checks every name a step acts on, as <see cref="Uses(Statement, string, AutomationSystem, Automation, bool, ScriptTrouble)" /> does.</summary>
         public static void Uses(Statement statement, Act act, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
-            for (var i = 0; act != null && i < act.Targets.Count; i++)
-                Uses(statement, act.Targets[i], system, program, false, trouble);
+            if (act == null)
+                return;
+
+            var lists = new List<IList<string>>();
+            act.NameLists(lists);
+            foreach (var names in lists)
+            {
+                for (var i = 0; i < names.Count; i++)
+                    Uses(statement, names[i], system, program, false, trouble);
+            }
         }
 
         /// <summary>

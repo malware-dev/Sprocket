@@ -21,6 +21,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Taking(WhichInventory(block), TheItem(block)).Joined("in", "of").MeasuredBy("item", UnitOf);
         }
 
+        /// <summary>How much of an item the inventory a slot holds has, the inventory coming from the slot and only the item asked.</summary>
+        public static OwnValue AmountInSlot(IMyTerminalBlock block)
+        {
+            return OwnValue.Number<IMyTerminalBlock, Asked>(Asked.Of, Held).AnsweredBy<IMyTerminalBlock>(Has)
+                .Taking(TheItem(block)).Joined("in", "of").MeasuredBy("item", UnitOf);
+        }
+
         /// <summary>How much of what is <paramref name="asked" /> the block holds, 0 of an item the game hasn't or an inventory it lacks.</summary>
         static double Held(IMyTerminalBlock block, Asked asked)
         {
@@ -48,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>The unit an amount of the item <paramref name="said" /> is counted in, for a count of one where <paramref name="one" /> says so.</summary>
-        static string UnitOf(string said, bool one)
+        public static string UnitOf(string said, bool one)
         {
             if (string.IsNullOrEmpty(said))
                 return "";
@@ -89,7 +96,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Planning(PlannedMember.MovingItems);
             kind.WithValue("inventory_amount", "amount", Amount(block)).In(Category.Stock).Announced();
             if (block.InventoryCount != 1)
                 return;

@@ -15,8 +15,8 @@ public class BlueprintWritingTests
         var screen = OnTheSystem();
         var part = Assert.Single(screen.Editor.Program.Systems[0].Parts);
 
-        Assert.Equal("slot 1", part.Id);
-        Assert.Equal("slot 1", Assert.Single(screen.Editor.SystemSlots()).Name);
+        Assert.Equal("signal slot 1", part.Id);
+        Assert.Equal("signal slot 1", Assert.Single(screen.Editor.SystemSlots()).Name);
     }
 
     /// <summary>Pressing a slot's name opens its page, named for it.</summary>
@@ -25,7 +25,7 @@ public class BlueprintWritingTests
     {
         var screen = OnTheSlot();
 
-        Assert.Equal("slot 1", screen.Editor.Slot().Title);
+        Assert.Equal("signal slot 1", screen.Editor.Slot().Title);
     }
 
     /// <summary>A slot renamed on its heading is renamed wherever its system names it, and one step back takes it back.</summary>
@@ -104,7 +104,7 @@ public class BlueprintWritingTests
         editor.Screen.Heading[0].Renames!("Spare");
         screen.Run(5);
 
-        Assert.Equal("slot 1", part.Id);
+        Assert.Equal("signal slot 1", part.Id);
         Assert.Equal(new[] { part, spare }, system.Parts);
         Assert.Equal("Spare", spare.Id);
     }
@@ -131,7 +131,7 @@ public class BlueprintWritingTests
 
         editor.Screen.Heading[0].Renames!("Other");
         screen.Run(5);
-        Assert.Equal("slot 1", part.Id);
+        Assert.Equal("signal slot 1", part.Id);
     }
 
     /// <summary>A slot's name is refused where a state or a type has it in any case, and the slot's own name in another case is not.</summary>
@@ -161,7 +161,7 @@ public class BlueprintWritingTests
         editor.Screen.Heading[0].Renames!("");
         screen.Run(5);
 
-        Assert.Equal("slot 1", part.Id);
+        Assert.Equal("signal slot 1", part.Id);
     }
 
     /// <summary>A signal slot being filled in names the trigger on its block that answers it, not only the block.</summary>
@@ -260,7 +260,7 @@ public class BlueprintWritingTests
         var editor = screen.Editor;
         Guides(screen, editor.PressTab(editor.Texts.SystemInstallationPanel));
 
-        editor.OpenSlot("slot 1");
+        editor.OpenSlot("signal slot 1");
         screen.Run(5);
         Guides(screen, editor.Slot().View);
     }
@@ -338,7 +338,7 @@ public class BlueprintWritingTests
     static Screen OnTheSlot()
     {
         var screen = OnTheSystem();
-        screen.Editor.OpenSlot("slot 1");
+        screen.Editor.OpenSlot("signal slot 1");
         screen.Run(5);
         return screen;
     }

@@ -86,7 +86,16 @@
     <value>Logikksystem {number}</value>
   </data>
   <data name="Sprocket.Slot.Numbered" xml:space="preserve">
-    <value>plass {number}</value>
+    <value>blokkplass {number}</value>
+  </data>
+  <data name="Sprocket.Slot.NumberedSignal" xml:space="preserve">
+    <value>signalplass {number}</value>
+  </data>
+  <data name="Sprocket.Slot.NumberedScreen" xml:space="preserve">
+    <value>skjermplass {number}</value>
+  </data>
+  <data name="Sprocket.Slot.NumberedInventory" xml:space="preserve">
+    <value>inventarplass {number}</value>
   </data>
   <data name="Sprocket.Slot.Optimize" xml:space="preserve">
     <value>Optimaliser plasser</value>
@@ -439,9 +448,6 @@
   </data>
   <data name="Sprocket.Pick.NoteAndShared" xml:space="preserve">
     <value>{note} {shared}.</value>
-  </data>
-  <data name="Sprocket.Plan.MovingItems" xml:space="preserve">
-    <value>flytting av gjenstander</value>
   </data>
   <data name="Sprocket.Plan.SorterList" xml:space="preserve">
     <value>innstilling av listen i en conveyor sorter</value>
@@ -864,6 +870,24 @@
   </data>
   <data name="Sprocket.Trouble.VentNotAirtight" xml:space="preserve">
     <value>kan ikke fylle fordi rommet ikke er lufttett</value>
+  </data>
+  <data name="Sprocket.Pick.SelectSlots" xml:space="preserve">
+    <value>Velg</value>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNotConnected" xml:space="preserve">
+    <value>kan ikke flytte gjenstandene fordi transportsystemet ikke kobler den til dit de skal</value>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNoRoom" xml:space="preserve">
+    <value>kan ikke flytte gjenstandene fordi det ikke er plass der de skal</value>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNotAccepted" xml:space="preserve">
+    <value>kan ikke flytte gjenstandene fordi de ikke tas imot der de skal</value>
+  </data>
+  <data name="Sprocket.Trouble.ItemsAlreadyThere" xml:space="preserve">
+    <value>kan ikke flytte gjenstandene fordi de allerede er der de skal</value>
+  </data>
+  <data name="Sprocket.Trouble.ItemsNoStock" xml:space="preserve">
+    <value>har ingen av gjenstandene som skal flyttes</value>
   </data>
   <data name="Sprocket.Trouble.VentNoOxygen" xml:space="preserve">
     <value>kan ikke fylle fordi det ikke er noe oksygen å fylle det med</value>

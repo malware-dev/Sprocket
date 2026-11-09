@@ -89,6 +89,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         DoorToldToOpen = 27,
 
         /// <summary>Something else told the door to close while a step waited for it to open.</summary>
-        DoorToldToClose = 28
+        DoorToldToClose = 28,
+
+        /// <summary>No conveyor connects the inventory to where a step moves its items, or none takes the item.</summary>
+        ItemsNotConnected = 29,
+
+        /// <summary>Where a step moves the items has no room for them.</summary>
+        ItemsNoRoom = 30,
+
+        /// <summary>The inventory holds none of the items a step moves.</summary>
+        ItemsNoStock = 31,
+
+        /// <summary>No inventory the items could go to takes that item at all, as a refinery's input takes only ore.</summary>
+        ItemsNotAccepted = 32,
+
+        /// <summary>Everywhere a step moves the items to is the inventory they are already in.</summary>
+        ItemsAlreadyThere = 33
     }
 }

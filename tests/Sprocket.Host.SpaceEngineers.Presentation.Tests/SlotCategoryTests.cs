@@ -28,7 +28,7 @@ public class SlotCategoryTests
         AddCategory(screen);
         AddCategory(screen);
 
-        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3", "# Category 1", "# Category 2" }, Rows(screen));
+        Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2", "# Category 1", "# Category 2" }, Rows(screen));
         Assert.Equal(new[] { "Category 1", "Category 2" }, Empty(screen));
 
         editor.Screen.Undo!.Execute();
@@ -74,17 +74,17 @@ public class SlotCategoryTests
         var editor = screen.Editor;
         AddCategory(screen);
 
-        Carry(screen, Row(screen, "slot 1"), Row(screen, "# Category 1"), true, Sizes.Indent);
+        Carry(screen, Row(screen, "signal slot 1"), Row(screen, "# Category 1"), true, Sizes.Indent);
 
-        Assert.Equal(new[] { "slot 2", "slot 3", "# Category 1", "slot 1" }, Rows(screen));
-        Assert.Equal("Category 1", Part(screen, "slot 1").Category);
-        Assert.Equal(new[] { "slot 2", "slot 3", "slot 1" }, Order(screen));
+        Assert.Equal(new[] { "block slot 1", "block slot 2", "# Category 1", "signal slot 1" }, Rows(screen));
+        Assert.Equal("Category 1", Part(screen, "signal slot 1").Category);
+        Assert.Equal(new[] { "block slot 1", "block slot 2", "signal slot 1" }, Order(screen));
         Assert.Empty(Empty(screen));
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
-        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3", "# Category 1" }, Rows(screen));
-        Assert.Equal("", Part(screen, "slot 1").Category);
+        Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2", "# Category 1" }, Rows(screen));
+        Assert.Equal("", Part(screen, "signal slot 1").Category);
     }
 
     /// <summary>A slot carried straight down under a category with nothing in it stays out of it, under it.</summary>
@@ -94,10 +94,10 @@ public class SlotCategoryTests
         var screen = Slots();
         AddCategory(screen);
 
-        Carry(screen, Row(screen, "slot 1"), Row(screen, "# Category 1"), true);
+        Carry(screen, Row(screen, "signal slot 1"), Row(screen, "# Category 1"), true);
 
-        Assert.Equal(new[] { "slot 2", "slot 3", "# Category 1", "slot 1" }, Rows(screen));
-        Assert.Equal("", Part(screen, "slot 1").Category);
+        Assert.Equal(new[] { "block slot 1", "block slot 2", "# Category 1", "signal slot 1" }, Rows(screen));
+        Assert.Equal("", Part(screen, "signal slot 1").Category);
         Assert.Equal(new[] { "Category 1" }, Empty(screen));
     }
 
@@ -107,9 +107,9 @@ public class SlotCategoryTests
     {
         var screen = Slots();
 
-        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 1"), false);
+        Carry(screen, Row(screen, "block slot 2"), Row(screen, "signal slot 1"), false);
 
-        Assert.Equal(new[] { "slot 3", "slot 1", "slot 2" }, Rows(screen));
+        Assert.Equal(new[] { "block slot 2", "signal slot 1", "block slot 1" }, Rows(screen));
     }
 
     /// <summary>A category stands where its first slot stands in the program, with slots under no category above and below it.</summary>
@@ -117,9 +117,9 @@ public class SlotCategoryTests
     public void ACategoryStandsAmongTheSlotsWithNone()
     {
         var screen = Slots();
-        Put(screen, "slot 2", "Doors");
+        Put(screen, "block slot 1", "Doors");
 
-        Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, Rows(screen));
+        Assert.Equal(new[] { "signal slot 1", "# Doors", "block slot 1", "block slot 2" }, Rows(screen));
     }
 
     /// <summary>Two runs of slots under the same name are two categories, each with its own name over it.</summary>
@@ -127,9 +127,9 @@ public class SlotCategoryTests
     public void TwoRunsUnderOneNameAreTwoCategories()
     {
         var screen = Slots();
-        Put(screen, "slot 1", "Doors", "slot 3", "Doors");
+        Put(screen, "signal slot 1", "Doors", "block slot 2", "Doors");
 
-        Assert.Equal(new[] { "# Doors", "slot 1", "slot 2", "# Doors", "slot 3" }, Rows(screen));
+        Assert.Equal(new[] { "# Doors", "signal slot 1", "block slot 1", "# Doors", "block slot 2" }, Rows(screen));
     }
 
     /// <summary>The last slot of a category carried left in its place leaves the category, standing under it.</summary>
@@ -137,12 +137,12 @@ public class SlotCategoryTests
     public void ALastSlotCarriedLeftLeavesItsCategory()
     {
         var screen = Slots();
-        Put(screen, "slot 2", "Doors", "slot 3", "Doors");
+        Put(screen, "block slot 1", "Doors", "block slot 2", "Doors");
 
-        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 3"), false, -Sizes.Indent);
+        Carry(screen, Row(screen, "block slot 2"), Row(screen, "block slot 2"), false, -Sizes.Indent);
 
-        Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, Rows(screen));
-        Assert.Equal("", Part(screen, "slot 3").Category);
+        Assert.Equal(new[] { "signal slot 1", "# Doors", "block slot 1", "block slot 2" }, Rows(screen));
+        Assert.Equal("", Part(screen, "block slot 2").Category);
     }
 
     /// <summary>A slot under a category carried right in its place joins the category above it.</summary>
@@ -150,12 +150,12 @@ public class SlotCategoryTests
     public void ASlotCarriedRightJoinsTheCategoryAboveIt()
     {
         var screen = Slots();
-        Put(screen, "slot 2", "Doors");
+        Put(screen, "block slot 1", "Doors");
 
-        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 3"), false, Sizes.Indent);
+        Carry(screen, Row(screen, "block slot 2"), Row(screen, "block slot 2"), false, Sizes.Indent);
 
-        Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, Rows(screen));
-        Assert.Equal("Doors", Part(screen, "slot 3").Category);
+        Assert.Equal(new[] { "signal slot 1", "# Doors", "block slot 1", "block slot 2" }, Rows(screen));
+        Assert.Equal("Doors", Part(screen, "block slot 2").Category);
     }
 
     /// <summary>A slot dropped between two slots of a category is in it, however far across it is carried.</summary>
@@ -163,12 +163,12 @@ public class SlotCategoryTests
     public void ASlotDroppedInsideACategoryIsInIt()
     {
         var screen = Slots();
-        Put(screen, "slot 1", "Doors", "slot 2", "Doors");
+        Put(screen, "signal slot 1", "Doors", "block slot 1", "Doors");
 
-        Carry(screen, Row(screen, "slot 3"), Row(screen, "slot 2"), false, -Sizes.Indent);
+        Carry(screen, Row(screen, "block slot 2"), Row(screen, "block slot 1"), false, -Sizes.Indent);
 
-        Assert.Equal(new[] { "# Doors", "slot 1", "slot 3", "slot 2" }, Rows(screen));
-        Assert.Equal("Doors", Part(screen, "slot 3").Category);
+        Assert.Equal(new[] { "# Doors", "signal slot 1", "block slot 2", "block slot 1" }, Rows(screen));
+        Assert.Equal("Doors", Part(screen, "block slot 2").Category);
     }
 
     /// <summary>The only slot of a category carried out of it leaves the category standing empty where it was.</summary>
@@ -176,11 +176,11 @@ public class SlotCategoryTests
     public void ACategoryLeftWithNoSlotsStandsEmpty()
     {
         var screen = Slots();
-        Put(screen, "slot 2", "Doors");
+        Put(screen, "block slot 1", "Doors");
 
-        Carry(screen, Row(screen, "slot 2"), Row(screen, "slot 1"), false);
+        Carry(screen, Row(screen, "block slot 1"), Row(screen, "signal slot 1"), false);
 
-        Assert.Equal(new[] { "slot 2", "slot 1", "# Doors", "slot 3" }, Rows(screen));
+        Assert.Equal(new[] { "block slot 1", "signal slot 1", "# Doors", "block slot 2" }, Rows(screen));
         Assert.Equal(new[] { "Doors" }, Empty(screen));
     }
 
@@ -189,14 +189,14 @@ public class SlotCategoryTests
     public void ACategoryCarriesItsSlots()
     {
         var screen = Slots();
-        Put(screen, "slot 1", "Calls", "slot 2", "Doors");
+        Put(screen, "signal slot 1", "Calls", "block slot 1", "Doors");
 
-        Assert.Equal(new[] { "# Calls", "slot 1", "# Doors", "slot 2", "slot 3" }, Rows(screen));
+        Assert.Equal(new[] { "# Calls", "signal slot 1", "# Doors", "block slot 1", "block slot 2" }, Rows(screen));
 
-        Carry(screen, Row(screen, "# Calls"), Row(screen, "slot 3"), true);
+        Carry(screen, Row(screen, "# Calls"), Row(screen, "block slot 2"), true);
 
-        Assert.Equal(new[] { "# Doors", "slot 2", "slot 3", "# Calls", "slot 1" }, Rows(screen));
-        Assert.Equal(new[] { "slot 2", "slot 3", "slot 1" }, Order(screen));
+        Assert.Equal(new[] { "# Doors", "block slot 1", "block slot 2", "# Calls", "signal slot 1" }, Rows(screen));
+        Assert.Equal(new[] { "block slot 1", "block slot 2", "signal slot 1" }, Order(screen));
     }
 
     /// <summary>A category removed leaves its slots where they stand, under no category, and one step back puts them under it again.</summary>
@@ -205,17 +205,17 @@ public class SlotCategoryTests
     {
         var screen = Slots();
         var editor = screen.Editor;
-        Put(screen, "slot 2", "Doors");
+        Put(screen, "block slot 1", "Doors");
 
         Category(screen, "Doors").Removes!.Execute();
         screen.Run(5);
 
-        Assert.Equal(new[] { "slot 1", "slot 2", "slot 3" }, Rows(screen));
-        Assert.Equal("", Part(screen, "slot 2").Category);
+        Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2" }, Rows(screen));
+        Assert.Equal("", Part(screen, "block slot 1").Category);
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
-        Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, Rows(screen));
+        Assert.Equal(new[] { "signal slot 1", "# Doors", "block slot 1", "block slot 2" }, Rows(screen));
     }
 
     /// <summary>Pressing a category's name lets it be typed; Enter renames it, and its slots stay under it.</summary>
@@ -223,12 +223,12 @@ public class SlotCategoryTests
     public void PressingTheNameRenamesTheCategory()
     {
         var screen = Slots();
-        Put(screen, "slot 2", "Doors");
+        Put(screen, "block slot 1", "Doors");
 
         Type(screen, "Doors", "Calls", MyKeys.Enter);
 
-        Assert.Equal(new[] { "slot 1", "# Calls", "slot 2", "slot 3" }, Rows(screen));
-        Assert.Equal("Calls", Part(screen, "slot 2").Category);
+        Assert.Equal(new[] { "signal slot 1", "# Calls", "block slot 1", "block slot 2" }, Rows(screen));
+        Assert.Equal("Calls", Part(screen, "block slot 1").Category);
     }
 
     /// <summary>A category may take another's name, and the two stay two.</summary>
@@ -280,7 +280,7 @@ public class SlotCategoryTests
     public void OnlyTheSlotsSayTheirCategories()
     {
         var screen = Slots();
-        Put(screen, "slot 2", "Doors");
+        Put(screen, "block slot 1", "Doors");
         AddCategory(screen);
 
         var written = ProgramWriter.Save(screen.Editor.Program, screen.Editor.World.Values);
@@ -320,14 +320,14 @@ public class SlotCategoryTests
         var screen = Slots();
         var system = screen.Editor.Program.Systems[0];
         system.EmptyCategories.Add(new EmptyCategory("Empty", null));
-        Put(screen, "slot 2", "Doors");
+        Put(screen, "block slot 1", "Doors");
         screen.Editor.GoToRoot();
         screen.Run(5);
         screen.Editor.RootRows()[0].Opens!.Execute();
         screen.Run(5);
 
         var rows = screen.Editor.Blueprint().Parts.Select(Said).ToArray();
-        Assert.Equal(new[] { "slot 1", "# Doors", "slot 2", "slot 3" }, rows);
+        Assert.Equal(new[] { "signal slot 1", "# Doors", "block slot 1", "block slot 2" }, rows);
         Assert.All(screen.Editor.Blueprint().Parts.OfType<IReorderable>(), row => Assert.False(row.DragHandle.IsVisible));
     }
 

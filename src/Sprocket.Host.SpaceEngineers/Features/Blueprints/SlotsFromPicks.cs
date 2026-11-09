@@ -158,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var type = forecast.Type;
             var numbers = type == null ? null : Numbers(blocks, type, answer.Facet);
             Func<List<string>> make = () => With(system, () => Made(system, shown,
-                new Part(Free(system, answer.SlotName)) { Expects = type == null ? Nearest(blocks) : "", Holds = type == null ? "" : type.Id },
+                new Part(Free(system, answer.SlotName, false, type)) { Expects = type == null ? Nearest(blocks) : "", Holds = type == null ? "" : type.Id },
                 declared, numbers, replacing, ProgramRepairs.Carried(_editor.Runner.Bindings, system, shown, replacing, type)));
             var own = forecast.Changes;
             if (own == null)
@@ -190,9 +190,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (forecast.Matched != null)
                 named(forecast.Matched[0]);
             else if (forecast.Changes == null)
-                named(NewSlotName(system, called));
+                named(NewSlotName(system, called, true));
             else if (forecast.Shared)
-                Ask(forecast.Changes.Id, () => named(keeps), () => named(NewSlotName(system, called)));
+                Ask(forecast.Changes.Id, () => named(keeps), () => named(NewSlotName(system, called, true)));
             else
                 named(keeps);
         }
@@ -379,9 +379,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// What a new slot of <paramref name="system" /> is called: <paramref name="called" /> where it is free, and otherwise the
         /// numbered slot name free next, the picks not yet made counted.
         /// </summary>
-        public string NewSlotName(AutomationSystem system, string called = "")
+        public string NewSlotName(AutomationSystem system, string called = "", bool signal = false, HostType holds = null, string avoiding = "")
         {
-            return With(system, () => Free(system, called));
+            return With(system, () => Free(system, called, signal, holds, avoiding));
         }
 
         /// <summary>Whether a new slot of <paramref name="system" /> can be called <paramref name="name" />: no slot, state or type has it in any case, the picks not yet made included.</summary>
@@ -392,13 +392,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary><paramref name="called" /> where a new slot of <paramref name="system" /> can take it, and otherwise the numbered slot name free next.</summary>
-        string Free(AutomationSystem system, string called)
+        string Free(AutomationSystem system, string called, bool signal, HostType holds, string avoiding = "")
         {
             var clean = NameRules.Clean(called ?? "");
             if (clean.Length > 0 && !system.TakesInAnyCase(clean))
                 return clean;
 
-            return NumberedName.Free(_editor.Texts.SlotNumbered, system.Parts.Count, system.TakesInAnyCase);
+            return NumberedName.Free(SlotNames.Numbered(_editor.Texts, signal, holds), system.SlotsAlike(signal, holds == null ? "" : holds.Id),
+                name => name == avoiding || system.TakesInAnyCase(name));
         }
 
         /// <summary>The slots <paramref name="shown" /> fills exactly with the blocks <paramref name="picked" />, by entity id, or null.</summary>

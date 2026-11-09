@@ -183,6 +183,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return !(Bound(Most, out bound) && given.Number > bound);
         }
 
+        /// <summary>Whether what this asks for is slots of the logic system, which a step gives as a list of names.</summary>
+        public bool TakesSlots;
+
+        /// <summary>Whether its words are a list searched whatever its length, for a list as long as what the game and its mods hold.</summary>
+        public bool Searched;
+
+        /// <summary>Where a sentence says this ahead of the blocks, from 1 in the order said; 0 where it is said after them.</summary>
+        public int SaidAhead;
+
+        /// <summary>What a sentence says for this left empty, or null to say nothing.</summary>
+        public string SaidEmpty;
+
+        /// <summary>The id of the type the host provides that the slots it asks for hold, or null for blocks.</summary>
+        public string SlotsHold;
+
+        /// <summary>A field called <paramref name="name" /> that asks for slots of the logic system holding the type <paramref name="holds" />.</summary>
+        public static Field TakingSlots(string name, string holds)
+        {
+            var field = new Field { Name = name };
+            field.TakesSlots = true;
+            field.SlotsHold = holds;
+            field.Entry = FieldInput.Name;
+            field.Open = true;
+            field.Needed = true;
+            return field;
+        }
+
         /// <summary>Whether <paramref name="given" /> is this field left empty, which is a value not given where none is needed.</summary>
         public bool Unfilled(Literal given)
         {
@@ -362,6 +389,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             if (string.IsNullOrEmpty(said))
                 return Needed ? Template.Fill(texts.ValueNeeded, "name", SentenceText.Capitalised(called)) : "";
+
+            // What it holds is names with commas between rather than one of its words.
+            if (TakesSlots)
+                return "";
 
             if (Words != null && Words.Count > 0)
                 return Knows(said) ? "" : Template.Fill(Template.Fill(texts.ValueOneOf, "words", Listed(texts)), "name", called);

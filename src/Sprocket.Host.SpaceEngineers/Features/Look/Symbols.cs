@@ -119,6 +119,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A monitor on its stand: the slot a screen of a block fills.</summary>
         public const string Screen = "C";
 
+        /// <summary>An open bin holding three boxes, the mark of a slot an inventory of a block fills.</summary>
+        public const string Inventory = "N";
+
         /// <summary>An open eye over a toolbar: blocks hidden from toolbars are shown.</summary>
         public const string HiddenShown = "h";
 

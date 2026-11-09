@@ -6,7 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// <summary>Every type this host provides, beside the language's own.</summary>
     public static class HostTypes
     {
-        static readonly HostType[] Provided = { new ScreenType() };
+        static readonly HostType[] Provided = { new ScreenType(), new InventoryType() };
 
         /// <summary>Every type, in the order a kind of block is described by them.</summary>
         public static IList<HostType> All => Provided;

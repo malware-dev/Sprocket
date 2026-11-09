@@ -556,7 +556,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return;
             }
 
-            var part = new Part(_editor.Picks.NewSlotName(system));
+            var part = new Part(_editor.Picks.NewSlotName(system, "", true));
             part.IsSignal = true;
 
             _editor.Picks.Make(system, shown, part);

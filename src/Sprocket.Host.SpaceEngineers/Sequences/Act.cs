@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// What the step gives its action, in the order the action declares it: an action's options, or the new value for a
         /// step that sets one.
         /// </summary>
-        public IList<Literal> Arguments => _arguments;
+        public override IList<Literal> Arguments => _arguments;
 
         /// <summary>Whether the step has both parts to act on and an action to do to them.</summary>
         public bool HasAction => Targets.Count > 0 && !string.IsNullOrEmpty(ActionId);
