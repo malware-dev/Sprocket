@@ -18,9 +18,6 @@ namespace Sprocket.GameTests
     /// </summary>
     public sealed class MoveItemsGameTest
     {
-        // The server calls a plugin every second gameplay frame: 90 calls in 180 frames over 3 s, measured on the dedicated server.
-        const int UpdatesPerSecond = 30;
-
         const int Ingots = 1000;
 
         static readonly MyDefinitionId Iron = new MyDefinitionId(typeof(MyObjectBuilder_Ingot), "Iron");
@@ -54,7 +51,7 @@ namespace Sprocket.GameTests
             done.Enabled = false;
 
             // Time for the conveyor network to form, and for Sprocket to take up the pasted programmable block.
-            yield return 5 * UpdatesPerSecond;
+            yield return 5 * PluginUpdates.PerSecond;
 
             _report.Note($"the game says Move A is connected to Move B: {source.GetInventory(0).IsConnectedTo(joined.GetInventory(0))}, to Move C: {source.GetInventory(0).IsConnectedTo(apart.GetInventory(0))}");
 
@@ -63,7 +60,7 @@ namespace Sprocket.GameTests
             // ActivateButton runs the button's toolbar slot on the server. PressButton is the client's request, and on the dedicated
             // server it runs nothing: measured, no ingot moved after it.
             toJoined.ActivateButton(0);
-            yield return 3 * UpdatesPerSecond;
+            yield return 3 * PluginUpdates.PerSecond;
 
             var arrived = Amount(joined);
             _report.Check("move items over a conveyor", arrived == Ingots && Amount(source) == 0 && done.Enabled,
@@ -72,7 +69,7 @@ namespace Sprocket.GameTests
             joined.GetInventory(0).RemoveItemsOfType(arrived, ingot);
             source.GetInventory(0).AddItems(Ingots - Amount(source), ingot);
             toApart.ActivateButton(0);
-            yield return 3 * UpdatesPerSecond;
+            yield return 3 * PluginUpdates.PerSecond;
             _report.Check("move items with no conveyor", Amount(apart) == 0 && Amount(source) == Ingots,
                 $"{Amount(apart)} kg of iron ingots reached Move C, {Amount(source)} kg stayed in Move A");
 
@@ -87,13 +84,13 @@ namespace Sprocket.GameTests
             _report.Note($"Move B holds {filler} kg of stone, leaving {(double)(target.MaxVolume - target.CurrentVolume) / ingotVolume:0} kg of room for iron ingots");
 
             toJoined.ActivateButton(0);
-            yield return 3 * UpdatesPerSecond;
+            yield return 3 * PluginUpdates.PerSecond;
             var fitted = Amount(joined);
             _report.Check("move items into a full container", fitted > 0 && fitted < Ingots && Amount(source) == Ingots - fitted && !done.Enabled,
                 $"{fitted} kg reached Move B, {Amount(source)} kg waited in Move A, B Done is {(done.Enabled ? "on" : "off")}");
 
             target.RemoveItemsOfType(filler, stone);
-            yield return 3 * UpdatesPerSecond;
+            yield return 3 * PluginUpdates.PerSecond;
             _report.Check("move items once there is room", Amount(joined) == Ingots && Amount(source) == 0 && done.Enabled,
                 $"{Amount(joined)} kg in Move B, {Amount(source)} kg left in Move A, B Done is {(done.Enabled ? "on" : "off")}");
         }

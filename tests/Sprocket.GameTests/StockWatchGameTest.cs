@@ -14,9 +14,6 @@ namespace Sprocket.GameTests
     /// </summary>
     public sealed class StockWatchGameTest
     {
-        // The server calls a plugin every second gameplay frame: 90 calls in 180 frames over 3 s, measured on the dedicated server.
-        const int UpdatesPerSecond = 30;
-
         readonly string _blueprint;
         readonly GameTestReport _report;
 
@@ -44,7 +41,7 @@ namespace Sprocket.GameTests
             light.Enabled = false;
 
             // Time for Sprocket to take up the pasted programmable block and switch its logic system on.
-            yield return 5 * UpdatesPerSecond;
+            yield return 5 * PluginUpdates.PerSecond;
 
             var ingot = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_Ingot>("Iron");
             var ore = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_Ore>("Iron");
@@ -57,7 +54,7 @@ namespace Sprocket.GameTests
                     yield return wait;
                 flash.Report(_report, $"cargo, round {round}");
                 cargo.GetInventory(0).RemoveItemsOfType(200, ingot);
-                yield return UpdatesPerSecond;
+                yield return PluginUpdates.PerSecond;
             }
 
             for (var round = 1; round <= 2; round++)
@@ -68,7 +65,7 @@ namespace Sprocket.GameTests
                     yield return wait;
                 flash.Report(_report, $"refinery input, round {round}");
                 refinery.GetInventory(0).RemoveItemsOfType(200, ore);
-                yield return UpdatesPerSecond;
+                yield return PluginUpdates.PerSecond;
             }
         }
     }

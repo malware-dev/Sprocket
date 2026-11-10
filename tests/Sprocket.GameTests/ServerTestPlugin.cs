@@ -71,10 +71,10 @@ namespace Sprocket.GameTests
 
         IEnumerator<int> Steps(string blueprints)
         {
-            // Two seconds of a running world before anything is pasted into it, at 30 plugin updates a second.
-            yield return 60;
+            // Two seconds of a running world before anything is pasted into it.
+            yield return 2 * PluginUpdates.PerSecond;
 
-            var tests = new[] { new StockWatchGameTest(blueprints, _report).Run(), new MoveItemsGameTest(blueprints, _report).Run(), new ProjectorGameTest(_report).Run() };
+            var tests = new[] { new StockWatchGameTest(blueprints, _report).Run(), new MoveItemsGameTest(blueprints, _report).Run(), new InventoryReadingsGameTest(blueprints, _report).Run(), new ProjectorGameTest(_report).Run() };
             foreach (var test in tests)
             {
                 while (test.MoveNext())

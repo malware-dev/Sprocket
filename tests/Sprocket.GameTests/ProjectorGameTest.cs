@@ -28,7 +28,7 @@ namespace Sprocket.GameTests
         {
             var plain = Build("LargeProjector", new Vector3D(0, 0, 200));
             var scaling = Build("LargeBlockConsole", new Vector3D(0, 0, 260));
-            yield return 30;
+            yield return PluginUpdates.PerSecond;
 
             if (plain == null || scaling == null)
             {
@@ -39,7 +39,7 @@ namespace Sprocket.GameTests
             // One step each way the game's own terminal would set it: RotX given in the unit its slider takes.
             plain.SetValueFloat("RotX", 90);
             scaling.SetValueFloat("RotX", 1);
-            yield return 10;
+            yield return PluginUpdates.PerSecond / 3;
 
             Read(plain, "plain projector", 90);
             Read(scaling, "scaling projector", 1);
