@@ -738,8 +738,10 @@ public class ProductionTests
 
         foreach (var turned in new[] { "RotX", "RotY", "RotZ" })
         {
-            Assert.True(projector.Measures(turned, out var unit, out _, out var stepped, out _), turned);
+            // The game's rotation values are already in degrees, measured on the dedicated server, so they show as they are.
+            Assert.True(projector.Measures(turned, out var unit, out var scale, out var stepped, out _), turned);
             Assert.Equal("°", unit);
+            Assert.Equal(1, scale);
             Assert.Equal(step, stepped);
         }
     }

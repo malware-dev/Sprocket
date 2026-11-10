@@ -29,12 +29,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return block is IMyProjector;
         }
 
-        // A scaling projector turns its blueprint a degree at a time and any other a quarter turn at a time, from the game's
-        // projector code.
+        // The degrees a projector turns its blueprint by at a time, as its definition gives them: 90 on the plain projectors and
+        // 1 on the scaling one. The terminal's rotation values are already in degrees, measured on the dedicated server.
         static double Turn(IMyTerminalBlock block)
         {
             var definition = block.SlimBlock?.BlockDefinition as MyProjectorDefinition;
-            return definition != null && definition.AllowScaling ? 1 : 90;
+            return definition != null && definition.RotationAngleStepDeg > 0 ? definition.RotationAngleStepDeg : 90;
         }
 
         /// <inheritdoc />
@@ -55,11 +55,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Y", true, "vertical offset")
                 .Renaming("Z", true, "forward offset")
                 .Renaming("RotX", true, "pitch")
-                .Measuring("RotX", "°", turn, turn)
+                .Measuring("RotX", "°", 1, turn)
                 .Renaming("RotY", true, "yaw")
-                .Measuring("RotY", "°", turn, turn)
+                .Measuring("RotY", "°", 1, turn)
                 .Renaming("RotZ", true, "roll")
-                .Measuring("RotZ", "°", turn, turn)
+                .Measuring("RotZ", "°", 1, turn)
                 .Renaming("Scale", true, "scale")
                 .Renaming("ShowOnlyBuildable", true, "show only buildable")
                 .Renaming("MarkMissingBlocks", true, "mark missing blocks")

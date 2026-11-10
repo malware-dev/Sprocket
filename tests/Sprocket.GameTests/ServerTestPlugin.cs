@@ -74,9 +74,12 @@ namespace Sprocket.GameTests
             // Two seconds of a running world before anything is pasted into it, at 30 plugin updates a second.
             yield return 60;
 
-            var test = new StockWatchGameTest(blueprint, _report).Run();
-            while (test.MoveNext())
-                yield return test.Current;
+            var tests = new[] { new StockWatchGameTest(blueprint, _report).Run(), new ProjectorGameTest(_report).Run() };
+            foreach (var test in tests)
+            {
+                while (test.MoveNext())
+                    yield return test.Current;
+            }
         }
     }
 }
