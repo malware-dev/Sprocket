@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.Entities.Blocks;
 using VRage;
@@ -43,11 +44,14 @@ namespace Sprocket.GameTests
             var apart = pasted.Find("Move C");
             var toJoined = pasted.Find("To B Button") as MyButtonPanel;
             var toApart = pasted.Find("To C Button") as MyButtonPanel;
-            if (source == null || joined == null || apart == null || toJoined == null || toApart == null)
+            var done = pasted.Find("B Done") as IMyFunctionalBlock;
+            if (source == null || joined == null || apart == null || toJoined == null || toApart == null || done == null)
             {
-                _report.Fail("move items blueprint", "a container or a button is missing after the paste");
+                _report.Fail("move items blueprint", "a container, a button or B Done is missing after the paste");
                 yield break;
             }
+
+            done.Enabled = false;
 
             // Time for the conveyor network to form, and for Sprocket to take up the pasted programmable block.
             yield return 5 * UpdatesPerSecond;
@@ -62,8 +66,8 @@ namespace Sprocket.GameTests
             yield return 3 * UpdatesPerSecond;
 
             var arrived = Amount(joined);
-            _report.Check("move items over a conveyor", arrived == Ingots && Amount(source) == 0,
-                $"{arrived} of {Ingots} kg of iron ingots reached Move B, {Amount(source)} kg stayed in Move A");
+            _report.Check("move items over a conveyor", arrived == Ingots && Amount(source) == 0 && done.Enabled,
+                $"{arrived} of {Ingots} kg of iron ingots reached Move B, {Amount(source)} kg stayed in Move A, B Done is {(done.Enabled ? "on" : "off")}");
 
             joined.GetInventory(0).RemoveItemsOfType(arrived, ingot);
             source.GetInventory(0).AddItems(Ingots - Amount(source), ingot);
@@ -71,6 +75,27 @@ namespace Sprocket.GameTests
             yield return 3 * UpdatesPerSecond;
             _report.Check("move items with no conveyor", Amount(apart) == 0 && Amount(source) == Ingots,
                 $"{Amount(apart)} kg of iron ingots reached Move C, {Amount(source)} kg stayed in Move A");
+
+            // Move B filled with stone until only half the ingots fit: the step moves what fits and waits, and finishes once there is room.
+            done.Enabled = false;
+            var stone = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_Ore>("Stone");
+            var stoneVolume = MyDefinitionManager.Static.GetPhysicalItemDefinition(stone.GetId()).Volume;
+            var ingotVolume = MyDefinitionManager.Static.GetPhysicalItemDefinition(Iron).Volume;
+            var target = joined.GetInventory(0);
+            var filler = (MyFixedPoint)(int)(((double)target.MaxVolume - Ingots / 2 * ingotVolume) / stoneVolume);
+            target.AddItems(filler, stone);
+            _report.Note($"Move B holds {filler} kg of stone, leaving {(double)(target.MaxVolume - target.CurrentVolume) / ingotVolume:0} kg of room for iron ingots");
+
+            toJoined.ActivateButton(0);
+            yield return 3 * UpdatesPerSecond;
+            var fitted = Amount(joined);
+            _report.Check("move items into a full container", fitted > 0 && fitted < Ingots && Amount(source) == Ingots - fitted && !done.Enabled,
+                $"{fitted} kg reached Move B, {Amount(source)} kg waited in Move A, B Done is {(done.Enabled ? "on" : "off")}");
+
+            target.RemoveItemsOfType(filler, stone);
+            yield return 3 * UpdatesPerSecond;
+            _report.Check("move items once there is room", Amount(joined) == Ingots && Amount(source) == 0 && done.Enabled,
+                $"{Amount(joined)} kg in Move B, {Amount(source)} kg left in Move A, B Done is {(done.Enabled ? "on" : "off")}");
         }
 
         static MyFixedPoint Amount(IMyTerminalBlock block) => block.GetInventory(0).GetItemAmount(Iron);

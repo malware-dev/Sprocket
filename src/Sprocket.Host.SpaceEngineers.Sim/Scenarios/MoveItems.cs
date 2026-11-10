@@ -9,7 +9,7 @@ using VRageMath;
 
 namespace Sprocket.Sim.Scenarios;
 
-/// <summary>Three cargo containers, the first two joined by a conveyor junction, and two buttons that move every item out of the first.</summary>
+/// <summary>Three cargo containers, the first two joined by a conveyor junction, two buttons that move every item out of the first, and a light the move to the second switches on once it is done.</summary>
 public sealed class MoveItems : Scenario
 {
     /// <summary>The container the items start in.</summary>
@@ -30,7 +30,7 @@ public sealed class MoveItems : Scenario
         new GameCheck("Items move only over a real conveyor connection",
             "Sprocket Move Items pasted, its Move logic system switched on. Iron ingots in Move A.",
             new[] { "Press To B Button.", "Put the ingots back in Move A, and press To C Button." },
-            "To B, every ingot moves. To C, nothing moves, since no conveyor joins it to Move A.",
+            "To B, every ingot moves and B Done comes on. To C, nothing moves, since no conveyor joins it to Move A.",
             "The harness models no conveyors, so only the game's own connection check says what can move.")
     };
 
@@ -41,7 +41,7 @@ public sealed class MoveItems : Scenario
         Source = rig.Cargo(2, "Move A");
         Joined = rig.Cargo(3, "Move B");
         Apart = rig.Cargo(4, "Move C");
-        deck.Lay(new List<Fitting> { Source, Joined, Apart, rig.Sprocket, rig.Panel(5, "To B Button"), rig.Panel(6, "To C Button"), rig.Battery(7, "Move Battery") }, Vector3I.Zero, 40);
+        deck.Lay(new List<Fitting> { Source, Joined, Apart, rig.Sprocket, rig.Panel(5, "To B Button"), rig.Panel(6, "To C Button"), rig.Light(8, "B Done"), rig.Battery(7, "Move Battery") }, Vector3I.Zero, 40);
 
         // In the gap between A and B, level with the middle of their faces, where each has a conveyor port.
         deck.Conveyor(deck[Source].Min + new Vector3I(3, 1, 1));
@@ -53,6 +53,12 @@ public sealed class MoveItems : Scenario
         var editor = sim.Editor;
         editor.NewSystem("Move");
         Moving(sim, "To B Button", "Move B");
+        editor.PressAdd("task");
+        editor.PressBlock("B Done");
+        editor.PressChoice("power");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
+        editor.PressPrimary();
+        sim.Tick();
         editor.GoToRoot();
         sim.Tick();
 
