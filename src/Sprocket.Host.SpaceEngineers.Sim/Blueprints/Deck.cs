@@ -110,6 +110,22 @@ public sealed class Deck
         _conveyors.Add(cell);
     }
 
+    /// <summary>
+    /// Fills the gap between <paramref name="near" /> and <paramref name="far" />, laid side by side in one row, with conveyor
+    /// junctions over the full height and depth of both, so every conveyor port on the faces they turn to each other joins.
+    /// </summary>
+    public void ConveyorWall(Fitting near, Fitting far)
+    {
+        var a = _placed[near];
+        var b = _placed[far];
+        var aEnd = a.Min + a.Extent(Defined(near)) - Vector3I.One;
+        var bEnd = b.Min + b.Extent(Defined(far)) - Vector3I.One;
+        var x = aEnd.X + 1;
+        for (var y = Math.Min(a.Min.Y, b.Min.Y); y <= Math.Max(aEnd.Y, bEnd.Y); y++)
+        for (var z = Math.Min(a.Min.Z, b.Min.Z); z <= Math.Max(aEnd.Z, bEnd.Z); z++)
+            Conveyor(new Vector3I(x, y, z));
+    }
+
     /// <summary>Puts one armor block at <paramref name="cell" />.</summary>
     public void Floor(Vector3I cell)
     {

@@ -15,7 +15,7 @@ param(
     [string]$Instance = 'E:\Data\sprocket-ds-test',
     [string]$Server = 'E:\Steam\steamapps\common\SpaceEngineersDedicatedServer',
     [string]$Branch = 'steamctg',
-    [string[]]$Scenarios = @('Sprocket Stock Watch', 'Sprocket Move Items', 'Sprocket Inventory Readings'),
+    [string[]]$Scenarios = @('Sprocket Stock Watch', 'Sprocket Move Items', 'Sprocket Inventory Readings', 'Sprocket Refinery Moves'),
     [int]$TimeoutSeconds = 600
 )
 $ErrorActionPreference = 'Stop'
@@ -45,8 +45,8 @@ if ($LASTEXITCODE -ge 8) { throw "Copying the mod failed (robocopy $LASTEXITCODE
 
 # 4. A clean world, the scenario's blueprint, and the run.
 $world = Join-Path $Instance 'Saves\Sprocket Test'
-Get-ChildItem $world -File | Remove-Item -Force
-Copy-Item (Join-Path $Instance 'WorldTemplate\*') $world
+Get-ChildItem $world | Remove-Item -Recurse -Force
+Copy-Item (Join-Path $Instance 'WorldTemplate\*') $world -Recurse
 
 $blueprints = Join-Path $work 'blueprints'
 foreach ($scenario in $Scenarios) {

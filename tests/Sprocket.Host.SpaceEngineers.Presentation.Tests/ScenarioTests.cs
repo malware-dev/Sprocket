@@ -43,6 +43,23 @@ public class ScenarioTests
         Assert.Equal(4, sim.Machine.Log.Count(line => line == "Stock Light:off"));
     }
 
+    /// <summary>Store Button moves the ingots out of the refinery's output, its second inventory, into the cargo container.</summary>
+    [Fact]
+    public void TheRefineryMovesStoreTheOutput()
+    {
+        VRage.ObjectBuilders.MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
+        var scenario = new RefineryMoves();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+
+        scenario.Refinery.Holds("Iron", 500, 1);
+        Run(sim);
+        sim.Press("Store Button");
+        Run(sim);
+
+        Assert.Equal(0, scenario.Refinery.Holding("Iron", 1));
+        Assert.Equal(500, scenario.Cargo.Holding("Iron"));
+    }
+
     static void Run(Simulation sim)
     {
         for (var i = 0; i < 400; i++)

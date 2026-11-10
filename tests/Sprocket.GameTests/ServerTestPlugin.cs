@@ -74,7 +74,7 @@ namespace Sprocket.GameTests
             // Two seconds of a running world before anything is pasted into it.
             yield return 2 * PluginUpdates.PerSecond;
 
-            var tests = new[] { new StockWatchGameTest(blueprints, _report).Run(), new MoveItemsGameTest(blueprints, _report).Run(), new InventoryReadingsGameTest(blueprints, _report).Run(), new ProjectorGameTest(_report).Run() };
+            var tests = new[] { new StockWatchGameTest(blueprints, _report).Run(), new MoveItemsGameTest(blueprints, _report).Run(), new InventoryReadingsGameTest(blueprints, _report).Run(), new RefineryMovesGameTest(blueprints, _report).Run(), new ProjectorGameTest(_report).Run() };
             foreach (var test in tests)
             {
                 while (test.MoveNext())
