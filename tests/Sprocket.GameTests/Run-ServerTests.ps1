@@ -5,7 +5,7 @@
     2. Builds the test plugin and packs the mod.
     3. Copies the packed mod over the server's copy of Sprocket Automation (Bleeding Edge). The server takes its copy as
        up to date, so the local build is what runs.
-    4. Puts back the clean test world, writes the scenario's blueprint, and starts the server with the plugin.
+    4. Puts back the clean test world, writes the scenarios' blueprints, and starts the server with the plugin.
     5. Prints the report. The exit code is 0 when every check passed.
 
     The server's instance (its config, clean world template and Workshop downloads) is in -Instance and is never the
@@ -15,7 +15,7 @@ param(
     [string]$Instance = 'E:\Data\sprocket-ds-test',
     [string]$Server = 'E:\Steam\steamapps\common\SpaceEngineersDedicatedServer',
     [string]$Branch = 'steamctg',
-    [string]$Scenario = 'Sprocket Stock Watch',
+    [string[]]$Scenarios = @('Sprocket Stock Watch', 'Sprocket Move Items'),
     [int]$TimeoutSeconds = 600
 )
 $ErrorActionPreference = 'Stop'
@@ -49,12 +49,14 @@ Get-ChildItem $world -File | Remove-Item -Force
 Copy-Item (Join-Path $Instance 'WorldTemplate\*') $world
 
 $blueprints = Join-Path $work 'blueprints'
-dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint $Scenario $blueprints | Out-Null
-if ($LASTEXITCODE -ne 0) { throw "The blueprint for '$Scenario' was not written." }
+foreach ($scenario in $Scenarios) {
+    dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint $scenario $blueprints | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "The blueprint for '$scenario' was not written." }
+}
 
 $report = Join-Path $work 'report.txt'
 Remove-Item $report -ErrorAction SilentlyContinue
-$env:SPROCKET_GAMETEST_BLUEPRINT = Join-Path $blueprints "$Scenario\bp.sbc"
+$env:SPROCKET_GAMETEST_BLUEPRINTS = $blueprints
 $env:SPROCKET_GAMETEST_REPORT = $report
 $plugin = "$repo\tests\Sprocket.GameTests\bin\Debug\net48\Sprocket.GameTests.dll"
 $exe = Join-Path $Server 'DedicatedServer64\SpaceEngineersDedicated.exe'

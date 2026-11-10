@@ -15,10 +15,17 @@ public sealed class Deck
     /// <summary>The subtype of a floor's armor.</summary>
     public const string ArmorSubtype = "LargeBlockArmorBlock";
 
+    /// <summary>The type of a conveyor junction, which joins the conveyor ports on all six of its faces.</summary>
+    public const string ConveyorType = "Conveyor";
+
+    /// <summary>The subtype of a large grid's conveyor junction.</summary>
+    public const string ConveyorSubtype = "LargeBlockConveyor";
+
     readonly BlockDefinitions _definitions;
     readonly Dictionary<Fitting, Placement> _placed = new Dictionary<Fitting, Placement>();
     readonly List<Fitting> _order = new List<Fitting>();
     readonly List<Vector3I> _armor = new List<Vector3I>();
+    readonly List<Vector3I> _conveyors = new List<Vector3I>();
     readonly Dictionary<Vector3I, string> _taken = new Dictionary<Vector3I, string>();
     readonly Dictionary<Fitting, string> _texts = new Dictionary<Fitting, string>();
     readonly Dictionary<Vector3I, Fitting> _at = new Dictionary<Vector3I, Fitting>();
@@ -91,6 +98,16 @@ public sealed class Deck
             Floor(new Vector3I(fx, corner.Y, fz));
 
         return far;
+    }
+
+    /// <summary>The conveyor junction cells.</summary>
+    public IReadOnlyList<Vector3I> Conveyors => _conveyors;
+
+    /// <summary>Puts one conveyor junction at <paramref name="cell" />, joining what has a conveyor port on its faces.</summary>
+    public void Conveyor(Vector3I cell)
+    {
+        Take(cell, ConveyorSubtype);
+        _conveyors.Add(cell);
     }
 
     /// <summary>Puts one armor block at <paramref name="cell" />.</summary>

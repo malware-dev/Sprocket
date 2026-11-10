@@ -33,7 +33,10 @@ public static class Blueprint
     {
         var blocks = new XElement("CubeBlocks");
         foreach (var cell in deck.Armor)
-            blocks.Add(Armor(cell));
+            blocks.Add(Plain(cell, Deck.ArmorType, Deck.ArmorSubtype));
+
+        foreach (var cell in deck.Conveyors)
+            blocks.Add(Plain(cell, Deck.ConveyorType, Deck.ConveyorSubtype));
 
         foreach (var fitting in deck.Blocks)
             blocks.Add(Block(fitting, deck));
@@ -92,11 +95,11 @@ public static class Blueprint
         return path;
     }
 
-    static XElement Armor(Vector3I cell)
+    static XElement Plain(Vector3I cell, string type, string subtype)
     {
         return new XElement("MyObjectBuilder_CubeBlock",
-            new XAttribute(Xsi + "type", "MyObjectBuilder_" + Deck.ArmorType),
-            new XElement("SubtypeName", Deck.ArmorSubtype),
+            new XAttribute(Xsi + "type", "MyObjectBuilder_" + type),
+            new XElement("SubtypeName", subtype),
             Min(cell),
             Color());
     }

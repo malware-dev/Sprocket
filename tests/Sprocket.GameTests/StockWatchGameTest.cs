@@ -20,17 +20,17 @@ namespace Sprocket.GameTests
         readonly string _blueprint;
         readonly GameTestReport _report;
 
-        /// <summary>The test on the blueprint at <paramref name="blueprint" />, answering into <paramref name="report" />.</summary>
-        public StockWatchGameTest(string blueprint, GameTestReport report)
+        /// <summary>The test on the scenario's blueprint in <paramref name="blueprints" />, answering into <paramref name="report" />.</summary>
+        public StockWatchGameTest(string blueprints, GameTestReport report)
         {
-            _blueprint = blueprint;
+            _blueprint = System.IO.Path.Combine(blueprints, "Sprocket Stock Watch", "bp.sbc");
             _report = report;
         }
 
         /// <summary>The test's steps, each yielding the plugin updates to wait before the next.</summary>
         public IEnumerator<int> Run()
         {
-            var pasted = new PastedBlueprint(_blueprint);
+            var pasted = new PastedBlueprint(_blueprint, VRageMath.Vector3D.Zero);
             var cargo = pasted.Find("Stock Cargo");
             var refinery = (IMyFunctionalBlock)pasted.Find("Stock Refinery");
             var light = (IMyFunctionalBlock)pasted.Find("Stock Light");

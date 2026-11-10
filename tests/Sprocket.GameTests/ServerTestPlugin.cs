@@ -6,8 +6,8 @@ using VRage.Plugins;
 namespace Sprocket.GameTests
 {
     /// <summary>
-    /// The dedicated server plugin that runs a game test once the world is ready, then stops the server. It reads the blueprint
-    /// from SPROCKET_GAMETEST_BLUEPRINT and writes its report to SPROCKET_GAMETEST_REPORT; without both it does nothing.
+    /// The dedicated server plugin that runs a game test once the world is ready, then stops the server. It reads the scenarios'
+    /// blueprints from the folder SPROCKET_GAMETEST_BLUEPRINTS and writes its report to SPROCKET_GAMETEST_REPORT; without both it does nothing.
     /// </summary>
     public sealed class ServerTestPlugin : IPlugin
     {
@@ -18,13 +18,13 @@ namespace Sprocket.GameTests
         /// <inheritdoc />
         public void Init(object gameInstance)
         {
-            var blueprint = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_BLUEPRINT");
+            var blueprints = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_BLUEPRINTS");
             var report = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_REPORT");
-            if (string.IsNullOrEmpty(blueprint) || string.IsNullOrEmpty(report))
+            if (string.IsNullOrEmpty(blueprints) || string.IsNullOrEmpty(report))
                 return;
 
             _report = new GameTestReport(report);
-            _steps = Steps(blueprint);
+            _steps = Steps(blueprints);
         }
 
         /// <inheritdoc />
@@ -69,12 +69,12 @@ namespace Sprocket.GameTests
         {
         }
 
-        IEnumerator<int> Steps(string blueprint)
+        IEnumerator<int> Steps(string blueprints)
         {
             // Two seconds of a running world before anything is pasted into it, at 30 plugin updates a second.
             yield return 60;
 
-            var tests = new[] { new StockWatchGameTest(blueprint, _report).Run(), new ProjectorGameTest(_report).Run() };
+            var tests = new[] { new StockWatchGameTest(blueprints, _report).Run(), new MoveItemsGameTest(blueprints, _report).Run(), new ProjectorGameTest(_report).Run() };
             foreach (var test in tests)
             {
                 while (test.MoveNext())
