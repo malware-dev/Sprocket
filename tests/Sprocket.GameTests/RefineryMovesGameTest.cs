@@ -3,7 +3,6 @@ using System.IO;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
 using SpaceEngineers.Game.Entities.Blocks;
-using VRage;
 using VRage.Game;
 using VRage.ObjectBuilders;
 using VRageMath;

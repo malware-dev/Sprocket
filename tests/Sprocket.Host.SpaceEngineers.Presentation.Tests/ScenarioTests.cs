@@ -43,6 +43,24 @@ public class ScenarioTests
         Assert.Equal(4, sim.Machine.Log.Count(line => line == "Stock Light:off"));
     }
 
+    /// <summary>Three Button moves the piston to 3 m and switches At Three on once it is there, every time it is pressed.</summary>
+    [Fact]
+    public void ThePistonStatusMovesToThreeEachPress()
+    {
+        var scenario = new PistonStatus();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+
+        for (var round = 0; round < 2; round++)
+        {
+            sim.Press("Three Button");
+            Run(sim);
+            Assert.Equal(3f, scenario.Piston.Position, 3);
+            Assert.True(scenario.Arrived.Enabled);
+        }
+
+        Assert.Equal(2, sim.Machine.Log.Count(line => line == "At Three:on"));
+    }
+
     /// <summary>Store Button moves the ingots out of the refinery's output, its second inventory, into the cargo container.</summary>
     [Fact]
     public void TheRefineryMovesStoreTheOutput()

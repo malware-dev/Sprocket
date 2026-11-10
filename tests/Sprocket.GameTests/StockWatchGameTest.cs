@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using VRage;
 using VRage.Game;
-using VRage.Game.ModAPI;
 using VRage.ObjectBuilders;
 
 namespace Sprocket.GameTests

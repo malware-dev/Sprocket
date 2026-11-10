@@ -5,7 +5,6 @@ using Sandbox.ModAPI;
 using SpaceEngineers.Game.Entities.Blocks;
 using VRage;
 using VRage.Game;
-using VRage.Game.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
 
@@ -79,7 +78,7 @@ namespace Sprocket.GameTests
             var stoneVolume = MyDefinitionManager.Static.GetPhysicalItemDefinition(stone.GetId()).Volume;
             var ingotVolume = MyDefinitionManager.Static.GetPhysicalItemDefinition(Iron).Volume;
             var target = joined.GetInventory(0);
-            var filler = (MyFixedPoint)(int)(((double)target.MaxVolume - Ingots / 2 * ingotVolume) / stoneVolume);
+            var filler = (MyFixedPoint)(int)(((double)target.MaxVolume - Ingots / 2.0 * ingotVolume) / stoneVolume);
             target.AddItems(filler, stone);
             _report.Note($"Move B holds {filler} kg of stone, leaving {(double)(target.MaxVolume - target.CurrentVolume) / ingotVolume:0} kg of room for iron ingots");
 

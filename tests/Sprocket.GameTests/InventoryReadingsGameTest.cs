@@ -52,7 +52,7 @@ namespace Sprocket.GameTests
             var stone = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_Ore>("Stone");
             var stoneVolume = MyDefinitionManager.Static.GetPhysicalItemDefinition(stone.GetId()).Volume;
             var inventory = full.GetInventory(0);
-            inventory.AddItems((MyFixedPoint)(int)((double)inventory.MaxVolume / 2 / stoneVolume), stone);
+            inventory.AddItems((int)((double)inventory.MaxVolume / 2 / stoneVolume), stone);
             yield return 3 * PluginUpdates.PerSecond;
 
             var held = $"Mass Cargo holds {(double)heavy.GetInventory(0).CurrentMass:0.##} kg, Fill Cargo is {100 * (double)inventory.CurrentVolume / (double)inventory.MaxVolume:0.##}% full";
