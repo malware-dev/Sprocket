@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.IO;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
-using VRage;
 using VRage.Game;
 using VRage.ObjectBuilders;
 using VRageMath;

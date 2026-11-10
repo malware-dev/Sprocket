@@ -829,11 +829,11 @@
     <comment>Codex entry on the block member "closed" of a door, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Door.Opening" xml:space="preserve">
-    <value>Met while the door is opening. Once it is fully open, the status is `open`.</value>
+    <value>Met while the door is opening, and while a door that lost its power partway stands where it stopped. Once it is fully open, the status is `open`.</value>
     <comment>Codex entry on the block member "opening" of a door, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Door.Closing" xml:space="preserve">
-    <value>Met while the door is closing. Once it is fully closed, the status is `closed`.</value>
+    <value>Met while the door is closing, and while a door that lost its power partway stands where it stopped. Once it is fully closed, the status is `closed`.</value>
     <comment>Codex entry on the block member "closing" of a door, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Door.FinishesOpening" xml:space="preserve">

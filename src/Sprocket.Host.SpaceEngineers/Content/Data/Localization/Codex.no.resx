@@ -635,11 +635,11 @@
     <comment>Codex entry on the block member "closed" of a door, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Door.Opening" xml:space="preserve">
-    <value>Oppfylt mens døra åpner seg. Når den er helt åpen, er statusen `open`.</value>
+    <value>Oppfylt mens døra åpner seg, og mens en dør som mistet strømmen underveis blir stående der den stoppet. Når den er helt åpen, er statusen `open`.</value>
     <comment>Codex entry on the block member "opening" of a door, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Door.Closing" xml:space="preserve">
-    <value>Oppfylt mens døra lukker seg. Når den er helt lukket, er statusen `closed`.</value>
+    <value>Oppfylt mens døra lukker seg, og mens en dør som mistet strømmen underveis blir stående der den stoppet. Når den er helt lukket, er statusen `closed`.</value>
     <comment>Codex entry on the block member "closing" of a door, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Door.FinishesOpening" xml:space="preserve">
