@@ -1,6 +1,7 @@
 using Lumel.Drawing;
 using Lumel.Layout;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -26,6 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
             var size = look.Size;
             _mark.Style = size.Mark;
+            _mark.IsVisible = true;
+            _underMark.IsVisible = true;
             _mark.Symbol = StatusLook.Mark(item.Level);
             var shade = look.Shade(item.Level);
             _mark.Base.Tint = look.IsFresh(item) ? Color.Lerp(shade, look.Ink, look.Pulse) : shade;
@@ -51,8 +54,11 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _sentence.IsVisible = true;
         }
 
-        /// <summary>Leaves out, until the card is no taller than <paramref name="high" /> laid <paramref name="wide" /> across, the sentence, the logic system, and then the name's size.</summary>
-        public void Fit(IGraphics graphics, float wide, float high)
+        /// <summary>
+        /// Leaves out, until the card is no taller than <paramref name="high" /> laid <paramref name="wide" /> across, the sentence,
+        /// the logic system, the name's size, the mark's size in <paramref name="size" />, and then the mark.
+        /// </summary>
+        public void Fit(IGraphics graphics, PanelSize size, float wide, float high)
         {
             if (StatusLook.Tall(graphics, _body, wide) > high)
             {
@@ -68,6 +74,16 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
             if (StatusLook.Tall(graphics, _body, wide) > high)
                 _name.Style = _sentence.Style;
+
+            if (StatusLook.Tall(graphics, _body, wide) > high)
+                _mark.Style = size.BannerMark;
+
+            // The top line counts the trouble with its own mark, so a card that still does not fit is said by its name alone.
+            if (StatusLook.Tall(graphics, _body, wide) > high)
+            {
+                _mark.IsVisible = false;
+                _underMark.IsVisible = false;
+            }
         }
 
         /// <summary>What the installation is called: its own name where it is one of a blueprint's, and its logic system's otherwise.</summary>

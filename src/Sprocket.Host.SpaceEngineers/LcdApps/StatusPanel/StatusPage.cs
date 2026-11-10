@@ -109,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             {
                 var card = _cards[i];
                 card.Show(look, status, items[i]);
-                card.Fit(graphics, column, high);
+                card.Fit(graphics, size, column, high);
                 var tall = StatusLook.Tall(graphics, card.Body, column);
                 if (filled > 0f && filled + tall * 2f > high)
                 {

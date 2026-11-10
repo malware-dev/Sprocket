@@ -53,6 +53,19 @@ public static class FaceShot
             png.Save(file);
     }
 
+    /// <summary>Has <paramref name="app" /> draw a frame on <paramref name="face" />, measuring in the game's fonts, and hands back the device that holds what it drew, in the face's own pixels.</summary>
+    public static ScreenSpaceDevice Drawn(Face face, Action app)
+    {
+        Vector2 size = face.Shape.SurfaceSize;
+        var surface = ScreenSession.Surface();
+        surface.Target = new PixelSize((int)Math.Ceiling(size.X), (int)Math.Ceiling(size.Y));
+        face.Measuring = surface.Screen;
+        app();
+        surface.Device.BeginFrame();
+        Draw(surface.Screen, face);
+        return surface.Device;
+    }
+
     static void Draw(IScreenSpace screen, Face face)
     {
         Vector2 texture = face.Shape.TextureSize;

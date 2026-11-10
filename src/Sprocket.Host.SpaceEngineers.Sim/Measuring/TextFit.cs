@@ -15,6 +15,13 @@ public static class TextFit
     // A pixel either way, for rounding between the layout's units and the device's pixels.
     const float Rounding = 1f;
 
+    // How far down its line a run's letters start: the game's blank over every line, 3 x 23 / 18 of the 37 units of a line
+    // (ScreenSpaceGraphics.TopSideBearing; Fonts/white/FontDataPA.xml, height 37).
+    const float Over = 3f * 23f / 18f / 37f;
+
+    // How far down its line a run's baseline is: 30 of the 37 units (Fonts/white/FontDataPA.xml, base 30, height 37).
+    const float Baseline = 30f / 37f;
+
     /// <summary>Each run in <paramref name="commands" /> cut short by its clip, measured with <paramref name="fonts" />, said as the words and how far past.</summary>
     public static List<string> Cut(IList<DrawCommand> commands, IFontMetrics fonts, float width, float height)
     {
@@ -74,10 +81,13 @@ public static class TextFit
             if (!clip.Contains(new Vector2(start.X + Rounding, start.Y + Rounding)))
                 continue;
 
+            // The letters stand between the blank the game leaves over every line and the baseline: the rest of the line is room
+            // for descenders, which most words leave empty.
             var size = fonts.MeasurePixels(command.Font, command.Text, command.Scale);
             var right = System.Math.Min(start.X + size.X, clip.X + clip.Width);
-            var bottom = System.Math.Min(start.Y + size.Y, clip.Y + clip.Height);
-            runs.Add(new KeyValuePair<string, RectangleF>(command.Text, new RectangleF(start.X, start.Y, right - start.X, bottom - start.Y)));
+            var top = start.Y + size.Y * Over;
+            var bottom = System.Math.Min(start.Y + size.Y * Baseline, clip.Y + clip.Height);
+            runs.Add(new KeyValuePair<string, RectangleF>(command.Text, new RectangleF(start.X, top, right - start.X, bottom - top)));
         }
 
         var over = new List<string>();
