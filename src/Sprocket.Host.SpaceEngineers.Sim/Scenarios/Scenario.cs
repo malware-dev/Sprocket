@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sprocket.Sim.Blueprints;
+using Sprocket.Sim.Driving;
 using Sprocket.Sim.Machine;
 using VRageMath;
 
@@ -44,6 +45,18 @@ public abstract class Scenario
 
         sim.Save();
         return new Built(sim, deck);
+    }
+
+    /// <summary>Adds a task to the open sequence that switches <paramref name="block" /> <paramref name="power" />, on or off.</summary>
+    protected static void Power(Machine.Simulation sim, string block, string power)
+    {
+        var editor = sim.Editor;
+        editor.PressAdd("task");
+        editor.PressBlock(block);
+        editor.PressChoice("power");
+        editor.Pick().Arguments!.Form.Fields[0].Text = power;
+        editor.PressPrimary();
+        sim.Tick();
     }
 
     /// <summary>The blueprint of what <paramref name="built" /> holds.</summary>

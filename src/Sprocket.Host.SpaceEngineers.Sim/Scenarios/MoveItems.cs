@@ -53,12 +53,7 @@ public sealed class MoveItems : Scenario
         var editor = sim.Editor;
         editor.NewSystem("Move");
         Moving(sim, "To B Button", "Move B");
-        editor.PressAdd("task");
-        editor.PressBlock("B Done");
-        editor.PressChoice("power");
-        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
-        editor.PressPrimary();
-        sim.Tick();
+        Power(sim, "B Done", "on");
         editor.GoToRoot();
         sim.Tick();
 

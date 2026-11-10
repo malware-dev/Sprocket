@@ -61,6 +61,27 @@ public class ScenarioTests
         Assert.Equal(2, sim.Machine.Log.Count(line => line == "At Three:on"));
     }
 
+    /// <summary>Each of the script limit's buttons runs its own script and switches its light on, every time it is pressed.</summary>
+    [Fact]
+    public void TheScriptLimitRunsEachScriptEachPress()
+    {
+        var sim = new ScriptLimit().Build(BlockDefinitions.FromGame()).Sim;
+
+        for (var round = 0; round < 2; round++)
+        {
+            sim.Press("Looping Button");
+            Run(sim);
+            sim.Press("Plain Button");
+            Run(sim);
+        }
+
+        foreach (var script in new[] { "Looping", "Plain" })
+        {
+            Assert.Equal(2, sim.Machine.Log.Count(line => line == script + " Script:run go"));
+            Assert.Equal(2, sim.Machine.Log.Count(line => line == script + " Ran:on"));
+        }
+    }
+
     /// <summary>Store Button moves the ingots out of the refinery's output, its second inventory, into the cargo container.</summary>
     [Fact]
     public void TheRefineryMovesStoreTheOutput()

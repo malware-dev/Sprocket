@@ -49,7 +49,7 @@ public sealed class PistonStatus : Scenario
         editor.PressPrimary();
         sim.Tick();
 
-        Power(sim, "off");
+        Power(sim, "At Three", "off");
         editor.PressAdd("task");
         editor.PressBlock("Status Piston");
         sim.Tick();
@@ -60,22 +60,10 @@ public sealed class PistonStatus : Scenario
         fields[1].Text = "2";
         editor.PressPrimary();
         sim.Tick();
-        Power(sim, "on");
+        Power(sim, "At Three", "on");
 
         editor.GoToRoot();
         editor.SwitchSystem(editor.Program.Systems[0], true);
-        sim.Tick();
-    }
-
-    /// <summary>A task that switches At Three <paramref name="power" />.</summary>
-    static void Power(Machine.Simulation sim, string power)
-    {
-        var editor = sim.Editor;
-        editor.PressAdd("task");
-        editor.PressBlock("At Three");
-        editor.PressChoice("power");
-        editor.Pick().Arguments!.Form.Fields[0].Text = power;
-        editor.PressPrimary();
         sim.Tick();
     }
 }
