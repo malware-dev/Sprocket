@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction(MoveItems, "move", Moves, (string)null).Listed("move items").Joining("from").Lasting()
+            kind.WithAction(MoveItems, "move", Moves, (string)null).Listed("move items").Joining("from").Lasting().ThroughConveyors()
                 .Asking(To(), TheItem(block), HowMuch(), WhenStuck()).In(Category.Stock).Of(this);
 
             // What the block reads of an inventory it names, for a slot that already holds one.

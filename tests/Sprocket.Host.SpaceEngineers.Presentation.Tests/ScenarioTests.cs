@@ -60,6 +60,24 @@ public class ScenarioTests
         Assert.Equal(500, scenario.Cargo.Holding("Iron"));
     }
 
+    /// <summary>A refinery switched off still has its output moved: the conveyors carry items through a block switched off.</summary>
+    [Fact]
+    public void TheRefineryMovesStoreTheOutputOfASwitchedOffRefinery()
+    {
+        VRage.ObjectBuilders.MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
+        var scenario = new RefineryMoves();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+
+        scenario.Refinery.Enabled = false;
+        scenario.Refinery.Holds("Iron", 500, 1);
+        Run(sim);
+        sim.Press("Store Button");
+        Run(sim);
+
+        Assert.Equal(0, scenario.Refinery.Holding("Iron", 1));
+        Assert.Equal(500, scenario.Cargo.Holding("Iron"));
+    }
+
     static void Run(Simulation sim)
     {
         for (var i = 0; i < 400; i++)

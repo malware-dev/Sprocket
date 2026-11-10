@@ -1,8 +1,6 @@
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
-using VRage.Game;
 using VRage.Game.Components;
-using VRage.Game.ObjectBuilders.Definitions;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
@@ -13,16 +11,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const string Unheard = "The game raises no event as the most a block can draw changes.";
 
-        // The game's resource id for electricity, transcribed from its resource distributor.
-        static readonly MyDefinitionId Electricity = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Electricity");
 
-        static readonly OwnValue Use = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.CurrentInputByType(Electricity));
+        static readonly OwnValue Use = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.CurrentInputByType(GameResources.Electricity));
 
-        static readonly OwnValue Required = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.RequiredInputByType(Electricity));
+        static readonly OwnValue Required = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.RequiredInputByType(GameResources.Electricity));
 
-        static readonly OwnValue Most = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.MaxRequiredInputByType(Electricity));
+        static readonly OwnValue Most = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.MaxRequiredInputByType(GameResources.Electricity));
 
-        static readonly OwnValue Supplied = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.SuppliedRatioByType(Electricity) * 100d);
+        static readonly OwnValue Supplied = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.SuppliedRatioByType(GameResources.Electricity) * 100d);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -48,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var accepted = sink.AcceptedResources;
             for (var i = 0; i < accepted.Count; i++)
             {
-                if (accepted[i] == Electricity)
+                if (accepted[i] == GameResources.Electricity)
                     return true;
             }
 

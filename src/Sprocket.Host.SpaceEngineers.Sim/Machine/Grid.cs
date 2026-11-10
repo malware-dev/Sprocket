@@ -57,6 +57,8 @@ public sealed class Grid
             .Takes("CustomName", value => called = (string)value)
             .Gives("DisplayName", () => called)
             .Gives("GridSizeEnum", () => MyCubeSize.Large)
+            // The harness models no power: no distributor, which the mod reads as a grid with power.
+            .Gives("ResourceDistributor", () => null)
             .Gives("Closed", () => _closed)
             .Gives("MarkedForClose", () => _closed)
             .Does("GetBlocks", Blocks)

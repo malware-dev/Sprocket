@@ -148,16 +148,31 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _hearing[i]();
         }
 
-        /// <summary>Whether a step asking this block for <paramref name="action" /> would be lost: it is waited for, and the block is switched off.</summary>
+        /// <summary>Whether a step asking this block for <paramref name="action" /> would be lost: it is waited for, the block is switched off, and the action needs the block on.</summary>
         public bool Refuses(EntityAction action)
         {
-            return action.Lasts && IsSwitchedOff;
+            return action.Lasts && !action.Conveyed && IsSwitchedOff;
         }
 
         /// <summary>Whether this block is getting nowhere with <paramref name="action" />, which is waited for: switched off, unpowered or broken.</summary>
+        /// <remarks>An action through the conveyors stalls only where the grid has no power: the conveyors carry items through a block switched off.</remarks>
         public bool Stalls(EntityAction action)
         {
-            return action.Lasts && !IsWorking;
+            if (!action.Lasts)
+                return false;
+
+            return action.Conveyed ? !HasGridPower : !IsWorking;
+        }
+
+        /// <summary>Whether any power reaches the block's grid, which its conveyors need to carry anything.</summary>
+        bool HasGridPower
+        {
+            get
+            {
+                var grid = _block.CubeGrid;
+                var power = grid?.ResourceDistributor;
+                return power == null || power.MaxAvailableResourceByType(GameResources.Electricity, grid) > 0;
+            }
         }
 
         /// <summary>

@@ -423,6 +423,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says that the action added last works through the grid's conveyors, which carry items through a switched-off block.</summary>
+        public EntityKind ThroughConveyors()
+        {
+            _actions[_actions.Count - 1].ThroughConveyors();
+            return this;
+        }
+
         /// <summary>Says that reaching the state of the action added last takes time, and that the block announces getting there - see <see cref="Capability.Listen" />.</summary>
         public EntityKind LastingAnnounced()
         {

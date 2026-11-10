@@ -86,11 +86,33 @@ namespace Sprocket.GameTests
             _report.Check("move ingots into a refinery's own input", output.GetItemAmount(IronIngot) == 500 && input.GetItemAmount(IronIngot) == 0,
                 $"{(double)output.GetItemAmount(IronIngot):0.##} kg of iron ingots stayed in the output, {(double)input.GetItemAmount(IronIngot):0.##} kg reached the input");
 
-            // What the game itself allows out of a switched-off refinery, beside Sprocket refusing such a task.
+            // The conveyors carry items through a block switched off, so a move goes ahead from a refinery that is off.
             refinery.Enabled = false;
+            stored.Clear();
+            output.Clear();
+            output.AddItems(500, ingot);
             yield return PluginUpdates.PerSecond;
-            output.TransferItemTo(stored, 0, null, true, 100, true);
-            _report.Note($"with the refinery switched off, the game's own transfer moved {(double)stored.GetItemAmount(IronIngot):0.##} kg of its output's ingots to Refinery Cargo");
+            store.ActivateButton(0);
+            yield return 3 * PluginUpdates.PerSecond;
+            _report.Check("move ingots out of a switched off refinery's output", stored.GetItemAmount(IronIngot) == 500 && output.GetItemAmount(IronIngot) == 0,
+                $"{(double)stored.GetItemAmount(IronIngot):0.##} kg of iron ingots reached Refinery Cargo, {(double)output.GetItemAmount(IronIngot):0.##} kg stayed in the output");
+
+            // With no power on the grid, the programmable block Sprocket runs on is unpowered too, so a press runs nothing and is not
+            // kept: what reaches the cargo is nothing, before the power comes back or after.
+            var batteries = new[] { pasted.Find("Refine Battery") as IMyFunctionalBlock, pasted.Find("Refine Battery 2") as IMyFunctionalBlock };
+            stored.Clear();
+            output.Clear();
+            output.AddItems(500, ingot);
+            foreach (var battery in batteries)
+                battery.Enabled = false;
+            yield return PluginUpdates.PerSecond;
+            store.ActivateButton(0);
+            yield return 3 * PluginUpdates.PerSecond;
+            foreach (var battery in batteries)
+                battery.Enabled = true;
+            yield return 5 * PluginUpdates.PerSecond;
+            _report.Check("a press with no power on the grid runs nothing", stored.GetItemAmount(IronIngot) == 0 && output.GetItemAmount(IronIngot) == 500,
+                $"{(double)stored.GetItemAmount(IronIngot):0.##} kg of iron ingots in Refinery Cargo and {(double)output.GetItemAmount(IronIngot):0.##} kg in the output, 5 s after the power came back");
         }
     }
 }

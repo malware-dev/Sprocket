@@ -59,6 +59,16 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Whether this works through the grid's conveyors rather than the block's own machinery, so it goes on while the block is switched off.</summary>
+        public bool Conveyed { get; private set; }
+
+        /// <summary>Says this works through the grid's conveyors, which carry items through a switched-off block.</summary>
+        public EntityAction ThroughConveyors()
+        {
+            Conveyed = true;
+            return this;
+        }
+
         /// <summary>Whether the block announces getting to the state this action leads to, so a step waiting on it is looked at then.</summary>
         public bool ArrivalAnnounced { get; private set; }
 
