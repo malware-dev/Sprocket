@@ -42,9 +42,9 @@ public sealed class BlockDefinitions
     }
 
     /// <summary>The definition of the block <paramref name="type" /> and <paramref name="subtype" />, or null.</summary>
-    public BlockDefinition Find(string type, string subtype)
+    public BlockDefinition? Find(string type, string subtype)
     {
-        BlockDefinition found;
+        BlockDefinition? found;
         return _found.TryGetValue(Key(type, subtype), out found) ? found : null;
     }
 
@@ -67,9 +67,16 @@ public sealed class BlockDefinitions
                     mounts.Add(new Mount(side, (string)mount.Attribute("Default") == "true"));
             }
 
+            var classes = new List<string>();
+            foreach (var made in definition.Element("BlueprintClasses")?.Elements("Class") ?? new XElement[0])
+                classes.Add(made.Value.Trim());
+
+            var turn = (string)definition.Element("RotationAngleStepDeg");
             var center = definition.Element("Center");
             _found[Key(type, subtype)] = new BlockDefinition(type, subtype, Cell(size),
-                center == null ? Vector3I.Zero : Cell(center), mounts, (string)definition.Element("MaxStoredPower"));
+                center == null ? Vector3I.Zero : Cell(center), mounts, (string)definition.Element("MaxStoredPower"), classes,
+                turn == null ? null : int.Parse(turn, CultureInfo.InvariantCulture),
+                (string)definition.Element("AllowScaling") == "true");
         }
     }
 

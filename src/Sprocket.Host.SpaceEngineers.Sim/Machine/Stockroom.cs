@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage;
@@ -26,7 +27,7 @@ public sealed class Stockroom : Fitting
     double _room = double.MaxValue;
     readonly List<IMyInventory> _inventories = new List<IMyInventory>();
     readonly List<Action<IMyInventory, float, float>> _heard = new List<Action<IMyInventory, float, float>>();
-    readonly List<VRage.Game.ModAPI.Ingame.MyItemType> _accepted = new List<VRage.Game.ModAPI.Ingame.MyItemType>();
+    readonly List<List<VRage.Game.ModAPI.Ingame.MyItemType>> _accepted = new List<List<VRage.Game.ModAPI.Ingame.MyItemType>>();
 
     /// <summary>A block known by <paramref name="id" /> and called <paramref name="name" />, of the game's <paramref name="type" /> and <paramref name="subtype" />, shown as <paramref name="display" />, with <paramref name="inventories" /> inventories.</summary>
     public Stockroom(long id, string name, MyObjectBuilderType type, string subtype, string display, int inventories)
@@ -36,7 +37,9 @@ public sealed class Stockroom : Fitting
         {
             var held = new Dictionary<string, double>();
             _held.Add(held);
-            var inventory = Inventory(held);
+            var accepted = new List<VRage.Game.ModAPI.Ingame.MyItemType>();
+            _accepted.Add(accepted);
+            var inventory = Inventory(held, accepted);
             _inventories.Add(inventory);
             Rooms.Add(inventory, this);
         }
@@ -98,22 +101,38 @@ public sealed class Stockroom : Fitting
     /// <summary>Takes up to <paramref name="amount" /> of the item into <paramref name="into" />, as much as fits, and answers how much; none of an item its list of accepted items lacks, where it has a list.</summary>
     double Takes(IMyInventory into, string subtype, double amount)
     {
-        if (_accepted.Count > 0 && !_accepted.Contains(ItemType(subtype)))
+        var at = _inventories.IndexOf(into);
+        var accepted = _accepted[at];
+        if (accepted.Count > 0 && !accepted.Contains(ItemType(subtype)))
             return 0;
 
-        var held = _held[_inventories.IndexOf(into)];
+        var held = _held[at];
         var taken = Math.Max(0, Math.Min(amount, Free(held)));
-        Holds(subtype, Holding(subtype, _inventories.IndexOf(into)) + taken, _inventories.IndexOf(into));
+        Holds(subtype, Holding(subtype, at) + taken, at);
         return taken;
     }
 
     /// <summary>Lets its inventories take the item <paramref name="item" />.</summary>
     public void Accepts(VRage.Game.MyDefinitionId item)
     {
-        _accepted.Add(item);
+        foreach (var accepted in _accepted)
+            accepted.Add(item);
     }
 
-    IMyInventory Inventory(Dictionary<string, double> held)
+    /// <summary>Lets the inventory at <paramref name="at" /> take each of <paramref name="items" />, named as a step names them: <c>Ore/Iron</c>.</summary>
+    /// <remarks>Throws on an item of a kind the game has not registered.</remarks>
+    public void Accepts(IEnumerable<string> items, int at)
+    {
+        foreach (var item in items)
+        {
+            if (!ItemIds.Read(item, out var id))
+                throw new ArgumentException($"'{item}' is no kind of item the game has registered.", nameof(items));
+
+            _accepted[at].Add(id);
+        }
+    }
+
+    IMyInventory Inventory(Dictionary<string, double> held, List<VRage.Game.ModAPI.Ingame.MyItemType> accepted)
     {
         return Pretend.To<IMyInventory>()
             .Gives("VolumeFillFactor", () => FillFactor)
@@ -145,7 +164,7 @@ public sealed class Stockroom : Fitting
             })
             .Does("GetAcceptedItems", args =>
             {
-                ((List<VRage.Game.ModAPI.Ingame.MyItemType>)args[0]).AddRange(_accepted);
+                ((List<VRage.Game.ModAPI.Ingame.MyItemType>)args[0]).AddRange(accepted);
                 return null;
             })
             .Does("GetItemAmount", args =>

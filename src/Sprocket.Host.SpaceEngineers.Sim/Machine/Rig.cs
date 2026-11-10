@@ -4,6 +4,7 @@ using Castle.DynamicProxy;
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
+using Sprocket.Sim.Items;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
@@ -84,6 +85,44 @@ public sealed class Rig
 
     /// <summary>The players using every terminal as admins, for every block on the construct.</summary>
     public HashSet<long> Admins { get; } = new HashSet<long>();
+
+    /// <summary>The game's items the mod lists and every inventory on the construct takes, or null for none, as in a harness with no definitions.</summary>
+    public GameStock? Stock { get; private set; }
+
+    /// <summary>Gives the construct the game's items in <paramref name="stock" />: the mod lists them, and each block's inventories take what its definition says, on the blocks welded on already and on those to come.</summary>
+    public Rig Stocked(GameStock stock)
+    {
+        // The game registers its kinds of object by name as it starts, which reading an item's kind from its name needs:
+        // ores, ingots, components and tools in one assembly, bottles, datapads and seeds in the other.
+        MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
+        MyObjectBuilderType.RegisterFromAssembly(typeof(MyObjectBuilder_Refinery).Assembly);
+
+        Stock = stock;
+        foreach (var fitting in Fitted)
+        {
+            if (fitting is Stockroom room)
+                Shelve(room);
+        }
+
+        ItemIds.Use(stock.Items);
+        return this;
+    }
+
+    /// <summary>Has each of <paramref name="room" />'s inventories take what the game's definition of its block says, where the construct is stocked.</summary>
+    Stockroom Shelve(Stockroom room)
+    {
+        if (Stock == null)
+            return room;
+
+        var definition = room.Definition;
+        var type = definition.TypeIdString.StartsWith("MyObjectBuilder_", StringComparison.Ordinal)
+            ? definition.TypeIdString.Substring("MyObjectBuilder_".Length)
+            : definition.TypeIdString;
+        for (var at = 0; at < room.Block.InventoryCount; at++)
+            room.Accepts(Stock.Taken(type, definition.SubtypeName, at), at);
+
+        return room;
+    }
 
     /// <summary>Hands every block on the construct to <paramref name="identity" />, shared as <paramref name="share" /> says, as the game's transfer of a whole ship does.</summary>
     public void Own(long identity, Sharing share = Sharing.Nobody)
@@ -578,13 +617,13 @@ public sealed class Rig
     /// <summary>Welds on a cargo container called <paramref name="name" />, with one inventory.</summary>
     public Stockroom Cargo(long id, string name)
     {
-        return Weld(new Stockroom(id, name, Type<VRage.Game.MyObjectBuilder_CargoContainer>(), "LargeBlockLargeContainer", "Large Cargo Container", 1));
+        return Shelve(Weld(new Stockroom(id, name, Type<VRage.Game.MyObjectBuilder_CargoContainer>(), "LargeBlockLargeContainer", "Large Cargo Container", 1)));
     }
 
     /// <summary>Welds on a refinery called <paramref name="name" />, with an input and an output.</summary>
     public Stockroom Refinery(long id, string name)
     {
-        return Weld(new Stockroom(id, name, Type<MyObjectBuilder_Refinery>(), "LargeRefinery", "Refinery", 2));
+        return Shelve(Weld(new Stockroom(id, name, Type<MyObjectBuilder_Refinery>(), "LargeRefinery", "Refinery", 2)));
     }
 
     /// <summary>An interior light, named, with the game's own type behind it.</summary>
@@ -727,6 +766,9 @@ public sealed class Rig
 
         // And every reading of a vent's gas, over this rig's own vents.
         VentFlow.Use(new RigGas(this));
+
+        // And every list of the game's items, over the game's own definitions where the construct is stocked with them.
+        ItemIds.Use(Stock?.Items);
 
         // The game's log, as the game makes it at start. This one is never opened, so it takes every line and keeps none.
         MyLog.Default ??= new MyLog();

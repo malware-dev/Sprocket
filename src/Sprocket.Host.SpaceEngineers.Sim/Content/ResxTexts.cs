@@ -6,11 +6,11 @@ using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Sim.Content
 {
-    /// <summary>The mod's texts read straight out of its .resx files, layered the way the game's <c>MyTexts.LoadTexts</c> layers them.</summary>
+    /// <summary>Texts read straight out of a folder of .resx files, the mod's or the game's, layered the way the game's <c>MyTexts.LoadTexts</c> layers them.</summary>
     /// <remarks>
     /// Every file with no culture first, such as <c>MyTexts.resx</c> and <c>Codex.resx</c>, then each one's
     /// <c>&lt;culture&gt;</c> file over it, then its <c>&lt;culture&gt;-&lt;subculture&gt;</c> file, each replacing what it
-    /// repeats. The files are the ones the mod ships, copied beside the harness.
+    /// repeats.
     /// </remarks>
     public sealed class ResxTexts : ITextSource
     {
@@ -45,7 +45,7 @@ namespace Sprocket.Sim.Content
             }
         }
 
-        /// <summary>The folder the mod's texts are copied to beside the harness.</summary>
+        /// <summary>The folder the mod's texts are copied to beside the harness, the files the mod ships.</summary>
         public static string Beside => Path.Combine(AppContext.BaseDirectory, "Content", "Localization");
 
         /// <inheritdoc />

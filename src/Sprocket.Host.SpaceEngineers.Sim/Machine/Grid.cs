@@ -100,7 +100,7 @@ public sealed class Grid
         _slim[fitting] = Pretend.To<IMySlimBlock>()
             .Gives("FatBlock", () => fitting.Block)
             .Gives("CubeGrid", () => Block)
-            .Gives("BlockDefinition", () => null!)
+            .Gives("BlockDefinition", () => fitting.GameDefinition!)
             .Done();
         fitting.Slim = _slim[fitting];
 

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using VRage.Game;
@@ -13,35 +12,37 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string GamePrefix = "MyObjectBuilder_";
 
+        // Static because the game has one list of items, and the harness puts its own in for the length of a test.
+        static IItemCatalog _catalog = new GameItemCatalog();
+
         /// <summary>A field choosing one of the game's public items, named <paramref name="name" />, by the names the game shows them by, of those <paramref name="block" /> can hold where it is given.</summary>
-        /// <remarks>Where no definitions are loaded, as in the test harness, a box that takes any item written out.</remarks>
+        /// <remarks>Where the catalog lists no items, a box that takes any item written out.</remarks>
         public static Field Asked(string name, IMyTerminalBlock block = null)
         {
+            var names = new List<string>();
+            var ids = new List<string>();
+            _catalog.Public(names, ids);
+
+            var held = block == null || ids.Count == 0 ? null : Held(block);
             var words = new List<string>();
             var means = new List<string>();
-
-            var definitions = MyDefinitionManager.Static;
-            if (definitions != null)
+            for (var i = 0; i < ids.Count; i++)
             {
-                var held = block == null ? null : Held(block);
-                foreach (var item in definitions.GetPhysicalItemDefinitions())
-                {
-                    if (!item.Public || (held != null && !held.Contains(Said(item.Id))))
-                        continue;
+                if (held != null && !held.Contains(ids[i]))
+                    continue;
 
-                    words.Add(item.DisplayNameText);
-                    means.Add(Said(item.Id));
-                }
+                words.Add(names[i]);
+                means.Add(ids[i]);
             }
 
-            
-            
-            
-            
-            
-            
-            
             return Choosing(name, words, means);
+        }
+
+        /// <summary>Puts something else behind every list of the game's items.</summary>
+        /// <remarks>For the test harness; null puts the game back.</remarks>
+        public static void Use(IItemCatalog catalog)
+        {
+            _catalog = catalog ?? new GameItemCatalog();
         }
 
         /// <summary>The items any inventory of <paramref name="block" /> can hold, as a step or a test names them.</summary>

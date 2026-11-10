@@ -4,12 +4,20 @@ using VRageMath;
 
 namespace Sprocket.Sim.Blueprints;
 
-/// <summary>What the game's definition of a kind of block says about placing it.</summary>
+/// <summary>What the game's definition of a kind of block says about placing it and about the work it does.</summary>
 public sealed class BlockDefinition
 {
-    /// <summary>The definition of the block <paramref name="type" /> and <paramref name="subtype" />.</summary>
-    public BlockDefinition(string type, string subtype, Vector3I size, Vector3I center, IReadOnlyList<Mount> mounts, string stored)
+    /// <summary>
+    /// The definition of the block <paramref name="type" /> and <paramref name="subtype" />, making what the blueprint classes
+    /// <paramref name="classes" /> make, turning a projection by <paramref name="turn" /> degrees where it says, and scaling one
+    /// where <paramref name="scales" /> says.
+    /// </summary>
+    public BlockDefinition(string type, string subtype, Vector3I size, Vector3I center, IReadOnlyList<Mount> mounts, string stored,
+        IReadOnlyList<string> classes, int? turn, bool scales)
     {
+        Classes = classes;
+        Turn = turn;
+        Scales = scales;
         Stored = stored;
         Type = type;
         Subtype = subtype;
@@ -32,6 +40,15 @@ public sealed class BlockDefinition
 
     /// <summary>How much power it stores when full, as the definition writes it, or null.</summary>
     public string Stored { get; private set; }
+
+    /// <summary>The blueprint classes a production block makes, as the definition lists them; none on any other block.</summary>
+    public IReadOnlyList<string> Classes { get; private set; }
+
+    /// <summary>The degrees a projector turns its projection by in one step, where the definition says.</summary>
+    public int? Turn { get; private set; }
+
+    /// <summary>Whether a projector may scale its projection.</summary>
+    public bool Scales { get; private set; }
 
     /// <summary>The faces it mounts by, as the definition lists them.</summary>
     public IReadOnlyList<Mount> Mounts { get; private set; }

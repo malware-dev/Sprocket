@@ -138,6 +138,9 @@ public abstract class Fitting
     /// <summary>The block as its grid holds it, which the grid gives it as it is welded; null before.</summary>
     public IMySlimBlock? Slim { get; set; }
 
+    /// <summary>The game's own definition of the block, which its slim block answers; null, as in a harness with no definitions loaded, until a test gives one.</summary>
+    public MyDefinitionBase? GameDefinition { get; set; }
+
     /// <summary>The identity of the player who owns the block, or 0 where nobody does; setting it tells its grid, as the game does.</summary>
     public long Owner
     {

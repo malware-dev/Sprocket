@@ -1,4 +1,6 @@
 using Sandbox.Common.ObjectBuilders;
+using Sandbox.Definitions;
+using Sprocket.Sim.Blueprints;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -199,8 +201,8 @@ public class ProductionTests
     /// <summary>A projector whose blocks left a test sets, offering the game's own settings for where and how it shows.</summary>
     sealed class Printer : Fitting
     {
-        public Printer(long id, string name)
-            : base(id, name, new MyObjectBuilderType(typeof(MyObjectBuilder_Projector)), "LargeProjector", "Projector")
+        public Printer(long id, string name, string subtype = "LargeProjector")
+            : base(id, name, new MyObjectBuilderType(typeof(MyObjectBuilder_Projector)), subtype, "Projector")
         {
             Fit(Pretend.To<IMyProjector>().Gives("RemainingBlocks", () => Left));
 
@@ -707,6 +709,39 @@ public class ProductionTests
         Vetted(drill, ReachKind.Action, "TerrainClearingMode");
         Unvetted(drill, ReachKind.Value, "TerrainClearingMode");
         Unvetted(drill, ReachKind.Action, "TerrainClearingMode_On", "TerrainClearingMode_Off");
+    }
+
+    /// <summary>
+    /// A projector turns its projection by the step the game's definition of it gives, a quarter turn on the plain projector and
+    /// a degree on the scaling one, where the game's content is here.
+    /// </summary>
+    [Theory]
+    [InlineData("LargeProjector", 90)]
+    [InlineData("SmallProjector", 90)]
+    [InlineData("LargeBlockConsole", 1)]
+    public void AProjectorTurnsByTheStepItsDefinitionGives(string subtype, int turn)
+    {
+        var defined = BlockDefinitions.FromGame().Find("Projector", subtype);
+        if (defined == null)
+            return;
+
+        // A projector definition that names no step turns 90 degrees at a time, from the game's projector object builder.
+        var step = defined.Turn ?? 90;
+        Assert.Equal(turn, step);
+
+        var ship = new Ship();
+        var printer = new Printer(1, "Printer", subtype)
+        {
+            GameDefinition = new MyProjectorDefinition { AllowScaling = defined.Scales, RotationAngleStepDeg = step }
+        };
+        var projector = ship.Rig.Entity(ship.Weld(printer).Id).Kind;
+
+        foreach (var turned in new[] { "RotX", "RotY", "RotZ" })
+        {
+            Assert.True(projector.Measures(turned, out var unit, out _, out var stepped, out _), turned);
+            Assert.Equal("°", unit);
+            Assert.Equal(step, stepped);
+        }
     }
 
     /// <summary>A projector's members are vetted, and the game's increase and decrease steps beside its placement are not.</summary>

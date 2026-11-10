@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -287,14 +288,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             _offered = true;
         }
 
-        /// <summary>Finishes the form on Enter, while it or a part of it that does not take Enter holds the keyboard.</summary>
+        /// <summary>Finishes the form on Enter, while it or a part of it that does not take Enter holds the keyboard, and no list of it is open.</summary>
         protected override bool OnKeyDown(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
-            if (key != MyKeys.Enter)
+            if (key != MyKeys.Enter || IsListOpen())
                 return false;
 
             _submit.Execute();
             return true;
+        }
+
+        // An open list's Enter chooses what its search found, and reaches the form on its way up from the list.
+        bool IsListOpen()
+        {
+            for (var i = 0; i < _fields.Count; i++)
+            {
+                var list = _fields[i] as DropDown;
+                if (list != null && list.IsOpen)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Holds every value to what it takes from now on, marking each that fails.</summary>

@@ -27,16 +27,6 @@ public sealed class StockWatch : Scenario
     /// <inheritdoc />
     public override IReadOnlyList<GameCheck> Checks => new[]
     {
-        new GameCheck("The item list holds what the block can hold",
-            "Sprocket Stock Watch pasted.",
-            new[]
-            {
-                "Open the Stock logic system and start a new when trigger on Stock Refinery.",
-                "Pick amount, and open the item list.",
-                "Do the same on Stock Cargo, then cancel."
-            },
-            "The refinery lists ores and ingots and nothing else. The cargo container lists every item, by the names the game shows. The inventory row shows input and output on the refinery, and no row on the cargo container.",
-            "The harness has no item definitions; only the game says what a block accepts and what an item is called."),
         new GameCheck("Stock in a cargo container fires its trigger",
             "Sprocket Stock Watch pasted, its Stock logic system switched on, in creative mode.",
             new[]
@@ -54,12 +44,7 @@ public sealed class StockWatch : Scenario
                 "Take it all out, then put 200 in again."
             },
             "Stock Light comes on for 3 seconds at each 200 put in, and the line reads \"the amount of Iron Ore in the input of Stock Refinery is above 100 kg\".",
-            "Only the game has a refinery's real input, and its event."),
-        new GameCheck("A unit follows the item",
-            "Sprocket Stock Watch pasted.",
-            new[] { "Open a new when trigger on Stock Cargo, pick amount, and pick Iron Ingot, then Steel Plate, in the item list." },
-            "The number box says kg for Iron Ingot and pcs for Steel Plate.",
-            "The item list holds nothing in the harness, so only the game picks a real item from it.")
+            "Only the game has a refinery's real input, and its event.")
     };
 
     /// <inheritdoc />
