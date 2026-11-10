@@ -2641,11 +2641,11 @@
     <comment>Codex entry on the block member "charge" of Railgun, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Railgun.TimeUntilCharged" xml:space="preserve">
-    <value>Hvor lenge det er til railgunen er fulladet, i sekunder.</value>
+    <value>Hvor lenge det er til railgunen er fulladet, i sekunder. Uten strøm på rutenettet er det uendelig, større enn et hvilket som helst tall. Er den slått av, er det 0.</value>
     <comment>Codex entry on the block member "time until charged" of Railgun, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Railgun.Charging" xml:space="preserve">
-    <value>Oppfylt mens railgunen er slått på og ikke fulladet.</value>
+    <value>Oppfylt mens railgunen er slått på, har strøm og ikke er fulladet.</value>
     <comment>Codex entry on the block member "charging" of Railgun, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Railgun.Charged" xml:space="preserve">

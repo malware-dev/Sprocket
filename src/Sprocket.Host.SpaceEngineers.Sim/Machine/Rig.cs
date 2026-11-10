@@ -488,6 +488,12 @@ public sealed class Rig
         return Weld(new Rotor(id, name, Type<MyObjectBuilder_MotorAdvancedStator>(), "LargeHinge", "Hinge"));
     }
 
+    /// <summary>A large railgun, named, its capacitor empty.</summary>
+    public Railgun Railgun(long id, string name)
+    {
+        return Weld(new Railgun(id, name, Type<MyObjectBuilder_SmallMissileLauncherReload>(), "LargeRailgun", "Large Railgun"));
+    }
+
     /// <summary>A beacon, answering the game's own beacon interface.</summary>
     public Beacon Beacon(long id, string name)
     {

@@ -2,9 +2,6 @@ using System.Collections.Generic;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
-using VRage;
-using VRage.Game;
-using VRage.ObjectBuilders;
 using VRageMath;
 
 namespace Sprocket.GameTests
@@ -57,18 +54,7 @@ namespace Sprocket.GameTests
 
         static IMyProjector Build(string subtype, Vector3D at)
         {
-            var block = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_Projector>(subtype);
-            block.Min = Vector3I.Zero;
-            var grid = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_CubeGrid>();
-            grid.GridSizeEnum = MyCubeSize.Large;
-            grid.IsStatic = true;
-            grid.PersistentFlags = MyPersistentEntityFlags2.InScene;
-            grid.PositionAndOrientation = new MyPositionAndOrientation(at, Vector3.Forward, Vector3.Up);
-            grid.CubeBlocks.Add(block);
-            var built = (VRage.Game.ModAPI.IMyCubeGrid)MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid);
-            var blocks = new List<VRage.Game.ModAPI.IMySlimBlock>();
-            built.GetBlocks(blocks, slim => slim.FatBlock is IMyProjector);
-            return blocks.Count == 0 ? null : (IMyProjector)blocks[0].FatBlock;
+            return new BuiltGrid(at, BuiltGrid.Block<MyObjectBuilder_Projector>(subtype, Vector3I.Zero)).Find<IMyProjector>();
         }
     }
 }

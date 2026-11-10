@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
-using VRage;
-using VRage.Game;
-using VRage.Game.ModAPI;
-using VRage.ObjectBuilders;
 using VRageMath;
 using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
 
@@ -29,9 +25,9 @@ namespace Sprocket.GameTests
         /// <summary>The test's steps, each yielding the plugin updates to wait before the next.</summary>
         public IEnumerator<int> Run()
         {
-            IMyDoor door;
-            IMyFunctionalBlock battery;
-            Build(new Vector3D(0, 0, 320), out door, out battery);
+            var grid = new BuiltGrid(new Vector3D(0, 0, 320), BuiltGrid.Battery(Vector3I.Zero), BuiltGrid.Block<MyObjectBuilder_Door>("", new Vector3I(1, 0, 0)));
+            var door = grid.Find<IMyDoor>();
+            var battery = grid.Find<IMyBatteryBlock>();
             if (door == null || battery == null)
             {
                 _report.Fail("door", "the door or its battery was not built");
@@ -134,37 +130,6 @@ namespace Sprocket.GameTests
             {
                 _thirds++;
                 yield return PluginUpdates.PerSecond / 3;
-            }
-        }
-
-        static void Build(Vector3D at, out IMyDoor door, out IMyFunctionalBlock battery)
-        {
-            var stored = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_BatteryBlock>("LargeBlockBatteryBlock");
-            stored.Min = Vector3I.Zero;
-            stored.CurrentStoredPower = 3;
-            stored.Enabled = true;
-            var plain = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_Door>("");
-            plain.Min = new Vector3I(1, 0, 0);
-            plain.Enabled = true;
-
-            var grid = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_CubeGrid>();
-            grid.GridSizeEnum = MyCubeSize.Large;
-            grid.IsStatic = true;
-            grid.PersistentFlags = MyPersistentEntityFlags2.InScene;
-            grid.PositionAndOrientation = new MyPositionAndOrientation(at, Vector3.Forward, Vector3.Up);
-            grid.CubeBlocks.Add(stored);
-            grid.CubeBlocks.Add(plain);
-            var built = (IMyCubeGrid)MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid);
-            var blocks = new List<IMySlimBlock>();
-            built.GetBlocks(blocks);
-            door = null;
-            battery = null;
-            foreach (var block in blocks)
-            {
-                if (block.FatBlock is IMyDoor)
-                    door = (IMyDoor)block.FatBlock;
-                else if (block.FatBlock is IMyBatteryBlock)
-                    battery = (IMyFunctionalBlock)block.FatBlock;
             }
         }
     }

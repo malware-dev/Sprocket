@@ -42,10 +42,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return capacitor != null && capacitor.IsCharged;
             }));
 
+            // With no power on the grid the game gives the time remaining as infinite, measured on the dedicated server: a
+            // capacitor that never gets there is not charging.
             _charging = OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
-                return capacitor != null && !capacitor.IsCharged && capacitor.TimeRemaining > 0f;
+                return capacitor != null && !capacitor.IsCharged && capacitor.TimeRemaining > 0f
+                    && !float.IsPositiveInfinity(capacitor.TimeRemaining);
             }));
         }
 

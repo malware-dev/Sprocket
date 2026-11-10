@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
@@ -270,6 +271,7 @@ public abstract class Fitting
         var container = Pretend.To<IMyEntityComponentContainer>()
             .Answers("TryGet", Component)
             .Answers("Get", _ => null)
+            .Answers("GetEnumerator", _ => Carried().GetEnumerator())
             .Done();
 
         return stand
@@ -628,6 +630,12 @@ public abstract class Fitting
 
     readonly Dictionary<Type, object> _components = new Dictionary<Type, object>();
 
+    /// <summary>The components given to this block that are the game's own kind, which are what walking its container finds.</summary>
+    IEnumerable<MyComponentBase> Carried()
+    {
+        return _components.Values.OfType<MyComponentBase>().Distinct();
+    }
+
     /// <summary>
     /// A component the mod asks a block for: its toolbar, one a test gave it, or one <see cref="Part" /> gives.
     /// </summary>
@@ -637,7 +645,19 @@ public abstract class Fitting
     /// </remarks>
     object Component(Castle.DynamicProxy.IInvocation invocation)
     {
-        var wanted = invocation.GenericArguments.Length == 1 ? invocation.GenericArguments[0] : null;
+        // Castle gives no generic arguments at all for a method that has none.
+        var generic = invocation.GenericArguments ?? Type.EmptyTypes;
+
+        // Asked by the component's own type, as the game is once a mod has learned that type by walking the container.
+        var named = generic.Length == 0 ? invocation.Arguments[0] as Type : null;
+        if (named != null)
+        {
+            var found = Carried().FirstOrDefault(named.IsInstanceOfType);
+            invocation.Arguments[invocation.Arguments.Length - 1] = found;
+            return found != null;
+        }
+
+        var wanted = generic.Length == 1 ? generic[0] : null;
         object held;
         var carried = wanted == null ? null : _components.TryGetValue(wanted, out held) ? held : Part(wanted);
         if (carried != null)

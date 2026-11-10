@@ -2837,11 +2837,11 @@
     <comment>Codex entry on the block member "charge" of Railgun, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Railgun.TimeUntilCharged" xml:space="preserve">
-    <value>How long until the railgun is fully charged, in seconds.</value>
+    <value>How long until the railgun is fully charged, in seconds. With no power on the grid it is endless, above any number. Switched off, it is 0.</value>
     <comment>Codex entry on the block member "time until charged" of Railgun, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Railgun.Charging" xml:space="preserve">
-    <value>Met while the railgun is switched on and not fully charged.</value>
+    <value>Met while the railgun is switched on, has power, and is not fully charged.</value>
     <comment>Codex entry on the block member "charging" of Railgun, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Railgun.Charged" xml:space="preserve">
