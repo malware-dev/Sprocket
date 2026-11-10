@@ -30,28 +30,36 @@ namespace Sprocket.Sim.Simulation
 
         /// <summary>A frame of the editor on a block holding <paramref name="holding" />, or nothing for null.</summary>
         public Offscreen(float windowWidth, float windowHeight, string holding = null)
-            : this(windowWidth, windowHeight, () => holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding))
+            : this(windowWidth, windowHeight, () => holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding), false)
         {
         }
 
         /// <summary>A frame of the editor on a construct of <paramref name="rig" />'s blocks that remembers nothing.</summary>
         public Offscreen(float windowWidth, float windowHeight, Rig rig)
-            : this(windowWidth, windowHeight, () => EditorScene.On(rig))
+            : this(windowWidth, windowHeight, () => EditorScene.On(rig), false)
+        {
+        }
+
+        /// <summary>A frame of the editor on <paramref name="rig" />'s blocks, its letters measured with the game's own widths where <paramref name="gameFonts" /> and the game is installed.</summary>
+        public Offscreen(float windowWidth, float windowHeight, Rig rig, bool gameFonts)
+            : this(windowWidth, windowHeight, () => EditorScene.On(rig), gameFonts)
         {
         }
 
         /// <summary>A frame of the editor on the scene <paramref name="scene" /> makes, made once the device it draws to is in place.</summary>
-        Offscreen(float windowWidth, float windowHeight, System.Func<EditorScene> scene)
+        Offscreen(float windowWidth, float windowHeight, System.Func<EditorScene> scene, bool gameFonts)
         {
             _width = windowWidth;
             _height = windowHeight;
 
             _device = new ScreenSpaceDevice(SprocketContent.Instance);
 
-            // The letters are a stand-in, because the game's own widths need the game. The mod's own
-            // faces are not: they are in the build output, so they are measured exactly and a frame
-            // reproduces on a machine that has never had Space Engineers.
-            var fonts = new FontSet(new FallbackFonts(_device, "Segoe UI"));
+            // The letters are a stand-in unless the game's own widths are asked for, because those need the game. The mod's
+            // own faces are not: they are in the build output, so they are measured exactly and a frame reproduces on a
+            // machine that has never had Space Engineers.
+            var game = gameFonts ? SeFontMetrics.Load(_device) : null;
+            HasGameFonts = game != null;
+            var fonts = new FontSet(game ?? (IFontMetrics)new FallbackFonts(_device, "Segoe UI"));
             foreach (var font in SprocketContent.Instance.Fonts)
                 fonts = fonts.And(font.Name, font.Metrics(_device));
 
@@ -69,6 +77,12 @@ namespace Sprocket.Sim.Simulation
 
         /// <summary>The editor being drawn.</summary>
         public EditorScene Scene => _scene;
+
+        /// <summary>Whether its letters are measured with the game's own widths.</summary>
+        public bool HasGameFonts { get; }
+
+        /// <summary>What its letters are measured with.</summary>
+        public IFontMetrics Fonts => _device.Fonts;
 
         /// <summary>The last frame's calls. Beginning a frame empties it, so this is never a history.</summary>
         public IList<DrawCommand> Commands => _device.Commands;

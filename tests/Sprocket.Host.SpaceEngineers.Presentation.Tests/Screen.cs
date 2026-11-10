@@ -1,4 +1,5 @@
 using Sprocket.Sim.Machine;
+using Sprocket.Sim.Measuring;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -42,6 +43,25 @@ sealed class Screen
 
         return new Screen(frame);
     }
+
+    /// <summary>The editor on <paramref name="rig" />'s blocks, its letters measured with the game's own widths, after <paramref name="script" />.</summary>
+    /// <remarks>Needs the game installed; <see cref="HasGameFonts" /> says whether it found it.</remarks>
+    public static Screen WithGameFonts(Rig rig, params string[] script)
+    {
+        var frame = new Offscreen(Width, Height, rig, true);
+        frame.Play(Script.Parse(script, 0));
+
+        return new Screen(frame);
+    }
+
+    /// <summary>Whether the letters are measured with the game's own widths.</summary>
+    public bool HasGameFonts => _frame.HasGameFonts;
+
+    /// <summary>Every run of words the last frame drew past the side of its clip.</summary>
+    public List<string> Cut => TextFit.Cut(_frame.Commands, _frame.Fonts, Width, Height);
+
+    /// <summary>Every pair of runs of words the last frame drew over each other.</summary>
+    public List<string> Overlapping => TextFit.Overlapping(_frame.Commands, _frame.Fonts, Width, Height);
 
     /// <summary>The editor on a block that already holds <paramref name="program" />, after <paramref name="script" />.</summary>
     public static Screen Holding(string program, params string[] script)
