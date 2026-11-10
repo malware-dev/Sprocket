@@ -293,12 +293,15 @@ public class MoveItemsScreenTests
         Assert.Equal("Cargo 2", system.First!.FilledWith(Target(screen).Slots[0])![0]);
     }
 
-    /// <summary>A slot whose name holds a comma stays one slot when its step is opened and finished.</summary>
+    /// <summary>A slot whose name holds a comma stays one slot on its button, and when its step is finished.</summary>
     [Fact]
     public void ACommaInASlotsNameKeepsItOneSlot()
     {
         var screen = Picking(out _, "bay, left");
-        screen.Editor.Pick().Arguments!.Form.Fields[0].Text = "bay, left";
+        var field = (SlotsField)screen.Editor.Pick().Arguments!.Form.Fields[0];
+        field.Text = "bay, left";
+
+        Assert.Equal("bay, left", field.Within().OfType<SlotChip>().Single().Text);
 
         screen.Editor.PressPrimary();
         screen.Run(4);

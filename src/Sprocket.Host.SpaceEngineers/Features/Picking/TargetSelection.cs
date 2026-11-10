@@ -39,6 +39,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return _chosen != null ? Made() : Named(said);
         }
 
+        /// <summary>Has every field in <paramref name="form" /> that takes slots read its names as the slots of the logic system, a name with a comma in it whole.</summary>
+        public void Reads(FieldSet form)
+        {
+            foreach (var field in form.Fields)
+                (field as SlotsField)?.ReadNamesBy(Named);
+        }
+
         /// <summary>Opens the selector of the first field in <paramref name="strip" /> that takes slots, which finishes the pick through <paramref name="finish" />; whether there is one.</summary>
         public bool SelectFirst(PickStrip strip, ICommand finish)
         {

@@ -875,16 +875,16 @@
     <value>Velg</value>
   </data>
   <data name="Sprocket.Trouble.ItemsNotConnected" xml:space="preserve">
-    <value>kan ikke flytte gjenstandene fordi transportsystemet ikke kobler den til dit de skal</value>
+    <value>kan ikke flytte gjenstandene fordi den ikke er koblet til målet gjennom transportsystemet</value>
   </data>
   <data name="Sprocket.Trouble.ItemsNoRoom" xml:space="preserve">
-    <value>kan ikke flytte gjenstandene fordi det ikke er plass der de skal</value>
+    <value>kan ikke flytte gjenstandene fordi det ikke er plass til dem der de skal</value>
   </data>
   <data name="Sprocket.Trouble.ItemsNotAccepted" xml:space="preserve">
-    <value>kan ikke flytte gjenstandene fordi de ikke tas imot der de skal</value>
+    <value>kan ikke flytte gjenstandene fordi målet ikke tar imot dem</value>
   </data>
   <data name="Sprocket.Trouble.ItemsAlreadyThere" xml:space="preserve">
-    <value>kan ikke flytte gjenstandene fordi de allerede er der de skal</value>
+    <value>kan ikke flytte gjenstandene fordi de allerede er der de skal være</value>
   </data>
   <data name="Sprocket.Trouble.ItemsNoStock" xml:space="preserve">
     <value>har ingen av gjenstandene som skal flyttes</value>

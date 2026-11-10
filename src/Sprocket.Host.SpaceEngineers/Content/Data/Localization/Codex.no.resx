@@ -3545,19 +3545,19 @@
     <comment>Codex entry on the block member "empty" of CryoChamber, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.MoveItems" xml:space="preserve">
-    <value>Flytter gjenstander ut av dette inventaret til målet, og fyller én før den neste. Transportsystemet må koble dem sammen.</value>
+    <value>Flytter gjenstander ut av dette inventaret til målet, og fyller ett om gangen. De må være koblet sammen gjennom transportsystemet.</value>
   </data>
   <data name="Sprocket.Member.Option.To" xml:space="preserve">
-    <value>Hvor gjenstandene skal: blokkene eller plassene som er valgt, hver installasjon med sine egne.</value>
+    <value>Hvor gjenstandene skal hen: de valgte blokkene eller plassene, hver installasjon med sine egne.</value>
   </data>
   <data name="Sprocket.Member.Option.Items" xml:space="preserve">
     <value>Gjenstanden som skal flyttes, eller alle gjenstander.</value>
   </data>
   <data name="Sprocket.Member.Option.HowMuch" xml:space="preserve">
-    <value>Hvor mye som skal flyttes. Står den tom, flyttes alt.</value>
+    <value>Hvor mye som skal flyttes. Står det tomt, flyttes alt.</value>
   </data>
   <data name="Sprocket.Member.Option.WhenStuck" xml:space="preserve">
-    <value>`hold` venter til gjenstandene kan flyttes. `move on` går videre med det som er flyttet.</value>
+    <value>`hold` venter til gjenstandene kan flyttes. `move on` går videre med det som er flyttet så langt.</value>
   </data>
   <data name="Sprocket.Member.Option.Door.Force" xml:space="preserve">
     <value>`normal` stopper steget med et problem hvis noe snur døra. `forced` gir døra beskjed på nytt hver gang noe snur den, til den er framme eller ikke lenger kan bevege seg.</value>

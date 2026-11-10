@@ -210,6 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var made = strip.Arguments == null;
             var arguments = strip.Restate(shown, chosenName, fields, Filled, new ColorOffer(colors, _editor.Viewer, _editor.Preferred));
+            Target.Reads(arguments.Form);
             if (_offering)
                 arguments.Form.Offer();
             arguments.Describe(about);

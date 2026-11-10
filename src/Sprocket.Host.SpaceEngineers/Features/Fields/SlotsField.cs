@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         readonly SlotChip _select;
         readonly string _unselected;
         readonly string _mark;
+        Func<string, List<string>> _read = Split;
         string _text = "";
 
         /// <summary>A chip that says <paramref name="unselected" /> until slots are given and then names them under <paramref name="mark" />, and raises <see cref="Selecting" /> when pressed.</summary>
@@ -51,13 +52,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     return;
                 }
 
-                var names = new List<string>();
+                var names = _read(_text);
                 var marks = new List<string>();
-                foreach (var name in _text.Split(','))
-                {
-                    names.Add(name.Trim());
+                for (var i = 0; i < names.Count; i++)
                     marks.Add(_mark);
-                }
 
                 var pieces = new List<Mention>();
                 SentenceText.Slots(names, marks, pieces);
@@ -74,6 +72,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public Element Keyboard => _select;
 
+        /// <summary>Reads the names its words hold by <paramref name="read" />, which knows the slots the names can be, and says them again.</summary>
+        public void ReadNamesBy(Func<string, List<string>> read)
+        {
+            _read = read;
+            Text = _text;
+        }
+
         /// <summary>Asks to choose the slots, as pressing the button does.</summary>
         public void Select()
         {
@@ -85,6 +90,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             Text = names;
             Edited?.Invoke();
+        }
+
+        /// <summary>The names in <paramref name="text" />, comma by comma.</summary>
+        static List<string> Split(string text)
+        {
+            var names = new List<string>();
+            foreach (var name in text.Split(','))
+                names.Add(name.Trim());
+
+            return names;
         }
     }
 }
