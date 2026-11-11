@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
+using VRage.Input;
 using VRageMath;
 using VRageRender;
 
@@ -42,14 +43,49 @@ namespace Sprocket.GameTests
 
             open.Action(block);
             yield return 2 * PluginUpdates.PerSecond;
+            var editor = InGameEditor.Of(block);
+            if (editor == null)
+            {
+                _report.Fail("editor open", "Sprocket keeps no editor for the block it opened on");
+                yield break;
+            }
 
-            var picture = Path.Combine(_shots, "editor-home.png");
+            foreach (var stop in new[] { new[] { "home" }, new[] { "library", "Library" }, new[] { "logic system", "Kept Here" }, new[] { "installation panel", "Kept Here", "Installation panel" }, new[] { "slots switched off", "Kept Here", "off", "Installation panel" }, new[] { "optimize slots asks", "Kept Here", "Installation panel", "Optimize slots" } })
+            {
+                editor.Home();
+                yield return PluginUpdates.PerSecond / 2;
+                var pressed = true;
+                for (var i = 1; i < stop.Length && pressed; i++)
+                {
+                    pressed = stop[i] == "off" ? editor.Switch(false) : editor.Press(stop[i]);
+                    if (!pressed)
+                        _report.Fail($"editor {stop[0]}", $"no button {stop[i]}; the page offers {editor.Buttons()}");
+
+                    yield return PluginUpdates.PerSecond / 2;
+                }
+
+                if (!pressed)
+                    continue;
+
+                var shot = Shoot("editor-" + stop[0].Replace(" ", "-"));
+                while (shot.MoveNext())
+                    yield return shot.Current;
+            }
+        }
+
+        /// <summary>Takes a picture called <paramref name="name" /> with the mouse in the screen's corner, so no tip is open in it.</summary>
+        IEnumerator<int> Shoot(string name)
+        {
+            MyInput.Static.SetMousePosition(0, 0);
+            yield return PluginUpdates.PerSecond;
+
+            var picture = Path.Combine(_shots, name + ".png");
             if (File.Exists(picture))
                 File.Delete(picture);
 
             MyRenderProxy.TakeScreenshot(Vector2.One, picture, false, false, false);
             yield return 3 * PluginUpdates.PerSecond;
-            _report.Check("editor open", File.Exists(picture), File.Exists(picture) ? picture : $"no picture at {picture}");
+            _report.Check(name, File.Exists(picture), File.Exists(picture) ? picture : $"no picture at {picture}");
         }
 
         static IMyTerminalBlock Named(string name)

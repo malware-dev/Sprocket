@@ -19,6 +19,11 @@
         <SpaceEngineersBinCopyLocal>false</SpaceEngineersBinCopyLocal>
     </PropertyGroup>
 
+    <!-- The runtime binder for C#'s dynamic, which the client tests press Sprocket's editor through (InGameEditor). -->
+    <ItemGroup>
+        <Reference Include="Microsoft.CSharp" />
+    </ItemGroup>
+
     <!-- The game's assemblies, found through the mdk.local.ini beside this file: the dedicated server's Bin64. -->
     <ItemGroup>
         <PackageReference Include="Mal.Mdk2.References" Version="2.2.9">
