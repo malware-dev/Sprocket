@@ -1,5 +1,6 @@
 using System.IO;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -109,6 +110,43 @@ public class TextFitTests
         screen.Editor.NewButtonSystem("Fit");
         screen.Run(2);
         screen.Editor.PressAdd("task");
+        screen.Run(2);
+        if (language.Length > 0)
+        {
+            screen.Scene.Speak(language);
+            screen.Run(2);
+        }
+
+        var found = new List<string>();
+        var seen = 0;
+        foreach (var block in screen.Editor.Pick().Stages[0].Entries().Where(e => !e.IsHeading).Select(e => e.Text).ToList())
+        {
+            screen.Editor.PressBlock(block);
+            screen.Run(2);
+            foreach (var member in screen.Editor.Pick().Stages[1].Entries().Where(e => !e.IsHeading).Select(e => e.Text).ToList())
+            {
+                screen.Editor.PressChoice(member);
+                screen.Run(2);
+                seen++;
+                Look(screen, $"{block} / {member}", found);
+            }
+        }
+
+        Assert.True(seen > 40, $"only {seen} members were seen");
+        Assert.True(found.Count == 0, string.Join("\n", found.Distinct()));
+    }
+
+    /// <summary>Every signal and value each block offers a when trigger, chosen so its description shows, fits, in both languages.</summary>
+    [Theory]
+    [InlineData("")]
+    [InlineData("no")]
+    public void EveryWhenMemberFits(string language)
+    {
+        var screen = Screen.WithGameFonts(Rig.Demo());
+        Assert.True(screen.HasGameFonts, "the game's font was not found, so nothing was measured as the game measures it");
+        screen.Editor.NewSystem("Fit");
+        screen.Run(2);
+        screen.Editor.PressStart(SentenceText.WhenWord);
         screen.Run(2);
         if (language.Length > 0)
         {

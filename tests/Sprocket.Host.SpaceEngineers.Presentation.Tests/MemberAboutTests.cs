@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Xunit;
 
@@ -6,6 +7,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>What the picker says of the block member chosen, at the top of the column about it.</summary>
 public class MemberAboutTests
 {
+    // The page a member's description links for an awaitable action (Codex.resx, Sprocket.Member.Waits).
+    const string Awaitable = "Term.Awaitable";
+
     static Screen Stepping()
     {
         var screen = Screen.Fresh();
@@ -37,6 +41,20 @@ public class MemberAboutTests
         Assert.Equal("OPEN", column.Title);
         Assert.True(column.About.IsVisible);
         Assert.StartsWith("Opens the door.", column.About.Markdown);
+    }
+
+    /// <summary>Resting on the awaitable link in an action's description opens the awaitable page in a tip.</summary>
+    [Fact]
+    public void TheAwaitableLinkOpensItsPage()
+    {
+        var screen = Stepping();
+        screen.Editor.PressChoice("open");
+        screen.Run(2);
+
+        var at = Links.First(screen.Editor.Pick().Arguments!.About, Awaitable, out _);
+        screen.Do("move", ((int)at.X + 4).ToString(), ((int)at.Y + 6).ToString(), "tick", (Styles.TipDelay * 2).ToString());
+
+        Assert.Equal(screen.Editor.Codex.Find(Awaitable)!.Text, screen.Scene.ShownTip?.Text);
     }
 
     /// <summary>A status word and an action of one name each say their own thing.</summary>

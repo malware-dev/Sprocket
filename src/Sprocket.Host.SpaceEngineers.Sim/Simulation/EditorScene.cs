@@ -88,11 +88,14 @@ namespace Sprocket.Sim.Simulation
         /// <summary>The workspace the editor is shown in, windows included.</summary>
         public SprocketWorkspace Workspace => _workspace;
 
-        /// <summary>Says everything in <paramref name="culture" />, such as <c>no</c>, read from the mod's own texts; one frame passes while the screen is built again in it.</summary>
+        /// <summary>
+        /// Says everything in <paramref name="culture" />, such as <c>no</c>, read from the mod's own texts and rewording the editor as
+        /// the session does when the game's language changes; one frame passes while the screen is built again in it.
+        /// </summary>
         public void Speak(string culture)
         {
             _ship.Texts.Load(new ResxTexts(ResxTexts.Beside, culture));
-            _ship.Editor.Invalidate();
+            _ship.Editor.Reword();
             Tick();
         }
 
