@@ -1,4 +1,5 @@
 using System.IO;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -53,6 +54,48 @@ public class TextFitTests
         Look(norwegian, stop + ", Norwegian", found);
 
         Assert.True(found.Count == 0, string.Join("\n", found));
+    }
+
+    /// <summary>The tip of every word on each stop of the tour, held over until it opens, fits, in both languages.</summary>
+    [Theory]
+    [MemberData(nameof(Stops))]
+    public void EveryTipFits(string stop, string[] presses)
+    {
+        var found = new List<string>();
+        var english = Screen.WithGameFonts(Rig.Demo(), presses.Select(Literal).ToArray());
+        Assert.True(english.HasGameFonts, "the game's font was not found, so nothing was measured as the game measures it");
+        var shown = Tips(english, stop + ", English", found);
+
+        var norwegian = Screen.WithGameFonts(Rig.Demo());
+        norwegian.Scene.Speak("no");
+        norwegian.Run(2);
+        norwegian.Do(Norwegian(presses));
+        shown += Tips(norwegian, stop + ", Norwegian", found);
+
+        Assert.True(shown > 0, "no word on " + stop + " opened a tip");
+        Assert.True(found.Count == 0, string.Join("\n", found.Distinct()));
+    }
+
+    /// <summary>Holds the pointer over each word <paramref name="screen" /> shows until its tip opens, looks, and says how many opened one.</summary>
+    static int Tips(Screen screen, string where, List<string> into)
+    {
+        var words = screen.Drawings.Where(drawn => drawn.IsText && !drawn.IsSymbol && drawn.Text.Trim().Length > 0 && screen.IsInsideItsClip(drawn))
+            .Select(drawn => new { drawn.Text, At = Screen.Ui(drawn.At.X + 4f, screen.MiddleOf(drawn)) }).ToList();
+        var opened = 0;
+        foreach (var word in words)
+        {
+            var at = word.At;
+            screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", (Styles.TipDelay + 2).ToString());
+            if (screen.Scene.ShownTip != null)
+            {
+                opened++;
+                Look(screen, $"{where}, the tip of \"{word.Text}\"", into);
+            }
+
+            screen.Do("move", "0", "0", "tick", "2");
+        }
+
+        return opened;
     }
 
     /// <summary>Every member each block offers as a task, chosen so its description shows, fits, in both languages.</summary>

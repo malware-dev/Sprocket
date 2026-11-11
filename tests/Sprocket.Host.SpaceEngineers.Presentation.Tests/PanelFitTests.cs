@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
@@ -39,7 +40,7 @@ public class PanelFitTests
                 var device = FaceShot.Drawn(face, () => StatusFace.Draw(picture, face, status, texts, shown, shown));
                 var size = shape.SurfaceSize;
                 var said = TextFit.Cut(device.Commands, device.Fonts!, size.X, size.Y)
-                    .Concat(TextFit.Overlapping(device.Commands, device.Fonts!, size.X, size.Y));
+                    .Concat(TextFit.Overlapping(device.Commands, device.Fonts!, size.X, size.Y, Symbols.Font));
                 found.AddRange(said.Select(one => $"{shape.Name}, page {turn + 1}: {one}"));
             }
         }

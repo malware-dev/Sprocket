@@ -60,6 +60,19 @@ public class TextFitCheckTests
         Assert.Empty(TextFit.Overlapping(commands, new TenPixels(), 1000, 1000));
     }
 
+    /// <summary>Two glyphs of a mark's face drawn one over the other make one mark, and a word over a mark is still found.</summary>
+    [Fact]
+    public void AMarkMadeOfTwoGlyphsIsLeftOut()
+    {
+        var outer = Run("W", 0, 0);
+        outer.Font = "Marks";
+        var inner = Run("A", 2, 2);
+        inner.Font = "Marks";
+        var commands = new List<DrawCommand> { outer, inner, Run("word", 4, 4), Run("over it", 20, 4) };
+
+        Assert.Equal(new[] { "\"word\" over \"over it\"" }, TextFit.Overlapping(commands, new TenPixels(), 1000, 1000, "Marks"));
+    }
+
     static DrawCommand Run(string text, float x, float y)
     {
         return new DrawCommand { Kind = DrawKind.Text, Text = text, Font = "White", Scale = 1f, Position = new Vector2(x, y) };

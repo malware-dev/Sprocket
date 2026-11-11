@@ -60,8 +60,11 @@ public static class TextFit
     }
 
     /// <summary>Each pair of runs in <paramref name="commands" /> drawn over each other, measured with <paramref name="fonts" />, said as both runs.</summary>
-    /// <remarks>Only runs that start inside their clip are weighed, each to the end of its clip at most, since past that the game draws nothing.</remarks>
-    public static List<string> Overlapping(IList<DrawCommand> commands, IFontMetrics fonts, float width, float height)
+    /// <remarks>
+    /// Only runs that start inside their clip are weighed, each to the end of its clip at most, since past that the game draws nothing.
+    /// Runs in <paramref name="marks" /> are marks, drawn glyph over glyph to make one, and are left out.
+    /// </remarks>
+    public static List<string> Overlapping(IList<DrawCommand> commands, IFontMetrics fonts, float width, float height, string? marks = null)
     {
         var runs = new List<KeyValuePair<string, RectangleF>>();
         var clip = new RectangleF(0f, 0f, width, height);
@@ -74,7 +77,7 @@ public static class TextFit
             else if (command.Kind == DrawKind.Sprite && command.Color.A == 255)
                 Cover(runs, command.Destination, clip);
 
-            if (command.Kind != DrawKind.Text || string.IsNullOrWhiteSpace(command.Text))
+            if (command.Kind != DrawKind.Text || string.IsNullOrWhiteSpace(command.Text) || (marks != null && command.Font == marks))
                 continue;
 
             var start = command.Position;

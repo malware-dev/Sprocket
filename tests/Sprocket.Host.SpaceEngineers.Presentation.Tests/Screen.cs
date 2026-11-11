@@ -61,7 +61,7 @@ sealed class Screen
     public List<string> Cut => TextFit.Cut(_frame.Commands, _frame.Fonts, Width, Height);
 
     /// <summary>Every pair of runs of words the last frame drew over each other.</summary>
-    public List<string> Overlapping => TextFit.Overlapping(_frame.Commands, _frame.Fonts, Width, Height);
+    public List<string> Overlapping => TextFit.Overlapping(_frame.Commands, _frame.Fonts, Width, Height, Symbols.Font);
 
     /// <summary>The editor on a block that already holds <paramref name="program" />, after <paramref name="script" />.</summary>
     public static Screen Holding(string program, params string[] script)
