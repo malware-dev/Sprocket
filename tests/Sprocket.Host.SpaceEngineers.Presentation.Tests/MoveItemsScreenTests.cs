@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -412,4 +413,39 @@ public class MoveItemsScreenTests
         Assert.Contains("move 100 kg Ingot/Iron from", said);
         Assert.Contains(" to ", said);
     }
+
+    /// <summary>An if on a slot holding a container's inventory offers its amount, fill and mass; the container picked itself offers amount once.</summary>
+    [Fact]
+    public void AnInventorySlotOffersAmountFillAndMass()
+    {
+        var screen = Picking(out _);
+        SelectTarget(screen);
+        screen.Editor.PressPrimary();
+        screen.Run(4);
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        var made = ((Act)system.Sequences[0].Steps.First(step => (step as Act)?.ActionId == InventoryType.MoveItems)).Arguments[0].Names[0];
+
+        editor.PressAdd("if");
+        screen.Run(2);
+        editor.ChooseSource(editor.Texts.PickSourceSlots);
+        screen.Run(1);
+        editor.PressBlock(made);
+        screen.Run(2);
+        var offered = Offered(editor);
+        Assert.True(new[] { "amount", "fill", "mass" }.All(offered.Contains), string.Join(", ", offered));
+
+        editor.Back();
+        screen.Run(2);
+        editor.PressAdd("if");
+        screen.Run(2);
+        editor.PressBlock("Cargo 1");
+        screen.Run(2);
+        offered = Offered(editor);
+        Assert.Equal(1, offered.Count(text => text == "amount"));
+    }
+
+    /// <summary>The words of what the selector's second column offers, its headings left out.</summary>
+    static List<string> Offered(SprocketEditor editor) =>
+        editor.Pick().Stages[1].Entries().Where(entry => !entry.IsHeading).Select(entry => entry.Text).ToList();
 }

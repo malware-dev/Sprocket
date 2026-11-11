@@ -1,3 +1,4 @@
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
@@ -61,6 +62,62 @@ public class ReplacedBlockTests
         var part = system.Parts.First(one => instance.FilledWith(one.Id)?.Contains(declared) == true);
 
         Assert.Equal(SlotMark.Replaced, SlotMarks.Of(sim.Runner.Bindings, instance, part));
+    }
+
+    /// <summary>
+    /// On the installation panel, in the game's fonts, the slot of a door rebuilt elsewhere offers Use this block on a row that holds
+    /// it; one press takes the door, and the sequence runs on it.
+    /// </summary>
+    [Fact]
+    public void TheInstallationPanelTakesTheBlockInOnePress()
+    {
+        var rig = new Rig();
+        var door = rig.Door(2, "Airlock Inner Door");
+        var button = rig.Panel(3, "Airlock Button");
+        var screen = Screen.WithGameFonts(rig);
+        var editor = screen.Editor;
+        editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        editor.PressAdd("task");
+        editor.PressBlock("Airlock Inner Door");
+        editor.PressChoice("open");
+        editor.PressPrimary();
+        screen.Run(2);
+        editor.SwitchOn();
+        screen.Run(2);
+        var declared = editor.Program.Refs.First(one => editor.Runner.Bindings.Entity(one.Name)?.Id == door.Id).Name;
+
+        var rebuilt = rig.Door(9, "Airlock Inner Door");
+        rig.Grind(door);
+        screen.Run(2);
+        button.Press(0);
+        screen.Run(120);
+        Assert.Equal(Sandbox.ModAPI.Ingame.DoorStatus.Closed, rebuilt.Status);
+        editor.GoToRoot();
+        screen.Run(2);
+        screen.Do("press", "Airlock").Run(2);
+        screen.Do("press", editor.Texts.SystemInstallationPanel).Run(2);
+        var problem = Template.Fill(editor.Texts.StoppedBlockReplaced, "block", "Airlock Inner Door");
+        Assert.True(screen.Shows(problem), screen.Dump);
+
+        // Changing a logic system waits for it to be switched off.
+        editor.SwitchSystem(false);
+        screen.Run(2);
+        // The switch slides across as it flips, its word clipped until it rests, so the fit is read once it has.
+        screen.Do("press", editor.Texts.BlueprintSwitchThemOff).Run(60);
+        Assert.True(screen.Shows(editor.Texts.SlotUseBlock), screen.Dump);
+        Assert.Empty(screen.Overlapping);
+        Assert.Empty(screen.Cut);
+
+        screen.Do("press", editor.Texts.SlotUseBlock).Run(2);
+        Assert.Equal(RefState.Bound, editor.Runner.Bindings.State(declared));
+        Assert.False(screen.Shows(editor.Texts.SlotUseBlock), screen.Dump);
+
+        editor.SwitchOn();
+        screen.Run(2);
+        button.Press(0);
+        screen.Run(120);
+        Assert.NotEqual(Sandbox.ModAPI.Ingame.DoorStatus.Closed, rebuilt.Status);
     }
 
     /// <summary>Choosing the block in the picker is choosing it: the name stops being a guess.</summary>

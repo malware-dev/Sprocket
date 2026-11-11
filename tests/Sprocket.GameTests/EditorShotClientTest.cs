@@ -87,10 +87,12 @@ namespace Sprocket.GameTests
                 new[] { "tips off home" },
                 new[] { "tips off term", "hover:has:" + Term },
                 new[] { "tips off logic system", "Kept Here" },
+                new[] { "tips off sequences", "Kept Here", "Sequences" },
                 new[] { "tips off bin", "Kept Here", "Triggers", "hover:tip:" + TriggerBin },
                 new[] { "tips off strip to library tip", "Library", "hover:Moves.ToLibrary" },
                 new[] { "tips off undo", "Kept Here", "Triggers", "tip:" + TriggerBin, "answer", "hover:tip:" + Undo },
                 new[] { "tips on again term", "tip:" + TipsOff, "hover:has:" + Term },
+                new[] { "tips on again sequences", "Kept Here", "Sequences" },
                 new[] { "term tip pinned", "alt", "hover:has:" + Term }
             };
 
