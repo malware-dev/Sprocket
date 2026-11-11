@@ -82,6 +82,24 @@ public class ScenarioTests
         }
     }
 
+    /// <summary>Force Button opens the forced door every time it is pressed, from shut.</summary>
+    [Fact]
+    public void TheForcedDoorOpensEachPress()
+    {
+        var scenario = new ForcedDoor();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+
+        for (var round = 0; round < 2; round++)
+        {
+            sim.Press("Force Button");
+            Run(sim);
+            Assert.Equal(Sandbox.ModAPI.Ingame.DoorStatus.Open, scenario.Door.Status);
+            scenario.Door.Perform("Open_Off", new List<Literal>());
+            Run(sim);
+            Assert.Equal(Sandbox.ModAPI.Ingame.DoorStatus.Closed, scenario.Door.Status);
+        }
+    }
+
     /// <summary>Store Button moves the ingots out of the refinery's output, its second inventory, into the cargo container.</summary>
     [Fact]
     public void TheRefineryMovesStoreTheOutput()

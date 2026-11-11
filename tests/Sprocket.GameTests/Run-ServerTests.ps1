@@ -15,7 +15,7 @@ param(
     [string]$Instance = 'E:\Data\sprocket-ds-test',
     [string]$Server = 'E:\Steam\steamapps\common\SpaceEngineersDedicatedServer',
     [string]$Branch = 'steamctg',
-    [string[]]$Scenarios = @('Sprocket Stock Watch', 'Sprocket Move Items', 'Sprocket Inventory Readings', 'Sprocket Refinery Moves', 'Sprocket Piston Status', 'Sprocket Script Limit'),
+    [string[]]$Scenarios = @('Sprocket Stock Watch', 'Sprocket Move Items', 'Sprocket Inventory Readings', 'Sprocket Refinery Moves', 'Sprocket Piston Status', 'Sprocket Script Limit', 'Sprocket Forced Door'),
     [int]$TimeoutSeconds = 600
 )
 $ErrorActionPreference = 'Stop'
