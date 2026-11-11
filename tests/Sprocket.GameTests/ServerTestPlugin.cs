@@ -74,7 +74,7 @@ namespace Sprocket.GameTests
             // Two seconds of a running world before anything is pasted into it.
             yield return 2 * PluginUpdates.PerSecond;
 
-            var tests = new[] { new StockWatchGameTest(blueprints, _report).Run(), new MoveItemsGameTest(blueprints, _report).Run(), new InventoryReadingsGameTest(blueprints, _report).Run(), new RefineryMovesGameTest(blueprints, _report).Run(), new ProjectorGameTest(_report).Run(), new PistonStatusGameTest(blueprints, _report).Run(), new DoorGameTest(_report).Run(), new RailgunGameTest(_report).Run(), new ScriptLimitGameTest(blueprints, _report).Run(), new ButtonWiringGameTest(blueprints, _report).Run(), new RotorBrakingGameTest(_report).Run(), new ForcedDoorGameTest(blueprints, _report).Run(), new LaserAntennaGameTest(_report).Run(), new TurretControllerGameTest(_report).Run(), new WheelHeightGameTest(_report).Run() };
+            var tests = new[] { new StockWatchGameTest(blueprints, _report).Run(), new MoveItemsGameTest(blueprints, _report).Run(), new InventoryReadingsGameTest(blueprints, _report).Run(), new RefineryMovesGameTest(blueprints, _report).Run(), new ProjectorGameTest(_report).Run(), new PistonStatusGameTest(blueprints, _report).Run(), new DoorGameTest(_report).Run(), new RailgunGameTest(_report).Run(), new ScriptLimitGameTest(blueprints, _report).Run(), new ButtonWiringGameTest(blueprints, _report).Run(), new RotorBrakingGameTest(_report).Run(), new ForcedDoorGameTest(blueprints, _report).Run(), new LaserAntennaGameTest(_report).Run(), new TurretControllerGameTest(_report).Run(), new WheelHeightGameTest(_report).Run(), new SensorGameTest(_report).Run() };
             foreach (var test in tests)
             {
                 while (test.MoveNext())
