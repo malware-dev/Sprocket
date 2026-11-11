@@ -167,6 +167,38 @@ public class ScenarioTests
         Assert.Equal(500, scenario.Cargo.Holding("Iron"));
     }
 
+    /// <summary>Ingots Button moves 100 kg of iron ingots on each press, All Button the rest, and Empty Button moves on with nothing left to move.</summary>
+    [Fact]
+    public void TheMoveAmountsMoveWhatEachButtonSays()
+    {
+        VRage.ObjectBuilders.MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
+        var scenario = new MoveAmounts();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+        scenario.Source.Holds("Iron", 500);
+        Run(sim);
+
+        sim.Press("Ingots Button");
+        Run(sim);
+        Assert.Equal(100, scenario.Target.Holding("Iron"));
+        sim.Press("Ingots Button");
+        Run(sim);
+        Assert.Equal(200, scenario.Target.Holding("Iron"));
+        Assert.Equal(300, scenario.Source.Holding("Iron"));
+
+        sim.Press("All Button");
+        Run(sim);
+        Assert.Equal(0, scenario.Source.Holding("Iron"));
+        Assert.Equal(500, scenario.Target.Holding("Iron"));
+
+        for (var press = 0; press < 2; press++)
+        {
+            scenario.MovedOn.Enabled = false;
+            sim.Press("Empty Button");
+            Run(sim);
+            Assert.True(scenario.MovedOn.Enabled, "the move with nothing to move held");
+        }
+    }
+
     static void Run(Simulation sim)
     {
         for (var i = 0; i < 400; i++)
