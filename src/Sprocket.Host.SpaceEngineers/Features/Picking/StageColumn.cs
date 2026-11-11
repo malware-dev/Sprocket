@@ -26,8 +26,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _titleWords = "";
         string _titleTerm;
 
-        readonly string _showHidden;
-        readonly string _hideHidden;
+        string _showHidden;
+        string _hideHidden;
 
         /// <summary>
         /// A column <paramref name="width" /> across, narrowed by typing where <paramref name="canNarrow" /> says, looked at
@@ -40,17 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Width = width;
             CanNarrow = canNarrow;
             _search.IsVisible = canNarrow;
-            _narrow.Hint = texts.PickSearch;
-            _kindNarrow.Hint = texts.PickSearch;
-
-
-            _narrowClear.Tip = KeptTip.For(null, texts.Codex.PickClearTyped);
-            _kindNarrowClear.Tip = KeptTip.For(null, texts.Codex.PickClearTyped);
-            _kindClear.Tip = KeptTip.For(null, texts.Codex.PickEveryKind);
-            _showHidden = texts.Codex.PickShowHidden;
-            _hideHidden = texts.Codex.PickHideHidden;
+            Say(texts);
             ShowsHidden = false;
-            _kindLine.Tip = CodexTip.For(null, texts.Codex.PickKindAbout);
 
             _narrow.Edited += () => Typed(_narrow, _narrowClear, Narrowed);
             _narrowClear.Command = new RelayCommand(() => Emptied(_narrow, _narrowClear, Narrowed));
@@ -74,6 +65,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _views.Add(link);
                 _viewLinks.Children.Add(link);
             }
+        }
+
+        /// <summary>Says the column's own words, those of its search and its buttons, in <paramref name="texts" />.</summary>
+        public void Say(Texts texts)
+        {
+            _narrow.Hint = texts.PickSearch;
+            _kindNarrow.Hint = texts.PickSearch;
+            _narrowClear.Tip = KeptTip.For(_narrowClear.Tip, texts.Codex.PickClearTyped);
+            _kindNarrowClear.Tip = KeptTip.For(_kindNarrowClear.Tip, texts.Codex.PickClearTyped);
+            _kindClear.Tip = KeptTip.For(_kindClear.Tip, texts.Codex.PickEveryKind);
+            _showHidden = texts.Codex.PickShowHidden;
+            _hideHidden = texts.Codex.PickHideHidden;
+            ShowsHidden = ShowsHidden;
+            _kindLine.Tip = CodexTip.For(_kindLine.Tip, texts.Codex.PickKindAbout);
+        }
+
+        /// <summary>Names the views the column is looked at in <paramref name="views" />, in the order it was made with.</summary>
+        public void NameViews(IList<string> views)
+        {
+            for (var i = 0; i < _views.Count && i < views.Count; i++)
+                _views[i].Text = views[i];
         }
 
         /// <summary>Raised with what is typed into the box that narrows the column, as it is typed.</summary>

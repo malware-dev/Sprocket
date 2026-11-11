@@ -7,6 +7,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -43,6 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         ICommand _terminal;
         Action _moveOn;
         string _whatSearch = "";
+        int _worded;
         string _dropped = "";
         ReachKind _droppedForm;
 
@@ -97,18 +99,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Makes the column, <paramref name="width" /> wide, whose second press in quick succession on a row does <paramref name="moveOn" />.</summary>
         public StageColumn Make(float width, Action moveOn)
         {
-            var texts = _editor.Texts;
             _moveOn = moveOn;
-
-            // Two views of what is done to a block, checked of one or happens to one: what Sprocket vouches for, and the rest.
-            // The angle marks point the way each link goes; the words alone are translated.
-            var views = new[] { $"‹ {texts.PickToOrganized}", $"{texts.PickToTerminal} ›" };
-
-            _what = new StageColumn(width, true, views, texts);
-            _what.Title = _forTests ? texts.PickWhatToCheck : _forEvents ? texts.PickWhatHappens : texts.PickWhatToDo;
-            _what.EmptyText = _forTests
-                ? texts.PickNothingChecked
-                : _forEvents ? texts.PickNothingHappens : texts.PickNothingDone;
+            _what = new StageColumn(width, true, Views(_editor.Texts), _editor.Texts);
+            Say();
             _what.Narrowed += OnWhatSearch;
             _whatRows = new KeyedChildren<string, Element>(_what.Rows, WhatRow);
 
@@ -116,6 +109,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _terminal = _editor.Act(CommandKind.ShowTerminal, () => Show(true));
 
             return _what;
+        }
+
+        /// <summary>
+        /// The words of the two views of what is done to a block, checked of one or happens to one: what Sprocket vouches for,
+        /// and the rest, in <paramref name="texts" />.
+        /// </summary>
+        /// <remarks>The angle marks point the way each link goes; the words alone are translated.</remarks>
+        static string[] Views(Texts texts) => new[] { $"‹ {texts.PickToOrganized}", $"{texts.PickToTerminal} ›" };
+
+        /// <summary>Says the column's title, its views and what it says while empty, in the language the editor speaks.</summary>
+        void Say()
+        {
+            var texts = _editor.Texts;
+            _worded = _editor.Rewordings;
+            _what.NameViews(Views(texts));
+            _what.Title = _forTests ? texts.PickWhatToCheck : _forEvents ? texts.PickWhatHappens : texts.PickWhatToDo;
+            _what.EmptyText = _forTests
+                ? texts.PickNothingChecked
+                : _forEvents ? texts.PickNothingHappens : texts.PickNothingDone;
         }
 
         /// <summary>Lets the column go, where there is nothing for it to be about.</summary>
@@ -130,6 +142,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         public void Fill(HostType slotType, string only)
         {
+            // Words read again in another language since the column was made are said again; once, not on every fill.
+            if (_worded != _editor.Rewordings)
+            {
+                Say();
+                _what.Say(_editor.Texts);
+            }
+
             var selection = _picked.Blocks;
             _offers.Fill(selection, _picked.Totals, only);
             FindView(only);

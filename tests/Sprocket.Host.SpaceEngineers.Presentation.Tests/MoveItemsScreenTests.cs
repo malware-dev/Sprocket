@@ -4,7 +4,6 @@ using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
@@ -432,7 +431,7 @@ public class MoveItemsScreenTests
         screen.Run(1);
         editor.PressBlock(made);
         screen.Run(2);
-        var offered = Offered(editor);
+        var offered = editor.Members();
         Assert.True(new[] { "amount", "fill", "mass" }.All(offered.Contains), string.Join(", ", offered));
 
         editor.Back();
@@ -441,11 +440,7 @@ public class MoveItemsScreenTests
         screen.Run(2);
         editor.PressBlock("Cargo 1");
         screen.Run(2);
-        offered = Offered(editor);
+        offered = editor.Members();
         Assert.Equal(1, offered.Count(text => text == "amount"));
     }
-
-    /// <summary>The words of what the selector's second column offers, its headings left out.</summary>
-    static List<string> Offered(SprocketEditor editor) =>
-        editor.Pick().Stages[1].Entries().Where(entry => !entry.IsHeading).Select(entry => entry.Text).ToList();
 }

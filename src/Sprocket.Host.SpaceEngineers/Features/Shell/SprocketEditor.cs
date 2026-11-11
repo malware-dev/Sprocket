@@ -1056,9 +1056,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Raised when every word the editor shows has been read again in the language now spoken.</summary>
         public event Action Reworded;
 
+        /// <summary>How many times the editor's words have been read again in the language spoken, so a view that keeps words knows when they are old.</summary>
+        public int Rewordings { get; private set; }
+
         /// <summary>Has every word the editor shows read again in the language now spoken, the codex's included.</summary>
         public void Reword()
         {
+            Rewordings++;
             Codex.Reword();
             Guide?.Show(Texts);
             Invalidate();

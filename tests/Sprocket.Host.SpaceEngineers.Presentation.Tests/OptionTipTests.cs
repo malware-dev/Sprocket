@@ -1,6 +1,5 @@
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -27,7 +26,7 @@ public class OptionTipTests
         editor.PressAdd("task");
         editor.PressBlock(block);
         screen.Run(2);
-        var at = Members(editor).IndexOf(action);
+        var at = editor.Members().IndexOf(action);
         editor.Back();
         screen.Run(2);
         if (language.Length > 0)
@@ -39,7 +38,7 @@ public class OptionTipTests
         editor.PressAdd(editor.Texts.SequenceDoSomething);
         editor.PressBlock(block);
         screen.Run(2);
-        editor.PressChoice(Members(editor)[at]);
+        editor.PressChoice(editor.Members()[at]);
         screen.Run(2);
 
         var name = editor.Pick().Arguments!.Form.Within().OfType<Label>().SingleOrDefault(label => label.Tip?.Text.StartsWith(opens) == true);
@@ -51,8 +50,4 @@ public class OptionTipTests
         Assert.Empty(screen.Cut);
         Assert.Empty(screen.Overlapping);
     }
-
-    /// <summary>The words of what the selector's second column offers, its headings left out.</summary>
-    static List<string> Members(SprocketEditor editor) =>
-        editor.Pick().Stages[1].Entries().Where(entry => !entry.IsHeading).Select(entry => entry.Text).ToList();
 }

@@ -39,6 +39,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         bool _listsSlots;
         Action _moveOn;
         long _anchor;
+        SourceSwitch _source;
+        bool _fits;
+        int _worded;
 
         /// <summary>
         /// The blocks stage of a pick of <paramref name="picked" />, searched as <paramref name="screen" /> keeps its search, listing
@@ -77,22 +80,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         public StageColumn Make(float width, SourceSwitch source, bool listsSlots, AutomationSystem slotted, bool fits, Action moveOn)
         {
-            var texts = _editor.Texts;
             _listsSlots = listsSlots;
             _moveOn = moveOn;
+            _source = source;
+            _fits = fits;
 
-            _blocks = new StageColumn(width, true, null, texts);
-            _blocks.Title = source != null ? texts.PickSource : listsSlots ? texts.PickSlots : texts.PickBlocks;
+            _blocks = new StageColumn(width, true, null, _editor.Texts);
             _blocks.Explain(_editor.Codex);
-            if (source != null)
-                _blocks.Heads(source.Box(listsSlots ? PickSource.Slots : PickSource.Blocks));
-
-            _blocks.EmptyText = listsSlots
-                ? texts.PickNoSlots
-                : fits
-                ? texts.BlueprintNoneFits
-                : _forTests ? texts.PickNoBlocksChecked
-                : _forEvents ? texts.PickNoBlocksHappen : texts.PickNoBlocksDone;
+            Say();
 
             // For the whole life of the column, so the line does not come and go as the list of kinds is narrowed.
             _blocks.HasKinds = !listsSlots && _kinds.Present.Count > 0;
@@ -121,12 +116,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return _blocks;
         }
 
+        /// <summary>Says the column's title, its source and what it says while empty, in the language the editor speaks.</summary>
+        void Say()
+        {
+            var texts = _editor.Texts;
+            _worded = _editor.Rewordings;
+            _blocks.Title = _source != null ? texts.PickSource : _listsSlots ? texts.PickSlots : texts.PickBlocks;
+            if (_source != null)
+                _blocks.Heads(_source.Box(_listsSlots ? PickSource.Slots : PickSource.Blocks));
+
+            _blocks.EmptyText = _listsSlots
+                ? texts.PickNoSlots
+                : _fits
+                ? texts.BlueprintNoneFits
+                : _forTests ? texts.PickNoBlocksChecked
+                : _forEvents ? texts.PickNoBlocksHappen : texts.PickNoBlocksDone;
+        }
+
         /// <summary>
         /// Shows what is on offer and what is picked; <paramref name="limit" /> names the one kind every block on offer is of, said
         /// where the list of kinds would say it offers any, or is null.
         /// </summary>
         public void Fill(string limit)
         {
+            // Words read again in another language since the column was made are said again; once, not on every fill.
+            if (_worded != _editor.Rewordings)
+            {
+                Say();
+                _blocks.Say(_editor.Texts);
+            }
+
             if (_listsSlots)
             {
                 _slotListing.Show(_blocks, _screen.Search);

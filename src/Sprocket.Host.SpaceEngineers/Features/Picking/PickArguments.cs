@@ -33,6 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _entered;
         string _shown;
         bool _openedArguments;
+        int _worded;
 
         /// <summary>
         /// The arguments asked on <paramref name="page" /> for what <paramref name="picked" /> holds, which opened as
@@ -190,10 +191,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // Values that open on what the block holds are each facet's own, read off the one chosen.
             if (shown.Length != 0 && _picked.Facet.Length != 0 && OpensOnTheBlock(fields))
                 shown = $"{shown} {_picked.Facet}";
-            if (_shown == shown && Same(_shownFields, fields))
+            // Words read again in another language since they were shown are shown again.
+            if (_shown == shown && Same(_shownFields, fields) && _worded == _editor.Rewordings)
                 return;
 
             _shown = shown;
+            _worded = _editor.Rewordings;
             _shownFields.Clear();
             _shownFields.AddRange(fields);
 

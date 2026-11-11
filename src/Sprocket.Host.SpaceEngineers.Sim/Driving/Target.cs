@@ -690,6 +690,10 @@ namespace Sprocket.Sim.Driving
         /// <summary>The blocks the first column of the pick on the screen offers, as their rows.</summary>
         public static List<PickRow> Offered(this SprocketEditor editor) => editor.Stages().First().Entries().ToList();
 
+        /// <summary>The words of what the second column of the pick on the screen offers, its headings left out.</summary>
+        public static List<string> Members(this SprocketEditor editor) =>
+            editor.Stages().ElementAt(1).Entries().Where(entry => !entry.IsHeading).Select(entry => entry.Text).ToList();
+
         /// <summary>The row saying <paramref name="name" /> in a pick, or an exception naming the screen.</summary>
         static PickRow Row(SprocketEditor editor, string name)
         {

@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>The box a selector's first column is headed by, saying which of the sources it is, <paramref name="source" />.</summary>
-        /// <remarks>Made once by each selector, which keeps it for its life.</remarks>
+        /// <remarks>Made by each selector as it makes its column, and again when the editor's words are read in another language.</remarks>
         public Element Box(PickSource source)
         {
             var texts = _editor.Texts;
