@@ -1,12 +1,17 @@
 using System;
+using Sandbox.Definitions;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A wheel suspension: the members of its terminal said in Sprocket's words, where the wheel is turned, and whether it has a wheel.</summary>
+    /// <summary>A wheel suspension: the members of its terminal said in Sprocket's words, where the wheel is turned, whether it has a wheel, and moving the wheel to a height.</summary>
     public sealed partial class Suspension : Capability
     {
+        /// <summary>Moving the wheel to a height, which is Sprocket's own and waits until the wheel stops moving.</summary>
+        public const string MoveTo = "move_to";
+
         const string Steered = "A suspension raises nothing as its wheel turns.";
 
         static readonly Reading Wheeled = Reading.Of<IMyMotorSuspension>(suspension => suspension.IsAttached);
@@ -15,6 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly OwnValue Turned = OwnValue.Number<IMyMotorSuspension>(suspension => suspension.SteerAngle * 180.0 / Math.PI);
 
         static readonly OwnValue Attached = OwnValue.Flag(Wheeled);
+
+        static readonly Reading Settled = Reading.Remembering<IMyMotorSuspension>((suspension, seen) =>
+            suspension.IsAttached && !WheelMotion.Moving(suspension, seen));
+
+        static readonly OwnAction Moves = OwnAction.Of<IMyMotorSuspension, SuspensionMove>(SuspensionMove.Read, Moved, Settled, null,
+            (suspension, move, seen) => Why(suspension));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -25,7 +36,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("steering_angle", "steering angle", Turned).Measured("°").Looked(Steered).In(Category.Movement)
+            kind.WithAction(MoveTo, "move", Moves, AskedHeight(block)).Lasting().Listed("move to").In(Category.Movement)
+                .WithValue("steering_angle", "steering angle", Turned).Measured("°").Looked(Steered).In(Category.Movement)
                 .WithValue("wheel_attached", "wheel attached", Attached).Announced().In(Category.Repair)
                 .Hiding("ResetMaxSteerAngle", "ResetHeight", "ResetSpeed Limit", "ResetPropulsion override",
                     "ResetSteer override")
@@ -63,6 +75,38 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("SafetyDetach", true, "safety detach distance")
                 .Renaming("ShareInertiaTensor", true, "share inertia tensor")
                 .Renaming("ShareInertiaTensor", false, "toggle share inertia tensor");
+        }
+
+        /// <summary>Where along its travel the wheel will go, between the heights the suspension allows.</summary>
+        static Field AskedHeight(IMyTerminalBlock block)
+        {
+            // Without a definition, a large 3x3 suspension's (CubeBlocks_Wheels.sbc, MinHeight and MaxHeight).
+            var definition = block == null ? null : MyDefinitionManager.Static?.GetCubeBlockDefinition(block.BlockDefinition) as MyMotorSuspensionDefinition;
+            var least = definition?.MinHeight ?? -1.5f;
+            var most = definition?.MaxHeight ?? 1.3f;
+
+            var height = Field.Between("height", Field.Bound(least), Field.Bound(most));
+            height.Needed = true;
+            height.Entry = FieldInput.Decimal;
+            height.Lead = "to";
+            height.Unit = " m";
+            return height;
+        }
+
+        /// <summary>Sets the wheel's height to the one a step gave it, and starts watching it move.</summary>
+        static void Moved(IMyMotorSuspension suspension, SuspensionMove move, ReaderMemory seen)
+        {
+            if (!move.Given)
+                return;
+
+            suspension.Height = move.Height;
+            WheelMotion.Began(suspension, seen);
+        }
+
+        /// <summary>Why the wheel is not getting where it was sent, or none while it might.</summary>
+        static BlockTrouble Why(IMyMotorSuspension suspension)
+        {
+            return suspension.IsAttached ? BlockTrouble.None : BlockTrouble.Waiting(Cause.WheelNoWheel);
         }
 
         /// <summary>Told as the wheel is attached or comes off.</summary>

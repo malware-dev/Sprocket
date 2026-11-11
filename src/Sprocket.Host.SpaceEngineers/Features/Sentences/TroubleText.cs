@@ -45,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 case Cause.ScriptNotRun: return texts.TroubleScriptNotRun;
                 case Cause.DoorToldToOpen: return texts.TroubleDoorToldToOpen;
                 case Cause.DoorToldToClose: return texts.TroubleDoorToldToClose;
+                case Cause.WheelNoWheel: return texts.TroubleWheelNoWheel;
                 default: return "";
             }
         }

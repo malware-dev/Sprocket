@@ -104,6 +104,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         ItemsNotAccepted = 32,
 
         /// <summary>Everywhere a step moves the items to is the inventory they are already in.</summary>
-        ItemsAlreadyThere = 33
+        ItemsAlreadyThere = 33,
+
+        /// <summary>A wheel suspension a step moves the wheel of has no wheel.</summary>
+        WheelNoWheel = 34
     }
 }

@@ -1200,6 +1200,10 @@
     <value>cannot move because it has no head</value>
     <comment>Said as a sequence's problem while a step waits on a piston that has no head. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
+  <data name="Sprocket.Trouble.WheelNoWheel" xml:space="preserve">
+    <value>cannot move because it has no wheel</value>
+    <comment>Said as a sequence's problem while a step waits on a wheel suspension that has no wheel to move. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
+  </data>
   <data name="Sprocket.Trouble.PistonStopped" xml:space="preserve">
     <value>stopped moving because its speed was set to zero</value>
     <comment>Said as a warning after a run gave up because something else set a piston's speed to 0 while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>

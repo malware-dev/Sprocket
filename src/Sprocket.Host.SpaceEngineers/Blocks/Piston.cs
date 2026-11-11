@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.World;
@@ -146,7 +145,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var least = piston?.LowestPosition ?? 0f;
             var most = piston?.HighestPosition ?? 10f;
 
-            var position = Field.Between("position", Said(least), Said(most));
+            var position = Field.Between("position", Field.Bound(least), Field.Bound(most));
             position.Needed = true;
             position.Entry = FieldInput.Decimal;
             position.Lead = "to";
@@ -159,7 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // A move at no speed sets out for a position it can never reach, so there is no reading of an
             // empty speed that means anything.
             var piston = block as IMyPistonBase;
-            var speed = Field.Between("speed", "0", Said(piston?.MaxVelocity ?? 5f));
+            var speed = Field.Between("speed", "0", Field.Bound(piston?.MaxVelocity ?? 5f));
             speed.Needed = true;
             speed.Above = true;
             speed.Entry = FieldInput.Decimal;
@@ -167,14 +166,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             speed.Lead = "at";
             speed.Unit = " m/s";
             return speed;
-        }
-
-        /// <summary>A bound as a field writes one: whole where it is whole.</summary>
-        static string Said(float number)
-        {
-            return number == (float)Math.Floor(number)
-                ? ((int)number).ToString(CultureInfo.InvariantCulture)
-                : number.ToString("0.##", CultureInfo.InvariantCulture);
         }
 
         /// <summary>Whether the piston has reached the limit it is running towards.</summary>

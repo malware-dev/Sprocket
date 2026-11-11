@@ -210,14 +210,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return rotor == null ? 0f : rotor.MaxRotorAngularVelocity * 60f / (2f * (float)Math.PI);
         }
 
-        /// <summary>A bound as a field writes one: whole where it is whole.</summary>
-        static string Said(float number)
-        {
-            return number == (float)Math.Floor(number)
-                ? ((int)number).ToString(CultureInfo.InvariantCulture)
-                : number.ToString("0.##", CultureInfo.InvariantCulture);
-        }
-
         static Field AskedWay()
         {
             // The game's own values for MyRotationDirection: shortest way, then clockwise, then counter-clockwise.
@@ -243,7 +235,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 most = definition.MaxAngleDeg ?? most;
             }
 
-            var angle = Field.Between("angle", Said(least), Said(most));
+            var angle = Field.Between("angle", Field.Bound(least), Field.Bound(most));
             angle.Needed = true;
             angle.Entry = FieldInput.Decimal;
             angle.Edits = FieldEditor.Angle;
@@ -256,7 +248,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             // A turn at no speed sets out for an angle it can never reach, so there is no reading of an
             // empty speed that means anything.
-            var speed = Field.Between("speed", "0", Said(Fastest(block)));
+            var speed = Field.Between("speed", "0", Field.Bound(Fastest(block)));
             speed.Needed = true;
             speed.Above = true;
             speed.Entry = FieldInput.Decimal;

@@ -302,6 +302,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return field;
         }
 
+        /// <summary><paramref name="number" /> as a field writes a bound: whole where it is whole, and to two places otherwise.</summary>
+        public static string Bound(float number)
+        {
+            return number == (float)Math.Floor(number)
+                ? ((int)number).ToString(CultureInfo.InvariantCulture)
+                : number.ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
         /// <summary>This part as a plain number, asked of every block picked, where the blocks don't agree on what to call it.</summary>
         public Field Numbered()
         {

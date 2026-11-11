@@ -919,6 +919,9 @@
   <data name="Sprocket.Trouble.PistonNoHead" xml:space="preserve">
     <value>kan ikke bevege seg fordi det ikke har noe hode</value>
   </data>
+  <data name="Sprocket.Trouble.WheelNoWheel" xml:space="preserve">
+    <value>kan ikke bevege seg fordi det ikke har noe hjul</value>
+  </data>
   <data name="Sprocket.Trouble.PistonStopped" xml:space="preserve">
     <value>sluttet å bevege seg fordi farten ble satt til null</value>
   </data>

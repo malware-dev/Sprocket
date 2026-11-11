@@ -1316,6 +1316,10 @@
     <value>Hvor mange blokker modulen er festet til, enten den kan forsterke dem eller ikke.</value>
     <comment>Codex entry on the block member "connections" of UpgradeModule, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.Suspension.MoveTo" xml:space="preserve">
+    <value>Flytter hjulet til en høyde og er ferdig når hjulet slutter å bevege seg. Dette er [![](mark:awaited)&amp;nbsp;avventbart](Term.Awaitable class=term).</value>
+    <comment>Codex entry on the block member "move to" of Suspension, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.Suspension.SteeringAngle" xml:space="preserve">
     <value>Vinkelen hjulet er svingt til, i grader.</value>
     <comment>Codex entry on the block member "steering angle" of Suspension, shown in the picker when it is chosen.</comment>

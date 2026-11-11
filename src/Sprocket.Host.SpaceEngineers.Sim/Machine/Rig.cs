@@ -488,6 +488,12 @@ public sealed class Rig
         return Weld(new Rotor(id, name, Type<MyObjectBuilder_MotorAdvancedStator>(), "LargeHinge", "Hinge"));
     }
 
+    /// <summary>A large 3x3 wheel suspension, named, with its wheel on.</summary>
+    public Suspension Suspension(long id, string name)
+    {
+        return Weld(new Suspension(id, name, Type<MyObjectBuilder_MotorSuspension>(), "Suspension3x3", "Wheel Suspension 3x3"));
+    }
+
     /// <summary>A large railgun, named, its capacitor empty.</summary>
     public Railgun Railgun(long id, string name)
     {

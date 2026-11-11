@@ -94,6 +94,11 @@ sealed class Rigged
         return Rig.Piston(id, name);
     }
 
+    public Suspension Suspension(long id, string name)
+    {
+        return Rig.Suspension(id, name);
+    }
+
     public Battery Battery(long id, string name)
     {
         return Rig.Battery(id, name);

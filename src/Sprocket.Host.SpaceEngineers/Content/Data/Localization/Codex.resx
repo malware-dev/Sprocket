@@ -1512,6 +1512,10 @@
     <value>How many blocks the module is attached to, whether it can boost them or not.</value>
     <comment>Codex entry on the block member "connections" of UpgradeModule, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.Suspension.MoveTo" xml:space="preserve">
+    <value>Moves the wheel to a height, and finishes once the wheel stops moving. This is [![](mark:awaited)&amp;nbsp;awaitable](Term.Awaitable class=term).</value>
+    <comment>Codex entry on the block member "move to" of Suspension, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.Suspension.SteeringAngle" xml:space="preserve">
     <value>The angle the wheel is turned to, in degrees.</value>
     <comment>Codex entry on the block member "steering angle" of Suspension, shown in the picker when it is chosen.</comment>

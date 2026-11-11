@@ -154,8 +154,11 @@ namespace Sprocket.GameTests
                 while (settle.MoveNext())
                     yield return settle.Current;
 
-                _report.Note(string.Format(CultureInfo.InvariantCulture, "{0}: the ship moved {1:0.##} m, settled after {2:0.#} s, rose at most {3:0.##} m/s and went {4:0.##} m past where it ended, {5}",
-                    change.Name, _moved, _settled, _fastest, _past, Pose));
+                _report.Note(string.Format(CultureInfo.InvariantCulture, "{0}: the ship moved {1:0.##} m, settled after {2:0.#} s, rose at most {3:0.##} m/s and went {4:0.##} m past where it ended; its first wheel moved {6:0.##} m along its travel and stood still after {7:0.#} s; {5}",
+                    change.Name, _moved, _settled, _fastest, _past, Pose, _travelled, _still));
+                if (change.Wheels == 4 && change.Height > 1)
+                    _report.Check("a wheel stops moving along its travel as the ship settles", System.Math.Abs(_travelled) > 0.5 && System.Math.Abs(_still - _settled) < 1,
+                        string.Format(CultureInfo.InvariantCulture, "{0}: the wheel moved {1:0.##} m and stood still after {2:0.#} s, the ship settled after {3:0.#} s", change.Name, _travelled, _still, _settled));
             }
 
             _report.Check("wheels taking a height change settle", _settled < 15, $"the last change settled after {_settled:0.#} s");
@@ -172,6 +175,8 @@ namespace Sprocket.GameTests
         double _settled;
         double _fastest;
         double _past;
+        double _still;
+        double _travelled;
 
         /// <summary>
         /// Sets <paramref name="wheels" /> to <paramref name="height" /> and watches the ship every tenth of a second until it has
@@ -184,6 +189,7 @@ namespace Sprocket.GameTests
 
             var start = Rise;
             var heights = new List<double> { start };
+            var travels = new List<double> { Travel(_wheels[0]) };
             _fastest = 0;
             var still = 0;
             var tenth = 0;
@@ -193,6 +199,7 @@ namespace Sprocket.GameTests
                 var now = Rise;
                 var step = now - heights[heights.Count - 1];
                 heights.Add(now);
+                travels.Add(Travel(_wheels[0]));
                 _fastest = System.Math.Max(_fastest, step * 10);
                 still = System.Math.Abs(step) < 0.001 ? still + 1 : 0;
             }
@@ -203,6 +210,24 @@ namespace Sprocket.GameTests
             _moved = end - start;
             _settled = (tenth - still) / 10.0;
             _past = end >= start ? heights.Max() - end : end - heights.Min();
+
+            // When the wheel last moved more than Sprocket's 5 mm in half a second (WheelMotion), so when its move to would finish.
+            var last = 0;
+            for (var at = 5; at < travels.Count; at++)
+            {
+                if (System.Math.Abs(travels[at] - travels[at - 5]) > 0.005)
+                    last = at;
+            }
+
+            _still = (last + 5) / 10.0;
+            _travelled = travels[travels.Count - 1] - travels[0];
+        }
+
+        /// <summary>How far the wheel of <paramref name="suspension" /> stands along the suspension's forward, in meters, as Sprocket measures it (WheelMotion).</summary>
+        static double Travel(IMyMotorSuspension suspension)
+        {
+            var top = suspension.Top;
+            return top == null ? 0 : Vector3D.Dot(top.GetPosition() - suspension.GetPosition(), suspension.WorldMatrix.Forward);
         }
 
         /// <summary>A large 3x3 suspension at <paramref name="cell" />, its wheel to the <paramref name="side" /> and its travel up and down.</summary>
