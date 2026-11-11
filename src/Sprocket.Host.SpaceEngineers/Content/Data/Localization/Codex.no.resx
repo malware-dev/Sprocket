@@ -523,6 +523,10 @@
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
     <value>Ta dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) og [![](mark:installation)&amp;nbsp;installasjonene](Term.Installation class=term) dets bort fra denne [konstruksjonen](Term.Construct class=term).</value>
   </data>
+  <data name="Sprocket.Library.AlreadyHere" xml:space="preserve">
+    <value>Dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) er allerede på denne [konstruksjonen](Term.Construct class=term).</value>
+    <comment>In the library, the tooltip on the left-pointing arrow in the strip between its panes, which puts a blueprint on the construct, while it cannot be pressed because the logic system of the chosen row is on the construct already, the same as its blueprint or with none.</comment>
+  </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
     <value>[![](mark:blueprint)&amp;nbsp;Plantegningen](Term.Blueprint class=term) i [biblioteket](Term.Library class=term) er den samme som dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term).</value>
   </data>

@@ -85,7 +85,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var putsOn = entry != null && entry.Section != LibrarySection.OnConstruct && live == null && system != null;
             var replaces = !backed && live != null && volume != null && !same;
             _ins.CanExecute = free && (putsOn || replaces);
-            _in.Tip = KeptTip.For(_in.Tip, !replaces ? codex.LibraryPutOn : changed ? codex.LibraryResetAbout : codex.SystemsUpdateFromLibraryAbout);
+            var here = live != null;
+            _in.Tip = KeptTip.For(_in.Tip, replaces ? (changed ? codex.LibraryResetAbout : codex.SystemsUpdateFromLibraryAbout)
+                : here ? codex.LibraryAlreadyHere : codex.LibraryPutOn);
 
             _copies.CanExecute = free && entry != null && entry.Section == LibrarySection.OnConstruct && system != null;
             _copy.Tip = KeptTip.For(_copy.Tip, codex.LibraryCopyAbout);

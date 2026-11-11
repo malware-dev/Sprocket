@@ -366,6 +366,7 @@ public class LibraryTests
         page.Rows.OfType<StatusRow>().Last(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
         rig.Tick();
         Assert.False(Live(add), "the arrow puts it on while it is on this construct");
+        Assert.Equal(rig.Texts.Codex.LibraryAlreadyHere, Says(add));
     }
 
     /// <summary>A backup is a blueprint, so it offers no copy: the arrow onto this construct puts it on.</summary>
@@ -534,6 +535,21 @@ public class LibraryTests
 
         Assert.Single(rig.Shelf.All);
         Assert.Single(rig.Backups.All);
+    }
+
+    /// <summary>The arrow onto this construct, while a logic system on it is chosen that is the same as its blueprint, says it is already here.</summary>
+    [Fact]
+    public void TheArrowOntoThisConstructSaysALogicSystemIsAlreadyHere()
+    {
+        var rig = Blueprinted();
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        var page = Reopened(rig);
+
+        Choose(rig, page, "Airlock");
+        var add = ToConstruct(page);
+
+        Assert.False(Live(add));
+        Assert.Equal(rig.Texts.Codex.LibraryAlreadyHere, Says(add));
     }
 
     /// <summary>Copy is offered for a logic system on this construct alone: a blueprint in storage goes on with the arrow instead.</summary>

@@ -692,6 +692,10 @@
     <value>Take this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) and its [![](mark:installation)&amp;nbsp;installations](Term.Installation class=term) off this [construct](Term.Construct class=term).</value>
     <comment>On the home screen, the tooltip on the minus in a logic system's heading row, shown where the logic system's blueprint is in the library.</comment>
   </data>
+  <data name="Sprocket.Library.AlreadyHere" xml:space="preserve">
+    <value>This [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) is already on this [construct](Term.Construct class=term).</value>
+    <comment>In the library, the tooltip on the left-pointing arrow in the strip between its panes, which puts a blueprint on the construct, while it cannot be pressed because the logic system of the chosen row is on the construct already, the same as its blueprint or with none.</comment>
+  </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
     <value>The [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term) is the same as this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term).</value>
     <comment>In the library, the tooltip on the right-pointing arrow in the strip between its panes, which makes or updates a blueprint, while it cannot be pressed because the chosen logic system and its blueprint in the library are the same.</comment>
