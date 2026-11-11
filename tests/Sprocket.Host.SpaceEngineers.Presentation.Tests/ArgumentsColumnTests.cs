@@ -196,6 +196,28 @@ public class ArgumentsColumnTests
         Assert.Equal("Sequence 1", screen.Ended);
     }
 
+    /// <summary>While leaving a changed pick asks, letters do nothing; Escape puts the question away with the pick still open, and Enter asked again answers it.</summary>
+    [Fact]
+    public void AQuestionTakesNoLettersAndEscapeKeepsThePick()
+    {
+        var screen = Open(SetRadius + " " + RadiusBox + " type 7 escape");
+        Assert.True(screen.Scene.IsQuestioning, "leaving a changed pick did not ask first");
+
+        screen.Do("type", "\"qwz\"").Run(5);
+        Assert.True(screen.Scene.IsQuestioning, "letters put the question away");
+        Assert.True(screen.Shows("7"), "letters reached the field behind the question");
+        Assert.False(screen.Shows("7qwz"), "letters reached the field behind the question");
+
+        screen.Do("escape").Run(5);
+        Assert.False(screen.Scene.IsQuestioning, "Escape left the question up");
+        Assert.Equal(Slot, screen.Ended);
+
+        screen.Do("escape").Run(5);
+        Assert.True(screen.Scene.IsQuestioning, "leaving again did not ask");
+        screen.Do("enter").Run(5);
+        Assert.False(screen.Scene.IsQuestioning, "Enter left the question up");
+    }
+
     /// <summary>Escape goes back, keeping what was typed in a field, so leaving a changed pick asks first.</summary>
     [Fact]
     public void EscapeKeepsTheFieldAndAsksBeforeLeaving()
