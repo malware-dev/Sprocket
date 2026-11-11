@@ -70,9 +70,7 @@ namespace Sprocket.GameTests
             _report.Check("a forced door closed twice as it opens", _reopened == 2 && door.Status == DoorStatus.Open,
                 $"{_reopened} of 2 closings were turned back ({string.Join(", ", _closed)}), and {Waited} after the second it is {door.Status} at {door.OpenRatio:0.##} open");
 
-            // Arrived, it is let go: closed from outside, it stays closed. Sprocket sees it arrive at its next look, up to ten ticks
-            // later, and a door closed before that look is turned back once more, measured; half a second covers the look.
-            yield return PluginUpdates.PerSecond / 2;
+            // Arrived, it is let go as it says so: closed from outside on the update it is seen open, it stays closed.
             door.CloseDoor();
             yield return 3 * PluginUpdates.PerSecond;
             _report.Check("a forced door let go once open", door.Status == DoorStatus.Closed,

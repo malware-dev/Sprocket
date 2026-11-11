@@ -281,6 +281,32 @@ public class AirlockTests
         Assert.NotEqual(DoorStatus.Closing, a.Inner.Status);
     }
 
+    /// <summary>A forced door is let go on the tick it says it has arrived, so reversed at once it is left alone.</summary>
+    [Fact]
+    public void AForcedDoorIsLetGoAsItArrives()
+    {
+        var a = Build();
+        Force(a);
+        var steps = a.LetMeOut.Steps;
+        while (steps.Count > 1)
+            steps.RemoveAt(steps.Count - 1);
+
+        a.Automation.Edited();
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        for (var tick = 0; tick < 200 && a.Inner.Status != DoorStatus.Closed; tick++)
+            a.Tick();
+
+        Assert.Equal(DoorStatus.Closed, a.Inner.Status);
+        Assert.Equal(0, a.Runner.Forced.Count);
+
+        a.Inner.Perform("Open_On", new List<Literal>());
+        a.Tick(30);
+        Assert.NotEqual(DoorStatus.Closing, a.Inner.Status);
+    }
+
     /// <summary>A forced door is left alone once the run is stopped.</summary>
     [Fact]
     public void AForcedDoorIsLetGoWhenTheRunStops()

@@ -144,7 +144,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Tells everything listening that Sprocket has asked the block for something.</summary>
         public void Asked()
         {
-            for (var i = 0; i < _hearing.Count; i++)
+            // Last first: a listener told may stop listening, which takes it out of the list.
+            for (var i = _hearing.Count - 1; i >= 0; i--)
                 _hearing[i]();
         }
 
