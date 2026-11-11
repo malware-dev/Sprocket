@@ -22,13 +22,14 @@ public class SharingTests
     readonly List<long> _barred = new List<long>();
     readonly List<KeyValuePair<long, ShareTiding>> _told = new List<KeyValuePair<long, ShareTiding>>();
     int _now = 1;
+    int _limit = 100;
     readonly BlueprintShares _world;
     readonly ShareDesk _desk;
 
     public SharingTests()
     {
-        _world = new BlueprintShares(_shares, _barred, Player, (_, __) => false, new Values(), () => _now);
-        _desk = new ShareDesk(_world, () => 100, player => player == Ann ? "Ann" : "Me", () => new List<long> { Me, Ann }, Player, () => new List<long> { Me, Ann }, (player, tiding) => _told.Add(new KeyValuePair<long, ShareTiding>(player, tiding)));
+        _world = new BlueprintShares(_shares, _barred, Player, (_, _) => false, new Values(), () => _now);
+        _desk = new ShareDesk(_world, () => _limit, player => player == Ann ? "Ann" : "Me", () => new List<long> { Me, Ann }, Player, () => new List<long> { Me, Ann }, (player, tiding) => _told.Add(new KeyValuePair<long, ShareTiding>(player, tiding)));
     }
 
     /// <summary>What another player shares is listed with who shared it.</summary>
@@ -288,6 +289,49 @@ public class SharingTests
         Assert.True(Assert.Single(read.Known).IsBlocked);
     }
 
+    /// <summary>
+    /// With the world's limit set to 0 while the library is open, sharing is refused with the reason the world gives, and the
+    /// library opened again offers no sharing.
+    /// </summary>
+    [Fact]
+    public void ALimitOfNoneRefusesWithItsReason()
+    {
+        var screen = Screen.On(Rig.Demo());
+        ShareBoard board = null!;
+        // ReSharper disable once AccessToModifiedClosure - the board answers itself, and is set before it is ever asked.
+        board = new ShareBoard(order => board.Heard(_desk.Hear(order, Me, false)));
+        screen.Editor.Sharing = board;
+        // The session draws the editor again whenever the board hears news (SprocketSession.SharesChanged).
+        board.Changed += screen.Editor.Invalidate;
+        screen.Editor.Shelf = new LibraryShelf(new Folder(), delegate { });
+        var texts = screen.Editor.Texts;
+        screen.Editor.NewSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.GoToRoot();
+        screen.Run(2);
+        screen.Do("press", texts.SystemsMakeBlueprint).Run(2);
+        screen.Editor.GoToRoot();
+        screen.Run(2);
+        screen.Do("press", texts.SystemsLoad).Run(2);
+        // The second Airlock is the library's kept copy, under the construct's own.
+        var kept = screen.Drawings.Last(drawn => drawn.IsText && drawn.Text == "Airlock");
+        screen.Scene.Press(Screen.Ui(kept.At.X + 4f, screen.MiddleOf(kept)), 1);
+        screen.Run(2);
+
+        _limit = 0;
+        screen.Do("press", texts.LibraryShare).Run(2);
+        screen.Do("press", texts.ShareConfirm).Run(2);
+        Assert.True(screen.Shows(texts.LibraryShareClosed), screen.Dump);
+
+        screen.Editor.GoToRoot();
+        screen.Run(2);
+        screen.Do("press", texts.SystemsLoad).Run(2);
+        kept = screen.Drawings.Last(drawn => drawn.IsText && drawn.Text == "Airlock");
+        screen.Scene.Press(Screen.Ui(kept.At.X + 4f, screen.MiddleOf(kept)), 1);
+        screen.Run(2);
+        Assert.False(screen.Shows(texts.LibraryShare), screen.Dump);
+    }
+
     /// <summary>Ann offers <paramref name="blueprint" /> for those <paramref name="reach" /> says, through the desk.</summary>
     void Offer(string blueprint, ShareReach reach)
     {
@@ -299,6 +343,7 @@ public class SharingTests
     {
         var rig = Simulation.Fresh();
         ShareBoard board = null!;
+        // ReSharper disable once AccessToModifiedClosure - the board answers itself, and is set before it is ever asked.
         board = new ShareBoard(order => board.Heard(_desk.Hear(order, Me, false)));
         rig.Editor.Sharing = board;
         return rig;
