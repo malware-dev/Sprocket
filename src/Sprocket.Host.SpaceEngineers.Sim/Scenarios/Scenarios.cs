@@ -8,7 +8,7 @@ namespace Sprocket.Sim.Scenarios;
 public static class Scenarios
 {
     /// <summary>Each scenario, newly made.</summary>
-    public static IReadOnlyList<Scenario> All => new Scenario[] { new SplitTwin(), new StockWatch(), new MoveItems(), new InventoryReadings(), new RefineryMoves(), new PistonStatus(), new ScriptLimit(), new ForcedDoor() };
+    public static IReadOnlyList<Scenario> All => new Scenario[] { new SplitTwin(), new StockWatch(), new MoveItems(), new InventoryReadings(), new RefineryMoves(), new PistonStatus(), new ScriptLimit(), new ForcedDoor(), new OldAirlock() };
 
     /// <summary>The scenario whose blueprint is called <paramref name="name" />.</summary>
     public static Scenario Named(string name)

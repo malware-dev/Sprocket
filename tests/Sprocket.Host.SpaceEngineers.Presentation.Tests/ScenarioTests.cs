@@ -61,6 +61,25 @@ public class ScenarioTests
         Assert.Equal(2, sim.Machine.Log.Count(line => line == "At Three:on"));
     }
 
+    /// <summary>Cycle Button closes Old Door, moves Old Piston to 2 m and opens the door, and Opened comes on as it finishes opening, every time it is pressed.</summary>
+    [Fact]
+    public void TheOldAirlockCyclesEachPress()
+    {
+        var scenario = new OldAirlock();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+
+        for (var round = 0; round < 2; round++)
+        {
+            sim.Press("Cycle Button");
+            Run(sim);
+            Assert.Equal(Sandbox.ModAPI.Ingame.DoorStatus.Open, scenario.Door.Status);
+            Assert.Equal(2f, scenario.Piston.Position, 3);
+        }
+
+        Assert.Equal(2, sim.Machine.Log.Count(line => line == "Cycled:on"));
+        Assert.Equal(2, sim.Machine.Log.Count(line => line == "Opened:on"));
+    }
+
     /// <summary>Each of the script limit's buttons runs its own script and switches its light on, every time it is pressed.</summary>
     [Fact]
     public void TheScriptLimitRunsEachScriptEachPress()
