@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Sim.Machine;
 using VRage.Input;
 using VRageMath;
 using Xunit;
@@ -64,6 +65,24 @@ public class SlotCategoryTests
         var name = row.Plate.Within().OfType<Lumel.Text.Label>().First();
         Assert.Equal(name.FontSize, row.Plate.Box.FontSize);
         Assert.Equal(name.Font, row.Plate.Box.Font);
+    }
+
+    /// <summary>In the game's fonts, a category's name is drawn in the same face, size and place while it is typed as before.</summary>
+    [Fact]
+    public void ACategoryNameStaysPutWhileRenamed()
+    {
+        var screen = Slots(true);
+        Put(screen, "block slot 1", "Doors");
+        var shown = screen.Text("DOORS");
+
+        Category(screen, "Doors").Renames!.Execute();
+        screen.Run(2);
+        Assert.Same(Category(screen, "Doors").Plate.Box, screen.Editor.Input!.Focused);
+        var typed = screen.Text("Doors");
+
+        Assert.Equal(shown.Font, typed.Font);
+        Assert.Equal(shown.Scale, typed.Scale);
+        Assert.True(Vector2.Distance(shown.At, typed.At) <= 1f, $"drawn at {shown.At}, typed at {typed.At}");
     }
 
     /// <summary>A slot carried right under a category's name goes into it, stands there in the program's order, and one step back takes it out again.</summary>
@@ -331,10 +350,13 @@ public class SlotCategoryTests
         Assert.All(screen.Editor.Blueprint().Parts.OfType<IReorderable>(), row => Assert.False(row.DragHandle.IsVisible));
     }
 
-    /// <summary>The screen, switched off to be written, of a button system whose sequence closes both airlock doors, the outer one first, on its installation panel.</summary>
-    static Screen Slots()
+    /// <summary>
+    /// The screen, switched off to be written, of a button system whose sequence closes both airlock doors, the outer one first, on its
+    /// installation panel, its letters measured with the game's own widths where <paramref name="gameFonts" /> says.
+    /// </summary>
+    static Screen Slots(bool gameFonts = false)
     {
-        var screen = Screen.Fresh();
+        var screen = gameFonts ? Screen.WithGameFonts(Rig.Demo()) : Screen.Fresh();
         var editor = screen.Editor;
         editor.NewButtonSystem("Airlock");
         screen.Run(2);
