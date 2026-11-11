@@ -15,8 +15,8 @@ namespace Sprocket.GameTests
     /// </summary>
     public sealed class OldAirlockGameTest
     {
-        // Sprocket's key for a construct's program in its block's storage (BlockStorage.ProgramKey).
-        static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
+        /// <summary>Sprocket's key for a construct's program in its block's storage, as BlockStorage.ProgramKey holds it.</summary>
+        public static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
 
         readonly string _blueprint;
         readonly GameTestReport _report;

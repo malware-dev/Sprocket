@@ -5,8 +5,10 @@
     2. Builds the test plugin and packs the mod.
     3. Copies the packed mod over the server's copy of Sprocket Automation (Bleeding Edge). The server takes its copy as
        up to date, so the local build is what runs.
-    4. Puts back the clean test world, writes the scenarios' blueprints, and starts the server with the plugin.
-    5. Prints the report. The exit code is 0 when every check passed.
+    4. Puts back the clean test world, writes the scenarios' blueprints, and starts the server with the plugin, which saves the
+       world once its tests are done.
+    5. Starts the server again on that save, with the plugin running the tests of a reloaded world.
+    6. Prints both reports. The exit code is 0 when every check in both passed.
 
     The server's instance (its config, clean world template and Workshop downloads) is in -Instance and is never the
     server set up for playing.
@@ -67,8 +69,24 @@ if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
     "The server did not finish within $TimeoutSeconds s."
 }
 
-# 5. The report.
+# 5. The saved world loaded again.
+$reloaded = Join-Path $work 'report-reload.txt'
+Remove-Item $reloaded -ErrorAction SilentlyContinue
+$env:SPROCKET_GAMETEST_REPORT = $reloaded
+$env:SPROCKET_GAMETEST_PHASE = 'reload'
+$process = Start-Process $exe -ArgumentList '-console', '-path', "`"$Instance`"", '-plugin', "`"$plugin`"" -WorkingDirectory (Split-Path $exe) -WindowStyle Minimized -PassThru
+if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+    Stop-Process -Id $process.Id -Force
+    "The reloaded server did not finish within $TimeoutSeconds s."
+}
+Remove-Item Env:SPROCKET_GAMETEST_PHASE
+
+# 6. The reports.
 '{0:n0} s, branch {1}' -f ((Get-Date) - $began).TotalSeconds, $installed
-if (Test-Path $report) { Get-Content $report } else { 'No report was written.' }
-if ((Test-Path $report) -and (Select-String $report -Pattern '^finished .*, 0 failed$' -Quiet)) { exit 0 }
+$clean = $true
+foreach ($one in $report, $reloaded) {
+    if (Test-Path $one) { Get-Content $one } else { "No report was written to $one." }
+    if (-not ((Test-Path $one) -and (Select-String $one -Pattern '^finished .*, 0 failed$' -Quiet))) { $clean = $false }
+}
+if ($clean) { exit 0 }
 exit 1

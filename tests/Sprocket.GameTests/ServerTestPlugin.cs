@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.Game.World;
+using Sandbox.ModAPI;
 using VRage.Plugins;
 
 namespace Sprocket.GameTests
@@ -8,6 +9,8 @@ namespace Sprocket.GameTests
     /// <summary>
     /// The dedicated server plugin that runs a game test once the world is ready, then stops the server. It reads the scenarios'
     /// blueprints from the folder SPROCKET_GAMETEST_BLUEPRINTS and writes its report to SPROCKET_GAMETEST_REPORT; without both it does nothing.
+    /// With SPROCKET_GAMETEST_PHASE set to reload it runs the tests of a world an earlier run saved; otherwise it runs every test and
+    /// saves the world for that run.
     /// </summary>
     public sealed class ServerTestPlugin : IPlugin
     {
@@ -24,7 +27,7 @@ namespace Sprocket.GameTests
                 return;
 
             _report = new GameTestReport(report);
-            _steps = Steps(blueprints);
+            _steps = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_PHASE") == "reload" ? Reloaded() : Steps(blueprints);
         }
 
         /// <inheritdoc />
@@ -60,7 +63,7 @@ namespace Sprocket.GameTests
             _steps = null;
             _report.Finish();
 
-            // Ended at once rather than shut down, so the server never saves the world with the test's grids in it.
+            // Ended at once rather than shut down, so the world is as the tests saved it, never as the server would on its way out.
             Environment.Exit(_report.IsClean ? 0 : 1);
         }
 
@@ -80,6 +83,21 @@ namespace Sprocket.GameTests
                 while (test.MoveNext())
                     yield return test.Current;
             }
+
+            // The world as the tests left it, for the run that loads it (OldAirlockReloadGameTest). The save is written in the
+            // background, so it is given time to finish before the server ends.
+            MyAPIGateway.Session.Save();
+            yield return 20 * PluginUpdates.PerSecond;
+        }
+
+        IEnumerator<int> Reloaded()
+        {
+            // Five seconds of a running world, for Sprocket to take up the constructs it loaded.
+            yield return 5 * PluginUpdates.PerSecond;
+
+            var test = new OldAirlockReloadGameTest(_report).Run();
+            while (test.MoveNext())
+                yield return test.Current;
         }
     }
 }
