@@ -40,6 +40,18 @@ namespace Sprocket.GameTests
             return null;
         }
 
+        /// <summary>The block on the grid at <paramref name="cell" /> if it is a <typeparamref name="T" />, or null.</summary>
+        public T At<T>(Vector3I cell) where T : class
+        {
+            foreach (var block in _blocks)
+            {
+                if (block.Position == cell)
+                    return block.FatBlock as T;
+            }
+
+            return null;
+        }
+
         /// <summary>A block of <typeparamref name="T" /> and <paramref name="subtype" /> at <paramref name="cell" />, switched on.</summary>
         public static T Block<T>(string subtype, Vector3I cell) where T : MyObjectBuilder_FunctionalBlock, new()
         {
