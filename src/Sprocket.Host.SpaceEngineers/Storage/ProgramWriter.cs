@@ -145,6 +145,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             for (var i = 0; i < systems.Count; i++)
             {
                 var system = systems[i];
+                if (!string.IsNullOrEmpty(system.ListedOn))
+                    blocks.Add(system.ListedOn);
+
                 if (!system.IsBlueprint)
                 {
                     system.Acted(named);
@@ -274,8 +277,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system.LastSequenceNumber > system.HighestSequenceNumber())
                 pen.Attribute(ScriptAttributes.LastSequence, system.LastSequenceNumber.ToString(CultureInfo.InvariantCulture));
 
-            if (kept && system.ListedOn != 0)
-                pen.AttributeText(ScriptAttributes.ListedOn, system.ListedOn.ToString(CultureInfo.InvariantCulture));
+            if (kept && !string.IsNullOrEmpty(system.ListedOn))
+                pen.AttributeText(ScriptAttributes.ListedOn, system.ListedOn);
 
             pen.Attributes(system.Attributes);
             pen.Start(Keyword.System);

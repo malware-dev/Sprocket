@@ -14,7 +14,7 @@ param(
     [string]$Game = 'E:\Steam\steamapps\common\SpaceEngineers',
     [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
     [string]$Template = 'E:\Data\sprocket-ds-test\WorldTemplate',
-    [string[]]$Scenarios = @('Sprocket Piston Status'),
+    [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count'),
     [int]$TimeoutSeconds = 600
 )
 $ErrorActionPreference = 'Stop'
@@ -43,15 +43,15 @@ $world = Join-Path $AppData 'Saves\Sprocket Client Test'
 if (Test-Path $world) { Remove-Item $world -Recurse -Force }
 New-Item -ItemType Directory -Force $world | Out-Null
 Copy-Item (Join-Path $Template '*') $world -Recurse
-$sandbox = Join-Path $world 'Sandbox.sbc'
-$text = [IO.File]::ReadAllText($sandbox)
-$text = $text -replace '<Name>3807234771\.sbm</Name>(\s*)<PublishedFileId>3807234771</PublishedFileId>', "<Name>$mod</Name>`$1<PublishedFileId>0</PublishedFileId>"
-if ($text -notmatch "<Name>$([regex]::Escape($mod))</Name>") { throw 'The world names no Sprocket mod to point at the local copy.' }
-[IO.File]::WriteAllText($sandbox, $text)
-
-# Spectator on, for the pictures taken from it, in the checkpoint and in its world configuration both.
-foreach ($file in $sandbox, (Join-Path $world 'Sandbox_config.sbc')) {
-    $xml = [IO.File]::ReadAllText($file) -replace '<EnableSpectator>false</EnableSpectator>', '<EnableSpectator>true</EnableSpectator>'
+# The checkpoint and its world configuration both list the mods and the settings, and the configuration wins where they
+# differ, so both are changed: Sprocket pointed at the local copy, offline, since the game loads a local mod only in an
+# offline world, and spectator on for the pictures taken from it.
+foreach ($file in (Join-Path $world 'Sandbox.sbc'), (Join-Path $world 'Sandbox_config.sbc')) {
+    $xml = [IO.File]::ReadAllText($file)
+    $xml = $xml -replace '<Name>3807234771\.sbm</Name>(\s*)<PublishedFileId>3807234771</PublishedFileId>', "<Name>$mod</Name>`$1<PublishedFileId>0</PublishedFileId>"
+    if ($xml -notmatch "<Name>$([regex]::Escape($mod))</Name>") { throw "$file names no Sprocket mod to point at the local copy." }
+    $xml = $xml -replace '<EnableSpectator>false</EnableSpectator>', '<EnableSpectator>true</EnableSpectator>'
+    $xml = $xml -replace '<OnlineMode>[A-Z]+</OnlineMode>', '<OnlineMode>OFFLINE</OnlineMode>'
     [IO.File]::WriteAllText($file, $xml)
 }
 

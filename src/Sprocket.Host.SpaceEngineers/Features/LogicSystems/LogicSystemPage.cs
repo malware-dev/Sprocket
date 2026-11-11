@@ -443,7 +443,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     : Editor.Texts.Codex.SystemTurnOffToEdit;
         }
 
-        /// <summary>The action keeping this logic system to the block the editor was opened from, or taking it back, or null where somebody else holds the construct or no block opened the editor.</summary>
+        /// <summary>The action keeping this logic system to the block the editor was opened from, or taking it back, or null where somebody else holds the construct or no block found opened the editor.</summary>
         public ChoiceEntry KeepHere
         {
             get
@@ -451,9 +451,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (Editor.Holder != null || Editor.OpenedFrom == 0)
                     return null;
 
-                var kept = _system.ListedOn != 0;
+                var kept = !string.IsNullOrEmpty(_system.ListedOn);
+                var here = Editor.World?.FindEntity(Editor.OpenedFrom);
+                if (!kept && here == null)
+                    return null;
+
                 var text = kept ? Editor.Texts.SystemsListEverywhere : Editor.Texts.SystemsKeepHere;
-                var command = Editor.Act(CommandKind.Expand, () => Editor.Do(_system, new ListSystemOn(_system.ListedOn, kept ? 0L : Editor.OpenedFrom)));
+                var command = Editor.Act(CommandKind.Expand, () => Editor.Do(_system, new ListSystemOn(_system.ListedOn, kept ? "" : Editor.Program.Declare(Editor.World, here).Name)));
                 return new ChoiceEntry(text, false, command) { About = Editor.Texts.SystemsKeepHereAbout };
             }
         }

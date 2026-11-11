@@ -80,6 +80,19 @@ public class ScenarioTests
         Assert.Equal(2, sim.Machine.Log.Count(line => line == "Opened:on"));
     }
 
+    /// <summary>The kept count's first logic system is kept to its programmable block, and its second is listed everywhere.</summary>
+    [Fact]
+    public void TheKeptCountKeepsOneSystemToItsBlock()
+    {
+        var scenario = new KeptCount();
+        var built = scenario.Build(BlockDefinitions.FromGame());
+        var systems = built.Sim.Editor.Program.Systems;
+
+        Assert.Equal(2, systems.Count);
+        Assert.Equal(built.Sim.Machine.Sprocket.Id, Features.Shell.SystemSummary.KeptTo(built.Sim.Editor.Runner, systems[0]));
+        Assert.Equal("", systems[1].ListedOn);
+    }
+
     /// <summary>Each of the script limit's buttons runs its own script and switches its light on, every time it is pressed.</summary>
     [Fact]
     public void TheScriptLimitRunsEachScriptEachPress()

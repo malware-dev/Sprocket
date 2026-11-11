@@ -72,7 +72,7 @@ namespace Sprocket.GameTests
                 $"after {_thirds / 3.0:0.#} s Old Door is {door.Status}, Old Piston at {piston.CurrentPosition:0.##} m, Cycled is {Said(cycled)} and Opened {Said(opened)}");
 
             var program = Program(automation);
-            _report.Check("an alpha 21 program is kept in the current draft", program.StartsWith("sprocket 1 alpha 24")
+            _report.Check("an alpha 21 program is kept in the current draft", program.StartsWith("sprocket 1 alpha 25")
                     && program.Contains("ext.move_to(") && program.Contains("ext.finishes_opening"),
                 $"the block keeps it as {Header(program)}, its piston step as {Line(program, "move")} and its trigger as {Line(program, "opening")}");
         }
@@ -81,7 +81,7 @@ namespace Sprocket.GameTests
         /// <remarks>Alpha 22 changed only the spelling of member ids (MemberSpelling), so this is the program alpha 21 wrote.</remarks>
         static string Older(string blueprint)
         {
-            return blueprint.Replace("sprocket 1 alpha 24", "sprocket 1 alpha 21")
+            return blueprint.Replace("sprocket 1 alpha 25", "sprocket 1 alpha 21")
                 .Replace("ext.move_to(", "ext.'move-to'(")
                 .Replace("ext.finishes_opening", "ext.'finishes-opening'");
         }

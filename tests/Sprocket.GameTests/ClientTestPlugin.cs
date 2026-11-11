@@ -31,6 +31,7 @@ namespace Sprocket.GameTests
         IEnumerator<int> _steps;
         int _waiting;
         bool _odd;
+        bool _respawned;
 
         /// <inheritdoc />
         public void Init(object gameInstance)
@@ -67,13 +68,25 @@ namespace Sprocket.GameTests
 
             if (MySession.Static == null || !MySession.Static.Ready)
             {
+                // An offline world pauses while a screen is open, and counts towards ready only while it runs, so the respawn
+                // screen a new player stands at is answered here: its own request spawns them in a space suit.
+                if (!_respawned && MySession.Static != null && MySession.Static.LocalCharacter == null && MyGuiScreenMedicals.Static != null)
+                {
+                    _respawned = true;
+                    MyPlayerCollection.RespawnRequest(true, false, 0, null, 0, null, Color.White);
+                }
+
+                // The screen stays open until the character it asked for is there, and closing it sooner leaves it open.
+                if (MySession.Static != null && MySession.Static.LocalCharacter != null && MyGuiScreenMedicals.Static != null)
+                    MyGuiScreenMedicals.Close();
+
                 // Three minutes is many times what the test world takes; past that the game is waiting on something, such as a
                 // message box, and says so in its log.
                 _loadUpdates++;
                 if (_loadUpdates < 180 * PluginUpdates.PerSecond)
                     return;
 
-                _report.Fail("client world", $"the world in {_world} did not load within three minutes; the game's log says why");
+                _report.Fail("client world", $"the world in {_world} did not load within three minutes: a session {(MySession.Static != null ? "is" : "is not")} open, its character is {(MySession.Static?.LocalCharacter == null ? "missing" : "there")}, the respawn screen is {(MyGuiScreenMedicals.Static == null ? "closed" : "open")}, and a respawn {(_respawned ? "was" : "was not")} asked for");
                 Close();
                 return;
             }
@@ -81,6 +94,8 @@ namespace Sprocket.GameTests
             if (_steps == null)
             {
                 _report.Pass("client world", $"the world in {_world} loaded");
+                var local = MySession.Static.Mods.Exists(mod => mod.PublishedFileId == 0 && mod.Name.StartsWith("Sprocket Automation"));
+                _report.Check("client mod", local, local ? "Sprocket is the local copy built from this repository" : "Sprocket is not the local copy, so the tests run the published build");
                 _steps = Steps();
             }
 
@@ -148,16 +163,6 @@ namespace Sprocket.GameTests
             // Five seconds of a running world before anything is pasted into it.
             yield return 5 * PluginUpdates.PerSecond;
 
-            // A player new to the world stands at the respawn screen, which covers everything; the screen's own request spawns
-            // them in a space suit.
-            if (MySession.Static.LocalCharacter == null)
-            {
-                MyPlayerCollection.RespawnRequest(true, false, 0, null, 0, null, Color.White);
-                yield return 5 * PluginUpdates.PerSecond;
-                MyGuiScreenMedicals.Close();
-                yield return PluginUpdates.PerSecond;
-            }
-
             CloseDialogs();
             yield return PluginUpdates.PerSecond;
 
@@ -167,6 +172,10 @@ namespace Sprocket.GameTests
             var shot = new SceneShotClientTest(_blueprints, _shots, _report).Run();
             while (shot.MoveNext())
                 yield return shot.Current;
+
+            var kept = new KeptCountClientTest(_blueprints, _shots, _report).Run();
+            while (kept.MoveNext())
+                yield return kept.Current;
         }
 
         /// <summary>Closes the welcome and the consent dialogs the main menu opens for new user data, answering neither.</summary>

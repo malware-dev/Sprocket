@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
@@ -12,6 +13,7 @@ public class ListedOnTests
 {
     const long Office = 300;
     const long Bay = 301;
+    const long Pasted = 302;
 
     /// <summary>A system kept to a block lists from that block and from no other.</summary>
     [Fact]
@@ -33,11 +35,34 @@ public class ListedOnTests
     {
         var rig = Kept();
         var system = rig.Editor.Program.Systems[0];
-        system.ListedOn = 0;
+        system.ListedOn = "";
 
         rig.Editor.OpenedFrom = Bay;
 
         Assert.True(rig.Editor.Lists(system));
+    }
+
+    /// <summary>A kept block that comes back under a new id, as a pasted copy's blocks do, is found again by what else it is known by.</summary>
+    [Fact]
+    public void AKeptBlockIsFoundAgainUnderANewId()
+    {
+        var made = Rig.Demo();
+        var office = made.Programmable(Office, "Back Office PB");
+        made.Programmable(Bay, "Bay PB");
+        var rig = Simulation.On(made);
+        rig.Editor.NewButtonSystem("Doors");
+        rig.Tick();
+        var system = rig.Editor.Program.Systems[0];
+        system.ListedOn = Declared(rig.Editor, Office);
+        rig.Editor.Program.Edited();
+        rig.Tick();
+
+        made.Grind(office);
+        made.Programmable(Pasted, "Back Office PB");
+        for (var tick = 0; tick < 120; tick++)
+            rig.Tick();
+
+        Assert.Equal(Pasted, KeptId(rig.Editor, system));
     }
 
     /// <summary>A system kept to a block that isn't found lists everywhere, so nothing is out of reach.</summary>
@@ -46,7 +71,7 @@ public class ListedOnTests
     {
         var rig = Kept();
         var system = rig.Editor.Program.Systems[0];
-        system.ListedOn = 999;
+        system.ListedOn = "nowhere";
 
         rig.Editor.OpenedFrom = Bay;
 
@@ -96,7 +121,7 @@ public class ListedOnTests
 
         screen.Do("press", "Done").Run(120);
         var kept = screen.Editor.Program.Systems[0];
-        Assert.Equal(Office, kept.ListedOn);
+        Assert.Equal(Office, KeptId(screen.Editor, kept));
         Assert.Same(system, kept);
 
         screen.Scene.Reopen();
@@ -123,10 +148,10 @@ public class ListedOnTests
         var system = screen.Editor.Program.Systems[0];
 
         screen.Do("press", "LIST ONLY ON THIS BLOCK").Run(2);
-        Assert.Equal(Office, system.ListedOn);
+        Assert.Equal(Office, KeptId(screen.Editor, system));
 
         screen.Do("press", "LIST ON EVERY BLOCK").Run(2);
-        Assert.Equal(0L, system.ListedOn);
+        Assert.Equal("", system.ListedOn);
         Assert.True(screen.Shows("LIST ONLY ON THIS BLOCK"));
     }
 
@@ -153,7 +178,7 @@ public class ListedOnTests
         screen.Do("press", "LIST ONLY ON THIS BLOCK").Run(2);
 
         Assert.True(system.Enabled);
-        Assert.Equal(Office, system.ListedOn);
+        Assert.Equal(Office, KeptId(screen.Editor, system));
     }
 
     /// <summary>The home screen, open and idle on a construct with a kept system, gathers its list no more.</summary>
@@ -195,12 +220,18 @@ public class ListedOnTests
         screen.Run(2);
 
         var program = screen.Editor.Program;
-        program.Systems[0].ListedOn = Office;
+        program.Systems[0].ListedOn = Declared(screen.Editor, Office);
         program.Edited();
         screen.Editor.GoToRoot();
         screen.Run(10);
         return screen;
     }
+
+    /// <summary>The variable naming block <paramref name="id" /> in <paramref name="editor" />'s program, declared as keeping a system to it declares it.</summary>
+    static string Declared(SprocketEditor editor, long id) => editor.Program.Declare(editor.World, editor.World.FindEntity(id)).Name;
+
+    /// <summary>The id of the block <paramref name="system" /> is kept to, or 0 where it is kept to none found.</summary>
+    static long KeptId(SprocketEditor editor, AutomationSystem system) => SystemSummary.KeptTo(editor.Runner, system);
 
     /// <summary>A rig with two programmable blocks and one logic system, kept to the first.</summary>
     static Simulation Kept()
@@ -214,7 +245,7 @@ public class ListedOnTests
 
         var program = rig.Editor.Program;
         var system = program.Systems[0];
-        system.ListedOn = Office;
+        system.ListedOn = Declared(rig.Editor, Office);
         program.Edited();
         rig.Tick();
         return rig;
