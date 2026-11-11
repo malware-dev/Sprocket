@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Sandbox;
 using Sandbox.ModAPI;
+using VRage.Input;
+using VRageMath;
 
 namespace Sprocket.GameTests
 {
@@ -102,6 +105,44 @@ namespace Sprocket.GameTests
             // Switching a running system off asks first.
             Answer();
 
+            return true;
+        }
+
+        /// <summary>
+        /// Rests the game's mouse on the middle of what <paramref name="target" /> names: a property path from the page the editor is
+        /// on, such as <c>Moves.ToLibrary</c>, or else the words of something in the editor. Says whether it found it.
+        /// </summary>
+        public bool Hover(string target)
+        {
+            object found = _editor.Current;
+            foreach (var part in target.Split('.'))
+                found = Get(found, part);
+
+            if (found == null)
+            {
+                foreach (var element in Within(Root()))
+                {
+                    var said = Get(element, "AutomationId") as string ?? Get(element, "Text") as string ?? Get(element, "Summary") as string ?? Get(element, "Header") as string;
+                    if (said == target)
+                    {
+                        found = element;
+                        break;
+                    }
+                }
+            }
+
+            if (found == null)
+                return false;
+
+            // The editor lays out in units of a 1080-high screen, over the safe area the game keeps: the window's full height,
+            // four by three wide and centred (GameScreen, Lumel's Sim/Surface).
+            dynamic hovered = found;
+            RectangleF bounds = hovered.Bounds;
+            Vector2 middle = hovered.ToScreen(new Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
+            var window = MySandboxGame.ScreenSize;
+            var scale = window.Y / 1080f;
+            var left = (window.X - Math.Min(window.X, window.Y * 4f / 3f)) / 2f;
+            MyInput.Static.SetMousePosition((int)(left + middle.X * scale), (int)(middle.Y * scale));
             return true;
         }
 

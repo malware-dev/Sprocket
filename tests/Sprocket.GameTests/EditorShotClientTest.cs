@@ -50,14 +50,16 @@ namespace Sprocket.GameTests
                 yield break;
             }
 
-            foreach (var stop in new[] { new[] { "home" }, new[] { "library", "Library" }, new[] { "logic system", "Kept Here" }, new[] { "installation panel", "Kept Here", "Installation panel" }, new[] { "slots switched off", "Kept Here", "off", "Installation panel" }, new[] { "optimize slots asks", "Kept Here", "Installation panel", "Optimize slots" }, new[] { "heading renaming", "Kept Here", "Kept Here" }, new[] { "blueprint made", "Make blueprint" } })
+            foreach (var stop in new[] { new[] { "home" }, new[] { "library", "Library" }, new[] { "logic system", "Kept Here" }, new[] { "installation panel", "Kept Here", "Installation panel" }, new[] { "slots switched off", "Kept Here", "off", "Installation panel" }, new[] { "optimize slots asks", "Kept Here", "Installation panel", "Optimize slots" }, new[] { "heading renaming", "Kept Here", "Kept Here" }, new[] { "blueprint made", "Make blueprint" }, new[] { "strip copy tip", "Library", "hover:Moves.Copies" }, new[] { "strip to library tip", "Library", "hover:Moves.ToLibrary" }, new[] { "strip to construct tip", "Library", "hover:Moves.ToConstruct" } })
             {
                 editor.Home();
                 yield return PluginUpdates.PerSecond / 2;
                 var pressed = true;
+                var hovering = false;
                 for (var i = 1; i < stop.Length && pressed; i++)
                 {
-                    pressed = stop[i] == "off" ? editor.Switch(false) : stop[i] == "answer" ? editor.Answer() : editor.Press(stop[i]);
+                    hovering = stop[i].StartsWith("hover:");
+                    pressed = hovering ? editor.Hover(stop[i].Substring(6)) : stop[i] == "off" ? editor.Switch(false) : stop[i] == "answer" ? editor.Answer() : editor.Press(stop[i]);
                     if (!pressed)
                         _report.Fail($"editor {stop[0]}", $"no button {stop[i]}; the page offers {editor.Buttons()}");
 
@@ -67,17 +69,19 @@ namespace Sprocket.GameTests
                 if (!pressed)
                     continue;
 
-                var shot = Shoot("editor-" + stop[0].Replace(" ", "-"));
+                var shot = Shoot("editor-" + stop[0].Replace(" ", "-"), !hovering);
                 while (shot.MoveNext())
                     yield return shot.Current;
             }
         }
 
-        /// <summary>Takes a picture called <paramref name="name" /> with the mouse in the screen's corner, so no tip is open in it.</summary>
-        IEnumerator<int> Shoot(string name)
+        /// <summary>Takes a picture called <paramref name="name" />, with the mouse in the screen's corner so no tip is open in it where <paramref name="park" /> holds, and otherwise once the tip of what it rests on has had time to open.</summary>
+        IEnumerator<int> Shoot(string name, bool park)
         {
-            MyInput.Static.SetMousePosition(0, 0);
-            yield return PluginUpdates.PerSecond;
+            if (park)
+                MyInput.Static.SetMousePosition(0, 0);
+
+            yield return 2 * PluginUpdates.PerSecond;
 
             var picture = Path.Combine(_shots, name + ".png");
             if (File.Exists(picture))
