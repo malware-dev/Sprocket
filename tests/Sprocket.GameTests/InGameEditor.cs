@@ -99,16 +99,25 @@ namespace Sprocket.GameTests
             if ((bool)screen.SwitchIsOn != on)
                 Run(screen.Flip);
 
-            // Switching a running system off asks first; the answer that goes ahead is the last.
-            if ((bool)screen.HasQuestion)
-            {
-                dynamic last = null;
-                foreach (dynamic answer in screen.Answers)
-                    last = answer;
+            // Switching a running system off asks first.
+            Answer();
 
-                if (last != null)
-                    Run(last.Command);
-            }
+            return true;
+        }
+
+        /// <summary>Answers the question the editor asks with the answer that goes ahead, its last, and says whether one was asked.</summary>
+        public bool Answer()
+        {
+            var screen = _editor.Screen;
+            if (!(bool)screen.HasQuestion)
+                return false;
+
+            dynamic last = null;
+            foreach (dynamic answer in screen.Answers)
+                last = answer;
+
+            if (last != null)
+                Run(last.Command);
 
             return true;
         }

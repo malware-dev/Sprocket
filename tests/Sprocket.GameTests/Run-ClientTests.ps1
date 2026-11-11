@@ -55,6 +55,9 @@ foreach ($file in (Join-Path $world 'Sandbox.sbc'), (Join-Path $world 'Sandbox_c
     [IO.File]::WriteAllText($file, $xml)
 }
 
+# An empty library, as a player new to Sprocket has; it is kept in the user data, beside the worlds.
+Get-ChildItem (Join-Path $AppData 'Storage') -Filter 'sprocket-*' -ErrorAction SilentlyContinue | Remove-Item -Force
+
 $blueprints = Join-Path $work 'blueprints'
 foreach ($scenario in $Scenarios) {
     dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint $scenario $blueprints | Out-Null

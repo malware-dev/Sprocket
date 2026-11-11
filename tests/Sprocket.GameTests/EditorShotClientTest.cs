@@ -50,14 +50,14 @@ namespace Sprocket.GameTests
                 yield break;
             }
 
-            foreach (var stop in new[] { new[] { "home" }, new[] { "library", "Library" }, new[] { "logic system", "Kept Here" }, new[] { "installation panel", "Kept Here", "Installation panel" }, new[] { "slots switched off", "Kept Here", "off", "Installation panel" }, new[] { "optimize slots asks", "Kept Here", "Installation panel", "Optimize slots" } })
+            foreach (var stop in new[] { new[] { "home" }, new[] { "library", "Library" }, new[] { "logic system", "Kept Here" }, new[] { "installation panel", "Kept Here", "Installation panel" }, new[] { "slots switched off", "Kept Here", "off", "Installation panel" }, new[] { "optimize slots asks", "Kept Here", "Installation panel", "Optimize slots" }, new[] { "heading renaming", "Kept Here", "Kept Here" }, new[] { "blueprint made", "Make blueprint" } })
             {
                 editor.Home();
                 yield return PluginUpdates.PerSecond / 2;
                 var pressed = true;
                 for (var i = 1; i < stop.Length && pressed; i++)
                 {
-                    pressed = stop[i] == "off" ? editor.Switch(false) : editor.Press(stop[i]);
+                    pressed = stop[i] == "off" ? editor.Switch(false) : stop[i] == "answer" ? editor.Answer() : editor.Press(stop[i]);
                     if (!pressed)
                         _report.Fail($"editor {stop[0]}", $"no button {stop[i]}; the page offers {editor.Buttons()}");
 
