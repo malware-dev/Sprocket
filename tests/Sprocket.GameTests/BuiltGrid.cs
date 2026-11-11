@@ -9,23 +9,32 @@ using VRageMath;
 
 namespace Sprocket.GameTests
 {
-    /// <summary>A static large grid a test builds into the world from blocks it names, and the blocks on it.</summary>
+    /// <summary>A large grid a test builds into the world from blocks it names, static or free to move, and the blocks on it.</summary>
     public sealed class BuiltGrid
     {
         readonly List<IMySlimBlock> _blocks = new List<IMySlimBlock>();
 
-        /// <summary>A grid at <paramref name="at" /> holding <paramref name="blocks" />, each at the cell its Min gives it.</summary>
+        /// <summary>A static grid at <paramref name="at" /> holding <paramref name="blocks" />, each at the cell its Min gives it.</summary>
         public BuiltGrid(Vector3D at, params MyObjectBuilder_CubeBlock[] blocks)
+            : this(at, true, blocks)
+        {
+        }
+
+        /// <summary>A grid at <paramref name="at" />, static where <paramref name="isStatic" /> holds, holding <paramref name="blocks" />, each at the cell its Min gives it.</summary>
+        public BuiltGrid(Vector3D at, bool isStatic, params MyObjectBuilder_CubeBlock[] blocks)
         {
             var grid = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_CubeGrid>();
             grid.GridSizeEnum = MyCubeSize.Large;
-            grid.IsStatic = true;
+            grid.IsStatic = isStatic;
             grid.PersistentFlags = MyPersistentEntityFlags2.InScene;
             grid.PositionAndOrientation = new MyPositionAndOrientation(at, Vector3.Forward, Vector3.Up);
             grid.CubeBlocks.AddRange(blocks);
-            var built = (IMyCubeGrid)MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid);
-            built.GetBlocks(_blocks);
+            Grid = (IMyCubeGrid)MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid);
+            Grid.GetBlocks(_blocks);
         }
+
+        /// <summary>The grid itself.</summary>
+        public IMyCubeGrid Grid { get; private set; }
 
         /// <summary>The first block on the grid that is a <typeparamref name="T" />, or null.</summary>
         public T Find<T>() where T : class
@@ -38,6 +47,20 @@ namespace Sprocket.GameTests
             }
 
             return null;
+        }
+
+        /// <summary>Every block on the grid that is a <typeparamref name="T" />.</summary>
+        public List<T> All<T>() where T : class
+        {
+            var all = new List<T>();
+            foreach (var block in _blocks)
+            {
+                var found = block.FatBlock as T;
+                if (found != null)
+                    all.Add(found);
+            }
+
+            return all;
         }
 
         /// <summary>The block on the grid at <paramref name="cell" /> if it is a <typeparamref name="T" />, or null.</summary>
@@ -59,6 +82,14 @@ namespace Sprocket.GameTests
             block.Min = cell;
             block.Enabled = true;
             return block;
+        }
+
+        /// <summary>A large block of light armor at <paramref name="cell" />.</summary>
+        public static MyObjectBuilder_CubeBlock Armor(Vector3I cell)
+        {
+            var armor = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_CubeBlock>("LargeBlockArmorBlock");
+            armor.Min = cell;
+            return armor;
         }
 
         /// <summary>A large battery at <paramref name="cell" />, charged full and switched on.</summary>
