@@ -50,10 +50,8 @@ namespace Sprocket.GameTests
 
             _report.Note("pasted with its program as " + Header(Program(automation)));
 
-            // A blueprint holds the piston without its head (PistonStatusGameTest), and a new door moves only from its second
-            // order (DoorGameTest).
+            // A new door moves only from its second order (DoorGameTest).
             yield return 3 * PluginUpdates.PerSecond;
-            piston.GetActionWithName("Add Top Part").Apply(piston);
             door.OpenDoor();
             yield return 3 * PluginUpdates.PerSecond;
             door.CloseDoor();

@@ -38,17 +38,12 @@ namespace Sprocket.GameTests
                 yield break;
             }
 
-            // A blueprint holds the piston without its head, which is a grid of its own; the game's own action puts one on once the
-            // pasted grid has settled. Measured: right after the paste the action throws inside the game.
-            yield return 3 * PluginUpdates.PerSecond;
-            piston.GetActionWithName("Add Top Part").Apply(piston);
+            // The blueprint holds the piston's head as a grid of its own, which the paste attaches.
             piston.LimitReached += delegate { _reached++; };
-            yield return 5 * PluginUpdates.PerSecond;
+            yield return 3 * PluginUpdates.PerSecond;
+            _report.Check("a pasted piston with its head", piston.IsAttached, piston.IsAttached ? "the head came with the paste" : "the piston was pasted without its head");
             if (!piston.IsAttached)
-            {
-                _report.Fail("piston head", "Add Top Part gave the piston no head");
                 yield break;
-            }
 
             // A piston moves slower than its speed on the server, measured: 7.58 m in 3 s at a speed of 5, and 6 m in 6 s at 2. So
             // each move is watched until it is done, for at most fifteen seconds.

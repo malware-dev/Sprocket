@@ -19,7 +19,6 @@ namespace Sprocket.GameTests
 
         readonly GameTestReport _report;
         readonly HashSet<MyLaserAntennaStatus> _seen = new HashSet<MyLaserAntennaStatus>();
-        bool _outside;
 
         /// <summary>The test, answering into <paramref name="report" />.</summary>
         public LaserAntennaGameTest(GameTestReport report)
@@ -46,7 +45,7 @@ namespace Sprocket.GameTests
                 yield return left.Current;
 
             _report.Check("an idle laser antenna left alone", Only(MyLaserAntennaStatus.Idle),
-                $"over 10 s the game reports {Said()}, outside its limits: {_outside}");
+                $"over 10 s the game reports {Said()}");
 
             // Given a direction straight up, 2 km away, where no antenna answers, then told to go idle.
             var up = antenna.WorldMatrix.Up;
@@ -72,7 +71,7 @@ namespace Sprocket.GameTests
 
             var facing = Vector3D.Dot(antenna.WorldMatrix.Up, up);
             _report.Check("an idle laser antenna turned upside down", facing < -0.99 && idled == MyLaserAntennaStatus.Idle && Only(MyLaserAntennaStatus.Idle),
-                $"turned until its up is {facing:0.##} of where it was, over 10 s the game reports {Said()}, outside its limits: {_outside}");
+                $"turned until its up is {facing:0.##} of where it was, over 10 s the game reports {Said()}");
 
             // The same direction asked for upside down, which it turns to.
             antenna.Connect();
@@ -80,7 +79,7 @@ namespace Sprocket.GameTests
             while (asked.MoveNext())
                 yield return asked.Current;
 
-            _report.Note($"told to connect upside down, over 3 s the game reports {Said()}, outside its limits: {_outside}");
+            _report.Note($"told to connect upside down, over 3 s the game reports {Said()}");
             antenna.GetActionWithName("Idle").Apply(antenna);
         }
 
@@ -88,11 +87,9 @@ namespace Sprocket.GameTests
         IEnumerator<int> Watch(IMyLaserAntenna antenna, int seconds)
         {
             _seen.Clear();
-            _outside = false;
             for (var sixth = 0; sixth < seconds * 6; sixth++)
             {
                 _seen.Add(antenna.Status);
-                _outside |= antenna.IsOutsideLimits;
                 yield return PluginUpdates.PerSecond / 6;
             }
         }

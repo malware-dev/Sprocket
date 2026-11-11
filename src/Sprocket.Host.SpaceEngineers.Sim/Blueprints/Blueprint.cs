@@ -25,6 +25,22 @@ public static class Blueprint
     /// <summary>The binary the game writes beside a blueprint, which wins over the text.</summary>
     public const string Binary = "bp.sbcB5";
 
+    // The head the game puts on each large piston, rotor and hinge, by the base's subtype: its type, its subtype, and how far up the
+    // base's own up its grid stands from the base block's middle, turned as the base is. Measured in the game (HeadOffsetGameTest):
+    // a piston's head at 1.41 m, a rotor's at 0.421 m, a hinge's at its base.
+    static readonly Dictionary<string, Head> Heads = new Dictionary<string, Head>
+    {
+        ["LargePistonBase"] = new Head("PistonTop", "LargePistonTop", 1.41),
+        ["LargeStator"] = new Head("MotorRotor", "LargeRotor", 0.421),
+        ["LargeHinge"] = new Head("MotorAdvancedRotor", "LargeHingeHead", 0)
+    };
+
+    // A large grid's cell, in meters.
+    const double GridSize = 2.5;
+
+    // A head's entity id is its base's past this, clear of every id a rig gives.
+    const long HeadIds = 1000000000L;
+
     static readonly XNamespace Xsi = "http://www.w3.org/2001/XMLSchema-instance";
     static readonly XNamespace Xsd = "http://www.w3.org/2001/XMLSchema";
 
@@ -38,8 +54,14 @@ public static class Blueprint
         foreach (var cell in deck.Conveyors)
             blocks.Add(Plain(cell, Deck.ConveyorType, Deck.ConveyorSubtype));
 
+        var grids = new List<XElement>();
         foreach (var fitting in deck.Blocks)
+        {
             blocks.Add(Block(fitting, deck));
+            var headed = HeadOf(fitting, deck);
+            if (headed != null)
+                grids.Add(headed);
+        }
 
         var grid = new XElement("CubeGrid",
             new XElement("SubtypeName"),
@@ -65,7 +87,7 @@ public static class Blueprint
                         new XAttribute(Xsi + "type", "MyObjectBuilder_ShipBlueprintDefinition"),
                         new XElement("Id", new XAttribute("Type", "MyObjectBuilder_ShipBlueprintDefinition"), new XAttribute("Subtype", name)),
                         new XElement("DisplayName", name),
-                        new XElement("CubeGrids", grid),
+                        new XElement("CubeGrids", grid, grids),
                         new XElement("WorkshopId", 0),
                         new XElement("OwnerSteamId", 0),
                         new XElement("Points", 0)))));
@@ -114,6 +136,9 @@ public static class Blueprint
             new XElement("EntityId", fitting.Id),
             Min(placement.Min));
 
+        if (Heads.ContainsKey(definition.Subtype))
+            block.Add(new XElement("TopBlockId", fitting.Id + HeadIds));
+
         if (placement.Forward != "Forward" || placement.Up != "Up")
             block.Add(new XElement("BlockOrientation", new XAttribute("Forward", placement.Forward), new XAttribute("Up", placement.Up)));
 
@@ -141,6 +166,41 @@ public static class Blueprint
             block.Add(new XElement("CurrentStoredPower", definition.Stored));
 
         return block;
+    }
+
+    /// <summary>The grid of the head the game puts on <paramref name="fitting" />, at rest, or null where it takes none.</summary>
+    static XElement? HeadOf(Fitting fitting, Deck deck)
+    {
+        var definition = deck.Defined(fitting);
+        if (!Heads.TryGetValue(definition.Subtype, out var head))
+            return null;
+
+        var placement = deck[fitting];
+        var forward = Base6Directions.GetVector((Base6Directions.Direction)Enum.Parse(typeof(Base6Directions.Direction), placement.Forward));
+        var up = Base6Directions.GetVector((Base6Directions.Direction)Enum.Parse(typeof(Base6Directions.Direction), placement.Up));
+        var middle = ((Vector3D)placement.Min + ((Vector3D)placement.Extent(definition) - Vector3D.One) / 2) * GridSize;
+        var turn = Quaternion.CreateFromForwardUp(forward, up);
+        return new XElement("CubeGrid",
+            new XElement("SubtypeName"),
+            new XElement("EntityId", fitting.Id + 2 * HeadIds),
+            new XElement("PersistentFlags", "CastShadows InScene"),
+            new XElement("PositionAndOrientation",
+                Vector("Position", middle + (Vector3D)up * head.Rise),
+                Vector("Forward", forward),
+                Vector("Up", up),
+                new XElement("Orientation", new XElement("X", turn.X), new XElement("Y", turn.Y), new XElement("Z", turn.Z), new XElement("W", turn.W))),
+            new XElement("GridSizeEnum", "Large"),
+            new XElement("CubeBlocks",
+                new XElement("MyObjectBuilder_CubeBlock",
+                    new XAttribute(Xsi + "type", "MyObjectBuilder_" + head.Type),
+                    new XElement("SubtypeName", head.Subtype),
+                    new XElement("EntityId", fitting.Id + HeadIds),
+                    Min(Vector3I.Zero),
+                    Color(),
+                    new XElement("ParentEntityId", fitting.Id))),
+            new XElement("IsStatic", false),
+            new XElement("DisplayName", fitting.Name + " Head"),
+            new XElement("DestructibleBlocks", true));
     }
 
     /// <summary>Whether a block of <paramref name="type" /> fails to paste without a toolbar.</summary>
@@ -244,6 +304,16 @@ public static class Blueprint
     static XElement Color()
     {
         return new XElement("ColorMaskHSV", new XAttribute("x", 0), new XAttribute("y", -0.8), new XAttribute("z", 0.4));
+    }
+
+    /// <summary>The game's head on a base: its type and subtype, and how far up the base's up its grid stands, in meters.</summary>
+    sealed class Head(string type, string subtype, double rise)
+    {
+        public string Type { get; } = type;
+
+        public string Subtype { get; } = subtype;
+
+        public double Rise { get; } = rise;
     }
 
     static XElement Vector(string name, Vector3D value)

@@ -1,0 +1,86 @@
+<#
+    Runs Sprocket's client tests in the game itself, against the mod as built from this repository.
+
+    1. Refuses to run while Space Engineers is running, or while the PC is locked: the game is never closed by this script,
+       and a game started on a locked PC waits at its start for ever.
+    2. Builds the test plugin and packs the mod into the test's own user data folder, -AppData, never the one played in.
+    3. Puts back a clean test world there, its Sprocket mod pointed at that local copy, and writes the scenarios' blueprints.
+    4. Starts the game through SevrLoader with the plugin, which loads the world, runs the tests, takes its pictures and closes
+       the game. A game that has not finished by -TimeoutSeconds is stopped.
+    5. Prints the report and where the pictures are. The exit code is 0 when every check passed.
+#>
+param(
+    [string]$AppData = 'E:\Data\sprocket-client-test',
+    [string]$Game = 'E:\Steam\steamapps\common\SpaceEngineers',
+    [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
+    [string]$Template = 'E:\Data\sprocket-ds-test\WorldTemplate',
+    [string[]]$Scenarios = @('Sprocket Piston Status'),
+    [int]$TimeoutSeconds = 600
+)
+$ErrorActionPreference = 'Stop'
+$repo = Resolve-Path "$PSScriptRoot\..\.."
+$work = Join-Path $AppData 'run'
+New-Item -ItemType Directory -Force $work | Out-Null
+
+# 1. Nothing of the game running, and nobody away from an unlocked PC.
+if (Get-Process -Name 'SpaceEngineers', 'SevrLoader' -ErrorAction SilentlyContinue) { throw 'Space Engineers is running; it is never closed for a test.' }
+if (Get-Process -Name 'LogonUI' -ErrorAction SilentlyContinue) { throw 'The PC is locked, and the game waits at its start while it is.' }
+
+# 2. The plugin, and the mod packed as the game would load it, as a local mod of the test's own user data.
+dotnet build "$repo\tests\Sprocket.GameTests" -v q | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'The test plugin did not build.' }
+$pack = Join-Path $work 'pack'
+if (Test-Path $pack) { Remove-Item $pack -Recurse -Force }
+$packer = "$env:USERPROFILE\.nuget\packages\mal.mdk2.modpackager\2.3.0\tools\win-x64\mdk.exe"
+& $packer pack "$repo\src\Sprocket.Host.SpaceEngineers\Sprocket.Host.SpaceEngineers.csproj" -output $pack -configuration Debug -interactive DoNothing | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'The mod did not pack.' }
+$mod = 'Sprocket Automation (Bleeding Edge)'
+robocopy "$pack\$mod" (Join-Path $AppData "Mods\$mod") /MIR /NJH /NJS /NP /NFL /NDL | Out-Null
+if ($LASTEXITCODE -ge 8) { throw "Copying the mod failed (robocopy $LASTEXITCODE)." }
+
+# 3. A clean world whose Sprocket is the local copy: a mod with no Workshop id is read from the Mods folder by its name.
+$world = Join-Path $AppData 'Saves\Sprocket Client Test'
+if (Test-Path $world) { Remove-Item $world -Recurse -Force }
+New-Item -ItemType Directory -Force $world | Out-Null
+Copy-Item (Join-Path $Template '*') $world -Recurse
+$sandbox = Join-Path $world 'Sandbox.sbc'
+$text = [IO.File]::ReadAllText($sandbox)
+$text = $text -replace '<Name>3807234771\.sbm</Name>(\s*)<PublishedFileId>3807234771</PublishedFileId>', "<Name>$mod</Name>`$1<PublishedFileId>0</PublishedFileId>"
+if ($text -notmatch "<Name>$([regex]::Escape($mod))</Name>") { throw 'The world names no Sprocket mod to point at the local copy.' }
+[IO.File]::WriteAllText($sandbox, $text)
+
+# Spectator on, for the pictures taken from it, in the checkpoint and in its world configuration both.
+foreach ($file in $sandbox, (Join-Path $world 'Sandbox_config.sbc')) {
+    $xml = [IO.File]::ReadAllText($file) -replace '<EnableSpectator>false</EnableSpectator>', '<EnableSpectator>true</EnableSpectator>'
+    [IO.File]::WriteAllText($file, $xml)
+}
+
+$blueprints = Join-Path $work 'blueprints'
+foreach ($scenario in $Scenarios) {
+    dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint $scenario $blueprints | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "The blueprint for '$scenario' was not written." }
+}
+
+# 4. The run.
+$report = Join-Path $work 'report.txt'
+$shots = Join-Path $work 'shots'
+Remove-Item $report -ErrorAction SilentlyContinue
+$env:SPROCKET_CLIENTTEST_REPORT = $report
+$env:SPROCKET_CLIENTTEST_WORLD = $world
+$env:SPROCKET_CLIENTTEST_SHOTS = $shots
+$env:SPROCKET_GAMETEST_BLUEPRINTS = $blueprints
+$plugin = "$repo\tests\Sprocket.GameTests\bin\Debug\net48\Sprocket.GameTests.dll"
+$began = Get-Date
+$process = Start-Process $Loader -ArgumentList '--game', "`"$Game\Bin64`"", '--plugin', "`"$plugin`"", '-appdata', "`"$AppData`"", '-nosplash', '-skipintro' -WorkingDirectory (Split-Path $Loader) -PassThru
+if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+    # The game this script started, and only that one: the first step refuses to run beside any other.
+    Stop-Process -Id $process.Id -Force
+    "The game did not finish within $TimeoutSeconds s, and was stopped."
+}
+
+# 5. The report.
+'{0:n0} s' -f ((Get-Date) - $began).TotalSeconds
+if (Test-Path $report) { Get-Content $report } else { 'No report was written.' }
+if (Test-Path $shots) { Get-ChildItem $shots | ForEach-Object { "picture: $($_.FullName)" } }
+if ((Test-Path $report) -and (Select-String $report -Pattern '^finished .*, 0 failed$' -Quiet)) { exit 0 }
+exit 1

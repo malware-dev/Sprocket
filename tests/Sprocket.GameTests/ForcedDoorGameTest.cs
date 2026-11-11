@@ -53,12 +53,11 @@ namespace Sprocket.GameTests
             // door opens in about 0.75 s, measured (0.67 open 0.5 s after the order), so a door turned back may arrive between two looks
             // and read open rather than opening.
             button.ActivateButton(0);
-            yield return PluginUpdates.PerSecond / 2;
+            yield return PluginUpdates.PerSecond / 4;
             var first = Reverse(door);
             while (first.MoveNext())
                 yield return first.Current;
 
-            yield return PluginUpdates.PerSecond / 6;
             var second = Reverse(door);
             while (second.MoveNext())
                 yield return second.Current;

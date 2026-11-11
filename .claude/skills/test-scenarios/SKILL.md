@@ -66,8 +66,10 @@ automation, says in its own setup who takes ownership of which blocks; every oth
   every battery full. A part that splits off needs a battery of its own.
 - **Storage.** The program and switches go in the programmable block's mod storage under Sprocket's two keys, written
   lowercase, as a save writes them.
-- **Not yet supported:** rotor, piston and hinge heads, and more than one grid. A head is its own grid, at an offset
-  measured from real pairs; add it with a test before a scenario needs it.
+- **Heads.** A large piston, rotor or hinge is written with its head, a grid of its own at the offset the game puts it,
+  measured on the dedicated server (`HeadOffsetGameTest`, which also checks the offsets still hold). Another block with a
+  head gets its offset measured there first.
+- **Not yet supported:** more than one grid of blocks laid on the deck.
 
 The first time a scenario uses a block type, Mal sees it pasted. A block type that pastes wrong gets its rule fixed here,
 with a test. The harness is Claude's; never ask Mal to look at it.
