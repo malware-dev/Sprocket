@@ -176,6 +176,10 @@ namespace Sprocket.GameTests
             var kept = new KeptCountClientTest(_blueprints, _shots, _report).Run();
             while (kept.MoveNext())
                 yield return kept.Current;
+
+            var editor = new EditorShotClientTest(_shots, _report).Run("Kept Automation");
+            while (editor.MoveNext())
+                yield return editor.Current;
         }
 
         /// <summary>Closes the welcome and the consent dialogs the main menu opens for new user data, answering neither.</summary>
