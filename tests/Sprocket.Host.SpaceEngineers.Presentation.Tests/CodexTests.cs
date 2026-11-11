@@ -112,6 +112,26 @@ public class CodexTests
         Assert.Equal(Palette.Link, term.LinkColor);
     }
 
+    /// <summary>A logic system's installation panel, opened with tips off, has its SLOTS heading in the words' own look, with no tip.</summary>
+    [Fact]
+    public void TheSlotsHeadingIsPlainWithTipsOff()
+    {
+        var screen = Screen.On(Rig.Demo());
+        screen.Editor.NewButtonSystem("Doors");
+        screen.Run(2);
+        screen.Editor.GoToRoot();
+        screen.Run(2);
+        screen.Editor.TipsShown = false;
+        screen.Run(2);
+
+        screen.Do("press", "Doors").Run(2);
+        screen.Do("press", screen.Editor.Texts.SystemInstallationPanel).Run(2);
+
+        var heading = FirstLink(screen, out var term, CodexPages.Slot);
+        Assert.NotEqual(Palette.Link, term.LinkColor);
+        Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
+    }
+
     /// <summary>With tips off, a button of only a mark still says what it does, and the question mark says it turns them back on.</summary>
     [Fact]
     public void AMarksTipStaysWithTipsOff()

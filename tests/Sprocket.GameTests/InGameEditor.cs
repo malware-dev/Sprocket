@@ -18,7 +18,11 @@ namespace Sprocket.GameTests
         // The mod's own names, which the harness's driver uses too (SprocketSession, SprocketEditor, Lumel's Element and Button).
         const string Session = "Sprocket.Host.SpaceEngineers.SprocketSession";
 
+        // How far into a text its first words are rested on, in the editor's units: inside the shortest word a heading opens with.
+        const float FirstWords = 24f;
+
         readonly dynamic _editor;
+        object _altKey;
 
         InGameEditor(object editor)
         {
@@ -67,15 +71,24 @@ namespace Sprocket.GameTests
 
         /// <summary>
         /// Presses what says <paramref name="label" /> anywhere in the editor, its frame included: a button by its words or name, a row by its
-        /// summary, which it opens, or a tab by its header. Says whether there was one.
+        /// summary, which it opens, or a tab by its header; written <c>last:</c> and its words, the last of several that say them. Says
+        /// whether there was one.
         /// </summary>
         public bool Press(string label)
         {
+            var last = label.StartsWith("last:");
+            var found = new List<object>();
             foreach (var element in Within(Root()))
             {
-                var said = Get(element, "AutomationId") as string ?? Get(element, "Text") as string ?? Get(element, "Summary") as string ?? Get(element, "Header") as string;
-                if (said != label && said != "+ " + label)
-                    continue;
+                if (Matches(element, last ? label.Substring(5) : label))
+                    found.Add(element);
+            }
+
+            if (last)
+                found.Reverse();
+
+            foreach (var element in found)
+            {
 
                 // A tab already showing is where pressing it leads.
                 if (Get(element, "Header") != null && Get(element, "IsSelected") is bool selected && selected)
@@ -110,7 +123,8 @@ namespace Sprocket.GameTests
 
         /// <summary>
         /// Rests the game's mouse on the middle of what <paramref name="target" /> names: a property path from the page the editor is
-        /// on, such as <c>Moves.ToLibrary</c>, or else the words of something in the editor. Says whether it found it.
+        /// on, such as <c>Moves.ToLibrary</c>, or else the words of something in the editor, a text named by <c>has:</c> at its
+        /// first words. Says whether it found it.
         /// </summary>
         public bool Hover(string target)
         {
@@ -122,8 +136,7 @@ namespace Sprocket.GameTests
             {
                 foreach (var element in Within(Root()))
                 {
-                    var said = Get(element, "AutomationId") as string ?? Get(element, "Text") as string ?? Get(element, "Summary") as string ?? Get(element, "Header") as string;
-                    if (said == target)
+                    if (Matches(element, target))
                     {
                         found = element;
                         break;
@@ -138,12 +151,36 @@ namespace Sprocket.GameTests
             // four by three wide and centred (GameScreen, Lumel's Sim/Surface).
             dynamic hovered = found;
             RectangleF bounds = hovered.Bounds;
-            Vector2 middle = hovered.ToScreen(new Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
+            var across = target.StartsWith("has:") ? Math.Min(bounds.Width / 2f, FirstWords) : bounds.Width / 2f;
+            Vector2 middle = hovered.ToScreen(new Vector2(bounds.X + across, bounds.Y + bounds.Height / 2f));
             var window = MySandboxGame.ScreenSize;
             var scale = window.Y / 1080f;
             var left = (window.X - Math.Min(window.X, window.Y * 4f / 3f)) / 2f;
             MyInput.Static.SetMousePosition((int)(left + middle.X * scale), (int)(middle.Y * scale));
             return true;
+        }
+
+        /// <summary>
+        /// Holds Alt down for the editor's tips while <paramref name="held" /> holds, so a tip that opens stays pinned, or hands the
+        /// tips back to the game's own key. Says whether the editor has tips.
+        /// </summary>
+        public bool HoldAlt(bool held)
+        {
+            foreach (var element in Within(Root()))
+            {
+                var codex = Get(element, "Codex");
+                var key = codex?.GetType().GetProperty("FnIsPinKeyHeld");
+                if (key == null)
+                    continue;
+
+                if (_altKey == null)
+                    _altKey = key.GetValue(codex);
+
+                key.SetValue(codex, held ? (Func<bool>)(() => true) : _altKey);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>Answers the question the editor asks with the answer that goes ahead, its last, and says whether one was asked.</summary>
@@ -174,6 +211,33 @@ namespace Sprocket.GameTests
             }
 
             return string.Join(", ", said);
+        }
+
+        /// <summary>
+        /// Whether <paramref name="element" /> is what <paramref name="label" /> names: its words, its name, its summary or its
+        /// header, after the plus of anything that adds; written <c>tip:</c> and the words its tip starts with, its tip; or, written
+        /// <c>has:</c> and words its text holds, a text, such as a heading holding a term. Only what is showing matches.
+        /// </summary>
+        static bool Matches(object element, string label)
+        {
+            if (Get(element, "IsVisible") is bool visible && !visible)
+                return false;
+
+            if (label.StartsWith("has:"))
+            {
+                var markdown = Get(element, "Markdown") as string;
+                return markdown != null && markdown.Contains(label.Substring(4));
+            }
+
+            if (label.StartsWith("tip:"))
+            {
+                var tip = Get(Get(element, "Tip"), "Text") as string;
+                return tip != null && tip.StartsWith(label.Substring(4));
+            }
+
+            var said = Get(element, "AutomationId") as string ?? Get(element, "Text") as string ?? Get(element, "Summary") as string
+                ?? Get(element, "Header") as string;
+            return said == label || said == "+ " + label;
         }
 
         /// <summary>The top of the editor's elements, its frame, from the page it is on.</summary>

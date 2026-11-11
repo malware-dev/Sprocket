@@ -53,6 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _fill = new SlotFill(editor, system);
             _arranger = new SlotArranger(editor, system);
             _optimizing = new OptimizeQuestion(editor);
+            editor.Codex.Explain(panel.SlotsHeading);
 
             var slots = panel.Slots;
             _slotRows = new KeyedChildren<object, Element>(slots.Children, SlotRow);
