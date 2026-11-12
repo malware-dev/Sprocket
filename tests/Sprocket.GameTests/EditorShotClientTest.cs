@@ -59,23 +59,11 @@ namespace Sprocket.GameTests
         public IEnumerator<int> Run(string name)
         {
             var block = Named(name);
-            List<IMyTerminalControl> controls;
-            MyAPIGateway.TerminalControls.GetControls<IMyProgrammableBlock>(out controls);
-            var open = controls.Find(control => control.Id == OpenButton) as IMyTerminalControlButton;
-            if (block == null || open == null)
-            {
-                _report.Fail("editor open", block == null ? $"no block called {name}" : "the programmable block has no Automation button");
-                yield break;
-            }
-
-            open.Action(block);
-            yield return 2 * PluginUpdates.PerSecond;
-            var editor = InGameEditor.Of(block);
+            var editor = Open(block, name);
             if (editor == null)
-            {
-                _report.Fail("editor open", "Sprocket keeps no editor for the block it opened on");
                 yield break;
-            }
+
+            yield return 2 * PluginUpdates.PerSecond;
 
             // Each stop is its picture's name and what is pressed from the home screen to reach it. Tips switched off stay off until
             // switched on again, so the stops from "tips switch off" on are seen with tips off.
@@ -167,6 +155,9 @@ namespace Sprocket.GameTests
             var panes = Tour(editor, Panes(), "");
             while (panes.MoveNext())
                 yield return panes.Current;
+
+            _input.Close();
+            yield return PluginUpdates.PerSecond;
         }
 
         /// <summary>The library's two panes: a logic system with no blueprint chosen and its blueprint made by the arrow, then each pane's search typed into.</summary>
@@ -211,6 +202,45 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>
+        /// Opens the editor on the programmable block called <paramref name="name" />, which an earlier test pasted, goes to each of
+        /// <paramref name="stops" /> and takes its picture, named with <paramref name="prefix" /> before it, and closes the editor.
+        /// </summary>
+        public IEnumerator<int> Visit(string name, string[][] stops, string prefix)
+        {
+            var editor = Open(Named(name), name);
+            if (editor == null)
+                yield break;
+
+            yield return 2 * PluginUpdates.PerSecond;
+            var tour = Tour(editor, stops, prefix);
+            while (tour.MoveNext())
+                yield return tour.Current;
+
+            _input.Close();
+            yield return PluginUpdates.PerSecond;
+        }
+
+        /// <summary>Opens the editor on <paramref name="block" />, called <paramref name="name" />, by its Automation button, and returns it, or null with the reason reported.</summary>
+        InGameEditor Open(IMyTerminalBlock block, string name)
+        {
+            List<IMyTerminalControl> controls;
+            MyAPIGateway.TerminalControls.GetControls<IMyProgrammableBlock>(out controls);
+            var open = controls.Find(control => control.Id == OpenButton) as IMyTerminalControlButton;
+            if (block == null || open == null)
+            {
+                _report.Fail("editor open", block == null ? $"no block called {name}" : "the programmable block has no Automation button");
+                return null;
+            }
+
+            open.Action(block);
+            var editor = InGameEditor.Of(block);
+            if (editor == null)
+                _report.Fail("editor open", "Sprocket keeps no editor for the block it opened on");
+
+            return editor;
+        }
+
+        /// <summary>
         /// Goes to each of <paramref name="stops" /> from the editor's home screen and takes its picture, named with
         /// <paramref name="prefix" /> before it.
         /// </summary>
@@ -228,6 +258,13 @@ namespace Sprocket.GameTests
                 var frame = stop[last].StartsWith("frame:") ? int.Parse(stop[last].Substring(6)) : 0;
                 for (var i = 1; i < (frame > 0 ? last : stop.Length) && pressed; i++)
                 {
+                    // A page whose rows come later than its frame, such as a sequence's steps, is waited for.
+                    if (stop[i] == "wait")
+                    {
+                        yield return 2 * PluginUpdates.PerSecond;
+                        continue;
+                    }
+
                     // A page opened in the tip keeps the pointer where it rests, so the tip stays open.
                     hovering = stop[i].StartsWith("hover:") || hovering && stop[i].StartsWith("page:");
                     pressed = Step(editor, stop[i]);
@@ -251,7 +288,7 @@ namespace Sprocket.GameTests
         /// <summary>
         /// Takes one step of a stop, and says whether there was what it names: <c>hover:</c> rests the pointer on what follows,
         /// <c>page:</c> opens the codex page it names in the tip that is open, <c>type:</c> types what follows, <c>click</c> clicks
-        /// where the pointer rests, <c>tab</c> presses Tab, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds
+        /// where the pointer rests, <c>tab</c> and <c>escape</c> press their keys, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds
         /// Alt, <c>answer</c> answers a question where one is asked, since some presses ask and some go ahead, and anything else is
         /// pressed by its words.
         /// </summary>
@@ -270,6 +307,8 @@ namespace Sprocket.GameTests
                     return _input.Click();
                 case "tab":
                     return _input.Press(MyKeys.Tab);
+                case "escape":
+                    return _input.Press(MyKeys.Escape);
                 case "on":
                     return editor.Switch(true);
                 case "off":

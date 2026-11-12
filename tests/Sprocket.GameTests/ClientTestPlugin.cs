@@ -180,9 +180,14 @@ namespace Sprocket.GameTests
             while (kept.MoveNext())
                 yield return kept.Current;
 
-            var editor = new EditorShotClientTest(_shots, _report, _input).Run("Kept Automation");
+            var shots = new EditorShotClientTest(_shots, _report, _input);
+            var editor = shots.Run("Kept Automation");
             while (editor.MoveNext())
                 yield return editor.Current;
+
+            var move = new MoveItemsClientTest(_blueprints, _report, shots).Run();
+            while (move.MoveNext())
+                yield return move.Current;
         }
 
         /// <summary>Closes the welcome and the consent dialogs the main menu opens for new user data, answering neither.</summary>

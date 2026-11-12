@@ -87,6 +87,14 @@ namespace Sprocket.GameTests
             return true;
         }
 
+        /// <summary>Closes every window of the editor, which closes its screen, and forgets where the pointer rested.</summary>
+        public void Close()
+        {
+            dynamic workspace = Workspace();
+            workspace?.CloseAll();
+            _at = null;
+        }
+
         /// <summary>The tip open in the editor, or null where none is.</summary>
         public object ShownTip()
         {

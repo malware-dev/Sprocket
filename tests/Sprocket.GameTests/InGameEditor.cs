@@ -215,7 +215,7 @@ namespace Sprocket.GameTests
             foreach (var element in Within(Root()))
             {
                 if ((Get(element, "Command") ?? Get(element, "Opens")) != null)
-                    said.Add(Get(element, "AutomationId") as string ?? Get(element, "Text") as string ?? Get(element, "Summary") as string ?? Get(element, "Header") as string ?? "");
+                    said.Add(element.GetType().Name + ":" + (Get(element, "AutomationId") as string ?? Get(element, "Text") as string ?? Get(element, "Summary") as string ?? Get(element, "Header") as string ?? ""));
             }
 
             return string.Join(", ", said);
@@ -258,10 +258,20 @@ namespace Sprocket.GameTests
             return element;
         }
 
-        /// <summary>The public property <paramref name="name" /> of <paramref name="thing" />, or null where it has none.</summary>
+        /// <summary>
+        /// The public property <paramref name="name" /> of <paramref name="thing" />, the one its own type declares where it hides one
+        /// of its base's, such as a slot chip's words over its button's text; or null where it has none.
+        /// </summary>
         static object Get(object thing, string name)
         {
-            return thing?.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public)?.GetValue(thing);
+            for (var type = thing?.GetType(); type != null; type = type.BaseType)
+            {
+                var property = type.GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                if (property != null)
+                    return property.GetValue(thing);
+            }
+
+            return null;
         }
 
         static IEnumerable<object> Within(dynamic element)

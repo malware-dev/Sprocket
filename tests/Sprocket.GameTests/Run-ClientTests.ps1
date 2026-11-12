@@ -13,8 +13,8 @@ param(
     [string]$Game = 'E:\Steam\steamapps\common\SpaceEngineers',
     [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
     [string]$Template = 'E:\Data\sprocket-ds-test\WorldTemplate',
-    [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count'),
-    [int]$TimeoutSeconds = 600
+    [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count', 'Sprocket Move Items'),
+    [int]$TimeoutSeconds = 900
 )
 $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path "$PSScriptRoot\..\.."
