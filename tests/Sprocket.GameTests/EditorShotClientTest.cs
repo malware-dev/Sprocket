@@ -6,6 +6,7 @@ using Sandbox.Graphics.GUI;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage;
+using VRage.Input;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using VRageMath;
 using VRageRender;
@@ -22,12 +23,14 @@ namespace Sprocket.GameTests
         const string OpenButton = "Sprocket_Open";
 
         // The English codex's words for what the tips stops rest on (MyTextsCodex.resx): the term home's heading holds, the tips switch's
-        // tip while tips are on and while they are off, a trigger's bin and the undo arrow.
+        // tip while tips are on and while they are off, a trigger's bin, the undo arrow, a step's pause button, and the arrow that makes a backup a blueprint.
         const string Term = "Term.LogicSystem";
         const string TipsOn = "Show fewer tips";
         const string TipsOff = "Show every tip";
         const string TriggerBin = "Delete this trigger";
         const string Undo = "[![](mark:undo)";
+        const string PauseStep = "Pause this step";
+        const string MakeBlueprint = "Make this [backup]";
 
         // The logic system the editor opens on and its blueprint (KeptCount), the logic system of the construct Destroy takes the
         // programmable block of (PistonStatus), and the library button's Norwegian word (MyTexts.no.resx, Sprocket.Systems.Load).
@@ -37,14 +40,14 @@ namespace Sprocket.GameTests
 
         readonly string _shots;
         readonly GameTestReport _report;
-        readonly GameCursor _cursor;
+        readonly EditorInput _input;
 
-        /// <summary>The test, writing pictures to <paramref name="shots" /> and answering into <paramref name="report" />, pointing with <paramref name="cursor" />.</summary>
-        public EditorShotClientTest(string shots, GameTestReport report, GameCursor cursor)
+        /// <summary>The test, writing pictures to <paramref name="shots" /> and answering into <paramref name="report" />, pointing with <paramref name="input" />.</summary>
+        public EditorShotClientTest(string shots, GameTestReport report, EditorInput input)
         {
             _shots = shots;
             _report = report;
-            _cursor = cursor;
+            _input = input;
         }
 
         /// <summary>The test's steps, each yielding the plugin updates to wait before the next.</summary>
@@ -92,8 +95,12 @@ namespace Sprocket.GameTests
                 new[] { "tips off bin", "Kept Here", "Triggers", "hover:tip:" + TriggerBin },
                 new[] { "tips off strip to library tip", "Library", "hover:Moves.ToLibrary" },
                 new[] { "tips off undo", "Kept Here", "Triggers", "tip:" + TriggerBin, "answer", "hover:tip:" + Undo },
+                new[] { "tips off sequence steps", "Kept Here", "Sequences", "Sequence 1", "tip:" + PauseStep },
+                new[] { "tips off clicked tab left", "Kept Here", "hover:Installation panel", "click" },
+                new[] { "tips off keys", "Kept Here", "tab", "tab", "tab" },
                 new[] { "tips on again term", "tip:" + TipsOff, "hover:has:" + Term },
                 new[] { "tips on again sequences", "Kept Here", "Sequences" },
+                new[] { "tips on again sequence steps", "Kept Here", "Sequences", "Sequence 1" },
                 new[] { "term tip pinned", "alt", "hover:has:" + Term }
             };
 
@@ -123,6 +130,37 @@ namespace Sprocket.GameTests
             var back = Speak(MyLanguagesEnum.English);
             while (back.MoveNext())
                 yield return back.Current;
+
+            // The backup made a blueprint, so the library holds one whose logic system is on no construct here, seen in both languages.
+            var promoted = Tour(editor, new[] { new[] { "backup made a blueprint", "Library", Backup, "tip:" + MakeBlueprint, "answer" } }, "");
+            while (promoted.MoveNext())
+                yield return promoted.Current;
+
+            var added = Tour(editor, NewBlueprint("Library"), "");
+            while (added.MoveNext())
+                yield return added.Current;
+
+            var norwegianAgain = Speak(MyLanguagesEnum.Norwegian);
+            while (norwegianAgain.MoveNext())
+                yield return norwegianAgain.Current;
+
+            var addedNorwegian = Tour(editor, NewBlueprint(NorwegianLibrary), "no ");
+            while (addedNorwegian.MoveNext())
+                yield return addedNorwegian.Current;
+
+            var englishAgain = Speak(MyLanguagesEnum.English);
+            while (englishAgain.MoveNext())
+                yield return englishAgain.Current;
+        }
+
+        /// <summary>The library's strip rested on with the blueprint made of the backup chosen, reached by the library button that says <paramref name="library" />.</summary>
+        static string[][] NewBlueprint(string library)
+        {
+            return new[]
+            {
+                new[] { "strip new blueprint to construct tip", library, Backup, "hover:Moves.ToConstruct" },
+                new[] { "strip new blueprint to library tip", library, Backup, "hover:Moves.ToLibrary" }
+            };
         }
 
         /// <summary>
@@ -159,8 +197,10 @@ namespace Sprocket.GameTests
                 for (var i = 1; i < stop.Length && pressed; i++)
                 {
                     hovering = stop[i].StartsWith("hover:");
-                    // "answer" answers a question where one is asked, since some presses ask and some go ahead.
-                    pressed = hovering ? editor.Hover(stop[i].Substring(6), _cursor) : stop[i] == "off" ? editor.Switch(false) : stop[i] == "alt" ? editor.HoldAlt(true) : stop[i] == "answer" ? editor.Answer() || true : editor.Press(stop[i]);
+                    // "answer" answers a question where one is asked, since some presses ask and some go ahead; "click" clicks where the pointer
+                    // rests and "tab" presses Tab, as a player does.
+                    pressed = hovering ? editor.Hover(stop[i].Substring(6), _input) : stop[i] == "off" ? editor.Switch(false) : stop[i] == "alt" ? editor.HoldAlt(true) : stop[i] == "answer" ? editor.Answer() || true
+                        : stop[i] == "click" ? _input.Click() : stop[i] == "tab" ? _input.Press(MyKeys.Tab) : editor.Press(stop[i]);
                     if (!pressed)
                         _report.Fail($"editor {name}", $"no button {stop[i]}; the page offers {editor.Buttons()}");
 
@@ -218,7 +258,7 @@ namespace Sprocket.GameTests
         IEnumerator<int> Shoot(string name, bool park)
         {
             if (park)
-                _cursor.Park();
+                _input.Park();
 
             yield return 2 * PluginUpdates.PerSecond;
 
@@ -229,7 +269,7 @@ namespace Sprocket.GameTests
             MyRenderProxy.TakeScreenshot(Vector2.One, picture, false, false, false);
             yield return 3 * PluginUpdates.PerSecond;
             if (!park)
-                _report.Note($"{name}: {_cursor.Describe()}");
+                _report.Note($"{name}: {_input.Describe()}");
 
             _report.Check(name, File.Exists(picture), File.Exists(picture) ? picture : $"no picture at {picture}");
         }

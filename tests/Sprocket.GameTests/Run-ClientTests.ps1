@@ -56,6 +56,14 @@ foreach ($file in (Join-Path $world 'Sandbox.sbc'), (Join-Path $world 'Sandbox_c
 # An empty library, as a player new to Sprocket has; it is kept in the user data, beside the worlds.
 Get-ChildItem (Join-Path $AppData 'Storage') -Filter 'sprocket-*' -ErrorAction SilentlyContinue | Remove-Item -Force
 
+# The world's own mod storage, where Sprocket keeps its backups: for a world outside a player's folder the game keeps it in
+# Saves\<player id>\<session name>\Storage, which the fresh world above does not replace (seen 2026-11-12).
+$session = [regex]::Match([IO.File]::ReadAllText((Join-Path $world 'Sandbox.sbc')), '<SessionName>([^<]*)</SessionName>').Groups[1].Value
+if ($session) {
+    Get-ChildItem (Join-Path $AppData 'Saves') -Directory | ForEach-Object { Join-Path $_.FullName $session } |
+        Where-Object { Test-Path $_ } | Remove-Item -Recurse -Force
+}
+
 $blueprints = Join-Path $work 'blueprints'
 foreach ($scenario in $Scenarios) {
     dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint $scenario $blueprints | Out-Null

@@ -120,11 +120,11 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>
-        /// Rests <paramref name="cursor" /> on the middle of what <paramref name="target" /> names: a property path from the page the editor is
+        /// Rests <paramref name="input" /> on the middle of what <paramref name="target" /> names: a property path from the page the editor is
         /// on, such as <c>Moves.ToLibrary</c>, or else the words of something in the editor, a text named by <c>has:</c> at its
         /// first words. Says whether it found it.
         /// </summary>
-        public bool Hover(string target, GameCursor cursor)
+        public bool Hover(string target, EditorInput input)
         {
             object found = _editor.Current;
             foreach (var part in target.Split('.'))
@@ -149,7 +149,7 @@ namespace Sprocket.GameTests
             RectangleF bounds = hovered.Bounds;
             var across = target.StartsWith("has:") ? Math.Min(bounds.Width / 2f, FirstWords) : bounds.Width / 2f;
             Vector2 middle = hovered.ToScreen(new Vector2(bounds.X + across, bounds.Y + bounds.Height / 2f));
-            cursor.Rest(middle);
+            input.Rest(middle);
             return true;
         }
 

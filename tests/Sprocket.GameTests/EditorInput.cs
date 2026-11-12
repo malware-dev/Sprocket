@@ -1,25 +1,29 @@
+using System;
 using System.Reflection;
 using Sandbox.Graphics.GUI;
+using VRage.Input;
 using VRageMath;
 
 namespace Sprocket.GameTests
 {
     /// <summary>
-    /// The pointer of the editor's screen, held where a test rests it, so the editor finds under it what the test points at with the
-    /// game window out of focus or the PC locked, and Windows' own mouse is left alone.
+    /// The pointer and keys of the editor's screen, driven by a test: the pointer held where the test rests it, pressed there, and
+    /// keys pressed, so the editor finds what the test points at with the game window out of focus or the PC locked, and Windows'
+    /// own mouse and keyboard are left alone.
     /// </summary>
     /// <remarks>
     /// Out of focus the game clears its input on every frame and the editor reads none of it (Lumel's GameInput.IsCleared), and in
     /// focus the editor takes its pointer from Windows' mouse in the screen's input, which the game runs before it updates a
     /// plugin, so <see cref="Hold" /> called on every plugin update is the pointer the editor draws and opens tips by.
     /// </remarks>
-    public sealed class GameCursor
+    public sealed class EditorInput
     {
-        // Lumel's screen, which keeps its workspace in a private field, and the field of the game's host screen holding the mod's
-        // screen it shows; the mod's assembly is the game's own compile, so the type is found by name.
+        // Lumel's screen, which keeps its workspace in a private field, the field of the game's host screen holding the mod's
+        // screen it shows, and Lumel's pointer buttons; the mod's assembly is the game's own compile, so each is found by name.
         const string Screen = "Lumel.Screens.GameScreen";
         const string View = "_view";
         const string Owner = "m_owner";
+        const string Button = "Lumel.Input.PointerButton";
 
         Vector2? _at;
 
@@ -45,6 +49,30 @@ namespace Sprocket.GameTests
             dynamic workspace = Workspace();
             if (workspace != null)
                 workspace.Pointer = _at.Value;
+        }
+
+        /// <summary>Presses and releases the left button where the pointer rests, as a click does, and says whether an editor was open to take it.</summary>
+        public bool Click()
+        {
+            dynamic workspace = Workspace();
+            if (workspace == null || !_at.HasValue)
+                return false;
+
+            var left = Enum.Parse(((object)workspace).GetType().Assembly.GetType(Button, true), "Left");
+            workspace.PointerDown(_at.Value, (dynamic)left, 1, false, false);
+            workspace.PointerUp(_at.Value, (dynamic)left);
+            return true;
+        }
+
+        /// <summary>Presses <paramref name="key" /> in the editor, with neither Shift nor Ctrl, and says whether an editor was open to take it.</summary>
+        public bool Press(MyKeys key)
+        {
+            dynamic workspace = Workspace();
+            if (workspace == null)
+                return false;
+
+            workspace.Key(key, false, false);
+            return true;
         }
 
         /// <summary>Says where the pointer is held, what of the editor is under it and the tip open there, for a test's report.</summary>
