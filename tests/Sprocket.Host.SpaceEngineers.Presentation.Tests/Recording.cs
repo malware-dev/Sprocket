@@ -32,6 +32,10 @@ sealed class Recording(RectangleF area) : IGraphics
 
     public Vector2 MeasureText(string font, StringBuilder text, float size) => new Vector2(text.Length * size * 0.5f, size);
 
+    public Vector2 ToDevicePixels(Vector2 point) => point;
+
+    public Vector2 FromDevicePixels(Vector2 pixels) => pixels;
+
     public void Fill(RectangleF destination, Color color, float rotation = 0f) { }
 
     /// <summary>How many clips were pushed.</summary>
