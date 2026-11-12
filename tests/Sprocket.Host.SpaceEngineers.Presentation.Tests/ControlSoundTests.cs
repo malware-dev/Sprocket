@@ -1,5 +1,8 @@
+using System.IO;
+using System.Xml.Linq;
 using Lumel;
 using Lumel.Input;
+using Lumel.Sim;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Xunit;
 
@@ -18,6 +21,25 @@ public class ControlSoundTests
         "press Library",
         "press \"+ logic system\" type Airlock enter press \"Installation panel\" press Markup"
     };
+
+    /// <summary>
+    /// The hover and click cues are the game's own HUD sounds, the ones its menus play for the pointer coming onto a control and
+    /// pressing it, so the editor sounds as loud as the menus where the game's content is here.
+    /// </summary>
+    [Fact]
+    public void TheCuesAreTheGamesOwnHudSounds()
+    {
+        if (GameContent.ContentFolder == null)
+            return;
+
+        var audio = XDocument.Load(Path.Combine(GameContent.ContentFolder, "Data", "Audio_gui.sbc"));
+        foreach (var cue in new[] { ControlCues.Hover, ControlCues.Click })
+        {
+            var sound = audio.Descendants("Sound").SingleOrDefault(s => (string?)s.Element("Id")?.Element("SubtypeId") == cue.Name);
+            Assert.True(sound != null, $"the game defines no sound {cue.Name}");
+            Assert.Equal("HUD", (string?)sound!.Element("Category"));
+        }
+    }
 
     /// <summary>Everything shown that a press would run sounds as the pointer comes onto it and as it is pressed.</summary>
     [Theory]
