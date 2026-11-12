@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Sandbox.Graphics.GUI;
 using VRage.Input;
@@ -134,6 +135,44 @@ namespace Sprocket.GameTests
             dynamic workspace = Workspace();
             workspace?.CloseAll();
             _at = null;
+        }
+
+        /// <summary>Whether a screen of Sprocket's is open, the editor or a notice.</summary>
+        public bool IsOpen => Workspace() != null;
+
+        /// <summary>Presses the button saying <paramref name="words" /> in the top window of Sprocket's screen, and says whether there was one to press.</summary>
+        public bool PressWords(string words)
+        {
+            dynamic workspace = Workspace();
+            object top = workspace?.Windows.Top;
+            foreach (var element in Within(top))
+            {
+                dynamic pressable = element;
+                var command = element.GetType().GetProperty("Command")?.GetValue(element);
+                if (command == null || pressable.Text as string != words)
+                    continue;
+
+                ((dynamic)command).Execute();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary><paramref name="element" /> and every element under it, in drawing order.</summary>
+        static IEnumerable<object> Within(object element)
+        {
+            if (element == null)
+                yield break;
+
+            yield return element;
+            dynamic holder = element;
+            int count = holder.VisualChildCount;
+            for (var i = 0; i < count; i++)
+            {
+                foreach (var inner in Within((object)holder.GetVisualChild(i)))
+                    yield return inner;
+            }
         }
 
         /// <summary>The tip open in the editor, or null where none is.</summary>

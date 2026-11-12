@@ -25,8 +25,8 @@ namespace Sprocket.GameTests
     /// </remarks>
     public sealed class EditorTour
     {
-        // The id of Sprocket's button in a programmable block's control panel (SprocketControls).
-        const string OpenButton = "Sprocket_Open";
+        /// <summary>The id of Sprocket's button in a programmable block's control panel (SprocketControls).</summary>
+        public const string OpenButton = "Sprocket_Open";
 
         readonly string _shots;
         readonly GameTestReport _report;

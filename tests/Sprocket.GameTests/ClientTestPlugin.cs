@@ -16,13 +16,15 @@ namespace Sprocket.GameTests
     /// <summary>
     /// The game client plugin that runs Sprocket's client tests, loaded by Run-ClientTests.ps1 through SevrLoader. At the main menu
     /// it loads the world in SPROCKET_CLIENTTEST_WORLD, runs the tests in it with the blueprints in SPROCKET_GAMETEST_BLUEPRINTS,
-    /// writes pictures to SPROCKET_CLIENTTEST_SHOTS and its report to SPROCKET_CLIENTTEST_REPORT, and closes the game. Without a
-    /// report to write it does nothing.
+    /// writes pictures to SPROCKET_CLIENTTEST_SHOTS and its report to SPROCKET_CLIENTTEST_REPORT, and closes the game. With
+    /// SPROCKET_CLIENTTEST_JOIN, a server's address, it joins that server instead and runs the tests of a client joined to it
+    /// (Run-JoinedTests.ps1). Without a report to write it does nothing.
     /// </summary>
     public sealed class ClientTestPlugin : IPlugin
     {
         GameTestReport _report;
         string _world;
+        string _join;
         string _blueprints;
         string _shots;
         int _menuUpdates;
@@ -43,6 +45,7 @@ namespace Sprocket.GameTests
 
             _report = new GameTestReport(report);
             _world = Environment.GetEnvironmentVariable("SPROCKET_CLIENTTEST_WORLD");
+            _join = Environment.GetEnvironmentVariable("SPROCKET_CLIENTTEST_JOIN");
             _blueprints = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_BLUEPRINTS");
             _shots = Environment.GetEnvironmentVariable("SPROCKET_CLIENTTEST_SHOTS");
             _report.Note($"client plugin loaded, user data in {VRage.FileSystem.MyFileSystem.UserDataPath}");
@@ -96,10 +99,19 @@ namespace Sprocket.GameTests
 
             if (_steps == null)
             {
-                _report.Pass("client world", $"the world in {_world} loaded");
-                var local = MySession.Static.Mods.Exists(mod => mod.PublishedFileId == 0 && mod.Name.StartsWith("Sprocket Automation"));
-                _report.Check("client mod", local, local ? "Sprocket is the local copy built from this repository" : "Sprocket is not the local copy, so the tests run the published build");
-                _steps = Steps();
+                if (!string.IsNullOrEmpty(_join))
+                {
+                    // A joined client loads Sprocket from the Workshop download the runner put the local build in.
+                    _report.Pass("client world", $"joined the server at {_join}");
+                    _steps = Joined();
+                }
+                else
+                {
+                    _report.Pass("client world", $"the world in {_world} loaded");
+                    var local = MySession.Static.Mods.Exists(mod => mod.PublishedFileId == 0 && mod.Name.StartsWith("Sprocket Automation"));
+                    _report.Check("client mod", local, local ? "Sprocket is the local copy built from this repository" : "Sprocket is not the local copy, so the tests run the published build");
+                    _steps = Steps();
+                }
             }
 
             if (_waiting > 0)
@@ -133,7 +145,7 @@ namespace Sprocket.GameTests
         {
         }
 
-        /// <summary>Waits ten seconds at the main menu, then loads the test world, or closes the game where there is none.</summary>
+        /// <summary>Waits ten seconds at the main menu, then joins the test server or loads the test world, or closes the game where it has neither.</summary>
         void Menu()
         {
             if (MySession.Static != null)
@@ -144,7 +156,7 @@ namespace Sprocket.GameTests
                 return;
 
             _report.Pass("client start", "the game reached its main menu with the plugin loaded");
-            if (string.IsNullOrEmpty(_world))
+            if (string.IsNullOrEmpty(_world) && string.IsNullOrEmpty(_join))
             {
                 Close();
                 return;
@@ -158,7 +170,36 @@ namespace Sprocket.GameTests
             MySandboxGame.Config.WelcomScreenCurrentStatus = MyConfig.WelcomeScreenStatus.AlreadySeen;
             CloseDialogs();
             _loading = true;
-            MySessionLoader.LoadSingleplayerSession(_world);
+            if (!string.IsNullOrEmpty(_join))
+                MyJoinGameHelper.JoinServer(_join);
+            else
+                MySessionLoader.LoadSingleplayerSession(_world);
+        }
+
+        /// <summary>The tests of a client joined to the dedicated server, which stands in for the other players.</summary>
+        IEnumerator<int> Joined()
+        {
+            // Five seconds of a running world, and the dialogs a new user data folder opens closed.
+            yield return 5 * PluginUpdates.PerSecond;
+            CloseDialogs();
+            yield return PluginUpdates.PerSecond;
+
+            // A server is ready before the player has a body: the respawn screen it shows is answered with a space suit, as a new
+            // player answers it, and closed once the character stands; a minute is many times what that takes.
+            if (MySession.Static.LocalCharacter == null)
+                MyPlayerCollection.RespawnRequest(true, false, 0, null, 0, null, Color.White);
+            for (var waited = 0; waited < 60 && MySession.Static.LocalCharacter == null; waited++)
+                yield return PluginUpdates.PerSecond;
+
+            if (MyGuiScreenMedicals.Static != null)
+                MyGuiScreenMedicals.Close();
+            _report.Check("joined character", MySession.Static.LocalCharacter != null, MySession.Static.LocalCharacter != null
+                ? "the player stands in a space suit" : "the player has no character a minute after asking to respawn");
+            yield return 2 * PluginUpdates.PerSecond;
+
+            var notice = new TerminalNoticeClientTest(_shots, _report, _input).Run();
+            while (notice.MoveNext())
+                yield return notice.Current;
         }
 
         IEnumerator<int> Steps()
