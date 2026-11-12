@@ -147,14 +147,18 @@ namespace Sprocket.GameTests
 
         /// <summary>
         /// Rests <paramref name="input" /> on the middle of what <paramref name="target" /> names: a property path from the page the editor is
-        /// on, such as <c>Moves.ToLibrary</c>, or else the words of something in the editor, a text named by <c>has:</c> at its
-        /// first words. Says whether it found it.
+        /// on, such as <c>Moves.ToLibrary</c>, the element of a type by its place among them, such as <c>is:DragHandle#3</c> for the
+        /// third step's grip, or else the words of something in the editor, a text named by <c>has:</c> at its first words. Says
+        /// whether it found it.
         /// </summary>
         public bool Hover(string target, EditorInput input)
         {
-            object found = _editor.Current;
-            foreach (var part in target.Split('.'))
-                found = Get(found, part);
+            object found = target.StartsWith("is:") ? Nth(target.Substring(3)) : _editor.Current;
+            if (!target.StartsWith("is:"))
+            {
+                foreach (var part in target.Split('.'))
+                    found = Get(found, part);
+            }
 
             if (found == null)
             {
@@ -272,6 +276,21 @@ namespace Sprocket.GameTests
             var said = Get(element, "AutomationId") as string ?? Get(element, "Text") as string ?? Get(element, "Summary") as string
                 ?? Get(element, "Header") as string;
             return said == label || said == "+ " + label;
+        }
+
+        /// <summary>The visible element of the type <paramref name="kind" /> names, such as <c>DragHandle#3</c>, the first where no place is given; or null.</summary>
+        object Nth(string kind)
+        {
+            var hash = kind.IndexOf('#');
+            var type = hash < 0 ? kind : kind.Substring(0, hash);
+            var place = hash < 0 ? 1 : int.Parse(kind.Substring(hash + 1));
+            foreach (var element in Within(Root()))
+            {
+                if (element.GetType().Name == type && !(Get(element, "IsVisible") is bool visible && !visible) && --place == 0)
+                    return element;
+            }
+
+            return null;
         }
 
         /// <summary>The top of the editor's elements, its frame, from the page it is on.</summary>

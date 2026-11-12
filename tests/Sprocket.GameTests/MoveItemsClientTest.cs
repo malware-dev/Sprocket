@@ -58,7 +58,10 @@ namespace Sprocket.GameTests
                 new[] { "action", System, "off", "Sequences", "Sequence 1", "move" },
                 new[] { "target", System, "off", "Sequences", "Sequence 1", Target },
                 new[] { "target left", System, "off", "Sequences", "Sequence 1", Target, "escape" },
-                new[] { "target changed", System, "off", "Sequences", "Sequence 1", Target, "hover:" + Other, "click", "Done" }
+                new[] { "target changed", System, "off", "Sequences", "Sequence 1", Target, "hover:" + Other, "click", "Done" },
+                new[] { "drag step moving 1", System, "off", "Sequences", "Sequence 1", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "frame:1" },
+                new[] { "drag step moving 4", System, "off", "Sequences", "Sequence 1", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "frame:4" },
+                new[] { "drag step dropped", System, "off", "Sequences", "Sequence 1", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "up" }
             };
 
             var visit = _tour.Visit(Automation, stops, "move ");

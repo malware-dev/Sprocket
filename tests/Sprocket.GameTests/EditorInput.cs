@@ -26,17 +26,48 @@ namespace Sprocket.GameTests
         const string Button = "Lumel.Input.PointerButton";
 
         Vector2? _at;
+        bool _held;
 
-        /// <summary>Rests the pointer at <paramref name="at" />, in the editor's units.</summary>
+        /// <summary>Rests the pointer at <paramref name="at" />, in the editor's units, dragging what it holds there where the button is down.</summary>
         public void Rest(Vector2 at)
         {
             _at = at;
+            if (!_held)
+                return;
+
+            dynamic workspace = Workspace();
+            workspace?.PointerMove(at);
         }
 
-        /// <summary>Rests the pointer outside the editor, on nothing.</summary>
+        /// <summary>Rests the pointer outside the editor, on nothing, unless the button is down, which keeps a drag where it is.</summary>
         public void Park()
         {
-            _at = new Vector2(float.NegativeInfinity);
+            if (!_held)
+                _at = new Vector2(float.NegativeInfinity);
+        }
+
+        /// <summary>Presses the left button where the pointer rests and holds it, as a drag begins, and says whether an editor was open to take it.</summary>
+        public bool Down()
+        {
+            dynamic workspace = Workspace();
+            if (workspace == null || !_at.HasValue)
+                return false;
+
+            workspace.PointerDown(_at.Value, (dynamic)Left(workspace), 1, false, false);
+            _held = true;
+            return true;
+        }
+
+        /// <summary>Lets the left button go where the pointer rests, ending a drag, and says whether it was down.</summary>
+        public bool Up()
+        {
+            if (!_held)
+                return false;
+
+            _held = false;
+            dynamic workspace = Workspace();
+            workspace?.PointerUp(_at.Value, (dynamic)Left(workspace));
+            return true;
         }
 
         /// <summary>Writes the rested pointer into the editor's screen, where one is open and a pointer has been given.</summary>
@@ -58,9 +89,8 @@ namespace Sprocket.GameTests
             if (workspace == null || !_at.HasValue)
                 return false;
 
-            var left = Enum.Parse(((object)workspace).GetType().Assembly.GetType(Button, true), "Left");
-            workspace.PointerDown(_at.Value, (dynamic)left, 1, false, false);
-            workspace.PointerUp(_at.Value, (dynamic)left);
+            workspace.PointerDown(_at.Value, (dynamic)Left(workspace), 1, false, false);
+            workspace.PointerUp(_at.Value, (dynamic)Left(workspace));
             return true;
         }
 
@@ -90,6 +120,7 @@ namespace Sprocket.GameTests
         /// <summary>Closes every window of the editor, which closes its screen, and forgets where the pointer rested.</summary>
         public void Close()
         {
+            Up();
             dynamic workspace = Workspace();
             workspace?.CloseAll();
             _at = null;
@@ -112,6 +143,12 @@ namespace Sprocket.GameTests
             object over = workspace.PointerOver;
             object tip = workspace.ShownTip;
             return $"pointer {(Vector2)workspace.Pointer}, over {over?.GetType().Name ?? "nothing"}, tip {tip?.GetType().Name ?? "none"}";
+        }
+
+        /// <summary>Lumel's left pointer button, in the assembly of <paramref name="workspace" />.</summary>
+        static object Left(object workspace)
+        {
+            return Enum.Parse(workspace.GetType().Assembly.GetType(Button, true), "Left");
         }
 
         /// <summary>The workspace of the editor's screen, or null where none is open.</summary>

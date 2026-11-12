@@ -18,7 +18,7 @@ namespace Sprocket.GameTests
     /// </summary>
     /// <remarks>
     /// A stop is its picture's name and its steps, each one of: <c>hover:</c> rests the pointer on what follows, <c>page:</c> opens
-    /// the codex page it names in the tip that is open, <c>type:</c> types what follows, <c>add:</c> takes the entry it names from a plus menu, <c>click</c> clicks where the pointer rests,
+    /// the codex page it names in the tip that is open, <c>type:</c> types what follows, <c>add:</c> takes the entry it names from a plus menu, <c>click</c> clicks where the pointer rests, <c>down</c> and <c>up</c> press and let go of its button, so a <c>hover:</c> between them drags,
     /// <c>tab</c> and <c>escape</c> press their keys, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds Alt,
     /// <c>answer</c> answers a question where one is asked, <c>wait</c> gives a page two seconds, and anything else is pressed by
     /// its words. A stop ending <c>frame:</c> and a count is pictured that many plugin updates after its last press.
@@ -93,6 +93,8 @@ namespace Sprocket.GameTests
         {
             foreach (var stop in stops)
             {
+                // A drag a stop left held is let go before the next.
+                _input.Up();
                 editor.Home();
                 yield return PluginUpdates.PerSecond / 2;
                 var name = prefix + stop[0];
@@ -174,6 +176,10 @@ namespace Sprocket.GameTests
             {
                 case "click":
                     return _input.Click();
+                case "down":
+                    return _input.Down();
+                case "up":
+                    return _input.Up();
                 case "tab":
                     return _input.Press(MyKeys.Tab);
                 case "escape":
