@@ -79,4 +79,30 @@ public class RunFaultsTests
         Assert.False(faults.Quit.Exists);
         Assert.True(faults.Fault.Same(found), "switching on kept a problem it should have forgotten");
     }
+
+    /// <summary>A logic system switched off and on forgets every problem, as an installation does.</summary>
+    [Fact]
+    public void SwitchingTheSystemOnForgetsEveryProblem()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Tick();
+        var system = sim.Editor.Program.Systems[0];
+        var instance = system.First!;
+        sim.Tick();
+        var faults = sim.Runner.Get(system.Sequences[0], instance)!.Faults;
+        var found = faults.Found;
+
+        faults.Met(new SequenceFault(SequenceProblem.MissingTarget, 1, BlockTrouble.None, "Inner Door"));
+        faults.Quit = new SequenceFault(SequenceProblem.MissingTarget, 2, BlockTrouble.None, "Outer Door");
+        system.Enabled = false;
+        sim.Tick();
+        Assert.True(faults.Quit.Exists, "switching off forgot what the run met");
+
+        system.Enabled = true;
+        sim.Tick();
+
+        Assert.False(faults.Quit.Exists);
+        Assert.True(faults.Fault.Same(found), "switching the system on kept a problem it should have forgotten");
+    }
 }

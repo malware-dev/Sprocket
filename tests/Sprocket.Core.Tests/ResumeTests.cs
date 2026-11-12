@@ -191,12 +191,11 @@ public class ResumeTests
         Assert.False(a.State.IsRunning);
     }
 
-    /// <summary>A run started by hand on a system that is switched off carries on after a reload, as it was let run before.</summary>
+    /// <summary>A run started by hand carries on after a reload, and is still known to have been started by hand.</summary>
     [Fact]
     public void ARunStartedByHandCarriesOnAfterAReload()
     {
         var a = Build();
-        a.Program.Systems[0].Enabled = false;
         a.Tick(3);
         a.Runner.Call(a.Program.Sequences[0], a.Program.Systems[0].Uses[0], true);
         a.Tick(20);

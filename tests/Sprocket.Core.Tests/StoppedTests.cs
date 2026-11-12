@@ -176,9 +176,9 @@ public class StoppedTests
         Assert.Equal(StopCause.Switch, a.State.StoppedBy);
     }
 
-    /// <summary>A run started by hand ignores the switch, so switching off leaves it running.</summary>
+    /// <summary>A run started by hand stops when its logic system is switched off, as any run does.</summary>
     [Fact]
-    public void ARunByHandIsLeftToRun()
+    public void ARunByHandStopsWhenSwitchedOff()
     {
         var a = new Airlock();
         a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
@@ -187,8 +187,23 @@ public class StoppedTests
         a.Cycle.System.Enabled = false;
         a.Tick(5);
 
-        Assert.True(a.State.IsRunning);
-        Assert.Equal(StopCause.None, a.State.StoppedBy);
+        Assert.False(a.State.IsRunning);
+        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
+    }
+
+    /// <summary>A run by hand of a switched-off logic system is refused, as a trigger's or a call's is.</summary>
+    [Fact]
+    public void ARunByHandOfASwitchedOffSystemIsRefused()
+    {
+        var a = new Airlock();
+        a.Cycle.System.Enabled = false;
+        a.Tick(5);
+
+        a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
+        a.Tick(5);
+
+        Assert.False(a.State.IsRunning);
+        Assert.Equal(1, a.State.RefusedCount);
     }
 
     /// <summary>The next run forgets the stop, and a sequence stopped while at rest has nothing to say.</summary>

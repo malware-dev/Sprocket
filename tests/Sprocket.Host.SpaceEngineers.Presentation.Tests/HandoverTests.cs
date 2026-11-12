@@ -758,6 +758,8 @@ public class HandoverTests : IDisposable
     public void AClientRunsAndStopsASequenceOnTheServer()
     {
         var sequence = Waiting();
+        sequence.System.Enabled = true;
+        _sim.Tick();
         var (anna, hers, copy) = Lent();
         var theirs = copy.Editor.Program.Sequences[0];
 

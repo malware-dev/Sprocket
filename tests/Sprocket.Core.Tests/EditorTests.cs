@@ -1430,20 +1430,9 @@ public class EditorTests
         Assert.Contains("Airlock Light:on", ship.Log);
     }
 
-    /// <summary>
-    /// A sequence can be run by hand, from its own screen, switched off.
-    /// </summary>
-    /// <remarks>
-    /// What starts a sequence is usually a door or a button somewhere else on the ship, so watching
-    /// one work meant going and pressing it. This is the same call a trigger makes.
-    /// <para>
-    /// Parked is the state somebody working on one is in: the switch is what keeps its triggers off
-    /// it while they poke at it, so refusing to run it then would take away the one way left to see
-    /// it work. The switch holds against everything else, including another sequence calling it.
-    /// </para>
-    /// </remarks>
+    /// <summary>A switched-off sequence's play button says to switch its logic system on, and runs it once it is.</summary>
     [Fact]
-    public void AParkedSequenceCanBeRunByHand()
+    public void AParkedSequenceHoldsItsPlayButton()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -1457,53 +1446,15 @@ public class EditorTests
         ship.Tick();
 
         Assert.False(ship.Automation.Systems[0].Enabled);
+        Assert.Null(editor.Screen.Runs);
+        Assert.Equal(editor.Texts.Codex.SequenceRunSystemOff, editor.Screen.RunLocked);
 
-        var run = editor.Screen.Runs;
-        Assert.NotNull(run);
-
-        run.Execute();
-        ship.Tick(3);
-
-        Assert.Contains("Airlock Light:on", ship.Log);
-
-        // And it says what is happening rather than what is allowed to: the switch is still off.
-        Assert.False(ship.Automation.Systems[0].Enabled);
-    }
-
-    /// <summary>
-    /// A run by hand is not stopped by the switch it was started under.
-    /// </summary>
-    /// <remarks>
-    /// The tick that follows would otherwise throw it away - a parked sequence is stopped, which is
-    /// what makes the switch mean anything - so a parked run would light its first step and vanish.
-    /// </remarks>
-    [Fact]
-    public void AParkedRunCarriesOnToItsEnd()
-    {
-        var ship = Build();
-        var editor = ship.Editor;
-
-        StartOnTheButton(editor);
-
-        editor.PressAdd("delay");
-        editor.GiveLength("2");
-
-        editor.PressAdd("task");
-        editor.PressBlock("Airlock Light");
-        editor.PressChoice("power");
-        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
-        editor.PressPrimary();
+        editor.SwitchSystem(ship.Automation.Systems[0], true);
         ship.Tick();
 
+        Assert.Null(editor.Screen.RunLocked);
         editor.Screen.Runs!.Execute();
         ship.Tick(3);
-
-        // Still going, on the wait, with the switch off throughout.
-        var running = ship.Runner.Get(ship.Automation.Sequences[0]);
-        Assert.True(running.IsRunning);
-        Assert.DoesNotContain("Airlock Light:on", ship.Log);
-
-        ship.Tick(400);
 
         Assert.Contains("Airlock Light:on", ship.Log);
     }

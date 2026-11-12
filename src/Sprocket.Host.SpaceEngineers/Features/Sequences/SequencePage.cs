@@ -78,8 +78,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
         }
 
-        /// <summary>The command that runs the sequence by hand, whatever the switch says.</summary>
-        public override ICommand Runs => Editor.Act(CommandKind.RunNow, () => Editor.RunNow(_sequence));
+        /// <summary>The command that runs the sequence by hand, or null while it or the installation shown is switched off.</summary>
+        public override ICommand Runs => RunLocked == null ? Editor.Act(CommandKind.RunNow, () => Editor.RunNow(_sequence)) : null;
+
+        /// <inheritdoc />
+        public override string RunLocked => SequenceText.RunLocked(Editor.Texts, _sequence, Editor.StandIn(_sequence.System));
 
         /// <inheritdoc />
         public override ICommand Stops => Editor.Act(CommandKind.StopNow, () => Editor.StopNow(_sequence));

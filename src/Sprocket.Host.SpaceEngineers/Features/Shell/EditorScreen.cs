@@ -28,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         ICommand _deletes;
         string _deleteAbout = "";
         string _deleteLocked;
+        string _runLocked;
         bool _hasHistory;
         ICommand _undo;
         string _undoText = "";
@@ -136,6 +137,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _runs; }
             set { Set(ref _runs, value); }
+        }
+
+        /// <summary>Why the subject cannot be run now, which the play button says dimmed in its place; null where nothing holds it.</summary>
+        public string RunLocked
+        {
+            get { return _runLocked; }
+            set { Set(ref _runLocked, value); }
         }
 
         /// <summary>Stops the subject, or null where it cannot be stopped from here.</summary>

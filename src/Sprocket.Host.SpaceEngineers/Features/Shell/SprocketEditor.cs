@@ -979,6 +979,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // Read once per build: only another page's switch locks it.
             _screen.SwitchLocked = page.SwitchLocked;
             _screen.Runs = page.Runs;
+            _screen.RunLocked = page.RunLocked;
             _screen.Stops = page.Stops;
             _screen.Deletes = page.Deletes;
             _screen.DeleteAbout = page.DeleteAbout;
@@ -1255,7 +1256,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
-            // By hand, so a sequence switched off still runs: its switch holds off only triggers.
             _runner.Call(sequence, StandIn(sequence.System), true);
         }
 

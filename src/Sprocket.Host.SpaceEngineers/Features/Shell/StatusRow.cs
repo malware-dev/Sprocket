@@ -123,6 +123,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What starting it does, or null where it cannot be started from here.</summary>
         public ICommand Runs { get; set; }
 
+        /// <summary>Why it cannot be started now, which its play button says dimmed in its place; null where nothing holds it.</summary>
+        public string RunLocked { get; set; }
+
         /// <summary>What stopping it does, or null where it cannot be stopped from here.</summary>
         public ICommand Stops { get; set; }
 
@@ -327,12 +330,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _status.Text = Status;
             _lastRun.Text = LastRun;
 
-            var doing = Running ? Stops : Runs;
+            // A play button held back keeps its place, so nothing beside it moves when a switch is flipped.
+            var runHeld = !Running && RunLocked != null;
+            var doing = Running ? Stops : runHeld ? null : Runs;
 
             _run.Symbol = Running ? Symbols.Stop : Symbols.Play;
-            _run.IsVisible = doing != null;
+            _run.IsVisible = doing != null || runHeld && Runs != null;
             _runs.CanExecute = doing != null;
-            _run.Tip = KeptTip.For(_run.Tip, doing != null ? (Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts)) : null);
+            _run.Tip = KeptTip.For(_run.Tip, runHeld ? RunLocked : doing != null ? (Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts)) : null);
 
             var saying = !string.IsNullOrEmpty(Problem);
 

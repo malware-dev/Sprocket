@@ -640,6 +640,14 @@
     <value>Run this sequence manually now</value>
     <comment>Tooltip on the play button in the editor's heading bar on a sequence's screen, and on the play button of each sequence's row on a logic system's screen, while the sequence is not running; pressing it runs the sequence by hand.</comment>
   </data>
+  <data name="Sprocket.Sequence.RunSystemOff" xml:space="preserve">
+    <value>Switch the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) on to run this sequence.</value>
+    <comment>Tooltip on the play button, dimmed and unpressable, in the editor's heading bar on a sequence's screen and on each sequence's row on a logic system's screen, while the logic system is switched off: a switched-off logic system runs nothing.</comment>
+  </data>
+  <data name="Sprocket.Sequence.RunInstallationOff" xml:space="preserve">
+    <value>Switch the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) on to run this sequence.</value>
+    <comment>Tooltip on the play button, dimmed and unpressable, in the editor's heading bar on a sequence's screen and on each sequence's row on a logic system's screen, while the logic system is on but the installation shown is switched off: a switched-off installation runs nothing.</comment>
+  </data>
   <data name="Sprocket.Sequence.StopNow" xml:space="preserve">
     <value>Stop this sequence where it is</value>
     <comment>Tooltip on the stop button in the editor's heading bar on a sequence's screen, and on the stop button of each sequence's row on a logic system's screen, while the sequence is running; pressing it stops the sequence and leaves every block as it is.</comment>

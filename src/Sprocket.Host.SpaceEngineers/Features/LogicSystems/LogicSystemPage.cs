@@ -537,6 +537,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var status = SequenceSummary.Status(sequence, running);
             row.Status = status == SequenceStatus.Off ? "" : SequenceText.Status(Editor.Texts, status);
             row.Running = running != null && running.IsRunning;
+            row.RunLocked = SequenceText.RunLocked(Editor.Texts, sequence, Editor.StandIn(sequence.System));
             row.JustRan = running != null && running.LastFiredTick >= 0 && tick - running.LastFiredTick < JustRanTicks;
             row.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(running, tick));
         }

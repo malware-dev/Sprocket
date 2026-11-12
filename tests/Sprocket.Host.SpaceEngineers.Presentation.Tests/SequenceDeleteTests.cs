@@ -43,9 +43,13 @@ public class SequenceDeleteTests
 
         var light = (Sandbox.ModAPI.Ingame.IMyFunctionalBlock)editor.World.Entities.First(e => e.Name == "Airlock Light").Block!;
         Assert.True(light.Enabled, "the light was off before the run, so this proves nothing");
+        system.Enabled = true;
+        screen.Run(2);
         editor.RunNow(first);
         screen.Run(5);
         Assert.False(light.Enabled, "the sequence brought back did not run");
+        system.Enabled = false;
+        screen.Run(2);
 
         editor.Screen.Redo!.Execute();
         screen.Run(2);

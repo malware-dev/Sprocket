@@ -541,11 +541,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _libraries.CanExecute = screen.Library != null;
             _library.Tip = CodexTip.For(_library.Tip, screen.Library != null ? texts.Codex.TermLibrary : null);
 
+            // A play button held back keeps its place, as the bin does.
             var doing = screen.Running ? screen.Stops : screen.Runs;
-            _run.IsVisible = doing != null;
+            var held = !screen.Running && screen.RunLocked != null;
+            _run.IsVisible = doing != null || held;
             _run.Symbol = screen.Running ? Symbols.Stop : Symbols.Play;
             _runs.CanExecute = doing != null;
-            _run.Tip = KeptTip.For(_run.Tip, doing == null ? null : screen.Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts));
+            _run.Tip = KeptTip.For(_run.Tip, held ? screen.RunLocked : doing == null ? null : screen.Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts));
 
             // A bin held back keeps its place, so nothing beside it moves when a switch is flipped.
             _delete.IsVisible = screen.Deletes != null || screen.DeleteLocked != null;

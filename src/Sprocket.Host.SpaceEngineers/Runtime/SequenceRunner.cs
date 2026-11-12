@@ -306,7 +306,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             private set { _memory.Refused = value; }
         }
 
-        /// <summary>Stops the run where what it runs on has just been switched off, unless it was started by hand.</summary>
+        /// <summary>Stops the run where what it runs on has just been switched off, however it was started.</summary>
         /// <remarks>
         /// Told on the tick a switch is flipped, and on no other. Nothing moves on while the machine Sprocket runs on is
         /// unpowered or switched off, and what was running is kept rather than stopped; the run's own next look stops it
@@ -314,7 +314,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public void Switched()
         {
-            if (IsRunning && _owner.Live && !CanRun && !_memory.ByHand)
+            if (IsRunning && _owner.Live && !CanRun)
                 Interrupt(StopCause.Switch, 0);
         }
 
@@ -332,7 +332,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            if (!CanRun && !_memory.ByHand)
+            if (!CanRun)
             {
                 Interrupt(StopCause.Switch, 0);
                 return;
@@ -427,8 +427,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Starts the sequence by name, from another sequence, a trigger or a button.</summary>
         /// <remarks>
-        /// Refused, and counted, where the machine has no power, or where the sequence is switched off and the call is not
-        /// by hand, or where a slot it needs is empty.
+        /// Refused, and counted, where the machine has no power, where the sequence is switched off, or where a slot it needs
+        /// is empty, whoever asks.
         /// </remarks>
         public void Call(Bindings bindings, int tick, bool live = true,
             bool byHand = false)
@@ -444,8 +444,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            // The switch is not refused to a run by hand; an empty slot is, as nothing can fill it mid-run.
-            if (!CanRun && !byHand)
+            if (!CanRun)
             {
                 RefusedCount++;
                 _owner.Log?.Refused(this, tick, RunRefusal.Off);
@@ -471,7 +470,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Start(tick, byHand ? RunStart.Hand : RunStart.Call);
         }
 
-        /// <summary>Whether the run under way was started by hand, which lets it run where its sequence is switched off.</summary>
+        /// <summary>Whether the run under way was started by hand, from the editor's play button.</summary>
         public bool ByHand => _memory.ByHand;
 
         /// <summary>
@@ -722,7 +721,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (!IsRunning)
                         return;
 
-                    if (!CanRun && !_memory.ByHand)
+                    if (!CanRun)
                     {
                         Interrupt(StopCause.Switch, 0);
                         return;

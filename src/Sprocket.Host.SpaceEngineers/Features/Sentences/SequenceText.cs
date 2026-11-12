@@ -139,6 +139,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return texts.Codex.SequenceRunNow;
         }
 
+        /// <summary>Why the button that starts <paramref name="sequence" /> on <paramref name="instance" /> cannot be pressed: the switch that is off, or null where both are on.</summary>
+        public static string RunLocked(Texts texts, Sequence sequence, SystemInstance instance)
+        {
+            if (sequence.CanRun(instance))
+                return null;
+
+            return sequence.System != null && !sequence.System.Enabled ? texts.Codex.SequenceRunSystemOff : texts.Codex.SequenceRunInstallationOff;
+        }
+
         /// <summary>What the one button that starts and stops a sequence promises while the sequence is running, facing the way that stops it.</summary>
         public static string Stops(Texts texts)
         {

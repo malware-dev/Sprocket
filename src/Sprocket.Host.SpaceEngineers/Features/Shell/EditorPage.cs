@@ -173,6 +173,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>Asked as the screen is built; made through the editor's commands, which a lent copy is refused.</remarks>
         public virtual ICommand Runs => null;
 
+        /// <summary>Why the subject cannot be run now, which the play button says dimmed in its place; null where nothing holds it.</summary>
+        public virtual string RunLocked => null;
+
         /// <summary>Stops the subject, or null where it cannot be stopped from here.</summary>
         public virtual ICommand Stops => null;
 

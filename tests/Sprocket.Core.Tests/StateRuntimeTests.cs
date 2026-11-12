@@ -300,7 +300,7 @@ public class StateRuntimeTests
         var self = system.Uses[0];
         system.Enabled = false;
 
-        runner.Call(system.FindSequence(1)!, self, true);
+        runner.Set(system, self, (SetState)system.FindSequence(1)!.Steps[0]);
 
         Assert.Equal(Literal.Of(true), Held(runner, system, self, "cycling"));
         Assert.Equal(Literal.Of(false), Held(runner, system, self, "alarm"));
