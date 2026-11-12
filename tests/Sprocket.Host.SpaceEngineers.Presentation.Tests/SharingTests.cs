@@ -78,6 +78,23 @@ public class SharingTests
         Assert.DoesNotContain(page.Rows.OfType<Lumel.Text.Label>(), label => label.Text == "SHARED WITH YOU");
     }
 
+    /// <summary>The arrow into the library, while a shared blueprint is chosen, cannot be pressed and has no tip, since Keep a copy is what keeps it.</summary>
+    [Fact]
+    public void TheArrowIntoTheLibrarySaysNothingOfASharedBlueprint()
+    {
+        _world.Share(Ann, Blueprint("Hangar"), ShareReach.Everyone, null, 100);
+        var rig = Sharing();
+        Library(rig);
+        var page = Library(rig);
+
+        page.Rows.OfType<StatusRow>().Single(r => r.Summary == "Hangar").Opens!.Execute();
+        rig.Tick();
+
+        var arrow = page.Moves.ToLibrary;
+        Assert.False(arrow.Command!.CanExecute, "the arrow keeps a shared blueprint");
+        Assert.Null(arrow.Tip);
+    }
+
     /// <summary>A copy kept is the player's own: it keeps its maker's name and outlasts the share.</summary>
     [Fact]
     public void AKeptCopyOutlastsTheShare()

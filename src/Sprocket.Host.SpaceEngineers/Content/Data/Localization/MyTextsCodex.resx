@@ -700,6 +700,10 @@
     <value>The [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term) is the same as this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term).</value>
     <comment>In the library, the tooltip on the right-pointing arrow in the strip between its panes, which makes or updates a blueprint, while it cannot be pressed because the chosen logic system and its blueprint in the library are the same.</comment>
   </data>
+  <data name="Sprocket.Library.InLibrary" xml:space="preserve">
+    <value>This [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) is in the [library](Term.Library class=term) already.</value>
+    <comment>In the library, the tooltip on the right-pointing arrow in the strip between its panes, which makes or updates a blueprint, while it cannot be pressed because the chosen row is a blueprint kept in the library whose logic system is not on this construct.</comment>
+  </data>
   <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
     <value>A [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) needs at least one [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term).</value>
     <comment>Tooltip on the dimmed bin of an installation's row on the home screen, shown when it is the logic system's only installation and so cannot be deleted.</comment>

@@ -537,6 +537,22 @@ public class LibraryTests
         Assert.Single(rig.Backups.All);
     }
 
+    /// <summary>The arrow into the library, while a blueprint is chosen whose logic system is not on this construct, says the blueprint is in the library already and cannot be pressed.</summary>
+    [Fact]
+    public void TheArrowIntoTheLibrarySaysABlueprintIsThereAlready()
+    {
+        var rig = Blueprinted();
+        var elsewhere = Simulation.Fresh();
+        elsewhere.Editor.NewButtonSystem("Hangar");
+        rig.Shelf.Keep(elsewhere.Editor.Program.Systems[0]);
+        var page = Reopened(rig);
+
+        Choose(rig, page, "Hangar");
+        var keep = ToLibrary(page);
+        Assert.False(Live(keep), "the arrow keeps a blueprint the library holds");
+        Assert.Equal(rig.Texts.Codex.LibraryInLibrary, Says(keep));
+    }
+
     /// <summary>The arrow onto this construct, while a logic system on it is chosen that is the same as its blueprint, says it is already here.</summary>
     [Fact]
     public void TheArrowOntoThisConstructSaysALogicSystemIsAlreadyHere()

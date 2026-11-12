@@ -530,6 +530,9 @@
   <data name="Sprocket.Library.Same" xml:space="preserve">
     <value>[![](mark:blueprint)&amp;nbsp;Plantegningen](Term.Blueprint class=term) i [biblioteket](Term.Library class=term) er den samme som dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term).</value>
   </data>
+  <data name="Sprocket.Library.InLibrary" xml:space="preserve">
+    <value>Denne [![](mark:blueprint)&amp;nbsp;plantegningen](Term.Blueprint class=term) ligger i [biblioteket](Term.Library class=term) allerede.</value>
+  </data>
   <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
     <value>Et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) trenger minst én [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term).</value>
   </data>
