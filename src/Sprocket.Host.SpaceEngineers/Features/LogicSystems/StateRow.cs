@@ -117,7 +117,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         bool IDragged.IsDragging
         {
-            set { IsDragging = value; }
+            set
+            {
+                IsDragging = value;
+                RemarkLook.Ground(this, NoticeLevel.Info, value ? Palette.SlotFill : Palette.None);
+            }
         }
 
         /// <inheritdoc />

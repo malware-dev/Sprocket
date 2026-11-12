@@ -5,12 +5,14 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
+using VRageMath;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -310,6 +312,27 @@ public class StateEditingTests
         Assert.Equal(new[] { "choice 1", "choice 2" }, system.Types[1].Choices.ToArray());
         Assert.Equal("state 4", system.States[3].Name);
         Assert.True(system.States[3].IsFlag);
+    }
+
+    /// <summary>The state being carried is highlighted while it is held, as a step is, and the highlight goes as it is dropped.</summary>
+    [Fact]
+    public void TheStateBeingCarriedIsHighlighted()
+    {
+        var screen = OnSystem(Program, out _);
+        var view = screen.Editor.PressTab(screen.Editor.Texts.SystemState);
+        screen.Run(1);
+        var row = Target.Within(view).OfType<StateRow>().ToList()[1];
+        var grab = row.DragHandle.ToScreen(row.DragHandle.Bounds.Center);
+
+        screen.Scene.MoveTo(grab);
+        screen.Scene.Down(grab);
+        screen.Scene.Move(new Vector2(grab.X, grab.Y + 10f));
+        screen.Run(1);
+        Assert.Equal(Palette.SlotFill, row.Background);
+
+        screen.Scene.Up();
+        screen.Run(1);
+        Assert.NotEqual(Palette.SlotFill, row.Background);
     }
 
     /// <summary>The page on states is on the heading over the states, beside the tab's own tip.</summary>
@@ -677,7 +700,7 @@ public class StateEditingTests
         Assert.Equal(CodexPages.Term(editor.Texts.PickStates.ToUpperInvariant(), CodexPages.LogicSystemStates), heading.Markdown);
         Assert.Same(editor.Codex.Find(CodexPages.LogicSystemStates), heading.TipAt(at));
         var bounds = heading.Bounds;
-        var said = Page(screen).View.TipOwnerAt(new VRageMath.Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
+        var said = Page(screen).View.TipOwnerAt(new Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
         Assert.Same(heading, said);
         var starts = Target.Within(view).OfType<Label>().Single(label => label.Text == editor.Texts.StateStarts);
         Assert.NotNull(starts.Tip);

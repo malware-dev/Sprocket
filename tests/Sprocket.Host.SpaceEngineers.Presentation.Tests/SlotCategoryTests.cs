@@ -350,6 +350,25 @@ public class SlotCategoryTests
         Assert.All(screen.Editor.Blueprint().Parts.OfType<IReorderable>(), row => Assert.False(row.DragHandle.IsVisible));
     }
 
+    /// <summary>The slot being carried is highlighted while it is held, as a step is, and the highlight goes as it is dropped.</summary>
+    [Fact]
+    public void TheSlotBeingCarriedIsHighlighted()
+    {
+        var screen = Slots();
+        var row = Target.Within(screen.Editor.Current.View!).OfType<PartRow>().ToList()[1];
+        var grab = row.DragHandle.ToScreen(row.DragHandle.Bounds.Center);
+
+        screen.Scene.MoveTo(grab);
+        screen.Scene.Down(grab);
+        screen.Scene.Move(new Vector2(grab.X, grab.Y + 10f));
+        screen.Run(1);
+        Assert.Equal(Palette.SlotFill, row.Background);
+
+        screen.Scene.Up();
+        screen.Run(1);
+        Assert.NotEqual(Palette.SlotFill, row.Background);
+    }
+
     /// <summary>
     /// The screen, switched off to be written, of a button system whose sequence closes both airlock doors, the outer one first, on its
     /// installation panel, its letters measured with the game's own widths where <paramref name="gameFonts" /> says.

@@ -98,7 +98,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <inheritdoc />
         bool IDragged.IsDragging
         {
-            set { IsDragging = value; }
+            set
+            {
+                IsDragging = value;
+                RemarkLook.Ground(this, NoticeLevel.Info, value ? Palette.SlotFill : Palette.None);
+            }
         }
 
         /// <summary>How many slots stand under it, which go with it when it is carried.</summary>
