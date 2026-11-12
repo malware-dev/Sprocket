@@ -13,8 +13,9 @@ namespace Sprocket.GameTests
     /// </summary>
     public sealed class InGameEditor
     {
-        // The mod's own names, which the harness's driver uses too (SprocketSession, SprocketEditor, Lumel's Element and Button).
+        // The mod's own names, which the harness's driver uses too (SprocketSession, SprocketEditor, Lumel's Element and Button, PlusMenu).
         const string Session = "Sprocket.Host.SpaceEngineers.SprocketSession";
+        const string PlusMenu = "PlusMenu";
 
         // How far into a text its first words are rested on, in the editor's units: inside the shortest word a heading opens with.
         const float FirstWords = 24f;
@@ -65,6 +66,31 @@ namespace Sprocket.GameTests
         {
             if (command != null && command.CanExecute)
                 command.Execute();
+        }
+
+        /// <summary>
+        /// Adds what the entry saying <paramref name="text" /> in a plus menu on the page adds, such as <c>task</c> under a sequence's
+        /// steps, as choosing it in the open menu does. Says whether a menu offered it.
+        /// </summary>
+        /// <remarks>The menu opens in a window of its own, out of the page's elements, so its entry is taken from what the menu offers.</remarks>
+        public bool Add(string text)
+        {
+            foreach (var element in Within(Root()))
+            {
+                if (element.GetType().Name != PlusMenu)
+                    continue;
+
+                foreach (dynamic choice in ((dynamic)element).Choices)
+                {
+                    if (choice.Text == text && choice.Adds != null)
+                    {
+                        choice.Adds.Execute();
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

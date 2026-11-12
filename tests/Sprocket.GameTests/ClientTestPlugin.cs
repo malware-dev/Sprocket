@@ -180,12 +180,12 @@ namespace Sprocket.GameTests
             while (kept.MoveNext())
                 yield return kept.Current;
 
-            var shots = new EditorShotClientTest(_shots, _report, _input);
-            var editor = shots.Run("Kept Automation");
+            var tour = new EditorTour(_shots, _report, _input);
+            var editor = new EditorShotClientTest(tour, _report).Run("Kept Automation");
             while (editor.MoveNext())
                 yield return editor.Current;
 
-            var move = new MoveItemsClientTest(_blueprints, _report, shots).Run();
+            var move = new MoveItemsClientTest(_blueprints, _report, tour).Run();
             while (move.MoveNext())
                 yield return move.Current;
         }

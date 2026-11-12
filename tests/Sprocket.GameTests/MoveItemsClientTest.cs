@@ -21,14 +21,14 @@ namespace Sprocket.GameTests
 
         readonly string _blueprint;
         readonly GameTestReport _report;
-        readonly EditorShotClientTest _editor;
+        readonly EditorTour _tour;
 
-        /// <summary>The test on the blueprints in <paramref name="blueprints" />, answering into <paramref name="report" />, pictured by <paramref name="editor" />.</summary>
-        public MoveItemsClientTest(string blueprints, GameTestReport report, EditorShotClientTest editor)
+        /// <summary>The test on the blueprints in <paramref name="blueprints" />, answering into <paramref name="report" />, pictured by <paramref name="tour" />.</summary>
+        public MoveItemsClientTest(string blueprints, GameTestReport report, EditorTour tour)
         {
             _blueprint = Path.Combine(blueprints ?? "", "Sprocket Move Items", "bp.sbc");
             _report = report;
-            _editor = editor;
+            _tour = tour;
         }
 
         /// <summary>The test's steps, each yielding the plugin updates to wait before the next.</summary>
@@ -53,7 +53,7 @@ namespace Sprocket.GameTests
                 new[] { "target changed", System, "off", "Sequences", "Sequence 1", Target, "hover:" + Other, "click", "Done" }
             };
 
-            var visit = _editor.Visit(Automation, stops, "move ");
+            var visit = _tour.Visit(Automation, stops, "move ");
             while (visit.MoveNext())
                 yield return visit.Current;
         }

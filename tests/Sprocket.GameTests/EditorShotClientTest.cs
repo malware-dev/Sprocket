@@ -1,15 +1,10 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using Sandbox;
 using Sandbox.Graphics.GUI;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage;
-using VRage.Input;
-using Sandbox.ModAPI.Interfaces.Terminal;
-using VRageMath;
-using VRageRender;
 
 namespace Sprocket.GameTests
 {
@@ -19,9 +14,6 @@ namespace Sprocket.GameTests
     /// </summary>
     public sealed class EditorShotClientTest
     {
-        // The id of Sprocket's button in a programmable block's control panel (SprocketControls).
-        const string OpenButton = "Sprocket_Open";
-
         // The English codex's words for what the tips stops rest on (MyTextsCodex.resx): the term home's heading holds, the tips switch's
         // tip while tips are on and while they are off, a trigger's bin, the undo arrow, a step's pause button, and the arrow that makes a backup a blueprint.
         const string Term = "Term.LogicSystem";
@@ -42,24 +34,29 @@ namespace Sprocket.GameTests
         const string Backup = "Piston";
         const string NorwegianLibrary = "Bibliotek";
 
-        readonly string _shots;
-        readonly GameTestReport _report;
-        readonly EditorInput _input;
+        // Kept Count's button panel and the signal its buttons send, its programmable block, which has two screens, and the action
+        // that shows text on one of a block's screens.
+        const string Button = "Kept Button";
+        const string Automation = "Kept Automation";
+        const string ShowText = "show text";
+        const string Pressed = "button is pressed";
 
-        /// <summary>The test, writing pictures to <paramref name="shots" /> and answering into <paramref name="report" />, pointing with <paramref name="input" />.</summary>
-        public EditorShotClientTest(string shots, GameTestReport report, EditorInput input)
+        readonly EditorTour _tour;
+        readonly GameTestReport _report;
+
+        /// <summary>The test, pictured by <paramref name="tour" /> and answering into <paramref name="report" />.</summary>
+        public EditorShotClientTest(EditorTour tour, GameTestReport report)
         {
-            _shots = shots;
+            _tour = tour;
             _report = report;
-            _input = input;
         }
 
         /// <summary>The test's steps, each yielding the plugin updates to wait before the next.</summary>
         /// <remarks>Opens the editor on the block called <paramref name="name" />, which an earlier test pasted.</remarks>
         public IEnumerator<int> Run(string name)
         {
-            var block = Named(name);
-            var editor = Open(block, name);
+            var block = EditorTour.Named(name);
+            var editor = _tour.Open(block, name);
             if (editor == null)
                 yield break;
 
@@ -103,7 +100,7 @@ namespace Sprocket.GameTests
                 new[] { "term tip pinned", "alt", "hover:has:" + Term }
             };
 
-            var tour = Tour(editor, stops, "");
+            var tour = _tour.Tour(editor, stops, "");
             while (tour.MoveNext())
                 yield return tour.Current;
 
@@ -114,7 +111,7 @@ namespace Sprocket.GameTests
             _report.Check("backup made", lost > 0, $"{lost} programmable blocks destroyed on other constructs");
             yield return 2 * PluginUpdates.PerSecond;
 
-            var english = Tour(editor, Strip("Library"), "");
+            var english = _tour.Tour(editor, Strip("Library"), "");
             while (english.MoveNext())
                 yield return english.Current;
 
@@ -122,7 +119,7 @@ namespace Sprocket.GameTests
             while (norwegian.MoveNext())
                 yield return norwegian.Current;
 
-            var strip = Tour(editor, Strip(NorwegianLibrary), "no ");
+            var strip = _tour.Tour(editor, Strip(NorwegianLibrary), "no ");
             while (strip.MoveNext())
                 yield return strip.Current;
 
@@ -131,11 +128,11 @@ namespace Sprocket.GameTests
                 yield return back.Current;
 
             // The backup made a blueprint, so the library holds one whose logic system is on no construct here, seen in both languages.
-            var promoted = Tour(editor, new[] { new[] { "backup made a blueprint", "Library", Backup, "tip:" + MakeBlueprint, "answer" } }, "");
+            var promoted = _tour.Tour(editor, new[] { new[] { "backup made a blueprint", "Library", Backup, "tip:" + MakeBlueprint, "answer" } }, "");
             while (promoted.MoveNext())
                 yield return promoted.Current;
 
-            var added = Tour(editor, NewBlueprint("Library"), "");
+            var added = _tour.Tour(editor, NewBlueprint("Library"), "");
             while (added.MoveNext())
                 yield return added.Current;
 
@@ -143,7 +140,7 @@ namespace Sprocket.GameTests
             while (norwegianAgain.MoveNext())
                 yield return norwegianAgain.Current;
 
-            var addedNorwegian = Tour(editor, NewBlueprint(NorwegianLibrary), "no ");
+            var addedNorwegian = _tour.Tour(editor, NewBlueprint(NorwegianLibrary), "no ");
             while (addedNorwegian.MoveNext())
                 yield return addedNorwegian.Current;
 
@@ -152,11 +149,20 @@ namespace Sprocket.GameTests
                 yield return englishAgain.Current;
 
             // The library's panes, ending with each search narrowed, so nothing after them is seen through a search.
-            var panes = Tour(editor, Panes(), "");
+            var panes = _tour.Tour(editor, Panes(), "");
             while (panes.MoveNext())
                 yield return panes.Current;
 
-            _input.Close();
+            // Last, since each leaves a selector open: the spines set in under a signal's toolbar slots and a block's screens.
+            var spines = _tour.Tour(editor, new[]
+            {
+                new[] { "spine toolbar slots", Kept, "Triggers", "add:when", "wait", "hover:" + Button, "click", "hover:" + Pressed, "click" },
+                new[] { "spine screen choices", Kept, "Sequences", "Sequence 1", "add:task", "wait", "hover:" + Automation, "click", "hover:" + ShowText, "click" }
+            }, "");
+            while (spines.MoveNext())
+                yield return spines.Current;
+
+            _tour.Close();
             yield return PluginUpdates.PerSecond;
         }
 
@@ -201,143 +207,6 @@ namespace Sprocket.GameTests
             };
         }
 
-        /// <summary>
-        /// Opens the editor on the programmable block called <paramref name="name" />, which an earlier test pasted, goes to each of
-        /// <paramref name="stops" /> and takes its picture, named with <paramref name="prefix" /> before it, and closes the editor.
-        /// </summary>
-        public IEnumerator<int> Visit(string name, string[][] stops, string prefix)
-        {
-            var editor = Open(Named(name), name);
-            if (editor == null)
-                yield break;
-
-            yield return 2 * PluginUpdates.PerSecond;
-            var tour = Tour(editor, stops, prefix);
-            while (tour.MoveNext())
-                yield return tour.Current;
-
-            _input.Close();
-            yield return PluginUpdates.PerSecond;
-        }
-
-        /// <summary>Opens the editor on <paramref name="block" />, called <paramref name="name" />, by its Automation button, and returns it, or null with the reason reported.</summary>
-        InGameEditor Open(IMyTerminalBlock block, string name)
-        {
-            List<IMyTerminalControl> controls;
-            MyAPIGateway.TerminalControls.GetControls<IMyProgrammableBlock>(out controls);
-            var open = controls.Find(control => control.Id == OpenButton) as IMyTerminalControlButton;
-            if (block == null || open == null)
-            {
-                _report.Fail("editor open", block == null ? $"no block called {name}" : "the programmable block has no Automation button");
-                return null;
-            }
-
-            open.Action(block);
-            var editor = InGameEditor.Of(block);
-            if (editor == null)
-                _report.Fail("editor open", "Sprocket keeps no editor for the block it opened on");
-
-            return editor;
-        }
-
-        /// <summary>
-        /// Goes to each of <paramref name="stops" /> from the editor's home screen and takes its picture, named with
-        /// <paramref name="prefix" /> before it.
-        /// </summary>
-        IEnumerator<int> Tour(InGameEditor editor, string[][] stops, string prefix)
-        {
-            foreach (var stop in stops)
-            {
-                editor.Home();
-                yield return PluginUpdates.PerSecond / 2;
-                var name = prefix + stop[0];
-                var pressed = true;
-                var hovering = false;
-                var last = stop.Length - 1;
-                // A stop ending frame: and a count is pictured that many plugin updates after its last press, as the motion it began runs.
-                var frame = stop[last].StartsWith("frame:") ? int.Parse(stop[last].Substring(6)) : 0;
-                for (var i = 1; i < (frame > 0 ? last : stop.Length) && pressed; i++)
-                {
-                    // A page whose rows come later than its frame, such as a sequence's steps, is waited for.
-                    if (stop[i] == "wait")
-                    {
-                        yield return 2 * PluginUpdates.PerSecond;
-                        continue;
-                    }
-
-                    // A page opened in the tip keeps the pointer where it rests, so the tip stays open.
-                    hovering = stop[i].StartsWith("hover:") || hovering && stop[i].StartsWith("page:");
-                    pressed = Step(editor, stop[i]);
-                    if (!pressed)
-                        _report.Fail($"editor {name}", $"no button {stop[i]}; the page offers {editor.Buttons()}");
-
-                    // The press that begins a pictured motion is followed by its picture alone.
-                    if (frame == 0 || i < last - 1)
-                        yield return PluginUpdates.PerSecond / 2;
-                }
-
-                if (!pressed)
-                    continue;
-
-                var shot = frame > 0 ? Moment("editor-" + name.Replace(" ", "-"), frame) : Shoot("editor-" + name.Replace(" ", "-"), !hovering);
-                while (shot.MoveNext())
-                    yield return shot.Current;
-            }
-        }
-
-        /// <summary>
-        /// Takes one step of a stop, and says whether there was what it names: <c>hover:</c> rests the pointer on what follows,
-        /// <c>page:</c> opens the codex page it names in the tip that is open, <c>type:</c> types what follows, <c>click</c> clicks
-        /// where the pointer rests, <c>tab</c> and <c>escape</c> press their keys, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds
-        /// Alt, <c>answer</c> answers a question where one is asked, since some presses ask and some go ahead, and anything else is
-        /// pressed by its words.
-        /// </summary>
-        bool Step(InGameEditor editor, string step)
-        {
-            if (step.StartsWith("hover:"))
-                return editor.Hover(step.Substring(6), _input);
-            if (step.StartsWith("page:"))
-                return editor.Page(step.Substring(5), _input);
-            if (step.StartsWith("type:"))
-                return _input.Type(step.Substring(5));
-
-            switch (step)
-            {
-                case "click":
-                    return _input.Click();
-                case "tab":
-                    return _input.Press(MyKeys.Tab);
-                case "escape":
-                    return _input.Press(MyKeys.Escape);
-                case "on":
-                    return editor.Switch(true);
-                case "off":
-                    return editor.Switch(false);
-                case "alt":
-                    return editor.HoldAlt(true);
-                case "answer":
-                    editor.Answer();
-                    return true;
-                default:
-                    return editor.Press(step);
-            }
-        }
-
-        /// <summary>Takes a picture called <paramref name="name" /> <paramref name="updates" /> plugin updates into a motion that has just begun, two game frames each.</summary>
-        IEnumerator<int> Moment(string name, int updates)
-        {
-            _input.Park();
-            yield return updates;
-
-            var picture = Path.Combine(_shots, name + ".png");
-            if (File.Exists(picture))
-                File.Delete(picture);
-
-            MyRenderProxy.TakeScreenshot(Vector2.One, picture, false, false, false);
-            yield return 3 * PluginUpdates.PerSecond;
-            _report.Check(name, File.Exists(picture), File.Exists(picture) ? picture : $"no picture at {picture}");
-        }
-
         /// <summary>Puts the game in <paramref name="language" /> as its options screen does, by the setting and a screen closing after it.</summary>
         /// <remarks>Sprocket looks for a new language as any screen closes. The setting is the test user data's own (Run-ClientTests.ps1 -AppData).</remarks>
         static IEnumerator<int> Speak(MyLanguagesEnum language)
@@ -376,40 +245,5 @@ namespace Sprocket.GameTests
             return destroyed;
         }
 
-        /// <summary>Takes a picture called <paramref name="name" />, with the pointer outside the editor so no tip is open in it where <paramref name="park" /> holds, and otherwise once the tip of what it rests on has had time to open.</summary>
-        IEnumerator<int> Shoot(string name, bool park)
-        {
-            if (park)
-                _input.Park();
-
-            yield return 2 * PluginUpdates.PerSecond;
-
-            var picture = Path.Combine(_shots, name + ".png");
-            if (File.Exists(picture))
-                File.Delete(picture);
-
-            MyRenderProxy.TakeScreenshot(Vector2.One, picture, false, false, false);
-            yield return 3 * PluginUpdates.PerSecond;
-            if (!park)
-                _report.Note($"{name}: {_input.Describe()}");
-
-            _report.Check(name, File.Exists(picture), File.Exists(picture) ? picture : $"no picture at {picture}");
-        }
-
-        static IMyTerminalBlock Named(string name)
-        {
-            var found = new List<IMyTerminalBlock>();
-            var grids = new HashSet<VRage.ModAPI.IMyEntity>();
-            MyAPIGateway.Entities.GetEntities(grids, entity => entity is VRage.Game.ModAPI.IMyCubeGrid);
-            foreach (VRage.Game.ModAPI.IMyCubeGrid grid in grids)
-            {
-                var blocks = new List<VRage.Game.ModAPI.IMySlimBlock>();
-                grid.GetBlocks(blocks, slim => (slim.FatBlock as IMyTerminalBlock)?.CustomName == name);
-                foreach (var slim in blocks)
-                    found.Add((IMyTerminalBlock)slim.FatBlock);
-            }
-
-            return found.Count > 0 ? found[0] : null;
-        }
     }
 }
