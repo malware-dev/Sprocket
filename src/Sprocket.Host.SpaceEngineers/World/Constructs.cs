@@ -10,6 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Roster _roster;
         readonly List<IMyCubeGrid> _group = new List<IMyCubeGrid>();
         readonly List<SprocketUnit> _members = new List<SprocketUnit>();
+        readonly List<IMySlimBlock> _blocks = new List<IMySlimBlock>();
+        readonly Dictionary<long, int> _sizes = new Dictionary<long, int>();
 
         /// <summary>The constructs of a world whose Sprockets <paramref name="roster" /> holds.</summary>
         public Constructs(Roster roster)
@@ -78,6 +80,34 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Members(grid, _members);
             return Name(_members);
+        }
+
+        /// <summary>
+        /// What a player turned away from the construct <paramref name="grid" /> is part of is told it is called: its name, or, where
+        /// this machine holds no Sprocket of it, as a client turned away holds none, the name of its largest grid worked out from its
+        /// grids.
+        /// </summary>
+        /// <remarks>Counts the blocks of every grid of such a construct, so it is for a refusal, never a repeating path.</remarks>
+        public string Called(IMyCubeGrid grid)
+        {
+            Members(grid, _members);
+            if (_members.Count > 0)
+                return Name(_members);
+
+            // The grids of the construct, as Members found them.
+            if (grid == null || MyAPIGateway.GridGroups == null)
+                return "";
+
+            _sizes.Clear();
+            foreach (var member in _group)
+            {
+                _blocks.Clear();
+                member.GetBlocks(_blocks);
+                _sizes[member.EntityId] = _blocks.Count;
+            }
+
+            var largest = Largest(_group, _sizes);
+            return largest == null ? "" : largest.CustomName ?? "";
         }
 
         /// <summary>What the construct with the Sprockets <paramref name="members" /> on it is called: the name of its largest grid, or empty for a construct with no automation.</summary>

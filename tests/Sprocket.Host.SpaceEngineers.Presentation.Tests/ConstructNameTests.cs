@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -6,6 +7,22 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>The home screen's heading names the construct for its largest grid, renames that grid, and follows it as it changes.</summary>
 public class ConstructNameTests
 {
+    /// <summary>
+    /// A construct this machine holds no Sprocket of, as a client turned away from it holds none, is still called for its largest
+    /// grid, so the notice turning the player away names it.
+    /// </summary>
+    [Fact]
+    public void AConstructWithNoSprocketHereIsCalledForItsLargestGrid()
+    {
+        var rig = Rig.Demo();
+        var other = rig.Apart("Other Ship");
+        rig.Light(300, "Other Light");
+        rig.OnBase();
+        var sim = Simulation.On(rig);
+
+        Assert.Equal("Other Ship", new Constructs(sim.Roster).Called(other.Block));
+    }
+
     /// <summary>A rotor's head holding more blocks than the base names the construct in the heading.</summary>
     [Fact]
     public void TheHeadingNamesTheLargestGrid()

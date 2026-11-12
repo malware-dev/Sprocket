@@ -654,7 +654,7 @@ namespace Sprocket.Host.SpaceEngineers
         void Foreign(long id)
         {
             var block = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock;
-            var construct = block == null ? "" : _constructs.Name(block.CubeGrid);
+            var construct = block == null ? "" : _constructs.Called(block.CubeGrid);
             var arguments = new Arguments();
             arguments.Set("construct", construct);
             TerminalNotice.Show(_workspace, _texts.TerminalForeign, arguments, _texts.TerminalOk);
