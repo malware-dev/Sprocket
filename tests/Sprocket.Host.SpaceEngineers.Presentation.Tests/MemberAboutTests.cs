@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>What the picker says of the block member chosen, at the top of the column about it.</summary>
 public class MemberAboutTests
 {
-    // The page a member's description links for an awaitable action (Codex.resx, Sprocket.Member.Waits).
+    // The page a member's description links for an awaitable action (MyTextsCodex.resx, Sprocket.Member.Waits).
     const string Awaitable = "Term.Awaitable";
 
     static Screen Stepping()

@@ -1,6 +1,6 @@
 """The codex's own checks, run over its pages: python .claude/skills/writing/codex-check.py
 
-Every entry of Codex.resx and Codex.no.resx is a page.
+Every entry of MyTextsCodex.resx and MyTextsCodex.no.resx is a page.
 
     name      the product's name in running text; a ::: player box and `quoted` text are left out, since a
               file name or a path can carry it there
@@ -17,7 +17,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 FOLDER = os.path.join("src", "Sprocket.Host.SpaceEngineers", "Content", "Data", "Localization")
-FILES = {"en": "Codex.resx", "no": "Codex.no.resx"}
+FILES = {"en": "MyTextsCodex.resx", "no": "MyTextsCodex.no.resx"}
 NAME = re.compile(r"sprocket", re.I)
 LINK = re.compile(r"(?<!!)\[(?:!\[[^\]]*\]\([^)]*\)|[^\]])*\]\(([A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)(?: class=[A-Za-z0-9_-]+)?\)")
 QUOTED = re.compile(r"`[^`]*`")

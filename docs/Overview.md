@@ -40,7 +40,7 @@ that shows it.
 |---|---|
 | `src/Lumel` | The user interface framework: elements, layout, controls, text, drawing. A shared project, compiled into each mod that uses it, and it knows nothing of Sprocket, so any mod can use it as it is. A submodule of the `malware-dev/Lumel` repository. Its `Sim` folder is a shared project of its own, for a harness and never a mod: it draws a Lumel screen on a desktop from the game's content and a mod's, in the game's own fonts, and writes it as a picture |
 | `src/Sprocket.Host.SpaceEngineers.Sim` | The simulator: runs the real mod outside the game, over blocks it makes up, and draws its screens to pictures. The tests and every check of what a screen looks like go through it |
-| `src/Sprocket.Localization.Generator` | A source generator that writes a class from each of the mod's text files at build time, `Texts` from `MyTexts.resx` and `Codex` from `Codex.resx`, and reports every text that cannot be said |
+| `src/Sprocket.Localization.Generator` | A source generator that writes a class from each of the mod's text files at build time, `Texts` from `MyTexts.resx` and `Codex` from `MyTextsCodex.resx`, and reports every text that cannot be said |
 | `src/Sprocket.GalleryWorld` | Writes a test world holding one block of every terminal type the game defines, for checking what the picker offers for each. Run by hand, with `--replace` to write over the last one; it is outside the solution. |
 | `tools/rename-world.py` | Points a saved world at the mod under a new name |
 

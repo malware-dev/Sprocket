@@ -36,14 +36,14 @@ public class GeneratorTests
         Assert.Single(run.GeneratedTrees);
     }
 
-    /// <summary>The game's own file of texts holds one of every other file's class and loads them with its own, so a new file needs no code to be loaded.</summary>
+    /// <summary>The game's own file of texts holds one of every other file's class, named after MyTexts as the game needs to load it, and loads them with its own, so a new file needs no code to be loaded.</summary>
     [Fact]
     public void TheGamesFileLoadsEveryOther()
     {
         var run = Run(
             ("MyTexts.resx", Resx(("Mod.Greeting", "Hello"))),
-            ("Codex.resx", Resx(("Mod.Term.Slot", "A slot."))),
-            ("Codex.no.resx", Resx(("Mod.Term.Slot", "En plass."))));
+            ("MyTextsCodex.resx", Resx(("Mod.Term.Slot", "A slot."))),
+            ("MyTextsCodex.no.resx", Resx(("Mod.Term.Slot", "En plass."))));
 
         Assert.Empty(run.Diagnostics);
         var texts = run.GeneratedTrees.Single(tree => tree.FilePath.EndsWith("Texts.g.cs")).ToString();

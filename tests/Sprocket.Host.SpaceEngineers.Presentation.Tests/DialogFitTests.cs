@@ -158,7 +158,7 @@ public class DialogFitTests
         var tip = screen.Scene.CodexTip;
         Assert.NotNull(tip);
 
-        var ids = System.Xml.Linq.XDocument.Load(System.IO.Path.Combine(Sim.Content.ResxTexts.Beside, "Codex.resx")).Root!.Elements("data")
+        var ids = System.Xml.Linq.XDocument.Load(System.IO.Path.Combine(Sim.Content.ResxTexts.Beside, "MyTextsCodex.resx")).Root!.Elements("data")
             .Select(data => (string)data.Attribute("name")!)
             .Where(name => name.StartsWith(Features.Codex.CodexPages.Prefix + "Term."))
             .Select(name => name.Substring(Features.Codex.CodexPages.Prefix.Length))

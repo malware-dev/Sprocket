@@ -1,6 +1,6 @@
 # Codex tips
 
-Every tip is a codex page: one entry in `Content/Data/Localization/Codex.resx`, with its Norwegian in `Codex.no.resx`,
+Every tip is a codex page: one entry in `Content/Data/Localization/MyTextsCodex.resx`, with its Norwegian in `MyTextsCodex.no.resx`,
 written in rich text. A few short lines, no title. It never scrolls.
 
 A page links a term by its key without the `Sprocket.` prefix: `[slot](Term.Slot class=term)`. A link to a page that

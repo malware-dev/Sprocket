@@ -63,7 +63,7 @@ change, and is read against it.
 
 **Every change a player can see keeps the codex true.** For each one in the diff (a new button, a
 screen that behaves differently, a rule that changed), find the codex tips that cover it, in
-`Content/Data/Localization/Codex.resx`: the element's own tip and the term pages it links. Read what they
+`Content/Data/Localization/MyTextsCodex.resx`: the element's own tip and the term pages it links. Read what they
 say against the change. A tip left saying what is no longer so is a finding, and so is a new element with
 no tip where one is needed. The tip is mended in the same change, in both languages, by the `writing`
 skill.

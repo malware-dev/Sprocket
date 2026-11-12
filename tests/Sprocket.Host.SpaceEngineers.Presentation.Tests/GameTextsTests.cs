@@ -31,6 +31,19 @@ public class GameTextsTests
         Assert.Equal(MyLanguagesEnum.Norwegian, texts.Language);
     }
 
+    /// <summary>The codex is loaded beside the texts, in each language, so its pages read in the language spoken.</summary>
+    [Fact]
+    public void TheCodexIsLoadedInEachLanguage()
+    {
+        var texts = new GameTexts(Mod);
+        texts.Load(MyLanguagesEnum.English);
+        Assert.StartsWith("A ![](mark:logic-system)", texts.Find("Sprocket.Term.LogicSystem"));
+
+        texts.Load(MyLanguagesEnum.Norwegian);
+        Assert.StartsWith("Et ![](mark:logic-system)", texts.Find("Sprocket.Term.LogicSystem"));
+        Assert.Equal("logikksystem", texts.Find("Sprocket.Systems.New"));
+    }
+
     /// <summary>A key the translation lacks keeps its English, and a key nobody wrote is not found at all.</summary>
     [Fact]
     public void AMissingTranslationKeepsTheEnglish()

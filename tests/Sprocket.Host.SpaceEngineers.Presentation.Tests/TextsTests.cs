@@ -21,7 +21,7 @@ public class TextsTests
     /// <summary>Each translation shipped beside the texts and the codex translates only texts there are.</summary>
     [Theory]
     [InlineData("MyTexts", "no")]
-    [InlineData("Codex", "no")]
+    [InlineData("MyTextsCodex", "no")]
     public void EachTranslationTranslatesTextsThereAre(string stem, string culture)
     {
         var written = Keys(stem + ".resx");

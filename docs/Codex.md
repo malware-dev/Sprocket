@@ -14,8 +14,8 @@ An admin trial, `tipKeeping`, sets whether a tip always lets the pointer onto it
 
 ## Pages
 
-The pages are the texts of `src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/Codex.resx`, one entry a page,
-translated in `Codex.no.resx` as `MyTexts.resx` is in `MyTexts.no.resx`. The game loads both pairs into its table of
+The pages are the texts of `src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/MyTextsCodex.resx`, one entry a page,
+translated in `MyTextsCodex.no.resx` as `MyTexts.resx` is in `MyTexts.no.resx`. The game loads both pairs into its table of
 texts together, and the text generator writes the class `Codex` from the file, one property a page, reached as
 `texts.Codex`, so a page the code names and the file lacks fails the build.
 

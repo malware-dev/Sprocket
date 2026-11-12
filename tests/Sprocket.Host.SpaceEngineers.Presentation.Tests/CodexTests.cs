@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>The codex: every tip a screen shows, read from Codex.resx, shown in the codex tip, its pages found by the names links give them.</summary>
+/// <summary>The codex: every tip a screen shows, read from MyTextsCodex.resx, shown in the codex tip, its pages found by the names links give them.</summary>
 public class CodexTests
 {
     /// <summary>Resting the pointer on something with a tip for the delay opens the codex tip beside it, at what it says.</summary>
@@ -495,7 +495,7 @@ public class CodexTests
     /// <summary>Every page of every Codex file the mod ships: the file, the page's key, and its text.</summary>
     static IEnumerable<(string File, string Key, string Text)> Pages()
     {
-        var files = Directory.GetFiles(ResxTexts.Beside, "Codex*.resx");
+        var files = Directory.GetFiles(ResxTexts.Beside, "MyTextsCodex*.resx");
         Assert.NotEmpty(files);
         foreach (var path in files)
         {

@@ -25,15 +25,15 @@ may be behind or ahead of it.
 
 You may read the code and the texts to quote the screens exactly: button and heading texts are in
 `src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/MyTexts.resx` (Norwegian in `MyTexts.no.resx`),
-and the codex pages are the entries of `src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/Codex.resx`
-(Norwegian in `Codex.no.resx`). Read the existing pages first; a new page matches their voice and links into
+and the codex pages are the entries of `src/Sprocket.Host.SpaceEngineers/Content/Data/Localization/MyTextsCodex.resx`
+(Norwegian in `MyTextsCodex.no.resx`). Read the existing pages first; a new page matches their voice and links into
 them.
 
 Where the brief and the code disagree, write what the brief says and report the disagreement.
 
 ## What you produce
 
-- Each page, in `Codex.resx` and `Codex.no.resx`.
+- Each page, in `MyTextsCodex.resx` and `MyTextsCodex.no.resx`.
 - `codex-check.py`, with every hit fixed.
 - For a new term page, the reader test's questions with their answers, in the report. Do not run the test.
 

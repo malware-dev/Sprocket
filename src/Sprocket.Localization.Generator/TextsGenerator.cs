@@ -10,7 +10,9 @@ namespace Sprocket.Localization.Generator
     /// <summary>Writes a class from each file of texts a mod defines, and checks each translation of it.</summary>
     /// <remarks>
     ///     Reads the project's additional files. <c>MyTexts.resx</c> defines the texts and names the class,
-    ///     <c>Texts</c>, without the game's <c>My</c>; <c>MyTexts.no.resx</c> and the like translate them.
+    ///     <c>Texts</c>, without the game's <c>My</c>; <c>MyTexts.no.resx</c> and the like translate them. Another file of
+    ///     texts names its class after <c>MyTexts</c>, <c>MyTextsCodex.resx</c> the class <c>Codex</c>, since the game loads
+    ///     only files whose name holds <c>MyTexts</c>.
     ///     Three build properties steer it: <c>LocalizationPrefix</c>, which every key starts with and which
     ///     no member name repeats; <c>LocalizationNamespace</c>, where the class goes, the root namespace
     ///     where it is not set; and <c>LocalizationRuntime</c>, the namespace of <c>Phrasebook</c>, the root
@@ -19,6 +21,8 @@ namespace Sprocket.Localization.Generator
     [Generator]
     public sealed class TextsGenerator : IIncrementalGenerator
     {
+        const string GameTextsName = "MyTexts";
+
         /// <inheritdoc />
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -79,20 +83,32 @@ namespace Sprocket.Localization.Generator
             }
         }
 
-        /// <summary>The class a file of texts named <paramref name="stem" /> becomes: its name without the game's <c>My</c>.</summary>
+        /// <summary>The class a file of texts named <paramref name="stem" /> becomes: its name after <c>MyTexts</c> where more follows, and otherwise its name without the game's <c>My</c>.</summary>
         static string Type(string stem)
         {
+            if (IsCompanion(stem))
+                return stem.Substring(GameTextsName.Length);
+
             return stem.StartsWith("My", StringComparison.Ordinal) && stem.Length > 2 ? stem.Substring(2) : stem;
+        }
+
+        /// <summary>Whether a file of texts named <paramref name="stem" /> is one beside the game's own, such as <c>MyTextsCodex</c>.</summary>
+        static bool IsCompanion(string stem)
+        {
+            // The game loads a mod's texts only from files whose name holds MyTexts, and looks a file up by the first path holding
+            // its name (MyTexts.LoadTexts), so a second file starts with MyTexts: ending with it, CodexMyTexts.resx, is found
+            // where MyTexts.resx is looked for.
+            return stem.StartsWith(GameTextsName, StringComparison.Ordinal) && stem.Length > GameTextsName.Length;
         }
 
         /// <summary>
         ///     The classes the file named <paramref name="stem" /> holds and loads with its own: every other file of texts where it is
-        ///     the game's own, named with <c>My</c>, and none otherwise.
+        ///     the game's own, named with <c>My</c> and no more after <c>MyTexts</c>, and none otherwise.
         /// </summary>
         static List<string> Beside(ImmutableArray<KeyValuePair<string, string>> files, string stem)
         {
             var beside = new List<string>();
-            if (!stem.StartsWith("My", StringComparison.Ordinal))
+            if (!stem.StartsWith("My", StringComparison.Ordinal) || IsCompanion(stem))
                 return beside;
 
             foreach (var file in files)

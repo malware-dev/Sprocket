@@ -8,7 +8,8 @@ namespace Sprocket.Sim.Content
 {
     /// <summary>Texts read straight out of a folder of .resx files, the mod's or the game's, layered the way the game's <c>MyTexts.LoadTexts</c> layers them.</summary>
     /// <remarks>
-    /// Every file with no culture first, such as <c>MyTexts.resx</c> and <c>Codex.resx</c>, then each one's
+    /// Only files whose name holds <c>MyTexts</c>, <c>MyCommonTexts</c> or <c>MyCoreTexts</c>, as the game reads no others. Every
+    /// such file with no culture first, such as <c>MyTexts.resx</c> and <c>MyTextsCodex.resx</c>, then each one's
     /// <c>&lt;culture&gt;</c> file over it, then its <c>&lt;culture&gt;-&lt;subculture&gt;</c> file, each replacing what it
     /// repeats.
     /// </remarks>
@@ -24,7 +25,7 @@ namespace Sprocket.Sim.Content
             foreach (var path in Directory.GetFiles(folder, "*.resx"))
             {
                 var name = Path.GetFileNameWithoutExtension(path);
-                if (name.IndexOf('.') < 0)
+                if (name.IndexOf('.') < 0 && IsRead(name))
                     stems.Add(name);
             }
 
@@ -43,6 +44,14 @@ namespace Sprocket.Sim.Content
 
                 Read(Path.Combine(folder, stem + "." + culture + ".resx"));
             }
+        }
+
+        /// <summary>Whether the game reads a file of texts called <paramref name="name" />: one whose name holds one of its three kinds of texts.</summary>
+        static bool IsRead(string name)
+        {
+            return name.IndexOf("MyTexts", StringComparison.OrdinalIgnoreCase) >= 0
+                || name.IndexOf("MyCommonTexts", StringComparison.OrdinalIgnoreCase) >= 0
+                || name.IndexOf("MyCoreTexts", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>The folder the mod's texts are copied to beside the harness, the files the mod ships.</summary>

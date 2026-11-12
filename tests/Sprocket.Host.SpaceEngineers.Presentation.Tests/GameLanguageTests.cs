@@ -115,7 +115,7 @@ public class GameLanguageTests
     /// <summary>The keys of Sprocket's member descriptions.</summary>
     static IEnumerable<string> Keys()
     {
-        var codex = System.Xml.Linq.XDocument.Load(System.IO.Path.Combine(ResxTexts.Beside, "Codex.resx"));
+        var codex = System.Xml.Linq.XDocument.Load(System.IO.Path.Combine(ResxTexts.Beside, "MyTextsCodex.resx"));
         return codex.Root!.Elements("data").Select(data => (string)data.Attribute("name")!).Where(key => key.StartsWith("Sprocket.Member.", StringComparison.Ordinal));
     }
 }
