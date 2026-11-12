@@ -350,6 +350,25 @@ public class SlotCategoryTests
         Assert.All(screen.Editor.Blueprint().Parts.OfType<IReorderable>(), row => Assert.False(row.DragHandle.IsVisible));
     }
 
+    /// <summary>A category draws a spine down from its grip to the middle of its last slot, as an if does down its steps.</summary>
+    [Fact]
+    public void ACategoryDrawsASpineDownItsSlots()
+    {
+        var screen = Slots();
+        Put(screen, "block slot 1", "Doors", "block slot 2", "Doors");
+
+        var view = screen.Editor.Current.View!;
+        var heading = Target.Within(view).OfType<CategoryRow>().Single();
+        var last = Target.Within(view).OfType<PartRow>().Last();
+        var grip = ((IReorderable)heading).DragHandle.Bounds;
+        var x = grip.X + grip.Width * 0.5f - Screen.Ui(0f, 0f).X;
+        var lines = screen.Drawings.Where(d => !d.IsText && d.Ink == Palette.Line && d.Where.Height > d.Where.Width && Math.Abs(d.Where.X - x) < 2f).ToList();
+
+        Assert.NotEmpty(lines);
+        Assert.True(lines.Min(d => d.Where.Y) <= heading.Bounds.Y + heading.Bounds.Height + 1f, "the spine starts short of the category's row");
+        Assert.True(lines.Max(d => d.Where.Y + d.Where.Height) >= last.Bounds.Y + last.Bounds.Height * 0.5f - 1f, "the spine stops short of the last slot's middle");
+    }
+
     /// <summary>The slot being carried is highlighted while it is held, as a step is, and the highlight goes as it is dropped.</summary>
     [Fact]
     public void TheSlotBeingCarriedIsHighlighted()

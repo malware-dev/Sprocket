@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Lumel.Controls;
 using Lumel.Drawing;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
 
@@ -60,6 +61,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 if (empty.Above == part)
                     rows.Add(CategoryHeading.Of(empty));
+            }
+        }
+
+        /// <summary>Draws a spine down from each category's grip to the middle of its last slot, of the rows standing in the list or of those being dragged.</summary>
+        protected override void DrawBeside(IGraphics g, bool dragged)
+        {
+            for (var i = 0; i < Children.Count; i++)
+            {
+                var heading = Children[i] as CategoryRow;
+                if (heading == null || Dragged(i) != dragged)
+                    continue;
+
+                PartRow last = null;
+                for (var j = i + 1; j < Children.Count; j++)
+                {
+                    var slot = Children[j] as PartRow;
+                    if (slot == null || !slot.Indented || Dragged(j) != dragged)
+                        break;
+
+                    last = slot;
+                }
+
+                if (last == null)
+                    continue;
+
+                var grip = ((IReorderable)heading).DragHandle.Bounds;
+                var x = grip.X + grip.Width * 0.5f;
+                var top = heading.Bounds.Y + heading.Bounds.Height + heading.RenderTransform.Translate.Y;
+                var middle = last.Bounds.Y + last.Bounds.Height * 0.5f + last.RenderTransform.Translate.Y;
+                TreeLine.Turning(g, x, top, middle, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
             }
         }
 

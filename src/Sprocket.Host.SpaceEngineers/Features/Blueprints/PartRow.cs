@@ -200,8 +200,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Whether the slot stands under a category, in from its name; its blocks stay in line with every other slot's.</summary>
         public bool Indented
         {
-            set { _column.Base.Padding = new Thickness(value ? Sizes.Indent : 0f, 0f, 0f, 0f); }
+            get { return _indented; }
+            set
+            {
+                _indented = value;
+                _column.Base.Padding = new Thickness(value ? Sizes.Indent : 0f, 0f, 0f, 0f);
+            }
         }
+
+        bool _indented;
 
         /// <summary>Whether its place can be changed at all: where it can, it shows a grip.</summary>
         public bool Arranged
