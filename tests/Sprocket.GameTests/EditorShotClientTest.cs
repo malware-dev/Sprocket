@@ -7,7 +7,6 @@ using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage;
 using Sandbox.ModAPI.Interfaces.Terminal;
-using VRage.Input;
 using VRageMath;
 using VRageRender;
 
@@ -22,7 +21,7 @@ namespace Sprocket.GameTests
         // The id of Sprocket's button in a programmable block's control panel (SprocketControls).
         const string OpenButton = "Sprocket_Open";
 
-        // The English codex's words for what the tips stops rest on (Codex.resx): the term home's heading holds, the tips switch's
+        // The English codex's words for what the tips stops rest on (MyTextsCodex.resx): the term home's heading holds, the tips switch's
         // tip while tips are on and while they are off, a trigger's bin and the undo arrow.
         const string Term = "Term.LogicSystem";
         const string TipsOn = "Show fewer tips";
@@ -38,12 +37,14 @@ namespace Sprocket.GameTests
 
         readonly string _shots;
         readonly GameTestReport _report;
+        readonly GameCursor _cursor;
 
-        /// <summary>The test, writing pictures to <paramref name="shots" /> and answering into <paramref name="report" />.</summary>
-        public EditorShotClientTest(string shots, GameTestReport report)
+        /// <summary>The test, writing pictures to <paramref name="shots" /> and answering into <paramref name="report" />, pointing with <paramref name="cursor" />.</summary>
+        public EditorShotClientTest(string shots, GameTestReport report, GameCursor cursor)
         {
             _shots = shots;
             _report = report;
+            _cursor = cursor;
         }
 
         /// <summary>The test's steps, each yielding the plugin updates to wait before the next.</summary>
@@ -159,7 +160,7 @@ namespace Sprocket.GameTests
                 {
                     hovering = stop[i].StartsWith("hover:");
                     // "answer" answers a question where one is asked, since some presses ask and some go ahead.
-                    pressed = hovering ? editor.Hover(stop[i].Substring(6)) : stop[i] == "off" ? editor.Switch(false) : stop[i] == "alt" ? editor.HoldAlt(true) : stop[i] == "answer" ? editor.Answer() || true : editor.Press(stop[i]);
+                    pressed = hovering ? editor.Hover(stop[i].Substring(6), _cursor) : stop[i] == "off" ? editor.Switch(false) : stop[i] == "alt" ? editor.HoldAlt(true) : stop[i] == "answer" ? editor.Answer() || true : editor.Press(stop[i]);
                     if (!pressed)
                         _report.Fail($"editor {name}", $"no button {stop[i]}; the page offers {editor.Buttons()}");
 
@@ -213,11 +214,11 @@ namespace Sprocket.GameTests
             return destroyed;
         }
 
-        /// <summary>Takes a picture called <paramref name="name" />, with the mouse in the screen's corner so no tip is open in it where <paramref name="park" /> holds, and otherwise once the tip of what it rests on has had time to open.</summary>
+        /// <summary>Takes a picture called <paramref name="name" />, with the pointer outside the editor so no tip is open in it where <paramref name="park" /> holds, and otherwise once the tip of what it rests on has had time to open.</summary>
         IEnumerator<int> Shoot(string name, bool park)
         {
             if (park)
-                MyInput.Static.SetMousePosition(0, 0);
+                _cursor.Park();
 
             yield return 2 * PluginUpdates.PerSecond;
 
@@ -227,6 +228,9 @@ namespace Sprocket.GameTests
 
             MyRenderProxy.TakeScreenshot(Vector2.One, picture, false, false, false);
             yield return 3 * PluginUpdates.PerSecond;
+            if (!park)
+                _report.Note($"{name}: {_cursor.Describe()}");
+
             _report.Check(name, File.Exists(picture), File.Exists(picture) ? picture : $"no picture at {picture}");
         }
 

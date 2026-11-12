@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sandbox;
 using Sandbox.ModAPI;
-using VRage.Input;
 using VRageMath;
 
 namespace Sprocket.GameTests
@@ -122,11 +120,11 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>
-        /// Rests the game's mouse on the middle of what <paramref name="target" /> names: a property path from the page the editor is
+        /// Rests <paramref name="cursor" /> on the middle of what <paramref name="target" /> names: a property path from the page the editor is
         /// on, such as <c>Moves.ToLibrary</c>, or else the words of something in the editor, a text named by <c>has:</c> at its
         /// first words. Says whether it found it.
         /// </summary>
-        public bool Hover(string target)
+        public bool Hover(string target, GameCursor cursor)
         {
             object found = _editor.Current;
             foreach (var part in target.Split('.'))
@@ -147,16 +145,11 @@ namespace Sprocket.GameTests
             if (found == null)
                 return false;
 
-            // The editor lays out in units of a 1080-high screen, over the safe area the game keeps: the window's full height,
-            // four by three wide and centred (GameScreen, Lumel's Sim/Surface).
             dynamic hovered = found;
             RectangleF bounds = hovered.Bounds;
             var across = target.StartsWith("has:") ? Math.Min(bounds.Width / 2f, FirstWords) : bounds.Width / 2f;
             Vector2 middle = hovered.ToScreen(new Vector2(bounds.X + across, bounds.Y + bounds.Height / 2f));
-            var window = MySandboxGame.ScreenSize;
-            var scale = window.Y / 1080f;
-            var left = (window.X - Math.Min(window.X, window.Y * 4f / 3f)) / 2f;
-            MyInput.Static.SetMousePosition((int)(left + middle.X * scale), (int)(middle.Y * scale));
+            cursor.Rest(middle);
             return true;
         }
 

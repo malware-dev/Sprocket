@@ -1,8 +1,7 @@
 <#
     Runs Sprocket's client tests in the game itself, against the mod as built from this repository.
 
-    1. Refuses to run while Space Engineers is running, or while the PC is locked: the game is never closed by this script,
-       and a game started on a locked PC waits at its start for ever.
+    1. Refuses to run while Space Engineers is running: the game is never closed by this script.
     2. Builds the test plugin and packs the mod into the test's own user data folder, -AppData, never the one played in.
     3. Puts back a clean test world there, its Sprocket mod pointed at that local copy, and writes the scenarios' blueprints.
     4. Starts the game through SevrLoader with the plugin, which loads the world, runs the tests, takes its pictures and closes
@@ -22,9 +21,8 @@ $repo = Resolve-Path "$PSScriptRoot\..\.."
 $work = Join-Path $AppData 'run'
 New-Item -ItemType Directory -Force $work | Out-Null
 
-# 1. Nothing of the game running, and nobody away from an unlocked PC.
+# 1. Nothing of the game running.
 if (Get-Process -Name 'SpaceEngineers', 'SevrLoader' -ErrorAction SilentlyContinue) { throw 'Space Engineers is running; it is never closed for a test.' }
-if (Get-Process -Name 'LogonUI' -ErrorAction SilentlyContinue) { throw 'The PC is locked, and the game waits at its start while it is.' }
 
 # 2. The plugin, and the mod packed as the game would load it, as a local mod of the test's own user data.
 dotnet build "$repo\tests\Sprocket.GameTests" -v q | Out-Null

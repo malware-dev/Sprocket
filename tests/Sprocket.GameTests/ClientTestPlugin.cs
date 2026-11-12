@@ -29,6 +29,7 @@ namespace Sprocket.GameTests
         int _loadUpdates;
         bool _loading;
         IEnumerator<int> _steps;
+        readonly GameCursor _cursor = new GameCursor();
         int _waiting;
         bool _odd;
         bool _respawned;
@@ -53,6 +54,8 @@ namespace Sprocket.GameTests
         {
             if (_report == null)
                 return;
+
+            _cursor.Hold();
 
             // The client calls a plugin sixty times a second, measured (5,400 updates in 90 s), and the tests count in the server's
             // thirty (PluginUpdates), so every other call is let by.
@@ -177,7 +180,7 @@ namespace Sprocket.GameTests
             while (kept.MoveNext())
                 yield return kept.Current;
 
-            var editor = new EditorShotClientTest(_shots, _report).Run("Kept Automation");
+            var editor = new EditorShotClientTest(_shots, _report, _cursor).Run("Kept Automation");
             while (editor.MoveNext())
                 yield return editor.Current;
         }
