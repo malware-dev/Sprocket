@@ -46,6 +46,16 @@ namespace Sprocket.GameTests
                 _at = new Vector2(float.NegativeInfinity);
         }
 
+        /// <summary>Moves the pointer <paramref name="across" /> editor units to the right of where it rests, dragging with it where the button is down, and says whether it rested anywhere.</summary>
+        public bool Nudge(float across)
+        {
+            if (!_at.HasValue)
+                return false;
+
+            Rest(_at.Value + new Vector2(across, 0f));
+            return true;
+        }
+
         /// <summary>Presses the left button where the pointer rests and holds it, as a drag begins, and says whether an editor was open to take it.</summary>
         public bool Down()
         {

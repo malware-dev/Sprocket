@@ -61,7 +61,10 @@ namespace Sprocket.GameTests
                 new[] { "target changed", System, "off", "Sequences", "Sequence 1", Target, "hover:" + Other, "click", "Done" },
                 new[] { "drag step moving 1", System, "off", "Sequences", "Sequence 1", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "frame:1" },
                 new[] { "drag step moving 4", System, "off", "Sequences", "Sequence 1", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "frame:4" },
-                new[] { "drag step dropped", System, "off", "Sequences", "Sequence 1", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "up" }
+                new[] { "drag step dropped", System, "off", "Sequences", "Sequence 1", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "up" },
+                new[] { "drag state moving", System, "off", "State", "add:state", "add:state", "add:state", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#3", "frame:2" },
+                new[] { "drag slot into category", System, "off", "Installation panel", "add:category", "hover:is:DragHandle#1", "down", "hover:is:DragHandle#last", "right:24", "up" },
+                new[] { "drag slot out of category", System, "off", "Installation panel", "hover:is:DragHandle#last", "down", "hover:is:DragHandle#1", "up" }
             };
 
             var visit = _tour.Visit(Automation, stops, "move ");

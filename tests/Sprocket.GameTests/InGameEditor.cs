@@ -70,7 +70,8 @@ namespace Sprocket.GameTests
 
         /// <summary>
         /// Adds what the entry saying <paramref name="text" /> in a plus menu on the page adds, such as <c>task</c> under a sequence's
-        /// steps, as choosing it in the open menu does. Says whether a menu offered it.
+        /// steps, as choosing it in the open menu does, or presses the add button saying it where no menu offers it. Says whether
+        /// either was there.
         /// </summary>
         /// <remarks>The menu opens in a window of its own, out of the page's elements, so its entry is taken from what the menu offers.</remarks>
         public bool Add(string text)
@@ -90,7 +91,8 @@ namespace Sprocket.GameTests
                 }
             }
 
-            return false;
+            // A list with one kind of thing to add has a button of its own, "+" and the word.
+            return Press(text);
         }
 
         /// <summary>
@@ -278,19 +280,28 @@ namespace Sprocket.GameTests
             return said == label || said == "+ " + label;
         }
 
-        /// <summary>The visible element of the type <paramref name="kind" /> names, such as <c>DragHandle#3</c>, the first where no place is given; or null.</summary>
+        /// <summary>
+        /// The visible element of the type <paramref name="kind" /> names, such as <c>DragHandle#3</c>, the first where no place is
+        /// given and the last for <c>#last</c>; or null.
+        /// </summary>
         object Nth(string kind)
         {
             var hash = kind.IndexOf('#');
             var type = hash < 0 ? kind : kind.Substring(0, hash);
-            var place = hash < 0 ? 1 : int.Parse(kind.Substring(hash + 1));
+            var last = hash >= 0 && kind.Substring(hash + 1) == "last";
+            var place = hash < 0 || last ? 1 : int.Parse(kind.Substring(hash + 1));
+            object found = null;
             foreach (var element in Within(Root()))
             {
-                if (element.GetType().Name == type && !(Get(element, "IsVisible") is bool visible && !visible) && --place == 0)
+                if (element.GetType().Name != type || Get(element, "IsVisible") is bool visible && !visible)
+                    continue;
+
+                found = element;
+                if (!last && --place == 0)
                     return element;
             }
 
-            return null;
+            return last ? found : null;
         }
 
         /// <summary>The top of the editor's elements, its frame, from the page it is on.</summary>
