@@ -82,3 +82,16 @@ resharper_csharp_naming_rule.constant_field = AaBb + _aaBb
 [src/Sprocket.Host.SpaceEngineers.Sim/Fakes/*.cs]
 resharper_check_namespace_highlighting = none
 resharper_inconsistent_naming_highlighting = none
+
+# ---------------------------------------------------------------------------------------------------
+# Sprocket's mod API is a shared project compiled into Sprocket and into every mod that registers
+# members through it, so its namespace is its own, Sprocket.ModApi, wherever it is built. Its public
+# surface is what the other mods call, so the inspections that judge it by this solution's callers are
+# off for it too.
+# ---------------------------------------------------------------------------------------------------
+
+[src/Sprocket.ModApi/**.cs]
+resharper_check_namespace_highlighting = none
+resharper_unused_member_global_highlighting = none
+resharper_unused_method_return_value_global_highlighting = none
+resharper_unused_auto_property_accessor_global_highlighting = none

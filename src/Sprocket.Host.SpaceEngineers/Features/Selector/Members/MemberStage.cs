@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             }
         }
 
-        /// <summary>What the codex says of what is chosen in the organized list, or empty where it says nothing.</summary>
+        /// <summary>What is said of what is chosen in the organized list: the words of the mod that adds it, or the codex's page; empty where neither says anything.</summary>
         public string ChosenAbout
         {
             get
@@ -94,6 +94,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                 var block = _picked.Blocks.Count == 0 ? null : _editor.World.FindEntity(_picked.Blocks[0]);
                 if (at < 0 || block == null || _editor.ShowsTerminal)
                     return "";
+
+                // A mod's member is described by the mod that adds it, whose words stand before any codex page of its name.
+                var member = block.Kind.FindAction(_picked.Member, _picked.Form);
+                if (member != null && member.About != null)
+                    return member.About;
 
                 return _editor.Codex.Member(block.Kind, _offers.Names[at], _offers.IsStatusWord(at));
             }

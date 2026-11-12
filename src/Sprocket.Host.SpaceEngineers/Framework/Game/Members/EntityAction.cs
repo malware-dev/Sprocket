@@ -206,6 +206,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// </summary>
         public Category Category { get; set; }
 
+        /// <summary>The heading of the group of its own a mod stands the member in, in the player's language, or null where it stands in its <see cref="Category" />.</summary>
+        public string Group { get; set; }
+
+        /// <summary>What the mod that adds the member says of it, in the player's language, or null for a member the codex describes.</summary>
+        public string About { get; set; }
+
         /// <summary>The type the host provides that this is a member of, or null for a member of the block itself.</summary>
         /// <remarks>Its options receive the number of the thing it acts on first, from 1, ahead of the step's own values.</remarks>
         public HostType Type { get; set; }

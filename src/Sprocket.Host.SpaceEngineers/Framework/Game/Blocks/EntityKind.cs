@@ -331,6 +331,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             return this;
         }
 
+        /// <summary>Stands the member added last in a mod's own group, headed <paramref name="heading" />, after Sprocket's groups and before Other.</summary>
+        public EntityKind InGroup(string heading)
+        {
+            _actions[_actions.Count - 1].Group = heading;
+            return this;
+        }
+
+        /// <summary>Gives the member added last <paramref name="about" />, what the mod that adds it says of it, shown in the selector before any codex page of its name.</summary>
+        public EntityKind Telling(string about)
+        {
+            _actions[_actions.Count - 1].About = about;
+            return this;
+        }
+
         /// <summary>Says the action or value added last is a member of <paramref name="type" /> - see <see cref="EntityAction.Type" />.</summary>
         public EntityKind Of(HostType type)
         {
