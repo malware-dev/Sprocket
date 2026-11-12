@@ -20,7 +20,7 @@ namespace Sprocket.GameTests
     /// A stop is its picture's name and its steps, each one of: <c>hover:</c> rests the pointer on what follows, <c>page:</c> opens
     /// the codex page it names in the tip that is open, <c>type:</c> types what follows, <c>add:</c> takes the entry it names from a plus menu, <c>click</c> clicks where the pointer rests, <c>down</c> and <c>up</c> press and let go of its button, so a <c>hover:</c> between them drags, <c>right:</c> moves the pointer that many units right,
     /// <c>tab</c> and <c>escape</c> press their keys, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds Alt,
-    /// <c>answer</c> answers a question where one is asked, <c>wait</c> gives a page two seconds, and anything else is pressed by
+    /// <c>answer</c> answers a question where one is asked, <c>wait</c> gives a page two seconds, <c>stay</c> first starts where the last stop left the editor, and anything else is pressed by
     /// its words. A stop ending <c>frame:</c> and a count is pictured that many plugin updates after its last press.
     /// </remarks>
     public sealed class EditorTour
@@ -95,7 +95,10 @@ namespace Sprocket.GameTests
             {
                 // A drag a stop left held is let go before the next.
                 _input.Up();
-                editor.Home();
+
+                // A stop opening with stay starts where the last one left the editor, such as the resume screen it opens on.
+                if (stop.Length < 2 || stop[1] != "stay")
+                    editor.Home();
                 yield return PluginUpdates.PerSecond / 2;
                 var name = prefix + stop[0];
                 var pressed = true;
@@ -104,7 +107,10 @@ namespace Sprocket.GameTests
                 var frame = stop[last].StartsWith("frame:") ? int.Parse(stop[last].Substring(6)) : 0;
                 for (var i = 1; i < (frame > 0 ? last : stop.Length) && pressed; i++)
                 {
-                    if (stop[i] == "wait")
+                    if (stop[i] == "stay")
+                    continue;
+
+                if (stop[i] == "wait")
                     {
                         yield return 2 * PluginUpdates.PerSecond;
                         continue;

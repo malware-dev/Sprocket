@@ -14,7 +14,9 @@ param(
     [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
     [string]$Template = 'E:\Data\sprocket-ds-test\WorldTemplate',
     [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count', 'Sprocket Move Items'),
-    [int]$TimeoutSeconds = 900
+    [int]$TimeoutSeconds = 900,
+    # The parts to play, of scene, kept, editor, move, remote and banner; every part where none is named.
+    [string[]]$Only = @()
 )
 $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path "$PSScriptRoot\..\.."
@@ -77,6 +79,7 @@ Remove-Item $report -ErrorAction SilentlyContinue
 $env:SPROCKET_CLIENTTEST_REPORT = $report
 $env:SPROCKET_CLIENTTEST_WORLD = $world
 $env:SPROCKET_CLIENTTEST_SHOTS = $shots
+$env:SPROCKET_CLIENTTEST_ONLY = $Only -join ','
 $env:SPROCKET_GAMETEST_BLUEPRINTS = $blueprints
 $plugin = "$repo\tests\Sprocket.GameTests\bin\Debug\net48\Sprocket.GameTests.dll"
 $began = Get-Date

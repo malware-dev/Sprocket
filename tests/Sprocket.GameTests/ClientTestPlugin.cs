@@ -25,6 +25,7 @@ namespace Sprocket.GameTests
         GameTestReport _report;
         string _world;
         string _join;
+        string[] _only;
         string _blueprints;
         string _shots;
         int _menuUpdates;
@@ -46,6 +47,8 @@ namespace Sprocket.GameTests
             _report = new GameTestReport(report);
             _world = Environment.GetEnvironmentVariable("SPROCKET_CLIENTTEST_WORLD");
             _join = Environment.GetEnvironmentVariable("SPROCKET_CLIENTTEST_JOIN");
+            var only = Environment.GetEnvironmentVariable("SPROCKET_CLIENTTEST_ONLY");
+            _only = string.IsNullOrEmpty(only) ? null : only.Split(',');
             _blueprints = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_BLUEPRINTS");
             _shots = Environment.GetEnvironmentVariable("SPROCKET_CLIENTTEST_SHOTS");
             _report.Note($"client plugin loaded, user data in {VRage.FileSystem.MyFileSystem.UserDataPath}");
@@ -213,22 +216,41 @@ namespace Sprocket.GameTests
             _report.Check("client character", MySession.Static.LocalCharacter != null, MySession.Static.LocalCharacter == null
                 ? "the player has no character after the respawn" : $"the player stands at {MySession.Static.LocalCharacter.PositionComp.GetPosition()}");
 
-            var shot = new SceneShotClientTest(_blueprints, _shots, _report).Run();
-            while (shot.MoveNext())
-                yield return shot.Current;
+            // The editor's tour stands on Kept Count and makes its backup of Piston Status, so it brings both pastes with it.
+            if (Wants("scene") || Wants("editor"))
+            {
+                var shot = new SceneShotClientTest(_blueprints, _shots, _report).Run();
+                while (shot.MoveNext())
+                    yield return shot.Current;
+            }
 
-            var kept = new KeptCountClientTest(_blueprints, _shots, _report).Run();
-            while (kept.MoveNext())
-                yield return kept.Current;
+            if (Wants("kept") || Wants("editor"))
+            {
+                var kept = new KeptCountClientTest(_blueprints, _shots, _report).Run();
+                while (kept.MoveNext())
+                    yield return kept.Current;
+            }
 
             var tour = new EditorTour(_shots, _report, _input);
-            var editor = new EditorShotClientTest(tour, _report).Run("Kept Automation");
-            while (editor.MoveNext())
-                yield return editor.Current;
+            if (Wants("editor"))
+            {
+                var editor = new EditorShotClientTest(tour, _report).Run("Kept Automation");
+                while (editor.MoveNext())
+                    yield return editor.Current;
+            }
 
-            var move = new MoveItemsClientTest(_blueprints, _report, tour).Run();
-            while (move.MoveNext())
-                yield return move.Current;
+            if (Wants("move") || Wants("remote") || Wants("banner"))
+            {
+                var move = new MoveItemsClientTest(_blueprints, _report, tour).Run(Wants);
+                while (move.MoveNext())
+                    yield return move.Current;
+            }
+        }
+
+        /// <summary>Whether the run plays the part called <paramref name="part" />: every part where SPROCKET_CLIENTTEST_ONLY names none.</summary>
+        bool Wants(string part)
+        {
+            return _only == null || Array.IndexOf(_only, part) >= 0;
         }
 
         /// <summary>Closes the welcome and the consent dialogs the main menu opens for new user data, answering neither.</summary>
