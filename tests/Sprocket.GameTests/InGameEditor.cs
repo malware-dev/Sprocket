@@ -154,6 +154,21 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>
+        /// Opens the codex page called <paramref name="id" />, such as <c>Term.Branch</c>, in the tip open where <paramref name="input" />
+        /// rests, as a link in it would. Says whether a tip was open and the codex has the page.
+        /// </summary>
+        public bool Page(string id, EditorInput input)
+        {
+            dynamic tip = input.ShownTip();
+            object page = _editor.Codex.Find(id);
+            if (tip == null || page == null || tip.GetType().GetMethod("Navigate") == null)
+                return false;
+
+            tip.Navigate((dynamic)page);
+            return true;
+        }
+
+        /// <summary>
         /// Holds Alt down for the editor's tips while <paramref name="held" /> holds, so a tip that opens stays pinned, or hands the
         /// tips back to the game's own key. Says whether the editor has tips.
         /// </summary>

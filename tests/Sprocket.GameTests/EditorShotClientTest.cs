@@ -32,9 +32,13 @@ namespace Sprocket.GameTests
         const string PauseStep = "Pause this step";
         const string MakeBlueprint = "Make this [backup]";
 
-        // The logic system the editor opens on and its blueprint (KeptCount), the logic system of the construct Destroy takes the
+        // A codex page with code in it (MyTextsCodex.resx, Sprocket.Term.Branch).
+        const string CodePage = "Term.Branch";
+
+        // The logic system the editor opens on and its blueprint, the one with no blueprint (KeptCount), the logic system of the construct Destroy takes the
         // programmable block of (PistonStatus), and the library button's Norwegian word (MyTexts.no.resx, Sprocket.Systems.Load).
         const string Kept = "Kept Here";
+        const string Unkept = "Listed Everywhere";
         const string Backup = "Piston";
         const string NorwegianLibrary = "Bibliotek";
 
@@ -86,6 +90,13 @@ namespace Sprocket.GameTests
                 new[] { "heading renaming", "Kept Here", "Kept Here" },
                 new[] { "blueprint made", "Make blueprint" },
                 new[] { "term tip", "hover:has:" + Term },
+                new[] { "codex code page", "hover:has:" + Term, "page:" + CodePage },
+                new[] { "switch sliding on 1", "Kept Here", "on", "frame:1" },
+                new[] { "switch sliding off 1", "Kept Here", "off", "frame:1" },
+                new[] { "switch sliding on 2", "Kept Here", "on", "frame:2" },
+                new[] { "switch sliding off 2", "Kept Here", "off", "frame:2" },
+                new[] { "switch sliding on 3", "Kept Here", "on", "frame:3" },
+                new[] { "switch sliding off 3", "Kept Here", "off", "frame:3" },
                 new[] { "tips switch on", "hover:tip:" + TipsOn },
                 new[] { "tips switch off", "tip:" + TipsOn, "hover:tip:" + TipsOff },
                 new[] { "tips off home" },
@@ -151,6 +162,24 @@ namespace Sprocket.GameTests
             var englishAgain = Speak(MyLanguagesEnum.English);
             while (englishAgain.MoveNext())
                 yield return englishAgain.Current;
+
+            // The library's panes, ending with each search narrowed, so nothing after them is seen through a search.
+            var panes = Tour(editor, Panes(), "");
+            while (panes.MoveNext())
+                yield return panes.Current;
+        }
+
+        /// <summary>The library's two panes: a logic system with no blueprint chosen and its blueprint made by the arrow, then each pane's search typed into.</summary>
+        static string[][] Panes()
+        {
+            return new[]
+            {
+                new[] { "library chosen", "Library", Unkept },
+                new[] { "library unkept to library tip", "Library", Unkept, "hover:Moves.ToLibrary" },
+                new[] { "library blueprint made", "Library", Unkept, "hover:Moves.ToLibrary", "click", "answer" },
+                new[] { "library search here", "Library", "hover:ConstructSearchBox", "click", "type:" + Unkept.Substring(0, 6) },
+                new[] { "library search storage", "Library", "hover:SearchBox", "click", "type:" + Kept.Substring(0, 4) }
+            };
         }
 
         /// <summary>The library's strip rested on with the blueprint made of the backup chosen, reached by the library button that says <paramref name="library" />.</summary>
@@ -194,26 +223,80 @@ namespace Sprocket.GameTests
                 var name = prefix + stop[0];
                 var pressed = true;
                 var hovering = false;
-                for (var i = 1; i < stop.Length && pressed; i++)
+                var last = stop.Length - 1;
+                // A stop ending frame: and a count is pictured that many plugin updates after its last press, as the motion it began runs.
+                var frame = stop[last].StartsWith("frame:") ? int.Parse(stop[last].Substring(6)) : 0;
+                for (var i = 1; i < (frame > 0 ? last : stop.Length) && pressed; i++)
                 {
-                    hovering = stop[i].StartsWith("hover:");
-                    // "answer" answers a question where one is asked, since some presses ask and some go ahead; "click" clicks where the pointer
-                    // rests and "tab" presses Tab, as a player does.
-                    pressed = hovering ? editor.Hover(stop[i].Substring(6), _input) : stop[i] == "off" ? editor.Switch(false) : stop[i] == "alt" ? editor.HoldAlt(true) : stop[i] == "answer" ? editor.Answer() || true
-                        : stop[i] == "click" ? _input.Click() : stop[i] == "tab" ? _input.Press(MyKeys.Tab) : editor.Press(stop[i]);
+                    // A page opened in the tip keeps the pointer where it rests, so the tip stays open.
+                    hovering = stop[i].StartsWith("hover:") || hovering && stop[i].StartsWith("page:");
+                    pressed = Step(editor, stop[i]);
                     if (!pressed)
                         _report.Fail($"editor {name}", $"no button {stop[i]}; the page offers {editor.Buttons()}");
 
-                    yield return PluginUpdates.PerSecond / 2;
+                    // The press that begins a pictured motion is followed by its picture alone.
+                    if (frame == 0 || i < last - 1)
+                        yield return PluginUpdates.PerSecond / 2;
                 }
 
                 if (!pressed)
                     continue;
 
-                var shot = Shoot("editor-" + name.Replace(" ", "-"), !hovering);
+                var shot = frame > 0 ? Moment("editor-" + name.Replace(" ", "-"), frame) : Shoot("editor-" + name.Replace(" ", "-"), !hovering);
                 while (shot.MoveNext())
                     yield return shot.Current;
             }
+        }
+
+        /// <summary>
+        /// Takes one step of a stop, and says whether there was what it names: <c>hover:</c> rests the pointer on what follows,
+        /// <c>page:</c> opens the codex page it names in the tip that is open, <c>type:</c> types what follows, <c>click</c> clicks
+        /// where the pointer rests, <c>tab</c> presses Tab, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds
+        /// Alt, <c>answer</c> answers a question where one is asked, since some presses ask and some go ahead, and anything else is
+        /// pressed by its words.
+        /// </summary>
+        bool Step(InGameEditor editor, string step)
+        {
+            if (step.StartsWith("hover:"))
+                return editor.Hover(step.Substring(6), _input);
+            if (step.StartsWith("page:"))
+                return editor.Page(step.Substring(5), _input);
+            if (step.StartsWith("type:"))
+                return _input.Type(step.Substring(5));
+
+            switch (step)
+            {
+                case "click":
+                    return _input.Click();
+                case "tab":
+                    return _input.Press(MyKeys.Tab);
+                case "on":
+                    return editor.Switch(true);
+                case "off":
+                    return editor.Switch(false);
+                case "alt":
+                    return editor.HoldAlt(true);
+                case "answer":
+                    editor.Answer();
+                    return true;
+                default:
+                    return editor.Press(step);
+            }
+        }
+
+        /// <summary>Takes a picture called <paramref name="name" /> <paramref name="updates" /> plugin updates into a motion that has just begun, two game frames each.</summary>
+        IEnumerator<int> Moment(string name, int updates)
+        {
+            _input.Park();
+            yield return updates;
+
+            var picture = Path.Combine(_shots, name + ".png");
+            if (File.Exists(picture))
+                File.Delete(picture);
+
+            MyRenderProxy.TakeScreenshot(Vector2.One, picture, false, false, false);
+            yield return 3 * PluginUpdates.PerSecond;
+            _report.Check(name, File.Exists(picture), File.Exists(picture) ? picture : $"no picture at {picture}");
         }
 
         /// <summary>Puts the game in <paramref name="language" /> as its options screen does, by the setting and a screen closing after it.</summary>

@@ -75,6 +75,25 @@ namespace Sprocket.GameTests
             return true;
         }
 
+        /// <summary>Types <paramref name="text" /> into what has the editor's keyboard, a character at a time, and says whether an editor was open to take it.</summary>
+        public bool Type(string text)
+        {
+            dynamic workspace = Workspace();
+            if (workspace == null)
+                return false;
+
+            foreach (var c in text)
+                workspace.Text(c);
+            return true;
+        }
+
+        /// <summary>The tip open in the editor, or null where none is.</summary>
+        public object ShownTip()
+        {
+            dynamic workspace = Workspace();
+            return workspace?.ShownTip;
+        }
+
         /// <summary>Says where the pointer is held, what of the editor is under it and the tip open there, for a test's report.</summary>
         public string Describe()
         {
