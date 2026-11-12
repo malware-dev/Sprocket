@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using VRage;
 using VRageMath;
 
 namespace Sprocket.GameTests
@@ -13,11 +14,18 @@ namespace Sprocket.GameTests
         static readonly Vector3D At = new Vector3D(0, 0, -330);
 
         // The scenario's programmable block, its logic system, the slot its first step moves to, as its part on the line says it,
-        // and a cargo container that slot does not hold (MoveItems).
+        // a cargo container that slot does not hold, and a remote control (MoveItems).
         const string Automation = "Move Automation";
         const string System = "Move";
         const string Target = "inventory slot 2";
         const string Other = "Move C";
+        const string Remote = "Move Remote";
+
+        // The remote control's flight settings by Sprocket's own names, and the Norwegian words of the Sequences tab and of the task a
+        // step adds (MyTexts.no.resx, Sprocket.System.Sequences and Sprocket.Sequence.DoSomething).
+        static readonly string[] Flight = { "handbrake", "dampeners", "control thrusters" };
+        const string NorwegianSequences = "Sekvenser";
+        const string NorwegianTask = "oppgave";
 
         readonly string _blueprint;
         readonly GameTestReport _report;
@@ -56,6 +64,25 @@ namespace Sprocket.GameTests
             var visit = _tour.Visit(Automation, stops, "move ");
             while (visit.MoveNext())
                 yield return visit.Current;
+
+            // Testing row "Remote control rows in a Norwegian game": the remote control's flight settings, each chosen in a step's
+            // selector with the game in Norwegian, where Sprocket names them its own way and describes them in Norwegian.
+            var norwegian = EditorTour.Speak(MyLanguagesEnum.Norwegian);
+            while (norwegian.MoveNext())
+                yield return norwegian.Current;
+
+            // Each in a visit of its own, since a stop leaves its selector open.
+            foreach (var setting in Flight)
+            {
+                var stop = new[] { "remote " + setting, System, "off", NorwegianSequences, "Sequence 1", "add:" + NorwegianTask, "wait", "hover:" + Remote, "click", "hover:" + setting, "click" };
+                var row = _tour.Visit(Automation, new[] { stop }, "move no ");
+                while (row.MoveNext())
+                    yield return row.Current;
+            }
+
+            var english = EditorTour.Speak(MyLanguagesEnum.English);
+            while (english.MoveNext())
+                yield return english.Current;
         }
     }
 }

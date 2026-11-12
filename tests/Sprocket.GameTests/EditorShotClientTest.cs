@@ -1,7 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
-using Sandbox;
-using Sandbox.Graphics.GUI;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage;
@@ -115,7 +112,7 @@ namespace Sprocket.GameTests
             while (english.MoveNext())
                 yield return english.Current;
 
-            var norwegian = Speak(MyLanguagesEnum.Norwegian);
+            var norwegian = EditorTour.Speak(MyLanguagesEnum.Norwegian);
             while (norwegian.MoveNext())
                 yield return norwegian.Current;
 
@@ -123,7 +120,7 @@ namespace Sprocket.GameTests
             while (strip.MoveNext())
                 yield return strip.Current;
 
-            var back = Speak(MyLanguagesEnum.English);
+            var back = EditorTour.Speak(MyLanguagesEnum.English);
             while (back.MoveNext())
                 yield return back.Current;
 
@@ -136,7 +133,7 @@ namespace Sprocket.GameTests
             while (added.MoveNext())
                 yield return added.Current;
 
-            var norwegianAgain = Speak(MyLanguagesEnum.Norwegian);
+            var norwegianAgain = EditorTour.Speak(MyLanguagesEnum.Norwegian);
             while (norwegianAgain.MoveNext())
                 yield return norwegianAgain.Current;
 
@@ -144,7 +141,7 @@ namespace Sprocket.GameTests
             while (addedNorwegian.MoveNext())
                 yield return addedNorwegian.Current;
 
-            var englishAgain = Speak(MyLanguagesEnum.English);
+            var englishAgain = EditorTour.Speak(MyLanguagesEnum.English);
             while (englishAgain.MoveNext())
                 yield return englishAgain.Current;
 
@@ -205,19 +202,6 @@ namespace Sprocket.GameTests
                 new[] { "strip backup to library tip", library, Backup, "hover:Moves.ToLibrary" },
                 new[] { "strip backup to construct tip", library, Backup, "hover:Moves.ToConstruct" }
             };
-        }
-
-        /// <summary>Puts the game in <paramref name="language" /> as its options screen does, by the setting and a screen closing after it.</summary>
-        /// <remarks>Sprocket looks for a new language as any screen closes. The setting is the test user data's own (Run-ClientTests.ps1 -AppData).</remarks>
-        static IEnumerator<int> Speak(MyLanguagesEnum language)
-        {
-            MySandboxGame.Config.Language = language;
-            var box = MyGuiSandbox.CreateMessageBox(MyMessageBoxStyleEnum.Info, messageText: new StringBuilder(language.ToString()));
-            MyGuiSandbox.AddScreen(box);
-            yield return PluginUpdates.PerSecond / 2;
-
-            box.CloseScreen();
-            yield return PluginUpdates.PerSecond;
         }
 
         /// <summary>

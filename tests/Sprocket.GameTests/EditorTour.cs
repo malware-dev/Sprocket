@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using System.Text;
+using Sandbox;
+using Sandbox.Graphics.GUI;
+using VRage;
 using System.IO;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
@@ -122,6 +126,19 @@ namespace Sprocket.GameTests
                 while (shot.MoveNext())
                     yield return shot.Current;
             }
+        }
+
+        /// <summary>Puts the game in <paramref name="language" /> as its options screen does, by the setting and a screen closing after it.</summary>
+        /// <remarks>Sprocket looks for a new language as any screen closes. The setting is the test user data's own (Run-ClientTests.ps1 -AppData).</remarks>
+        public static IEnumerator<int> Speak(MyLanguagesEnum language)
+        {
+            MySandboxGame.Config.Language = language;
+            var box = MyGuiSandbox.CreateMessageBox(MyMessageBoxStyleEnum.Info, messageText: new StringBuilder(language.ToString()));
+            MyGuiSandbox.AddScreen(box);
+            yield return PluginUpdates.PerSecond / 2;
+
+            box.CloseScreen();
+            yield return PluginUpdates.PerSecond;
         }
 
         /// <summary>The programmable block, or other terminal block, called <paramref name="name" />, or null where none is.</summary>

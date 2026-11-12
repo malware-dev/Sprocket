@@ -41,7 +41,7 @@ public sealed class MoveItems : Scenario
         Source = rig.Cargo(2, "Move A");
         Joined = rig.Cargo(3, "Move B");
         Apart = rig.Cargo(4, "Move C");
-        deck.Lay(new List<Fitting> { Source, Joined, Apart, rig.Sprocket, rig.Panel(5, "To B Button"), rig.Panel(6, "To C Button"), rig.Light(8, "B Done"), rig.Battery(7, "Move Battery") }, Vector3I.Zero, 40);
+        deck.Lay(new List<Fitting> { Source, Joined, Apart, rig.Sprocket, rig.Panel(5, "To B Button"), rig.Panel(6, "To C Button"), rig.Light(8, "B Done"), rig.Battery(7, "Move Battery"), rig.RemoteControl(9, "Move Remote") }, Vector3I.Zero, 40);
 
         // In the gap between A and B, level with the middle of their faces, where each has a conveyor port.
         deck.Conveyor(deck[Source].Min + new Vector3I(3, 1, 1));
