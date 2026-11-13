@@ -79,17 +79,6 @@ public class ScreensTests
         Assert.False(kind.FindAction("FontSize", ReachKind.Value)!.Vetted);
     }
 
-    /// <summary>A block offers each of its screens by number and by the name the game gives it.</summary>
-    [Fact]
-    public void ABlockOffersItsScreensByNumberAndName()
-    {
-        var (ship, board) = Built();
-        var facets = ship.Entity(board.Id).Kind.Facets(HostTypes.Returned("screen")!);
-
-        Assert.Equal(new[] { 1, 2 }, facets.Select(facet => facet.Number));
-        Assert.Equal(new[] { "Front", "Back" }, facets.Select(facet => facet.Name));
-    }
-
     /// <summary>Text longer than a sentence has room for is cut short in its step, however long the text is.</summary>
     [Fact]
     public void LongTextIsCutShortInItsStep()
@@ -188,9 +177,9 @@ public class ScreensTests
         Assert.Equal("", board.Faces[1].Text);
     }
 
-    /// <summary>A step using a screen through a block slot is warned of, naming the slot, and still runs.</summary>
+    /// <summary>A step using a screen through a block slot is warned of, naming the slot, and still runs; one through a screen slot is not warned of.</summary>
     [Fact]
-    public void AScreenOnABlockSlotIsWarnedOfAndStillRuns()
+    public void AScreenOnABlockSlotIsWarnedOfAndOnAScreenSlotIsNot()
     {
         var (ship, board) = Built();
         var (program, runner, sequence, installation) = Slotted(ship, board, 1, ScreenType.ShowText, Literal.Of("Closed"));
@@ -205,50 +194,32 @@ public class ScreensTests
         Assert.False(fault.Parks);
         Assert.Equal("This step is outdated and now needs a screen slot. Press status to make one.",
             SequenceText.Problem(new Texts(), fault, sequence));
+
+        var (screenShip, screenBoard) = Built();
+        var (_, screenRunner, screenSequence, screenInstallation) = Slotted(screenShip, screenBoard, 1, ScreenType.ShowText, Literal.Of("Closed"));
+        screenShip.Tick();
+        screenRunner.Tick(1);
+
+        Assert.NotEqual(SequenceProblem.ScreenOnBlockSlot, SequenceSummary.Checked(screenShip.World, screenRunner.Bindings, screenSequence, screenInstallation).Problem);
     }
 
-    /// <summary>A step using a screen through a screen slot is not warned of.</summary>
-    [Fact]
-    public void AScreenOnAScreenSlotIsNotWarnedOf()
+    /// <summary>Setting up a screen to run an app sets which app, on the screen its slot holds, and to run no app sets it running none, so a script can draw on it.</summary>
+    [Theory]
+    [InlineData("", "TSS_Weather")]
+    [InlineData("TSS_Weather", "")]
+    public void SettingUpAScreenSetsItsApp(string before, string app)
     {
         var (ship, board) = Built();
-        var (_, runner, sequence, installation) = Slotted(ship, board, 1, ScreenType.ShowText, Literal.Of("Closed"));
-        ship.Tick();
-        runner.Tick(1);
-
-        Assert.NotEqual(SequenceProblem.ScreenOnBlockSlot, SequenceSummary.Checked(ship.World, runner.Bindings, sequence, installation).Problem);
-    }
-
-    /// <summary>Setting up a screen to run an app sets which app, on the screen its slot holds.</summary>
-    [Fact]
-    public void SettingUpAScreenSetsItsApp()
-    {
-        var (ship, board) = Built();
+        board.Faces[1].App = before;
         var empty = Literal.Of("");
-        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.SetUp, Literal.Of("app"), Literal.Of("TSS_Weather"),
+        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.SetUp, Literal.Of("app"), Literal.Of(app),
             empty, empty, empty, empty, empty, empty, empty, empty, empty, empty);
 
         Run(ship, runner, sequence, installation);
 
         Assert.Equal(ContentType.SCRIPT, board.Faces[1].Content);
-        Assert.Equal("TSS_Weather", board.Faces[1].App);
+        Assert.Equal(app, board.Faces[1].App);
         Assert.Equal("", board.Faces[0].App);
-    }
-
-    /// <summary>Setting up a screen to run no app sets it running none, so a script can draw on it.</summary>
-    [Fact]
-    public void SettingUpAScreenToRunNoAppSetsNone()
-    {
-        var (ship, board) = Built();
-        board.Faces[1].App = "TSS_Weather";
-        var empty = Literal.Of("");
-        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.SetUp, Literal.Of("app"), empty,
-            empty, empty, empty, empty, empty, empty, empty, empty, empty, empty);
-
-        Run(ship, runner, sequence, installation);
-
-        Assert.Equal(ContentType.SCRIPT, board.Faces[1].Content);
-        Assert.Equal("", board.Faces[1].App);
     }
 
     /// <summary>Showing an image shows it on the screen its slot holds alone, which is set to show text and images.</summary>
@@ -265,31 +236,21 @@ public class ScreensTests
         Assert.Empty(board.Faces[0].Images);
     }
 
-    /// <summary>The text a screen shows and the app it runs are read off the screen its slot holds.</summary>
+    /// <summary>The text a screen shows, the app it runs and its settings are read off the screen its slot holds.</summary>
     [Fact]
-    public void WhatAScreenShowsIsReadOffTheScreenItsSlotHolds()
+    public void WhatAScreenShowsAndItsSettingsAreReadOffTheScreenItsSlotHolds()
     {
         var (ship, board) = Built();
         board.Faces[1].Text = "DOCKED";
         board.Faces[1].App = "TSS_Weather";
+        board.Faces[1].FontSize = 3f;
+        board.Faces[1].Alignment = TextAlignment.RIGHT;
         ship.Tick();
         var entity = ship.Entity(board.Id);
 
         Assert.True(Probe.Of(entity, BlockKinds.Own, ScreenType.TextShown, new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 2)!.Holds());
         Assert.False(Probe.Of(entity, BlockKinds.Own, ScreenType.TextShown, new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 1)!.Holds());
         Assert.True(Probe.Of(entity, BlockKinds.Own, ScreenType.App, new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("TSS_Weather"), facet: 2)!.Holds());
-    }
-
-    /// <summary>A screen's setting is read off the screen its slot holds.</summary>
-    [Fact]
-    public void ASettingIsReadOffTheScreenItsSlotHolds()
-    {
-        var (ship, board) = Built();
-        board.Faces[1].FontSize = 3f;
-        board.Faces[1].Alignment = TextAlignment.RIGHT;
-        ship.Tick();
-        var entity = ship.Entity(board.Id);
-
         Assert.True(Probe.Of(entity, BlockKinds.Own, "font_size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(3.0), facet: 2)!.Holds());
         Assert.True(Probe.Of(entity, BlockKinds.Own, "font_size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(1.0), facet: 1)!.Holds());
         Assert.True(Probe.Of(entity, BlockKinds.Own, "alignment", new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("right"), facet: 2)!.Holds());

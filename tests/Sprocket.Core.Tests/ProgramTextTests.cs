@@ -262,7 +262,7 @@ public class ProgramTextTests
     /// </para>
     /// </remarks>
     /// <summary>
-    /// A step is written in the form that says whose it is, and read back as the same.
+    /// A step is written in the form that says whose it is, and read back as the same; one asking for nothing has no <c>with</c>, and one of a block's own values is written as a set.
     /// </summary>
     /// <remarks>
     /// A bare head is Sprocket's own word, <c>action</c> is one of the game's actions and <c>set</c>
@@ -276,6 +276,8 @@ public class ProgramTextTests
         var program = new Automation();
         var values = new Values();
         program.Restore(Declared("rotor", "rotor", values, 1, "Arm Rotor"));
+        program.Restore(Declared("inner", "door", values, 2, "Inner Door"));
+        program.Restore(Declared("light", "light", values, 3, "Airlock Light"));
 
         var arm = program.AddSystem();
         arm.Name = "Arm";
@@ -297,10 +299,23 @@ public class ProgramTextTests
         speed.Arguments.Add(Literal.Of(5.0));
         sequence.Steps.Add(speed);
 
+        var shut = new Act("close");
+        shut.Targets.Add("inner");
+        sequence.Steps.Add(shut);
+
+        var radius = new Act("Radius");
+        radius.Form = ReachKind.Value;
+        radius.Targets.Add("light");
+        radius.Arguments.Add(Literal.Of(4.5));
+        sequence.Steps.Add(radius);
+
         var saved = Save(program);
         Assert.Contains("call Reverse on [ rotor ]", saved);
         Assert.Contains("call ext.rotate_to(90, 2.5) on [ rotor ]", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
+        Assert.Contains("call ext.close on [ inner ]\n", saved);
+        Assert.DoesNotContain("with", saved);
+        Assert.Contains("set Radius on [ light ] to 4.5", saved);
 
         var after = new Automation();
         LoadAll(program, after);
@@ -321,6 +336,12 @@ public class ProgramTextTests
         var value = Assert.IsType<Act>(steps[2]);
         Assert.Equal(ReachKind.Value, value.Form);
         Assert.Equal("Velocity", value.ActionId);
+
+        var back = Assert.IsType<Act>(steps[4]);
+        Assert.True(back.Sets);
+        Assert.Equal("Radius", back.ActionId);
+        Assert.Equal(new[] { "light" }, back.Targets);
+        Assert.Equal(4.5, Assert.Single(back.Arguments).Real);
     }
 
     [Fact]
@@ -415,57 +436,6 @@ public class ProgramTextTests
         Assert.Equal(read, Assert.IsType<Act>(after.Sequences[0].Steps[0]).Arguments[0].Text);
     }
 
-    /// <summary>An action that asked for nothing is written as the action and its parts, with no <c>with</c>.</summary>
-    [Fact]
-    public void AStepWithNoValuesHasNoWith()
-    {
-        var program = new Automation();
-        var values = new Values();
-        program.Restore(Declared("inner", "door", values, 1, "Inner Door"));
-
-        var airlock = program.AddSystem();
-        airlock.Name = "Airlock";
-
-        var sequence = program.AddSequence(airlock, null);
-        var shut = new Act("close");
-        shut.Targets.Add("inner");
-        sequence.Steps.Add(shut);
-
-        var written = Save(program);
-        Assert.Contains("call ext.close on [ inner ]\n", written);
-        Assert.DoesNotContain("with", written);
-    }
-
-    /// <summary>One of a block's own values is written as a set, and comes back as one.</summary>
-    [Fact]
-    public void AValueIsWrittenAsASet()
-    {
-        var program = new Automation();
-        var values = new Values();
-        program.Restore(Declared("light", "light", values, 1, "Airlock Light"));
-
-        var lights = program.AddSystem();
-        lights.Name = "Lights";
-
-        var sequence = program.AddSequence(lights, null);
-        var radius = new Act("Radius");
-        radius.Form = ReachKind.Value;
-        radius.Targets.Add("light");
-        radius.Arguments.Add(Literal.Of(4.5));
-        sequence.Steps.Add(radius);
-
-        Assert.Contains("set Radius on [ light ] to 4.5", Save(program));
-
-        var after = new Automation();
-        LoadAll(program, after);
-
-        var back = Assert.IsType<Act>(after.Sequences[0].Steps[0]);
-        Assert.True(back.Sets);
-        Assert.Equal("Radius", back.ActionId);
-        Assert.Equal(new[] { "light" }, back.Targets);
-        Assert.Equal(4.5, Assert.Single(back.Arguments).Real);
-    }
-
     /// <summary>
     /// Names are whatever somebody typed, and a backslash is an ordinary character.
     /// </summary>
@@ -556,7 +526,7 @@ public class ProgramTextTests
     }
 
     /// <summary>
-    /// A system nobody named still writes down, and reads back.
+    /// A system nobody named still writes down, and reads back, and two of them are not both called the same thing.
     /// </summary>
     /// <remarks>
     /// The format has no spelling for a system with no name: it wrote an empty one and then refused
@@ -564,7 +534,7 @@ public class ProgramTextTests
     /// load. Named from birth now - see <see cref="Automation.AddSystem" />.
     /// </remarks>
     [Fact]
-    public void ASystemNobodyNamedSurvivesBeingSaved()
+    public void ASystemNobodyNamedSurvivesBeingSavedAndIsNamedApart()
     {
         var program = new Automation();
         var system = program.AddSystem();
@@ -577,15 +547,10 @@ public class ProgramTextTests
 
         Assert.Single(after.Systems);
         Assert.Equal(system.Name, after.Systems[0].Name);
-    }
 
-    /// <summary>Two of them are not both called the same thing.</summary>
-    [Fact]
-    public void SystemsNobodyNamedAreNamedApart()
-    {
-        var program = new Automation();
+        var another = new Automation();
 
-        Assert.NotEqual(program.AddSystem().Name, program.AddSystem().Name);
+        Assert.NotEqual(another.AddSystem().Name, another.AddSystem().Name);
     }
 
     [Fact]

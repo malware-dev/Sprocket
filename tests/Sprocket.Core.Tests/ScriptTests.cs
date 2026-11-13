@@ -892,11 +892,19 @@ public class ScriptTests
         Assert.Contains("        run 2\n        run 2\n", Save(after));
     }
 
+    /// <summary>
+    /// A <c>run</c> that names nothing, or a sequence the system has not got, is trouble.
+    /// </summary>
+    /// <remarks>
+    /// Loud, because the alternative was a program that read cleanly and then threw out of the runner
+    /// on the tick that reached the step.
+    /// </remarks>
     [Theory]
     [InlineData("run 'Nothing like this'")]
     [InlineData("run \"Tidy up\"")]
     [InlineData("run")]
-    public void ARunThatNamesNothingIsTrouble(string line)
+    [InlineData("run 7")]
+    public void ARunThatNamesNoSequenceOfTheSystemIsTrouble(string line)
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
@@ -927,25 +935,6 @@ public class ScriptTests
 
         Assert.False(after.Intact);
         Assert.Empty(after.Systems);
-    }
-
-    /// <summary>
-    /// A <c>run</c> that names a sequence the system has not got is trouble.
-    /// </summary>
-    /// <remarks>
-    /// Loud, because the alternative was a program that read cleanly and then threw out of the runner
-    /// on the tick that reached the step.
-    /// </remarks>
-    [Theory]
-    [InlineData("run 7")]
-    [InlineData("run 'Nothing like this'")]
-    public void ARunThatNamesNoSequenceOfTheSystemIsTrouble(string line)
-    {
-        var after = new Automation();
-        Assert.NotEqual("", Load(
-            Head + "MalTek.Airlock {\n    sequence 1 {\n        " + line + "\n    }\n}\n", after));
-
-        Assert.False(after.Intact);
     }
 
     /// <summary>
@@ -1515,38 +1504,23 @@ public class ScriptTests
     }
 
     /// <summary>
-    /// A save in any other version is turned away whole and never written back.
+    /// A save in any other version, or from another draft of the same format, is turned away whole and never written back.
     /// </summary>
     /// <remarks>
     /// Not backwards compatible while the language is being designed, so nothing of an older save is
     /// read - but nothing on disk is lost, because trouble stops the program being saved over it.
-    /// </remarks>
-    [Fact]
-    public void ASaveFromAnotherVersionIsTurnedAwayAndNotWrittenBack()
-    {
-        var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 25", "sprocket 2"), after);
-
-        Assert.NotEqual("", trouble);
-        Assert.False(after.Intact);
-        Assert.True(after.Incompatible);
-        Assert.Empty(after.Systems);
-    }
-
-    /// <summary>
-    /// A save from another draft of the same format is refused the same way.
-    /// </summary>
-    /// <remarks>
+    /// <para>
     /// The two numbers oblige different things and that is the whole reason there are two: the format
     /// moving means a program somebody else holds has to be brought forward, and a draft moving means only that this build will not read it. Both are refused at the first line, where the refusal can
     /// say something, rather than deep in the file where it cannot.
+    /// </para>
     /// </remarks>
     [Theory]
+    [InlineData("sprocket 2")]
     [InlineData("sprocket 1 alpha 11")]
     [InlineData("sprocket 1 alpha 12")]
     [InlineData("sprocket 1")]
-
-    public void ASaveFromAnotherDraftOfTheFormatIsRefused(string head)
+    public void ASaveFromAnotherVersionOrDraftOfTheFormatIsRefusedAndNotWrittenBack(string head)
     {
         var after = new Automation();
         var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 25", head), after);

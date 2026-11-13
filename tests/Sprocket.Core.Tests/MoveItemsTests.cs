@@ -153,7 +153,7 @@ public class MoveItemsTests
         Assert.False(runner.Get(sequence, installation).IsRunning);
     }
 
-    /// <summary>Nothing moves over no conveyor: a step that holds stays stuck, and nothing leaves the source.</summary>
+    /// <summary>Nothing moves over no conveyor: a step that holds stays stuck, says no conveyor connects them, and nothing leaves the source.</summary>
     [Fact]
     public void NoConveyorMovesNothing()
     {
@@ -169,6 +169,7 @@ public class MoveItemsTests
         Assert.Equal(100, source.Holding("Iron"), 3);
         Assert.Equal(0, target.Holding("Iron"), 3);
         Assert.True(runner.Get(sequence, installation).IsRunning);
+        Assert.Equal(Cause.ItemsNotConnected, SequenceSummary.Fault(runner.Get(sequence, installation)!).Because.Cause);
     }
 
     /// <summary>A block refusing the item takes none of it, and a step that holds stays stuck, as a refinery's input refuses ingots.</summary>

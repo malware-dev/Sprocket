@@ -25,21 +25,6 @@ namespace Sprocket.Tests;
 /// </remarks>
 public class ProblemTests
 {
-    [Fact]
-    public void ASequenceWhoseTriggerCanNeverFireSaysSo()
-    {
-        var ship = Build();
-
-        Assert.False(Fault(ship).Exists);
-
-        // What a button that no longer starts this looks like from core's side.
-        ship.Rig.CannotStart(ship.Sequence);
-
-        var fault = Fault(ship);
-        Assert.Equal(SequenceProblem.NeverTriggered, fault.Problem);
-        Assert.Equal(SequenceFault.Trigger, fault.Step);
-    }
-
     /// <summary>Half way through picking blocks is not the same as unreachable.</summary>
     /// <remarks>
     /// Nothing chosen and nothing done yet is somebody mid-thought, and saying "nothing can start
@@ -233,7 +218,7 @@ public class ProblemTests
     }
 
     /// <summary>
-    /// The end of the trail: a trigger that cannot fire is marked on its own row.
+    /// The end of the trail: a trigger that cannot fire is marked on its own row, and a mended one is not.
     /// </summary>
     /// <remarks>
     /// What is wrong is said once, and it is said where it can be mended - pressing that row asks
@@ -242,7 +227,7 @@ public class ProblemTests
     /// the time.
     /// </remarks>
     [Fact]
-    public void TheTriggerAtFaultIsMarkedOnItsOwnRow()
+    public void TheTriggerAtFaultIsMarkedOnItsOwnRowAndMendingItClearsTheMark()
     {
         var ship = Build();
         ship.Rig.CannotStart(ship.Sequence);
@@ -255,6 +240,13 @@ public class ProblemTests
 
         Assert.Equal("", ship.Editor.Rows()[0].Problem);
         Assert.Equal(0, ship.Editor.Rows()[0].Problems);
+
+        // A mended trigger stops being marked, which is the half that is easy to forget.
+        ship.Rig.CanStart(ship.Sequence);
+        ship.Runner.Tick(1800);
+        ship.Editor.Tick(1800);
+
+        Assert.True(string.IsNullOrEmpty(ship.Editor.Triggers()[0].Problem));
     }
 
     /// <summary>
@@ -367,25 +359,6 @@ public class ProblemTests
         Assert.Empty(sentence.Bar.Problem);
     }
 
-    /// <summary>A mended trigger stops being marked, which is the half that is easy to forget.</summary>
-    [Fact]
-    public void MendingItClearsTheMark()
-    {
-        var ship = Build();
-        ship.Rig.CannotStart(ship.Sequence);
-
-        ship.Editor.PressRow(0);
-        ship.Runner.Tick(1200);
-        ship.Editor.Tick(1200);
-        Assert.Equal("This trigger can't fire, for an unknown reason.", ship.Editor.Triggers()[0].Problem);
-
-        ship.Rig.CanStart(ship.Sequence);
-        ship.Runner.Tick(1800);
-        ship.Editor.Tick(1800);
-
-        Assert.True(string.IsNullOrEmpty(ship.Editor.Triggers()[0].Problem));
-    }
-
     /// <summary>
     /// A step whose blocks do not offer what it does is broken, and stays as it was written.
     /// </summary>
@@ -483,7 +456,7 @@ public class ProblemTests
     }
 
     /// <summary>
-    /// A trigger the construct has to answer, and has not, is reported on the sequence.
+    /// A trigger the construct has to answer, and has not, is reported on the sequence, at the trigger.
     /// </summary>
     /// <remarks>
     /// Which slot answers which declaration is nowhere recorded - the host counts them - so what core
@@ -493,6 +466,16 @@ public class ProblemTests
     public void ATriggerNothingAnsweredIsReported()
     {
         var ship = Build();
+
+        Assert.False(Fault(ship).Exists);
+
+        // What a button that no longer starts this looks like from core's side.
+        ship.Rig.CannotStart(ship.Sequence);
+
+        var started = Fault(ship);
+        Assert.Equal(SequenceProblem.NeverTriggered, started.Problem);
+        Assert.Equal(SequenceFault.Trigger, started.Step);
+
         var system = ship.Automation.Systems[0];
         var sequence = ship.Automation.AddSequence(system);
 

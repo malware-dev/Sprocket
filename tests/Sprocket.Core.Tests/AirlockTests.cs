@@ -177,11 +177,15 @@ public class AirlockTests
         Assert.Equal(Blocks.Vent.MoveOn, Assert.Single(told.Arguments).Whole);
     }
 
-    /// <summary>A room whose air has nowhere to go holds the cycle, says why, and keeps the outer door shut.</summary>
-    [Fact]
-    public void ARoomWhoseAirHasNowhereToGoHoldsTheCycleAndSaysSo()
+    /// <summary>A room whose air has nowhere to go holds the cycle, says why, and keeps the outer door shut, whether it was told to wait or told nothing.</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ARoomWhoseAirHasNowhereToGoHoldsTheCycleAndSaysSo(bool toldToWait)
     {
         var a = Build();
+        if (toldToWait)
+            ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.Hold);
         a.Inner.ForceOpen();
         a.Vent.Nowhere = true;
         a.Tick(3);
@@ -461,23 +465,6 @@ public class AirlockTests
 
         a.Tick(200);
         Assert.Contains("Outer Door:open", a.Log);
-    }
-
-    /// <summary>A room told to wait where its air has nowhere to go is held as one told nothing is.</summary>
-    [Fact]
-    public void ARoomToldToWaitHoldsTheCycle()
-    {
-        var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.Hold);
-        a.Inner.ForceOpen();
-        a.Vent.Nowhere = true;
-        a.Tick(3);
-        a.Log.Clear();
-
-        a.Press();
-        a.Tick(400);
-
-        Assert.DoesNotContain("Outer Door:open", a.Log);
     }
 
     [Fact]
@@ -1366,20 +1353,25 @@ public class AirlockTests
         Assert.Single(a.Automation.Sequences, s => s.System == system && s != a.LetMeOut);
     }
 
-    /// <summary>A <c>when</c> looks no more often than the runner allows, whatever it asks for.</summary>
+    /// <summary>A <c>when</c> looks every thirty ticks, whether it asks for thirty or the runner allows no more often, and fires on the look that sees the moment.</summary>
     /// <remarks>
-    /// Held to every thirty ticks, a full vent switched back on on tick 40, which finishes filling there, is seen on tick 61,
-    /// as it is by a <c>when</c> that asks for thirty. Nothing announces a vent filling, which is what leaves the cadence to
-    /// decide.
+    /// Its first look is on the first tick after it is made, which is tick 1, and every thirtieth tick after that; so a full
+    /// vent switched back on on tick 40, which finishes filling there, is seen on tick 61, where one left to the default of
+    /// ten would be seen on tick 41. Nothing announces a vent filling, which is what leaves the cadence to decide.
     /// </remarks>
-    [Fact]
-    public void AWhenIsHeldToTheFastestUpdate()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AWhenLooksAsOftenAsItSays(bool heldByTheRunner)
     {
         var a = Build();
-        a.Runner.FastestUpdate = 30;
         var system = a.Automation.Systems[0];
 
         var on = new WhenTrigger("room_status") { Value = Literal.Name("full") };
+        if (heldByTheRunner)
+            a.Runner.FastestUpdate = 30;
+        else
+            on.Interval = Duration.OfTicks(30);
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
         on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(on);
@@ -1459,11 +1451,14 @@ public class AirlockTests
     }
 
 
-    /// <summary>A moment the block announces is looked for on the tick after, whatever the <c>when</c> asks for.</summary>
-    [Fact]
-    public void AnAnnouncedMomentIsSeenOnTheTickAfter()
+    /// <summary>A moment the block announces is seen on the tick after, whatever the <c>when</c> asks for and however slow the world's fastest update, as nothing repeats.</summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(100)]
+    public void AnAnnouncedMomentIsSeenOnTheTickAfter(int fastestUpdate)
     {
         var a = Build();
+        a.Runner.FastestUpdate = fastestUpdate;
         var system = a.Automation.Systems[0];
 
         var opened = SignalTrigger.Written("ext", "finishes_opening");
@@ -1483,30 +1478,6 @@ public class AirlockTests
 
         // One each for finishing opening, finishing closing, and being told to move.
         Assert.Equal(3, a.Outer.Listeners);
-    }
-
-    /// <summary>A moment the block announces is seen on the tick after however slow the world's fastest update, as nothing repeats.</summary>
-    [Fact]
-    public void AnAnnouncedMomentIsNotHeldBackByTheFastestUpdate()
-    {
-        var a = Build();
-        a.Runner.FastestUpdate = 100;
-        var system = a.Automation.Systems[0];
-
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
-        opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(opened);
-        a.Automation.Edited();
-
-        a.Inner.ForceOpen();
-        a.Tick(39);
-        a.Log.Clear();
-
-        a.Outer.ForceOpen();
-        a.Tick();
-
-        Assert.Equal(["Inner Door:close"], a.Log);
     }
 
     /// <summary>A run looking at a step it waits on, again and again until the blocks finish, is held to the world's fastest update.</summary>
@@ -1710,37 +1681,6 @@ public class AirlockTests
         Assert.Equal(0, a.Outer.Listeners);
     }
 
-    /// <summary>A <c>when</c> that says how often it looks looks that often, and fires on the look that sees the moment.</summary>
-    /// <remarks>
-    /// Its first look is on the first tick after it is made, which is tick 1, and every thirtieth tick after that; so a full
-    /// vent switched back on on tick 40, which finishes filling there, is seen on tick 61, where one left to the default of
-    /// ten would be seen on tick 41. Nothing announces a vent filling, which is what leaves the cadence to decide.
-    /// </remarks>
-    [Fact]
-    public void AWhenLooksAsOftenAsItSays()
-    {
-        var a = Build();
-        var system = a.Automation.Systems[0];
-
-        var on = new WhenTrigger("room_status") { Value = Literal.Name("full"), Interval = Duration.OfTicks(30) };
-        on.Sources.Add(a.Ref(a.Seen(a.Vent)));
-        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(on);
-        a.Automation.Edited();
-
-        a.Vent.Enabled = false;
-        a.Inner.ForceOpen();
-        a.Tick(39);
-        a.Log.Clear();
-
-        a.Vent.Enabled = true;
-        a.Tick(21);
-        Assert.Empty(a.Log);
-
-        a.Tick();
-        Assert.Equal(["Inner Door:close"], a.Log);
-    }
-
     /// <summary>
     /// The airlock as a player would actually write it: secure the side you are not
     /// using, then open the side you are.
@@ -1900,13 +1840,15 @@ public class AirlockTests
         Assert.Equal(DoorStatus.Open, a.Outer.Status);
     }
 
-    /// <summary>A room told to move on where there is no more oxygen to give counts as full, and the inner door opens.</summary>
-    [Fact]
-    public void ARoomToldToMoveOnOpensTheInnerDoorWithNoOxygenToGive()
+    /// <summary>A room where there is no more oxygen to give counts as full and opens the inner door when told to move on, and keeps it shut when told to hold.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ARoomWithNoOxygenToGiveOpensTheInnerDoorOnlyWhenToldToMoveOn(bool toldToMoveOn)
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
+        ((Act)letMeIn.Steps[4]).Arguments[0] = Literal.Of(toldToMoveOn ? Blocks.Vent.MoveOn : Blocks.Vent.Hold);
         a.Vent.Dry = true;
         a.Automation.Edited();
         a.Tick();
@@ -1914,24 +1856,10 @@ public class AirlockTests
         a.Runner.Call(letMeIn);
         a.Tick(300);
 
-        Assert.Equal(DoorStatus.Open, a.Inner.Status);
-    }
-
-    /// <summary>A room told to hold where there is no more oxygen to give keeps the inner door shut.</summary>
-    [Fact]
-    public void ARoomToldToHoldKeepsTheInnerDoorShutWithNoOxygenToGive()
-    {
-        var a = Emptied();
-        var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments[0] = Literal.Of(Blocks.Vent.Hold);
-        a.Vent.Dry = true;
-        a.Automation.Edited();
-        a.Tick();
-
-        a.Runner.Call(letMeIn);
-        a.Tick(300);
-
-        Assert.NotEqual(DoorStatus.Open, a.Inner.Status);
+        if (toldToMoveOn)
+            Assert.Equal(DoorStatus.Open, a.Inner.Status);
+        else
+            Assert.NotEqual(DoorStatus.Open, a.Inner.Status);
     }
 
     /// <summary>A room that is not airtight holds even where it was told to move on: moving on would open it to the leak.</summary>

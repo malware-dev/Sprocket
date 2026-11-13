@@ -131,33 +131,28 @@ public class UndoTests
         Assert.Equal(before, Shape(sequence));
     }
 
-    [Fact]
-    public void AddingAStepReversesExactly() =>
-        RoundTrip(new AddStep(ChangeKind.AddStep, 3, StepFor("close", "outer")));
+    /// <summary>A step added at the end or in the middle is taken away exactly again by undoing it.</summary>
+    [Theory]
+    [InlineData(3)]
+    [InlineData(1)]
+    public void AddingAStepReversesExactly(int index) =>
+        RoundTrip(new AddStep(ChangeKind.AddStep, index, StepFor("close", "outer")));
 
-    [Fact]
-    public void AddingAStepInTheMiddleReversesExactly() =>
-        RoundTrip(new AddStep(ChangeKind.AddStep, 1, StepFor("close", "outer")));
-
-    [Fact]
-    public void RemovingAStepReversesExactly()
+    /// <summary>A step removed from the middle or from the front is put back exactly by undoing it.</summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(0)]
+    public void RemovingAStepReversesExactly(int index)
     {
         Sequence sequence = Build();
-        RoundTrip(new RemoveStep(1, sequence.Steps[1]));
+        RoundTrip(new RemoveStep(index, sequence.Steps[index]));
     }
 
-    [Fact]
-    public void RemovingTheFirstStepReversesExactly()
-    {
-        Sequence sequence = Build();
-        RoundTrip(new RemoveStep(0, sequence.Steps[0]));
-    }
-
-    [Fact]
-    public void MovingAStepReversesExactly() => RoundTrip(new MoveStep(0, 2));
-
-    [Fact]
-    public void MovingAStepBackwardsReversesExactly() => RoundTrip(new MoveStep(2, 0));
+    /// <summary>A step moved forward or backward is put back exactly by undoing it.</summary>
+    [Theory]
+    [InlineData(0, 2)]
+    [InlineData(2, 0)]
+    public void MovingAStepReversesExactly(int from, int to) => RoundTrip(new MoveStep(from, to));
 
     [Fact]
     public void ChangingAStepReversesExactly()

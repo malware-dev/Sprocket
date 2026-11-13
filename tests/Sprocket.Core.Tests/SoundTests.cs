@@ -167,31 +167,20 @@ public class SoundTests
         Assert.False(kind.FindAction("IncreaseVolumeSlider", ReachKind.Action)!.Vetted);
     }
 
-    /// <summary>A step sets the sound the block holds ready, by its id, without playing it.</summary>
-    [Fact]
-    public void AStepChoosesTheSelectedSound()
+    /// <summary>A step sets the sound the block holds ready, by its id, without playing it; a sound the block does not have is a fault, and leaves the sound it holds as it was.</summary>
+    [Theory]
+    [InlineData("SoundBlockLightsOn", SequenceProblem.None, "SoundBlockLightsOn")]
+    [InlineData("SoundBlockAlert9", SequenceProblem.Mistyped, "SoundBlockAlert1")]
+    public void AStepChoosesTheSelectedSound(string sound, SequenceProblem problem, string selected)
     {
         var ship = new Rigged();
         var speaker = ship.Speaker(1, "Speaker");
         speaker.Selected = "SoundBlockAlert1";
 
-        Assert.Equal(SequenceProblem.None, Ran.Set(ship, speaker, Blocks.Speaker.Selected, Literal.Name("SoundBlockLightsOn")));
+        Assert.Equal(problem, Ran.Set(ship, speaker, Blocks.Speaker.Selected, Literal.Name(sound)));
 
-        Assert.Equal("SoundBlockLightsOn", speaker.Selected);
+        Assert.Equal(selected, speaker.Selected);
         Assert.DoesNotContain(ship.Rig.Log, line => line.StartsWith("Speaker:play"));
-    }
-
-    /// <summary>A sound the block does not have is a fault, and leaves the sound it holds as it was.</summary>
-    [Fact]
-    public void ASoundTheBlockLacksIsAFault()
-    {
-        var ship = new Rigged();
-        var speaker = ship.Speaker(1, "Speaker");
-        speaker.Selected = "SoundBlockAlert1";
-
-        Assert.Equal(SequenceProblem.Mistyped, Ran.Set(ship, speaker, Blocks.Speaker.Selected, Literal.Name("SoundBlockAlert9")));
-
-        Assert.Equal("SoundBlockAlert1", speaker.Selected);
     }
 
     [Fact]

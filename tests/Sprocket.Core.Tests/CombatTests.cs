@@ -128,7 +128,7 @@ public class CombatTests
         Assert.Equal("firing", firing.Text);
     }
 
-    /// <summary>An <c>if</c> reads each of a turret's own flags as the turret holds it.</summary>
+    /// <summary>An <c>if</c> reads each of a turret's own flags as the turret holds it, and a warhead counting down or armed as it is.</summary>
     [Theory]
     [InlineData("targeting", true)]
     [InlineData("targeting", false)]
@@ -138,16 +138,35 @@ public class CombatTests
     [InlineData("manually_controlled", false)]
     [InlineData("firing", true)]
     [InlineData("firing", false)]
-    public void AnIfReadsEachOfATurretsFlags(string id, bool holds)
+    [InlineData("counting_down", true)]
+    [InlineData("counting_down", false)]
+    [InlineData("armed", true)]
+    [InlineData("armed", false)]
+    public void AnIfReadsEachOfATurretsFlagsAndAWarheadsState(string id, bool holds)
     {
         var ship = new Ship();
-        ship.Turret.Targeting = id == "targeting" && holds;
-        ship.Turret.OnTarget = id == "on_target" && holds;
-        ship.Turret.Controlled = id == "manually_controlled" && holds;
-        ship.Turret.Firing = id == "firing" && holds;
+        string target;
+        if (id == "counting_down" || id == "armed")
+        {
+            if (id == "counting_down")
+                ship.Warhead.CountingDown = holds;
+            else
+                ship.Warhead.Armed = holds;
+
+            target = ship.Name(ship.Warhead);
+        }
+        else
+        {
+            ship.Turret.Targeting = id == "targeting" && holds;
+            ship.Turret.OnTarget = id == "on_target" && holds;
+            ship.Turret.Controlled = id == "manually_controlled" && holds;
+            ship.Turret.Firing = id == "firing" && holds;
+            target = ship.Name(ship.Turret);
+        }
+
         var cycle = ship.Program.AddSequence((Trigger)null!);
         var test = new Comparison { Provider = BlockKinds.Own, MemberId = id, Relation = Relation.Is, Value = Literal.Of(true) };
-        test.Targets.Add(ship.Name(ship.Turret));
+        test.Targets.Add(target);
         cycle.Steps.Add(new If(test));
         cycle.Steps.Add(ship.Off());
         cycle.Steps.Add(new EndIf());
@@ -210,50 +229,6 @@ public class CombatTests
         Assert.Equal("start countdown", Listed(kind, "StartCountdown").Text);
         Assert.Equal("detonate", Listed(kind, "Detonate").Text);
         Assert.True(kind.FindAction("IncreaseDetonationTime", ReachKind.Action)!.Hidden);
-    }
-
-    /// <summary>An <c>if</c> on a warhead counting down holds while it is.</summary>
-    [Theory]
-    [InlineData(true, 1)]
-    [InlineData(false, 0)]
-    public void AnIfReadsAWarheadCountingDown(bool counting, int fired)
-    {
-        var ship = new Ship();
-        ship.Warhead.CountingDown = counting;
-        var cycle = ship.Program.AddSequence((Trigger)null!);
-        var test = new Comparison { Provider = BlockKinds.Own, MemberId = "counting_down", Relation = Relation.Is, Value = Literal.Of(true) };
-        test.Targets.Add(ship.Name(ship.Warhead));
-        cycle.Steps.Add(new If(test));
-        cycle.Steps.Add(ship.Off());
-        cycle.Steps.Add(new EndIf());
-
-        ship.Start();
-        ship.Runner.Call(cycle);
-        ship.Tick(5);
-
-        Assert.Equal(fired, ship.Fired);
-    }
-
-    /// <summary>An <c>if</c> on a warhead being armed holds while it is.</summary>
-    [Theory]
-    [InlineData(true, 1)]
-    [InlineData(false, 0)]
-    public void AnIfReadsAWarheadArmed(bool armed, int fired)
-    {
-        var ship = new Ship();
-        ship.Warhead.Armed = armed;
-        var cycle = ship.Program.AddSequence((Trigger)null!);
-        var test = new Comparison { Provider = BlockKinds.Own, MemberId = "armed", Relation = Relation.Is, Value = Literal.Of(true) };
-        test.Targets.Add(ship.Name(ship.Warhead));
-        cycle.Steps.Add(new If(test));
-        cycle.Steps.Add(ship.Off());
-        cycle.Steps.Add(new EndIf());
-
-        ship.Start();
-        ship.Runner.Call(cycle);
-        ship.Tick(5);
-
-        Assert.Equal(fired, ship.Fired);
     }
 
     /// <summary>A turret vouches for what it keeps, and not for the pair a target switch's value says, nor what it hides.</summary>

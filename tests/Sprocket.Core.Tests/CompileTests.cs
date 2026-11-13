@@ -20,56 +20,44 @@ public class CompileTests
 {
     const long Directly = 0;
 
+    /// <summary>A whole number is a real where a real is wanted, and nothing else becomes anything.</summary>
     [Fact]
-    public void AWholeNumberIsARealWhereARealIsWanted()
+    public void AWholeNumberIsARealWhereARealIsWantedAndNothingElseBecomesAnything()
     {
         Literal became;
         Assert.True(Literal.Of(90L).Becomes(ValueKind.Real, out became));
         Assert.Equal(ValueKind.Real, became.Kind);
         Assert.Equal(90.0, became.Real);
-    }
 
-    [Fact]
-    public void NothingElseBecomesAnything()
-    {
         Assert.False(Literal.Of(2.5).Becomes(ValueKind.Integer, out _));
         Assert.False(Literal.Of("ninety").Becomes(ValueKind.Real, out _));
         Assert.False(Literal.Of(1L).Becomes(ValueKind.Flag, out _));
         Assert.False(Literal.Of(42L).Becomes(ValueKind.Text, out _));
     }
 
+    /// <summary>A step given a value of the wrong kind is a fault found before it runs, and the block is left alone when it is run.</summary>
     [Fact]
-    public void AStepGivenTheWrongKindIsAFault()
+    public void AStepGivenTheWrongKindIsAFaultAndLeavesTheBlockAlone()
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
         var automation = new Automation();
-        var sequence = automation.AddSequence((Trigger)null!);
-        sequence.Steps.Add(Turn(ship, automation, rotor, Literal.Of("ninety"), Literal.Of(10L)));
-        sequence.Steps.Add(new Await());
-
-        var runner = new AutomationRunner(automation, ship.World);
-        runner.Tick(1);
-
-        var fault = SequenceSummary.Checked(ship.World, runner.Bindings, sequence, sequence.System.First);
-
-        Assert.Equal(SequenceProblem.Mistyped, fault.Problem);
-        Assert.Equal(0, fault.Step);
-        Assert.True(fault.Parks);
-    }
-
-    [Fact]
-    public void AMistypedStepLeavesTheBlockAlone()
-    {
-        var ship = new Rigged();
-        var rotor = ship.Rotor(1, "Rotor");
-        var automation = new Automation();
+        var checkedSequence = automation.AddSequence((Trigger)null!);
+        checkedSequence.Steps.Add(Turn(ship, automation, rotor, Literal.Of("ninety"), Literal.Of(10L)));
+        checkedSequence.Steps.Add(new Await());
         var sequence = automation.AddSequence((Trigger)null!);
         sequence.Steps.Add(Turn(ship, automation, rotor, Literal.Of("ninety"), Literal.Of(10L)));
 
         var runner = new AutomationRunner(automation, ship.World);
         ship.Tick();
         runner.Tick(1);
+
+        var fault = SequenceSummary.Checked(ship.World, runner.Bindings, checkedSequence, checkedSequence.System.First);
+
+        Assert.Equal(SequenceProblem.Mistyped, fault.Problem);
+        Assert.Equal(0, fault.Step);
+        Assert.True(fault.Parks);
+
         runner.Call(sequence);
 
         for (var frame = 2; frame < 200; frame++)

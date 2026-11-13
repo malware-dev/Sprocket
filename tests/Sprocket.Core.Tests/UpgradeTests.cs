@@ -159,37 +159,27 @@ public class UpgradeTests
         Assert.Equal(new[] { "status" }, ((Act)system.Sequences[0].Steps[0]).Targets);
     }
 
-    /// <summary>An alpha 18 block slot a step also uses for the block itself is left holding blocks, for the repair.</summary>
-    [Fact]
-    public void AnAlpha18BlockSlotABlockStepUsesIsLeftAlone()
+    /// <summary>An alpha 18 block slot a step also uses for the block itself, on a block with more than one screen, or read with no world where its screens cannot be seen, is left holding blocks, for the repair.</summary>
+    [Theory]
+    [InlineData("ABlockStepUsesIt")]
+    [InlineData("TwoScreens")]
+    [InlineData("NoWorld")]
+    public void AnAlpha18BlockSlotThatCannotBecomeAScreenSlotIsLeftAlone(string why)
     {
         var ship = new Rigged();
-        ship.Rig.TextPanel(1, "Shown");
+        if (why == "TwoScreens")
+            ship.Rig.Weld(new Billboard(1, "Shown"));
+        else
+            ship.Rig.TextPanel(1, "Shown");
+
         ship.Tick();
 
-        var part = Upgraded(OnABlockSlot("TextPanel/LargeTextPanel", "        set ext.power on [ status ] to on\n"), ship, out _);
+        var text = why == "TwoScreens"
+            ? OnABlockSlot("LCDPanelsBlock/LargeBlockBillboard")
+            : OnABlockSlot("TextPanel/LargeTextPanel", why == "ABlockStepUsesIt" ? "        set ext.power on [ status ] to on\n" : "");
+        var part = Upgraded(text, why == "NoWorld" ? null : ship, out _);
 
         Assert.Equal("", part.Holds);
-    }
-
-    /// <summary>An alpha 18 block slot on a block with more than one screen is left holding blocks, for the repair to ask which.</summary>
-    [Fact]
-    public void AnAlpha18BlockSlotOnABlockWithTwoScreensIsLeftAlone()
-    {
-        var ship = new Rigged();
-        ship.Rig.Weld(new Billboard(1, "Shown"));
-        ship.Tick();
-
-        var part = Upgraded(OnABlockSlot("LCDPanelsBlock/LargeBlockBillboard"), ship, out _);
-
-        Assert.Equal("", part.Holds);
-    }
-
-    /// <summary>An alpha 18 block slot read with no world, where its screens cannot be seen, is left holding blocks.</summary>
-    [Fact]
-    public void AnAlpha18BlockSlotWithNoWorldIsLeftAlone()
-    {
-        Assert.Equal("", Upgraded(OnABlockSlot("TextPanel/LargeTextPanel"), null, out _).Holds);
     }
 
     /// <summary>A screen named in a step moves onto a slot of screens of its own, which the installation fills with the screen of that name.</summary>

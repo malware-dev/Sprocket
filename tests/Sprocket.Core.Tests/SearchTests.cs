@@ -7,42 +7,26 @@ namespace Sprocket.Tests;
 /// <summary>What typing into a search box finds: each word anywhere, whatever its case, in the order typed.</summary>
 public class SearchTests
 {
+    /// <summary>A search finds a name where each word typed is found, whatever its case, in the order typed, each starting only where the one before it ended.</summary>
     [Theory]
-    [InlineData("Airlock 2", "airloc 2")]
-    [InlineData("Airlock 2", "AIRLOCK")]
-    [InlineData("Airlock 1", "airl 1")]
-    [InlineData("Airlock 10", "airl 1")]
-    [InlineData("Airlock Door 1", "airl 1")]
-    [InlineData("Airlock Inner Door", "  air   inn  ")]
-    [InlineData("Airlock Inner Door", "")]
-    public void EveryWordTypedIsFound(string name, string search)
+    [InlineData("Airlock 2", "airloc 2", true)]
+    [InlineData("Airlock 2", "AIRLOCK", true)]
+    [InlineData("Airlock 1", "airl 1", true)]
+    [InlineData("Airlock 10", "airl 1", true)]
+    [InlineData("Airlock Door 1", "airl 1", true)]
+    [InlineData("Airlock Inner Door", "  air   inn  ", true)]
+    [InlineData("Airlock Inner Door", "", true)]
+    [InlineData("Airlock 2", "airloc 3", false)]
+    [InlineData("Airlock Inner Door", "door outer", false)]
+    [InlineData("Airlock", "airlocks", false)]
+    [InlineData("1 Airlock", "airl 1", false)]
+    [InlineData("Airlock Inner Door", "door inner", false)]
+    [InlineData("Airlock Inner Door", "inn air", false)]
+    [InlineData("Airlock", "airlock lock", false)]
+    [InlineData("Airlock Lock", "airlock lock", true)]
+    public void EveryWordTypedIsFoundInTheOrderTyped(string name, string search, bool found)
     {
-        Assert.True(EntityQuery.MatchesText(name, search));
-    }
-
-    [Theory]
-    [InlineData("Airlock 2", "airloc 3")]
-    [InlineData("Airlock Inner Door", "door outer")]
-    [InlineData("Airlock", "airlocks")]
-    public void AWordNotThereIsNotFound(string name, string search)
-    {
-        Assert.False(EntityQuery.MatchesText(name, search));
-    }
-
-    [Theory]
-    [InlineData("1 Airlock", "airl 1")]
-    [InlineData("Airlock Inner Door", "door inner")]
-    [InlineData("Airlock Inner Door", "inn air")]
-    public void WordsOutOfOrderAreNotFound(string name, string search)
-    {
-        Assert.False(EntityQuery.MatchesText(name, search));
-    }
-
-    [Fact]
-    public void AWordCanStartOnlyWhereTheOneBeforeItEnded()
-    {
-        Assert.False(EntityQuery.MatchesText("Airlock", "airlock lock"));
-        Assert.True(EntityQuery.MatchesText("Airlock Lock", "airlock lock"));
+        Assert.Equal(found, EntityQuery.MatchesText(name, search));
     }
 
     [Fact]

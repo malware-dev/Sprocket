@@ -249,38 +249,15 @@ public class SensingTests
         Assert.Equal(new[] { "dock", "" }, ran);
     }
 
-    /// <summary>A script that throws as it is run ends the run at its step, as one that would not run does.</summary>
-    [Fact]
-    public void AScriptThatThrowsEndsTheRun()
+    /// <summary>A script that throws as it is run, or does not run, ends the run at its step, saying why and which block.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AScriptThatThrowsOrDoesNotRunEndsTheRun(bool throws)
     {
         var ship = new Rigged();
         var block = Weld<IMyProgrammableBlock>(ship, 1, "Script Block", typeof(MyObjectBuilder_MyProgrammableBlock),
-            stand => stand.Does("TryRun", _ => throw new InvalidOperationException("over its instruction limit")));
-
-        var automation = new Automation();
-        var sequence = automation.AddSequence((Trigger)null!);
-        var run = new Act(ProgrammableBlock.Run);
-        run.Targets.Add(automation.Declare(ship.World, ship.Entity(block.Id)).Name);
-        run.Arguments.Add(Literal.Of(""));
-        sequence.Steps.Add(run);
-
-        var runner = new AutomationRunner(automation, ship.World);
-        ship.Tick();
-        runner.Tick(1);
-        runner.Call(sequence);
-        ship.Tick();
-        runner.Tick(2);
-
-        Assert.Equal(SequenceProblem.Stuck, runner.Get(sequence)!.Fault.Problem);
-    }
-
-    /// <summary>A script that does not run ends the run at its step, saying why and which block.</summary>
-    [Fact]
-    public void AScriptThatDoesNotRunEndsTheRun()
-    {
-        var ship = new Rigged();
-        var block = Weld<IMyProgrammableBlock>(ship, 1, "Script Block", typeof(MyObjectBuilder_MyProgrammableBlock),
-            stand => stand.Does("TryRun", _ => false));
+            stand => stand.Does("TryRun", _ => throws ? throw new InvalidOperationException("over its instruction limit") : false));
 
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);

@@ -76,8 +76,9 @@ public class DuplicateTests
         return text.ToString();
     }
 
+    /// <summary>A copy says exactly what it was copied from, is started by nothing, and is its own sequence in the same system.</summary>
     [Fact]
-    public void ACopySaysExactlyWhatItWasCopiedFrom()
+    public void ACopySaysExactlyWhatItWasCopiedFromAndIsItsOwnSequence()
     {
         var program = Program(out var sequence);
 
@@ -85,27 +86,11 @@ public class DuplicateTests
 
         Assert.Equal(Steps(sequence), Steps(copy));
         Assert.Equal(sequence.Annotation, copy.Annotation);
-    }
-
-    [Fact]
-    public void ACopyIsStartedByNothing()
-    {
-        var program = Program(out var sequence);
-
-        var copy = program.Duplicate(sequence);
 
         // A toolbar slot holds one claim on Sprocket's action, so the copy cannot have the trigger it
         // was copied from. It has to be told what starts it.
         Assert.NotNull(sequence.Trigger);
         Assert.Null(copy.Trigger);
-    }
-
-    [Fact]
-    public void ACopyIsItsOwnSequenceInTheSameSystem()
-    {
-        var program = Program(out var sequence);
-
-        var copy = program.Duplicate(sequence);
 
         Assert.Same(sequence.System, copy.System);
         Assert.NotEqual(sequence.Number, copy.Number);

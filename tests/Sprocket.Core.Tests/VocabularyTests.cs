@@ -189,45 +189,21 @@ public class VocabularyTests
         Assert.Equal(1, ship.Fired);
     }
 
-    /// <summary><c>sum</c> adds what every block reads and compares the total once.</summary>
+    /// <summary><c>sum</c> compares the total of what every block reads once, and <c>average</c> compares the readings added and divided by how many blocks were read.</summary>
     [Theory]
-    [InlineData(Relation.AtLeast, 7.0, true)]
-    [InlineData(Relation.Above, 7.0, false)]
-    [InlineData(Relation.Is, 7.0, true)]
-    public void SumComparesTheTotal(Relation relation, double than, bool holds)
+    [InlineData(Quantifier.Sum, Relation.AtLeast, 7.0, true)]
+    [InlineData(Quantifier.Sum, Relation.Above, 7.0, false)]
+    [InlineData(Quantifier.Sum, Relation.Is, 7.0, true)]
+    [InlineData(Quantifier.Average, Relation.Is, 3.5, true)]
+    [InlineData(Quantifier.Average, Relation.Above, 3.5, false)]
+    [InlineData(Quantifier.Average, Relation.Below, 4.0, true)]
+    public void ASumComparesTheTotalAndAnAverageTheMean(Quantifier quantifier, Relation relation, double than, bool holds)
     {
         var ship = new Ship();
         ship.Left.Set("Radius", Literal.Of(3.0));
         ship.Right.Set("Radius", Literal.Of(4.0));
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var test = new Comparison { MemberId = "Radius", Quantifier = Quantifier.Sum, Relation = relation, Value = Literal.Of(than) };
-        test.Targets.Add(ship.Name(ship.Left));
-        test.Targets.Add(ship.Name(ship.Right));
-        var off = Given.Power(false);
-        off.Targets.Add(ship.Name(ship.Door));
-        cycle.Steps.Add(new If(test));
-        cycle.Steps.Add(off);
-        cycle.Steps.Add(new EndIf());
-
-        ship.Start();
-        ship.Runner.Call(cycle);
-        ship.Tick(5);
-
-        Assert.Equal(holds ? 1 : 0, ship.Fired);
-    }
-
-    /// <summary><c>average</c> compares the readings added and divided by how many blocks were read.</summary>
-    [Theory]
-    [InlineData(Relation.Is, 3.5, true)]
-    [InlineData(Relation.Above, 3.5, false)]
-    [InlineData(Relation.Below, 4.0, true)]
-    public void AverageComparesTheMean(Relation relation, double than, bool holds)
-    {
-        var ship = new Ship();
-        ship.Left.Set("Radius", Literal.Of(3.0));
-        ship.Right.Set("Radius", Literal.Of(4.0));
-        var cycle = ship.Program.AddSequence((Trigger)null!);
-        var test = new Comparison { MemberId = "Radius", Quantifier = Quantifier.Average, Relation = relation, Value = Literal.Of(than) };
+        var test = new Comparison { MemberId = "Radius", Quantifier = quantifier, Relation = relation, Value = Literal.Of(than) };
         test.Targets.Add(ship.Name(ship.Left));
         test.Targets.Add(ship.Name(ship.Right));
         var off = Given.Power(false);
@@ -547,48 +523,33 @@ public class VocabularyTests
         Assert.Equal(SequenceProblem.None, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
     }
 
-    /// <summary>A <c>when</c> on a value reads as its comparison; one on Sprocket's own value read for off, as leaving the state.</summary>
+    /// <summary>A <c>when</c> on a value reads as its comparison; one on Sprocket's own value read for off, as leaving the state; one over several blocks that must all get there says its blocks' words in the plural.</summary>
     [Fact]
-    public void AWhenOnAValueReadsAsItsComparison()
+    public void AWhenReadsAsItsComparisonAndTakesThePluralOverSeveralBlocks()
     {
         var ship = new Ship();
         var radius = ship.When("", "Radius", Quantifier.Sum, Relation.AtLeast, Literal.Of(7.0), ship.Left, ship.Right);
         var open = ship.When(BlockKinds.Own, "status", Quantifier.Any, Relation.IsNot, Literal.Name("closed"), ship.Door);
+        var on = ship.When(BlockKinds.Own, "power", Quantifier.All, Relation.Is, Literal.Of(true), ship.Left, ship.Right);
         ship.Start();
 
         Assert.Equal("When the sum of the radius on Left Lamp and Right Lamp is at least 7 m",
             SequenceText.Trigger(null!, ship.Runner.Bindings, null!, radius, null));
         Assert.Equal("When Door is not closed", SequenceText.Trigger(null!, ship.Runner.Bindings, null!, open, null));
-    }
-
-    /// <summary>A <c>when</c> over several blocks that must all get there says its blocks' words in the plural.</summary>
-    [Fact]
-    public void AWhenOverSeveralBlocksTakesThePlural()
-    {
-        var ship = new Ship();
-        var on = ship.When(BlockKinds.Own, "power", Quantifier.All, Relation.Is, Literal.Of(true), ship.Left, ship.Right);
-        ship.Start();
-
         Assert.Equal("When Left Lamp and Right Lamp turn on", SequenceText.Trigger(null!, ship.Runner.Bindings, null!, on, null));
     }
 
-    /// <summary>A comparison a block's member cannot be read for is a fault found before anything runs.</summary>
+    /// <summary>A comparison a block's member cannot be read for is a fault found before anything runs, and a state tested by one of the names its value has is sound.</summary>
     [Theory]
-    [InlineData("ext", "status", Quantifier.Sum, Relation.Is, "closed")]
-    [InlineData("ext", "status", Quantifier.Any, Relation.Above, "closed")]
-    [InlineData("ext", "status", Quantifier.Any, Relation.Is, "ajar")]
-    [InlineData("", "Radius", Quantifier.Any, Relation.Is, "")]
-    public void ATestItsBlockCannotReadIsMistyped(string provider, string member, Quantifier quantifier, Relation relation,
-        string name)
+    [InlineData("ext", "status", Quantifier.Sum, Relation.Is, "closed", SequenceProblem.Mistyped)]
+    [InlineData("ext", "status", Quantifier.Any, Relation.Above, "closed", SequenceProblem.Mistyped)]
+    [InlineData("ext", "status", Quantifier.Any, Relation.Is, "ajar", SequenceProblem.Mistyped)]
+    [InlineData("", "Radius", Quantifier.Any, Relation.Is, "", SequenceProblem.Mistyped)]
+    [InlineData("ext", "status", Quantifier.Any, Relation.Is, "closed", SequenceProblem.None)]
+    public void ATestItsBlockCannotReadIsMistypedAndAStateByItsNameIsSound(string provider, string member, Quantifier quantifier,
+        Relation relation, string name, SequenceProblem problem)
     {
-        Assert.Equal(SequenceProblem.Mistyped, Checked(provider, member, quantifier, relation, name).Problem);
-    }
-
-    /// <summary>A state is tested by one of the names its value has, which is the case the faults above differ from.</summary>
-    [Fact]
-    public void ATestOfAStateByItsNameIsSound()
-    {
-        Assert.Equal(SequenceProblem.None, Checked("ext", "status", Quantifier.Any, Relation.Is, "closed").Problem);
+        Assert.Equal(problem, Checked(provider, member, quantifier, relation, name).Problem);
     }
 
     /// <summary>

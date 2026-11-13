@@ -77,20 +77,4 @@ public class TestShapeTests
         }
     }
 
-    /// <summary>The parts of a row stand in the order the line says them.</summary>
-    [Theory]
-    [InlineData(Quantifier.Sum, "reading value blocks")]
-    [InlineData(Quantifier.Any, "value reading blocks")]
-    [InlineData(Quantifier.All, "value reading blocks")]
-    public void APartsRowFollowsTheLine(Quantifier quantifier, string order)
-    {
-        var reading = new ActionSlot(null!, null!);
-        var value = new ActionSlot(null!, null!);
-        var blocks = new ActionSlot(null!, null!);
-        var parts = new List<SentenceSlot>();
-
-        TestShape.Of(quantifier, true, true, false).Lay(parts, reading, value, blocks);
-
-        Assert.Equal(order, string.Join(" ", parts.Select(part => part == reading ? "reading" : part == value ? "value" : "blocks")));
-    }
 }

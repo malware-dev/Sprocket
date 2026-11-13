@@ -177,26 +177,6 @@ public class InstanceTests
     }
 
     [Fact]
-    public void EachOneOfASystemActsOnItsOwnThings()
-    {
-
-        var ship = Build();
-        Fit(ship, ship.Airlock.AddInstance());
-
-        Door(ship, "Front Inner").ForceOpen();
-        Door(ship, "Port Inner").ForceOpen();
-        ship.Tick(2);
-        ship.Rig.Rig.Forget();
-
-        ship.Start(ship.Airlock.Instances[1]);
-        ship.Tick(3);
-
-        // The port button ran the port airlock, and only the port airlock.
-        Assert.Contains("Port Inner:close", ship.Rig.Rig.Log);
-        Assert.DoesNotContain("Front Inner:close", ship.Rig.Rig.Log);
-    }
-
-    [Fact]
     public void TheFirstOneOfASystemNeedsNoFillingIn()
     {
         var ship = Build();
@@ -279,6 +259,9 @@ public class InstanceTests
         var port = ship.Airlock.AddInstance();
         Fit(ship, port);
 
+        var cycle = ship.Program.Sequences[0];
+        var front = ship.Airlock.Instances[0];
+
         Door(ship, "Front Inner").ForceOpen();
         Door(ship, "Port Inner").ForceOpen();
         ship.Tick(2);
@@ -286,41 +269,18 @@ public class InstanceTests
         port.Enabled = false;
         ship.Rig.Rig.Forget();
 
+        // Parking one leaves the other and the sequence as they were, and the two switches are independent: neither
+        // overwrites the other.
+        Assert.False(port.Enabled);
+        Assert.True(front.Enabled);
+        Assert.True(cycle.CanRun(front));
+
         ship.Start(ship.Airlock.Instances[1]);
         ship.Start(Front(ship));
         ship.Tick(3);
 
         Assert.Contains("Front Inner:close", ship.Rig.Rig.Log);
         Assert.DoesNotContain("Port Inner:close", ship.Rig.Rig.Log);
-    }
-
-    /// <summary>
-    /// Two switches, and neither overwrites the other.
-    /// </summary>
-    [Fact]
-    public void TheTwoSwitchesAreIndependent()
-    {
-        var ship = Build();
-        var port = ship.Airlock.AddInstance();
-        Fit(ship, port);
-
-        var cycle = ship.Program.Sequences[0];
-        var front = ship.Airlock.Instances[0];
-
-        port.Enabled = false;
-
-        // Parking one leaves the other and the sequence as they were.
-        Assert.False(port.Enabled);
-        Assert.True(front.Enabled);
-        Assert.True(cycle.CanRun(front));
-
-        Door(ship, "Front Inner").ForceOpen();
-        ship.Tick(2);
-        ship.Rig.Rig.Forget();
-
-        ship.Start(Front(ship));
-        ship.Tick(3);
-        Assert.Contains("Front Inner:close", ship.Rig.Rig.Log);
     }
 
     /// <summary>

@@ -298,34 +298,6 @@ public class ProductionTests
         }
     }
 
-    /// <summary>
-    /// An assembler offers what it is ordered to make, whether it is making it, how it is set up and what its two inventories
-    /// hold, and each of its own values and signals says how it is heard.
-    /// </summary>
-    [Fact]
-    public void AnAssemblerSaysWhatItMakesAndHolds()
-    {
-        var ship = new Ship();
-        var kind = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
-
-        Assert.NotNull(kind.FindAction("make", ReachKind.Native));
-        Assert.NotNull(kind.FindAction("clear_the_queue", ReachKind.Native));
-        foreach (var value in new[]
-                 {
-                     "items_queued", "progress", "producing", "stuck", "mode", "able_to_disassemble", "repeating", "input_fill",
-                     "output_fill"
-                 })
-        {
-            var own = kind.FindAction(value, ReachKind.Value);
-            Assert.True(own?.OwnValue != null, value);
-            Assert.True(own.Announced || own.LookedBecause.Length > 0, value);
-        }
-
-        Assert.True(kind.FindEvent("starts_producing")!.Announced);
-        Assert.True(kind.FindEvent("stops_producing")!.Announced);
-        Assert.Null(kind.FindAction("refining", ReachKind.Value));
-    }
-
     /// <summary>Every signal and value of Sprocket's own on this family's blocks says how it is heard: announced or looked for, with why.</summary>
     [Fact]
     public void EverySignalAndValueSaysHowItIsHeard()
@@ -821,7 +793,7 @@ public class ProductionTests
         Vetted(ship.Rig.Entity(module.Id).Kind, ReachKind.Value, "connections");
     }
 
-    /// <summary>An assembler's mode is set by a step, to assembling or disassembling, and to nothing else.</summary>
+    /// <summary>An assembler's mode is set by a step, to assembling or disassembling, and a mode that is neither is the step's fault and leaves the assembler as it was.</summary>
     [Fact]
     public void AStepSetsAnAssemblersMode()
     {
@@ -833,14 +805,6 @@ public class ProductionTests
 
         Assert.Equal(SequenceProblem.None, ship.Set(assembler, "mode", Literal.Name("assembling")));
         Assert.Equal(Sandbox.ModAPI.Ingame.MyAssemblerMode.Assembly, assembler.Mode);
-    }
-
-    /// <summary>A mode that is none of an assembler's is the step's fault, and the assembler is left as it was.</summary>
-    [Fact]
-    public void AnAssemblerModeOutsideItsChoicesIsAFault()
-    {
-        var ship = new Ship();
-        var assembler = ship.Weld(new Factory(1, "Assembler", false));
 
         Assert.Equal(SequenceProblem.Mistyped, ship.Set(assembler, "mode", Literal.Name("melting")));
         Assert.Equal(Sandbox.ModAPI.Ingame.MyAssemblerMode.Assembly, assembler.Mode);

@@ -7,9 +7,11 @@ namespace Sprocket.Tests;
 /// <summary>The construct is the grids mechanically joined to the automation's own, as they are now: a head that floats away leaves it, one that attaches joins it.</summary>
 public class ConstructTests
 {
-    /// <summary>A rotor's head detaching takes the blocks on it out of the construct, though none of them was removed.</summary>
-    [Fact]
-    public void AHeadThatDetachesTakesItsBlocksAway()
+    /// <summary>A rotor's head detaching, or its grid deleted whole, takes the blocks on it out of the construct, though none of them was removed or reported removed.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AHeadThatLeavesTakesItsBlocksAway(bool detaches)
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(2, "Arm Rotor");
@@ -18,26 +20,13 @@ public class ConstructTests
         ship.Rig.OnBase();
         Assert.NotNull(ship.Entity(3));
 
-        ship.Rig.Detach(rotor);
+        if (detaches)
+            ship.Rig.Detach(rotor);
+        else
+            ship.Rig.Delete(rotor.TopGrid);
 
         Assert.Null(ship.Entity(3));
         Assert.NotNull(ship.Entity(2));
-    }
-
-    /// <summary>A head's grid deleted whole takes its blocks out of the construct, though the game reports none of them removed.</summary>
-    [Fact]
-    public void AHeadDeletedWholeTakesItsBlocksAway()
-    {
-        var ship = new Rigged();
-        var rotor = ship.Rotor(2, "Arm Rotor");
-        ship.Rig.OnHeadOf(rotor);
-        ship.Door(3, "Arm Door");
-        ship.Rig.OnBase();
-        Assert.NotNull(ship.Entity(3));
-
-        ship.Rig.Delete(rotor.TopGrid);
-
-        Assert.Null(ship.Entity(3));
     }
 
     /// <summary>A head attached after the construct was first read joins it, with what is on it.</summary>

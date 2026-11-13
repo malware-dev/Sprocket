@@ -102,26 +102,38 @@ public class StoppedTests
         Assert.Equal(by, a.State.StoppedBy);
     }
 
-    /// <summary>A run cut short by switching its logic system off keeps the step it got to, and says so once it is switched on.</summary>
-    [Fact]
-    public void ASwitchOffPartWayIsSaid()
+    /// <summary>A run cut short by switching its logic system or its installation off, or one started by hand, stops on the switch, keeps the step it got to, and says so once it is switched on.</summary>
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void ASwitchOffPartWayIsSaid(bool installation, bool byHand)
     {
         var a = new Airlock();
-        a.Runner.Call(a.Cycle, a.Cycle.System.First);
+        a.Runner.Call(a.Cycle, a.Cycle.System.First, byHand);
         a.Tick(5);
         Assert.True(a.State.IsRunning);
         var at = a.State.CurrentStep;
 
-        a.Cycle.System.Enabled = false;
+        if (installation)
+            a.Cycle.System.First.Enabled = false;
+        else
+            a.Cycle.System.Enabled = false;
+
         a.Tick(101);
 
         Assert.False(a.State.IsRunning);
-        Assert.Equal(SequenceStatus.Off, a.Status);
-        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
-        Assert.Equal(at, a.State.StoppedAt);
+        if (!installation && !byHand)
+            Assert.Equal(SequenceStatus.Off, a.Status);
 
-        a.Cycle.System.Enabled = true;
-        Assert.Equal(SequenceStatus.Stopped, a.Status);
+        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
+        if (!installation && !byHand)
+        {
+            Assert.Equal(at, a.State.StoppedAt);
+
+            a.Cycle.System.Enabled = true;
+            Assert.Equal(SequenceStatus.Stopped, a.Status);
+        }
     }
 
     /// <summary>A run is stopped on the tick its logic system is switched off, however long it was to wait before it was next looked at.</summary>
@@ -156,36 +168,6 @@ public class StoppedTests
 
         a.Runner.Live = true;
         a.Tick(20);
-
-        Assert.False(a.State.IsRunning);
-        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
-    }
-
-    /// <summary>An installation switched off part way through is said the same way.</summary>
-    [Fact]
-    public void AnInstallationSwitchedOffPartWayIsSaid()
-    {
-        var a = new Airlock();
-        a.Runner.Call(a.Cycle, a.Cycle.System.First);
-        a.Tick(5);
-
-        a.Cycle.System.First.Enabled = false;
-        a.Tick(101);
-
-        Assert.False(a.State.IsRunning);
-        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
-    }
-
-    /// <summary>A run started by hand stops when its logic system is switched off, as any run does.</summary>
-    [Fact]
-    public void ARunByHandStopsWhenSwitchedOff()
-    {
-        var a = new Airlock();
-        a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
-        a.Tick(5);
-
-        a.Cycle.System.Enabled = false;
-        a.Tick(5);
 
         Assert.False(a.State.IsRunning);
         Assert.Equal(StopCause.Switch, a.State.StoppedBy);

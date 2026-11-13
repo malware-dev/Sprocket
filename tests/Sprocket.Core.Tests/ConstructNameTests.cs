@@ -32,22 +32,16 @@ public class ConstructNameTests
         Assert.Equal("Arm Rotor Head", ship.World.Name);
     }
 
-    /// <summary>Where two grids hold as many blocks, the first the construct's group gives names it, as the game's own list of entities does.</summary>
+    /// <summary>Where two grids hold as many blocks, the first the construct's group gives names it, as the game's own list of entities does, whichever entity id is lower.</summary>
     [Fact]
     public void OfTwoAlikeTheFirstInTheGroupNamesTheConstruct()
     {
         // The rig's group gives the base first.
         // The base holds the programmable block and the rotor; the head its top and one door.
-        var ship = Armed(1);
+        var ship = Armed(1, out var rotor);
 
         Assert.Equal("Test Rig", ship.World.Name);
-    }
 
-    /// <summary>Of two grids holding as many blocks, the one given first is the largest, whichever entity id is lower.</summary>
-    [Fact]
-    public void OfTwoAlikeTheOneGivenFirstIsTheLargest()
-    {
-        var ship = Armed(1, out var rotor);
         var baseGrid = ship.Rig.Sprocket.Block.CubeGrid;
         var head = rotor.TopGrid;
         var sizes = new Dictionary<long, int> { { baseGrid.EntityId, 2 }, { head.EntityId, 2 } };

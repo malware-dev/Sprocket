@@ -26,24 +26,6 @@ public class LightTests
         Assert.False(kind.FindAction("Falloff", ReachKind.Value)!.Hidden);
     }
 
-    /// <summary>A spotlight carries a falloff and a spin it does nothing with, so neither is offered, nor the steps made of them.</summary>
-    [Fact]
-    public void ASpotlightOffersNeitherFalloffNorSpin()
-    {
-        var ship = new Rigged();
-        var spot = ship.Rig.Spotlight(1, "Spot");
-        spot.Carrying("Falloff", "Falloff", ValueKind.Real)
-            .Carrying("RotationSpeed", "Rotation speed", ValueKind.Real)
-            .Offering("IncreaseFalloff", "Increase Falloff")
-            .Offering("IncreaseRotationSpeed", "Increase Rotation speed");
-        var kind = ship.Entity(spot.Id).Kind;
-
-        Assert.True(kind.FindAction("Falloff", ReachKind.Value)!.Hidden);
-        Assert.True(kind.FindAction("IncreaseFalloff", ReachKind.Action)!.Hidden);
-        Assert.True(kind.FindAction("RotationSpeed", ReachKind.Value)!.Hidden);
-        Assert.True(kind.FindAction("IncreaseRotationSpeed", ReachKind.Action)!.Hidden);
-    }
-
     /// <summary>
     /// Every value an interior light offers is vouched for, and none of the game's setters and steps that only say one of
     /// them again.
@@ -75,19 +57,20 @@ public class LightTests
     }
 
     /// <summary>
-    /// A spotlight vouches for neither the falloff nor the spin it does nothing with; a rotating warning light vouches for its
-    /// spin.
+    /// A spotlight vouches for neither the falloff nor the spin it does nothing with, and offers neither, nor the steps made of
+    /// them; a rotating warning light vouches for and offers its spin, and still no falloff.
     /// </summary>
     [Theory]
     [InlineData("LargeBlockFrontLight", false)]
     [InlineData("RotatingLightLarge", true)]
-    public void ASpotlightVouchesOnlyForWhatItUses(string subtype, bool turns)
+    public void ASpotlightVouchesForAndOffersOnlyWhatItUses(string subtype, bool turns)
     {
         var ship = new Rigged();
         var spot = ship.Rig.Spotlight(1, "Spot", subtype);
         spot.Carrying("Radius", "Radius", ValueKind.Real)
             .Carrying("Falloff", "Falloff", ValueKind.Real)
             .Carrying("RotationSpeed", "Rotation speed", ValueKind.Real)
+            .Offering("IncreaseFalloff", "Increase Falloff")
             .Offering("IncreaseRotationSpeed", "Increase Rotation speed");
         var kind = ship.Entity(spot.Id).Kind;
 
@@ -95,21 +78,13 @@ public class LightTests
         Assert.False(kind.FindAction("Falloff", ReachKind.Value)!.Vetted);
         Assert.Equal(turns, kind.FindAction("RotationSpeed", ReachKind.Value)!.Vetted);
         Assert.False(kind.FindAction("IncreaseRotationSpeed", ReachKind.Action)!.Vetted);
-    }
 
-    /// <summary>A rotating warning light offers its spin speed, and still no falloff.</summary>
-    [Fact]
-    public void ARotatingLightOffersItsSpin()
-    {
-        var ship = new Rigged();
-        var spot = ship.Rig.Spotlight(1, "Beacon", "RotatingLightLarge");
-        spot.Carrying("Falloff", "Falloff", ValueKind.Real)
-            .Carrying("RotationSpeed", "Rotation speed", ValueKind.Real);
-        var kind = ship.Entity(spot.Id).Kind;
-
-        var spin = kind.FindAction("RotationSpeed", ReachKind.Value)!;
-        Assert.False(spin.Hidden);
-        Assert.Equal("rotation speed", spin.Text);
         Assert.True(kind.FindAction("Falloff", ReachKind.Value)!.Hidden);
+        Assert.True(kind.FindAction("IncreaseFalloff", ReachKind.Action)!.Hidden);
+        Assert.Equal(!turns, kind.FindAction("RotationSpeed", ReachKind.Value)!.Hidden);
+        if (turns)
+            Assert.Equal("rotation speed", kind.FindAction("RotationSpeed", ReachKind.Value)!.Text);
+        else
+            Assert.True(kind.FindAction("IncreaseRotationSpeed", ReachKind.Action)!.Hidden);
     }
 }

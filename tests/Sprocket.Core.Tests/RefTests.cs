@@ -110,9 +110,9 @@ public class RefTests
         Assert.Null(bindings.Entity("nothing-like-this"));
     }
 
-    /// <summary>The same block picked twice is one declaration, so re-pointing it is one act.</summary>
+    /// <summary>The same block picked twice is one declaration, so re-pointing it is one act, and two blocks are two declarations.</summary>
     [Fact]
-    public void DeclaringTheSameBlockTwiceNamesItOnce()
+    public void TheSameBlockTwiceIsOneDeclarationAndTwoBlocksAreTwo()
     {
         var program = new Automation();
         var door = Add(1, "Inner Door");
@@ -122,14 +122,7 @@ public class RefTests
 
         Assert.Same(first, again);
         Assert.Single(program.Refs);
-    }
 
-    [Fact]
-    public void TwoBlocksAreTwoDeclarations()
-    {
-        var program = new Automation();
-
-        program.Declare(_ship.World, Add(1, "Inner Door"));
         program.Declare(_ship.World, Add(2, "Outer Door"));
 
         Assert.Equal(2, program.Refs.Count);

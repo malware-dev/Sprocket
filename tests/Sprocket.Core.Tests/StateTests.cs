@@ -49,17 +49,13 @@ public class StateTests
         return after;
     }
 
+    /// <summary>Nothing parked writes nothing, and who the automation belongs to and who paused it are the world's, so a block with nothing off keeps nothing.</summary>
     [Fact]
-    public void NothingParkedWritesNothing()
-    {
-        Assert.Equal("", BlockSwitches.Save(Ship(), Binary));
-    }
-
-    /// <summary>Who the automation belongs to and who paused it are the world's, so a block with nothing off keeps nothing.</summary>
-    [Fact]
-    public void OwnersAndAPauseAreNotKeptInTheBlock()
+    public void NothingParkedWritesNothingAndOwnersAndAPauseAreNotKeptInTheBlock()
     {
         var before = Ship();
+        Assert.Equal("", BlockSwitches.Save(before, Binary));
+
         before.Owners.Add(144115188075855874);
         before.PausedFrom.Add(144115188075855873);
 
@@ -210,7 +206,8 @@ public class StateTests
     }
 
     /// <summary>
-    /// A line of the earlier form about something that is no longer there is dropped without a word.
+    /// A line of the earlier form about something that is no longer there is dropped without a word, and one naming a
+    /// sequence switches nothing, since a sequence has no switch of its own.
     /// </summary>
     /// <remarks>
     /// Deleting a system is the ordinary case this has to survive. Reporting it would mark the program damaged for having
@@ -220,21 +217,11 @@ public class StateTests
     [InlineData("off \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\"")]
     [InlineData("off \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" sequence 9")]
     [InlineData("off \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" instance 9")]
-    public void ALineAboutSomethingGoneIsDropped(string line)
+    [InlineData("off \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" sequence 2")]
+    public void ALineThatNamesNothingToSwitchSwitchesNothing(string line)
     {
         var after = Ship();
         Assert.Equal("", BlockSwitches.Load(line + "\n", after, Binary));
-
-        Assert.True(after.Systems[0].Enabled);
-        Assert.True(after.Systems[0].Instances[1].Enabled);
-    }
-
-    /// <summary>A line of the earlier form naming a sequence switches nothing, since a sequence has no switch of its own.</summary>
-    [Fact]
-    public void ALineForASequenceSwitchesNothing()
-    {
-        var after = Ship();
-        Assert.Equal("", BlockSwitches.Load("off \"" + Airlock + "\" sequence 2\n", after, Binary));
 
         Assert.True(after.Systems[0].Enabled);
         Assert.All(after.Systems[0].Instances, instance => Assert.True(instance.Enabled));

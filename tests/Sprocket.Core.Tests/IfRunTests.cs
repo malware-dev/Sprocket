@@ -89,33 +89,31 @@ public class IfRunTests
         }
     }
 
-    /// <summary>A test that holds runs its branch and passes over the else.</summary>
-    [Fact]
-    public void ATestThatHoldsRunsItsBranch()
+    /// <summary>A test that holds runs its branch and passes over the else; one that does not hold runs the else.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ATestRunsItsBranchWhereItHoldsAndTheElseWhereItFails(bool holds)
     {
         var a = new Airlock();
+        if (!holds)
+            a.Outer.ForceOpen();
+
         a.Add(new If(a.Closed(a.Outer, true)), a.Do("open", a.Inner), new Else(null!), a.Do("depressurize", a.Vent), new EndIf(), new Await());
 
         a.Start();
         a.Tick(5);
 
-        Assert.Contains("Inner Door:open", a.Log);
-        Assert.DoesNotContain("Airlock Vent:depressurize", a.Log);
-    }
-
-    /// <summary>A test that does not hold runs the else.</summary>
-    [Fact]
-    public void ATestThatFailsRunsTheElse()
-    {
-        var a = new Airlock();
-        a.Outer.ForceOpen();
-        a.Add(new If(a.Closed(a.Outer, true)), a.Do("open", a.Inner), new Else(null!), a.Do("depressurize", a.Vent), new EndIf(), new Await());
-
-        a.Start();
-        a.Tick(5);
-
-        Assert.DoesNotContain("Inner Door:open", a.Log);
-        Assert.Contains("Airlock Vent:depressurize", a.Log);
+        if (holds)
+        {
+            Assert.Contains("Inner Door:open", a.Log);
+            Assert.DoesNotContain("Airlock Vent:depressurize", a.Log);
+        }
+        else
+        {
+            Assert.DoesNotContain("Inner Door:open", a.Log);
+            Assert.Contains("Airlock Vent:depressurize", a.Log);
+        }
     }
 
     /// <summary>An else if is tested in turn where nothing before it held, and the first that holds is the one that runs.</summary>
@@ -235,34 +233,28 @@ public class IfRunTests
         Assert.Equal(0, a.State.Fault.Step);
     }
 
-    /// <summary>An average over no blocks has no number to compare, so the run ends at the test and says why.</summary>
-    [Fact]
-    public void AnAverageOfNoBlocksEndsTheRun()
+    /// <summary>An average over no blocks has no number to compare, so the run ends at the test and says why; a sum over no blocks is 0, and is compared as 0.</summary>
+    [Theory]
+    [InlineData(Quantifier.Average)]
+    [InlineData(Quantifier.Sum)]
+    public void ASumOfNoBlocksIsZeroAndAnAverageOfNoBlocksEndsTheRun(Quantifier quantifier)
     {
         var a = new Airlock();
-        var test = new Comparison { MemberId = "OnOff", Provider = "", Quantifier = Quantifier.Average, Relation = Relation.Below, Value = Literal.Of(1d) };
+        var test = new Comparison { MemberId = "OnOff", Provider = "", Quantifier = quantifier, Relation = Relation.Below, Value = Literal.Of(1d) };
         a.Add(new If(test), a.Do("open", a.Inner), new EndIf(), new Await());
 
         a.Start();
         a.Tick(5);
+
+        if (quantifier == Quantifier.Sum)
+        {
+            Assert.Contains("Inner Door:open", a.Log);
+            return;
+        }
 
         Assert.DoesNotContain("Inner Door:open", a.Log);
         Assert.Equal(SequenceProblem.NothingToAverage, a.State.Fault.Problem);
         Assert.Equal(0, a.State.Fault.Step);
-    }
-
-    /// <summary>A sum over no blocks is 0, and is compared as 0.</summary>
-    [Fact]
-    public void ASumOfNoBlocksIsZero()
-    {
-        var a = new Airlock();
-        var test = new Comparison { MemberId = "OnOff", Provider = "", Quantifier = Quantifier.Sum, Relation = Relation.Below, Value = Literal.Of(1d) };
-        a.Add(new If(test), a.Do("open", a.Inner), new EndIf(), new Await());
-
-        a.Start();
-        a.Tick(5);
-
-        Assert.Contains("Inner Door:open", a.Log);
     }
 
     /// <summary>A step that takes time, at the end of a branch, is waited for by an await after the if.</summary>

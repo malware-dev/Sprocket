@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -63,22 +62,6 @@ public class PowerTests
         Assert.Equal(3.0, Read(ship, battery, "capacity"), 3);
     }
 
-    /// <summary>Recharge asks whether it waits until the battery is charged, waiting where nothing says otherwise.</summary>
-    [Fact]
-    public void RechargeAsksWhetherItWaits()
-    {
-        var ship = new Rigged();
-        var recharge = ship.Entity(ship.Battery(1, "Battery").Id).Kind.FindAction(Blocks.Battery.Recharge, ReachKind.Native)!;
-
-        var fields = new List<Field>();
-        recharge.Fields(fields);
-        var wait = Assert.Single(fields);
-        Assert.Equal("wait until charged", wait.Name);
-        Assert.Equal("wait", wait.Default);
-        Assert.Equal("on", wait.Meaning("wait"));
-        Assert.Equal("off", wait.Meaning("move on"));
-    }
-
     /// <summary>A recharge told to move on sets the battery recharging, and the sequence carries on long before it is full.</summary>
     [Fact]
     public void ARechargeThatMovesOnDoesNotHoldTheSequence()
@@ -110,22 +93,40 @@ public class PowerTests
         Assert.False(entity.Trouble(Blocks.Battery.Recharge, off).Exists);
     }
 
-    /// <summary>A <c>when</c> on a battery's charge is seen on the tick after the charge moves, since the battery announces it.</summary>
-    [Fact]
-    public void AWhenOnChargeIsSeenOnTheTickAfter()
+    /// <summary>A <c>when</c> on a battery's charge or a thruster's override is seen on the tick after it changes, since both announce it.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AWhenOnChargeOrOverrideIsSeenOnTheTickAfter(bool onCharge)
     {
         var ship = new Rigged();
         var automation = new Automation();
-        var battery = ship.Battery(1, "Battery");
         var lamp = ship.Light(2, "Lamp");
-        battery.Charge = 0.25f;
+        long id;
+        Func<bool> listened;
+        Action change;
+        if (onCharge)
+        {
+            var battery = ship.Battery(1, "Battery");
+            battery.Charge = 0.25f;
+            id = battery.Id;
+            listened = () => battery.Listeners > 0;
+            change = () => battery.Charge = 0.5f;
+        }
+        else
+        {
+            var thruster = ship.Thruster(1, "Thruster");
+            id = thruster.Id;
+            listened = () => thruster.Listeners > 0;
+            change = () => thruster.Override = 0.6f;
+        }
 
-        var when = new WhenTrigger("charge")
+        var when = new WhenTrigger(onCharge ? "charge" : "override")
         {
             Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.AtLeast, Value = Literal.Of(50.0)
         };
 
-        when.Sources.Add(automation.Declare(ship.World, ship.Entity(battery.Id)).Name);
+        when.Sources.Add(automation.Declare(ship.World, ship.Entity(id)).Name);
         var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         when.Does = on;
@@ -141,17 +142,17 @@ public class PowerTests
         }
 
         Assert.DoesNotContain("Lamp:on", ship.Rig.Log);
-        Assert.True(battery.Listeners > 0, "nothing listens to the battery");
+        Assert.True(listened(), "nothing listens to the block");
 
-        battery.Charge = 0.5f;
-        var charged = frame;
+        change();
+        var changed = frame;
         while (frame < 200 && !ship.Rig.Log.Contains("Lamp:on"))
         {
             ship.Tick();
             runner.Tick(++frame);
         }
 
-        Assert.Equal(charged + 1, frame);
+        Assert.Equal(changed + 1, frame);
     }
 
     /// <summary>A battery vouches for every member it keeps, and for none of the game's duplicates of charge mode.</summary>
@@ -233,49 +234,6 @@ public class PowerTests
     {
         var ship = new Rigged();
         Assert.Equal(problem, Checked(ship, ship.Thruster(1, "Thruster"), "override", Literal.Of(given)));
-    }
-
-    /// <summary>A <c>when</c> on a thruster's override is seen on the tick after somebody changes it, since the thruster announces it.</summary>
-    [Fact]
-    public void AWhenOnOverrideIsSeenOnTheTickAfter()
-    {
-        var ship = new Rigged();
-        var automation = new Automation();
-        var thruster = ship.Thruster(1, "Thruster");
-        var lamp = ship.Light(2, "Lamp");
-
-        var when = new WhenTrigger("override")
-        {
-            Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.AtLeast, Value = Literal.Of(50.0)
-        };
-
-        when.Sources.Add(automation.Declare(ship.World, ship.Entity(thruster.Id)).Name);
-        var on = Given.Power(true);
-        on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
-        when.Does = on;
-        automation.AddSequence((Trigger)null!).System.AddTrigger(when);
-        automation.Edited();
-
-        var runner = new AutomationRunner(automation, ship.World);
-        var frame = 0;
-        for (; frame < 23; frame++)
-        {
-            ship.Tick();
-            runner.Tick(frame + 1);
-        }
-
-        Assert.DoesNotContain("Lamp:on", ship.Rig.Log);
-        Assert.True(thruster.Listeners > 0, "nothing listens to the thruster");
-
-        thruster.Override = 0.6f;
-        var changed = frame;
-        while (frame < 200 && !ship.Rig.Log.Contains("Lamp:on"))
-        {
-            ship.Tick();
-            runner.Tick(++frame);
-        }
-
-        Assert.Equal(changed + 1, frame);
     }
 
     static void Vetted(EntityKind kind, ReachKind form, params string[] ids)

@@ -44,22 +44,17 @@ public class ColorTests
         Assert.Equal(new[] { "18", "52", "86" }, into);
     }
 
-    /// <summary>Values nobody has filled in are no color at all, rather than black.</summary>
+    /// <summary>Values nobody has filled in are no color at all, rather than black, and nor is a value that is not a number a channel of anything.</summary>
     /// <remarks>
     /// A step somebody has not finished writing has not chosen black. Opening its picker on black
     /// would be an answer it never gave, and pressing Continue would then write one.
     /// </remarks>
     [Fact]
-    public void ValuesThatWereNeverGivenAreNoColor()
+    public void ValuesThatWereNeverGivenOrAreNoNumberAreNoColor()
     {
         Assert.Equal("", ColorChannels.Said(new List<Literal>(), 0, 3));
         Assert.Equal("", ColorChannels.Said(Values(255, 136, 0), 1, 3));
-    }
 
-    /// <summary>And a value that is not a number is not a channel of anything.</summary>
-    [Fact]
-    public void NorIsAnythingThatIsNotANumber()
-    {
         var said = new List<Literal> { Literal.Of("red"), Literal.Of(136L), Literal.Of(0L) };
 
         Assert.Equal("", ColorChannels.Said(said, 0, 3));

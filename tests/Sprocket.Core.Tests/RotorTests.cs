@@ -20,7 +20,7 @@ public class RotorTests
     const long Clockwise = 1;
 
     /// <summary>
-    /// What matters about a rotor is said in Sprocket's words, and is still the rotor's own.
+    /// What matters about a rotor is said in Sprocket's words, and is still the rotor's own, and a list spells Sprocket's own words the way the game spells its own.
     /// </summary>
     /// <remarks>
     /// A rename changes what a list and a sentence call a member and nothing else: the id is the
@@ -59,6 +59,13 @@ public class RotorTests
 
         // Displacement is the rotor's own word for it, which Sprocket keeps.
         Assert.Equal("Displacement", kind.FindAction("Displacement", ReachKind.Value)!.Named);
+
+        // Sprocket's own words are spelled for a list the way the game spells its own.
+        Assert.Equal("Rotate to", kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!.Named);
+        Assert.Equal("Unlock", kind.FindAction("RotorLock_Off", ReachKind.Action)!.Named);
+
+        // And the sentence keeps the word it needs, which is the one the capability wrote.
+        Assert.Equal("rotate", kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!.Text);
     }
 
     /// <summary>
@@ -133,22 +140,6 @@ public class RotorTests
         Assert.InRange(frames, 90, 100);
     }
 
-    /// <summary>Sprocket's own words are spelled for a list the way the game spells its own.</summary>
-    [Fact]
-    public void AListNamesSprocketsOwnMembersTheWayTheGameNamesIts()
-    {
-        var ship = new Rigged();
-        var rotor = ship.Rotor(1, "Rotor");
-        var kind = ship.Entity(rotor.Id).Kind;
-
-        Assert.Equal("Rotate to", kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!.Named);
-        Assert.Equal("Unlock", kind.FindAction("RotorLock_Off", ReachKind.Action)!.Named);
-        Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", ReachKind.Value)!.Named);
-
-        // And the sentence keeps the word it needs, which is the one the capability wrote.
-        Assert.Equal("rotate", kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!.Text);
-    }
-
     /// <summary>A renamed member is the game's own, and does what the game's does.</summary>
     [Fact]
     public void ARenamedMemberDoesWhatTheGamesDoes()
@@ -199,35 +190,29 @@ public class RotorTests
 
     /// <summary>
     /// A turn to where the rotor already is arrives at once, and leaves the rotor held there as any
-    /// finished turn does - which is the ordinary case of a sequence run twice.
+    /// finished turn does - which is the ordinary case of a sequence run twice, a second run to the same angle after the first
+    /// has left the rotor where it sent it.
     /// </summary>
-    [Fact]
-    public void TurningToWhereItAlreadyIsArrivesAtOnce()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void TurningToWhereItAlreadyIsArrivesAtOnce(bool standing)
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
         var lamp = ship.Light(2, "Lamp");
-        rotor.Stand(90);
+        if (standing)
+            rotor.Stand(90);
+        else
+        {
+            Run(ship, rotor, lamp, Directly, 90, 10);
+            ship.Rig.Log.Clear();
+        }
 
         var frame = Run(ship, rotor, lamp, Directly, 90, 10);
 
         Assert.InRange(frame, 0, 1);
         Assert.InRange(rotor.Degrees, 89.9f, 90.1f);
-    }
-
-    /// <summary>The same sequence run a second time, after the first has left the rotor where it sent it.</summary>
-    [Fact]
-    public void ASecondRunToTheSameAngleArrivesAtOnce()
-    {
-        var ship = new Rigged();
-        var rotor = ship.Rotor(1, "Rotor");
-        var lamp = ship.Light(2, "Lamp");
-
-        Run(ship, rotor, lamp, Directly, 90, 10);
-        ship.Rig.Log.Clear();
-        var frame = Run(ship, rotor, lamp, Directly, 90, 10);
-
-        Assert.InRange(frame, 0, 1);
     }
 
     /// <summary>

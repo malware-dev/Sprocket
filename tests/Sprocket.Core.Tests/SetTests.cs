@@ -19,18 +19,15 @@ public class SetTests
     readonly EntityAction _value = new EntityAction("OnOff", "set On", null, 1)
         .Writes("OnOff", Field.Called("On"), "On", ValueKind.Flag);
 
+    /// <summary>An action names the toggle and a set names the value, where both share an id.</summary>
     [Fact]
-    public void AnActionNamesTheToggle()
+    public void AnActionNamesTheToggleAndASetNamesTheValue()
     {
         var flip = new Act("OnOff");
 
         Assert.Same(_toggle, flip.Names(Both()));
         Assert.False(flip.Sets);
-    }
 
-    [Fact]
-    public void ASetNamesTheValue()
-    {
         var off = new Act("OnOff") { Form = ReachKind.Value };
         off.Arguments.Add(Literal.Of(false));
 
