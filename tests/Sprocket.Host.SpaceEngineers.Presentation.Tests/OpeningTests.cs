@@ -38,27 +38,19 @@ public class OpeningTests
         screen.Run(2);
     }
 
-    [Fact]
-    public void AStepsActionOpensOnWhatToDo()
+    /// <summary>Pressing a step's action opens its picker on the column of what to do, and pressing its blocks opens it on the blocks, so what is typed goes to the column pressed.</summary>
+    [Theory]
+    [InlineData(0, "Rad", 1)]
+    [InlineData(1, "Air", 0)]
+    public void AStepsPartOpensOnItsColumn(int part, string typed, int column)
     {
         var screen = Screen.Fresh(ARadiusStep.Split(' '));
 
-        PressStep(screen, 0);
-        screen.Do("type", "Rad");
+        PressStep(screen, part);
+        screen.Do("type", typed);
 
-        Assert.Equal("Rad", Stage(screen, 1).NarrowText);
-        Assert.True(string.IsNullOrEmpty(Stage(screen, 0).NarrowText), "the blocks took what was typed");
-    }
-
-    [Fact]
-    public void AStepsBlocksOpenOnTheBlocks()
-    {
-        var screen = Screen.Fresh(ARadiusStep.Split(' '));
-
-        PressStep(screen, 1);
-        screen.Do("type", "Air");
-
-        Assert.Equal("Air", Stage(screen, 0).NarrowText);
+        Assert.Equal(typed, Stage(screen, column).NarrowText);
+        Assert.True(string.IsNullOrEmpty(Stage(screen, 1 - column).NarrowText), "the other column took what was typed");
     }
 
     [Fact]

@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>A number between two bounds is set with a slider beside its box, as the game's terminal sets it.</summary>
 public class SliderTests
 {
-    /// <summary>A range far wider at the top than the bottom runs on a log scale, so its middle is a small number.</summary>
+    /// <summary>A range far wider at the top than the bottom runs on a log scale, so its middle is a small number, and a narrow range runs straight, so its middle is the number halfway between the bounds.</summary>
     [Fact]
     public void AWideRangeRunsOnALogScale()
     {
@@ -20,14 +20,9 @@ public class SliderTests
         field.Text = "200";
 
         Assert.Equal(Math.Log(200) / Math.Log(50000), slider.Value, 3);
-    }
 
-    /// <summary>A narrow range runs straight, so its middle is the number halfway between the bounds.</summary>
-    [Fact]
-    public void ANarrowRangeRunsStraight()
-    {
-        var field = new SliderField(Field.Between("radius", "0", "20"), null!);
-        var slider = Assert.IsType<Slider>(field.Children[0]);
+        field = new SliderField(Field.Between("radius", "0", "20"), null!);
+        slider = Assert.IsType<Slider>(field.Children[0]);
 
         field.Text = "5";
 

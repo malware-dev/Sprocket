@@ -22,16 +22,18 @@ public class PausingTests
     const long Bert = 144115188075855874;
     const long Cora = 144115188075855875;
 
-    /// <summary>A ship shared with its faction, handed to a member of that faction, keeps running.</summary>
-    [Fact]
-    public void AHandOverWithinTheFactionKeepsItRunning()
+    /// <summary>A ship shared with its faction, handed to a member of that faction, keeps running whether the new owner shares it with the faction or the game has turned its sharing off.</summary>
+    [Theory]
+    [InlineData(Sharing.Faction)]
+    [InlineData(Sharing.Nobody)]
+    public void AHandOverWithinTheFactionKeepsItRunning(Sharing sharing)
     {
         var sim = Airlock(out _);
         sim.Machine.Factions.Join(Anna, "MAL");
         sim.Machine.Factions.Join(Bert, "MAL");
         Owned(sim, Anna, Sharing.Faction);
 
-        Owned(sim, Bert, Sharing.Faction);
+        Owned(sim, Bert, sharing);
 
         Assert.False(sim.Editor.Program.Paused);
         Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
@@ -280,22 +282,6 @@ public class PausingTests
         sim.Editor.Current.View.Within().OfType<Button>().Single(button => button.Text == text).Command!.Execute();
     }
 
-    /// <summary>A logic system whose button opens the inner door, switched on.</summary>
-    /// <summary>A ship shared with its faction, given to a member of it, keeps running though the game turns the sharing of every block it gives off.</summary>
-    [Fact]
-    public void AGiftWithinTheFactionKeepsItRunningThoughTheGameUnsharesIt()
-    {
-        var sim = Airlock(out _);
-        sim.Machine.Factions.Join(Anna, "MAL");
-        sim.Machine.Factions.Join(Bert, "MAL");
-        Owned(sim, Anna, Sharing.Faction);
-
-        Owned(sim, Bert, Sharing.Nobody);
-
-        Assert.False(sim.Editor.Program.Paused);
-        Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
-    }
-
     /// <summary>
     /// A transfer that reaches the programmable block before the rest of the construct leaves the automation running
     /// throughout, judged once whole from the owners before the transfer.
@@ -421,6 +407,7 @@ public class PausingTests
         Assert.False(AsAdmin(Cora, MyAdminSettingsEnum.Invulnerable, () => sim.Unit.MayOpen(hero, Cora)));
     }
 
+    /// <summary>A logic system whose button opens the inner door, switched on.</summary>
     static Simulation Airlock(out Sequence sequence)
     {
         var sim = Simulation.Fresh();

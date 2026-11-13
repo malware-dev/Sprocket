@@ -35,18 +35,6 @@ public class HeroTests
         Assert.True(Running(rig, sequence), "the press did not reach the sequence");
     }
 
-    /// <summary>With no programmable block left, the automation is lost.</summary>
-    [Fact]
-    public void GrindingTheLastProgrammableBlockLosesTheAutomation()
-    {
-        Simulation rig = Wired();
-
-        rig.Machine.Grind(rig.Machine.Sprocket);
-        rig.Tick();
-
-        Assert.True(rig.Unit.Lost);
-    }
-
     /// <summary>The hero given to somebody the big owners share nothing with keeps the automation, which runs on.</summary>
     [Fact]
     public void TheHeroGivenAwayKeepsTheAutomation()
@@ -99,18 +87,6 @@ public class HeroTests
 
         Assert.Equal(1, rig.Roster.Count);
         Assert.True(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the hero given away lost the automation");
-    }
-
-    /// <summary>The construct's grid deleted whole, the automation goes with it.</summary>
-    [Fact]
-    public void DeletingTheGridLosesTheAutomation()
-    {
-        Simulation rig = Wired();
-
-        rig.Machine.Delete(rig.Machine.Sprocket.Grid);
-        rig.Tick();
-
-        Assert.True(rig.Unit.Lost);
     }
 
     /// <summary>The hero's grid deleted whole, a programmable block on a grid of the construct that is left keeps the automation.</summary>

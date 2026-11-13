@@ -114,33 +114,28 @@ public class RenameTests
     }
 
     /// <summary>
-    /// Escape goes back, in one press, keeping the name typed as pressing away does: the box is only the name, shown so it
-    /// can be typed into, and not something opened over the page.
+    /// Escape, or a press away from the box, gives the name typed in it, as Enter does: the box is only the name, shown so it
+    /// can be typed into, and not something opened over the page. Escape goes back in the same press.
     /// </summary>
-    [Fact]
-    public void EscapeGivesTheNameAndGoesBack()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void LeavingTheBoxGivesTheName(bool byEscape)
     {
         var screen = Renaming();
 
-        screen.Do("clear", "type", "Hangar", "escape");
+        if (byEscape)
+            screen.Do("clear", "type", "Hangar", "escape");
+        else
+            screen.Do("clear", "type", "Hangar", "700", "700");
         screen.Run(5);
 
         Assert.Equal("Hangar", screen.Editor.Program.Systems.Single().Name);
-        Assert.False(IsEditing(screen), "the box is still up after Escape");
-        Assert.False(screen.Editor.Screen.CanGoBack, "Escape did not go back");
-    }
-
-    /// <summary>Pressing away from the box gives the name typed in it, as Enter does.</summary>
-    [Fact]
-    public void PressingAwayGivesTheName()
-    {
-        var screen = Renaming();
-
-        screen.Do("clear", "type", "Hangar", "700", "700");
-        screen.Run(5);
-
-        Assert.Equal("Hangar", screen.Editor.Screen.Title());
-        Assert.False(IsEditing(screen), "the box is still up after pressing away");
+        Assert.False(IsEditing(screen), "the box is still up after leaving it");
+        if (byEscape)
+            Assert.False(screen.Editor.Screen.CanGoBack, "Escape did not go back");
+        else
+            Assert.Equal("Hangar", screen.Editor.Screen.Title());
     }
 
     /// <summary>A press inside the open box puts the caret where it lands, in place of the whole name being selected.</summary>

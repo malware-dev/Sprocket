@@ -324,32 +324,24 @@ public class IfStepTests
         Assert.Equal(60, Assert.IsType<Wait>(sequence.Steps[1]).Ticks);
     }
 
-    /// <summary>A branch dropped outside its if, or below its otherwise, stays where it was.</summary>
+    /// <summary>A branch may land only right above a line opening a branch of its if, the if's own included, and never below the otherwise, so one dropped outside its if or below its otherwise stays where it was.</summary>
     [Theory]
     [InlineData(7)]
     [InlineData(6)]
-    public void ABranchStaysInsideItsIfAndAboveItsOtherwise(int to)
+    public void ABranchLandsOnlyBetweenBranches(int to)
     {
         var rig = Chain(out var sequence, out _, out var second);
         var before = sequence.Steps.ToList();
         var list = (StepList)rig.Editor.StepRows()[0].Parent!;
+
+        // Above the if, or where it stands now, right above the otherwise.
+        Assert.Equal(new[] { 0, 3 }, list.FnAllowedDropIndexes!(3));
 
         Dropped.On(list, 3, to);
         rig.Tick();
 
         Assert.Equal(before, sequence.Steps);
         Assert.Same(second, ((Else)sequence.Steps[2]).Test);
-    }
-
-    /// <summary>A branch carried may land only right above a line opening a branch of its if, the if's own included, and never below the otherwise.</summary>
-    [Fact]
-    public void ABranchLandsOnlyBetweenBranches()
-    {
-        var rig = Chain(out _, out _, out _);
-        var list = (StepList)rig.Editor.StepRows()[0].Parent!;
-
-        // Above the if, or where it stands now, right above the otherwise.
-        Assert.Equal(new[] { 0, 3 }, list.FnAllowedDropIndexes!(3));
     }
 
     /// <summary>if A { wait 60 } otherwise if B { wait 120 } otherwise { wait 30 }, on the screen.</summary>

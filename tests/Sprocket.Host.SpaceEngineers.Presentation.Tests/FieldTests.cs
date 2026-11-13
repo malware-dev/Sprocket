@@ -20,6 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class FieldTests
 {
+    /// <summary>A field says what it takes beside its name, and on its own where nobody named the value.</summary>
     [Fact]
     public void WhatItTakesIsSaidBesideItsName()
     {
@@ -27,16 +28,12 @@ public class FieldTests
         Assert.Equal("Angle (0 or more)", Field.Between("Angle", "0", "").Label(new Texts()));
         Assert.Equal("Angle (90 or less)", Field.Between("Angle", "", "90").Label(new Texts()));
         Assert.Equal("Angle", Field.Called("Angle").Label(new Texts()));
-    }
 
-    /// <summary>A value nobody named still says what it takes, which is all there is to say.</summary>
-    [Fact]
-    public void AndOnItsOwnWhereNobodyNamedTheValue()
-    {
         Assert.Equal("(0 - 255)", Field.Between("", "0", "255").Label(new Texts()));
         Assert.Equal("", Field.Unnamed().Label(new Texts()));
     }
 
+    /// <summary>A value within the bounds is taken, and one outside them or not a number is refused in words saying what the field takes.</summary>
     [Fact]
     public void AValueWithinThemIsTaken()
     {
@@ -45,23 +42,12 @@ public class FieldTests
         Assert.Equal("", red.Refuses(new Texts(), "Red", "0"));
         Assert.Equal("", red.Refuses(new Texts(), "Red", "136"));
         Assert.Equal("", red.Refuses(new Texts(), "Red", "255"));
-    }
-
-    [Fact]
-    public void OneOutsideThemIsRefusedAndSaysWhatItTakes()
-    {
-        Field red = Field.Between("Red", "0", "255");
 
         Assert.Equal("Red must be between 0 and 255.", red.Refuses(new Texts(), "Red", "256"));
         Assert.Equal("Red must be between 0 and 255.", red.Refuses(new Texts(), "Red", "-1"));
         Assert.Equal("Angle must be 0 or more.", Field.Between("Angle", "0", "").Refuses(new Texts(), "Angle", "-4"));
         Assert.Equal("Angle must be 90 or less.", Field.Between("Angle", "", "90").Refuses(new Texts(), "Angle", "91"));
-    }
 
-    /// <summary>And so is one that is not a number at all, since a bound is something to compare with.</summary>
-    [Fact]
-    public void SoIsOneThatIsNotANumber()
-    {
         Assert.Equal("Red must be a number.", Field.Between("Red", "0", "255").Refuses(new Texts(), "Red", "crimson"));
     }
 

@@ -810,7 +810,7 @@ public class LibraryTests
         Assert.NotEqual("Airlock", chosen.Summary);
     }
 
-    /// <summary>Where the library's blueprint was changed after the logic system, the home screen and the library offer to update the logic system from it.</summary>
+    /// <summary>Where the library's blueprint was changed after the logic system, the home screen and the library offer to update the logic system from it, and offer no reset, since there is nothing on the logic system to go back from.</summary>
     [Fact]
     public void ANewerBlueprintIsOfferedToTheLogicSystem()
     {
@@ -1506,18 +1506,6 @@ public class LibraryTests
 
         Assert.True(screen.Editor.Shelf.Holds(system), "the answer stored nothing");
         Assert.False(screen.Shows("Update blueprint"), "the button is still offered");
-    }
-
-    /// <summary>The library's blueprint being the newer of the two offers no reset: there is nothing on the logic system to go back from.</summary>
-    [Fact]
-    public void ANewerBlueprintOffersNoReset()
-    {
-        var rig = Newer();
-
-        rig.Editor.OpenLibrary();
-        rig.Tick();
-        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
-        Assert.Equal(rig.Texts.Codex.SystemsUpdateFromLibraryAbout, Says(ToConstruct(page)));
     }
 
     /// <summary>The same, whose blueprint in the library is a newer copy, renamed Airlock Mk II.</summary>

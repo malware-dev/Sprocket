@@ -41,20 +41,16 @@ public class ArgumentsColumnTests
         return Screen.Fresh((ALight + " " + then).Split(' '));
     }
 
-    /// <summary>The column comes once something to do is chosen, and not before.</summary>
+    /// <summary>The column comes once something to do is chosen, and not before, and then asks for the values of what was chosen.</summary>
     [Fact]
-    public void TheColumnWaitsForSomethingToDo()
+    public void TheColumnComesOnceSomethingToDoIsChosen()
     {
         var screen = Screen.Fresh(ALight.Split(' '));
 
         Assert.False(screen.Shows("RADIUS"), "the options column came before anything was chosen");
         Assert.True(screen.Shows("WHAT TO DO"), "the second column is not there");
-    }
 
-    [Fact]
-    public void ChosenThingsAskForTheirValuesInTheColumn()
-    {
-        var screen = Open(SetRadius);
+        screen.Do(SetRadius.Split(' '));
 
         Assert.True(screen.Shows("RADIUS"), "the column is not headed by what was chosen");
         Assert.True(screen.Shows("radius"), "the column asks for nothing");
@@ -73,25 +69,17 @@ public class ArgumentsColumnTests
         Assert.Equal(5L, Assert.Single(act.Arguments).Whole);
     }
 
-    /// <summary>Done with nothing given says so at the foot of the column, and the caret goes to the field.</summary>
-    [Fact]
-    public void DoneWithNothingGivenSaysWhat()
+    /// <summary>Done with nothing given, or with a value the field will not take, is refused with the reason at the foot of the column, and the caret goes to the field.</summary>
+    [Theory]
+    [InlineData("clear", "Radius is missing.")]
+    [InlineData("type 50", "radius must be between 0.1 and 20.")]
+    public void DoneRefusedSaysWhy(string entry, string reason)
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " clear " + Done);
+        var screen = Open(SetRadius + " " + RadiusBox + " " + entry + " " + Done);
 
         Assert.Equal(Slot, screen.Ended);
-        Assert.True(screen.Shows("Radius is missing."), "nothing said why it did not finish");
+        Assert.True(screen.Shows(reason), "nothing said why it did not finish");
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
-    }
-
-    /// <summary>A value the field will not take is refused by Done, with the reason.</summary>
-    [Fact]
-    public void DoneWithAWrongValueSaysWhy()
-    {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 50 " + Done);
-
-        Assert.Equal(Slot, screen.Ended);
-        Assert.True(screen.Shows("radius must be between 0.1 and 20."), "nothing said why");
     }
 
     /// <summary>Nothing is held against what is typed until Done has been tried.</summary>

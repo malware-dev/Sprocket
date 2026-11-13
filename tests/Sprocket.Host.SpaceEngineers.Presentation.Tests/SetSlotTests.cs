@@ -20,26 +20,19 @@ public class SetSlotTests
     const string Light = "Airlock Light";
     const string Cockpit = "Cockpit Light";
 
-    /// <summary>Several blocks picked for one step are one slot holding all of them, numbered on from the slots there are.</summary>
-    [Fact]
-    public void APickOfSeveralBlocksIsOneSlot()
+    /// <summary>The blocks picked for one step, several or one, are one slot holding all of them, numbered on from the slots there are.</summary>
+    [Theory]
+    [InlineData(Inner + "," + Outer + "," + Light + "," + Cockpit)]
+    [InlineData(Light)]
+    public void APickOfBlocksIsOneSlot(string picked)
     {
+        var blocks = picked.Split(',');
         var screen = Built(out var system);
-        Off(screen, Inner, Outer, Light, Cockpit);
+        Off(screen, blocks);
 
         var slot = Assert.Single(Targets(screen, 0));
-        Assert.Equal(4, system.First!.FilledWith(slot)!.Count);
+        Assert.Equal(blocks.Length, system.First!.FilledWith(slot)!.Count);
         Assert.Equal("block slot 1", slot);
-    }
-
-    /// <summary>A slot of one block is numbered as any other slot is.</summary>
-    [Fact]
-    public void ASlotOfOneBlockIsNumberedToo()
-    {
-        var screen = Built(out _);
-        Off(screen, Light);
-
-        Assert.Equal("block slot 1", Assert.Single(Targets(screen, 0)));
     }
 
     /// <summary>The number skips a name taken in any case, by a slot, a state or a type.</summary>

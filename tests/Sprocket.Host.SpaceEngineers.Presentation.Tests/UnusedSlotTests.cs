@@ -13,7 +13,7 @@ public class UnusedSlotTests
     const string Light = "Airlock Light";
     const string Cockpit = "Cockpit Light";
 
-    /// <summary>The slot of a step taken away stays on the installation panel, warned about, with its blocks and a bin.</summary>
+    /// <summary>The slot of a step taken away stays on the installation panel, warned about in amber, with its blocks and a bin that removes the slot.</summary>
     [Fact]
     public void AnUnusedSlotIsWarnedAbout()
     {
@@ -26,6 +26,13 @@ public class UnusedSlotTests
         Assert.True(row.Removable);
         Assert.NotNull(row.Removes);
         Assert.Null(screen.Editor.SystemSlots().Single(r => r.Name == Assert.Single(Targets(system))).Problem);
+
+        Assert.True(row.Removable);
+        var warning = row.Within().OfType<Lumel.Text.Label>().Single(label => label.Text == screen.Editor.Texts.SlotUnused);
+        Assert.Equal(Features.Look.Palette.Notice, warning.Color);
+        row.Removes!.Execute();
+        screen.Run(2);
+        Assert.Null(system.FindPart(slot));
     }
 
     /// <summary>The bin takes the slot out with every installation's blocks in it, and Undo puts both back.</summary>
@@ -65,27 +72,7 @@ public class UnusedSlotTests
         Assert.Equal(screen.Editor.Texts.SlotUnused, row.Problem);
     }
 
-    /// <summary>An installation's own page leaves out a slot nothing uses, and does not count it among the slots it has to fill.</summary>
-    [Fact]
-    public void AnInstallationsPageLeavesOutAnUnusedSlot()
-    {
-        var screen = Unused(out var system, out var slot);
-        var port = system.AddInstance();
-        port.Fill(Assert.Single(Targets(system)), new[] { Declared(screen, Cockpit) });
-        foreach (var part in system.Parts.Where(part => part.IsSignal))
-            port.Fill(part.Id, system.First!.FilledWith(part.Id)!, system.First!.Positions(part.Id)!);
-
-        screen.Editor.Push(new BlueprintPage(screen.Editor, system));
-        screen.Run(2);
-        screen.Editor.Choose(system, port);
-        screen.Run(2);
-
-        Assert.DoesNotContain(screen.Editor.Parts(), r => r.Name == slot);
-        Assert.Contains(screen.Editor.Parts(), r => r.Name == Assert.Single(Targets(system)));
-        Assert.DoesNotContain(screen.Editor.Blueprint().View.Within().OfType<Lumel.Text.Label>(), label => label.IsVisible && label.Text == screen.Editor.Texts.BlueprintStillOne);
-    }
-
-    /// <summary>An unused slot left empty by another installation is not one it still has to fill on the logic system's screen.</summary>
+    /// <summary>An unused slot left empty by another installation is not one it still has to fill on the logic system's screen, and an installation's own page leaves it out and does not count it among the slots it has to fill.</summary>
     [Fact]
     public void AnUnusedSlotAsksNothingOfAnInstallation()
     {
@@ -100,21 +87,15 @@ public class UnusedSlotTests
         var slots = screen.Editor.SystemSlots();
         Assert.Null(slots.Single(r => r.Name == slot).Marks);
         Assert.Equal(screen.Editor.Texts.SlotUnused, slots.Single(r => r.Name == slot).Problem);
-    }
 
-    /// <summary>The warning on the logic system's screen is amber, and its bin removes the slot.</summary>
-    [Fact]
-    public void TheWarningIsAmberAndTheBinRemovesIt()
-    {
-        var screen = Unused(out var system, out var slot);
-
-        var row = screen.Editor.SystemSlots().Single(r => r.Name == slot);
-        Assert.True(row.Removable);
-        var warning = row.Within().OfType<Lumel.Text.Label>().Single(label => label.Text == screen.Editor.Texts.SlotUnused);
-        Assert.Equal(Features.Look.Palette.Notice, warning.Color);
-        row.Removes!.Execute();
+        screen.Editor.Push(new BlueprintPage(screen.Editor, system));
         screen.Run(2);
-        Assert.Null(system.FindPart(slot));
+        screen.Editor.Choose(system, port);
+        screen.Run(2);
+
+        Assert.DoesNotContain(screen.Editor.Parts(), r => r.Name == slot);
+        Assert.Contains(screen.Editor.Parts(), r => r.Name == Assert.Single(Targets(system)));
+        Assert.DoesNotContain(screen.Editor.Blueprint().View.Within().OfType<Lumel.Text.Label>(), label => label.IsVisible && label.Text == screen.Editor.Texts.BlueprintStillOne);
     }
 
     /// <summary>A logic system with a step on one slot and a second slot whose step was taken away, on its installation panel tab.</summary>

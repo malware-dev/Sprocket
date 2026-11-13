@@ -26,29 +26,26 @@ public class TerminalNoticeTests
         Assert.DoesNotContain("{construct}", said);
     }
 
-    /// <summary>Pressing OK closes the notice.</summary>
-    [Fact]
-    public void PressingOkClosesTheNotice()
+    /// <summary>Pressing OK, or Enter, which does as its OK does, closes the notice.</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PressingOkOrEnterClosesTheNotice(bool byEnter)
     {
         var stage = Notice();
-        var easel = new Easel(stage.Windows.Top!, Width, Height);
-        var ok = easel.Written.First(text => text.Text == "OK");
-        var at = new Vector2(ok.Position.X, ok.Position.Y) / easel.Pixels + new Vector2(4f, 4f);
+        if (byEnter)
+            Assert.True(stage.Key(MyKeys.Enter, false, false));
+        else
+        {
+            var easel = new Easel(stage.Windows.Top!, Width, Height);
+            var ok = easel.Written.First(text => text.Text == "OK");
+            var at = new Vector2(ok.Position.X, ok.Position.Y) / easel.Pixels + new Vector2(4f, 4f);
 
-        Assert.Equal(1, stage.Windows.Count);
-        stage.PointerDown(at, PointerButton.Left, 1, false, false);
-        stage.PointerUp(at, PointerButton.Left);
+            Assert.Equal(1, stage.Windows.Count);
+            stage.PointerDown(at, PointerButton.Left, 1, false, false);
+            stage.PointerUp(at, PointerButton.Left);
+        }
 
-        Assert.Equal(0, stage.Windows.Count);
-    }
-
-    /// <summary>Enter closes the notice, as its OK does.</summary>
-    [Fact]
-    public void EnterClosesTheNotice()
-    {
-        var stage = Notice();
-
-        Assert.True(stage.Key(MyKeys.Enter, false, false));
         Assert.Equal(0, stage.Windows.Count);
     }
 

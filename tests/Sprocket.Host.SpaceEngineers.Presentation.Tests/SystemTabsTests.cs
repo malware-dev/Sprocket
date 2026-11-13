@@ -40,17 +40,6 @@ public class SystemTabsTests
             Tabs(screen).Select(tab => tab.Tip?.Text).ToArray());
     }
 
-    /// <summary>A tab's mark says where to look for what it marks.</summary>
-    [Fact]
-    public void ATabsMarkSaysWhereToLook()
-    {
-        var screen = WithAWarnedSequence();
-
-        var sequences = Assert.IsType<Glyph>(Tabs(screen)[1].Badge);
-        Assert.True(sequences.IsVisible);
-        Assert.Equal(screen.Editor.Texts.Codex.SystemTabFlagged, sequences.Tip?.Text);
-    }
-
     /// <summary>A flagged tab lies on its level's wash and stripes, an unflagged one stays plain, and the screen stands at the graver of them.</summary>
     [Fact]
     public void AFlaggedTabLiesOnStripesAndTheScreenStandsByIt()
@@ -89,7 +78,7 @@ public class SystemTabsTests
         Assert.True(Tabs(screen)[2].IsSelected, "the logic system did not open on the tab it was left on");
     }
 
-    /// <summary>A sequence that wants looking at marks the Sequences tab in its color, wherever the screen is, and the Triggers tab stays plain.</summary>
+    /// <summary>A sequence that wants looking at marks the Sequences tab in its color, wherever the screen is, with a tip saying where to look, and the Triggers tab stays plain.</summary>
     [Fact]
     public void AWarningMarksItsTab()
     {
@@ -98,6 +87,7 @@ public class SystemTabsTests
 
         var sequences = Assert.IsType<Glyph>(tabs[1].Badge);
         Assert.True(sequences.IsVisible, "the Sequences tab carries no mark for a sequence with a warning");
+        Assert.Equal(screen.Editor.Texts.Codex.SystemTabFlagged, sequences.Tip?.Text);
         Assert.Equal(Palette.Notice, sequences.Tint);
         Assert.False(tabs[0].Badge!.IsVisible);
 

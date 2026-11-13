@@ -72,21 +72,10 @@ public class ButtonWiringTests
         Assert.False(port.Toolbar.TryGetItem(0, out _));
     }
 
-    /// <summary>A button picked for a signal slot is named after the slot, as the game names a button after what its slot holds.</summary>
-    [Fact]
-    public void AButtonPickedIsNamedAfterItsSlot()
-    {
-        var sim = Blueprinted();
-        var port = PanelNamed(sim, "Port Button");
-
-        FillWith(sim, "Port Button");
-
-        Assert.Equal(sim.Editor.Parts()[0].Name, port.Label(0));
-    }
-
     /// <summary>
-    /// A signal slot's short name, where it has one, names the button and is the caption under the toolbar slot's icon; a
-    /// change of it writes the slot again.
+    /// A button picked for a signal slot is named after the slot, as the game names a button after what its slot holds; the
+    /// slot's short name, where it has one, names the button and is the caption under the toolbar slot's icon, and a change of
+    /// it writes the slot again.
     /// </summary>
     [Fact]
     public void AButtonIsNamedAfterItsSlotsShortName()
@@ -94,6 +83,7 @@ public class ButtonWiringTests
         var sim = Blueprinted();
         var port = PanelNamed(sim, "Port Button");
         FillWith(sim, "Port Button");
+        Assert.Equal(sim.Editor.Parts()[0].Name, port.Label(0));
         var part = sim.Editor.Program.Systems[0].FindPart(sim.Editor.Parts()[0].Name)!;
         Assert.True(port.Toolbar.TryGetItem(0, out var item));
         Assert.Equal(part.Id, item.Label);

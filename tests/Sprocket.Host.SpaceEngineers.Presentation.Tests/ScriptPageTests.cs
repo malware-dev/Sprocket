@@ -47,15 +47,11 @@ public class ScriptPageTests
             point.Y.ToString("0.##", CultureInfo.InvariantCulture));
     }
 
+    /// <summary>The way in is offered when developer mode is on, and not otherwise.</summary>
     [Fact]
-    public void TheWayInIsNotOfferedUnlessItWasAskedFor()
+    public void TheWayInIsOfferedOnlyInDeveloperMode()
     {
         Assert.False(Screen.Fresh().Shows(Way));
-    }
-
-    [Fact]
-    public void DeveloperModeOffersTheWayIn()
-    {
         Assert.True(Developing().Shows(Way));
     }
 

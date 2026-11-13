@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 public class SlotTypeChoiceTests
 {
-    /// <summary>The types offered are those the slot's steps can still act through, the slot's own among them.</summary>
+    /// <summary>The types offered are those the slot's steps can still act through, the slot's own among them, and they are the block picker's kinds selector: each family heading its kinds and standing for the type they share, with any block left out.</summary>
     [Fact]
     public void OnlyTypesOfferingWhatTheSlotDoesAreListed()
     {
@@ -27,6 +27,15 @@ public class SlotTypeChoiceTests
         var own = page.Kinds[page.KeyOf(part.Expects)!];
         Assert.True(own.IsCurrent);
         Assert.Equal(TypeText.Of(screen.Editor.Texts, part.Expects), own.Text);
+
+        var doors = page.KeyOf("Door");
+        Assert.NotNull(doors);
+        Assert.Equal(Family.Door, KindFilter.FamilyOf(doors));
+        Assert.DoesNotContain(page.Strip.Stages[0].Rows.OfType<KindRow>(), row => row.Text == screen.Editor.Texts.SlotAnyBlock);
+        Assert.True(page.Kinds[page.KeyOf(part.Expects)!].IsCurrent);
+        var narrower = page.Offered.First(type => type.StartsWith("Door/", StringComparison.Ordinal));
+        Assert.True(page.Kinds[page.KeyOf(narrower)!].IsNested);
+        Assert.DoesNotContain(screen.Editor.World.Entities, entity => entity.Kind.Lineage[0] == "InteriorLight" && page.KeyOf(entity.Kind.Lineage[0]) != null);
     }
 
     /// <summary>Narrowed to one kind of block, the slot asks first, then takes it as one step back, and another installation's door that no longer fits is marked to fill again.</summary>
@@ -135,23 +144,6 @@ public class SlotTypeChoiceTests
         Assert.Equal(kind, blocks.Kind);
         Assert.Contains(kind, top.Tip!.Text);
         Assert.DoesNotContain(blocks.Kinds(), row => row.Text == editor.Texts.PickAnything);
-    }
-
-    /// <summary>The slot's types are the block picker's kinds selector: each family heading its kinds and standing for the type they share, and only what can do the slot's task, any block included.</summary>
-    [Fact]
-    public void TheTypesAreTheKindsSelector()
-    {
-        var screen = OnTheDoorsSlot(out _, out var part);
-        var page = Open(screen);
-
-        var doors = page.KeyOf("Door");
-        Assert.NotNull(doors);
-        Assert.Equal(Family.Door, KindFilter.FamilyOf(doors));
-        Assert.DoesNotContain(page.Strip.Stages[0].Rows.OfType<KindRow>(), row => row.Text == screen.Editor.Texts.SlotAnyBlock);
-        Assert.True(page.Kinds[page.KeyOf(part.Expects)!].IsCurrent);
-        var narrower = page.Offered.First(type => type.StartsWith("Door/", StringComparison.Ordinal));
-        Assert.True(page.Kinds[page.KeyOf(narrower)!].IsNested);
-        Assert.DoesNotContain(screen.Editor.World.Entities, entity => entity.Kind.Lineage[0] == "InteriorLight" && page.KeyOf(entity.Kind.Lineage[0]) != null);
     }
 
     /// <summary>Presses the slot's type on its page, opening the picker of types.</summary>

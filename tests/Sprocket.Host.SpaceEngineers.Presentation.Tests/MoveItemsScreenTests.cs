@@ -44,19 +44,6 @@ public class MoveItemsScreenTests
         screen.Run(2);
     }
 
-    /// <summary>Left with no item and no amount, the line says it moves all items.</summary>
-    [Fact]
-    public void NoItemReadsAsAllItems()
-    {
-        var screen = Picking(out _);
-        SelectTarget(screen);
-        screen.Editor.PressPrimary();
-        screen.Run(4);
-
-        var said = string.Join(" ", System.Text.RegularExpressions.Regex.Matches(screen.Dump, "\"([^\"]*)\"").Cast<System.Text.RegularExpressions.Match>().Select(m => m.Groups[1].Value));
-        Assert.Contains("move all items from", said);
-    }
-
     /// <summary>Selecting a block makes a slot holding its inventory, named in the step's argument, with the step waited for.</summary>
     [Fact]
     public void SelectingABlockMakesTheSlotTheItemsGoTo()
@@ -175,21 +162,6 @@ public class MoveItemsScreenTests
         Assert.Equal("Cargo 1", screen.Editor.Pick().Arguments!.Form.Fields[0].Text);
     }
 
-    /// <summary>The source's slot takes the first number and the target's the next, in the order the line reads them.</summary>
-    [Fact]
-    public void TheSlotsNumberInTheOrderTheLineReads()
-    {
-        var screen = Picking(out _);
-        SelectTarget(screen);
-        screen.Editor.PressPrimary();
-        screen.Run(4);
-
-        var system = screen.Editor.Program.Systems[0];
-        var act = (Act)system.Sequences[0].Steps.First(step => (step as Act)?.ActionId == InventoryType.MoveItems);
-        Assert.Equal("inventory slot 1", act.Targets[0]);
-        Assert.Equal("inventory slot 2", act.Arguments[0].Names[0]);
-    }
-
     /// <summary>A finished step and its target part, with a second container to change it to.</summary>
     static EntitiesSlot Finished(out Screen screen, out AutomationSystem system)
     {
@@ -205,11 +177,15 @@ public class MoveItemsScreenTests
 
     static EntitiesSlot Target(Screen screen) => screen.Editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single(slot => slot.IsOption);
 
-    /// <summary>The target is a part of the line of its own, named as the source is, under its mark, with "to" a word between them.</summary>
+    /// <summary>The target is a part of the line of its own, named as the source is, under its mark, with "to" a word between them; the source's slot takes the first number and the target's the next, in the order the line reads them.</summary>
     [Fact]
     public void TheTargetIsAPartOfItsOwn()
     {
-        var target = Finished(out var screen, out _);
+        var target = Finished(out var screen, out var system);
+
+        var act = (Act)system.Sequences[0].Steps.First(step => (step as Act)?.ActionId == InventoryType.MoveItems);
+        Assert.Equal("inventory slot 1", act.Targets[0]);
+        Assert.Equal("inventory slot 2", act.Arguments[0].Names[0]);
 
         var source = screen.Editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single(slot => !slot.IsOption);
         Assert.Equal(new[] { "inventory slot 2" }, target.Slots);
@@ -289,13 +265,21 @@ public class MoveItemsScreenTests
         Assert.Equal(new[] { "bay, left" }, Target(screen).Slots);
     }
 
-    /// <summary>Back from the target's selector goes straight back to the line, with the step as it was.</summary>
+    /// <summary>Back from the target's selector, or from the source's opened on its blocks and left with nothing changed, goes straight back to the line without asking, with the step as it was.</summary>
     [Fact]
-    public void BackFromTheTargetsSelectorReturnsToTheLine()
+    public void BackFromAStepsSelectorsReturnsToTheLine()
     {
         var target = Finished(out var screen, out _);
 
         target.Opens!.Execute();
+        screen.Run(3);
+        screen.Editor.Back();
+        screen.Run(4);
+
+        Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
+        Assert.Equal(new[] { "inventory slot 2" }, Target(screen).Slots);
+
+        screen.Editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single(slot => !slot.IsOption).Opens!.Execute();
         screen.Run(3);
         screen.Editor.Back();
         screen.Run(4);
@@ -361,35 +345,24 @@ public class MoveItemsScreenTests
         Assert.Equal("Stock", screen.Editor.Screen.Title());
     }
 
-    /// <summary>A step's move opened on its blocks and left with nothing changed goes back without asking.</summary>
-    [Fact]
-    public void LeavingAStepsMoveUnchangedAsksNothing()
-    {
-        Finished(out var screen, out _);
-
-        screen.Editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single(slot => !slot.IsOption).Opens!.Execute();
-        screen.Run(3);
-        screen.Editor.Back();
-        screen.Run(4);
-
-        Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
-        Assert.Equal(new[] { "inventory slot 2" }, Target(screen).Slots);
-    }
-
-    /// <summary>The line reads as a sentence: what moves, from where, to where.</summary>
-    [Fact]
-    public void TheStepReadsAsASentence()
+    /// <summary>The line reads as a sentence: what moves, from where, to where, and with no item and no amount it says it moves all items.</summary>
+    [Theory]
+    [InlineData(null, null, "move all items from")]
+    [InlineData("Ingot/Iron", "100", "move 100 kg Ingot/Iron from")]
+    public void TheStepReadsAsASentence(string? item, string? amount, string phrase)
     {
         var screen = Picking(out _);
         var form = screen.Editor.Pick().Arguments!.Form;
         SelectTarget(screen);
-        form.Fields[1].Text = "Ingot/Iron";
-        form.Fields[2].Text = "100";
+        if (item != null)
+            form.Fields[1].Text = item;
+        if (amount != null)
+            form.Fields[2].Text = amount;
         screen.Editor.PressPrimary();
         screen.Run(4);
 
         var said = string.Join(" ", System.Text.RegularExpressions.Regex.Matches(screen.Dump, "\"([^\"]*)\"").Cast<System.Text.RegularExpressions.Match>().Select(m => m.Groups[1].Value));
-        Assert.Contains("move 100 kg Ingot/Iron from", said);
+        Assert.Contains(phrase, said);
         Assert.Contains(" to ", said);
     }
 

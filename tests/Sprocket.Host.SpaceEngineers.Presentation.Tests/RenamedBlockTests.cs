@@ -6,9 +6,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>A block renamed in the game's terminal is named by its new name wherever a screen names it: a line's tooltip, which lists what fills its slot.</summary>
 public class RenamedBlockTests
 {
-    /// <summary>A step's sentence on the sequence's screen lists the block by its new name.</summary>
+    /// <summary>A step's sentence on the sequence's screen, and a trigger's on the logic system's screen, where its button is named, list the block by its new name.</summary>
     [Fact]
-    public void AStepNamesTheBlockByItsNewName()
+    public void AStepAndATriggerNameTheirBlocksByTheirNewNames()
     {
         var screen = Built();
         Assert.Contains("Airlock Inner Door", Said(screen));
@@ -18,13 +18,7 @@ public class RenamedBlockTests
 
         Assert.Contains("Lobby Door", Said(screen));
         Assert.DoesNotContain("Airlock Inner Door", Said(screen));
-    }
 
-    /// <summary>The same on the logic system's screen, where its trigger's button is named.</summary>
-    [Fact]
-    public void ATriggerNamesItsBlockByItsNewName()
-    {
-        var screen = Built();
         screen.Editor.BackKeeping();
         screen.Run(2);
         Assert.Contains("Airlock Button", Said(screen));

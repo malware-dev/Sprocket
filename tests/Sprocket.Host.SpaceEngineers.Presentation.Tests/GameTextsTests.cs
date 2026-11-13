@@ -10,38 +10,21 @@ public class GameTextsTests
 {
     static readonly string Mod = Path.Combine(AppContext.BaseDirectory, "Content", "Localization");
 
-    /// <summary>In English, a key says what the English file says.</summary>
+    /// <summary>A key says what the file of the language loaded says, English or Norwegian, and the codex is loaded beside the texts in each, so its pages read in the language spoken.</summary>
     [Fact]
-    public void EnglishSaysTheEnglish()
+    public void AKeySaysWhatTheLanguageLoadedSays()
     {
         var texts = new GameTexts(Mod);
         texts.Load(MyLanguagesEnum.English);
 
         Assert.Equal("logic system", texts.Find("Sprocket.Systems.New"));
-    }
+        Assert.StartsWith("A ![](mark:logic-system)", texts.Find("Sprocket.Term.LogicSystem"));
 
-    /// <summary>In another language, a key says what that language's file says.</summary>
-    [Fact]
-    public void NorwegianSaysTheNorwegian()
-    {
-        var texts = new GameTexts(Mod);
         texts.Load(MyLanguagesEnum.Norwegian);
 
         Assert.Equal("logikksystem", texts.Find("Sprocket.Systems.New"));
         Assert.Equal(MyLanguagesEnum.Norwegian, texts.Language);
-    }
-
-    /// <summary>The codex is loaded beside the texts, in each language, so its pages read in the language spoken.</summary>
-    [Fact]
-    public void TheCodexIsLoadedInEachLanguage()
-    {
-        var texts = new GameTexts(Mod);
-        texts.Load(MyLanguagesEnum.English);
-        Assert.StartsWith("A ![](mark:logic-system)", texts.Find("Sprocket.Term.LogicSystem"));
-
-        texts.Load(MyLanguagesEnum.Norwegian);
         Assert.StartsWith("Et ![](mark:logic-system)", texts.Find("Sprocket.Term.LogicSystem"));
-        Assert.Equal("logikksystem", texts.Find("Sprocket.Systems.New"));
     }
 
     /// <summary>A key the translation lacks keeps its English, and a key nobody wrote is not found at all.</summary>

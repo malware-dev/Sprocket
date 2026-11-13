@@ -170,24 +170,9 @@ public class ScreenChoiceTests
         Assert.Equal(new[] { 2 }, system.First.Facets(slot));
     }
 
-    /// <summary>Changing the step opens on the screen it acts on.</summary>
+    /// <summary>Changing a screen step opens on the screen it acts on, with its own slot named in the heading as it is and nothing to name anew.</summary>
     [Fact]
-    public void ChangingTheStepOpensOnItsScreen()
-    {
-        var (screen, _) = Picking();
-        screen.Editor.Facets()!.Choose("Back");
-        screen.Run(2);
-        Finish(screen, "Docked");
-
-        screen.Editor.PressStepSlot(0, 0);
-        screen.Run(2);
-
-        Assert.Equal("Back", screen.Editor.Facets()!.Name);
-    }
-
-    /// <summary>Opening the step again names its own slot of screens in the heading, as it is, with nothing to name anew.</summary>
-    [Fact]
-    public void ReopeningAScreenStepNamesItsOwnSlot()
+    public void ChangingTheStepOpensOnItsScreenAndNamesItsOwnSlot()
     {
         var (screen, _) = Picking();
         screen.Editor.Facets()!.Choose("Back");
@@ -198,6 +183,7 @@ public class ScreenChoiceTests
         screen.Editor.PressStepSlot(0, 0);
         screen.Run(2);
 
+        Assert.Equal("Back", screen.Editor.Facets()!.Name);
         var heading = screen.Editor.Screen.Heading[0];
         Assert.Equal(slot, heading.Text);
         Assert.True(heading.CanRename);

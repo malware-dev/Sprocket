@@ -15,7 +15,7 @@ public class ListedOnTests
     const long Bay = 301;
     const long Pasted = 302;
 
-    /// <summary>A system kept to a block lists from that block and from no other.</summary>
+    /// <summary>A system kept to a block lists from that block and from no other, one kept to nothing lists everywhere, and so does one kept to a block that isn't found, so nothing is out of reach.</summary>
     [Fact]
     public void AKeptSystemListsOnlyOnItsBlock()
     {
@@ -27,15 +27,14 @@ public class ListedOnTests
 
         rig.Editor.OpenedFrom = Bay;
         Assert.False(rig.Editor.Lists(system));
-    }
 
-    /// <summary>A system kept to nothing lists everywhere.</summary>
-    [Fact]
-    public void AnUnkeptSystemListsEverywhere()
-    {
-        var rig = Kept();
-        var system = rig.Editor.Program.Systems[0];
         system.ListedOn = "";
+
+        rig.Editor.OpenedFrom = Bay;
+
+        Assert.True(rig.Editor.Lists(system));
+
+        system.ListedOn = "nowhere";
 
         rig.Editor.OpenedFrom = Bay;
 
@@ -63,19 +62,6 @@ public class ListedOnTests
             rig.Tick();
 
         Assert.Equal(Pasted, KeptId(rig.Editor, system));
-    }
-
-    /// <summary>A system kept to a block that isn't found lists everywhere, so nothing is out of reach.</summary>
-    [Fact]
-    public void ALostBlockLetsTheSystemListEverywhere()
-    {
-        var rig = Kept();
-        var system = rig.Editor.Program.Systems[0];
-        system.ListedOn = "nowhere";
-
-        rig.Editor.OpenedFrom = Bay;
-
-        Assert.True(rig.Editor.Lists(system));
     }
 
     /// <summary>The block a system is kept to goes in the construct's program, and comes back from it.</summary>

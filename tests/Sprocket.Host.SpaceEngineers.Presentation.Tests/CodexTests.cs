@@ -119,25 +119,9 @@ public class CodexTests
         Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
     }
 
-    /// <summary>With tips off, a button of only a mark still says what it does, and the question mark says it turns them back on.</summary>
+    /// <summary>Under the pointer, the tips toggle shows at once whether tips are on or off, and with tips off its tip still says the question mark turns them back on.</summary>
     [Fact]
-    public void AMarksTipStaysWithTipsOff()
-    {
-        var screen = Screen.Fresh("tick", "3");
-        var mark = screen.Scene.Find("?");
-        screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
-        Assert.False(screen.Editor.TipsShown);
-
-        screen.Do("move", ((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", (Styles.TipDelay * 2).ToString());
-
-        var shown = screen.Scene.ShownTip;
-        Assert.NotNull(shown);
-        Assert.Equal(screen.Editor.Texts.Codex.ChromeTipsOn, shown.Text);
-    }
-
-    /// <summary>Under the pointer, the tips toggle still shows whether tips are on or off, and a press shows the change at once.</summary>
-    [Fact]
-    public void TheTipsToggleTellsOnFromOffUnderThePointer()
+    public void TheTipsToggleTellsOnFromOffAndKeepsItsTip()
     {
         var screen = Screen.Fresh("tick", "3");
         var mark = screen.Scene.Find("?");
@@ -150,6 +134,12 @@ public class CodexTests
         Assert.False(screen.Editor.TipsShown);
 
         Assert.NotEqual(on, screen.Text("?").Ink);
+
+        screen.Do("move", x, y, "tick", (Styles.TipDelay * 2).ToString());
+
+        var shown = screen.Scene.ShownTip;
+        Assert.NotNull(shown);
+        Assert.Equal(screen.Editor.Texts.Codex.ChromeTipsOn, shown.Text);
     }
 
     /// <summary>A kept tip's plain version gives each link as its words alone, and keeps its pictures and escapes.</summary>
@@ -277,21 +267,15 @@ public class CodexTests
         Assert.NotSame(heading, screen.Scene.Under(at));
     }
 
-    /// <summary>A heading holding a term is in capitals with the term alone a link, wherever in the heading its slot stands.</summary>
+    /// <summary>A heading holding a term is in capitals with the term alone a link, wherever in the heading its slot stands, and a heading whose text lacks the slot is its words in capitals with no link.</summary>
     [Theory]
     [InlineData("On your {constructs}", "ON YOUR [CONSTRUCTS](Term.Construct class=term)")]
     [InlineData("{constructs} of yours", "[CONSTRUCTS](Term.Construct class=term) OF YOURS")]
     [InlineData("All {constructs} here", "ALL [CONSTRUCTS](Term.Construct class=term) HERE")]
+    [InlineData("On your ships", "ON YOUR SHIPS")]
     public void AHeadingLinksOnlyItsTerm(string template, string markdown)
     {
         Assert.Equal(markdown, CodexPages.Within(template, "constructs", "constructs", CodexPages.Construct));
-    }
-
-    /// <summary>A heading whose text lacks the term's slot is its words in capitals with no link.</summary>
-    [Fact]
-    public void AHeadingWithoutItsSlotIsItsWords()
-    {
-        Assert.Equal("ON YOUR SHIPS", CodexPages.Within("On your ships", "constructs", "constructs", CodexPages.Construct));
     }
 
     /// <summary>

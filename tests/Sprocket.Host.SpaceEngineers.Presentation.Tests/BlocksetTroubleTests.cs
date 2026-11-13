@@ -74,22 +74,15 @@ public class BlocksetTroubleTests
         Assert.Contains("Airlock Inner Door, which this trigger watches, was lost.", sim.Editor.RootRows()[0].Problem);
     }
 
-    /// <summary>The blockset's row says what is wrong in place of what it is doing.</summary>
+    /// <summary>The blockset's row says what is wrong in place of what it is doing, and the blueprint's heading is marked broken with it, so the trouble shows from the blueprint down.</summary>
     [Fact]
-    public void ItsRowSaysWhatIsWrong()
+    public void ItsRowSaysWhatIsWrongAndItsBlueprintsHeadingIsMarkedWithIt()
     {
         var sim = Broken();
 
         var row = sim.Editor.RootRows()[0];
         Assert.True(row.Problems > 0);
         Assert.Equal(Why, row.Problem);
-    }
-
-    /// <summary>The blueprint's heading is marked broken with it, so the trouble shows from the blueprint down.</summary>
-    [Fact]
-    public void ItsBlueprintsHeadingIsMarkedWithIt()
-    {
-        var sim = Broken();
 
         var heading = sim.Editor.RootHeadings().Single();
         Assert.Equal(sim.Editor.RootRows()[0].Problems, heading.Problems);

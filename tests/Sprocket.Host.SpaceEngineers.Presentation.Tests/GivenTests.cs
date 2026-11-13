@@ -16,57 +16,32 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class GivenTests
 {
+    /// <summary>A whole number goes as a 32-bit one, a real as a float, a flag as a bool, text as text and a color as the way it is written, the game having no value of its own for one; only a number too big for 32 bits goes wide.</summary>
     [Fact]
-    public void AWholeNumberGoesAsAThirtyTwoBitOne()
+    public void AValueGoesAsTheKindItWasWrittenAs()
     {
-        TerminalActionParameter given = GameSlots.Given(Literal.Of(255));
+        TerminalActionParameter whole = GameSlots.Given(Literal.Of(255));
 
-        Assert.Equal(255, given.Value);
-        Assert.IsType<int>(given.Value);
-    }
+        Assert.Equal(255, whole.Value);
+        Assert.IsType<int>(whole.Value);
 
-    /// <summary>
-    /// Because the game's own handlers cast the boxed value to <c>int</c>.
-    /// </summary>
-    /// <remarks>
-    /// They say they accept a 64-bit one and then cast as though it were 32, which throws. Anything
-    /// that fits therefore goes as the narrower kind, and only what does not fit goes wide.
-    /// </remarks>
-    [Fact]
-    public void OneTooBigForThatGoesWide()
-    {
-        TerminalActionParameter given = GameSlots.Given(Literal.Of(5000000000L));
+        // The game's own handlers cast the boxed value to int. They say they accept a 64-bit one and then cast as though
+        // it were 32, which throws. Anything that fits therefore goes as the narrower kind, and only what does not fit goes wide.
+        TerminalActionParameter wide = GameSlots.Given(Literal.Of(5000000000L));
 
-        Assert.Equal(5000000000L, given.Value);
-        Assert.IsType<long>(given.Value);
-    }
+        Assert.Equal(5000000000L, wide.Value);
+        Assert.IsType<long>(wide.Value);
 
-    [Fact]
-    public void ARealGoesAsAFloat()
-    {
-        TerminalActionParameter given = GameSlots.Given(Literal.Of(4.5));
+        TerminalActionParameter real = GameSlots.Given(Literal.Of(4.5));
 
-        Assert.Equal(4.5f, given.Value);
-        Assert.IsType<float>(given.Value);
-    }
+        Assert.Equal(4.5f, real.Value);
+        Assert.IsType<float>(real.Value);
 
-    [Fact]
-    public void AFlagGoesAsABool()
-    {
         Assert.Equal(true, GameSlots.Given(Literal.Of(true)).Value);
         Assert.Equal(false, GameSlots.Given(Literal.Of(false)).Value);
-    }
 
-    [Fact]
-    public void TextGoesAsText()
-    {
         Assert.Equal("doors open", GameSlots.Given(Literal.Of("doors open")).Value);
-    }
 
-    /// <summary>A color goes as the way it is written, the game having no value of its own for one.</summary>
-    [Fact]
-    public void AColorGoesAsHowItIsWritten()
-    {
         Assert.Equal("#FF8800", GameSlots.Given(Literal.Color(255, 136, 0, 255)).Value);
     }
 }

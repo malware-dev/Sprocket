@@ -34,9 +34,11 @@ public class WaitTests
         Assert.True(screen.Shows("= 60 ticks"));
     }
 
-    /// <summary>Escape on a wait just added takes it away, leaving nothing to undo.</summary>
-    [Fact]
-    public void EscapeTakesAWaitJustAddedAway()
+    /// <summary>Escape, or a press anywhere else, on a wait just added takes it away, leaving nothing to undo.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void BackingOutOfAWaitJustAddedTakesItAway(bool byEscape)
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
@@ -46,7 +48,14 @@ public class WaitTests
 
         screen.Editor.PressAdd("delay");
         screen.Run(3);
-        screen.Editor.Input.Key(MyKeys.Escape, false, false);
+        if (byEscape)
+            screen.Editor.Input.Key(MyKeys.Escape, false, false);
+        else
+        {
+            Panel(screen).Box.Insert("4");
+            screen.Do("800", "900");
+        }
+
         screen.Run(2);
 
         Assert.Null(Page(screen).Lengths);
@@ -71,39 +80,6 @@ public class WaitTests
         screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);
         screen.Run(2);
         Assert.Empty(screen.Editor.Program.Sequences[0].Steps);
-    }
-
-    /// <summary>A press anywhere else backs out of a wait just added, as Escape does, taking it away.</summary>
-    [Fact]
-    public void APressElsewhereTakesAWaitJustAddedAway()
-    {
-        var screen = Added();
-
-        Panel(screen).Box.Insert("4");
-        screen.Do("800", "900");
-        screen.Run(2);
-
-        Assert.Null(Page(screen).Lengths);
-        Assert.Empty(screen.Editor.Program.Sequences[0].Steps);
-    }
-
-    /// <summary>A press anywhere else closes the panel of a wait already there and leaves its length as it was.</summary>
-    [Fact]
-    public void APressElsewhereLeavesAWaitAsItWas()
-    {
-        var screen = Added();
-        Panel(screen).Box.Submit!.Execute();
-        screen.Run(2);
-
-        PressLength(screen);
-        Panel(screen).Box.SelectAll();
-        Panel(screen).Box.Insert("4");
-        screen.Do("800", "900");
-        screen.Run(2);
-
-        Assert.Null(Page(screen).Lengths);
-        var wait = Assert.IsType<Wait>(Assert.Single(screen.Editor.Program.Sequences[0].Steps));
-        Assert.Equal(Duration.OfSeconds(1), wait.Length);
     }
 
     /// <summary>Pressing a wait's length opens its panel on it, and a change in ticks is kept in ticks.</summary>
@@ -134,19 +110,35 @@ public class WaitTests
         Assert.Equal(Duration.OfSeconds(1), wait.Length);
     }
 
-    /// <summary>Escape on a wait already there leaves it as it was.</summary>
-    [Fact]
-    public void EscapeLeavesAWaitAsItWas()
+    /// <summary>Escape, or a press anywhere else, on the panel of a wait already there closes it and leaves the wait as it was.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void BackingOutOfAWaitAlreadyThereLeavesItAsItWas(bool byEscape)
     {
         var screen = Added();
-        screen.Editor.Input.Key(MyKeys.Enter, false, false);
+        if (byEscape)
+            screen.Editor.Input.Key(MyKeys.Enter, false, false);
+        else
+            Panel(screen).Box.Submit!.Execute();
         screen.Run(2);
 
         PressLength(screen);
-        Panel(screen).Box.Insert("7");
-        screen.Editor.Input.Key(MyKeys.Escape, false, false);
+        if (byEscape)
+        {
+            Panel(screen).Box.Insert("7");
+            screen.Editor.Input.Key(MyKeys.Escape, false, false);
+        }
+        else
+        {
+            Panel(screen).Box.SelectAll();
+            Panel(screen).Box.Insert("4");
+            screen.Do("800", "900");
+        }
+
         screen.Run(2);
 
+        Assert.Null(Page(screen).Lengths);
         var wait = Assert.IsType<Wait>(Assert.Single(screen.Editor.Program.Sequences[0].Steps));
         Assert.Equal(Duration.OfSeconds(1), wait.Length);
     }
