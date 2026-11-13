@@ -122,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var index = _sequence.Steps.IndexOf(step);
 
-            Open(slots => new PickPage(_editor, "Do something", false,
+            Open(slots => new PickPage(_editor, _editor.Texts.PickHeadingTask, false,
                 slots ? new List<long>() : _editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
                 answer => Named(answer, step.Targets, named =>
                 {
@@ -182,7 +182,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var origin = _editor.Depth;
 
-            Open(slots => new PickPage(_editor, "Do something", false,
+            Open(slots => new PickPage(_editor, _editor.Texts.PickHeadingTask, false,
                 new List<long>(), "", ReachKind.Native,
                 answer => Named(answer, null, named =>
                 {
@@ -347,7 +347,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var value = test?.Names(_editor.SlotBlocks.Actions(_sequence.System, test.Targets));
             var stated = value != null && value.IsStatus && (test.Relation == Relation.Is || test.Relation == Relation.IsNot);
-            return new PickPage(_editor, "Check something", false,
+            return new PickPage(_editor, _editor.Texts.PickHeadingCondition, false,
                 test == null || slots ? new List<long>() : _editor.Blocks(_sequence.System, test.Targets),
                 test == null ? "" : stated ? ComparisonQuestion.Id(test.MemberId, test.Value.Said) : test.MemberId,
                 stated ? ReachKind.Native : ReachKind.Value,

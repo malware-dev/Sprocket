@@ -425,7 +425,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var moment = was as MomentTrigger;
             if (fresh)
             {
-                return new PickPage(_editor, "When something happens", true,
+                return new PickPage(_editor, _editor.Texts.PickHeadingTrigger, true,
                     new List<long>(), moment?.EventId ?? "", ReachKind.Native,
                     answer => Starter(system, answer, null, null, started =>
                     {
@@ -465,7 +465,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var when = moment as WhenTrigger;
             var compares = when != null && Vocabulary.Compares(when, _editor.SlotBlocks.Events(system, when.Sources));
-            return new PickPage(_editor, "When something happens", true,
+            return new PickPage(_editor, _editor.Texts.PickHeadingTrigger, true,
                 moment == null || slots ? new List<long>() : _editor.Blocks(system, moment.Sources),
                 moment == null ? "" : compares ? when.EventId : Vocabulary.EventOf(_editor.Program, _editor.Runner.Bindings, system, moment, _editor.StandIn(system)),
                 compares ? ReachKind.Value : ReachKind.Native,

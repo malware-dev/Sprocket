@@ -458,6 +458,15 @@
   <data name="Sprocket.Pick.SingleTask" xml:space="preserve">
     <value>En oppgave på blokker</value>
   </data>
+  <data name="Sprocket.Pick.HeadingTask" xml:space="preserve">
+    <value>Oppgave</value>
+  </data>
+  <data name="Sprocket.Pick.HeadingCondition" xml:space="preserve">
+    <value>Betingelse</value>
+  </data>
+  <data name="Sprocket.Pick.HeadingTrigger" xml:space="preserve">
+    <value>Utløser</value>
+  </data>
   <data name="Sprocket.Pick.NewSequence" xml:space="preserve">
     <value>En ny sekvens</value>
   </data>

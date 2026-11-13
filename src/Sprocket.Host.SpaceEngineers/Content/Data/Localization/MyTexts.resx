@@ -596,6 +596,18 @@
     <value>A task on blocks</value>
     <comment>Title in the editor's heading bar of the picker page choosing a trigger's own task, shown until something is chosen.</comment>
   </data>
+  <data name="Sprocket.Pick.HeadingTask" xml:space="preserve">
+    <value>Task</value>
+    <comment>Title in the editor's heading bar of the selector choosing a step's task, when a step is added or changed, wherever the heading names no slot.</comment>
+  </data>
+  <data name="Sprocket.Pick.HeadingCondition" xml:space="preserve">
+    <value>Condition</value>
+    <comment>Title in the editor's heading bar of the selector choosing what an if checks, when an if is added or changed, wherever the heading names no slot.</comment>
+  </data>
+  <data name="Sprocket.Pick.HeadingTrigger" xml:space="preserve">
+    <value>Trigger</value>
+    <comment>Title in the editor's heading bar of the selector choosing the signal a trigger fires on, when a trigger is added or changed, wherever the heading names no slot.</comment>
+  </data>
   <data name="Sprocket.Pick.NewSequence" xml:space="preserve">
     <value>A new sequence</value>
     <comment>Choice in the picker's column choosing what a trigger does: the trigger starts a new sequence made for it. Shown while the trigger starts a sequence rather than stopping one.</comment>
