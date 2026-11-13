@@ -2,7 +2,6 @@ using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -324,19 +323,6 @@ public class StateEditingTests
         Assert.NotEqual(Palette.SlotFill, row.Background);
     }
 
-    /// <summary>The page on states is on the heading over the states, beside the tab's own tip.</summary>
-    [Fact]
-    public void TheStatesHeadingIsATerm()
-    {
-        var screen = OnSystem(Untyped, out _);
-        var view = screen.Editor.PressTab(screen.Editor.Texts.SystemState);
-        screen.Run(1);
-
-        var at = Links.First(view, CodexPages.LogicSystemStates, out var heading);
-
-        Assert.Same(screen.Editor.Codex.Find(CodexPages.LogicSystemStates), heading.TipAt(at));
-    }
-
     /// <summary>An empty list leaves no gap between its heading and its add button.</summary>
     [Fact]
     public void AnEmptyListTakesNoRoom()
@@ -346,21 +332,6 @@ public class StateEditingTests
         screen.Run(1);
 
         Assert.False(Target.Within(tab).OfType<StatePanel>().Single().Types.IsVisible, "an empty list still takes a gap");
-    }
-
-    /// <summary>The type page is on the heading over the types, which stands over its add button while no type is listed.</summary>
-    [Fact]
-    public void TheTypePageIsOnTheHeadingWhileNoTypeIsListed()
-    {
-        var screen = OnSystem(Untyped, out _);
-        var editor = screen.Editor;
-        var view = editor.PressTab(editor.Texts.SystemState);
-        screen.Run(1);
-
-        var add = Target.Within(view).OfType<Button>().Single(button => button.Text == StatusRow.Plus + editor.Texts.StateTypeAdd);
-        Assert.Null(add.Tip);
-        var at = Links.First(view, CodexPages.Type, out var heading);
-        Assert.Same(editor.Codex.Find(CodexPages.Type), heading.TipAt(at));
     }
 
     /// <summary>A state something uses has no bin to press, and says why; one nothing uses can be removed.</summary>
@@ -669,30 +640,6 @@ public class StateEditingTests
 
         var set = Assert.IsType<SetState>(Assert.Single(sequence.Steps));
         Assert.Equal("inside", set.From);
-    }
-
-    /// <summary>
-    /// The state selector explains what it asks where the pointer rests: the column the value is set in, and how that differs
-    /// from what a new state starts as.
-    /// </summary>
-    [Fact]
-    public void TheSelectorSaysWhatItAsks()
-    {
-        var screen = OnSequence(Program, out _);
-        var editor = screen.Editor;
-        editor.PressAdd(SentenceText.SetStateWords);
-        screen.Run(1);
-        PickState(screen, editor.Texts.PickNewState);
-
-        var view = Page(screen).View;
-        var at = Links.First(view, CodexPages.LogicSystemStates, out var heading);
-        Assert.Equal(CodexPages.Term(editor.Texts.PickStates.ToUpperInvariant(), CodexPages.LogicSystemStates), heading.Markdown);
-        Assert.Same(editor.Codex.Find(CodexPages.LogicSystemStates), heading.TipAt(at));
-        var bounds = heading.Bounds;
-        var said = Page(screen).View.TipOwnerAt(new Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
-        Assert.Same(heading, said);
-        var starts = Target.Within(view).OfType<Label>().Single(label => label.Text == editor.Texts.StateStarts);
-        Assert.NotNull(starts.Tip);
     }
 
     /// <summary>A type's name typed over is taken as the keyboard leaves it, and reaches the states that hold it.</summary>

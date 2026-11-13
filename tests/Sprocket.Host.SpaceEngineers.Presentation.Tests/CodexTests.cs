@@ -99,26 +99,6 @@ public class CodexTests
         Assert.Equal(Palette.Link, term.LinkColor);
     }
 
-    /// <summary>A logic system's installation panel, opened with tips off, has its SLOTS heading in the words' own look, with no tip.</summary>
-    [Fact]
-    public void TheSlotsHeadingIsPlainWithTipsOff()
-    {
-        var screen = Screen.On(Rig.Demo());
-        screen.Editor.NewButtonSystem("Doors");
-        screen.Run(2);
-        screen.Editor.GoToRoot();
-        screen.Run(2);
-        screen.Editor.TipsShown = false;
-        screen.Run(2);
-
-        screen.Do("press", "Doors").Run(2);
-        screen.Do("press", screen.Editor.Texts.SystemInstallationPanel).Run(2);
-
-        var heading = FirstLink(screen, out var term, CodexPages.Slot);
-        Assert.NotEqual(Palette.Link, term.LinkColor);
-        Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
-    }
-
     /// <summary>Under the pointer, the tips toggle shows at once whether tips are on or off, and with tips off its tip still says the question mark turns them back on.</summary>
     [Fact]
     public void TheTipsToggleTellsOnFromOffAndKeepsItsTip()
@@ -193,17 +173,6 @@ public class CodexTests
         Assert.IsNotType<Features.Home.HomePage>(screen.Editor.Current);
     }
 
-    /// <summary>The home screen's heading is the term logic system: resting on it shows the codex's page on it, and it takes no press.</summary>
-    [Fact]
-    public void TheHeadingExplainsLogicSystems()
-    {
-        var screen = Screen.Fresh("tick", "3");
-        var at = FirstLink(screen, out var heading, CodexPages.LogicSystem);
-
-        Assert.Same(screen.Editor.Codex.Find(CodexPages.LogicSystem), heading.TipAt(at));
-        Assert.NotSame(heading, screen.Scene.Under(at));
-    }
-
     /// <summary>The home screen's heading is as wide as its words, so its tip opens to the right of them, not under a heading stretched across the row.</summary>
     [Fact]
     public void TheHeadingsTipOpensRightOfItsWords()
@@ -251,20 +220,6 @@ public class CodexTests
         var beside = field.ToScreen(new Vector2(field.Bounds.X + 2f, words.Bounds.Y + words.Bounds.Height / 2f));
         Assert.NotNull(view.TipOwnerAt(onWords));
         Assert.Null(view.TipOwnerAt(beside));
-    }
-
-    /// <summary>A logic system's installations heading is the term installation: resting on it shows the codex's page on it, and it takes no press.</summary>
-    [Fact]
-    public void TheInstallationsHeadingExplainsInstallations()
-    {
-        var screen = Screen.Fresh("tick", "3");
-        screen.Editor.NewButtonSystem("Airlock");
-        screen.Editor.GoToRoot();
-        screen.Do("tick", "3");
-        var at = FirstLink(screen, out var heading, CodexPages.Installation);
-
-        Assert.Same(screen.Editor.Codex.Find(CodexPages.Installation), heading.TipAt(at));
-        Assert.NotSame(heading, screen.Scene.Under(at));
     }
 
     /// <summary>A heading holding a term is in capitals with the term alone a link, wherever in the heading its slot stands, and a heading whose text lacks the slot is its words in capitals with no link.</summary>

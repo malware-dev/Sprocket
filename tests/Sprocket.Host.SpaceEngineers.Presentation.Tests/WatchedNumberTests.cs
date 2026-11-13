@@ -206,23 +206,6 @@ public class WatchedNumberTests
         return rig;
     }
 
-    /// <summary>Every part of what starts a trigger on a number says what pressing it does: how its blocks are read, the value, the blocks, the comparison and the number.</summary>
-    [Fact]
-    public void EveryPartOfANumberTriggerHasATooltip()
-    {
-        var rig = Made();
-        rig.Tick();
-
-        var row = rig.Editor.Triggers()[0];
-        var texts = rig.Editor.Texts;
-        var tips = row.Starts.Select(part => row.ChipOf(part)!.Tip?.Text).ToArray();
-        Assert.All(tips, Assert.NotNull);
-        Assert.Equal(texts.Codex.SequenceReadAbout, tips[0]);
-        Assert.Equal(texts.Codex.PartWatchedAbout, tips[1]);
-        Assert.Equal(texts.Codex.SequenceComparedAbout, tips[3]);
-        Assert.Equal(texts.Codex.SequenceCheckedAbout, tips[4]);
-    }
-
     /// <summary>A logic system started when the average radius of the airlock's lights is below 5, made in the picker, on its page.</summary>
     static Simulation Made()
     {

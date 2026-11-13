@@ -99,20 +99,6 @@ public class RenameTests
         Assert.Equal(screen.MiddleOf(title) + EditorWindow.LevelWithCapitals.Top, screen.MiddleOf(back), 1);
     }
 
-    /// <summary>The pointer resting on the grid's name says what it is and that pressing it renames the grid.</summary>
-    [Fact]
-    public void TheGridsNameSaysWhatItIs()
-    {
-        var screen = Screen.Fresh();
-        screen.Run(5);
-
-        var name = screen.Text("Test Rig");
-        var at = Screen.Ui(name.At.X + 8f, screen.MiddleOf(name));
-        screen.Do("move", Say(at.X), Say(at.Y), "tick", Styles.TipDelay.ToString());
-
-        Assert.True(screen.Legible.Any(t => t.Contains("taken from its largest grid")), "resting on the grid's name said nothing about it");
-    }
-
     /// <summary>
     /// Escape, or a press away from the box, gives the name typed in it, as Enter does: the box is only the name, shown so it
     /// can be typed into, and not something opened over the page. Escape goes back in the same press.

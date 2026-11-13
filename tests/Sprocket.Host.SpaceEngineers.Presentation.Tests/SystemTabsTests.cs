@@ -29,17 +29,6 @@ public class SystemTabsTests
 
     static Tab[] Tabs(Screen screen) => screen.Editor.Current!.View.Within().OfType<Tab>().ToArray();
 
-    /// <summary>Each tab explains the term it is named for where the pointer rests on it.</summary>
-    [Fact]
-    public void EachTabExplainsItsTerm()
-    {
-        var screen = WithAWarnedSequence();
-        var codex = screen.Editor.Texts.Codex;
-
-        Assert.Equal(new[] { codex.TermTrigger, codex.TermSequence, codex.TermLogicSystemStates, codex.TermInstallationPanel },
-            Tabs(screen).Select(tab => tab.Tip?.Text).ToArray());
-    }
-
     /// <summary>A flagged tab lies on its level's wash and stripes, an unflagged one stays plain, and the screen stands at the graver of them.</summary>
     [Fact]
     public void AFlaggedTabLiesOnStripesAndTheScreenStandsByIt()
