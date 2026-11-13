@@ -50,6 +50,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The term page of the step that waits for pending tasks.</summary>
         public const string Await = "Term.Await";
 
+        /// <summary>The term page of the step that ends its sequence.</summary>
+        public const string Abort = "Term.Abort";
+
         /// <summary>The name links give the page on the steps running and stopping a sequence.</summary>
         public const string RunAndStop = "Term.RunAndStop";
 

@@ -37,14 +37,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Arrived = Reading.Of<IMyPistonBase>(AtLimit);
 
-        static readonly OwnAction Extends = OwnAction.Of<IMyPistonBase>(null, Out,
-            piston => Why(piston, piston.Status == PistonStatus.Extended, 1), Stop, Outwards);
+        static readonly OwnAction Extends = OwnAction.Watched<IMyPistonBase>(null, Out,
+            (piston, seen) => Why(piston, piston.Status == PistonStatus.Extended, 1, seen), Stop, Outwards);
 
-        static readonly OwnAction Retracts = OwnAction.Of<IMyPistonBase>(null, In,
-            piston => Why(piston, piston.Status == PistonStatus.Retracted, -1), Stop, Inwards);
+        static readonly OwnAction Retracts = OwnAction.Watched<IMyPistonBase>(null, In,
+            (piston, seen) => Why(piston, piston.Status == PistonStatus.Retracted, -1, seen), Stop, Inwards);
 
         static readonly OwnAction Moves = OwnAction.Of<IMyPistonBase, PistonMove>(PistonMove.Read, Moved, Arrived, null,
-            (piston, move, seen) => Why(piston, AtLimit(piston), 0), Stop, Expected);
+            (piston, move, seen) => Why(piston, AtLimit(piston), 0, seen), Stop, Expected);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -181,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return false;
         }
 
-        /// <summary>Moves the piston to the position a step gave it.</summary>
+        /// <summary>Moves the piston to the position a step gave it, and starts watching whether it is held.</summary>
         static void Moved(IMyPistonBase piston, PistonMove move, ReaderMemory seen)
         {
             if (!move.Given)
@@ -191,6 +191,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 Hold(piston, move.Position, move.Speed);
             else
                 piston.MoveToPosition(move.Position, move.Speed);
+
+            MotionWatch.Began(piston.CurrentPosition, seen);
         }
 
         /// <summary>
@@ -210,8 +212,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             piston.Velocity = 0f;
         }
 
-        /// <summary>Why the piston is not getting where it was sent, or none while it might; <paramref name="sense" /> is positive outward and negative inward.</summary>
-        static BlockTrouble Why(IMyPistonBase piston, bool arrived, int sense)
+        /// <summary>
+        /// Why the piston is not getting where it was sent, or none while it might; <paramref name="sense" /> is positive outward and
+        /// negative inward, and <paramref name="seen" /> holds where it stood when last looked at.
+        /// </summary>
+        static BlockTrouble Why(IMyPistonBase piston, bool arrived, int sense, ReaderMemory seen)
         {
             if (arrived)
                 return BlockTrouble.None;
@@ -231,7 +236,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (sense < 0 && piston.Velocity > 0f)
                 return BlockTrouble.Fatal(Cause.PistonReversedRetracting);
 
-            return BlockTrouble.None;
+            // Waited through rather than given up on, as a held rotor is: whatever holds it may let go.
+            return MotionWatch.Moving(piston.CurrentPosition, seen)
+                ? BlockTrouble.None
+                : BlockTrouble.Waiting(Cause.PistonHeld);
         }
 
         /// <summary>The ticks extending should take: the distance to its upper limit, at the speed it goes.</summary>

@@ -330,8 +330,45 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Key == Keyword.Set)
                 return ReadSet(statement, trouble);
 
-            trouble.Say(statement, $"unexpected {ScriptQuotes.Headed(statement)}; expected call, set, run, stop, await or wait.");
+            if (statement.Key == Keyword.None && statement.Head == AbortWords.Abort)
+                return Aborted(statement, trouble);
+
+            trouble.Say(statement, $"unexpected {ScriptQuotes.Headed(statement)}; expected call, set, run, stop, await, wait or abort.");
             return null;
+        }
+
+        /// <summary><c>abort saying "Door jammed" as warning</c>: an abort, its message and its level each given or left out.</summary>
+        static Step Aborted(Statement statement, ScriptTrouble trouble)
+        {
+            var abort = new Abort();
+            var at = 0;
+            if (statement.ValueAt(0).Form == ValueForm.Identifier && statement.Word(0) == AbortWords.Saying)
+            {
+                var message = statement.ValueAt(1);
+                if (message.Form != ValueForm.Text)
+                {
+                    trouble.Say(statement, "expected text in double quotes after 'saying', like \"Door jammed\".");
+                    return null;
+                }
+
+                abort.Message = message.Word ?? "";
+                at = 2;
+            }
+
+            if (statement.Says(at, Keyword.As))
+            {
+                AbortLevel level;
+                if (!AbortWords.Level(statement.Word(at + 1), out level))
+                {
+                    trouble.Say(statement, "expected note, warning or problem after 'as'.");
+                    return null;
+                }
+
+                abort.Level = level;
+                at += 2;
+            }
+
+            return ScriptQuotes.Ends(statement, at, trouble) ? Noted(abort, statement) : null;
         }
 
         /// <summary>

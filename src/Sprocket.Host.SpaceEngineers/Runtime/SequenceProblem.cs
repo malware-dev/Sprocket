@@ -96,6 +96,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         NothingToAverage = 19,
 
         /// <summary>A block a step or a trigger reads can't answer what it is asked, so it is left out.</summary>
-        PassedOver = 20
+        PassedOver = 20,
+
+        /// <summary>An abort step ended the run, as a note; the fault's words are its message.</summary>
+        Aborted = 21,
+
+        /// <summary>An abort step ended the run, as a warning; the fault's words are its message.</summary>
+        AbortedWarning = 22,
+
+        /// <summary>An abort step ended the run, as a problem; the fault's words are its message.</summary>
+        /// <remarks>The installation the run was on is switched off, with the message as the reason.</remarks>
+        AbortedProblem = 23
     }
 }

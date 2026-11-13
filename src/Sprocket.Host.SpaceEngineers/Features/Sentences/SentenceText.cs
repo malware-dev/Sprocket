@@ -53,6 +53,52 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What a wait for everything started above it reads as, on a row of its own and where it is offered.</summary>
         public const string AwaitWords = "wait for pending tasks";
 
+        /// <summary>The word ending a sequence is said with, on its step and where it is offered.</summary>
+        public const string AbortWord = "abort";
+
+        /// <summary>The word an abort's message is said after.</summary>
+        public const string SayingWord = "saying";
+
+        /// <summary>The word an abort with no message and no level is said with: "abort silently".</summary>
+        public const string SilentlyWord = "silently";
+
+        /// <summary>The words an abort's level is said after: "as a warning".</summary>
+        public const string AsAWords = "as a";
+
+        static readonly string[] AbortLevelWords = { "note", "warning", "problem" };
+
+        /// <summary>Each level an abort can show at, by <see cref="AbortLevel" />: note, warning, problem.</summary>
+        public static IReadOnlyList<string> AbortLevels => AbortLevelWords;
+
+        /// <summary>The level <paramref name="word" />, one of <see cref="AbortLevels" />, names, or a note where it names none.</summary>
+        public static AbortLevel AbortLevelOf(string word)
+        {
+            var at = Array.IndexOf(AbortLevelWords, word);
+            return at < 0 ? AbortLevel.Note : (AbortLevel)at;
+        }
+
+        /// <summary>The message of an abort as a field called <paramref name="name" />, said after "saying".</summary>
+        public static Field AbortMessageField(string name)
+        {
+            var field = Field.Called(name);
+            field.Lead = SayingWord;
+            return field;
+        }
+
+        /// <summary>The level of an abort as a field called <paramref name="name" />, one of <see cref="AbortLevels" />, said after "as a".</summary>
+        public static Field AbortLevelField(string name)
+        {
+            var field = Field.Among(name, AbortLevelWords, AbortLevelWords);
+            field.Lead = AsAWords;
+            return field;
+        }
+
+        /// <summary>An abort's message as its sentence says it: in quotes, or nothing where it has none.</summary>
+        public static string Quote(string message)
+        {
+            return string.IsNullOrEmpty(message) ? "" : $"\"{message}\"";
+        }
+
         /// <summary>The word joining a value to the blocks it is read or set on.</summary>
         public const string OnWord = "on";
 
@@ -156,6 +202,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             if (kind == StepKind.Await)
                 return AwaitWords;
+
+            if (kind == StepKind.Abort)
+                return AbortWord;
 
             return kind == StepKind.Wait ? WaitWord : "";
         }

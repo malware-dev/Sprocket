@@ -121,6 +121,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>Starts a statement with <paramref name="word" />, a word the format reads only where it stands, after <c>//</c> where <paramref name="off" /> says it is switched off.</summary>
+        public ScriptWriter Start(string word, bool off)
+        {
+            Pad();
+            if (off)
+                _text.Append("// ");
+
+            _text.Append(word);
+            _fresh = false;
+            return this;
+        }
+
         /// <summary>
         /// Starts a statement whose first word is an id rather than a keyword.
         /// </summary>

@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 case Cause.PistonStopped: return texts.TroublePistonStopped;
                 case Cause.PistonReversedExtending: return texts.TroublePistonReversedExtending;
                 case Cause.PistonReversedRetracting: return texts.TroublePistonReversedRetracting;
+                case Cause.PistonHeld: return texts.TroublePistonHeld;
                 case Cause.RotorNoPower: return texts.TroubleRotorNoPower;
                 case Cause.RotorNoHead: return texts.TroubleRotorNoHead;
                 case Cause.RotorLocked: return texts.TroubleRotorLocked;

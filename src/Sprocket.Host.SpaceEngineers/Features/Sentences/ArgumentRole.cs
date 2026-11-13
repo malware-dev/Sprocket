@@ -19,6 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         Read,
 
         /// <summary>What a value is read with, where it takes arguments: the button whose label it reads.</summary>
-        ReadWith
+        ReadWith,
+
+        /// <summary>What an abort says and the level it shows at.</summary>
+        Aborts
     }
 }

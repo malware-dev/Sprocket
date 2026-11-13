@@ -940,6 +940,9 @@
   <data name="Sprocket.Trouble.PistonReversedRetracting" xml:space="preserve">
     <value>sluttet å trekke inn fordi det ble sendt motsatt vei</value>
   </data>
+  <data name="Sprocket.Trouble.PistonHeld" xml:space="preserve">
+    <value>kan ikke bevege seg fordi noe holder det</value>
+  </data>
   <data name="Sprocket.Trouble.RotorNoPower" xml:space="preserve">
     <value>kan ikke dreie fordi den er slått av eller ikke har strøm</value>
   </data>
@@ -1791,6 +1794,18 @@
   </data>
   <data name="Sprocket.Stopped.NothingToAverage" xml:space="preserve">
     <value>det hadde ingen blokker å ta gjennomsnittet av.</value>
+  </data>
+  <data name="Sprocket.Problem.Aborted" xml:space="preserve">
+    <value>Dette steget avsluttet sekvensen.</value>
+  </data>
+  <data name="Sprocket.Stopped.Aborted" xml:space="preserve">
+    <value>et abort-steg avsluttet den.</value>
+  </data>
+  <data name="Sprocket.Abort.Message" xml:space="preserve">
+    <value>Melding</value>
+  </data>
+  <data name="Sprocket.Abort.Level" xml:space="preserve">
+    <value>Vises som</value>
   </data>
   <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
     <value>Avansert dør</value>

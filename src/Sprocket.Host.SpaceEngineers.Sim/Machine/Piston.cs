@@ -79,6 +79,10 @@ public sealed class Piston : Fitting
     /// <summary>Whether it has a head on it, without which it moves nothing.</summary>
     public bool Attached { get; set; } = true;
 
+    /// <summary>Whether something is holding it, so its position stays where it is however fast it is told to go.</summary>
+    /// <remarks>What a piston pushing a drill into rock it cannot cut does. Nothing about the block says so, which is why the mod watches the position.</remarks>
+    public bool Held { get; set; }
+
     /// <summary>Stands the piston at a position, without its having moved there.</summary>
     public void Stand(float metres)
     {
@@ -153,7 +157,7 @@ public sealed class Piston : Fitting
     /// <remarks>Raises <c>LimitReached</c> on the tick it arrives at the limit it is moving towards, as the game does.</remarks>
     public override void Tick()
     {
-        if (!Enabled || !Attached || _speed == 0)
+        if (!Enabled || !Attached || Held || _speed == 0)
             return;
 
         var was = _position;

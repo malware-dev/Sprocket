@@ -704,6 +704,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
+                var abort = step as Abort;
+                if (abort != null)
+                {
+                    IsWaiting = false;
+                    Aborted(abort);
+                    return;
+                }
+
                 var run = step as Run;
                 if (run != null)
                 {
@@ -968,6 +976,32 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             return SequenceFault.None;
+        }
+
+        /// <summary>
+        /// Ends the run at <paramref name="abort" />, keeping its message as why: as a note or a warning, or as a problem, which
+        /// also has what it runs on switched off. A note with no message ends it as a run that finished.
+        /// </summary>
+        void Aborted(Abort abort)
+        {
+            if (abort.Level == AbortLevel.Note && abort.Message.Length == 0)
+            {
+                Stop();
+                return;
+            }
+
+            var problem = abort.Level == AbortLevel.Problem ? SequenceProblem.AbortedProblem
+                : abort.Level == AbortLevel.Warning ? SequenceProblem.AbortedWarning
+                : SequenceProblem.Aborted;
+            var said = new SequenceFault(problem, _memory.Step, BlockTrouble.None, abort.Message);
+            if (abort.Level == AbortLevel.Problem)
+            {
+                Meet(said);
+                return;
+            }
+
+            Stop();
+            _faults.Quit = said;
         }
 
         /// <summary>Ends the run at a step it cannot do, keeping why, and has what it runs on switched off.</summary>

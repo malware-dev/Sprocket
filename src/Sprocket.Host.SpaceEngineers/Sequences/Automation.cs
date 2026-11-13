@@ -644,6 +644,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (step is Await)
                 return Annotated(new Await(), step);
 
+            var abort = step as Abort;
+            if (abort != null)
+                return Annotated(new Abort { Message = abort.Message, Level = abort.Level }, step);
+
             var opens = step as If;
             if (opens != null)
                 return Annotated(new If(Copied(opens.Test)), step);

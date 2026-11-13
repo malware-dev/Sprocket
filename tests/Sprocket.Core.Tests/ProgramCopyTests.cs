@@ -195,6 +195,7 @@ public class ProgramCopyTests
         cycle.Steps.Add(new Wait(Duration.OfTicks(60)));
         cycle.Steps.Add(new Else(new StateTest { State = "where", Relation = Relation.IsNot, Value = Literal.Name("outside") }));
         cycle.Steps.Add(new Await());
+        cycle.Steps.Add(new Abort { Message = "Door \"B\" jammed", Level = AbortLevel.Problem });
         cycle.Steps.Add(new Else(null));
         cycle.Steps.Add(new SetState { State = "where", Value = Literal.Name("outside") });
         cycle.Steps.Add(new EndIf());

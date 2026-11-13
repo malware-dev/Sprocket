@@ -809,9 +809,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             pen.Note(step.Annotation);
             pen.Attributes(step.Attributes);
-            pen.Start(Head(step), step.IsOff);
+            Started(pen, step);
             Rest(pen, system, step);
             pen.End();
+        }
+
+        /// <summary>Starts <paramref name="step" />'s line with the word it starts with: a keyword, or <c>abort</c>, which is none.</summary>
+        static void Started(ScriptWriter pen, Step step)
+        {
+            if (step is Abort)
+                pen.Start(AbortWords.Abort, step.IsOff);
+            else
+                pen.Start(Head(step), step.IsOff);
         }
 
         /// <summary><c>call open on [ door ]</c>: one step as its line of script, without its note or its attributes, for a log to name it by.</summary>
@@ -839,7 +848,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return "}";
             else
             {
-                pen.Start(Head(step), step.IsOff);
+                Started(pen, step);
                 Rest(pen, null, step);
             }
 
@@ -873,6 +882,17 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Everything in a step after the word it starts with.</summary>
         static void Rest(ScriptWriter pen, AutomationSystem system, Step step)
         {
+            var abort = step as Abort;
+            if (abort != null)
+            {
+                if (abort.Message.Length > 0)
+                    pen.Word(AbortWords.Saying).Text(abort.Message);
+                if (abort.Level != AbortLevel.Note)
+                    pen.Says(Keyword.As).Word(AbortWords.Name(abort.Level));
+
+                return;
+            }
+
             var sets = step as SetState;
             if (sets != null)
             {

@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public bool Exists => Problem != SequenceProblem.None;
 
         /// <summary>Whether this only says how the sequence is set up, which is fine as it is: shown on it, and counted nowhere.</summary>
-        public bool IsNote => Problem == SequenceProblem.NothingStarts;
+        public bool IsNote => Problem == SequenceProblem.NothingStarts || Problem == SequenceProblem.Aborted;
 
         /// <summary>
         /// Whether this is worth saying quietly rather than marking as broken.
@@ -74,6 +74,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             || Problem == SequenceProblem.PassedOver
             || Problem == SequenceProblem.Conflicted
             || Problem == SequenceProblem.NothingToAwait
+            || Problem == SequenceProblem.Aborted
+            || Problem == SequenceProblem.AbortedWarning
             || ProgramRepairs.Of(Problem) != null;
 
         /// <summary>Whether it is wrong in the logic system itself, the same in every installation, rather than in what one installation holds.</summary>

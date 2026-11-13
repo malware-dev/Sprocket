@@ -209,6 +209,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (step is Await)
                 return new Await();
 
+            var abort = step as Abort;
+            if (abort != null)
+                return new Abort { Message = abort.Message, Level = abort.Level };
+
             var opens = step as If;
             if (opens != null)
                 return new If(Test(opens.Test));

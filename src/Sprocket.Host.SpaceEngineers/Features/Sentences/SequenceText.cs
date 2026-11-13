@@ -206,6 +206,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (fault.Problem == SequenceProblem.MissingFacet)
                 return Template.Fill(texts.ProblemMissingScreen, "block", fault.Which);
 
+            // An abort says what its player wrote, and only where nothing was written that it ended the run.
+            if (fault.Problem == SequenceProblem.Aborted || fault.Problem == SequenceProblem.AbortedWarning || fault.Problem == SequenceProblem.AbortedProblem)
+                return string.IsNullOrEmpty(fault.Which) ? texts.ProblemAborted : fault.Which;
+
             var repair = ProgramRepairs.Of(fault.Problem);
             if (repair != null)
                 return repair.Warning(texts, fault);
@@ -329,6 +333,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Template.Fill(texts.StoppedOptionWrong, "name", block);
             if (problem == SequenceProblem.MissingFacet)
                 return Template.Fill(texts.StoppedMissingScreen, "block", block);
+            if (problem == SequenceProblem.AbortedProblem)
+                return string.IsNullOrEmpty(block) ? texts.StoppedAborted : block;
 
             if (problem == SequenceProblem.NeverTriggered)
                 return texts.StoppedNeverTriggered;
@@ -464,6 +470,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             if (step is EndIf)
                 return "";
+
+            var abort = step as Abort;
+            if (abort != null)
+                return $"{SentenceText.AbortWord} {SentenceText.Given(ArgumentsSlot.Aborting(abort.Message, abort.Level, null))}";
 
             var set = step as SetState;
             if (set != null)

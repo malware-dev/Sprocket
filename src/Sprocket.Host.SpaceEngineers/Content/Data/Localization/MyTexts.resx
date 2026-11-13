@@ -1228,6 +1228,10 @@
     <value>stopped retracting because it was sent the other way</value>
     <comment>Said as a warning after a run gave up because something else reversed a piston that was retracting while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
+  <data name="Sprocket.Trouble.PistonHeld" xml:space="preserve">
+    <value>cannot move because something is holding it</value>
+    <comment>Said as a sequence's problem while a step waits on a piston that something is physically blocking, such as a drill on it pressing into rock. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...". It clears once the piston moves again.</comment>
+  </data>
   <data name="Sprocket.Trouble.RotorNoPower" xml:space="preserve">
     <value>cannot turn because it is switched off or has no power</value>
     <comment>Said as a sequence's problem while a step waits on a rotor or hinge that is switched off or unpowered. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
@@ -2363,6 +2367,22 @@
   <data name="Sprocket.Stopped.NothingToAverage" xml:space="preserve">
     <value>it had no blocks to take an average of.</value>
     <comment>Reason a run stopped: an if step took the average of a value over a set that holds no blocks, such as an empty slot. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Problem.Aborted" xml:space="preserve">
+    <value>This step ended the sequence.</value>
+    <comment>Said where an abort step with no message of its own, set to show as a warning, ended a run: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...". An abort with a message says the message instead, as the player wrote it.</comment>
+  </data>
+  <data name="Sprocket.Stopped.Aborted" xml:space="preserve">
+    <value>an abort step ended it.</value>
+    <comment>Reason a run stopped: an abort step with no message of its own, set to show as a problem, ended it and switched the installation off. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel. "abort" is the step's word in the script and stays as it is. An abort with a message says the message instead.</comment>
+  </data>
+  <data name="Sprocket.Abort.Message" xml:space="preserve">
+    <value>Message</value>
+    <comment>Label over the box in the small panel that opens from an abort step's line on a sequence's screen: the reason the step gives when it ends the sequence, shown on the sequence as written. It may be left empty.</comment>
+  </data>
+  <data name="Sprocket.Abort.Level" xml:space="preserve">
+    <value>Shown as</value>
+    <comment>Label beside the three words "note", "warning" and "problem" in the small panel that opens from an abort step's line on a sequence's screen: how the step's message shows when it ends the sequence. The three words are the step's words in the script and stay English.</comment>
   </data>
   <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
     <value>Advanced door</value>

@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             else
                 rotor.RotateToAngle(turn.Way, turn.Angle, turn.Speed);
 
-            RotorMotion.Began(rotor, seen);
+            MotionWatch.Began(rotor.Angle, seen);
         }
 
         /// <summary>Whether the rotor already stands at the angle, by the game's own test.</summary>
@@ -341,7 +341,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             // Waited through rather than given up on: measured in game, taking its speed away does not settle what the
             // pushing does to a construct.
-            return RotorMotion.Turning(rotor, seen)
+            return MotionWatch.Moving(rotor.Angle, seen)
                 ? BlockTrouble.None
                 : BlockTrouble.Waiting(Cause.RotorHeld);
         }

@@ -344,7 +344,7 @@ sequence 1 as Cycle {
 * **Identification:** Defined by a numeric ID (`sequence <n>`) scoped to the system. The number remains stable across imports, exports, and renames.
 * **Naming:** May declare an optional name (`as <name>`).
 * **Concurrency:** Steps execute sequentially. An asynchronous action or sequence execution starts immediately, allowing the script to proceed to the next statement without blocking unless paused by `await` or `wait`.
-* `await`, `wait` and `if` belong to sequences alone.
+* `await`, `wait`, `if` and `abort` belong to sequences alone.
 
 ### 11.2 Steps
 
@@ -355,6 +355,7 @@ sequence 1 as Cycle {
 | `set <state> to <value>` | Updates a system state within the current instance. Value must be a valid choice, flag, or another state of identical type. |
 | `run <sequence>` | Starts a sequence of the same system asynchronously. If already running, does nothing. Self-recursion or cyclical invocation chains produce an error. |
 | `stop <sequence>` | Halts a sequence of the same system if running. A sequence can stop itself, terminating execution immediately. |
+| `abort [saying <text>] [as <level>]` | Ends the sequence it is in, at once. `saying` gives the reason the sequence shows, as written. `as` says how it shows: `note`, the default; `warning`; or `problem`, which also switches off the installation it ran on, with the reason. |
 | `await` | Blocks the sequence until all actions and sequences started above it in the current sequence have completed. |
 | `wait <duration>` | Pauses sequence execution for the specified duration (e.g., `wait 60t`). |
 

@@ -92,6 +92,10 @@
     <value>A **wait for pending tasks** is a [step](Term.Step class=term) that holds its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) until the [![](mark:awaited)&amp;nbsp;awaitables](Term.Awaitable class=term) above it have finished, like a door closing.</value>
     <comment>Codex page on "Await", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
+  <data name="Sprocket.Term.Abort" xml:space="preserve">
+    <value>An **abort** is a [step](Term.Step class=term) that ends its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) at once. It can give a message saying why, shown as a note, a warning or a problem, and a problem also switches off the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) it ran on.</value>
+    <comment>Codex page on "Abort", shown in a tip. It says what the term is, naming it in bold with its mark where it has one. "abort" is the step's word in the script, and note, warning and problem are its levels.</comment>
+  </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
     <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, or one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
     <comment>Codex page on "If", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
@@ -783,6 +787,18 @@
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
     <value>The [![](mark:awaited)&amp;nbsp;awaitables](Term.Awaitable class=term) started since the last `wait for pending tasks` run together, and the [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) waits here until all of them have finished.</value>
     <comment>Tooltip on the words of a row waiting for every awaitable action started before it, on a sequence's screen. The row reads "wait for pending tasks", which stays English; ![](mark:awaited) draws the clock mark an awaitable action carries.</comment>
+  </data>
+  <data name="Sprocket.Sequence.AbortAbout" xml:space="preserve">
+    <value>End the [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) here.</value>
+    <comment>Tooltip on the choice "abort" in the add-step menu on a sequence's screen, which adds a step ending the sequence at once. "abort" is the step's word in the script and stays English.</comment>
+  </data>
+  <data name="Sprocket.Sequence.AbortPartAbout" xml:space="preserve">
+    <value>Change the message and how it shows.</value>
+    <comment>Tooltip on the part of an abort step's line on a sequence's screen that says its message and level, such as: saying "Door jammed" as a warning. Pressing it opens a small panel where both are given.</comment>
+  </data>
+  <data name="Sprocket.Sequence.AbortLevelAbout" xml:space="preserve">
+    <value>A note or a warning shows on the [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term). A problem also switches off the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) it ran on, with the message as the reason.</value>
+    <comment>Tooltip on the three words "note", "warning" and "problem" in the small panel that opens from an abort step's line on a sequence's screen, which choose how the step's message shows when it ends the sequence.</comment>
   </data>
   <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
     <value>Rename this category</value>

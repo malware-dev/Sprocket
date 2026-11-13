@@ -413,15 +413,15 @@ public class RotorTests
 
         var block = (IMyMotorStator)rotor.Block;
         var seen = new ReaderMemory { Clock = () => MyAPIGateway.Session.GameplayFrameCounter };
-        Assert.True(Blocks.RotorMotion.Turning(block, seen), "a rotor just looked at is already called held");
+        Assert.True(Blocks.MotionWatch.Moving(block.Angle, seen), "a rotor just looked at is already called held");
 
         for (var frame = 0; frame < 120; frame++)
             ship.Tick();
 
-        Assert.False(Blocks.RotorMotion.Turning(block, seen), "a rotor that has not moved for two seconds reads as turning");
+        Assert.False(Blocks.MotionWatch.Moving(block.Angle, seen), "a rotor that has not moved for two seconds reads as turning");
 
-        Blocks.RotorMotion.Began(block, seen);
-        Assert.True(Blocks.RotorMotion.Turning(block, seen), "a turn just begun is called held before it can move");
+        Blocks.MotionWatch.Began(block.Angle, seen);
+        Assert.True(Blocks.MotionWatch.Moving(block.Angle, seen), "a turn just begun is called held before it can move");
     }
 
     /// <summary>What is plainly wrong with a rotor is read off it, and needs no watching.</summary>

@@ -118,6 +118,78 @@ public class PistonTests
         Assert.Equal("cannot move because it has no head", TroubleText.Of(new Texts(), entity.Trouble(Blocks.Piston.Extend, new Literal[0])));
     }
 
+    /// <summary>
+    /// A piston something is holding, such as a drill pressing into rock, says so while the sequence waits on it, and the
+    /// run finishes by itself once it is let go.
+    /// </summary>
+    [Theory]
+    [InlineData(Blocks.Piston.Extend, 0f)]
+    [InlineData(Blocks.Piston.Retract, 10f)]
+    [InlineData(Blocks.Piston.MoveTo, 0f)]
+    public void APistonThatIsHeldSaysSo(string actionId, float from)
+    {
+        var ship = new Rigged();
+        var piston = ship.Piston(1, "Piston");
+        piston.Stand(from);
+        var automation = new Automation();
+        var sequence = automation.AddSequence((Trigger)null!);
+        var act = new Act(actionId);
+        act.Targets.Add(automation.Declare(ship.World, ship.Entity(piston.Id)).Name);
+        if (actionId == Blocks.Piston.MoveTo)
+        {
+            act.Arguments.Add(Literal.Of(10L));
+            act.Arguments.Add(Literal.Of(0.3));
+        }
+
+        sequence.Steps.Add(act);
+        sequence.Steps.Add(new Await());
+        var runner = new AutomationRunner(automation, ship.World);
+
+        var frame = 0;
+        ship.Tick();
+        runner.Tick(++frame);
+        runner.Call(sequence);
+        frame = Ticks(ship, runner, frame, 30);
+        Assert.NotEqual(SequenceProblem.Stuck, Faulted(runner, sequence).Problem);
+
+        piston.Held = true;
+        frame = Ticks(ship, runner, frame, 200);
+
+        var fault = Faulted(runner, sequence);
+        Assert.Equal(SequenceProblem.Stuck, fault.Problem);
+        Assert.Equal("cannot move because something is holding it", TroubleText.Of(new Texts(), fault.Because));
+        Assert.True(runner.Get(sequence)!.IsRunning);
+
+        piston.Held = false;
+        for (var end = frame + 6000; frame < end && runner.Get(sequence)!.IsRunning; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame + 1);
+        }
+
+        Assert.False(runner.Get(sequence)!.IsRunning);
+        Assert.NotEqual(SequenceProblem.Stuck, Faulted(runner, sequence).Problem);
+    }
+
+    /// <summary>Lets <paramref name="count" /> frames pass after <paramref name="frame" />, the ship and the runner each ticking, and says the frame it ends on.</summary>
+    static int Ticks(Rigged ship, AutomationRunner runner, int frame, int count)
+    {
+        for (var end = frame + count; frame < end; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame + 1);
+        }
+
+        return frame;
+    }
+
+    /// <summary>What the sequence's run says is wrong, as of now.</summary>
+    static SequenceFault Faulted(AutomationRunner runner, Sequence sequence)
+    {
+        runner.Look();
+        return SequenceSummary.Fault(runner.Get(sequence));
+    }
+
     /// <summary>Runs the one act on the piston, and counts the frames until the step after it runs.</summary>
     static int Run(Rigged ship, Piston piston, Lamp lamp, string actionId, params Literal[] given)
     {

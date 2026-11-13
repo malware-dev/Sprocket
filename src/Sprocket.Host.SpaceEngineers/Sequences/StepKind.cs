@@ -27,6 +27,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Stops another sequence of the same system where it is running.</summary>
         Stop,
 
+        /// <summary>Ends the sequence it is in, saying why at its level.</summary>
+        Abort,
+
         /// <summary>Opens an if: runs the steps under it where its test holds.</summary>
         If,
 

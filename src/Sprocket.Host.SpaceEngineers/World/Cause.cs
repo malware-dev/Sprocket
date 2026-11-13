@@ -107,6 +107,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         ItemsAlreadyThere = 33,
 
         /// <summary>A wheel suspension a step moves the wheel of has no wheel.</summary>
-        WheelNoWheel = 34
+        WheelNoWheel = 34,
+
+        /// <summary>The piston cannot move: something is holding it.</summary>
+        PistonHeld = 35
     }
 }

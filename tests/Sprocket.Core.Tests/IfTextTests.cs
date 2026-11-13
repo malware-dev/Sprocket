@@ -10,7 +10,7 @@ public class IfTextTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Top = "sprocket 1 alpha 25\n\n"
+    const string Top = "sprocket 1 alpha 26\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n"
         + "let door2 = block 'Door/LargeBlockDoor' [ 2 ]\n"
         + "\n"

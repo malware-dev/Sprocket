@@ -140,6 +140,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Adding a wait for everything started above it, where waits are rows of their own.</summary>
         AddAwait,
 
+        /// <summary>Adding a step that ends its sequence.</summary>
+        AddAbort,
+
         /// <summary>Adding a step that runs another sequence.</summary>
         AddRun,
 

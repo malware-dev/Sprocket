@@ -37,6 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         int _madeEdits;
         KeyedChildren<object, StepRow> _rows;
         LengthQuestion _length;
+        AbortQuestion _abort;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
         public SequencePage(SprocketEditor editor, Sequence sequence) : base(editor)
@@ -52,6 +53,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>The panel a wait's length is being given in, or null while none is open.</summary>
         public DurationPanel Lengths => _length != null && _length.IsOpen ? _length.Panel : null;
+
+        /// <summary>The form an abort's message and level are being given in, or null while none is open.</summary>
+        public FieldSet Aborting => _abort != null && _abort.IsOpen ? _abort.Form : null;
 
         /// <summary>What the sequence is called: its name, or its number where it has none.</summary>
         public override string Title => SequenceText.Called(Editor.Texts, _sequence);
@@ -287,18 +291,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             if (_length != null)
                 _length.Hang();
+
+            if (_abort != null)
+                _abort.Hang();
         }
 
-        /// <summary>The chip of <paramref name="wait" />'s length, or null where its row does not show one.</summary>
-        Element LengthChip(Wait wait)
+        /// <summary>The chip of the first part of <paramref name="step" />'s row that is a <typeparamref name="TSlot" />, or null where its row shows none.</summary>
+        Element Chip<TSlot>(Step step) where TSlot : SentenceSlot
         {
-            var row = _rows == null || !_keys.Contains(wait) ? null : _rows[wait];
+            var row = _rows == null || !_keys.Contains(step) ? null : _rows[step];
             if (row == null)
                 return null;
 
             foreach (var slot in row.Slots)
             {
-                if (slot is DurationSlot)
+                if (slot is TSlot)
                     return row.ChipOf(slot);
             }
 
@@ -431,6 +438,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             kinds.Add(new AddOption(SentenceText.AwaitWords, texts.Codex.SequenceAwaitAbout,
                 Changes(CommandKind.AddAwait, () => Editor.Do(_sequence, new AddStep(ChangeKind.AddStep, at, new Await())))));
 
+            kinds.Add(new AddOption(SentenceText.AbortWord, texts.Codex.SequenceAbortAbout,
+                Changes(CommandKind.AddAbort, () => Editor.Do(_sequence, new AddStep(ChangeKind.AddStep, at, new Abort())))));
+
             kinds.Add(new AddOption(SentenceText.RunWord, texts.Codex.TermRunAndStop, Changes(CommandKind.AddRun, () => _stepwork.AddRun(false, at))));
             kinds.Add(new AddOption(SentenceText.StopWord, texts.Codex.TermRunAndStop, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
             kinds.Add(new AddOption(SentenceText.SetStateWords, texts.Codex.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
@@ -545,6 +555,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (wait != null)
             {
                 row.Slots.Add(new DurationSlot(wait.Length, Changes(CommandKind.StepSlot, () => Open(wait, false))));
+                return;
+            }
+
+            var abort = step as Abort;
+            if (abort != null)
+            {
+                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
                 return;
             }
 
@@ -679,6 +696,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 case StepKind.Await:
                     page = CodexPages.Await;
                     break;
+                case StepKind.Abort:
+                    page = CodexPages.Abort;
+                    break;
                 case StepKind.Run:
                 case StepKind.Stop:
                     page = CodexPages.RunAndStop;
@@ -697,6 +717,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             if (step is Await)
                 return StepKind.Await;
+
+            if (step is Abort)
+                return StepKind.Abort;
 
             var branch = step as Branch;
             if (branch != null)
@@ -730,9 +753,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_length != null)
                 _length.Finish(false);
 
-            _length = new LengthQuestion(Editor, wait.Length, false, () => LengthChip(wait),
+            _length = new LengthQuestion(Editor, wait.Length, false, () => Chip<DurationSlot>(wait),
                 (length, cancelled) => _stepwork.Closed(wait, length, added, cancelled));
             _length.Hang();
+        }
+
+        /// <summary>Opens the panel what <paramref name="abort" /> says is given in, hung from the part of its row saying it.</summary>
+        void Open(Abort abort)
+        {
+            if (_abort != null)
+                _abort.Finish(false);
+
+            _abort = new AbortQuestion(Editor, abort, () => Chip<ArgumentsSlot>(abort),
+                (message, level, cancelled) => _stepwork.Closed(abort, message, level, cancelled));
+            _abort.Hang();
         }
 
         /// <summary>The places the row at <paramref name="from" /> may land, counted among the rows it does not carry.</summary>

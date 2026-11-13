@@ -215,14 +215,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             Asked();
         }
 
-        /// <summary>How many ticks this block should take to finish <paramref name="actionId" /> with <paramref name="arguments" />, or <see cref="Unestimated" />.</summary>
-        /// <remarks>For the editor and the harness: it works out what the action was told on every call.</remarks>
-        public int Expected(string actionId, IList<Literal> arguments)
-        {
-            var bound = Bind(actionId, arguments);
-            return bound?.Expected(_block) ?? Unestimated;
-        }
-
         /// <summary>Why this block cannot finish <paramref name="actionId" /> as told with <paramref name="arguments" />, or none while it might.</summary>
         /// <remarks>For the editor and the harness: it works out what the action was told on every call, and remembers nothing.</remarks>
         public BlockTrouble Trouble(string actionId, IList<Literal> arguments)

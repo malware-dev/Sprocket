@@ -70,6 +70,9 @@
   <data name="Sprocket.Term.Await" xml:space="preserve">
     <value>Et **avvent**, som står som `wait for pending tasks`, er et [steg](Term.Step class=term) som holder [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) tilbake til de [![](mark:awaited)&amp;nbsp;avventbare handlingene](Term.Awaitable class=term) over er ferdige, som en dør som lukkes.</value>
   </data>
+  <data name="Sprocket.Term.Abort" xml:space="preserve">
+    <value>Et **abort** er et [steg](Term.Step class=term) som avslutter [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) sin med en gang. Det kan gi en melding som sier hvorfor, vist som en merknad, en advarsel eller et problem, og et problem slår også av [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) den kjørte i.</value>
+  </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
     <value>Et **hvis**, også kjent som en *betinget setning*, er et [steg](Term.Step class=term) som sjekker blokker, eller en av [![](mark:state)&amp;nbsp;tilstandene](Term.LogicSystemStates class=term) til [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), og kjører stegene under seg bare når [betingelsen](Term.Condition class=term) er oppfylt.</value>
   </data>
@@ -592,6 +595,15 @@
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
     <value>De [![](mark:awaited)&amp;nbsp;avventbare handlingene](Term.Awaitable class=term) som er startet siden forrige `wait for pending tasks`, kjører samtidig, og [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) venter her til alle er ferdige.</value>
+  </data>
+  <data name="Sprocket.Sequence.AbortAbout" xml:space="preserve">
+    <value>Avslutt [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) her.</value>
+  </data>
+  <data name="Sprocket.Sequence.AbortPartAbout" xml:space="preserve">
+    <value>Endre meldingen og hvordan den vises.</value>
+  </data>
+  <data name="Sprocket.Sequence.AbortLevelAbout" xml:space="preserve">
+    <value>En merknad eller en advarsel vises på [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term). Et problem slår også av [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) den kjørte i, med meldingen som grunn.</value>
   </data>
   <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
     <value>Gi kategorien nytt navn</value>

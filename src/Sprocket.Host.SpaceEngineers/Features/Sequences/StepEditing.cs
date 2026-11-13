@@ -479,6 +479,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _editor.Do(_sequence, new SetWait(index, wait.Length, length.Value));
         }
 
+        /// <summary>Gives <paramref name="abort" /> the <paramref name="message" /> and <paramref name="level" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
+        public void Closed(Abort abort, string message, AbortLevel level, bool cancelled)
+        {
+            var index = _sequence.Steps.IndexOf(abort);
+            if (index < 0 || cancelled)
+                return;
+
+            _editor.Do(_sequence, new SetAbort(index, abort, message, level));
+        }
+
         /// <summary>Deletes the step at <paramref name="index" />; an if, or a branch of one, asks first whether the steps in it go too.</summary>
         public void Remove(int index)
         {
