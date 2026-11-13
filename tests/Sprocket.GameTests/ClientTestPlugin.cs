@@ -203,6 +203,17 @@ namespace Sprocket.GameTests
             var notice = new TerminalNoticeClientTest(_shots, _report, _input).Run();
             while (notice.MoveNext())
                 yield return notice.Current;
+
+            var signals = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_SIGNALS");
+            if (string.IsNullOrEmpty(signals))
+            {
+                _report.Fail("joined edits", "SPROCKET_GAMETEST_SIGNALS names no folder to signal the server through");
+                yield break;
+            }
+
+            var edits = new JoinedEditsClientTest(_report, _input, signals).Run();
+            while (edits.MoveNext())
+                yield return edits.Current;
         }
 
         IEnumerator<int> Steps()

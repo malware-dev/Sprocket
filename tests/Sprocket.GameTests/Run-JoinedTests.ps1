@@ -54,12 +54,15 @@ if (Test-Path $pack) { Remove-Item $pack -Recurse -Force }
 $packer = "$env:USERPROFILE\.nuget\packages\mal.mdk2.modpackager\2.3.0\tools\win-x64\mdk.exe"
 & $packer pack "$repo\src\Sprocket.Host.SpaceEngineers\Sprocket.Host.SpaceEngineers.csproj" -output $pack -configuration Debug -interactive DoNothing | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'The mod did not pack.' }
+# The pack's folder is named by the branch (mdk.ini), so the one folder it wrote is the build.
+$packed = Get-ChildItem $pack -Directory | Select-Object -First 1
+if ($null -eq $packed) { throw 'The pack wrote no mod folder.' }
 
 # 4. The local build over the server's copy and, once backed up, over the client's.
 $serverCopy = Join-Path $Instance 'content\244850\3807234771'
 if (-not (Test-Path $serverCopy)) { throw "The server has no copy of Sprocket at $serverCopy; start it once to download it." }
 if (-not (Test-Path $Workshop)) { throw "The client has no Workshop copy of Sprocket at $Workshop; subscribe to it once." }
-robocopy "$pack\$mod" $serverCopy /MIR /XF metadata.mod modinfo.sbmi /NJH /NJS /NP /NFL /NDL | Out-Null
+robocopy $packed.FullName $serverCopy /MIR /XF metadata.mod modinfo.sbmi /NJH /NJS /NP /NFL /NDL | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Copying the mod to the server failed (robocopy $LASTEXITCODE)." }
 
 robocopy $Workshop $backup /MIR /NJH /NJS /NP /NFL /NDL | Out-Null
@@ -71,16 +74,24 @@ $serverProcess = $null
 $clientProcess = $null
 $began = Get-Date
 try {
-    robocopy "$pack\$mod" $Workshop /MIR /XF metadata.mod modinfo.sbmi /NJH /NJS /NP /NFL /NDL | Out-Null
+    robocopy $packed.FullName $Workshop /MIR /XF metadata.mod modinfo.sbmi /NJH /NJS /NP /NFL /NDL | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "Copying the mod to the client failed (robocopy $LASTEXITCODE)." }
 
-    # 5. A clean world, Kept Count's blueprint, the server, and the client once the server is ready.
+    # 5. A clean world, Kept Count's and Status Pages' blueprints, the server, and the client once the server is ready.
     $world = Join-Path $Instance 'Saves\Sprocket Test'
     Get-ChildItem $world | Remove-Item -Recurse -Force
     Copy-Item (Join-Path $Instance 'WorldTemplate\*') $world -Recurse
     $blueprints = Join-Path $work 'blueprints'
     dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint 'Sprocket Kept Count' $blueprints | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Kept Count' was not written." }
+    dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint 'Sprocket Status Pages' $blueprints | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Status Pages' was not written." }
+
+    # A folder both machines write to, for the client to ask the server to switch a logic system, and the server to answer.
+    $signals = Join-Path $work 'signals'
+    if (Test-Path $signals) { Remove-Item $signals -Recurse -Force }
+    New-Item -ItemType Directory -Force $signals | Out-Null
+    $env:SPROCKET_GAMETEST_SIGNALS = $signals
 
     Remove-Item $serverReport, $clientReport -ErrorAction SilentlyContinue
     $plugin = "$repo\tests\Sprocket.GameTests\bin\Debug\net48\Sprocket.GameTests.dll"

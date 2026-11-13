@@ -29,7 +29,7 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>The editor of the construct <paramref name="block" /> keeps its automation in, or null where Sprocket has none for it.</summary>
-        public static InGameEditor Of(IMyTerminalBlock block)
+        public static InGameEditor? Of(IMyTerminalBlock block)
         {
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -40,6 +40,55 @@ namespace Sprocket.GameTests
 
                 dynamic unit = adopt.Invoke(null, new object[] { block });
                 return unit == null ? null : new InGameEditor(unit.Editor);
+            }
+
+            return null;
+        }
+
+        /// <summary>The editor of the copy the server lent this client, while it is open, or null where none is.</summary>
+        /// <remarks>A client's session keeps the copy it shows in a private field, <c>_copy</c>, of the session in its <c>_current</c>.</remarks>
+        public static InGameEditor? Lent()
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var session = assembly.GetType(Session, false);
+                var current = session?.GetField("_current", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(null);
+                if (current == null)
+                    continue;
+
+                dynamic copy = current.GetType().GetField("_copy", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(current);
+                return copy == null ? null : new InGameEditor(copy.Editor);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Switches the logic system called <paramref name="name" /> <paramref name="on" />, as its row's switch does, answering
+        /// the question a blueprint asks before it is switched off with its last answer, and says whether there was one.
+        /// </summary>
+        public bool SwitchSystem(string name, bool on)
+        {
+            foreach (dynamic system in _editor.Program.Systems)
+            {
+                if (system.Name != name)
+                    continue;
+
+                _editor.SwitchSystem(system, on);
+                Answer();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether the logic system called <paramref name="name" /> is switched on, or null where the editor has none by that name.</summary>
+        public bool? IsOn(string name)
+        {
+            foreach (dynamic system in _editor.Program.Systems)
+            {
+                if (system.Name == name)
+                    return system.Enabled;
             }
 
             return null;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.World;
@@ -143,15 +144,69 @@ namespace Sprocket.GameTests
             MyVisualScriptLogicProvider.SetPlayersPosition(players[0].IdentityId, automation.GetPosition() + automation.WorldMatrix.Forward * 2);
             _report.Pass("joined owner", $"Sprocket Kept Count belongs to {stranger.IdentityId}, shared with nobody, but Kept Automation to {players[0].DisplayName}");
 
-            // The client tests run until it leaves: fifteen minutes at most.
+            // Sprocket Status Pages, the player's own, beside it: the construct JoinedEditsClientTest edits and the server switches.
+            var pages = new PastedBlueprint(Path.Combine(blueprints, "Sprocket Status Pages", "bp.sbc"), near + new Vector3D(40, 0, 0));
+            var paged = pages.Find("Pages Automation");
+            _report.Check("joined pages paste", paged != null, paged != null ? "Sprocket Status Pages stands for the client" : "Pages Automation is missing after the paste");
+            if (paged != null)
+            {
+                yield return 3 * PluginUpdates.PerSecond;
+                paged.CubeGrid.ChangeGridOwnership(players[0].IdentityId, MyOwnershipShareModeEnum.None);
+            }
+
+            // The client tests run until it leaves: fifteen minutes at most. Meanwhile a logic system is switched where the client
+            // asks, as a second client would switch it (#36).
+            var signals = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_SIGNALS");
             for (var waited = 0; waited < 900 && players.Count > 0; waited++)
             {
                 yield return PluginUpdates.PerSecond;
+                if (paged != null && !string.IsNullOrEmpty(signals))
+                {
+                    foreach (var on in new[] { false, true })
+                    {
+                        var switched = Switched(paged, signals, on);
+                        while (switched.MoveNext())
+                            yield return switched.Current;
+                    }
+                }
+
                 players.Clear();
                 MyAPIGateway.Players.GetPlayers(players);
             }
 
             _report.Check("joined client left", players.Count == 0, players.Count == 0 ? "the client left" : "the client stayed past fifteen minutes");
+        }
+
+        /// <summary>
+        /// Switches the logic system the client names in the file switch-on or switch-off in <paramref name="signals" />, of the
+        /// construct <paramref name="block" /> keeps, <paramref name="on" /> through the server's own editor of it, and answers with
+        /// the file switched-on or switched-off; where the client has asked and not been answered.
+        /// </summary>
+        IEnumerator<int> Switched(IMyTerminalBlock block, string signals, bool on)
+        {
+            var word = on ? "on" : "off";
+            var asked = Path.Combine(signals, "switch-" + word);
+            var done = Path.Combine(signals, "switched-" + word);
+            if (!File.Exists(asked) || File.Exists(done))
+                yield break;
+
+            var before = Switches(block);
+
+            var name = File.ReadAllText(asked).Trim();
+            var editor = InGameEditor.Of(block);
+            var found = editor != null && editor.SwitchSystem(name, on);
+
+            _report.Check("joined server switched " + word, found, found ? $"{name} switched {word} on the server" : $"no logic system {name} on {block.CustomName} here");
+            yield return 3 * PluginUpdates.PerSecond;
+            var now = editor?.IsOn(name);
+            _report.Note($"three seconds after, the switches the server's {block.CustomName} carries {(Switches(block) == before ? "are as they were" : "changed")}; the unit's own logic system is {(now == null ? "missing" : now.Value ? "on" : "off")}");
+            File.WriteAllText(done, word);
+        }
+
+        /// <summary>Everything but the program that <paramref name="block" /> carries in its storage, the switches among it.</summary>
+        static string Switches(IMyTerminalBlock block)
+        {
+            return string.Join(" | ", block.Storage?.Values.Where(value => !value.StartsWith("sprocket ")) ?? Enumerable.Empty<string>());
         }
 
         IEnumerator<int> Reloaded()
