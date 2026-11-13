@@ -484,6 +484,12 @@
   <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
     <value>Kjør denne sekvensen manuelt nå</value>
   </data>
+  <data name="Sprocket.Pick.ToTerminalAbout" xml:space="preserve">
+    <value>Vis alt blokkene tilbyr i spillets terminal, med spillets egne navn.</value>
+  </data>
+  <data name="Sprocket.Pick.ToOrganizedAbout" xml:space="preserve">
+    <value>Gå tilbake til Sprockets ordnede liste.</value>
+  </data>
   <data name="Sprocket.Sequence.RunSystemOff" xml:space="preserve">
     <value>Slå på [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) for å kjøre denne sekvensen.</value>
   </data>

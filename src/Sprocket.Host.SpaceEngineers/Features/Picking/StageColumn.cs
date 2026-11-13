@@ -81,11 +81,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _kindLine.Tip = CodexTip.For(_kindLine.Tip, texts.Codex.PickKindAbout);
         }
 
-        /// <summary>Names the views the column is looked at in <paramref name="views" />, in the order it was made with.</summary>
-        public void NameViews(IList<string> views)
+        /// <summary>Names the views the column is looked at in <paramref name="views" />, in the order it was made with, each link saying what it shows by the text beside it in <paramref name="abouts" />.</summary>
+        public void NameViews(IList<string> views, IList<string> abouts)
         {
             for (var i = 0; i < _views.Count && i < views.Count; i++)
+            {
                 _views[i].Text = views[i];
+                _views[i].Tip = CodexTip.For(_views[i].Tip, i < abouts.Count ? abouts[i] : null);
+            }
         }
 
         /// <summary>Raised with what is typed into the box that narrows the column, as it is typed.</summary>

@@ -640,6 +640,14 @@
     <value>Run this sequence manually now</value>
     <comment>Tooltip on the play button in the editor's heading bar on a sequence's screen, and on the play button of each sequence's row on a logic system's screen, while the sequence is not running; pressing it runs the sequence by hand.</comment>
   </data>
+  <data name="Sprocket.Pick.ToTerminalAbout" xml:space="preserve">
+    <value>List everything the blocks offer in the game's terminal, under the game's own names.</value>
+    <comment>Tooltip on the Terminal link at the end of the heading of the selector's column of what can be done to the chosen blocks, checked of them or happens to them, while that column shows Sprocket's organized list.</comment>
+  </data>
+  <data name="Sprocket.Pick.ToOrganizedAbout" xml:space="preserve">
+    <value>Go back to Sprocket's organized list.</value>
+    <comment>Tooltip on the Organized link at the end of the heading of the selector's column of what can be done to the chosen blocks, checked of them or happens to them, while that column lists them the way the game's terminal does.</comment>
+  </data>
   <data name="Sprocket.Sequence.RunSystemOff" xml:space="preserve">
     <value>Switch the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) on to run this sequence.</value>
     <comment>Tooltip on the play button, dimmed and unpressable, in the editor's heading bar on a sequence's screen and on each sequence's row on a logic system's screen, while the logic system is switched off: a switched-off logic system runs nothing.</comment>

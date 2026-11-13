@@ -123,7 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             var texts = _editor.Texts;
             _worded = _editor.Rewordings;
-            _what.NameViews(Views(texts));
+            _what.NameViews(Views(texts), new[] { texts.Codex.PickToOrganizedAbout, texts.Codex.PickToTerminalAbout });
             _what.Title = _forTests ? texts.PickWhatToCheck : _forEvents ? texts.PickWhatHappens : texts.PickWhatToDo;
             _what.EmptyText = _forTests
                 ? texts.PickNothingChecked
