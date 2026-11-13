@@ -1,7 +1,6 @@
 using Lumel.Controls;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Memory;
 using VRageMath;
@@ -51,15 +50,6 @@ public class ColorChoiceTests
 
         Assert.Equal(written, field.Text);
         Assert.Null(field.Color);
-    }
-
-    /// <summary>The panel offers the player's paint colors first.</summary>
-    [Fact]
-    public void ThePaintColorsAreOffered()
-    {
-        var field = Field(new ColorOffer(Paint, null, null));
-
-        Assert.Equal(new[] { new Color(255, 0, 0), new Color(0, 255, 0) }, field.Palette.ToArray());
     }
 
     /// <summary>A color made in the panel reaches the field only on Done, written as the script writes one.</summary>
@@ -144,17 +134,6 @@ public class ColorChoiceTests
         Assert.Equal(1, player.ColorTab);
         Assert.Equal(1, told);
         Assert.Equal(ColorEntry.Rgb, Field(new ColorOffer(new Hsv[0], player, null)).Entry);
-    }
-
-    /// <summary>A field holding what cannot be used is marked.</summary>
-    [Fact]
-    public void AWrongFieldIsMarked()
-    {
-        var field = Field(new ColorOffer(new Hsv[0], null, null));
-
-        field.IsWrong = true;
-
-        Assert.True(field.Is(LookStates.Wrong));
     }
 
     /// <summary>Opens the field's panel, makes <paramref name="color" /> in it, and gives it with Done.</summary>

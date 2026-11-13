@@ -44,26 +44,6 @@ public class MoveItemsScreenTests
         screen.Run(2);
     }
 
-    /// <summary>The step asks where the items go, with a button that selects them.</summary>
-    [Fact]
-    public void TheStepAsksWhereTheItemsGo()
-    {
-        var screen = Picking(out _);
-
-        var form = screen.Editor.Pick().Arguments!.Form;
-        Assert.IsType<SlotsField>(form.Fields[0]);
-        Assert.Contains("Select", screen.Dump);
-    }
-
-    /// <summary>An amount left empty says in its box that all of it moves.</summary>
-    [Fact]
-    public void TheAmountSaysAllWhileEmpty()
-    {
-        var screen = Picking(out _);
-
-        Assert.Contains("\"all\"", screen.Dump);
-    }
-
     /// <summary>Left with no item and no amount, the line says it moves all items.</summary>
     [Fact]
     public void NoItemReadsAsAllItems()

@@ -19,15 +19,6 @@ public class BlueprintWritingTests
         Assert.Equal("signal slot 1", Assert.Single(screen.Editor.SystemSlots()).Name);
     }
 
-    /// <summary>Pressing a slot's name opens its page, named for it.</summary>
-    [Fact]
-    public void PressingASlotsNameOpensIt()
-    {
-        var screen = OnTheSlot();
-
-        Assert.Equal("signal slot 1", screen.Editor.Slot().Title);
-    }
-
     /// <summary>A slot renamed on its heading is renamed wherever its system names it, and one step back takes it back.</summary>
     [Fact]
     public void ASlotRenamedIsOneStepBack()

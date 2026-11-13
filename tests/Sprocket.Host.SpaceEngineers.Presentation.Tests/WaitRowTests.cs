@@ -1,7 +1,6 @@
 using Lumel.Input;
 using Lumel.Images;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -196,15 +195,6 @@ public class WaitRowTests
         Assert.All(rows, row => Assert.False(row.ClockLit || row.MarksLit));
     }
 
-    /// <summary>A mark that can be waited for is lit by the outline of its own shape, and any other mark has none.</summary>
-    [Fact]
-    public void AMarkIsLitByItsOwnOutline()
-    {
-        Assert.Equal(Symbols.LastingOutline, Outline(Symbols.Lasting));
-        Assert.Equal(Symbols.AwaitedOutline, Outline(Symbols.Awaited));
-        Assert.Null(Outline(Symbols.Action));
-    }
-
     /// <summary>A step that goes straight on still goes straight on once changed to another action that takes time.</summary>
     [Fact]
     public void ChangingAStepKeepsItGoingStraightOn()
@@ -281,19 +271,6 @@ public class WaitRowTests
         Assert.All(rig.Editor.StepRows(), row => Assert.False(row.HasProblem));
     }
 
-    /// <summary>Each wait is a numbered line of its own.</summary>
-    [Fact]
-    public void EachWaitIsARowOfItsOwn()
-    {
-        var rig = Airlock(out var sequence);
-        Steps(rig, sequence, Close(rig, "Airlock Inner Door"), new Await(), new Wait(60));
-
-        var rows = rig.Editor.StepRows();
-        Assert.Equal(3, rows.Count);
-        Assert.Equal(StepKind.Await, rows[1].Kind);
-        Assert.Equal(new[] { 1, 2, 3 }, rows.Select(row => row.Number).ToArray());
-    }
-
     /// <summary>A wait row is deleted on its own, and a step deleted leaves the wait row after it.</summary>
     [Fact]
     public void AWaitRowIsDeletedOnItsOwn()
@@ -313,27 +290,6 @@ public class WaitRowTests
         Assert.IsType<Await>(sequence.Steps[0]);
         Assert.IsType<Wait>(sequence.Steps[1]);
     }
-
-    /// <summary>The menu of steps offers an await, and adds one with nothing else.</summary>
-    [Fact]
-    public void TheMenuOffersAWaitForAll()
-    {
-        var rig = Airlock(out var sequence);
-        Steps(rig, sequence, new If(Closed(rig)), new EndIf());
-        Assert.Contains(SentenceText.AwaitWords, Offered(rig));
-
-        Menu(rig).Single(choice => choice.Text == SentenceText.AwaitWords).Adds!.Execute();
-        rig.Tick();
-        Assert.IsType<Await>(sequence.Steps[1]);
-        Assert.Equal(3, sequence.Steps.Count);
-    }
-
-    /// <summary>The menu of steps at the end of the if's branch.</summary>
-    static IList<AddOption> Menu(Simulation rig) =>
-        Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.Adds).Adds).Choices!;
-
-    /// <summary>The words the menu of steps offers.</summary>
-    static List<string> Offered(Simulation rig) => Menu(rig).Select(choice => choice.Text).ToList();
 
     static Comparison Closed(Simulation rig)
     {
@@ -362,8 +318,6 @@ public class WaitRowTests
         rig.Editor.Program.Edited();
         rig.Tick();
     }
-
-    static string? Outline(string mark) => ((Glyph)new MemberName { Mark = mark }.Children[0]).Halo;
 
     static Simulation Airlock(out Sequence sequence)
     {

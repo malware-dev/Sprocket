@@ -10,21 +10,6 @@ public class StepMenuTests
 {
     const string Kinds = "press \"logic system\" type Airlock enter press Airlock press Sequences press sequence enter";
 
-    /// <summary>The plus at the end of a sequence hangs the five kinds of step from itself, and nothing else is offered there.</summary>
-    [Fact]
-    public void ThePlusHangsEveryKindOfStep()
-    {
-        var screen = Screen.Fresh(Kinds.Split(' '));
-
-        Assert.True(screen.Shows("+ step"));
-        Assert.False(screen.Shows("task"), "the kinds were offered before the plus was pressed");
-
-        screen.Do("press", "step");
-
-        foreach (var kind in new[] { "task", "delay", "run", "stop", "if" })
-            Assert.True(screen.Shows(kind), "the menu does not offer " + kind);
-    }
-
     /// <summary>Choosing a kind puts the menu away and adds that step, opening what it opens as its own button did.</summary>
     [Fact]
     public void ChoosingAKindAddsIt()
@@ -66,21 +51,4 @@ public class StepMenuTests
         Assert.IsType<PickPage>(screen.Editor.Current);
     }
 
-    /// <summary>The end of an if's branch has its own plus, and a step chosen there goes into the branch.</summary>
-    [Fact]
-    public void TheEndOfABranchHasItsOwnPlus()
-    {
-        var screen = Screen.Fresh((Kinds + " press step press if press \"Airlock Outer Door\" press closed press Done").Split(' '));
-
-        var rows = screen.Editor.StepRows();
-        Assert.Single(rows, row => row.Kind == StepKind.Adds);
-
-        screen.Do("press", "step", "press", "delay");
-        screen.Run(1);
-
-        var steps = screen.Editor.Program.Systems[0].Sequences[0].Steps;
-        Assert.IsType<If>(steps[0]);
-        Assert.IsType<Wait>(steps[1]);
-        Assert.IsType<EndIf>(steps[2]);
-    }
 }

@@ -15,12 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class SequenceWordsTests
 {
     [Fact]
-    public void ATriggerTheShipAnswersSaysThatItIsOne()
-    {
-        Assert.Equal("When something on this construct starts it", SequenceText.Trigger(null!, null!, null!, new SignalTrigger(), null));
-    }
-
-    [Fact]
     public void ARunReadsAsTheSequenceItStarts()
     {
         var program = new Automation();

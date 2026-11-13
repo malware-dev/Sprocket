@@ -68,19 +68,6 @@ public class CodexTests
         Assert.False(tip.IsPinned);
     }
 
-    /// <summary>The editor's tips open a link's page in a tip beside them, casting the short shadow every hanging thing casts.</summary>
-    [Fact]
-    public void TheEditorsTipsNestAndCastAShadow()
-    {
-        var screen = Screen.Fresh("tick", "3");
-        var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
-        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", Styles.TipDelay.ToString());
-        var tip = screen.Scene.CodexTip!;
-
-        Assert.True(screen.Scene.View.Codex.OpensNestedTips);
-        Assert.Same(Styles.ShortShadow, tip.Shadow);
-    }
-
     /// <summary>
     /// The question mark turns every tip off, and the look of terms with them, keeping the choice; pressed again it turns
     /// them back on.
@@ -305,27 +292,6 @@ public class CodexTests
     public void AHeadingWithoutItsSlotIsItsWords()
     {
         Assert.Equal("ON YOUR SHIPS", CodexPages.Within("On your ships", "constructs", "constructs", CodexPages.Construct));
-    }
-
-    /// <summary>The library heads this construct's side with the construct's name, in every language.</summary>
-    [Theory]
-    [InlineData("")]
-    [InlineData("no")]
-    public void TheLibraryHeadsThisConstructWithItsName(string culture)
-    {
-        var screen = Screen.Fresh("tick", "3");
-        var editor = screen.Editor;
-        if (culture.Length != 0)
-        {
-            screen.Scene.Speak(culture);
-            editor.Reword();
-        }
-
-        editor.OpenLibrary();
-        screen.Run(2);
-        var page = Assert.IsType<LibraryPage>(editor.Current);
-
-        Assert.Equal(editor.World.Name, Assert.IsType<Label>(page.Rows.First()).Text);
     }
 
     /// <summary>

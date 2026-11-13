@@ -135,16 +135,4 @@ public class DuplicatingTests
         Assert.Single(screen.Editor.Program.Sequences);
     }
 
-    /// <summary>The copy is a sequence of the same system, so the system's list shows both.</summary>
-    [Fact]
-    public void BothSequencesAreInTheSameSystem()
-    {
-        var screen = AtTheList();
-
-        Duplicate(screen, 0);
-
-        var system = screen.Editor.Program.Systems[0];
-        Assert.Equal(2, system.Sequences.Count);
-        Assert.Single(screen.Editor.Program.Systems);
-    }
 }

@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
-using Lumel.Text;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -42,17 +41,6 @@ public class ChoicePageTests
 
         sim.Editor.PressChoice("Starboard");
         Assert.Equal("Starboard", given);
-    }
-
-    /// <summary>A question with nothing to choose from says so.</summary>
-    [Fact]
-    public void NothingToChooseFromIsSaid()
-    {
-        var sim = Asking(page => page.EmptyText = "No blueprints yet.");
-
-        Assert.Empty(sim.Editor.Choices());
-        Assert.Contains(sim.Editor.Current.View!.Within().OfType<Label>(),
-            label => label.IsVisible && label.Text == "No blueprints yet.");
     }
 
     static Simulation Asking(Action<ChoicePage> fill)

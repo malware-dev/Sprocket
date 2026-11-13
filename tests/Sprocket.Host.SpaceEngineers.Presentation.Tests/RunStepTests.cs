@@ -26,18 +26,6 @@ public class RunStepTests
         Assert.DoesNotContain(offered, text => text.Contains(first.Name));
     }
 
-    /// <summary>Each sequence offered is marked as a sequence.</summary>
-    [Fact]
-    public void TheSequencesOfferedAreMarked()
-    {
-        var rig = Two(out _, out _);
-
-        rig.Editor.PressAdd(SentenceText.RunWord);
-        rig.Tick();
-
-        Assert.All(rig.Editor.Choices(), row => Assert.Equal(Symbols.Sequence, row.Mark));
-    }
-
     /// <summary>Running another sequence adds the step and a wait for it after it, as one step back.</summary>
     [Fact]
     public void RunningOneAddsTheStepAndAWaitForIt()

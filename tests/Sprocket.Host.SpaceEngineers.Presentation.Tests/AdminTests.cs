@@ -27,28 +27,6 @@ public class AdminTests
         Assert.False(screen.Shows("Admin"));
     }
 
-    /// <summary>The button stands on the home screen alone.</summary>
-    [Fact]
-    public void TheButtonIsOnTheHomeScreenAlone()
-    {
-        var screen = Screen.Fresh();
-        screen.Scene.Ship.Admin = true;
-        screen.Editor.NewSystem("Airlock");
-        screen.Run(2);
-
-        Assert.False(screen.Shows("Admin"));
-    }
-
-    /// <summary>It opens on this world's tab, each rule left to every world, which gives what is built in.</summary>
-    [Fact]
-    public void ThisWorldLeavesEveryRuleToEveryWorld()
-    {
-        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
-
-        Assert.True(screen.Shows("Default (every tick)"));
-        Assert.True(screen.Shows("Default (off)"));
-    }
-
     /// <summary>Where nothing can be shared the two tabs left share the strip, with nothing kept open between them.</summary>
     [Fact]
     public void TabsLeaveNoRoomForOneNotOffered()

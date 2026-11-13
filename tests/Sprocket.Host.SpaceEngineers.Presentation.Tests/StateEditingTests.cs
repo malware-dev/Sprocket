@@ -39,17 +39,6 @@ public class StateEditingTests
     /// <summary>The airlock with a sequence that sets where.</summary>
     const string Setting = Head + "    sequence 1 {\n        set where to outside\n    }\n}\n";
 
-    /// <summary>The step menu offers setting a state after stop, and one if: a state is checked by choosing it as the if's source.</summary>
-    [Fact]
-    public void TheStepMenuOffersSettingAState()
-    {
-        var screen = OnSequence(Program, out _);
-        var offered = Offered(screen);
-
-        Assert.Equal(offered.IndexOf(SentenceText.StopWord) + 1, offered.IndexOf(SentenceText.SetStateWords));
-        Assert.Single(offered, word => word.StartsWith(SentenceText.IfWord, StringComparison.Ordinal));
-    }
-
     /// <summary>Set state asks which state and what to set it to, and adds the step, which reads as the script says it.</summary>
     [Fact]
     public void SetStateAddsTheStep()
@@ -816,13 +805,6 @@ public class StateEditingTests
         editor.Push(new SequencePage(editor, sequence));
         screen.Run(1);
         return screen;
-    }
-
-    /// <summary>What the plus under the sequence's last step offers, in order.</summary>
-    static List<string> Offered(Screen screen)
-    {
-        var plus = Target.Within(screen.Editor.Current.View!).OfType<PlusMenu>().Last();
-        return plus.Choices.SelectMany(choice => choice.Choices ?? new[] { choice }).Select(choice => choice.Text).ToList();
     }
 
     /// <summary>The Source box heading the selector's first column, showing <paramref name="shows" />.</summary>

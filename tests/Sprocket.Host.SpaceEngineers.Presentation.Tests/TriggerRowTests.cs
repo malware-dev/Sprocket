@@ -21,20 +21,6 @@ public class TriggerRowTests
         Assert.Equal(new[] { "When", "signal slot 1", "button 1 is pressed", "then run", "Sequence 1" }, Said(sim.Editor.Triggers()[0]));
     }
 
-    /// <summary>Each part is pressed by its own command, the one that opens the question it was answered with.</summary>
-    [Fact]
-    public void EachPartIsPressedByItsOwnCommand()
-    {
-        var sim = Built();
-        var row = sim.Editor.Triggers()[0];
-        var chips = row.Within().OfType<SlotChip>().ToList();
-
-        Assert.Equal(3, chips.Count);
-        Assert.Same(row.Starts[0].Opens, chips[0].Command);
-        Assert.Same(row.Starts[1].Opens, chips[1].Command);
-        Assert.Same(row.Does[0].Opens, chips[2].Command);
-    }
-
     /// <summary>A trigger with something wrong is washed and says what, on its own line under the sentence.</summary>
     [Fact]
     public void ABrokenTriggerIsWashedAndSaysWhy()

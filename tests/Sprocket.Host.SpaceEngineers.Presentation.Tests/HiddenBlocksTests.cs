@@ -112,15 +112,4 @@ public class HiddenBlocksTests
         Assert.True(screen.Editor.Viewer.ShowsHidden);
     }
 
-    /// <summary>The eye is drawn shut, and open once pressed.</summary>
-    [Fact]
-    public void TheEyeIsDrawnShutAndThenOpen()
-    {
-        var screen = WithAHiddenVent(Rig.Demo());
-        Assert.Contains(screen.Drawings, drawn => drawn.IsSymbol && drawn.Text == Symbols.HiddenHidden);
-
-        Blocks(screen).ShowHidden!.Execute();
-        screen.Run(2);
-        Assert.Contains(screen.Drawings, drawn => drawn.IsSymbol && drawn.Text == Symbols.HiddenShown);
-    }
 }

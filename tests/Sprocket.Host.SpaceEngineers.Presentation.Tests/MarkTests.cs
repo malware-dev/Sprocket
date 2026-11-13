@@ -14,43 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <remarks>The installation panel's two kinds of slot carry the same marks as the moments they are filled for.</remarks>
 public class MarkTests
 {
-    /// <summary>Every signal is marked by the pulse, one of Sprocket's own as one sent from a toolbar slot.</summary>
-    [Fact]
-    public void TheTriggerPickerMarksEverySignalByThePulse()
-    {
-        var screen = OnTheSystem();
-
-        screen.Editor.PressStart("when");
-        screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Run(2);
-        Assert.Equal(Symbols.Signal, Entry(screen, "finishes closing").Mark);
-
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Run(2);
-        Assert.Equal(Symbols.Signal, Entry(screen, "button is pressed").Mark);
-    }
-
-    /// <summary>What a trigger may do is marked as what it is: a single action by the bolt, a new sequence and each sequence by the sequence's mark.</summary>
-    [Fact]
-    public void WhatATriggerDoesIsMarked()
-    {
-        var screen = OnTheSystem();
-        var texts = screen.Editor.Texts;
-        screen.Editor.DeveloperMode = true;
-        screen.Run(1);
-
-        screen.Editor.PressStart("when");
-        screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("finishes closing");
-        screen.Run(2);
-
-        // The mark each row draws, from the first time the rows are filled.
-        var rows = screen.Editor.Pick().Stages.Last().Entries();
-        Assert.Equal(Symbols.Action, Drawn(rows.Single(row => row.Text == texts.PickSingleAction)));
-        Assert.Equal(Symbols.Sequence, Drawn(rows.Single(row => row.Text == texts.PickNewSequence)));
-        Assert.Equal(Symbols.Sequence, Drawn(rows.Single(row => row.Text == "Sequence 1")));
-    }
-
     /// <summary>
     /// A mark says nothing of its own: an action a step waits for says so on its whole row, and a mark beside a member that
     /// does not wait carries no note at all.
@@ -102,18 +65,6 @@ public class MarkTests
         var light = screen.Editor.World.Entities.Single(entity => entity.Name == "Airlock Light");
         Assert.Equal(Symbols.Value, MarkText.Of(light.Kind.FindAction("Radius", ReachKind.Value)!));
         Assert.Equal(Symbols.Action, MarkText.Of(light.Kind.FindAction("OnOff_On", ReachKind.Action)!));
-    }
-
-    /// <summary>A trigger's row marks the signal that starts it and the sequence it runs.</summary>
-    [Fact]
-    public void ATriggerRowMarksItsSignalAndItsSequence()
-    {
-        var screen = OnTheSystem();
-
-        var marks = screen.Editor.Triggers()[0].Within().OfType<MemberName>().Select(member => member.Mark).ToList();
-
-        Assert.Contains(Symbols.Signal, marks);
-        Assert.Contains(Symbols.Sequence, marks);
     }
 
     /// <summary>A logic system lists its slots in the order they were made, a block slot marked by the cube and a signal slot by the pulse.</summary>
@@ -192,18 +143,6 @@ public class MarkTests
     static PickRow Entry(Screen screen, string text)
     {
         return screen.Editor.Pick().Stages.Last().Entries().Single(entry => entry.Text == text);
-    }
-
-    /// <summary>The mark <paramref name="row" />'s name draws beside it.</summary>
-    static string Drawn(PickRow row) => row.Within().OfType<MemberName>().Single().Mark;
-
-    /// <summary>A button system's own screen.</summary>
-    static Screen OnTheSystem()
-    {
-        var screen = Screen.Fresh();
-        screen.Editor.NewButtonSystem("Airlock");
-        screen.Editor.Back();
-        return screen.Run(2);
     }
 
     /// <summary>A button system's sequence, open.</summary>

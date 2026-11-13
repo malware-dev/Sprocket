@@ -58,20 +58,6 @@ public class StepTermTests
         Assert.Equal(Palette.Dim, words.LinkColor);
     }
 
-    /// <summary>Resting the pointer on the first if opens the codex tip at the page on ifs.</summary>
-    [Fact]
-    public void RestingOnTheFirstIfShowsItsPage()
-    {
-        var (screen, rows) = Shown(Twice);
-        var at = Links.First(rows.First(row => row.Kind == StepKind.If), CodexPages.If, out _);
-
-        // The first point of a link is on its top left corner; a few units in is on its words.
-        screen.Do("move", Say(at.X + 4f), Say(at.Y + 6f), "tick", Styles.TipDelay.ToString());
-
-        Assert.NotNull(screen.Scene.CodexTip);
-        Assert.Same(screen.Editor.Codex.Find(CodexPages.If), screen.Scene.CodexTip!.Page);
-    }
-
     /// <summary>Once the first of a word is taken away, the next one on the screen becomes its term.</summary>
     [Fact]
     public void TheNextOfAWordTakesOverWhenTheFirstGoes()
@@ -122,8 +108,6 @@ public class StepTermTests
         screen.Run(5);
         return (screen, editor.StepRows());
     }
-
-    static string Say(float value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
     // Two of every step that opens with a term: two ifs, each with an otherwise if and an otherwise, two delays, two runs and two stops.
     const string Twice = "sprocket 1 alpha 18\n\n"

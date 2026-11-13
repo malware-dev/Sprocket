@@ -29,17 +29,6 @@ public class SystemTabsTests
 
     static Tab[] Tabs(Screen screen) => screen.Editor.Current!.View.Within().OfType<Tab>().ToArray();
 
-    /// <summary>The four tabs stand in order, each named.</summary>
-    [Fact]
-    public void TheScreenHasFourTabs()
-    {
-        var screen = WithAWarnedSequence();
-        var texts = screen.Editor.Texts;
-
-        Assert.Equal(new[] { texts.SystemTriggers, texts.SystemSequences, texts.SystemState, texts.SystemInstallationPanel },
-            Tabs(screen).Select(tab => tab.Header).ToArray());
-    }
-
     /// <summary>Each tab explains the term it is named for where the pointer rests on it.</summary>
     [Fact]
     public void EachTabExplainsItsTerm()

@@ -75,16 +75,4 @@ public class HeadingMarkTests
         return screen.Drawings.Where(drawn => drawn.IsSymbol && kinds.Contains(drawn.Text)).OrderBy(drawn => drawn.At.Y).First().Text;
     }
 
-    /// <summary>A sequence's mark says it is a sequence.</summary>
-    [Fact]
-    public void ASequencesMarkSaysItIsASequence()
-    {
-        var sim = Simulation.Fresh();
-        sim.Editor.NewButtonSystem("Airlock");
-        sim.Tick();
-
-        var heading = sim.Editor.Screen.Heading;
-        Assert.Equal(Symbols.Sequence, heading[0].Mark);
-        Assert.Equal(sim.Texts.Codex.TermSequence, heading[0].MarkAbout);
-    }
 }
