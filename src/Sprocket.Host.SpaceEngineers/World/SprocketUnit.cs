@@ -676,6 +676,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 state.Interrupt(StopCause.Hand, 0);
         }
 
+        /// <summary>Starts paused automation again as it was.</summary>
+        /// <remarks>Called on the server for a client that resumed it on its copy.</remarks>
+        public void Resume()
+        {
+            _program.PausedFrom.Clear();
+            _runner.Live = Runs;
+        }
+
         /// <summary>
         /// The program, and what is switched off, as they are written into the block: what a copy on
         /// another machine is made from.

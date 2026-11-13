@@ -159,6 +159,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>On a client's copy, set by whoever lent it, since the toolbars are written where the Sprocket is kept.</remarks>
         public Action<long> Wire { get; set; }
 
+        /// <summary>Where paused automation resumed here is resumed for real, or null where this is the automation itself.</summary>
+        /// <remarks>Set on a client's copy, which holds the pause only as the server lent it: the server resumes it.</remarks>
+        public Action Resumes { get; set; }
+
         /// <summary>Where the buttons picked and not yet written are let go of, as a pick is backed out of.</summary>
         /// <remarks>On a client's copy it asks the server.</remarks>
         public Action Unwire { get; set; }
@@ -1301,6 +1305,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void Resume()
         {
             _program.PausedFrom.Clear();
+            Resumes?.Invoke();
             UnwindTo(1);
         }
 
@@ -1323,6 +1328,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     DeleteSystem(doomed);
 
                 _program.PausedFrom.Clear();
+                Resumes?.Invoke();
                 UnwindTo(1);
             });
             Answer(Texts.ButtonLeaveAlone, () => { }, true);

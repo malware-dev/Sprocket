@@ -82,6 +82,36 @@ namespace Sprocket.GameTests
             return false;
         }
 
+        /// <summary>Runs the subject of the page the editor is on, as its play button does, and says whether it could be run.</summary>
+        public bool Run()
+        {
+            dynamic runs = _editor.Screen.Runs;
+            if (runs == null || !runs.CanExecute)
+                return false;
+
+            runs.Execute();
+            return true;
+        }
+
+        /// <summary>Whether a run of the first sequence met something it could not do and switched its first installation off, saying why.</summary>
+        public bool Stopped()
+        {
+            dynamic installation = _editor.Program.Sequences[0].System?.First;
+            return installation != null && !(bool)installation.Enabled && installation.Halt != null;
+        }
+
+        /// <summary>How the first sequence's last run stands, for a test's report.</summary>
+        public string LastRun()
+        {
+            dynamic run = _editor.Runner.Get(_editor.Program.Sequences[0]);
+            if (run == null)
+                return "no run";
+
+            dynamic fault = run.Faults.Fault;
+            dynamic installation = _editor.Program.Sequences[0].System.First;
+            return $"running {run.IsRunning}, fault {fault.Problem} on {fault.Which} at step {fault.Step}, installation {(installation.Enabled ? "on" : "off")}{(installation.Halt == null ? "" : " with a reason kept")}";
+        }
+
         /// <summary>Whether the logic system called <paramref name="name" /> is switched on, or null where the editor has none by that name.</summary>
         public bool? IsOn(string name)
         {

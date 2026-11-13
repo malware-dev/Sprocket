@@ -99,7 +99,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 .UsingModel<WiringRequest>(WiringRequest.SizeOf, WiringRequest.Read, WiringRequest.Write)
                 .UsingModel<UnwiringRequest>(UnwiringRequest.SizeOf, UnwiringRequest.Read, UnwiringRequest.Write)
                 .UsingModel<PlayerPreference>(PlayerPreference.SizeOf, PlayerPreference.Read, PlayerPreference.Write)
-                .UsingModel<SettingsRuling>(SettingsRuling.SizeOf, SettingsRuling.Read, SettingsRuling.Write);
+                .UsingModel<SettingsRuling>(SettingsRuling.SizeOf, SettingsRuling.Read, SettingsRuling.Write)
+                .UsingModel<ResumeOrder>(ResumeOrder.SizeOf, ResumeOrder.Read, ResumeOrder.Write);
         }
 
         /// <summary>Starts hearing what arrives on <paramref name="channel" />, which is built with <see cref="Carry" />.</summary>
@@ -115,6 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _channel.ListenFor<UnwiringRequest>(Unwired);
             _channel.ListenFor<PlayerPreference>(Preferred);
             _channel.ListenFor<SettingsRuling>(Ruled);
+            _channel.ListenFor<ResumeOrder>(Resumed);
         }
 
         /// <summary>Asks the server for the Sprocket on <paramref name="block" />, as <paramref name="name" />.</summary>
@@ -197,6 +199,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 Sequence = sequence.Number,
                 Stops = stops
             }, true);
+        }
+
+        /// <summary>Asks the server to resume the paused automation of the Sprocket on <paramref name="block" />.</summary>
+        public void Resume(long block)
+        {
+            GameLog.Say($"asking the server to resume the automation on block {block}");
+            _channel.SendToServer(new ResumeOrder { Block = block }, true);
         }
 
         /// <summary>Remembers what the server lent, so sending starts from it rather than from nothing.</summary>
@@ -512,6 +521,29 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             GameLog.Say(said);
             unit.Order(order.System, order.Instance, order.Sequence, order.Stops);
+        }
+
+        void Resumed(ushort channel, ResumeOrder order, ulong sender, bool fromServer)
+        {
+            if (!NetworkChannel.Network.IsServer)
+                return;
+
+            var said = $"{Who(sender)} asked to resume the automation on block {order.Block}";
+            if (!Holds(order.Block, sender))
+            {
+                GameLog.Say($"{said}, and was ignored: they do not hold it");
+                return;
+            }
+
+            SprocketUnit unit = _find(order.Block);
+            if (unit == null)
+            {
+                GameLog.Say($"{said}, which carries no Sprocket here");
+                return;
+            }
+
+            GameLog.Say(said);
+            unit.Resume();
         }
 
         /// <summary>What a change does to a program and its switches, for the log.</summary>

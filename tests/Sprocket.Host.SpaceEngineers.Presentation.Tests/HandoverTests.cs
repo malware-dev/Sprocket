@@ -777,6 +777,39 @@ public class HandoverTests : IDisposable
         Assert.False(run.IsRunning, "the sequence did not stop on the server");
     }
 
+    /// <summary>Paused automation resumed on a copy is resumed on the server, which runs it again.</summary>
+    [Fact]
+    public void AClientResumesPausedAutomationOnTheServer()
+    {
+        _sim.Machine.Own(Bert);
+        _sim.Tick();
+        _sim.Tick();
+        _sim.Machine.Own(Anna);
+        _sim.Tick();
+        _sim.Tick();
+        Assert.True(_sim.Unit.Program.Paused, "the construct taken outside sharing did not pause");
+
+        // Every client is Anna, the construct's new owner, who may open it.
+        MyAPIGateway.Players = Pretend.To<IMyPlayerCollection>()
+            .Does("TryGetIdentityId", _ => Anna)
+            .Does("TryGetSteamId", _ => 0UL)
+            .Done();
+        try
+        {
+            var (anna, hers, _) = Lent();
+            _wire.As(anna, () => hers.Resume(_block));
+            _wire.Settle();
+            _sim.Tick();
+        }
+        finally
+        {
+            MyAPIGateway.Players = null;
+        }
+
+        Assert.False(_sim.Unit.Program.Paused, "the resume did not reach the server");
+        Assert.True(_sim.Runner.Live, "the server's automation still does not run");
+    }
+
     /// <summary>A copy lent while a sequence runs on the server shows it running, from the construct's memory it is lent with.</summary>
     [Fact]
     public void ACopyShowsWhatTheServerIsRunning()

@@ -157,9 +157,20 @@ namespace Sprocket.GameTests
             // The client tests run until it leaves: fifteen minutes at most. Meanwhile a logic system is switched where the client
             // asks, as a second client would switch it (#36).
             var signals = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_SIGNALS");
+            var hands = string.IsNullOrEmpty(signals) ? null : new ChangingHandsServer(_report, signals, blueprints);
             for (var waited = 0; waited < 900 && players.Count > 0; waited++)
             {
                 yield return PluginUpdates.PerSecond;
+
+                // #2 once the client asks for it, played through to its end.
+                if (hands != null && hands.Asked)
+                {
+                    var played = hands.Run(players[0], near + new Vector3D(-40, 0, 0));
+                    hands = null;
+                    while (played.MoveNext())
+                        yield return played.Current;
+                }
+
                 if (paged != null && !string.IsNullOrEmpty(signals))
                 {
                     foreach (var on in new[] { false, true })

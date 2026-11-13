@@ -424,6 +424,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _handover.Wire(id, panel);
             };
             copy.Editor.Unwire = () => _handover.Unwire(id);
+            copy.Editor.Resumes = () => _handover.Resume(id);
 
             Lent(block, id, copy);
         }

@@ -86,6 +86,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Kept Count' was not written." }
     dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint 'Sprocket Status Pages' $blueprints | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Status Pages' was not written." }
+    dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint 'Sprocket Forced Door' $blueprints | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Forced Door' was not written." }
 
     # A folder both machines write to, for the client to ask the server to switch a logic system, and the server to answer.
     $signals = Join-Path $work 'signals'

@@ -214,6 +214,10 @@ namespace Sprocket.GameTests
             var edits = new JoinedEditsClientTest(_report, _input, signals).Run();
             while (edits.MoveNext())
                 yield return edits.Current;
+
+            var hands = new ChangingHandsClientTest(_shots, _report, _input, new EditorTour(_shots, _report, _input), signals).Run();
+            while (hands.MoveNext())
+                yield return hands.Current;
         }
 
         IEnumerator<int> Steps()
