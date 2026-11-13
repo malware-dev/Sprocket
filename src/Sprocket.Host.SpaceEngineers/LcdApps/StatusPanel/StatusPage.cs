@@ -47,9 +47,11 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _dots.IsVisible = false;
             _pageOf.IsVisible = false;
 
-            var under = high - size.Icon - Spacing;
+            // The gaps are the size's own: the stack's Spacing takes up Base.Spacing only once its looks are next resolved, so on
+            // a panel's first layout it still reads 0.
+            var under = high - size.Icon - size.Between;
             if (status.Heard && status.Troubled)
-                Troubled(graphics, look, status, under - Spacing - size.Small, wide, inset, turn, from);
+                Troubled(graphics, look, status, under - size.Between - size.Small, wide, inset, turn, from);
             else if (status.Heard)
             {
                 // The top line goes last, where the calm screen does not fit under it even at its smallest.

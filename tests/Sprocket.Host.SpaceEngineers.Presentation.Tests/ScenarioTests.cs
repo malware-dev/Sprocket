@@ -93,6 +93,31 @@ public class ScenarioTests
         Assert.Equal("", systems[1].ListedOn);
     }
 
+    /// <summary>The status pages' switched-off logic systems are more than one text panel lists at once, so its automation panel turns pages.</summary>
+    [Fact]
+    public void TheStatusPagesFillMoreThanOnePage()
+    {
+        var built = new StatusPages().Build(BlockDefinitions.FromGame());
+        var sim = built.Sim;
+        Assert.Equal(StatusPages.Systems.Count, sim.Editor.Program.Systems.Count);
+        Assert.All(sim.Editor.Program.Systems, system => Assert.False(system.Enabled));
+
+        var status = new LcdApps.StatusPanel.ConstructStatus();
+        status.Begin(sim.Now);
+        status.Include(sim.Unit.Program, sim.Runner);
+        status.End("Pages");
+
+        var face = StatusPictureTests.Face(Sim.Content.ScreenShape.Reference.First(each => each.Name == "lcd-panel"));
+        var picture = new LcdApps.StatusPanel.StatusPicture();
+        var panel = Sim.Simulation.StatusFace.Panel(picture, face);
+        Sim.Simulation.StatusFace.Lay(picture, panel, face, status, sim.Texts, 0, 0);
+        var first = picture.Pages;
+        Sim.Simulation.StatusFace.Lay(picture, panel, face, status, sim.Texts, 0, 0);
+
+        Assert.True(picture.Pages > 1, "the panel lists every logic system on one page, so it never turns");
+        Assert.Equal(picture.Pages, first);
+    }
+
     /// <summary>Each of the script limit's buttons runs its own script and switches its light on, every time it is pressed.</summary>
     [Fact]
     public void TheScriptLimitRunsEachScriptEachPress()

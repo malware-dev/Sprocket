@@ -246,7 +246,7 @@ public class StatusPictureTests
     }
 
     /// <summary>A screen of <paramref name="shape" /> measuring with the harness's stand-in widths and the mod's own faces.</summary>
-    static Face Face(ScreenShape shape)
+    public static Face Face(ScreenShape shape)
     {
         var device = new ScreenSpaceDevice(SprocketContent.Instance);
         var fonts = new FontSet(new FallbackFonts(device, "Segoe UI"));

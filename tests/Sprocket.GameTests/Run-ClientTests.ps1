@@ -13,9 +13,9 @@ param(
     [string]$Game = 'E:\Steam\steamapps\common\SpaceEngineers',
     [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
     [string]$Template = 'E:\Data\sprocket-ds-test\WorldTemplate',
-    [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count', 'Sprocket Move Items'),
+    [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count', 'Sprocket Move Items', 'Sprocket Status Pages'),
     [int]$TimeoutSeconds = 900,
-    # The parts to play, of scene, kept, editor, move, remote and banner; every part where none is named.
+    # The parts to play, of scene, kept, pages, editor, menus, move, remote and banner; every part where none is named.
     [string[]]$Only = @()
 )
 $ErrorActionPreference = 'Stop'
@@ -35,7 +35,10 @@ $packer = "$env:USERPROFILE\.nuget\packages\mal.mdk2.modpackager\2.3.0\tools\win
 & $packer pack "$repo\src\Sprocket.Host.SpaceEngineers\Sprocket.Host.SpaceEngineers.csproj" -output $pack -configuration Debug -interactive DoNothing | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'The mod did not pack.' }
 $mod = 'Sprocket Automation (Bleeding Edge)'
-robocopy "$pack\$mod" (Join-Path $AppData "Mods\$mod") /MIR /NJH /NJS /NP /NFL /NDL | Out-Null
+# The pack's folder is named by the branch (mdk.ini), so the one folder it wrote is copied under the name the world loads.
+$packed = Get-ChildItem $pack -Directory | Select-Object -First 1
+if ($null -eq $packed) { throw 'The pack wrote no mod folder.' }
+robocopy $packed.FullName (Join-Path $AppData "Mods\$mod") /MIR /NJH /NJS /NP /NFL /NDL | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Copying the mod failed (robocopy $LASTEXITCODE)." }
 
 # 3. A clean world whose Sprocket is the local copy: a mod with no Workshop id is read from the Mods folder by its name.

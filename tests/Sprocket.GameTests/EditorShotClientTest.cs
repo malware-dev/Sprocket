@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage;
@@ -163,6 +164,37 @@ namespace Sprocket.GameTests
             yield return PluginUpdates.PerSecond;
         }
 
+        /// <summary>
+        /// Testing row #62's menus and lists, on the block called <paramref name="name" />, which an earlier test pasted: a sequence's
+        /// plus menu opened and walked with Up, Down and Enter, and the block selector's Source list opened, walked and chosen from.
+        /// </summary>
+        public IEnumerator<int> Menus(string name)
+        {
+            var editor = _tour.Open(EditorTour.Named(name), name);
+            if (editor == null)
+                yield break;
+
+            yield return 2 * PluginUpdates.PerSecond;
+            var stops = new[]
+            {
+                new[] { "menu open", Kept, "off", "Sequences", "Sequence 1", "open:PlusMenu" },
+                new[] { "menu down", "stay", "arrowdown" },
+                new[] { "menu down twice", "stay", "arrowdown" },
+                new[] { "menu up", "stay", "arrowup" },
+                new[] { "menu enter", "stay", "enter" },
+                new[] { "source list open", Kept, "Sequences", "Sequence 1", "add:task", "wait", "open:ListField" },
+                new[] { "source list down", "stay", "arrowdown" },
+                new[] { "source list chosen", "stay", "enter" }
+            };
+
+            var tour = _tour.Tour(editor, stops, "");
+            while (tour.MoveNext())
+                yield return tour.Current;
+
+            _tour.Close();
+            yield return PluginUpdates.PerSecond;
+        }
+
         /// <summary>The library's two panes: a logic system with no blueprint chosen and its blueprint made by the arrow, then each pane's search typed into.</summary>
         static string[][] Panes()
         {
@@ -210,14 +242,14 @@ namespace Sprocket.GameTests
         /// </summary>
         static int Destroy(IMyTerminalBlock block)
         {
-            var mine = new List<VRage.Game.ModAPI.IMyCubeGrid>();
+            var mine = new List<IMyCubeGrid>();
             MyAPIGateway.GridGroups.GetGroup(block.CubeGrid, GridLinkTypeEnum.Mechanical, mine);
             var grids = new HashSet<VRage.ModAPI.IMyEntity>();
-            MyAPIGateway.Entities.GetEntities(grids, entity => entity is VRage.Game.ModAPI.IMyCubeGrid && !mine.Contains((VRage.Game.ModAPI.IMyCubeGrid)entity));
+            MyAPIGateway.Entities.GetEntities(grids, entity => entity is IMyCubeGrid grid && !mine.Contains(grid));
             var destroyed = 0;
-            foreach (VRage.Game.ModAPI.IMyCubeGrid grid in grids)
+            foreach (var grid in grids.OfType<IMyCubeGrid>())
             {
-                var blocks = new List<VRage.Game.ModAPI.IMySlimBlock>();
+                var blocks = new List<IMySlimBlock>();
                 grid.GetBlocks(blocks, slim => slim.FatBlock is IMyProgrammableBlock);
                 foreach (var slim in blocks)
                 {

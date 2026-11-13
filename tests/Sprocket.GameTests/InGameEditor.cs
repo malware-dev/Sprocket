@@ -69,6 +69,28 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>
+        /// Presses the first shown element of the type called <paramref name="type" /> on the page, such as a <c>PlusMenu</c>,
+        /// which hangs its menu open, or a <c>ListField</c>, which opens its list, and says whether there was one to press.
+        /// </summary>
+        public bool Open(string type)
+        {
+            foreach (var element in Within(Root()))
+            {
+                if (element.GetType().Name != type || !(Get(element, "IsVisible") is bool shown && shown))
+                    continue;
+
+                dynamic command = Get(element, "Command");
+                if (command == null || !command.CanExecute)
+                    continue;
+
+                command.Execute();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Adds what the entry saying <paramref name="text" /> in a plus menu on the page adds, such as <c>task</c> under a sequence's
         /// steps, as choosing it in the open menu does, or presses the add button saying it where no menu offers it. Says whether
         /// either was there.
@@ -318,7 +340,7 @@ namespace Sprocket.GameTests
         /// The public property <paramref name="name" /> of <paramref name="thing" />, the one its own type declares where it hides one
         /// of its base's, such as a slot chip's words over its button's text; or null where it has none.
         /// </summary>
-        static object Get(object thing, string name)
+        static object? Get(object? thing, string name)
         {
             for (var type = thing?.GetType(); type != null; type = type.BaseType)
             {

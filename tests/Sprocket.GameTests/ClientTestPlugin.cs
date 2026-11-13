@@ -224,11 +224,18 @@ namespace Sprocket.GameTests
                     yield return shot.Current;
             }
 
-            if (Wants("kept") || Wants("editor"))
+            if (Wants("kept") || Wants("editor") || Wants("menus"))
             {
                 var kept = new KeptCountClientTest(_blueprints, _shots, _report).Run();
                 while (kept.MoveNext())
                     yield return kept.Current;
+            }
+
+            if (Wants("pages"))
+            {
+                var pages = new StatusPagesClientTest(_blueprints, _shots, _report).Run();
+                while (pages.MoveNext())
+                    yield return pages.Current;
             }
 
             var tour = new EditorTour(_shots, _report, _input);
@@ -237,6 +244,13 @@ namespace Sprocket.GameTests
                 var editor = new EditorShotClientTest(tour, _report).Run("Kept Automation");
                 while (editor.MoveNext())
                     yield return editor.Current;
+            }
+
+            if (Wants("menus"))
+            {
+                var menus = new EditorShotClientTest(tour, _report).Menus("Kept Automation");
+                while (menus.MoveNext())
+                    yield return menus.Current;
             }
 
             if (Wants("move") || Wants("remote") || Wants("banner"))
