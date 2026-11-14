@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel.Input;
 using Lumel.Text;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

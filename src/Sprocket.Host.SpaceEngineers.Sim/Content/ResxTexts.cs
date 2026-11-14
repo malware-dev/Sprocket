@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
-using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Sim.Content
 {

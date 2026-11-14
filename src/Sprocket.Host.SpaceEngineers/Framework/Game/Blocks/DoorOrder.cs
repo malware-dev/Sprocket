@@ -1,0 +1,37 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using System.Collections.Generic;
+
+namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
+{
+    /// <summary>How a step tells a door to open or close: as usual, or forced, told again whenever something reverses it.</summary>
+    public struct DoorOrder
+    {
+        const string Normal = "normal";
+        const string Forced = "forced";
+
+        /// <summary>Whether the door is told again each time something reverses it, until it arrives.</summary>
+        public bool IsForced;
+
+        /// <summary>What a step's options come to: not forced unless it says so.</summary>
+        public static DoorOrder Read(IList<Literal> arguments)
+        {
+            return new DoorOrder
+            {
+                IsForced = arguments != null && arguments.Count > 0 && arguments[0].Kind == ValueKind.Flag && arguments[0].Flag
+            };
+        }
+
+        /// <summary>The field that asks whether a door is forced.</summary>
+        public static Field Asked()
+        {
+            var field = Field.Among("force", new[] { Normal, Forced }, new[] { Literal.Of(false).Said, Literal.Of(true).Said });
+            field.Default = Normal;
+            field.Quiet = Normal;
+            field.MayBeLeftOut = true;
+
+            return field;
+        }
+    }
+}

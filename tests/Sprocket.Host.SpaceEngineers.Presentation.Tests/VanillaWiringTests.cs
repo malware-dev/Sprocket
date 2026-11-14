@@ -1,8 +1,8 @@
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

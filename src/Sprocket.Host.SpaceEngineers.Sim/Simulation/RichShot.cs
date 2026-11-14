@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -12,7 +13,6 @@ using Thickness = Lumel.Thickness;
 using TextAlignment = Lumel.Text.TextAlignment;
 using Lumel.Text;
 using Lumel.Viewing;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Lumel.Sim;
 using Lumel.Styling;
 

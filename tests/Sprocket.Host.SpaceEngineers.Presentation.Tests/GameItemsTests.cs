@@ -1,10 +1,10 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Blocks;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Items;
 using Sprocket.Sim.Machine;

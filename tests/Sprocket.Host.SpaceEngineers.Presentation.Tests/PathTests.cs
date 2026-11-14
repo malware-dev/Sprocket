@@ -1,5 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Sim.Machine;
 using VRageMath;
 using Xunit;
@@ -173,7 +174,7 @@ public class PathTests
     static void Load(Simulation sim, string keys)
     {
         var program = "sprocket 1 alpha 18\n\nlet door1 = block 'Door/LargeBlockDoor' " + keys + "\n";
-        Assert.Equal("", Storage.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
     }
 
     static EntityRef Declared(Simulation sim, Fitting fitting)

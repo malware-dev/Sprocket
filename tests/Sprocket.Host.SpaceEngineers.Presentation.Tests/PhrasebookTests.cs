@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

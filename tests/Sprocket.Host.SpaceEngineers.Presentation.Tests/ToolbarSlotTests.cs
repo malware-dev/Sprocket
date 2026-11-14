@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using Xunit;

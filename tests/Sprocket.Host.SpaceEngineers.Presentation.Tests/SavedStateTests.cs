@@ -1,8 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using System.IO;
 using System.Xml.Linq;
-using Sprocket.Host.SpaceEngineers.Memory;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Saves;
 using Xunit;

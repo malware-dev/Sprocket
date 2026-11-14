@@ -1,7 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel.Controls;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Sim.Machine;
 using Xunit;
 

@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

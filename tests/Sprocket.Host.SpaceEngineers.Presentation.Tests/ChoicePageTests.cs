@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 

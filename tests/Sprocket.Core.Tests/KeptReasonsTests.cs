@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Memory;
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using Sprocket.Sim.Machine;
 using Xunit;
 

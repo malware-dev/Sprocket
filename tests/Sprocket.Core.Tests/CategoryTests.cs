@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Selector.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 

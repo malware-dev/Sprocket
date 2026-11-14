@@ -104,6 +104,6 @@ public class PickerSearchTests
     {
         sim.Editor.PressAdd("task");
         sim.Tick();
-        Assert.IsType<Features.Picking.PickPage>(sim.Editor.Current);
+        Assert.IsType<Features.Selector.PickPage>(sim.Editor.Current);
     }
 }

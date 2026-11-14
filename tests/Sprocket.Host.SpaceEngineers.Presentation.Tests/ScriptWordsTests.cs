@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Xunit;

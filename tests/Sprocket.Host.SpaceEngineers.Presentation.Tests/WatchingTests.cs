@@ -1,6 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -189,5 +189,5 @@ public class WatchingTests
 
     /// <summary>The slot the first task names, which its line says.</summary>
     static string Slot(Screen screen) =>
-        screen.Editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First().Targets[0];
+        screen.Editor.Program.Sequences[0].Steps.OfType<Act>().First().Targets[0];
 }

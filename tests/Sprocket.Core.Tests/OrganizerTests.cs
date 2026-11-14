@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Xunit;
 
 namespace Sprocket.Tests;

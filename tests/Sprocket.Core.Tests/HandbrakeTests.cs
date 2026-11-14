@@ -1,6 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Xunit;
 

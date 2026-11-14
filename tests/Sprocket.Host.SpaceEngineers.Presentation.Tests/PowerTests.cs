@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -37,7 +37,7 @@ public class PowerTests
         screen.Run(2);
 
         var act = screen.Editor.Program.Sequences.SelectMany(sequence => sequence.Steps).OfType<Act>()
-            .Single(step => step.ActionId == Blocks.Battery.Recharge);
+            .Single(step => step.ActionId == Framework.Game.Blocks.Battery.Recharge);
         Assert.False(Assert.Single(act.Arguments).Flag);
         Assert.True(screen.Shows("and move on"), "the step does not say it moves on");
     }
@@ -53,7 +53,7 @@ public class PowerTests
         screen.Run(2);
 
         var act = screen.Editor.Program.Sequences.SelectMany(sequence => sequence.Steps).OfType<Act>()
-            .Single(step => step.ActionId == Blocks.Battery.Recharge);
+            .Single(step => step.ActionId == Framework.Game.Blocks.Battery.Recharge);
         Assert.True(Assert.Single(act.Arguments).Flag);
         Assert.False(screen.Shows("and wait"), "the step says what it does anyway");
     }

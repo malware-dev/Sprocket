@@ -1,11 +1,11 @@
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Triggers;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
 using Lumel.Images;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

@@ -1,8 +1,10 @@
-using Sprocket.Host.SpaceEngineers.Memory;
-using Sprocket.Host.SpaceEngineers.Network;
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Network;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using Sandbox.ModAPI;
 using Sprocket.Sim.Fakes;
 using Sprocket.Sim.Machine;
@@ -119,7 +121,7 @@ public class HandoverTests : IDisposable
                     heard.Served = ruled;
                 });
 
-            made.Listen(Network.Handover.Carry(NetworkChannel.Create("Sprocket.HandoverTests")).Build());
+            made.Listen(Framework.Network.Handover.Carry(NetworkChannel.Create("Sprocket.HandoverTests")).Build());
         });
 
         return made;
@@ -723,7 +725,7 @@ public class HandoverTests : IDisposable
 
         string program;
         _sim.Unit.Written(out program, out _);
-        var switches = Storage.BlockSwitches.Save(_sim.Editor.Program, _sim.Unit.Binary);
+        var switches = BlockSwitches.Save(_sim.Editor.Program, _sim.Unit.Binary);
 
         SprocketUnit rebuilt = null!;
         _wire.As(_server, () =>

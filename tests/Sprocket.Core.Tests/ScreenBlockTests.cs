@@ -1,12 +1,14 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.GUI.TextPanel;
 using Xunit;
-using CameraBlock = Sprocket.Host.SpaceEngineers.Blocks.Camera;
-using EmotionController = Sprocket.Host.SpaceEngineers.Blocks.EmotionController;
-using HostTypes = Sprocket.Host.SpaceEngineers.Blocks.HostTypes;
-using ScreenType = Sprocket.Host.SpaceEngineers.Blocks.ScreenType;
+using CameraBlock = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.Camera;
+using EmotionController = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.EmotionController;
+using HostTypes = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.HostTypes;
+using ScreenType = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.ScreenType;
 
 namespace Sprocket.Tests;
 

@@ -24,15 +24,17 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Release;Debug</Configurations>
     <Platforms>x64</Platforms>
-    <!-- The texts in Content\Data\Localization\MyTexts.resx become the class Localization.Texts. Every key
+    <!-- The texts in Content\Data\Localization\MyTexts.resx become the class Framework.Text.Texts. Every key
          starts with the prefix, because the game keeps every mod's texts in one table with its own. -->
     <LocalizationPrefix>Sprocket.</LocalizationPrefix>
-    <LocalizationNamespace>Sprocket.Host.SpaceEngineers.Localization</LocalizationNamespace>
+    <LocalizationNamespace>Sprocket.Host.SpaceEngineers.Framework.Text</LocalizationNamespace>
+    <LocalizationRuntime>Sprocket.Host.SpaceEngineers.Framework.Text</LocalizationRuntime>
   </PropertyGroup>
   <ItemGroup>
     <CompilerVisibleProperty Include="RootNamespace" />
     <CompilerVisibleProperty Include="LocalizationPrefix" />
     <CompilerVisibleProperty Include="LocalizationNamespace" />
+    <CompilerVisibleProperty Include="LocalizationRuntime" />
     <!-- Both built first, and loaded from the copy each keeps for loading; see Loaded.targets. -->
     <ProjectReference Include="..\Sprocket.Localization.Generator\Sprocket.Localization.Generator.csproj" ReferenceOutputAssembly="false" />
     <Analyzer Include="..\Sprocket.Localization.Generator\bin\Loaded\Sprocket.Localization.Generator.dll" />

@@ -1,6 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Sim.Machine;
 using Xunit;
 

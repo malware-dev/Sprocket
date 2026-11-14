@@ -1,8 +1,10 @@
-using Sprocket.Sim.Machine;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Slots.Edits;
+using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Sprocket.Sim.Machine;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -318,7 +320,7 @@ public class UndoTests
         var screen = Built();
         var editor = screen.Editor;
         Light(screen);
-        var text = Storage.ProgramWriter.Save(editor.Program, editor.World.Values);
+        var text = Framework.Language.Writing.ProgramWriter.Save(editor.Program, editor.World.Values);
 
         Assert.Equal("", editor.Apply(text));
         editor.GoToRoot();

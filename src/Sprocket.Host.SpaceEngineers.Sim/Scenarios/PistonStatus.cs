@@ -1,5 +1,6 @@
+using Piston = Sprocket.Sim.Machine.Piston;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Sim.Blueprints;
 using Sprocket.Sim.Driving;
 using Sprocket.Sim.Machine;

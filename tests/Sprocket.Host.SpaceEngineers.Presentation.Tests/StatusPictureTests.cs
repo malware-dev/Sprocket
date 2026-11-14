@@ -1,7 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System.Text;
 using Lumel.Drawing;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Simulation;
@@ -235,12 +236,12 @@ public class StatusPictureTests
         Assert.Contains(face.Sprites, sprite => sprite.Data == Symbols.Close && sprite.Color == face.Foreground);
     }
 
-    static void Draw(StatusPicture picture, Face face, ConstructStatus status, Localization.Texts texts, int turn)
+    static void Draw(StatusPicture picture, Face face, ConstructStatus status, Texts texts, int turn)
     {
         Draw(picture, face, status, texts, turn, turn);
     }
 
-    static void Draw(StatusPicture picture, Face face, ConstructStatus status, Localization.Texts texts, int turn, int from)
+    static void Draw(StatusPicture picture, Face face, ConstructStatus status, Texts texts, int turn, int from)
     {
         StatusFace.Draw(picture, face, status, texts, turn, from);
     }

@@ -1,7 +1,10 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage.Game;
@@ -11,7 +14,6 @@ using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Sim.Machine;

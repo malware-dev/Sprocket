@@ -1,10 +1,10 @@
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Barge = Sprocket.Sim.Machine.Simulation;
 

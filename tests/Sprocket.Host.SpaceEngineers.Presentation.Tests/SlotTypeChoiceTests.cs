@@ -1,7 +1,9 @@
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Installations;
+using Sprocket.Host.SpaceEngineers.Features.Selector.Blocks;
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
 

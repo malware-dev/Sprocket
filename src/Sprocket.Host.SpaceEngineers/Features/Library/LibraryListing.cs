@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Features.Sharing.Messages;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Network;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {

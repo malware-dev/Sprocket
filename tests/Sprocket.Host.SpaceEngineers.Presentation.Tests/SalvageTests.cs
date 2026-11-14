@@ -1,6 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Developing;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 

@@ -20,14 +20,14 @@ loads. Its folders each hold one capability whole:
 | Folder | What it holds |
 |---|---|
 | `World` | The game as Sprocket sees it: blocks and the values, signals and actions they offer, constructs, and the catalogue of kinds |
-| `Blocks` | What Sprocket knows about each kind of block, one file a kind: a door's states, a piston's position, a vent's pressure |
+| `Framework/Game/Blocks` | What Sprocket knows about each kind of block, one file a kind: a door's states, a piston's position, a vent's pressure |
 | `Sequences` | The model a player builds: logic systems, installations, slots, sequences, steps and triggers, and every edit made to them |
-| `Runtime` | Running sequences: the world's rota, waits, faults and statuses |
+| `Framework/Running` | Running sequences: the world's rota, waits, faults and statuses |
 | `Storage` | The program as text, its reader and writer, the upgrades that load older formats, backups and the files kept on the player's computer |
-| `Memory` | What a world remembers while it runs, saved with it: Sprocket's own clock, each player's settings, each construct's state |
+| `Framework/Storage/Memory` | What a world remembers while it runs, saved with it: Sprocket's own clock, each player's settings, each construct's state |
 | `Network` | Multiplayer: the server lends each Sprocket to one editor at a time, and the editor's changes travel back |
-| `Localization` | Where words come from: the mod's texts in each language, and the codex's pages |
-| `LcdApps` | The status panel, an app an LCD can run to show every logic system's state |
+| `Framework/Text` | Where words come from: the mod's texts in each language, and the codex's pages |
+| `Features/StatusPanel` | The status panel, an app an LCD can run to show every logic system's state |
 | `Features` | Every screen of the editor, one folder a screen or a piece shared between screens |
 | `Content` | What the game reads as data: definitions, textures, and the texts and the codex in `Data/Localization` |
 
@@ -83,7 +83,7 @@ are never compiled by the game and use modern C#.
 **One assembly.** A mod is one assembly, so `internal` hides nothing: a type or member is public or private.
 
 **Two things only the game can do.** Drawing on screen (`Lumel/Drawing/IScreenSpace`) and reading toolbars
-(`World/ISlots`) are interfaces the mod asks through. The simulator answers both, which is how it records a frame
+(`Framework/Game/Wiring/ISlots`) are interfaces the mod asks through. The simulator answers both, which is how it records a frame
 rather than drawing it. Everything else the simulator gives the mod for real, through proxies over the game's own
 types.
 
@@ -95,5 +95,5 @@ position invalidates the layout; a color changes nothing else.
 and every hundred, and spreads machines built alike across the ticks. Nothing keeps a clock of its own.
 
 **Saves outlive builds.** A program is stored as text in the world, and a format it was written in earlier loads
-through the changes in `Storage/Upgrades/` that arrived after it, rather than being misread. What the text says
+through the changes in `Framework/Language/Format/Upgrades/` that arrived after it, rather than being misread. What the text says
 changes only together with an upgrade for it. [Saves and storage](Saves.md) has the rest.

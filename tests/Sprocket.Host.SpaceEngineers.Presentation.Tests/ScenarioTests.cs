@@ -1,8 +1,11 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using System.Xml.Linq;
-using Sprocket.Host.SpaceEngineers.Features.Terminal;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Blueprints;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Scenarios;
@@ -89,7 +92,7 @@ public class ScenarioTests
         var systems = built.Sim.Editor.Program.Systems;
 
         Assert.Equal(2, systems.Count);
-        Assert.Equal(built.Sim.Machine.Sprocket.Id, Features.Shell.SystemSummary.KeptTo(built.Sim.Editor.Runner, systems[0]));
+        Assert.Equal(built.Sim.Machine.Sprocket.Id, SystemSummary.KeptTo(built.Sim.Editor.Runner, systems[0]));
         Assert.Equal("", systems[1].ListedOn);
     }
 
@@ -102,13 +105,13 @@ public class ScenarioTests
         Assert.Equal(StatusPages.Systems.Count, sim.Editor.Program.Systems.Count);
         Assert.All(sim.Editor.Program.Systems, system => Assert.False(system.Enabled));
 
-        var status = new LcdApps.StatusPanel.ConstructStatus();
+        var status = new Features.StatusPanel.ConstructStatus();
         status.Begin(sim.Now);
         status.Include(sim.Unit.Program, sim.Runner);
         status.End("Pages");
 
         var face = StatusPictureTests.Face(Sim.Content.ScreenShape.Reference.First(each => each.Name == "lcd-panel"));
-        var picture = new LcdApps.StatusPanel.StatusPicture();
+        var picture = new Features.StatusPanel.StatusPicture();
         var panel = Sim.Simulation.StatusFace.Panel(picture, face);
         Sim.Simulation.StatusFace.Lay(picture, panel, face, status, sim.Texts, 0, 0);
         var first = picture.Pages;

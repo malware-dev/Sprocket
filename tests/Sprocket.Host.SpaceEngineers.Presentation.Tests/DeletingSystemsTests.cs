@@ -75,7 +75,7 @@ public class DeletingSystemsTests
 
         var store = Store.Nowhere();
         sim.Unit.Written(out var program, out _);
-        store.SetValue(World.BlockStorage.ProgramKey, program);
+        store.SetValue(Framework.Storage.BlockStorage.ProgramKey, program);
         var reread = Simulation.On(store);
         reread.Tick();
 
@@ -180,7 +180,7 @@ public class DeletingSystemsTests
 
         var store = Store.Nowhere();
         sim.Unit.Written(out var program, out _);
-        store.SetValue(World.BlockStorage.ProgramKey, program);
+        store.SetValue(Framework.Storage.BlockStorage.ProgramKey, program);
         var lent = Simulation.On(store);
         lent.Editor.Holder = "Bert";
         lent.Tick();

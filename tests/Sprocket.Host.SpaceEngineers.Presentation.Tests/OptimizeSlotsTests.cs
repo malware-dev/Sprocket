@@ -1,6 +1,6 @@
-using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Lumel.Controls;
 using Sprocket.Sim.Machine;
 using Xunit;
 

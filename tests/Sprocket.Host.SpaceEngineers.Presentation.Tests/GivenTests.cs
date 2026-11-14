@@ -1,4 +1,5 @@
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Xunit;
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 

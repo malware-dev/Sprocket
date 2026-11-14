@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System.Text;
 using BenchmarkDotNet.Attributes;
 using Lumel;
@@ -5,7 +6,6 @@ using Lumel.Drawing;
 using Lumel.Images;
 using Lumel.Text;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;

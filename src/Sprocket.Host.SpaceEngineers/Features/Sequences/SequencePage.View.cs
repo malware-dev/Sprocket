@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
 using Lumel.Layout;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {

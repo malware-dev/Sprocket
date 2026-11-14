@@ -1,6 +1,12 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using System.Collections.Generic;
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Drawing;
@@ -8,12 +14,6 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {

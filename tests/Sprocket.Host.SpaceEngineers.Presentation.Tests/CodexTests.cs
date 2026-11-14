@@ -1,10 +1,10 @@
+using Sprocket.Host.SpaceEngineers.Features.Library;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using System.IO;
 using System.Xml.Linq;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
-using Sprocket.Host.SpaceEngineers.Features.Library;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using VRageMath;
@@ -205,12 +205,12 @@ public class CodexTests
         editor.Program.Edited();
         editor.Push(new Features.Sequences.SequencePage(editor, system.Sequences[0]));
         screen.Run(1);
-        editor.PressAdd(Features.Sentences.SentenceText.SetStateWords);
+        editor.PressAdd(Framework.Ui.Parts.SentenceText.SetStateWords);
         screen.Run(1);
-        editor.Pick().Stages[0].Entries().First(entry => entry.Text == "where").Pick(Features.Picking.HeldModifier.Alone, 1);
+        editor.Pick().Stages[0].Entries().First(entry => entry.Text == "where").Pick(HeldModifier.Alone, 1);
         screen.Run(3);
 
-        var field = Target.Within(editor.Current!.View!).OfType<Features.Fields.WordsField>().First();
+        var field = Target.Within(editor.Current!.View!).OfType<Framework.Ui.Fields.WordsField>().First();
         var words = field.GetVisualChild(0);
         Assert.True(field.Bounds.Width > words.Bounds.Width, "the field does not fill more room than its words");
         Assert.Null(field.Tip);

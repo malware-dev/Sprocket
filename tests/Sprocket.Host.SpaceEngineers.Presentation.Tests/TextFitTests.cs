@@ -1,6 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using System.IO;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Xunit;

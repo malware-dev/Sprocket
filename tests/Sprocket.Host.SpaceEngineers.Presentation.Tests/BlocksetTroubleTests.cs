@@ -1,11 +1,12 @@
-using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.Installations;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Lumel.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -124,9 +125,9 @@ public class BlocksetTroubleTests
 
         Assert.IsType<BlueprintPage>(sim.Editor.Current);
         Assert.Contains(sim.Editor.Current.View!.Within().OfType<Label>(), label => label.Text == Why && label.IsVisible);
-        Assert.Equal(Features.Shell.NoticeLevel.Problem, sim.Editor.Current.Standing);
+        Assert.Equal(NoticeLevel.Problem, sim.Editor.Current.Standing);
         Run(sim, 501, 501);
-        Assert.Equal(Features.Shell.NoticeLevel.Problem, sim.Editor.Screen.Standing);
+        Assert.Equal(NoticeLevel.Problem, sim.Editor.Screen.Standing);
 
         sim.Editor.PressStart("Open Sequence 1");
         sim.Tick();

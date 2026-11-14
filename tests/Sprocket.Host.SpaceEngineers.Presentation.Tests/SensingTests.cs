@@ -1,7 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Sprocket.Sim.Machine;
 using VRage.ObjectBuilders;

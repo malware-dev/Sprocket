@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -50,7 +50,7 @@ public class SlotActionTests
         editor.PressPrimary();
         screen.Run(2);
         var system = editor.Program.Systems[0];
-        var slot = Assert.Single(editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First().Targets);
+        var slot = Assert.Single(editor.Program.Sequences[0].Steps.OfType<Framework.Model.Act>().First().Targets);
 
         editor.Another(system);
         screen.Run(2);
@@ -75,7 +75,7 @@ public class SlotActionTests
         editor.PressChoice("open");
         editor.PressPrimary();
         screen.Run(2);
-        var act = editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First();
+        var act = editor.Program.Sequences[0].Steps.OfType<Framework.Model.Act>().First();
 
         editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single().Opens!.Execute();
         screen.Run(3);
@@ -87,7 +87,7 @@ public class SlotActionTests
 
         editor.PressPrimary();
         screen.Run(3);
-        var after = editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First();
+        var after = editor.Program.Sequences[0].Steps.OfType<Framework.Model.Act>().First();
         Assert.Equal("Inner door", Assert.Single(after.Targets));
         Assert.Equal(new[] { "signal slot 1", "Inner door" }, editor.Program.Systems[0].Parts.Select(part => part.Id).ToArray());
     }

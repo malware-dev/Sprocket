@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Selector;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -83,7 +83,7 @@ public class GasPickerTests
         screen.Run(2);
 
         var act = screen.Editor.Program.Sequences.SelectMany(sequence => sequence.Steps).OfType<Act>()
-            .Single(step => step.ActionId == Blocks.Tank.Stockpile);
+            .Single(step => step.ActionId == Framework.Game.Blocks.Tank.Stockpile);
         Assert.True(Assert.Single(act.Arguments).Flag);
     }
 }

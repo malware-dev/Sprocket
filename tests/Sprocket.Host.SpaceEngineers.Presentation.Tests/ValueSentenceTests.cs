@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Blocks;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Sim.Machine;
 using VRage.Game;
 using VRage.ObjectBuilders;

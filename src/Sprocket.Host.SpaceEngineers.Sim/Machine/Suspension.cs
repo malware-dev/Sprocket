@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using System;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
 using VRage.ObjectBuilders;

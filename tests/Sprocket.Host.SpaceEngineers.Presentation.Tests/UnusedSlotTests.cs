@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.Installations;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -29,7 +29,7 @@ public class UnusedSlotTests
 
         Assert.True(row.Removable);
         var warning = row.Within().OfType<Lumel.Text.Label>().Single(label => label.Text == screen.Editor.Texts.SlotUnused);
-        Assert.Equal(Features.Look.Palette.Notice, warning.Color);
+        Assert.Equal(Framework.Ui.Look.Palette.Notice, warning.Color);
         row.Removes!.Execute();
         screen.Run(2);
         Assert.Null(system.FindPart(slot));

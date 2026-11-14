@@ -1,6 +1,8 @@
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Battery = Sprocket.Sim.Machine.Battery;
 using Sprocket.Sim.Machine;
 using Xunit;
 using ChargeMode = Sandbox.ModAPI.Ingame.ChargeMode;

@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -94,7 +94,7 @@ public class SlotSwapTests
         screen.Run(2);
 
         Assert.Equal(was, slot.Expects);
-        Assert.IsType<Features.Picking.PickPage>(screen.Editor.Current);
+        Assert.IsType<Features.Selector.PickPage>(screen.Editor.Current);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal(new[] { "Airlock Inner Door" }, screen.Editor.Seen(screen.Editor.Program.Systems[0], act.Targets).Select(Shown(screen)));
     }
@@ -147,7 +147,7 @@ public class SlotSwapTests
         screen.Run(2);
 
         Assert.False(screen.Editor.Screen.HasQuestion, "the question is still up");
-        Assert.IsType<Features.Picking.PickPage>(screen.Editor.Current);
+        Assert.IsType<Features.Selector.PickPage>(screen.Editor.Current);
         Assert.Equal(parts, system.Parts.Count);
         var steps = screen.Editor.Program.Sequences[0].Steps.OfType<Act>().ToList();
         Assert.Equal(slot.Id, Assert.Single(steps[0].Targets));

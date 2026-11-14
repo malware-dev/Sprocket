@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Lumel.Controls;
 using Lumel.Windows;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Memory;
 using VRageMath;
 using Xunit;
 

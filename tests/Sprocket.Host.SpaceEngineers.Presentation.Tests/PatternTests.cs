@@ -69,13 +69,13 @@ public class PatternTests
 
         var row = editor.RootRows()[0];
         Assert.False(editor.Program.Systems[0].Enabled);
-        Assert.Same(Features.Look.Styles.NoticeStripes, row.Pattern);
+        Assert.Same(Framework.Ui.Look.Styles.NoticeStripes, row.Pattern);
 
         ((IInputTarget)row).IsPointerOver = true;
-        Assert.Same(Features.Look.Styles.NoticeStripesHot, row.Pattern);
-        Assert.Equal(Features.Look.Palette.NoticeWashHot, row.Background);
+        Assert.Same(Framework.Ui.Look.Styles.NoticeStripesHot, row.Pattern);
+        Assert.Equal(Framework.Ui.Look.Palette.NoticeWashHot, row.Background);
         ((IInputTarget)row).IsPointerOver = false;
-        Assert.Same(Features.Look.Styles.NoticeStripes, row.Pattern);
+        Assert.Same(Framework.Ui.Look.Styles.NoticeStripes, row.Pattern);
 
         editor.SwitchSystem(editor.Program.Systems[0], true);
         screen.Run(70);
@@ -92,11 +92,11 @@ public class PatternTests
         screen.Run(2);
 
         Assert.False(editor.Program.Systems[0].Enabled);
-        Assert.Contains(screen.Drawings, d => !d.IsText && d.Ink == Features.Look.Palette.NoticeStripe && d.Where.Y < 100);
+        Assert.Contains(screen.Drawings, d => !d.IsText && d.Ink == Framework.Ui.Look.Palette.NoticeStripe && d.Where.Y < 100);
 
         editor.SwitchOn();
         screen.Run(2);
-        Assert.DoesNotContain(screen.Drawings, d => !d.IsText && d.Ink == Features.Look.Palette.NoticeStripe && d.Where.Y < 100);
+        Assert.DoesNotContain(screen.Drawings, d => !d.IsText && d.Ink == Framework.Ui.Look.Palette.NoticeStripe && d.Where.Y < 100);
     }
 
     /// <summary>A style laying a pattern draws it over the element's background, and a style laying none takes it away.</summary>

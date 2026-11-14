@@ -1,6 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Xunit;
 

@@ -1,5 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel.Controls;
 using Lumel.Text;
 

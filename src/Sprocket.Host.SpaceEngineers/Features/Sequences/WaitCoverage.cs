@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System;
 using System.Collections.Generic;
 using Lumel.Layout;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences

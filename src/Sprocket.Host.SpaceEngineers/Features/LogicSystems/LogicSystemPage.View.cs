@@ -1,11 +1,13 @@
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Features.States;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {

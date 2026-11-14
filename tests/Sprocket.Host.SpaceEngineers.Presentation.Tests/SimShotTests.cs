@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System.IO;
 using System.Windows.Media.Imaging;
 using Lumel;
@@ -5,7 +6,6 @@ using Lumel.Controls;
 using Lumel.Screens;
 using Lumel.Sim;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Content;
 using VRageMath;
 using Xunit;

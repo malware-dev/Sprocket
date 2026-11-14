@@ -1,9 +1,9 @@
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Lumel.Input;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Memory;
-using Sprocket.Host.SpaceEngineers.Shares;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -154,14 +154,14 @@ public class DialogFitTests
         }
 
         var at = screen.Scene.Find(screen.Editor.Texts.SystemsNew);
-        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", (Features.Look.Styles.TipDelay + 2).ToString());
+        screen.Do("move", ((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", (Framework.Ui.Look.Styles.TipDelay + 2).ToString());
         var tip = screen.Scene.CodexTip;
         Assert.NotNull(tip);
 
         var ids = System.Xml.Linq.XDocument.Load(System.IO.Path.Combine(Sim.Content.ResxTexts.Beside, "MyTextsCodex.resx")).Root!.Elements("data")
             .Select(data => (string)data.Attribute("name")!)
-            .Where(name => name.StartsWith(Features.Codex.CodexPages.Prefix + "Term."))
-            .Select(name => name.Substring(Features.Codex.CodexPages.Prefix.Length))
+            .Where(name => name.StartsWith(Framework.Ui.Tips.CodexPages.Prefix + "Term."))
+            .Select(name => name.Substring(Framework.Ui.Tips.CodexPages.Prefix.Length))
             .Distinct().ToList();
         var found = new List<string>();
         foreach (var id in ids)

@@ -1,5 +1,20 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Battery = Sprocket.Sim.Machine.Battery;
+using Beacon = Sprocket.Sim.Machine.Beacon;
+using Door = Sprocket.Sim.Machine.Door;
+using JumpDrive = Sprocket.Sim.Machine.JumpDrive;
+using Piston = Sprocket.Sim.Machine.Piston;
+using Rotor = Sprocket.Sim.Machine.Rotor;
+using Speaker = Sprocket.Sim.Machine.Speaker;
+using Suspension = Sprocket.Sim.Machine.Suspension;
+using Tank = Sprocket.Sim.Machine.Tank;
+using Thruster = Sprocket.Sim.Machine.Thruster;
+using Turret = Sprocket.Sim.Machine.Turret;
+using Vent = Sprocket.Sim.Machine.Vent;
+using Warhead = Sprocket.Sim.Machine.Warhead;
 using Sprocket.Sim.Machine;
 
 namespace Sprocket.Tests;

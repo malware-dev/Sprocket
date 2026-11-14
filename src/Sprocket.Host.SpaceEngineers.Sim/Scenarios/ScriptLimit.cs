@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using System.Collections.Generic;
 using Sprocket.Sim.Blueprints;
 using Sprocket.Sim.Driving;
 using Sprocket.Sim.Machine;

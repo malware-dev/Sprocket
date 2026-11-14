@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,7 +10,6 @@ using Lumel.Drawing;
 using Sprocket.Sim.Simulation;
 using VRage.Input;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Lumel.Sim;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;

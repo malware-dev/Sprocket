@@ -1,11 +1,10 @@
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Sim.Machine;
 using Xunit;
 using ChargeMode = Sandbox.ModAPI.Ingame.ChargeMode;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
 

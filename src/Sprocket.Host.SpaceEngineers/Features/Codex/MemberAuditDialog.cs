@@ -1,11 +1,11 @@
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Windows;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Codex
 {

@@ -1,7 +1,8 @@
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Xunit;
 
 namespace Sprocket.Tests;

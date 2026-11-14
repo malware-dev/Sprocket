@@ -43,7 +43,7 @@ public class GlyphAtlasTests
         var pixels = new byte[width * page.PixelHeight * 4];
         page.CopyPixels(pixels, width * 4, 0);
 
-        Assert.NotEmpty(Shades(pixels, width, Origin(Features.Look.Symbols.Screen)));
+        Assert.NotEmpty(Shades(pixels, width, Origin(Framework.Ui.Look.Symbols.Screen)));
     }
 
     /// <summary>Where the glyph <paramref name="ch" /> sits on the page, from the font's own table.</summary>

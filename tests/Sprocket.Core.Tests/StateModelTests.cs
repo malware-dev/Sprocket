@@ -1,5 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Xunit;
 
 namespace Sprocket.Tests;

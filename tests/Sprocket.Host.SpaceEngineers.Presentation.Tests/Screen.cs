@@ -1,9 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Measuring;
 using Sprocket.Sim.Simulation;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Lumel.Drawing;
 using Lumel.Sim;
 

@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using System;
 using System.IO;
 using ProtoBuf;
 using ProtoBuf.Meta;
-using Sprocket.Host.SpaceEngineers.Memory;
 
 namespace Sprocket.Sim.Machine;
 

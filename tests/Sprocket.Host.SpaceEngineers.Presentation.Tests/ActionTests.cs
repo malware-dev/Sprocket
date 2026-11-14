@@ -1,15 +1,14 @@
-using Lumel.Controls;
-using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Lumel.Controls;
 using Sprocket.Sim.Machine;
-using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -618,8 +617,8 @@ public class ActionTests
         screen.Run(2);
 
         var act = screen.Editor.Program.Sequences.SelectMany(sequence => sequence.Steps).OfType<Act>()
-            .Single(step => step.ActionId == Blocks.Vent.Depressurize);
-        Assert.Equal(Blocks.Vent.Hold, Assert.Single(act.Arguments).Whole);
+            .Single(step => step.ActionId == Framework.Game.Blocks.Vent.Depressurize);
+        Assert.Equal(Framework.Game.Blocks.Vent.Hold, Assert.Single(act.Arguments).Whole);
     }
 
     /// <summary>The fields of a form end together against the right, whatever their widths: a dial with its box, a number, a list.</summary>

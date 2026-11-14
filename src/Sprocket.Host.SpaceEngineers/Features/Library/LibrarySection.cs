@@ -1,3 +1,4 @@
+
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
     /// <summary>Which part of the library a listed blueprint stands in.</summary>

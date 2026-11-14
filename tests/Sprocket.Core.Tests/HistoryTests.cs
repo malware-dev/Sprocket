@@ -1,5 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Xunit;
 
 namespace Sprocket.Tests;

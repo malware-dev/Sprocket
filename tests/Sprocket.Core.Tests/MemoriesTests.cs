@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Memory;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using Sprocket.Sim.Machine;
 using Xunit;
 

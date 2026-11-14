@@ -1,16 +1,16 @@
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
+using Sprocket.Host.SpaceEngineers.Features.Sharing.Messages;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Lumel;
 using Lumel.Layout;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Memory;
-using Sprocket.Host.SpaceEngineers.Network;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Shares;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {

@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Xunit;
 
 namespace Sprocket.Tests;

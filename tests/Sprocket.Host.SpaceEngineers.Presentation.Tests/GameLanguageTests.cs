@@ -1,6 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
-using Sprocket.Host.SpaceEngineers.World;
 using VRage.ObjectBuilders;
 using Xunit;
 

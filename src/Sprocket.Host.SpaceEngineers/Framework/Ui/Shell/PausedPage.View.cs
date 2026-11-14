@@ -1,0 +1,53 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Lumel;
+using Lumel.Controls;
+using Lumel.Layout;
+using Lumel.Text;
+
+namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
+{
+    public sealed partial class PausedPage
+    {
+        const float Column = 640f;
+
+        RichText _body;
+        Button _resume;
+        Button _leave;
+        Button _remove;
+
+        /// <inheritdoc />
+        protected override Element CreateView()
+        {
+            return new VStack
+            {
+                Align = Align.Fill,
+                Children =
+                {
+                    new Label { Placement = Flex.Grow },
+                    new VStack
+                    {
+                        Align = Align.Center,
+                        Placement = FixedSize.Width(Column),
+                        Base = { Spacing = Gaps.Items },
+                        Children =
+                        {
+                            new RichText { Style = Styles.Reading }.As(out _body),
+                            new HStack
+                            {
+                                Align = Align.Center,
+                                Base = { Spacing = Gaps.Parts },
+                                Children =
+                                {
+                                    new Button { Style = Styles.Button }.As(out _resume),
+                                    new Button { Style = Styles.Button }.As(out _leave),
+                                    new Button { Style = Styles.Button }.As(out _remove)
+                                }
+                            }
+                        }
+                    },
+                    new Label { Placement = Flex.Grow }
+                }
+            };
+        }
+    }
+}

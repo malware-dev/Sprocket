@@ -1,8 +1,9 @@
-using Sprocket.Host.SpaceEngineers.Blocks;
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Sim.Machine;
 using VRage.Game;
 using VRage.ObjectBuilders;
@@ -242,7 +243,7 @@ public class MoveItemsTests
     {
         var field = InventoryType.OrAllItems(ItemIds.Choosing("item", new[] { "Iron Ingot" }, new[] { "Ingot/Iron" }));
         field.SaidEmpty = "items";
-        var slot = new Sprocket.Host.SpaceEngineers.Features.Sentences.ArgumentsSlot(new[] { Literal.Of("") }, new[] { field }, null!);
+        var slot = new Sprocket.Host.SpaceEngineers.Framework.Ui.Parts.ArgumentsSlot(new[] { Literal.Of("") }, new[] { field }, null!);
 
         Assert.Equal("items", slot.Filled[0]);
     }

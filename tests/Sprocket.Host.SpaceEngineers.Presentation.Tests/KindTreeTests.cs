@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Sim.Machine;
 using VRage.ObjectBuilders;
 using Xunit;

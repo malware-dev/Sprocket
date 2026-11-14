@@ -1,6 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sandbox.Common.ObjectBuilders;
 using VRage.ObjectBuilders;
 using Sprocket.Sim.Machine;
@@ -33,7 +33,7 @@ public class StateStepTests
         sim.Machine.Weld(new Tank(40, "Tank", new MyObjectBuilderType(typeof(MyObjectBuilder_OxygenTank)), "SmallHydrogenTank",
             "Small Hydrogen Tank"));
         sim.Tick();
-        Assert.Equal("", Storage.ProgramReader.Load(Program, sim.Editor.Program, sim.World.Values));
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(Program, sim.Editor.Program, sim.World.Values));
         sim.Editor.Invalidate();
         sim.Tick();
         var sequence = sim.Editor.Program.Systems[0].Sequences[0];

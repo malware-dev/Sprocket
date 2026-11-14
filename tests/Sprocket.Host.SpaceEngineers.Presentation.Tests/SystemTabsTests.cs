@@ -1,6 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel.Controls;
 using Lumel.Images;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -21,7 +22,7 @@ public class SystemTabsTests
         screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
-        screen.Editor.Program.Sequences[screen.Editor.Program.Sequences.Count - 1].Steps.Insert(0, new Sequences.Await());
+        screen.Editor.Program.Sequences[screen.Editor.Program.Sequences.Count - 1].Steps.Insert(0, new Framework.Model.Await());
         screen.Editor.Program.Edited();
         screen.Editor.BackKeeping();
         return screen.Run(120);
@@ -43,7 +44,7 @@ public class SystemTabsTests
         Assert.Same(warned ? current ? Styles.NoticeStripesHot : Styles.NoticeStripes : current ? Styles.ProblemStripesHot : Styles.ProblemStripes, tabs[1].Pattern);
         Assert.Same(Styles.Tab, tabs[0].Style);
         Assert.False(tabs[0].Is(LookStates.Warned) || tabs[0].Is(LookStates.Broken));
-        Assert.Equal(warned ? Features.Shell.NoticeLevel.Warning : Features.Shell.NoticeLevel.Problem, screen.Editor.Screen.Standing);
+        Assert.Equal(warned ? NoticeLevel.Warning : NoticeLevel.Problem, screen.Editor.Screen.Standing);
     }
 
     /// <summary>The screen opens on the tab it was left on, for each logic system apart.</summary>

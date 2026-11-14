@@ -1,9 +1,9 @@
+using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Utils;
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 {

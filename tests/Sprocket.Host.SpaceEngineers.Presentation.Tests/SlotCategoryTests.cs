@@ -1,10 +1,10 @@
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Lumel;
 using Lumel.Controls;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Sim.Machine;
 using VRage.Input;
 using VRageMath;

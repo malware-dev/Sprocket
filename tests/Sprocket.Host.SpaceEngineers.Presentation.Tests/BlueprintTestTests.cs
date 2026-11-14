@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -87,7 +87,7 @@ public class BlueprintTestTests
     static Simulation Opened(out Sequence sequence)
     {
         var rig = Simulation.Fresh();
-        Assert.Equal("", Storage.ProgramReader.Load(Program, rig.Editor.Program, rig.World.Values));
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(Program, rig.Editor.Program, rig.World.Values));
         rig.Editor.Invalidate();
         rig.Tick();
 

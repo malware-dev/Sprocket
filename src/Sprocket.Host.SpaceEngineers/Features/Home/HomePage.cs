@@ -1,17 +1,18 @@
-using Sprocket.Host.SpaceEngineers.Features.Codex;
+using Sprocket.Host.SpaceEngineers.Features.Installations;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Lumel.Layout;
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Lumel;
 using Lumel.Input;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {

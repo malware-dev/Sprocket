@@ -3,6 +3,7 @@ using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
 using Lumel.Drawing;
+
 // Supplies Lettering, which the inspection does not see from every configuration it runs in.
 // ReSharper disable once RedundantUsingDirective
 using Sprocket.Sim.Content;

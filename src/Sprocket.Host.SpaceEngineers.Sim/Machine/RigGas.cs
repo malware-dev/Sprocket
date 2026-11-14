@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using SpaceEngineers.Game.ModAPI;
 
 namespace Sprocket.Sim.Machine;

@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Lumel.Images;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

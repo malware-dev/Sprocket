@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using System.IO;
-using Sprocket.Host.SpaceEngineers.Localization;
 using VRage;
 using Xunit;
 

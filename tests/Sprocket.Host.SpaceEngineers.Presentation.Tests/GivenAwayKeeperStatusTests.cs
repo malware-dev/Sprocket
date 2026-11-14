@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Sim.Machine;
 using Xunit;
 

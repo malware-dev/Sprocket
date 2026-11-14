@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Sim.Machine;
 using Xunit;
 

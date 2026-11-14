@@ -1,5 +1,4 @@
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

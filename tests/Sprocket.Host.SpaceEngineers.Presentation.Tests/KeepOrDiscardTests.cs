@@ -1,6 +1,6 @@
-using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Lumel.Controls;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

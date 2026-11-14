@@ -1,13 +1,14 @@
+using Rotor = Sprocket.Sim.Machine.Rotor;
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System.IO;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Localization;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Measuring;

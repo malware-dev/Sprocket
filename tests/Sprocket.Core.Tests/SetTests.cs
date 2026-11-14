@@ -1,7 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Tests;
 

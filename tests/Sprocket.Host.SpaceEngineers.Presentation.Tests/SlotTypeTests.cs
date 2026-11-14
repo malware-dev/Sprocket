@@ -1,6 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -107,6 +107,6 @@ public class SlotTypeTests
     static EntityKind Kind(Simulation sim, string name) => sim.Editor.World.Entities.First(entity => entity.Name == name).Kind;
 
     /// <summary>Every word the screen showing says.</summary>
-    static List<string> Said(Features.Shell.SprocketEditor editor) =>
+    static List<string> Said(SprocketEditor editor) =>
         editor.Current.View!.Within().OfType<Label>().Where(label => label.IsVisible).Select(label => label.Text).ToList();
 }

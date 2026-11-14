@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Sim.Fakes;
 using VRage.Game.ModAPI;
 using Sprocket.Sim.Content;

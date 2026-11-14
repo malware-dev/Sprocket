@@ -1,10 +1,10 @@
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Library;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Memory;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {

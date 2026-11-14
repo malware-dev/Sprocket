@@ -1,6 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Lumel.Screens;
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
-using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Sim.Machine;
 
 namespace Sprocket.Sim.Simulation;

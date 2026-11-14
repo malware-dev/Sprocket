@@ -1,3 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,11 +11,6 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Windows;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Admin
 {

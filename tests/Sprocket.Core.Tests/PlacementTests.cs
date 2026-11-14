@@ -1,10 +1,11 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using SpaceEngineers.Game.ModAPI;
 using Xunit;
-using ScreenType = Sprocket.Host.SpaceEngineers.Blocks.ScreenType;
+using ScreenType = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.ScreenType;
 
 namespace Sprocket.Tests;
 

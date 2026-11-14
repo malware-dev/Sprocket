@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -11,7 +12,6 @@ using VRageMath;
 using Color = VRageMath.Color;
 using Size = System.Windows.Size;
 using Thickness = Lumel.Thickness;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Lumel.Sim;
 using Lumel.Styling;
 

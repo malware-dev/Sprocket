@@ -1,11 +1,12 @@
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Features.Triggers;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
 using Lumel.Images;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Sim.Machine;
 using VRageMath;
 using Xunit;
@@ -56,7 +57,7 @@ public class LineLevelTests
     [InlineData(NoticeLevel.Info)]
     public void ASlotLineSaysEachLevel(NoticeLevel level)
     {
-        var row = new PartRow(new Localization.Texts()) { Problem = Said, Level = level };
+        var row = new PartRow(new Texts()) { Problem = Said, Level = level };
         row.Restyle();
 
         Assert.Equal(Ink(level, Palette.Faint), Words(row).Color);

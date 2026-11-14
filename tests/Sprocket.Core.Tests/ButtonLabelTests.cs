@@ -1,5 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Blocks;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using VRage.Game.ModAPI;
 using Xunit;
 

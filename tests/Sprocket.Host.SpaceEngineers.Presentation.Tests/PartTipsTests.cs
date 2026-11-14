@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -49,7 +49,7 @@ public class PartTipsTests
         screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
         screen.Run(2);
 
-        var row = screen.Editor.Current!.View.Within().OfType<Features.Blueprints.PartRow>().First();
+        var row = screen.Editor.Current!.View.Within().OfType<Features.Slots.PartRow>().First();
         var chips = row.Within().OfType<SlotChip>().Where(chip => chip.IsVisible).ToArray();
         Assert.NotEmpty(chips);
         Assert.All(chips, chip => Assert.Equal(screen.Editor.Texts.Codex.PartFillsAbout, chip.Tip?.Text));

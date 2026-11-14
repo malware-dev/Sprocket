@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Measuring;

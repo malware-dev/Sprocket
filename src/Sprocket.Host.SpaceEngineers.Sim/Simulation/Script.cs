@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System.Collections.Generic;
 using System;
 using System.Globalization;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
 
 namespace Sprocket.Sim.Simulation
 {

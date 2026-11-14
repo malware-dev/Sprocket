@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using VRage.Game;
 using Lumel.Layout;
 using Sprocket.Sim.Machine;
@@ -5,8 +7,6 @@ using VRage.Utils;
 using VRageMath;
 using Xunit;
 using Lumel.Images;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

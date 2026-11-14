@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Features.Selector;
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Machine;
 using Xunit;
 

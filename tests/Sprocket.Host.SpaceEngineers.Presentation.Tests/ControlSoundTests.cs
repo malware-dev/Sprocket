@@ -1,9 +1,9 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System.IO;
 using System.Xml.Linq;
 using Lumel;
 using Lumel.Input;
 using Lumel.Sim;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -37,7 +37,7 @@ public class ControlSoundTests
         {
             var sound = audio.Descendants("Sound").SingleOrDefault(s => (string?)s.Element("Id")?.Element("SubtypeId") == cue.Name);
             Assert.True(sound != null, $"the game defines no sound {cue.Name}");
-            Assert.Equal("HUD", (string?)sound!.Element("Category"));
+            Assert.Equal("HUD", (string?)sound.Element("Category"));
         }
     }
 

@@ -1,8 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Sprocket.Host.SpaceEngineers.Blocks;
-using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Sim.Content;
 
 namespace Sprocket.Sim.Items;

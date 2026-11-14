@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Installations;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -109,7 +109,7 @@ public class BlueprintWritingTests
         var system = editor.Program.Systems[0];
         var part = Assert.Single(system.Parts);
         system.PartFor("Other");
-        var close = new Sequences.Act("close");
+        var close = new Framework.Model.Act("close");
         close.Targets.Add("Other");
         editor.Program.AddSequence(system).Steps.Add(close);
         editor.Invalidate();
@@ -132,8 +132,8 @@ public class BlueprintWritingTests
         var screen = OnTheSlot();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
-        system.States.Add(new Sequences.State("Cycling", "", World.Literal.Of(false)));
-        system.Types.Add(new Sequences.DeclaredType("Side"));
+        system.States.Add(new Framework.Model.State("Cycling", "", Framework.Model.Literal.Of(false)));
+        system.Types.Add(new Framework.Model.DeclaredType("Side"));
 
         Assert.False(editor.Slot().AcceptsName("cycling"));
         Assert.False(editor.Slot().AcceptsName("SIDE"));
@@ -262,7 +262,7 @@ public class BlueprintWritingTests
     {
         var screen = OnTheSlot();
         var editor = screen.Editor;
-        editor.Input.Clipboard = new Storage.ClipboardFile(new Folder(), delegate { }, editor.Pasted);
+        editor.Input.Clipboard = new Framework.Storage.ClipboardFile(new Folder(), delegate { }, editor.Pasted);
         var box = editor.Slot().About.Box;
 
         editor.Input.Focus(box);
@@ -281,7 +281,7 @@ public class BlueprintWritingTests
     static void Guides(Screen screen, Lumel.Element view)
     {
         var editor = screen.Editor;
-        var composers = view.Within().OfType<Features.Writing.Composer>().ToList();
+        var composers = view.Within().OfType<Framework.Ui.Writing.Composer>().ToList();
         Assert.NotEmpty(composers);
         foreach (var composer in composers)
         {
@@ -297,7 +297,7 @@ public class BlueprintWritingTests
     }
 
     /// <summary>How many windows are open saying where outside text comes in.</summary>
-    static int Notes(Features.Shell.SprocketEditor editor)
+    static int Notes(SprocketEditor editor)
     {
         var count = 0;
         for (var i = 0; i < editor.Windows!.Count; i++)

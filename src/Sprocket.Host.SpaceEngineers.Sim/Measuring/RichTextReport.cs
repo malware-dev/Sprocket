@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,6 @@ using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Lumel.Sim;
 
 namespace Sprocket.Sim.Measuring;

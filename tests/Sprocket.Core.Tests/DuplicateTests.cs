@@ -1,5 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System.Text;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
 namespace Sprocket.Tests;

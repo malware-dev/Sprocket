@@ -1,6 +1,8 @@
-using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Selector;
+using Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -77,7 +79,7 @@ public class SlotHeadingTests
     {
         var screen = Built();
         var editor = screen.Editor;
-        editor.Program.Systems[0].States.Add(new State("Cycling", "", World.Literal.Of(false)));
+        editor.Program.Systems[0].States.Add(new State("Cycling", "", Literal.Of(false)));
         editor.PressAdd("task");
         screen.Run(2);
         editor.PressBlock(Inner);

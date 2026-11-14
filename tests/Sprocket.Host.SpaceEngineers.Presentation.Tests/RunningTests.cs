@@ -1,7 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 

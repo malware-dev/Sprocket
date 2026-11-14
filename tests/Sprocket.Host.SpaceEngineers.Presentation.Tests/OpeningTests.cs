@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -194,7 +194,7 @@ public class OpeningTests
 
         Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
         var system = screen.Editor.Program.Systems[0];
-        var step = screen.Editor.Program.Sequences[0].Steps.OfType<Sequences.Act>().First();
+        var step = screen.Editor.Program.Sequences[0].Steps.OfType<Framework.Model.Act>().First();
         var filled = screen.Editor.Seen(system, step.Targets).Select(name => screen.Editor.Runner.Bindings.Entity(name)!.Name);
         Assert.Equal(new[] { "Airlock Outer Door" }, filled);
     }

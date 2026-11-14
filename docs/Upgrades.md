@@ -22,7 +22,7 @@ sprocket <format> [alpha <draft>]
 
 * `<format>` is the major format version integer (currently `1`). It increments only if a change would break existing programs outright.
 * `alpha <draft>` marks an in-development, unfinished format version, where `<draft>` is the draft iteration (currently `alpha 19`).
-* The numbers written by the current build are defined by `ScriptFormat.Version` and `ScriptFormat.Draft` in `Storage/ScriptFormat.cs`.
+* The numbers written by the current build are defined by `ScriptFormat.Version` and `ScriptFormat.Draft` in `Framework/Language/Format/ScriptFormat.cs`.
 
 ### Understanding `alpha` and Precedence
 
@@ -64,7 +64,7 @@ Common triggers include:
 
 ## Architecture: `FormatChange`
 
-All upgrades reside in `src/Sprocket.Host.SpaceEngineers/Storage/Upgrades/` and inherit from `FormatChange`.
+All upgrades reside in `src/Sprocket.Host.SpaceEngineers/Framework/Language/Format/Upgrades/` and inherit from `FormatChange`.
 
 ```csharp
 public sealed class ExampleUpgrade : FormatChange
@@ -88,7 +88,7 @@ A subclass may implement either hook, leaving unneeded hooks empty:
 For a minimal implementation reference, inspect `PowerValue.cs`.
 
 ### Ordering and Execution
-All upgrades are registered sequentially in `Storage/Upgrades/FormatUpgrades.cs`. 
+All upgrades are registered sequentially in `Framework/Language/Format/Upgrades/FormatUpgrades.cs`. 
 
 * **Chronological Order:** New upgrades must always be appended to the end of the list.
 * **Execution:** On load, the engine executes every upgrade with `Arrived > script.Draft` in exact sequential order.
@@ -103,8 +103,8 @@ All upgrades are registered sequentially in `Storage/Upgrades/FormatUpgrades.cs`
 Follow this sequence for any change affecting script syntax, keywords, or semantics:
 
 1. **Spec First:** Update `docs/Language.md`. The exact wording must be reviewed and approved by maintainers before writing reader or writer code.
-2. **Bump Draft:** Increment `ScriptFormat.Draft` in `Storage/ScriptFormat.cs` (required for breaking changes, grammar additions, and new keywords).
-3. **Write the Upgrade (if migrating historical code):** Implement the `FormatChange` subclass in `Storage/Upgrades/` setting `Arrived` to the new draft number. Append the class to the list in `FormatUpgrades.cs`. *(Note: Pure keyword additions that require no AST/program rewrite do not need a `FormatChange` subclass, but still require the draft bump).*
+2. **Bump Draft:** Increment `ScriptFormat.Draft` in `Framework/Language/Format/ScriptFormat.cs` (required for breaking changes, grammar additions, and new keywords).
+3. **Write the Upgrade (if migrating historical code):** Implement the `FormatChange` subclass in `Framework/Language/Format/Upgrades/` setting `Arrived` to the new draft number. Append the class to the list in `FormatUpgrades.cs`. *(Note: Pure keyword additions that require no AST/program rewrite do not need a `FormatChange` subclass, but still require the draft bump).*
 4. **Test:** Add regression tests to `tests/Sprocket.Core.Tests/UpgradeTests.cs`. Verify that:
    * Historical code parses into the expected transformed structure.
    * Transformed code writes back cleanly in the modern format.
@@ -117,13 +117,13 @@ Follow this sequence for any change affecting script syntax, keywords, or semant
 
 * **Zero Overwrites:** If a stored script fails to parse or cannot be upgraded, the engine leaves the text untouched on the programmable block. Never silently discard or overwrite broken user scripts.
 * **Non-Automatable Cases:** Certain migrations cannot be resolved automatically without human intent (for example, a slot repurposed across incompatible block types). The editor must continue to load and edit all legal format representations without silent corruption. Incompatible constructs must surface as explicit warnings in the program checker directing the player how to fix them.
-* **Repairs:** Each such case is one `Repair` class in `src/Sprocket.Host.SpaceEngineers/Repairs/`, listed last in `ProgramRepairs` and never removed while a stored program can still hold it. A repair holds everything about its case: the problem it marks, whether that problem is in the logic system or in one installation, how it is found, its words, the question asked before the picker opens to fix it, and what the picker does differently while the player fixes it. The checker, the texts and the picker ask `ProgramRepairs` and never name a repair. An upgrade fixes what it safely can first, and the repair is left the rest. Every repair has a test, as every upgrade does.
+* **Repairs:** Each such case is one `Repair` class in `src/Sprocket.Host.SpaceEngineers/Framework/Language/Format/Repairs/`, listed last in `ProgramRepairs` and never removed while a stored program can still hold it. A repair holds everything about its case: the problem it marks, whether that problem is in the logic system or in one installation, how it is found, its words, the question asked before the picker opens to fix it, and what the picker does differently while the player fixes it. The checker, the texts and the picker ask `ProgramRepairs` and never name a repair. An upgrade fixes what it safely can first, and the repair is left the rest. Every repair has a test, as every upgrade does.
 
 ---
 
 ## Non-Script Storage (Protobuf)
 
-The world's memory (`Memory/`: Sprocket's clock, every run and watch, what installations hold in their states, owners, pauses and player settings) is serialized using Protocol Buffers and does not use the script versioning pipeline.
+The world's memory (`Framework/Storage/Memory/`: Sprocket's clock, every run and watch, what installations hold in their states, owners, pauses and player settings) is serialized using Protocol Buffers and does not use the script versioning pipeline.
 * Any changes to disk or save formats require prior review and maintainer consensus.
 * **Tag Number Invariant:** `[ProtoMember]` tag numbers are strictly permanent. Once assigned, a tag number must never be reused or reassigned to a different type. Dropped fields must be left unused.
 * **Enum Number Invariant:** A stored enum, such as `SequenceProblem` or `Cause`, has a number set on every value. A number is never changed or given to another value, and a new value takes the next number.

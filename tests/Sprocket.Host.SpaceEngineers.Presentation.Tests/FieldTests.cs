@@ -1,10 +1,10 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using VRageMath;
 using Lumel.Input;
 using Lumel;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

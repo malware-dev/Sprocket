@@ -1,9 +1,9 @@
-using Sprocket.Host.SpaceEngineers.Runtime;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
 using VRageMath;
 using Xunit;
-using Cockpit = Sprocket.Host.SpaceEngineers.Blocks.Cockpit;
+using Cockpit = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.Cockpit;
 
 namespace Sprocket.Tests;
 

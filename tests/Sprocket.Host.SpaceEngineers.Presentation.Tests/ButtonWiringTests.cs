@@ -1,7 +1,8 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.Features.Terminal;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using Xunit;
@@ -176,7 +177,7 @@ public class ButtonWiringTests
         var system = sim.Editor.Program.Systems[0];
         var first = system.Instances[0];
         sim.Editor.Choose(system, first);
-        sim.Editor.Push(new Features.Blueprints.BlueprintPage(sim.Editor, system));
+        sim.Editor.Push(new Features.Installations.BlueprintPage(sim.Editor, system));
         system.Enabled = true;
         first.Enabled = true;
         Tick(sim);

@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Home;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Sim.Machine;
 using Xunit;
 

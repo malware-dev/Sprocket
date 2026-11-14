@@ -1,8 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Memory;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Shares;
-using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -40,7 +39,9 @@ public class BlueprintSharesTests
     public void AFactionShareReachesWhoeverIsInTheFactionNow()
     {
         var together = true;
-        var shares = Shares((_, __) => together);
+        // The share asks whether two players are together when it is read, so the test changes it after sharing.
+        // ReSharper disable once AccessToModifiedClosure
+        var shares = Shares((_, _) => together);
         shares.Share(Ann, Blueprint("Airlock"), ShareReach.Faction, null, Limit);
 
         Assert.Single(shares.Reaching(Bo));
@@ -173,7 +174,7 @@ public class BlueprintSharesTests
     public void SharesAndBarsAndBlocksSurviveASave()
     {
         var memories = new Memories(new ProtoBinary());
-        var shares = new BlueprintShares(memories.Shares, memories.Barred, memories.Player, (_, __) => true, new Values(), () => 0);
+        var shares = new BlueprintShares(memories.Shares, memories.Barred, memories.Player, (_, _) => true, new Values(), () => 0);
         var identity = Guid.NewGuid();
         shares.Share(Ann, Blueprint("Airlock", identity), ShareReach.Players, new[] { Bo }, Limit);
         shares.Block(Cy, Ann);
@@ -182,7 +183,7 @@ public class BlueprintSharesTests
         var saved = memories.Write(0, new List<ConstructMemory>());
         var back = new Memories(new ProtoBinary());
         back.Read(saved, 0);
-        var kept = new BlueprintShares(back.Shares, back.Barred, back.Player, (_, __) => true, new Values(), () => 0);
+        var kept = new BlueprintShares(back.Shares, back.Barred, back.Player, (_, _) => true, new Values(), () => 0);
 
         var share = kept.All.Single();
         Assert.Equal(identity, share.Identity);
@@ -194,7 +195,7 @@ public class BlueprintSharesTests
 
     BlueprintShares Shares(Func<long, long, bool>? sameFaction = null)
     {
-        return new BlueprintShares(_kept, _barred, Player, sameFaction ?? ((_, __) => false), new Values(), () => _now);
+        return new BlueprintShares(_kept, _barred, Player, sameFaction ?? ((_, _) => false), new Values(), () => _now);
     }
 
     PlayerMemory Player(long identity)

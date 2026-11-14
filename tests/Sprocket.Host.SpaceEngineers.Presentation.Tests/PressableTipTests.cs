@@ -1,9 +1,9 @@
+using Sprocket.Host.SpaceEngineers.Features.Selector;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
 using Lumel.Controls;
-using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

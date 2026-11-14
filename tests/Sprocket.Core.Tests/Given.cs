@@ -1,5 +1,6 @@
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 
 namespace Sprocket.Tests;
 
@@ -13,10 +14,10 @@ public static class Given
     /// <remarks>A member is given an argument for every parameter, so one of these written with none is a fault.</remarks>
     public static Act Defaults(Act act)
     {
-        if (act.Arguments.Count == 0 && (act.ActionId == Blocks.Vent.Pressurize || act.ActionId == Blocks.Vent.Depressurize))
-            act.Arguments.Add(Literal.Of(Blocks.Vent.Hold));
+        if (act.Arguments.Count == 0 && (act.ActionId == Vent.Pressurize || act.ActionId == Vent.Depressurize))
+            act.Arguments.Add(Literal.Of(Vent.Hold));
 
-        if (act.Arguments.Count == 0 && act.ActionId == Blocks.Tank.Stockpile)
+        if (act.Arguments.Count == 0 && act.ActionId == Tank.Stockpile)
             act.Arguments.Add(Literal.Of(true));
 
         return act;

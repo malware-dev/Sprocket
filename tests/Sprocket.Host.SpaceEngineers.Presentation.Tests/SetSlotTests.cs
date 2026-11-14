@@ -1,7 +1,8 @@
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.Features.Installations;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -40,7 +41,7 @@ public class SetSlotTests
     public void TheNumberSkipsANameTakenInAnyCase()
     {
         var screen = Built(out var system);
-        system.States.Add(new State("Slot 2", "", World.Literal.Of(false)));
+        system.States.Add(new State("Slot 2", "", Literal.Of(false)));
 
         Off(screen, Light);
 
@@ -254,7 +255,7 @@ public class SetSlotTests
     }
 
     /// <summary>Whether the logic system's screen shows the heading over its description.</summary>
-    static bool Headed(Features.LogicSystems.LogicSystemPage page, Features.Shell.SprocketEditor editor) =>
+    static bool Headed(Features.LogicSystems.LogicSystemPage page, SprocketEditor editor) =>
         page.View.Within().OfType<Lumel.Text.Label>().Any(label => label.IsVisible && label.Text == editor.Texts.BlueprintDescription.ToUpperInvariant());
 
     /// <summary>Home asks the other installation to fill nothing again after a step's removal leaves a slot nothing names.</summary>
