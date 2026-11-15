@@ -1,0 +1,42 @@
+[h1]Sprocket Automation[/h1]
+
+Event controllers, timer blocks, sensors... sure, there's already a way to automate stuff in Space Engineers. But it takes up a whole bunch of space, it's limited in what it can do, and it's fragile. One railgun shot to your automation bay and you get to set [i]everything[/i] up again. Yay.
+
+[h2]Enter Sprocket Automation[/h2]
+Describe your automation in simple but powerful [b]logic systems[/b]. Set up [b]triggers[/b] to run steps in order. Wait until a door is [i]actually[/i] closed before pressurizing that airlock, no fiddling with timers. Want more? There are conditions and states for the trickier stuff.
+
+Sprocket lives in [i]all[/i] of your programmable blocks. Lose one, and as long as there's another on your ship, your automation keeps working. Lose the last one too? The automatic backup has your logic stashed away, so you can restore it to a new ship, or to your patched-up old one.
+
+And no, it doesn't make programmable block scripts. Your programmable blocks are just where you get to Sprocket. So it works fine on servers where in-game scripts are switched off.
+
+[h2]One logic system, multiple installations[/h2]
+Describe your airlock logic [i]once[/i], then add [b]installations[/b] to run the same logic on several airlocks, without adding more programmable blocks.
+
+[h2]Share[/h2]
+Keep [b]blueprints[/b] of your logic systems in the library, and share them, whether it's just with your best friend, your faction, or everyone.
+
+The mod API gives no way to share them through the Workshop, so sharing happens within a world. To share outside the game, share a grid blueprint holding the logic, or the blueprint files themselves, which live in the game's Storage folder (%AppData%\SpaceEngineers\Storage by default).
+
+[h2]Getting started[/h2]
+Find any programmable block in the terminal and press [b]Automation[/b]. That's it. Not sure what something does? Rest the pointer on it for a tip. Hold Alt and the tip stays open, so you can dig into the words it links.
+
+[h2]Why I made it[/h2]
+I want more players to have a go at complex automation, programmer or not. Timer chains get fragile fast, and the programmable block wants you to write [i]code[/i]. That's a pretty steep wall if all you want is an airlock that cycles itself. Honestly? I'd love for Keen to take a look at this, and maybe take Space Engineers somewhere similar.
+
+It's not just for beginners though. Even if you can write scripts, writing one for every little routine job gets old fast. Sprocket lets you knock out the common stuff quickly.
+
+Oh, and you shouldn't have to dig through code to figure out what a machine does. In Sprocket the description [i]is[/i] the program. What you read is exactly what runs.
+
+[h2]Bleeding Edge[/h2]
+Want to help out with Sprocket? Happy to test unstable, half-finished features, or waiting on a fix for a bug you found? Then [b]Sprocket Automation (Bleeding Edge)[/b] is for you. It's the development build, updated as work lands. Fair warning: stuff [i]will[/i] break there now and then. https://steamcommunity.com/sharedfiles/filedetails/?id=3807234771
+
+[h2]License[/h2]
+Released under the Malforge Attribution License for Space Engineers Mods v1.0 (BRUTAL variant), which is included in the mod's files. The short version, in plain words: https://github.com/malforge/licenses/blob/main/MAL-SEMods-1.0-summary.md
+
+Use it, change it, re-upload it, as long as you credit this mod and link back to it.
+
+Want to change something? The source is on GitHub: https://github.com/malware-dev/Sprocket
+
+Before you publish your own copy though, please consider contributing there instead. Several copies of the same mod just leave people confused about which one has which bug, and every author involved, original or copy, ends up getting reports about bugs that aren't theirs.
+
+[i]Many thanks go to Enenra, who was invaluable in helping me test and develop the UX for Sprocket.[/i]

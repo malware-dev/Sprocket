@@ -16,6 +16,9 @@ Sprocket lives within _all_ of your programmable blocks. If you lose one, but th
 automation is still fully functional. And even if the last programmable block is lost, the automatic backup system has
 stored away your logic, so you can restore it to a new ship or back to your repaired old one.
 
+And no, it doesn't make programmable block scripts. Your programmable blocks are just where you get to
+Sprocket. So it works fine on servers where in-game scripts are switched off.
+
 ## One logic system, multiple installations
 
 Describe your airlock logic _once_, then add **installations** to run the same logic on several airlocks, without
@@ -32,25 +35,21 @@ game, share a grid blueprint holding the logic, or the blueprint files themselve
 
 ## Getting started
 
-Subscribe to Sprocket Automation on the Steam Workshop, then find any programmable block in
-the terminal and press **Automation**.
+Subscribe to Sprocket Automation on the Steam Workshop, then find any programmable block in the terminal and press
+**Automation**. Not sure what something does? Rest the pointer on it for a tip, and hold Alt to keep the tip open and
+explore the words it links.
 
 ## Why I made it
 
-I built Sprocket to give more players access to complex automation, making ship logic approachable
-for everyone regardless of background.
+I want more players to have a go at complex automation, programmer or not. Timer chains get fragile fast, and the
+programmable block wants you to write _code_. That's a pretty steep wall if all you want is an airlock that cycles itself. Honestly?
+I'd love for Keen to take a look at this, and maybe take Space Engineers somewhere similar.
 
-Basic timer chains quickly grow fragile, while the Programmable Block requires custom code.
-That creates a steep barrier for players who simply want their ship to work. My goal was to
-demonstrate an inclusive approach to automation and hopefully inspire Keen toward a similar
-direction for the future of Space Engineers.
+It's not just for beginners though. Even if you can write scripts, writing one for every little routine job gets old
+fast. Sprocket lets you knock out the common stuff quickly.
 
-There is a practical benefit for experienced players too. Writing a full script for routine tasks
-takes time that could be spent elsewhere. Sprocket lets you set up common systems quickly, giving
-non-programmers a tool they can master while offering veterans a fast path through repetitive jobs.
-
-Understanding a machine should be as immediate as reading a gauge. Sprocket achieves that by making
-the description and the program the exact same document.
+Oh, and you shouldn't have to dig through code to figure out what a machine does. In Sprocket the description _is_
+the program. What you read is exactly what runs.
 
 ## Building the mod
 
