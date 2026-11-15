@@ -41,23 +41,17 @@ that shows it.
 | `src/Lumel` | The user interface framework: elements, layout, controls, text, drawing. A shared project, compiled into each mod that uses it, and it knows nothing of Sprocket, so any mod can use it as it is. A submodule of the `malware-dev/Lumel` repository. Its `Sim` folder is a shared project of its own, for a harness and never a mod: it draws a Lumel screen on a desktop from the game's content and a mod's, in the game's own fonts, and writes it as a picture |
 | `src/Sprocket.Host.SpaceEngineers.Sim` | The simulator: runs the real mod outside the game, over blocks it makes up, and draws its screens to pictures. The tests and every check of what a screen looks like go through it |
 | `src/Sprocket.Localization.Generator` | A source generator that writes a class from each of the mod's text files at build time, `Texts` from `MyTexts.resx` and `Codex` from `MyTextsCodex.resx`, and reports every text that cannot be said |
-| `src/Sprocket.GalleryWorld` | Writes a test world holding one block of every terminal type the game defines, for checking what the picker offers for each. Run by hand, with `--replace` to write over the last one; it is outside the solution. |
-| `tools/rename-world.py` | Points a saved world at the mod under a new name |
+| `src/Sprocket.Standards` | An analyzer holding the mod to a rule the compiler can check: nothing is `internal`, since the game compiles a mod into one assembly where that hides nothing (STD001) |
 
 `art` holds the sources the logo, the color picker, the shadow and the stripes are drawn from, each with the script that
 draws it.
 `build` holds what the projects running the mod outside the game share: the reference to the game's own assemblies.
 
-## What it builds with from outside
+## What it reads from outside
 
-Each of these is a repository of its own, found by a path relative to this one.
-
-| Folder | What Sprocket takes from it |
-|---|---|
-| `..\..\Libraries\Gravity` | `Sprocket.Gravity`, a shared project: how big a gravity generator's field must be to cover part of its grid, built into Sprocket and Gravity Field Fit |
-| `..\..\..\BuildTools\Standards` | The analyzers holding the mod to two of its rules: nothing is `internal` (STD001), and nothing goes unused (STD002) |
-| `..\Maltek.Sans`, `..\Maltek.Mono`, `..\Maltek.Symbols` | Font mods Sprocket requires: the editor's lettering, its code face, and the symbols its buttons and marks are drawn in. The simulator reads Symbols' and Mono's fonts from there |
-| `..\SpaceEngineers.FontStyles` | A font mod with bold, italic and bold italic cuts of the game's own face. The simulator reads its fonts from there |
+The simulator draws with the font mods Sprocket requires, read from Steam's Workshop folder, where the game puts them
+once it has loaded a world with Sprocket: Maltek Symbols, Maltek Mono, and Space Engineers Font Styles, which has bold,
+italic and bold italic cuts of the game's own face. Where one is missing, the simulator stops and says so.
 
 ## The tests
 
@@ -67,6 +61,7 @@ Each of these is a repository of its own, found by a path relative to this one.
 | `tests/Sprocket.Host.SpaceEngineers.Tests` | The mod tested on its own, outside the simulator: a player's settings |
 | `tests/Sprocket.Host.SpaceEngineers.Presentation.Tests` | The screens: each test presses and reads by name, as a player would |
 | `tests/Sprocket.Localization.Generator.Tests` | The generator, run as the compiler runs it |
+| `tests/Sprocket.Standards.Tests` | The analyzer, run as the compiler runs it, over code written in the tests |
 | `tests/Sprocket.Benchmarks` | How long laying out a screen and reading a program take |
 
 ## Building and testing

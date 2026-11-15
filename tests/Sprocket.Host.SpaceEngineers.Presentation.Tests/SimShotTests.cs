@@ -65,7 +65,7 @@ public class SimShotTests
     [Fact]
     public void AModsFontsComeFromItsOwnDeclarations()
     {
-        var content = new SimContent().Mod(Path.Combine(SprocketContent.Mods, "Maltek.Symbols"));
+        var content = new SimContent().Mod(WorkshopMods.Required(WorkshopMods.Symbols, "Maltek Symbols"));
 
         var font = Assert.Single(content.Fonts);
         Assert.Equal("MaltekSymbols", font.Name);

@@ -113,5 +113,3 @@ A stored program can be read straight out of the XML, and the version on its fir
 ```
 grep -a "sprocket " SANDBOX_0_0_0_.sbs
 ```
-
-`tools/rename-world.py` points a saved world at the mod under a new name, changing every place the save names it.

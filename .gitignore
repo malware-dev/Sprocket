@@ -62,3 +62,6 @@ mdk.local.ini
 
 ## Python
 __pycache__/
+
+# Agent worktrees
+.claude/worktrees/

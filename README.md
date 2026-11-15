@@ -60,3 +60,11 @@ account for the malforge package feed. How a machine is set up, built and tested
 
 How the repository is put together, and how its parts work, is in the developer guide, starting at
 [docs/Overview.md](docs/Overview.md).
+
+## License
+
+Released under the Malforge Attribution License for Space Engineers Mods v1.0 (BRUTAL variant), in [LICENSE.txt](src/Sprocket.Host.SpaceEngineers/LICENSE.txt). The short version, in plain words: [the summary](https://github.com/malforge/licenses/blob/main/MAL-SEMods-1.0-summary.md).
+
+Use it, change it, re-upload it, as long as you credit this mod and link back to it.
+
+Before you publish your own copy though, please consider contributing here instead. Several copies of the same mod just leave people confused about which one has which bug, and every author involved, original or copy, ends up getting reports about bugs that aren't theirs.

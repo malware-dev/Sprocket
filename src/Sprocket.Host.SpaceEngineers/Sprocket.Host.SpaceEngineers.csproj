@@ -38,8 +38,8 @@
     <!-- Both built first, and loaded from the copy each keeps for loading; see Loaded.targets. -->
     <ProjectReference Include="..\Sprocket.Localization.Generator\Sprocket.Localization.Generator.csproj" ReferenceOutputAssembly="false" />
     <Analyzer Include="..\Sprocket.Localization.Generator\bin\Loaded\Sprocket.Localization.Generator.dll" />
-    <ProjectReference Include="..\..\..\..\..\BuildTools\Standards\Sprocket.Standards\Sprocket.Standards.csproj" ReferenceOutputAssembly="false" />
-    <Analyzer Include="..\..\..\..\..\BuildTools\Standards\Sprocket.Standards\bin\Loaded\Sprocket.Standards.dll" />
+    <ProjectReference Include="..\Sprocket.Standards\Sprocket.Standards.csproj" ReferenceOutputAssembly="false" />
+    <Analyzer Include="..\Sprocket.Standards\bin\Loaded\Sprocket.Standards.dll" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Mal.Mdk2.ModAnalyzers" Version="2.1.16">
@@ -63,9 +63,13 @@
     <AdditionalFiles Include="thumb.png" Condition="Exists('thumb.png')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </AdditionalFiles>
+    <!-- The license travels with every copy of the mod (its clause 1.0). -->
+    <AdditionalFiles Include="LICENSE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AdditionalFiles>
     <AdditionalFiles Remove="Content\*\**\*.cs" />
     <None Remove="thumb.png" />
+    <None Remove="LICENSE.txt" />
   </ItemGroup>
   <Import Project="..\Lumel\Lumel.projitems" Label="Shared" />
-  <Import Project="..\..\..\..\Libraries\Gravity\Sprocket.Gravity\Sprocket.Gravity.projitems" Label="Shared" />
 </Project>

@@ -1,7 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
-using Sprocket.Gravity;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 {
@@ -11,8 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     {
         static readonly OwnAction Reverses = OwnAction.Of<IMyGravityGeneratorBase>(generator =>
             generator.GravityAcceleration = -generator.GravityAcceleration);
-
-        static readonly OwnAction Fits = OwnAction.Of<IMyGravityGenerator>(Fit);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -30,8 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
             if (block is IMyGravityGenerator)
             {
-                kind.WithAction("fit_to_the_grid", "fit to the grid", Fits, (string)null).In(Category.Other)
-                    .Renaming("Width", true, "width")
+                kind.Renaming("Width", true, "width")
                     .Measuring("Width", " m")
                     .Renaming("Height", true, "height")
                     .Measuring("Height", " m")
@@ -42,14 +38,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             if (block is IMyGravityGeneratorSphere)
                 kind.Renaming("Radius", true, "radius")
                     .Measuring("Radius", " m");
-        }
-
-        /// <summary>Sizes <paramref name="generator" />'s field to every block of its grid, as far as the generator reaches.</summary>
-        /// <remarks>The game holds the field to the generator's own limits as it is set.</remarks>
-        static void Fit(IMyGravityGenerator generator)
-        {
-            var grid = generator.CubeGrid;
-            generator.FieldSize = GravityFieldSize.Covering(generator, grid.Min, grid.Max);
         }
     }
 }

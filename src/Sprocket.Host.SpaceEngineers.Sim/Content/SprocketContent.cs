@@ -17,7 +17,7 @@ namespace Sprocket.Sim.Content
         /// </summary>
         public static readonly SimContent Instance = Make();
 
-        /// <summary>The folder each mod's content is copied to beside the harness.</summary>
+        /// <summary>The folder Sprocket's own content is copied to beside the harness.</summary>
         public static string Mods => Path.Combine(AppContext.BaseDirectory, "Content", "Mods");
 
         /// <summary>The folder the font mod <paramref name="font" /> declares its pages and tables in.</summary>
@@ -36,9 +36,9 @@ namespace Sprocket.Sim.Content
         {
             return new SimContent()
                 .Mod(Path.Combine(Mods, "Sprocket"))
-                .Mod(Path.Combine(Mods, "Maltek.Symbols"))
-                .Mod(Path.Combine(Mods, "Maltek.Mono"))
-                .Mod(Path.Combine(Mods, "SpaceEngineers.FontStyles"))
+                .Mod(WorkshopMods.Required(WorkshopMods.Symbols, "Maltek Symbols"))
+                .Mod(WorkshopMods.Required(WorkshopMods.Mono, "Maltek Mono"))
+                .Mod(WorkshopMods.Required(WorkshopMods.FontStyles, "Space Engineers Font Styles"))
                 .Draws("Sprocket_Cursor", (context, box, color) => Cursor(context, box, new SolidColorBrush(Color.FromArgb(color.A, color.R, color.G, color.B))))
                 .Draws("Sprocket_CursorHand", (context, box, _) => Cursor(context, box, Brushes.Gold))
                 .Pictures(Picture)

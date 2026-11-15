@@ -1,0 +1,54 @@
+Malforge Attribution License for Space Engineers Mods v1.0 (BRUTAL variant)
+
+Sprocket Automation is Copyright (c) 2026 Malware
+(https://github.com/malware-dev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+1.0. The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+2.0. Any mod, script, blueprint, world, or other work that is distributed to
+others, through the Steam Workshop, mod.io, or any other channel, and that
+includes or is derived from the Software or a substantial portion of it (a
+"Derived Work") is subject to the following condition:
+
+2.1. The public description of the Derived Work (its Workshop page or
+equivalent) shall name the Software and its author and link to where the
+Software is published.
+
+3.0. Parts of the Software may be derived from content belonging to Keen
+Software House, such as models made from the Space Engineers ModSDK. This
+license grants no rights to that content: it remains under Keen Software
+House's terms, and any work using it shall respect them, including requiring
+any DLC the original content requires.
+
+4.0. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+5.0. Where the Software includes third-party components, they are listed,
+together with the licenses that govern them, in the LICENSES/ directory at the
+root of the Software. Those licenses continue to apply to those components, and
+nothing stated here limits any right they grant you.
+
+6.0. Any person submitting any contribution to the Software hereby grants the
+author and all recipients of the Software a perpetual, worldwide,
+non-exclusive, no-charge, royalty-free, irrevocable license to include the
+contribution in the Software and use it under the terms of this license. Any
+person submitting any contribution represents that they are legally entitled to
+grant this license and that their contribution does not infringe upon any
+third-party rights.
+
+This license is adapted from the BRUTAL License v1.0 by Ahwoo Limited
+(https://github.com/ahwootech/BRUTAL). It is not affiliated with or endorsed
+by Ahwoo Limited, or by Keen Software House.

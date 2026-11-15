@@ -1548,10 +1548,6 @@
     <value>Reverses the generator's `acceleration`, so the field pulls the other way.</value>
     <comment>Codex entry on the block member "reverse" of GravityGenerator, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.GravityGenerator.FitToTheGrid" xml:space="preserve">
-    <value>Sizes the field to cover the whole grid, as far as the generator reaches.</value>
-    <comment>Codex entry on the block member "fit to the grid" of GravityGenerator, shown in the picker when it is chosen.</comment>
-  </data>
   <data name="Sprocket.Member.GravityGenerator.Acceleration" xml:space="preserve">
     <value>How strongly the field pulls, in meters per second squared. A negative value pulls the other way.</value>
     <comment>Codex entry on the block member "acceleration" of GravityGenerator, shown in the picker when it is chosen.</comment>

@@ -1333,10 +1333,6 @@
     <value>Snur `acceleration` på generatoren, slik at feltet trekker motsatt vei.</value>
     <comment>Codex entry on the block member "reverse" of GravityGenerator, shown in the picker when it is chosen.</comment>
   </data>
-  <data name="Sprocket.Member.GravityGenerator.FitToTheGrid" xml:space="preserve">
-    <value>Tilpasser feltet så det dekker hele rutenettet, så langt generatoren rekker.</value>
-    <comment>Codex entry on the block member "fit to the grid" of GravityGenerator, shown in the picker when it is chosen.</comment>
-  </data>
   <data name="Sprocket.Member.GravityGenerator.Acceleration" xml:space="preserve">
     <value>Hvor sterkt feltet trekker, i meter per sekund i kvadrat. Negativ verdi trekker motsatt vei.</value>
     <comment>Codex entry on the block member "acceleration" of GravityGenerator, shown in the picker when it is chosen.</comment>
