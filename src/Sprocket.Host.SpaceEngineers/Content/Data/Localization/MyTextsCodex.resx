@@ -2964,6 +2964,10 @@
     <value>Detonates the warhead when it is armed.</value>
     <comment>Codex entry on the block member "detonate" of Warhead, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.SeparationCharge.Detach" xml:space="preserve">
+    <value>Blows the charge, splitting the ship where it was.</value>
+    <comment>Codex entry on the block member "detach" of SeparationCharge, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.Warhead.Armed" xml:space="preserve">
     <value>Met while the warhead is armed.</value>
     <comment>Codex entry on the block member "armed" of Warhead, shown in the picker when it is chosen.</comment>
