@@ -659,6 +659,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             if (step is EndIf)
                 return Annotated(new EndIf(), step);
 
+            if (step is Catch)
+                return Annotated(new Catch(), step);
+
+            if (step is Finally)
+                return Annotated(new Finally(), step);
+
             var sets = step as SetState;
             if (sets != null)
                 return Annotated(new SetState { State = sets.State, Value = sets.Value, From = sets.From }, step);

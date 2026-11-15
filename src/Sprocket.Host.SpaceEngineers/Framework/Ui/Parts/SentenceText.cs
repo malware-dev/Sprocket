@@ -49,6 +49,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>The word the branch of an if taken when no check holds is said with, on its row and where it is offered.</summary>
         public const string OtherwiseWord = "otherwise";
 
+        /// <summary>The words the part of a sequence run when it fails opens with.</summary>
+        public const string CatchWords = "if it fails";
+
+        /// <summary>The word the part of a sequence run however it ends opens with.</summary>
+        public const string FinallyWord = "finally";
+
         /// <summary>The words offering a step that sets one of the logic system's states.</summary>
         public const string SetStateWords = "set state";
 
@@ -201,6 +207,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             if (kind == StepKind.Otherwise)
                 return OtherwiseWord;
+
+            if (kind == StepKind.Catch)
+                return CatchWords;
+
+            if (kind == StepKind.Finally)
+                return FinallyWord;
 
             if (kind == StepKind.Await)
                 return AwaitWords;

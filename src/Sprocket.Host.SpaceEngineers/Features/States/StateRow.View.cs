@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         Label _startsLead;
         Button _start;
         Label _nowLead;
-        Label _now;
+        Button _now;
         Glyph _remove;
 
         /// <summary>Makes the grip, the name, what it holds, the value it starts at, what it holds now, and the bin.</summary>
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                     new Label { Style = Styles.Aside }.As(out _startsLead),
                     new Button { Style = Styles.SlotName }.As(out _start),
                     new Label { Style = Styles.Aside }.As(out _nowLead),
-                    new Label { Style = Styles.Phrase }.As(out _now)
+                    new Button { Style = Styles.SlotName }.As(out _now)
                 }
             });
             Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f) }.As(out _remove));

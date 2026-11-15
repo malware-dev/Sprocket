@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System.Collections.Generic;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Menus;
 using Lumel.Text;
 using Lumel.Windows;
@@ -32,6 +33,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             for (var i = 0; i < answers.Count; i++)
             {
                 var answer = answers[i];
+                if (answer.IsRule)
+                {
+                    Items.Add(new Separator());
+                    continue;
+                }
+
                 Items.Add(new MenuItem { Style = Styles.MenuItem, Text = answer.Text, Command = answer.Command, IsChosen = answer == taken });
             }
 

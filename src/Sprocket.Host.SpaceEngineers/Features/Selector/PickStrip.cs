@@ -489,6 +489,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             return new VStack
             {
                 Style = Styles.Fold,
+                // As tall as the strip, as the stages beside it are.
+                Align = Align.FillHeight,
                 Placement = FixedSize.Width(FoldWidth),
                 Tip = CodexTip.For(null, tip),
                 Children = { new Glyph { Symbol = symbol, Style = Styles.Waits, Placement = Flex.Grow } }

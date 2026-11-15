@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
@@ -134,6 +135,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return false;
         }
 
+        /// <summary>
+        /// Gives a check the <paramref name="values" /> a panel closed on: the first, what it compares with, to
+        /// <paramref name="compared" /> where it <paramref name="checks" />; otherwise all of them, what it is read with, in place
+        /// of <paramref name="arguments" />.
+        /// </summary>
+        public static void Give(IList<Literal> arguments, IList<Literal> values, bool checks, Action<Literal> compared)
+        {
+            if (checks)
+            {
+                if (values.Count > 0)
+                    compared(values[0]);
+
+                return;
+            }
+
+            arguments.Clear();
+            for (var i = 0; i < values.Count; i++)
+                arguments.Add(values[i]);
+        }
+
         /// <summary>How many of the literals a selector gives back for a check on <paramref name="value" /> are the arguments it is read with.</summary>
         public static int Taken(EntityAction value)
         {
@@ -243,7 +264,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 return field;
 
             // A side said only as the other's absence, "not working", is the relation's to say, so the flag has one word.
-            var stated = no == null || no.StartsWith("not ", System.StringComparison.Ordinal)
+            var stated = no == null || no.StartsWith("not ", StringComparison.Ordinal)
                 ? Field.Among(field.Name, new[] { yes }, new[] { Literal.Of(true).Said })
                 : Field.Among(field.Name, new[] { yes, no }, new[] { Literal.Of(true).Said, Literal.Of(false).Said });
             stated.Entry = field.Entry;
@@ -253,7 +274,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>A state's words without the "is" it is read after.</summary>
         static string Word(string state)
         {
-            return state.StartsWith("is ", System.StringComparison.Ordinal) ? state.Substring(3) : state;
+            return state.StartsWith("is ", StringComparison.Ordinal) ? state.Substring(3) : state;
         }
     }
 }

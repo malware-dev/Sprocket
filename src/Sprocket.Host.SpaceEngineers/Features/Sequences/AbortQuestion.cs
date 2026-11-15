@@ -21,7 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         readonly SprocketEditor _editor;
         readonly FieldSet _form;
         readonly Popup _window;
-        readonly Func<Element> _part;
         readonly Action<string, AbortLevel, bool> _answered;
 
         bool _done;
@@ -33,7 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public AbortQuestion(SprocketEditor editor, Abort abort, Func<Element> part, Action<string, AbortLevel, bool> answered)
         {
             _editor = editor;
-            _part = part;
             _answered = answered;
 
             var texts = editor.Texts;
@@ -43,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _form = new FieldSet();
             _form.Show(new[] { SentenceText.AbortMessageField(texts.AbortMessage), level },
                 new[] { abort.Message, SentenceText.AbortLevels[(int)abort.Level] }, null, texts);
-            _form.Submitted += () => Finish(false);
+            _form.Submitted += Accept;
 
             _window = new Popup
             {
@@ -60,12 +58,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                             Style = Styles.Primary,
                             Text = texts.ChromeDone,
                             Align = Align.Right,
-                            Command = new RelayCommand(() => Finish(false))
+                            Command = new RelayCommand(Accept)
                         }
                     }
                 }
             };
-            _window.Closed += _ => Finish(true);
+            _window.FnAnchor = part;
+            _window.Closed += reason => Finish(reason != CloseReason.Accepted);
         }
 
         /// <summary>The form the message and level are given in.</summary>
@@ -74,19 +73,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Whether it is still waiting for its answer.</summary>
         public bool IsOpen => !_done;
 
-        /// <summary>Hangs the panel from its part, once the part is on a screen; nothing where it hangs already or is answered.</summary>
+        /// <summary>Hangs the panel from its part, once the part is on a screen, and follows the part made again; nothing once answered.</summary>
+        /// <remarks>Called every tick: one look for the part.</remarks>
         public void Hang()
         {
-            if (_done || _window.IsOpen)
+            if (_done)
                 return;
 
-            var part = _part();
-            if (part == null || part.Windows == null)
-                return;
+            var opening = !_window.IsOpen;
+            _window.Hang();
+            if (opening && _window.IsOpen)
+                _form.Take(_editor.Input);
+        }
 
-            _window.Anchor = part;
-            _window.Open();
-            _form.Take(_editor.Input);
+        /// <summary>Answers with what the panel says, closing it as finished with.</summary>
+        void Accept()
+        {
+            if (_window.IsOpen)
+                _window.Accept();
+            else
+                Finish(false);
         }
 
         /// <summary>Puts the panel away and answers with what it says, or that it was put away where <paramref name="cancelled" />.</summary>

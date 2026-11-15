@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
@@ -18,7 +19,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Slots
 {
     /// <summary>One slot of a blueprint: its name, what it says about itself, the blocks one installation fills it with, and what is still to do about it.</summary>
-    public partial class PartRow : HStack, IReorderable, IDragged
+    public partial class PartRow : HStack, IReorderable, IDragged, IStandsIn
     {
         readonly List<Mention> _pieces = new List<Mention>();
         readonly List<Mention> _signalPieces = new List<Mention>();
@@ -211,6 +212,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         }
 
         bool _indented;
+
+        /// <summary>None: it sets its name in itself, keeping its blocks in line with every other slot's.</summary>
+        public bool SetsInWhole => false;
 
         /// <summary>Whether its place can be changed at all: where it can, it shows a grip.</summary>
         public bool Arranged

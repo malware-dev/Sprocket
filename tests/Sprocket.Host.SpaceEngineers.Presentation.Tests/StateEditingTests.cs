@@ -207,6 +207,135 @@ public class StateEditingTests
         Assert.Equal("inside", Assert.IsType<SetState>(Assert.Single(sequence.Steps)).Value.Text);
     }
 
+    /// <summary>The value a step sets a state to is chosen from a menu under it, the value it has marked, as one edit.</summary>
+    [Fact]
+    public void ASetsValueIsChosenFromAMenuUnderIt()
+    {
+        var screen = OnSequence(Setting, out var sequence);
+        var editor = screen.Editor;
+
+        Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
+        screen.Run(1);
+        Assert.True(editor.Screen.HasQuestion);
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal("outside", editor.Screen.Default!.Text);
+
+        editor.PressAnswer("inside");
+        screen.Run(1);
+        Assert.Equal("inside", Assert.IsType<SetState>(Assert.Single(sequence.Steps)).Value.Text);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(1);
+        Assert.Equal("outside", Assert.IsType<SetState>(Assert.Single(sequence.Steps)).Value.Text);
+    }
+
+    /// <summary>Pressing a set's value on the screen hangs its menu under it and keeps it there.</summary>
+    [Fact]
+    public void PressingASetsValueHangsItsMenu()
+    {
+        var screen = OnSequence(Setting, out _);
+        var editor = screen.Editor;
+        screen.Run(5);
+
+        var at = screen.Text("outside").At;
+        var point = Screen.Ui(at.X + 4f, at.Y + 8f);
+        screen.Scene.MoveTo(point);
+        screen.Scene.Press(point, 1);
+        screen.Run(1);
+
+        Assert.True(editor.Screen.HasQuestion, "the menu put itself away");
+        Assert.Equal("outside", editor.Screen.Default!.Text);
+    }
+
+    /// <summary>The value of another state, in the menu under a set's value, opens the selector the step was made in.</summary>
+    [Fact]
+    public void AnotherStatesValueOpensTheSelector()
+    {
+        var screen = OnSequence(Setting, out _);
+        var editor = screen.Editor;
+
+        Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
+        screen.Run(1);
+        editor.PressAnswer(editor.Texts.PickStateValueOf);
+        screen.Run(1);
+        Assert.Equal("Set where to outside", editor.Screen.Title());
+    }
+
+    /// <summary>A state set to another state's value has that state's name for its value, and a menu under it marks the value of another state.</summary>
+    [Fact]
+    public void AValueTakenFromAnotherStateIsMarkedInTheMenu()
+    {
+        var screen = OnSequence(Head + "    sequence 1 {\n        set where to there\n    }\n}\n", out var sequence);
+        var editor = screen.Editor;
+
+        var row = Assert.Single(editor.StepRows());
+        Assert.Equal("there", Assert.IsType<SystemStateSlot>(row.Slots[1]).Name);
+        row.Slots[1].Opens!.Execute();
+        screen.Run(1);
+        Assert.Equal(editor.Texts.PickStateValueOf, editor.Screen.Default!.Text);
+
+        editor.PressAnswer("inside");
+        screen.Run(1);
+        var set = Assert.IsType<SetState>(Assert.Single(sequence.Steps));
+        Assert.Equal("inside", set.Value.Text);
+        Assert.Equal("", set.From);
+    }
+
+    /// <summary>A flag no other state holds the like of is offered on and off alone.</summary>
+    [Fact]
+    public void AFlagsMenuOffersOnAndOffAlone()
+    {
+        var screen = OnSequence(Head + "    sequence 1 {\n        set cycling to on\n    }\n}\n", out _);
+        var editor = screen.Editor;
+
+        Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
+        screen.Run(1);
+        Assert.Equal(new[] { "on", "off" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+    }
+
+    /// <summary>The value an if on a state checks is chosen from a menu under it, as one edit.</summary>
+    [Fact]
+    public void AnIfsStateValueIsChosenFromAMenuUnderIt()
+    {
+        var screen = OnSequence(Head + "    sequence 1 {\n        if where == inside then {\n        }\n    }\n}\n", out var sequence);
+        var editor = screen.Editor;
+
+        editor.StepRows()[0].Slots[2].Opens!.Execute();
+        screen.Run(1);
+        Assert.Equal("inside", editor.Screen.Default!.Text);
+        editor.PressAnswer("outside");
+        screen.Run(1);
+        var test = Assert.IsType<StateTest>(((If)sequence.Steps[0]).Test);
+        Assert.Equal("outside", test.Value.Text);
+        Assert.Equal(Relation.Is, test.Relation);
+    }
+
+    /// <summary>The value a when watches a state for, and the value its trigger sets a state to, are each chosen from a menu under it.</summary>
+    [Fact]
+    public void ATriggersStateValuesAreChosenFromMenusUnderThem()
+    {
+        var screen = OnSystem(Head + "    when where == outside then set cycling to off\n\n    sequence 1 {\n    }\n}\n", out var system);
+        var editor = screen.Editor;
+
+        editor.Triggers()[0].Starts[2].Opens!.Execute();
+        screen.Run(1);
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        editor.PressAnswer("inside");
+        screen.Run(1);
+        Assert.Equal("inside", Assert.IsType<StateTrigger>(system.Triggers[0]).Test.Value.Text);
+
+        editor.Triggers()[0].Does[1].Opens!.Execute();
+        screen.Run(1);
+        Assert.Equal(new[] { "on", "off" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        editor.PressAnswer("on");
+        screen.Run(1);
+        Assert.Equal("on", Assert.IsType<SetState>(system.Triggers[0].Does).Value.Said);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(1);
+        Assert.Equal("off", Assert.IsType<SetState>(system.Triggers[0].Does).Value.Said);
+    }
+
     /// <summary>When state can watch a state made in its own picker, which is added with the trigger as one undo step.</summary>
     [Fact]
     public void WhenStateMakesANewState()
@@ -282,6 +411,62 @@ public class StateEditingTests
         Assert.Equal("(" + screen.Editor.Texts.StateFlag + ")", states[2].Kind);
         Assert.Equal("inside", states[0].Start.Text);
         Assert.Equal("inside", states[0].Now);
+    }
+
+    /// <summary>
+    /// While the logic system is switched off, what a state is now is changed by hand from a menu under it, the value it has
+    /// marked, as one edit; nothing watching the state reacts.
+    /// </summary>
+    [Fact]
+    public void AStateIsChangedByHandWhileOff()
+    {
+        var screen = OnSystem(Head + "    when where == outside then run 1\n\n    sequence 1 {\n    }\n}\n", out var system);
+        var editor = screen.Editor;
+        var view = editor.PressTab(editor.Texts.SystemState);
+        screen.Run(1);
+
+        var where = Target.Within(view).OfType<StateRow>().First();
+        Assert.NotNull(where.Current.Command);
+        where.Current.Command!.Execute();
+        screen.Run(1);
+        Assert.Equal(new[] { "inside", "outside" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal("inside", editor.Screen.Default!.Text);
+
+        editor.PressAnswer("outside");
+        screen.Run(1);
+        var shown = editor.StandIn(system);
+        Assert.Equal("outside", editor.Runner.States.Read(system, shown, system.FindState("where")!).Text);
+        Assert.Equal("outside", where.Now);
+        Assert.False(editor.Runner.Get(system.Sequences[0], shown)?.IsRunning ?? false, "a when on the state reacted to a change by hand");
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(1);
+        Assert.Equal("inside", editor.Runner.States.Read(system, shown, system.FindState("where")!).Text);
+        Assert.Equal("inside", where.Now);
+    }
+
+    /// <summary>While the logic system and the installation are both switched on, what a state is now cannot be pressed; switching the installation off lets it be.</summary>
+    [Fact]
+    public void AStateIsChangedByHandOnlyWhileSomethingIsOff()
+    {
+        var screen = OnSystem(Program, out var system);
+        var editor = screen.Editor;
+        var view = editor.PressTab(editor.Texts.SystemState);
+        system.Enabled = true;
+        editor.Program.Edited();
+        screen.Run(2);
+
+        var where = Target.Within(view).OfType<StateRow>().First();
+        Assert.Null(where.Current.Command);
+
+        editor.StandIn(system).Enabled = false;
+        screen.Run(2);
+        Assert.NotNull(where.Current.Command);
+        where.Current.Command!.Execute();
+        screen.Run(1);
+        editor.PressAnswer("outside");
+        screen.Run(1);
+        Assert.Equal("outside", editor.Runner.States.Read(system, editor.StandIn(system), system.FindState("where")!).Text);
     }
 
     /// <summary>A type and a state are added under names counted on from how many there are; a new type has two choices.</summary>

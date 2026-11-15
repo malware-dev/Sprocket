@@ -8,9 +8,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
-using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
-using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System;
 using System.Collections.Generic;
 using Run = Sprocket.Host.SpaceEngineers.Framework.Model.Run;
@@ -107,19 +105,58 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Opens a step's picker on the column <paramref name="opens" /> says, the part that was pressed.</summary>
         public void EditStep(Act step, OpeningColumn opens)
         {
+            Repaired(step, () => Edit(step, opens));
+        }
+
+        /// <summary>
+        /// Goes on to <paramref name="change" /> <paramref name="step" />, once anything its change will mend has been told and
+        /// agreed to; at once where there is nothing.
+        /// </summary>
+        public void Repaired(Act step, Action change)
+        {
             Repair repair;
             var system = _sequence.System;
             var ahead = ProgramRepairs.Ahead(_editor.Texts, _editor.Runner.Bindings, system, system == null ? null : _editor.StandIn(system),
                 step, out repair);
             if (ahead.Length == 0)
             {
-                Edit(step, opens);
+                change();
                 return;
             }
 
             _editor.Ask(ahead);
-            _editor.Answer(repair.Proceed(_editor.Texts), () => Edit(step, opens), true);
+            _editor.Answer(repair.Proceed(_editor.Texts), change, true);
             _editor.Answer(repair.Cancel(_editor.Texts), delegate { });
+        }
+
+        /// <summary>Changes the test of <paramref name="step" /> from <paramref name="test" /> to <paramref name="now" /> as one edit, where the step is still there with that test.</summary>
+        public void Retest(Step step, BranchTest test, BranchTest now)
+        {
+            var index = _sequence.Steps.IndexOf(step);
+            var branch = step as Branch;
+            if (index < 0 || branch == null || branch.Test != test)
+                return;
+
+            _editor.Do(_sequence, new SetTest(index, test, now));
+        }
+
+        /// <summary>
+        /// Gives <paramref name="step" /> the <paramref name="values" /> its panel closed on, as one edit, or leaves it as it was
+        /// where it was <paramref name="cancelled" />. Toggle chosen on a switch makes it the game's toggle beside it.
+        /// </summary>
+        public void Closed(Act step, List<Literal> values, bool cancelled)
+        {
+            var index = _sequence.Steps.IndexOf(step);
+            if (index < 0 || cancelled)
+                return;
+
+            var world = _editor.World;
+            var blocks = _editor.Blocks(_sequence.System, step.Targets);
+            var now = Vocabulary.Given(world, blocks, step, values);
+            var awaited = now.ActionId == step.ActionId && now.Form == step.Form
+                ? Waited(index)
+                : Awaited(index, step, Vocabulary.Lasts(world, blocks, now.ActionId, now.Form));
+            _editor.Do(_sequence, new ChangeStep(index, step, now.Targets, now.ActionId, now.Form, now.Provider, now.Arguments, awaited));
         }
 
         /// <summary>Opens the picker on <paramref name="step" />, on the column <paramref name="opens" />, to change what it does and to what.</summary>
@@ -235,6 +272,42 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     _editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
                 }, relation == test.Relation);
             }
+        }
+
+        /// <summary>
+        /// Offers enable and disable, and toggle where the switch flips, in a menu under the part pressed, the one <paramref name="step" /> does marked, and changes
+        /// what it does to the one chosen as one edit.
+        /// </summary>
+        public void Switch(Act step)
+        {
+            var flips = Vocabulary.Toggle(_editor.World, _editor.Blocks(_sequence.System, step.Targets), step.ActionId) != null;
+            SwitchQuestion.Offer(_editor, step, flips, values => Closed(step, new List<Literal>(values), false));
+        }
+
+        /// <summary>
+        /// Offers the values the state <paramref name="test" /> checks can hold in a menu under the part pressed, and changes the
+        /// test to the one chosen as one edit; the value of another state opens the selector.
+        /// </summary>
+        public void CompareState(Step step, StateTest test)
+        {
+            StateValueQuestion.Offer(_editor, _sequence.System, test.State, test.Value, test.Other, value =>
+            {
+                var now = test.Copy();
+                now.Value = value;
+                now.Other = "";
+                _editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
+            }, () => EditTest(step, test, OpeningColumn.Arguments));
+        }
+
+        /// <summary>
+        /// Offers the values the state <paramref name="step" /> sets can hold in a menu under the part pressed, and sets it to the
+        /// one chosen as one edit; the value of another state opens the selector.
+        /// </summary>
+        public void SetStateTo(SetState step)
+        {
+            StateValueQuestion.Offer(_editor, _sequence.System, step.State, step.Value, step.From, value =>
+                _editor.Do(_sequence, new ChangeSetState(_sequence.Steps.IndexOf(step), step, new SetState { State = step.State, Value = value })),
+                () => ChangeSetState(step));
         }
 
         /// <summary>The picker a test of a state is made and changed with, its sentence led by <paramref name="lead" />, opened on <paramref name="test" /> where there is one.</summary>
@@ -413,53 +486,77 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             return null;
         }
-
-        /// <summary>Asks which other sequence of the system to run, or to stop where <paramref name="stops" /> says so, and adds the step that does.</summary>
-        /// <remarks>A step that runs one comes with a wait after it, in the same edit.</remarks>
+        /// <summary>
+        /// Offers, in a menu under what was pressed, a new sequence and the system's other sequences to run, or those to stop
+        /// where <paramref name="stops" /> says so, and adds the step that does at the line <paramref name="at" />.
+        /// </summary>
+        /// <remarks>A step that runs one comes with a wait after it, in the same edit; a new sequence is made in it too, and opened.</remarks>
         public void AddRun(bool stops, int at)
         {
-            var origin = _editor.Depth;
-            _editor.Push(RunPage(stops, 0, number =>
-            {
-                _editor.Do(_sequence, stops
+            Offer(stops, 0,
+                number => _editor.Do(_sequence, stops
                     ? new AddStep(ChangeKind.AddStep, at, new Run(number, true))
-                    : new AddStep(ChangeKind.AddStep, at, new Run(number), new Await()));
-                _editor.UnwindTo(origin);
-            }));
+                    : new AddStep(ChangeKind.AddStep, at, new Run(number), new Await())),
+                made => new AddStep(ChangeKind.AddStep, at, new Run(made.Number), new Await()));
         }
 
-        /// <summary>Asks again which sequence <paramref name="step" /> runs or stops, on the list that made it.</summary>
-        public void ChangeRun(Run step)
+        /// <summary>
+        /// Offers, in a menu under the part pressed, the system's other sequences, and for a step that runs one a new sequence
+        /// first, the one <paramref name="step" /> names marked, and changes it to the one chosen as one edit.
+        /// </summary>
+        public void Rerun(Run step)
         {
-            var origin = _editor.Depth;
-            _editor.Push(RunPage(step.Stops, step.Number, number =>
-            {
-                _editor.Do(_sequence, new SetRun(_sequence.Steps.IndexOf(step), step.Number, number));
-                _editor.UnwindTo(origin);
-            }));
+            Offer(step.Stops, step.Number,
+                number =>
+                {
+                    var index = _sequence.Steps.IndexOf(step);
+                    if (index >= 0)
+                        _editor.Do(_sequence, new SetRun(index, step.Number, number));
+                },
+                made => new SetRun(_sequence.Steps.IndexOf(step), step.Number, made.Number));
         }
 
-        /// <summary>The system's other sequences, to run or to stop, with <paramref name="current" /> marked where it is one; <paramref name="chosen" /> is given the one chosen.</summary>
-        ChoicePage RunPage(bool stops, int current, Action<int> chosen)
+        /// <summary>
+        /// Offers the system's other sequences in a menu under what was pressed, <paramref name="current" /> marked: to stop
+        /// where <paramref name="stops" /> says so, saying so where there is none; to run otherwise, after a new sequence and a
+        /// line. <paramref name="chosen" /> is given the number of another one chosen; <paramref name="fresh" /> makes the edit
+        /// that uses a new sequence, which is made with it as one edit and opened.
+        /// </summary>
+        void Offer(bool stops, int current, Action<int> chosen, Func<Sequence, SequenceEdit> fresh)
         {
             var texts = _editor.Texts;
-            var page = new ChoicePage(_editor, stops ? texts.SequenceStopQuestion : texts.SequenceRunQuestion)
-            {
-                EmptyText = stops ? texts.SequenceStopNone : texts.SequenceRunNone
-            };
-
             var sequences = _sequence.System.Sequences;
+            _editor.AskHere(stops && sequences.Count < 2 ? texts.SequenceStopNone : "");
+            if (!stops)
+            {
+                _editor.Answer(texts.PickNewSequence, () => RunNew(fresh));
+                if (sequences.Count > 1)
+                    _editor.AnswerRule();
+            }
+
             for (var i = 0; i < sequences.Count; i++)
             {
                 var other = sequences[i];
                 if (other == _sequence)
                     continue;
 
-                page.Add(SequenceText.Called(texts, other), other.Number == current, () => chosen(other.Number));
-                page.MarkLast(Symbols.Sequence);
+                var number = other.Number;
+                _editor.Answer(SequenceText.Called(texts, other), delegate
+                {
+                    if (number != current)
+                        chosen(number);
+                }, number == current);
             }
+        }
 
-            return page;
+        /// <summary>Makes a new sequence in the system, and with it the edit <paramref name="uses" /> makes of it, as one edit; then opens it.</summary>
+        void RunNew(Func<Sequence, SequenceEdit> uses)
+        {
+            var system = _sequence.System;
+            var made = _editor.Program.AddSequence(system);
+            made.Name = _editor.Name(made);
+            _editor.Do(system, new WithMade(new MakeSequence(_editor.Program, made, ChangeKind.NewSequence), new OnSequence(_sequence, uses(made))));
+            _editor.PushNamed(new SequencePage(_editor, made));
         }
 
         /// <summary>Gives <paramref name="wait" /> the <paramref name="length" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
@@ -498,6 +595,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public void Remove(int index)
         {
             var step = _sequence.Steps[index];
+            if (step is Handler)
+            {
+                RemoveHandler(index);
+                return;
+            }
+
             if (!(step is Branch))
             {
                 RemoveStep(index);
@@ -509,6 +612,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _editor.AskHere(whole ? texts.SequenceRemoveIf : texts.SequenceRemoveBranch);
             _editor.Answer(texts.SequenceKeepSteps, () => Unwrap(index, whole));
             _editor.Answer(texts.SequenceDeleteSteps, () => Cut(index, whole));
+            _editor.Answer(texts.ButtonLeaveAlone, () => { }, true);
+        }
+
+        /// <summary>
+        /// Removes the catch or finally at <paramref name="index" />: at once where it holds nothing, and otherwise asking whether its
+        /// steps go with it or join the steps above.
+        /// </summary>
+        void RemoveHandler(int index)
+        {
+            var end = index + 1;
+            while (end < _sequence.Steps.Count && !(_sequence.Steps[end] is Handler))
+                end++;
+
+            if (end == index + 1)
+            {
+                RemoveStep(index);
+                return;
+            }
+
+            var texts = _editor.Texts;
+            _editor.AskHere(texts.SequenceRemoveHandler);
+            _editor.Answer(texts.SequenceKeepSteps, () => Unwrap(index, false));
+            _editor.Answer(texts.SequenceDeleteSteps, () =>
+            {
+                var going = new List<Step>();
+                for (var i = index; i < end; i++)
+                    going.Add(_sequence.Steps[i]);
+
+                _editor.Do(_sequence, new RemoveStep(ChangeKind.RemoveBranch, index, going.ToArray()));
+            });
             _editor.Answer(texts.ButtonLeaveAlone, () => { }, true);
         }
 

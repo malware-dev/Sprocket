@@ -210,6 +210,10 @@ public class ProgramCopyTests
         lit.Arguments.Add(Literal.Of(0.5));
         lit.Arguments.Add(Literal.Of("on"));
         cycle.Steps.Add(lit);
+        cycle.Steps.Add(new Catch { Annotation = "Undo what was done." });
+        cycle.Steps.Add(new Wait(Duration.OfTicks(5)));
+        cycle.Steps.Add(new Finally());
+        cycle.Steps.Add(new SetState { State = "where", Value = Literal.Name("inside") });
 
         var again = program.Restore(system, 3, null);
         again.Steps.Add(new Run(1, true));

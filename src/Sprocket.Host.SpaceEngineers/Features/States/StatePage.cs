@@ -239,7 +239,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                     if (_word == was)
                         _word = now;
                 };
-                _form = new FieldSet();
+                _form = new FieldSet { Placement = Flex.Grow };
                 _form.Edited += Edited;
                 _form.Submitted += delegate
                 {

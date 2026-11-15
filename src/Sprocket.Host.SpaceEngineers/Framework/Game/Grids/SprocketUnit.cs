@@ -681,6 +681,38 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 state.Interrupt(StopCause.Hand, 0);
         }
 
+        /// <summary>
+        /// Gives the state named <paramref name="state" /> of installation <paramref name="instance" /> of
+        /// <paramref name="system" /> the value <paramref name="value" />, as a player did by hand on their copy; only while
+        /// that installation or its logic system is switched off, and only a value the state can hold.
+        /// </summary>
+        /// <remarks>Called on the server. Nothing watching the state reacts.</remarks>
+        public void Hold(Guid system, int instance, string state, Literal value)
+        {
+            var named = _program.FindSystem(system);
+            var one = named?.FindInstance(instance);
+            var held = named?.FindState(state);
+            if (one == null || held == null)
+            {
+                GameLog.Say($"{Logged(_block)} has no {(named == null ? "such system" : one == null ? "such instance" : "such state")} for a state changed by hand");
+                return;
+            }
+
+            if (named.Enabled && one.Enabled)
+            {
+                GameLog.Say($"{Logged(_block)} refused a state changed by hand: {named.Name} #{instance} is switched on");
+                return;
+            }
+
+            if (!StateValues.Fits(named, held, value))
+            {
+                GameLog.Say($"{Logged(_block)} refused a state changed by hand: {held.Name} cannot hold {value.Said}");
+                return;
+            }
+
+            _runner.States.Write(named, one, held, value);
+        }
+
         /// <summary>Starts paused automation again as it was.</summary>
         /// <remarks>Called on the server for a client that resumed it on its copy.</remarks>
         public void Resume()

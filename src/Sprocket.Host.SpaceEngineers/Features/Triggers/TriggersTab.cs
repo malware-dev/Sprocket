@@ -1,8 +1,11 @@
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.States;
 using Sprocket.Host.SpaceEngineers.Features.Triggers.Edits;
+using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
@@ -22,35 +25,114 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
     {
         readonly SprocketEditor _editor;
         readonly AutomationSystem _system;
-        readonly KeyedChildren<Trigger, TriggerRow> _rows;
+        readonly KeyedChildren<object, Element> _rows;
+        readonly List<object> _keys = new List<object>();
+        readonly CategoryWork _categories;
         readonly Func<CommandKind, Action, ICommand> _changes;
         readonly Func<string> _locked;
 
         LengthQuestion _rate;
+        ValuesQuestion _values;
 
         /// <summary>
-        /// The Triggers tab of <paramref name="system" />, its lines in <paramref name="list" />, its changes made through commands
-        /// <paramref name="changes" /> makes, and <paramref name="locked" /> saying why nothing can be changed where it cannot.
+        /// The Triggers tab of <paramref name="system" />, its lines and their categories in <paramref name="list" />, its changes
+        /// made through commands <paramref name="changes" /> makes, and <paramref name="locked" /> saying why nothing can be changed
+        /// where it cannot.
         /// </summary>
-        public TriggersTab(SprocketEditor editor, AutomationSystem system, VStack list, Func<CommandKind, Action, ICommand> changes, Func<string> locked)
+        public TriggersTab(SprocketEditor editor, AutomationSystem system, CategoryList list, Func<CommandKind, Action, ICommand> changes, Func<string> locked)
         {
             _editor = editor;
             _system = system;
             _changes = changes;
             _locked = locked;
-            _rows = new KeyedChildren<Trigger, TriggerRow>(list.Children, delegate { return new TriggerRow(); });
+            _rows = new KeyedChildren<object, Element>(list.Children, Made);
+            _categories = new CategoryWork(editor,
+                new Arranger(editor, system, owner => owner.TriggerList, ChangeKind.MoveTrigger, ChangeKind.MoveTriggerCategory), changes, false);
+            list.FnAllowedDropIndexes = index => Arranger.Landings(_keys, index);
+            list.FnCanIndent = (from, to) => Arranger.Nests(_keys, from, to);
+            list.FnIsIndented = index => Arranger.StandsIn(_keys, index);
+            list.Reordered += moved =>
+            {
+                var move = changes(CommandKind.MoveTrigger, () => _categories.Arranger.Move(_keys, moved.From, moved.To, moved.IsIndented));
+                if (move != null)
+                    move.Execute();
+            };
+        }
+
+        /// <summary>The row <paramref name="key" /> is shown as: a trigger's line, a category's heading or its end.</summary>
+        static Element Made(object key)
+        {
+            if (key is Trigger)
+                return new TriggerRow();
+
+            return key is CategoryEnd ? (Element)new CategoryEndRow() : new CategoryRow();
+        }
+
+        /// <summary>Adds an empty category under every trigger, whose name opens for typing once its row stands.</summary>
+        public void AddCategory()
+        {
+            _categories.Add();
         }
 
         /// <summary>The line of <paramref name="trigger" />.</summary>
-        public TriggerRow Row(Trigger trigger) => _rows[trigger];
+        public TriggerRow Row(Trigger trigger) => _rows[trigger] as TriggerRow;
 
-        /// <summary>Shows a line for each of <paramref name="triggers" />, in order, worded as each reads.</summary>
+        /// <summary>
+        /// Shows a line for each trigger, in order under their categories, worded as each reads in <paramref name="texts" />; moved,
+        /// and the categories changed, where <paramref name="editable" />, and why not in <paramref name="locked" /> otherwise.
+        /// </summary>
         /// <remarks>Walks each trigger's blocks for their names, so it runs only when the page is built.</remarks>
-        public void Arrange(List<Trigger> triggers)
+        public void Arrange(Texts texts, bool editable, string locked)
         {
-            _rows.Show(triggers);
-            foreach (var trigger in triggers)
-                Word(_rows[trigger], trigger);
+            CategoryList.Listed(_system.TriggerList, _keys, true, editable);
+            _rows.Show(_keys);
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                var trigger = _keys[i] as Trigger;
+                if (trigger != null)
+                {
+                    var row = (TriggerRow)_rows[trigger];
+                    row.Arranged = true;
+                    row.Indented = trigger.Category.Length > 0;
+                    row.Grips(editable, editable ? texts.Codex.TriggerDrag : locked);
+                    Word(row, trigger);
+                    continue;
+                }
+
+                var heading = _keys[i] as CategoryHeading;
+                if (heading != null)
+                {
+                    _categories.Heading(texts, (CategoryRow)_rows[heading], heading, Arranger.Carries(_keys, i), editable, locked,
+                        texts.Codex.CategoryDragTriggers, texts.Codex.CategoryRemoveTriggers);
+                    continue;
+                }
+
+                var end = _keys[i] as CategoryEnd;
+                if (end != null)
+                    End(texts, (CategoryEndRow)_rows[end], end, i);
+            }
+        }
+
+        /// <summary>
+        /// The ways a new trigger can start, in <paramref name="texts" />, each placed by <paramref name="placed" /> once made, or
+        /// put under every other where it is null.
+        /// </summary>
+        public AddOption Adds(Texts texts, Func<Trigger, Arrangement> placed)
+        {
+            return new AddOption(texts.SystemTrigger, null, new[]
+            {
+                new AddOption(SentenceText.WhenWord, texts.Codex.SystemWhenAbout,
+                    _changes(CommandKind.StartWhen, () => _editor.Starts.StartSequence(_system, new WhenTrigger(""), placed))),
+                new AddOption(SentenceText.EveryWord, texts.Codex.SystemEveryAbout,
+                    _changes(CommandKind.StartEvery, () => _editor.Starts.StartSequence(_system, new EveryTrigger(_editor.NewLength), placed)))
+            });
+        }
+
+        /// <summary>Shows the end <paramref name="end" /> of a category, at <paramref name="at" /> of the rows, as the way to add a trigger into the category.</summary>
+        void End(Texts texts, CategoryEndRow row, CategoryEnd end, int at)
+        {
+            row.Category = end.Name;
+            row.Adds.Show(Adds(texts, made => _categories.Arranger.Placed(_keys, at, made)));
         }
 
         /// <summary>The panel a timer's rate is being given in, or null while none is open.</summary>
@@ -62,7 +144,45 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         {
             if (_rate != null)
                 _rate.Hang();
+
+            if (_values != null)
+                _values.Hang();
         }
+
+        /// <summary>The panel the values a trigger's action gives are being given in, or null while none is open.</summary>
+        public ValuesQuestion Giving => _values != null && _values.IsOpen ? _values : null;
+
+        /// <summary>
+        /// Opens the panel the values <paramref name="act" />, what <paramref name="trigger" /> does, gives are given in, asked for
+        /// by <paramref name="fields" />, hung from the part saying them, which are <paramref name="holds" /> to it; the selector
+        /// where a value is chosen on a screen of its own.
+        /// </summary>
+        void Give(Trigger trigger, Act act, List<Field> fields, ArgumentRole holds)
+        {
+            if (ValuesQuestion.Chooses(fields))
+            {
+                _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Arguments, true);
+                return;
+            }
+
+            Action<string, bool> answered = (said, cancelled) =>
+            {
+                if (cancelled || trigger.Does != act || _system.IndexOfTrigger(trigger) < 0)
+                    return;
+
+                var now = Vocabulary.Given(_editor.World, _editor.Blocks(_system, act.Targets), act, FieldSet.Read(said, fields));
+                _editor.Do(_system, new PointTrigger(_editor.Program, trigger, now, null));
+            };
+            if (ValuesQuestion.Offer(_editor, fields, act.Arguments, said => answered(said, false)))
+                return;
+
+            if (_values != null)
+                _values.Finish(true);
+
+            _values = new ValuesQuestion(_editor, fields, act.Arguments, () => Chip(trigger, false, holds), answered);
+            _values.Hang();
+        }
+
 
 
         /// <summary>Opens the panel the rate of <paramref name="every" /> is given in, which changes it as it closes.</summary>
@@ -83,7 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <summary>The chip of <paramref name="every" />'s rate, or null where its row does not show one.</summary>
         Element RateChip(EveryTrigger every)
         {
-            var row = _rows[every];
+            var row = Row(every);
             if (row == null)
                 return null;
 
@@ -153,7 +273,47 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             row.Starts.Add(new SystemStateSlot(test.State, opens));
             row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
                 _changes(CommandKind.OpenTrigger, () => RelateWatch(watch)), ArgumentRole.Compared));
-            row.Starts.Add(StateValueQuestion.Part(_system, test.State, test.Value, test.Other, opens, ArgumentRole.Checked));
+            row.Starts.Add(StateValueQuestion.Part(_system, test.State, test.Value, test.Other,
+                _changes(CommandKind.OpenTrigger, () => CompareWatch(watch)), ArgumentRole.Checked));
+        }
+
+        /// <summary>
+        /// Offers the values the state <paramref name="watch" /> watches can hold in a menu under the part pressed, and changes what
+        /// it starts on to the one chosen; the value of another state opens the selector.
+        /// </summary>
+        void CompareWatch(StateTrigger watch)
+        {
+            var test = watch.Test;
+            StateValueQuestion.Offer(_editor, _system, test.State, test.Value, test.Other, value =>
+            {
+                var now = test.Copy();
+                now.Value = value;
+                now.Other = "";
+                _editor.Do(_system, new SetWatch(watch, test, now));
+            }, () => _editor.Starts.ChangeTrigger(_system, watch, OpeningColumn.Blocks, false));
+        }
+
+        /// <summary>
+        /// Offers enable and disable, and toggle where the switch flips, in a menu under the part pressed, the one <paramref name="act" />, what
+        /// <paramref name="trigger" /> does, does marked, and has the trigger do the one chosen.
+        /// </summary>
+        void Switch(Trigger trigger, Act act)
+        {
+            var blocks = _editor.Blocks(_system, act.Targets);
+            SwitchQuestion.Offer(_editor, act, Vocabulary.Toggle(_editor.World, blocks, act.ActionId) != null,
+                values => _editor.Do(_system, new PointTrigger(_editor.Program, trigger, Vocabulary.Given(_editor.World, blocks, act, values), null)));
+        }
+
+        /// <summary>
+        /// Offers the values the state <paramref name="trigger" /> sets can hold in a menu under the part pressed, and has it set
+        /// the one chosen; the value of another state opens the selector.
+        /// </summary>
+        void SetStateTo(Trigger trigger)
+        {
+            var set = trigger.Sets;
+            StateValueQuestion.Offer(_editor, _system, set.State, set.Value, set.From,
+                value => _editor.Do(_system, new PointTrigger(_editor.Program, trigger, new SetState { State = set.State, Value = value }, null)),
+                () => _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false));
         }
 
         /// <summary>Offers is and is not in a menu under the part pressed, and changes what <paramref name="watch" /> starts on to the one chosen.</summary>
@@ -187,7 +347,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             var shape = TestShape.Of(when.Quantifier, true, slotted || blocks.Count > 1, slotted, ComparisonQuestion.Join(value, when.Arguments));
             var reading = shape.IsRead ? Reading(when, shape, true) : null;
             var parameters = ComparisonQuestion.Parameters(value);
-            var taking = !ComparisonQuestion.SaysAny(parameters, when.Arguments) ? null : new ArgumentsSlot(when.Arguments, parameters, Starts(when, OpeningColumn.Arguments), ArgumentRole.ReadWith);
+            var taking = !ComparisonQuestion.SaysAny(parameters, when.Arguments)
+                ? null
+                : new ArgumentsSlot(when.Arguments, parameters, _changes(CommandKind.OpenTrigger, () => Compare(when, parameters, ArgumentRole.ReadWith)),
+                    ArgumentRole.ReadWith);
             shape.Lay(row.Starts, reading, new ActionSlot(value, Starts(when, OpeningColumn.What)),
                 new EntitiesSlot(blocks, when.Sources, shape.JoinsAll, MarkText.OfSlots(_system, when.Sources), Starts(when, OpeningColumn.Blocks)), taking);
             if (value == null)
@@ -197,7 +360,63 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             var plural = shape.IsPlural;
             row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(when.Relation) }, fields.GetRange(0, 1),
                 _changes(CommandKind.OpenTrigger, () => Relate(when, fields[0], plural)), ArgumentRole.Compared, plural));
-            row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, fields.GetRange(1, fields.Count - 1), Starts(when, OpeningColumn.Arguments), ArgumentRole.Checked));
+            var checks = fields.GetRange(1, fields.Count - 1);
+            row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, checks,
+                _changes(CommandKind.OpenTrigger, () => Compare(when, checks, ArgumentRole.Checked)), ArgumentRole.Checked));
+        }
+
+        /// <summary>
+        /// Opens the panel the values <paramref name="when" /> starts on are given in, asked for by <paramref name="fields" />: what
+        /// it compares with where they are <paramref name="holds" /> <see cref="ArgumentRole.Checked" />, what it reads with
+        /// otherwise; hung from the part saying them, and changing the trigger as it closes. The selector where a value is chosen
+        /// on a screen of its own.
+        /// </summary>
+        void Compare(WhenTrigger when, List<Field> fields, ArgumentRole holds)
+        {
+            if (ValuesQuestion.Chooses(fields))
+            {
+                _editor.Starts.ChangeTrigger(_system, when, OpeningColumn.Arguments, false);
+                return;
+            }
+
+            var checks = holds == ArgumentRole.Checked;
+            var given = checks ? new[] { when.Value } : when.Arguments;
+            Action<string, bool> answered = (said, cancelled) =>
+            {
+                if (cancelled || _system.IndexOfTrigger(when) < 0)
+                    return;
+
+                var now = when.Copy();
+                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields), checks, value => now.Value = value);
+                _editor.Do(_system, new ChangeTrigger(when, now));
+            };
+            if (ValuesQuestion.Offer(_editor, fields, given, said => answered(said, false)))
+                return;
+
+            if (_values != null)
+                _values.Finish(true);
+
+            _values = new ValuesQuestion(_editor, fields, given, () => Chip(when, true, holds), answered);
+            _values.Hang();
+        }
+
+        /// <summary>
+        /// The chip of the first part of <paramref name="trigger" />'s line saying values that are <paramref name="holds" /> to
+        /// it, among what starts it where <paramref name="starts" />, among what it does otherwise; null where its row shows none.
+        /// </summary>
+        Element Chip(Trigger trigger, bool starts, ArgumentRole holds)
+        {
+            var row = Row(trigger);
+            if (row == null)
+                return null;
+
+            foreach (var part in starts ? row.Starts : row.Does)
+            {
+                if ((part as ArgumentsSlot)?.Holds == holds)
+                    return row.ChipOf(part);
+            }
+
+            return null;
         }
 
         /// <summary>Offers the comparisons <paramref name="relation" /> takes in a menu under the part pressed, and changes <paramref name="when" /> to the one chosen.</summary>
@@ -273,7 +492,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 var opens = _changes(CommandKind.TriggerTarget, () => _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false));
                 row.DoesLead = SentenceText.Then(row.Kind, false, false, true);
                 row.Does.Add(new SystemStateSlot(set.State, opens));
-                row.Does.Add(StateValueQuestion.Part(_system, set.State, set.Value, set.From, opens, ArgumentRole.NewValue));
+                row.Does.Add(StateValueQuestion.Part(_system, set.State, set.Value, set.From,
+                    _changes(CommandKind.TriggerTarget, () => SetStateTo(trigger)), ArgumentRole.NewValue));
                 return;
             }
 
@@ -293,7 +513,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
             row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, false, act.Sets && verb.Length == 0);
             if (verb.Length != 0)
-                row.Does.Add(ArgumentsSlot.Switching(verb, Does(trigger, OpeningColumn.Arguments)));
+                row.Does.Add(ArgumentsSlot.Switching(verb, _changes(CommandKind.TriggerTarget, () => Switch(trigger, act))));
 
             row.Does.Add(new ActionSlot(chosen, Does(trigger, OpeningColumn.What)));
             var blocks = _editor.Blocks(_system, act.Targets);
@@ -309,8 +529,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            ArgumentsSlot.Lay(row.Does, entities, chosen.Join, act.Arguments, fields, Does(trigger, OpeningColumn.Arguments),
-                act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options,
+            var holds = act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options;
+            ArgumentsSlot.Lay(row.Does, entities, chosen.Join, act.Arguments, fields,
+                _changes(CommandKind.TriggerTarget, () => Give(trigger, act, fields, holds)), holds,
                 names => new EntitiesSlot(_editor.Blocks(_system, names), names, true, MarkText.OfSlots(_system, names), Does(trigger, OpeningColumn.Target)));
         }
 

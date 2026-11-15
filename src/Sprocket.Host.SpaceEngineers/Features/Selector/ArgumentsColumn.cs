@@ -24,6 +24,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         {
             Base.Spacing = Gaps.Parts;
             Style = Styles.Column;
+            // As tall as the strip, as the stages beside it are.
+            Align = Align.FillHeight;
             Width = width;
 
             // Headed as a stage is, so the first argument lines up with the boxes beside it.

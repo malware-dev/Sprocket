@@ -274,6 +274,9 @@
   <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
     <value>{busy} starter tapt mens den kjørte, {off} avvist mens den var slått av</value>
   </data>
+  <data name="Sprocket.Sequence.HeldBy" xml:space="preserve">
+    <value>den siste mens {name} kjørte</value>
+  </data>
 
   <data name="Sprocket.Salvage.Different" xml:space="preserve">
     <value>Denne blokken har et program fra en annen versjon.</value>
@@ -1477,6 +1480,9 @@
   <data name="Sprocket.Sequence.DeleteSteps" xml:space="preserve">
     <value>Slett stegene i den også</value>
   </data>
+  <data name="Sprocket.Sequence.RemoveHandler" xml:space="preserve">
+    <value>Slette denne delen av sekvensen?</value>
+  </data>
   <data name="Sprocket.Sequence.StopQuestion" xml:space="preserve">
     <value>Stoppe hvilken sekvens?</value>
   </data>
@@ -2173,11 +2179,20 @@
   <data name="Sprocket.Category.Default" xml:space="preserve">
     <value>Kategori {number}</value>
   </data>
+  <data name="Sprocket.Category.Name" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="Sprocket.Category.OneAtATime" xml:space="preserve">
+    <value>Én om gangen</value>
+  </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} må slås av før det kan redigeres trygt.</value>
   </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
     <value>Kan bare leses mens {holder} redigerer den.</value>
+  </data>
+  <data name="Sprocket.Sequence.Cleaning" xml:space="preserve">
+    <value>Kjører finally. Stopp den for å redigere nå.</value>
   </data>
   <data name="Sprocket.Wait.AsTick" xml:space="preserve">
     <value>= 1 tikk</value>
@@ -2468,6 +2483,18 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   <data name="Sprocket.Change.MoveCategory" xml:space="preserve">
     <value>Flyttet kategorien &quot;{thing}&quot; med plassene i den</value>
   </data>
+  <data name="Sprocket.Change.MoveSequence" xml:space="preserve">
+    <value>Flyttet sekvensen &quot;{thing}&quot;</value>
+  </data>
+  <data name="Sprocket.Change.MoveSequenceCategory" xml:space="preserve">
+    <value>Flyttet kategorien &quot;{thing}&quot; med sekvensene i den</value>
+  </data>
+  <data name="Sprocket.Change.MoveTrigger" xml:space="preserve">
+    <value>Flyttet en utløser</value>
+  </data>
+  <data name="Sprocket.Change.MoveTriggerCategory" xml:space="preserve">
+    <value>Flyttet kategorien &quot;{thing}&quot; med utløserne i den</value>
+  </data>
   <data name="Sprocket.Change.AddCategory" xml:space="preserve">
     <value>La til kategorien &quot;{thing}&quot;</value>
   </data>
@@ -2476,6 +2503,9 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   </data>
   <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
     <value>Fjernet kategorien &quot;{thing}&quot;</value>
+  </data>
+  <data name="Sprocket.Change.CategoryOneAtATime" xml:space="preserve">
+    <value>Endret om kategorien &quot;{thing}&quot; kjører én om gangen</value>
   </data>
   <data name="Sprocket.Change.AddType" xml:space="preserve">
     <value>La til tilstandstypen &quot;{thing}&quot;</value>
@@ -2512,6 +2542,9 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   </data>
   <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
     <value>Endret hva tilstanden &quot;{thing}&quot; starter som, fra {was} til {now}</value>
+  </data>
+  <data name="Sprocket.Change.ChangeNow" xml:space="preserve">
+    <value>Endret hva tilstanden &quot;{thing}&quot; er nå, fra {was} til {now}</value>
   </data>
   <data name="Sprocket.Change.OptimizeSlots" xml:space="preserve">
     <value>Optimaliserte plassene</value>

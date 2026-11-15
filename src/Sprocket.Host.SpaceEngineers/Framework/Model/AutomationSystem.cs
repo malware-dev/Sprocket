@@ -12,6 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
         readonly List<Part> _parts = new List<Part>();
         readonly List<EmptyCategory> _emptyCategories = new List<EmptyCategory>();
+        readonly List<EmptyCategory> _emptySequenceCategories = new List<EmptyCategory>();
+        readonly List<EmptyCategory> _emptyTriggerCategories = new List<EmptyCategory>();
         readonly List<DeclaredType> _types = new List<DeclaredType>();
         readonly List<State> _states = new List<State>();
         readonly List<Trigger> _triggers = new List<Trigger>();
@@ -139,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
         public KeptAttributes Attributes { get; set; }
 
-        /// <summary>Its sequences, in the order they were made.</summary>
+        /// <summary>Its sequences, in the order the Sequences tab lists them.</summary>
         public IReadOnlyList<Sequence> Sequences => _sequences;
 
         /// <summary>
@@ -247,6 +249,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>The categories on its installation panel with no slot under them, which the program does not keep.</summary>
         public IList<EmptyCategory> EmptyCategories => _emptyCategories;
+
+        /// <summary>The categories on its Sequences tab with no sequence under them, which the program does not keep.</summary>
+        public IList<EmptyCategory> EmptySequenceCategories => _emptySequenceCategories;
+
+        /// <summary>Its slots as the installation panel lists them, to be arranged there.</summary>
+        public ICategorizedList SlotList => new Listed<Part>(_parts, _emptyCategories);
+
+        /// <summary>Its sequences as the Sequences tab lists them, to be arranged there.</summary>
+        public ICategorizedList SequenceList => new Listed<Sequence>(_sequences, _emptySequenceCategories);
+
+        /// <summary>The categories on its Triggers tab with no trigger under them, which the program does not keep.</summary>
+        public IList<EmptyCategory> EmptyTriggerCategories => _emptyTriggerCategories;
+
+        /// <summary>Its triggers as the Triggers tab lists them, to be arranged there.</summary>
+        public ICategorizedList TriggerList => new Listed<Trigger>(_triggers, _emptyTriggerCategories);
 
         /// <summary>The types it declares, in the order they are written.</summary>
         public IList<DeclaredType> Types => _types;

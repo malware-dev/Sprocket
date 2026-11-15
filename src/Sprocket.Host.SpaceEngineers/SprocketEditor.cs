@@ -164,6 +164,13 @@ namespace Sprocket.Host.SpaceEngineers
         /// <remarks>Set on a client's copy, whose runner runs nothing: the sequence runs on the server.</remarks>
         public Action<Sequence, SystemInstance, bool> Elsewhere { get; set; }
 
+        /// <summary>
+        /// Where a state's value changed by hand goes as well where it is not the runner here, or null: the logic system, the
+        /// installation, the state and its new value.
+        /// </summary>
+        /// <remarks>Set on a client's copy: the copy shows the value at once, and the server keeps it.</remarks>
+        public Action<AutomationSystem, SystemInstance, State, Literal> HeldElsewhere { get; set; }
+
         /// <summary>Where a button somebody has just picked goes to be written into its panel's slots: the panel, by entity id.</summary>
         /// <remarks>On a client's copy, set by whoever lent it, since the toolbars are written where the Sprocket is kept.</remarks>
         public Action<long> Wire { get; set; }
@@ -381,6 +388,12 @@ namespace Sprocket.Host.SpaceEngineers
         {
             var command = _gate.Refuses(CommandKind.Answer) ? null : new RelayCommand(() => Reply(chosen));
             _screen.Answer(new ChoiceEntry(text, false, command), byDefault);
+        }
+
+        /// <summary>Adds a line to the standing question's menu, between the answers offered so far and those offered after it.</summary>
+        public void AnswerRule()
+        {
+            _screen.Answer(ChoiceEntry.Rule(), false);
         }
 
         /// <summary>Carries out an answer to the standing question, which takes the question away first.</summary>
@@ -1129,9 +1142,23 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>Adds a sequence with nothing starting it yet to <paramref name="system" />, and opens it to be named.</summary>
         public void NewSequence(AutomationSystem system)
         {
+            NewSequence(system, null);
+        }
+
+        /// <summary>
+        /// Makes a sequence in <paramref name="system" />, stood where <paramref name="placed" /> says among its sequences, as one
+        /// step back with making it, and opens it; after the others, under no category, where that is null.
+        /// </summary>
+        public void NewSequence(AutomationSystem system, Func<Sequence, Arrangement> placed)
+        {
             var sequence = _program.AddSequence(system);
             sequence.Name = Name(sequence);
-            Do(system, new MakeSequence(_program, sequence, ChangeKind.NewSequence));
+            var made = new MakeSequence(_program, sequence, ChangeKind.NewSequence);
+            if (placed == null)
+                Do(system, made);
+            else
+                Do(system, new WithMade(made, new Rearrange(ChangeKind.NewSequence, owner => owner.SequenceList, Arrangement.Of(system.SequenceList),
+                    placed(sequence), sequence, null)));
 
             Invalidate();
             PushMade(new SequencePage(this, sequence));
@@ -1270,6 +1297,20 @@ namespace Sprocket.Host.SpaceEngineers
             }
 
             _runner.Call(sequence, StandIn(sequence.System), true);
+        }
+
+        /// <summary>
+        /// Gives <paramref name="state" /> of <paramref name="instance" /> of <paramref name="system" /> the value
+        /// <paramref name="value" />, here and on the construct <see cref="HeldElsewhere" /> keeps it on. Nothing watching the
+        /// state reacts.
+        /// </summary>
+        public void Hold(AutomationSystem system, SystemInstance instance, State state, Literal value)
+        {
+            _runner.States.Write(system, instance, state, value);
+            if (HeldElsewhere != null)
+                HeldElsewhere(system, instance, state, value);
+
+            _runner.Revise();
         }
 
         /// <summary>Takes a sequence out of its logic system, with the triggers that run it, as a step its undo takes back.</summary>

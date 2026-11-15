@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Images;
@@ -15,12 +16,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         Label _problem;
         Glyph _delete;
         Glyph _duplicate;
+        DragHandle _grip;
 
         /// <summary>Makes the sentence with its opening and joining words, the badge and the problem under it, and the bin.</summary>
         void CreateView()
         {
             Base.Spacing = Gaps.Parts;
 
+            // Shown only where the row's place can be changed, as a sequence's grip is.
+            Children.Add(new DragHandle { IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             Children.Add(new Glyph { Style = Styles.Waits, Symbol = Symbols.Trigger, Align = Align.Center, Placement = FixedSize.Width(16f) });
             Children.Add(new VStack
             {

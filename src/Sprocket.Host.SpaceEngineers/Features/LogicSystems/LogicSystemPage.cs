@@ -3,9 +3,11 @@ using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Slots;
 using Sprocket.Host.SpaceEngineers.Features.States;
 using Sprocket.Host.SpaceEngineers.Features.Triggers;
+using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
@@ -45,7 +47,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         NoticeLevel _standing;
 
         TriggersTab _triggersWork;
-        KeyedChildren<Sequence, StatusRow> _sequenceRows;
+        KeyedChildren<object, Element> _sequenceRows;
+        readonly List<object> _sequenceKeys = new List<object>();
+        CategoryWork _sequenceCategories;
 
         /// <summary>The page of <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
         public LogicSystemPage(SprocketEditor editor, AutomationSystem system) : base(editor)
@@ -73,6 +77,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <summary>The panel a timer's rate is being given in, or null while none is open.</summary>
         public DurationPanel Rate => _triggersWork?.Rate;
+
+        /// <summary>The panel values a trigger starts on or gives are being given in, or null while none is open.</summary>
+        public ValuesQuestion Giving => _triggersWork?.Giving;
 
         /// <summary>The logic system's annotation, or empty for a blueprint.</summary>
         public override string Subtitle => _system.IsBlueprint ? "" : _system.Annotation;
@@ -166,6 +173,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The blueprint's slots, one row each, with the shown installation's blocks for each.</summary>
         public Element.Collection Slots => _slotPanel.Slots.Children;
 
+        /// <summary>The rows of the Sequences tab, in order: each sequence's, and each category's heading and end.</summary>
+        public Element.Collection SequenceRows => _sequenceList.Children;
+
+        /// <summary>The form of the panel a category of sequences is being named and set in, or null while none is open.</summary>
+        public FieldSet CategorySettling => _sequenceCategories.Settling?.Form;
+
+        /// <summary>The rows of the Triggers tab, in order: each trigger's line, and each category's heading and end.</summary>
+        public Element.Collection TriggerRows => _triggerList.Children;
+
         /// <summary>Writes the description being typed, and asks whether to keep what was changed here, on the way out.</summary>
         public override bool Leaving()
         {
@@ -234,7 +250,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         protected override void ViewCreated()
         {
             _triggersWork = new TriggersTab(Editor, _system, _triggerList, Changes, Locked);
-            _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
+            _sequenceRows = new KeyedChildren<object, Element>(_sequenceList.Children, SequenceRow);
+            _sequenceCategories = new CategoryWork(Editor,
+                new Arranger(Editor, _system, owner => owner.SequenceList, ChangeKind.MoveSequence, ChangeKind.MoveSequenceCategory), Changes, true);
+            _sequenceList.FnAllowedDropIndexes = index => Arranger.Landings(_sequenceKeys, index);
+            _sequenceList.FnCanIndent = (from, to) => Arranger.Nests(_sequenceKeys, from, to);
+            _sequenceList.FnIsIndented = index => Arranger.StandsIn(_sequenceKeys, index);
+            _sequenceList.Reordered += moved =>
+            {
+                var move = Editor.Act(CommandKind.MoveSequence, () => _sequenceCategories.Arranger.Move(_sequenceKeys, moved.From, moved.To, moved.IsIndented));
+                if (move != null)
+                    move.Execute();
+            };
             _stateWork = new StateTab(Editor, _system, _statePanel, Changes, Locked);
             _panelWork = new SlotPanelTab(Editor, _system, _slotPanel, Changes, Locked);
 
@@ -299,7 +326,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             foreach (var sequence in _sequences)
             {
-                var row = _sequenceRows[sequence];
+                var row = (StatusRow)_sequenceRows[sequence];
 
                 Live(row, sequence, tick);
 
@@ -323,6 +350,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 _stateWork.Live();
 
             _triggersWork.Hang();
+
+            _sequenceCategories.Hang();
         }
 
         void Arrange(Texts texts)
@@ -342,13 +371,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _stateTab.Tip = CodexTip.For(_stateTab.Tip, texts.Codex.TermLogicSystemStates);
             _panelTab.Tip = CodexTip.For(_panelTab.Tip, texts.Codex.TermInstallationPanel);
             _stateWork.Arrange(texts);
-            _addTrigger.Show(new AddOption(texts.SystemTrigger, null, new[]
-            {
-                new AddOption(SentenceText.WhenWord, texts.Codex.SystemWhenAbout,
-                    Changes(CommandKind.StartWhen, () => Editor.Starts.StartSequence(_system, new WhenTrigger("")))),
-                new AddOption(SentenceText.EveryWord, texts.Codex.SystemEveryAbout,
-                    Changes(CommandKind.StartEvery, () => Editor.Starts.StartSequence(_system, new EveryTrigger(Editor.NewLength))))
-            }));
+            _addTrigger.Show(_triggersWork.Adds(texts, null));
+            _newTriggerCategory.Text = StatusRow.Plus + texts.CategoryAdd;
+            _newTriggerCategory.Command = Changes(CommandKind.AddCategory, _triggersWork.AddCategory);
+            _newTriggerCategory.Tip = CodexTip.For(_newTriggerCategory.Tip, texts.Codex.TermCategory);
 
             _runs.Clear();
             foreach (var trigger in _triggers)
@@ -356,7 +382,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 _runs.Add(trigger.Acts != null ? Editor.Runner.Alone(_system, trigger) : _system.FindSequence(trigger.Runs));
             }
 
-            _triggersWork.Arrange(_triggers);
+            _triggersWork.Arrange(texts, Editable, Locked());
 
             // A tab says it is empty only where nothing can be added to it; where something can, the ways to add it say enough.
             _noTriggersLine.IsVisible = _triggers.Count == 0 && !Editable;
@@ -366,13 +392,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _newSequence.Command = Changes(CommandKind.NewSequence, () => Editor.NewSequence(_system));
             _newSequence.Tip = KeptTip.For(_newSequence.Tip, _newSequence.Command != null ? null : Locked());
 
-            _sequenceRows.Show(_sequences);
-            _noSequences.IsVisible = _sequences.Count == 0 && !Editable;
+            // A category just added opens its name for typing once its row stands.
+            _newSequenceCategory.Text = StatusRow.Plus + texts.CategoryAdd;
+            _newSequenceCategory.Command = Changes(CommandKind.AddCategory, _sequenceCategories.Add);
+            _newSequenceCategory.Tip = CodexTip.For(_newSequenceCategory.Tip, texts.Codex.TermCategory);
+
+            var editable = Editable;
+            var locked = Locked();
+            CategoryList.Listed(_system.SequenceList, _sequenceKeys, true, editable);
+            _sequenceRows.Show(_sequenceKeys);
+            _noSequences.IsVisible = _sequences.Count == 0 && !editable;
             _noSequences.Text = texts.SystemNoSequences;
+            for (var i = 0; i < _sequenceKeys.Count; i++)
+            {
+                var heading = _sequenceKeys[i] as CategoryHeading;
+                if (heading != null)
+                    _sequenceCategories.Heading(texts, (CategoryRow)_sequenceRows[heading], heading, Arranger.Carries(_sequenceKeys, i), editable, locked,
+                        texts.Codex.CategoryDragSequences, texts.Codex.CategoryRemoveSequences);
+
+                var end = _sequenceKeys[i] as CategoryEnd;
+                if (end != null)
+                    ArrangeEnd(texts, (CategoryEndRow)_sequenceRows[end], end, i);
+            }
 
             foreach (var sequence in _sequences)
             {
-                var row = _sequenceRows[sequence];
+                var row = (StatusRow)_sequenceRows[sequence];
+                row.Arranged = true;
+                row.Indented = sequence.Category.Length > 0;
+                row.Grips(editable, editable ? texts.Codex.SequenceDrag : locked);
                 row.DuplicateText = sequence.Trigger != null ? texts.Codex.SystemCopy : texts.Codex.SystemCopyUnstarted;
                 row.About = texts.Codex.SystemOpenSequence;
                 row.AboutArguments.Set("name", SequenceText.Called(texts, sequence));
@@ -520,6 +568,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var choose = Editor.Act(CommandKind.ChooseInstance, () => Editor.Choose(_system, instance));
             if (choose != null)
                 choose.Execute();
+        }
+
+        /// <summary>The row for <paramref name="key" /> on the Sequences tab: a sequence's, or a category's heading.</summary>
+        Element SequenceRow(object key)
+        {
+            var sequence = key as Sequence;
+            if (sequence != null)
+                return Own(sequence);
+
+            return key is CategoryEnd ? (Element)new CategoryEndRow() : new CategoryRow();
+        }
+
+        /// <summary>Shows the end <paramref name="end" /> of a category, at <paramref name="at" /> of the rows, as the way to add a sequence into the category.</summary>
+        void ArrangeEnd(Texts texts, CategoryEndRow row, CategoryEnd end, int at)
+        {
+            row.Category = end.Name;
+            var adds = Changes(CommandKind.NewSequence, () => Editor.NewSequence(_system, made => _sequenceCategories.Arranger.Placed(_sequenceKeys, at, made)));
+            row.Adds.Show(new AddOption(texts.SystemNewSequence, null, new[] { new AddOption(texts.SystemNewSequence, null, adds) }));
         }
 
         StatusRow Own(Sequence sequence)

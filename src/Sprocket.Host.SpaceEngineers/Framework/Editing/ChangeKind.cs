@@ -141,12 +141,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         MoveSlot,
         /// <summary>Moving a category of slots, with its slots, to another place on the installation panel.</summary>
         MoveCategory,
+
+        /// <summary>Moving a sequence to another place on the Sequences tab, into or out of a category.</summary>
+        MoveSequence,
+
+        /// <summary>Moving a category, with the sequences under it, to another place on the Sequences tab.</summary>
+        MoveSequenceCategory,
+
+        /// <summary>Moving a trigger to another place on the Triggers tab, into or out of a category.</summary>
+        MoveTrigger,
+
+        /// <summary>Moving a category, with the triggers under it, to another place on the Triggers tab.</summary>
+        MoveTriggerCategory,
         /// <summary>Adding a category of slots.</summary>
         AddCategory,
         /// <summary>Renaming a category of slots.</summary>
         RenameCategory,
         /// <summary>Removing a category of slots, which leaves its slots under none.</summary>
         RemoveCategory,
+        /// <summary>Switching whether the sequences under a category run one at a time.</summary>
+        CategoryOneAtATime,
 
         /// <summary>Adding a type to a logic system.</summary>
         AddType,
@@ -183,6 +197,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
 
         /// <summary>Changing the value a state starts at.</summary>
         ChangeStart,
+
+        /// <summary>Changing by hand the value a state has now, in an installation, while it or its logic system is switched off.</summary>
+        ChangeNow,
 
         /// <summary>Giving a blueprint as few slots as its steps and triggers can name, and taking out the slots nothing uses.</summary>
         OptimizeSlots,

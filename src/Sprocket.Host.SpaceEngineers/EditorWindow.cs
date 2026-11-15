@@ -365,6 +365,29 @@ namespace Sprocket.Host.SpaceEngineers
             _editor.Unask();
         }
 
+        /// <summary>
+        /// What a question raised by a press on <paramref name="pressed" /> hangs under: that element, or, where it stood in a
+        /// popup that has closed since, such as a row of a menu, what that popup hung from.
+        /// </summary>
+        static Element HangsUnder(Element pressed)
+        {
+            var at = pressed;
+            while (at != null && at.Windows == null)
+            {
+                var top = at;
+                while (top.Parent != null)
+                    top = top.Parent;
+
+                var popup = top as Popup;
+                if (popup == null)
+                    return pressed;
+
+                at = popup.Anchor;
+            }
+
+            return at ?? pressed;
+        }
+
         /// <summary>Notes what a press is about to reach, under which a question it raises hangs.</summary>
         void PressReaching(Element target)
         {
@@ -434,7 +457,7 @@ namespace Sprocket.Host.SpaceEngineers
             _hanging = screen.QuestionIsHere && _raisedBy != null;
             if (_hanging)
             {
-                _confirm.Ask(screen.Question, screen.QuestionArguments, screen.Answers, screen.Default, _raisedBy, _workspace.Windows);
+                _confirm.Ask(screen.Question, screen.QuestionArguments, screen.Answers, screen.Default, HangsUnder(_raisedBy), _workspace.Windows);
                 return;
             }
 

@@ -286,7 +286,7 @@ public class CheckViewTests
         Assert.Equal(rig.Texts.Codex.SequenceReadWithAbout, taking.About(rig.Texts));
         taking.Opens!.Execute();
         rig.Tick();
-        Assert.Equal("2", ((PickPage)rig.Editor.Current).Filled[0]);
+        Assert.Equal("2", Assert.IsType<SequencePage>(rig.Editor.Current).Giving!.Form.Fields[0].Text);
     }
 
     static void Open(Simulation rig)

@@ -43,6 +43,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         End,
 
         /// <summary>The end of a branch of an if, where steps are added to it; no step of its own.</summary>
-        Adds
+        Adds,
+
+        /// <summary>Opens the part of a sequence that runs when it fails.</summary>
+        Catch,
+
+        /// <summary>Opens the part of a sequence that runs however it ends.</summary>
+        Finally
     }
 }

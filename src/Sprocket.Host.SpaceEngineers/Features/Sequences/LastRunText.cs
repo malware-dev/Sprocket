@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         readonly Sequence _sequence;
         int _busy;
         int _off;
+        Sequence _held;
         string _skips = "";
         string _calledOff;
         StopCause _stoppedBy;
@@ -47,15 +48,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return _calledOff;
         }
 
-        /// <summary>What was asked for and did not happen, and why not, in one line when both happened.</summary>
-        /// <remarks>Called every tick; makes a new line only when a count changes.</remarks>
-        public string Skips(Texts texts, int busy, int off)
+        /// <summary>
+        /// What was asked for and did not happen, and why not, in one line when both happened, naming <paramref name="held" />
+        /// where the last start missed was held by it.
+        /// </summary>
+        /// <remarks>Called every tick; makes a new line only when a count or the holder changes.</remarks>
+        public string Skips(Texts texts, int busy, int off, Sequence held)
         {
-            if (busy == _busy && off == _off)
+            if (busy == _busy && off == _off && held == _held)
                 return _skips;
 
             _busy = busy;
             _off = off;
+            _held = held;
 
             var missed = busy.ToString(CultureInfo.InvariantCulture);
             var refused = off.ToString(CultureInfo.InvariantCulture);
@@ -69,6 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _skips = busy == 1
                     ? Template.Fill(texts.SequenceSkippedBothOne, "off", refused)
                     : Template.Fill(Template.Fill(texts.SequenceSkippedBoth, "busy", missed), "off", refused);
+
+            if (held != null && busy > 0)
+                _skips += ", " + Template.Fill(texts.SequenceHeldBy, "name", SequenceText.Called(texts, held));
 
             return _skips;
         }

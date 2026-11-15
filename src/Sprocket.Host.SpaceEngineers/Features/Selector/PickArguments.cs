@@ -154,17 +154,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <remarks>The answer comes as a line of text, which carries a chosen word as a bare word, and a bare word reads as text.</remarks>
         public List<Literal> Read(string said)
         {
-            var arguments = new List<Literal>();
-            ValueLine.Read(said, arguments);
-
             var fields = Wanted();
+            var arguments = FieldSet.Read(said, fields);
             var at = 0;
             for (var f = 0; f < fields.Count && at < arguments.Count; f++)
             {
                 if (fields[f].TakesSlots)
                     arguments[at] = Literal.Slots(Target.Slots(arguments[at].Said));
-                else if (fields[f].Entry == FieldInput.Name && arguments[at].Kind == ValueKind.Text)
-                    arguments[at] = Literal.Name(arguments[at].Text);
 
                 at += fields[f].Covers;
             }

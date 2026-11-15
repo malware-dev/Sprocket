@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Xunit;
@@ -72,7 +73,7 @@ public class ArgumentsColumnTests
     /// <summary>Done with nothing given, or with a value the field will not take, is refused with the reason at the foot of the column, and the caret goes to the field.</summary>
     [Theory]
     [InlineData("clear", "Radius is missing.")]
-    [InlineData("type 50", "radius must be between 0.1 and 20.")]
+    [InlineData("type 50", "Radius must be between 0.1 and 20.")]
     public void DoneRefusedSaysWhy(string entry, string reason)
     {
         var screen = Open(SetRadius + " " + RadiusBox + " " + entry + " " + Done);
@@ -147,14 +148,14 @@ public class ArgumentsColumnTests
     }
 
     /// <summary>
-    /// Pressing a step's values opens its picker with the caret in them, where they were first given.
+    /// Pressing a step's values opens their panel under them with the caret in them, on what they were given.
     /// </summary>
     [Fact]
-    public void PressingAStepsValuesOpensItsPickerOnThem()
+    public void PressingAStepsValuesOpensTheirPanelOnThem()
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " " + Values);
 
-        Assert.Equal(Slot, screen.Ended);
+        Assert.NotNull(Assert.IsType<SequencePage>(screen.Editor.Current).Giving);
         Assert.False(screen.Scene.IsQuestioning, "a dialog was raised");
         Assert.True(screen.Scene.IsFilling, "the caret is not in the values");
         Assert.Equal("5.0", screen.Scene.Filling!.Text);

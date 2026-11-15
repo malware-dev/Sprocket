@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _sentence.Tip = CodexTip.For(_sentence.Tip, Kind == StepKind.Run ? texts.Codex.MemberWaits : Kind == StepKind.Await ? texts.Codex.SequenceAwaitRow : null);
 
             var adds = Kind == StepKind.End || Kind == StepKind.Adds;
-            var branch = adds || Kind == StepKind.OtherwiseIf || Kind == StepKind.Otherwise;
+            var branch = adds || Kind == StepKind.OtherwiseIf || Kind == StepKind.Otherwise || Kind == StepKind.Catch || Kind == StepKind.Finally;
             _pause.IsVisible = !branch;
             _delete.IsVisible = !adds;
 

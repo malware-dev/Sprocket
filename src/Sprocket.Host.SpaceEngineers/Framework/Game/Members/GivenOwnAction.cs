@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
@@ -21,6 +22,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         /// <inheritdoc />
         public override bool IsForced => _doing.Forced != null && _doing.Forced(_options);
+
+        /// <inheritdoc />
+        public override bool Begins => _doing.Begun != null;
+
+        /// <inheritdoc />
+        public override void Begin(IList<IMyTerminalBlock> blocks)
+        {
+            if (_doing.Begun == null)
+                return;
+
+            var typed = new List<T>(blocks.Count);
+            foreach (var block in blocks)
+            {
+                var one = block as T;
+                if (one != null)
+                    typed.Add(one);
+            }
+
+            _doing.Begun(typed, _options);
+        }
 
         /// <inheritdoc />
         public override void Do(IMyTerminalBlock block, ReaderMemory seen)

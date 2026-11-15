@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using System;
@@ -12,7 +13,7 @@ using Lumel.Images;
 namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 {
     /// <summary>One live thing on one line: what it is, what it is doing, and when it last did anything.</summary>
-    public class StatusRow : HStack
+    public class StatusRow : HStack, IReorderable, IDragged, IStandsIn
     {
         /// <summary>What goes before the words of anything that adds.</summary>
         public const string Plus = "+ ";
@@ -42,6 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         readonly Glyph _delete;
         readonly HStack _detail;
         readonly Glyph _below;
+        readonly DragHandle _grip;
+        bool _indented;
 
         string _said;
 
@@ -57,6 +60,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
             Style = Styles.Row;
             Command = _opens;
+            // Shown only where the row's place can be changed, as a slot's grip is.
+            Children.Add(new DragHandle { IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip));
             Children.Add(new HStack
             {
                 Base = { Spacing = Gaps.Items },
@@ -240,6 +245,52 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>The bin, for a press on it that has to hang something under it.</summary>
         public Element DeletePart => _delete;
+
+        /// <summary>Whether its place among the rows beside it can be changed at all: where it can, it shows a grip.</summary>
+        public bool Arranged
+        {
+            set { _grip.IsVisible = value; }
+        }
+
+        /// <summary>Whether it stands under a category, which the list it stands in sets it in by.</summary>
+        public bool Indented
+        {
+            get { return _indented; }
+            set
+            {
+                if (_indented == value)
+                    return;
+
+                _indented = value;
+                InvalidateArrange();
+            }
+        }
+
+        /// <summary>The whole row: it is drawn as a box, so a spine beside it stays out of it.</summary>
+        public bool SetsInWhole => true;
+
+        /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
+        public void Grips(bool can, string about)
+        {
+            _grip.CanDrag = can;
+            _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
+            _grip.Tip = KeptTip.For(_grip.Tip, about);
+        }
+
+        /// <inheritdoc />
+        public DragHandle DragHandle => _grip;
+
+        /// <inheritdoc />
+        public bool IsDragging { get; private set; }
+
+        /// <inheritdoc />
+        bool IDragged.IsDragging
+        {
+            set { IsDragging = value; }
+        }
+
+        /// <summary>None: a row goes alone.</summary>
+        public int DraggedWithCount => 0;
 
         /// <summary>What pressing a switch would do, as a note on the switch.</summary>
         public static string Switching(Texts texts, bool governsAll, bool isOn)

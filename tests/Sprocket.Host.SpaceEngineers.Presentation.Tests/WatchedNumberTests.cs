@@ -145,7 +145,42 @@ public class WatchedNumberTests
 
         row.Starts.OfType<ArgumentsSlot>().First().Opens!.Execute();
         rig.Tick();
-        Assert.Equal("2.0 above 5.0", rig.Editor.Pick().Arguments!.Form.Answer);
+        var giving = Assert.IsType<LogicSystemPage>(rig.Editor.Current).Giving!;
+        Assert.Equal("2.0", giving.Form.Answer);
+        giving.Form.Fields[0].Text = "3";
+        giving.Done();
+        rig.Tick();
+        var now = Assert.IsType<WhenTrigger>(rig.Editor.Program.Systems[0].Triggers[0]);
+        Assert.Equal(new[] { 3.0 }, now.Arguments.Select(argument => argument.Number).ToArray());
+        Assert.Equal(5.0, now.Value.Number);
+    }
+
+    /// <summary>What a trigger on a number compares with is changed in a panel under it, as one change.</summary>
+    [Fact]
+    public void WhatATriggerComparesWithIsChangedInItsPanel()
+    {
+        var rig = Made();
+        var page = Assert.IsType<LogicSystemPage>(rig.Editor.Current);
+        rig.Editor.Triggers()[0].Starts.OfType<ArgumentsSlot>().Single(part => part.Holds == ArgumentRole.Checked).Opens!.Execute();
+        rig.Tick();
+
+        var giving = page.Giving;
+        Assert.NotNull(giving);
+        Assert.Equal("5.0", giving.Form.Fields[0].Text);
+        giving.Form.Fields[0].Text = "7";
+        giving.Done();
+        rig.Tick();
+
+        Assert.Null(page.Giving);
+        var system = rig.Editor.Program.Systems[0];
+        var when = Assert.IsType<WhenTrigger>(system.Triggers[0]);
+        Assert.Equal(7.0, when.Value.Number);
+        Assert.Equal(Relation.Below, when.Relation);
+        Assert.Equal(Quantifier.Average, when.Quantifier);
+
+        rig.Editor.Screen.Undo!.Execute();
+        rig.Tick();
+        Assert.Equal(5.0, Assert.IsType<WhenTrigger>(system.Triggers[0]).Value.Number);
     }
 
     /// <summary>A trigger missing what its value is read with says so, naming it, and so does one given what it can't take.</summary>

@@ -365,6 +365,38 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return result;
         }
 
+        /// <summary>
+        /// Whether <paramref name="arguments" />, given to a member reached as <paramref name="form" />, choose toggle on a switch:
+        /// the game's toggle beside it, which takes nothing, rather than a value.
+        /// </summary>
+        public static bool Toggles(ReachKind form, IList<Literal> arguments)
+        {
+            return form == ReachKind.Value && arguments.Count == 1 && arguments[0].Kind == ValueKind.Text && arguments[0].Text == EntityAction.Toggle;
+        }
+
+        /// <summary>
+        /// <paramref name="act" />, which acts on the blocks <paramref name="entityIds" />, given <paramref name="values" /> in
+        /// place of its own, as a step of its own: the game's toggle beside its switch, taking nothing, where the values choose
+        /// toggle.
+        /// </summary>
+        public static Act Given(GridWorld world, IList<long> entityIds, Act act, IList<Literal> values)
+        {
+            var given = (Act)Automation.Copied(act);
+            given.Arguments.Clear();
+            if (!Toggles(act.Form, values))
+            {
+                for (var i = 0; i < values.Count; i++)
+                    given.Arguments.Add(values[i]);
+
+                return given;
+            }
+
+            given.ActionId = Toggle(world, entityIds, act.ActionId) ?? act.ActionId;
+            given.Form = ReachKind.Action;
+            given.Provider = Provider(world, entityIds, given.ActionId, ReachKind.Action);
+            return given;
+        }
+
         /// <summary>The game's toggle that flips the switch <paramref name="value" /> on the blocks, or null where none does.</summary>
         public static string Toggle(GridWorld world, IList<long> entityIds, string value)
         {

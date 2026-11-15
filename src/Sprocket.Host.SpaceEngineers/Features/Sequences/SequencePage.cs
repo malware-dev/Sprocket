@@ -32,6 +32,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         readonly HashSet<string> _termed = new HashSet<string>();
         Dictionary<Step, object> _ends = new Dictionary<Step, object>();
 
+        // The row the last catch or finally ends at, kept so it is not made again.
+        readonly object _handlersEnd = new object();
+
+        // Whether a run of the sequence is in its catch or finally, which locks it.
+        bool _cleaning;
+
         readonly LastRunText _account;
         readonly StepEditing _stepwork;
         readonly WaitCoverage _ties;
@@ -41,6 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         KeyedChildren<object, StepRow> _rows;
         LengthQuestion _length;
         AbortQuestion _abort;
+        ValuesQuestion _values;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
         public SequencePage(SprocketEditor editor, Sequence sequence) : base(editor)
@@ -59,6 +66,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>The form an abort's message and level are being given in, or null while none is open.</summary>
         public FieldSet Aborting => _abort != null && _abort.IsOpen ? _abort.Form : null;
+
+        /// <summary>The panel a step's values are being given in, or null while none is open.</summary>
+        public ValuesQuestion Giving => _values != null && _values.IsOpen ? _values : null;
 
         /// <summary>What the sequence is called: its name, or its number where it has none.</summary>
         public override string Title => SequenceText.Called(Editor.Texts, _sequence);
@@ -133,15 +143,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Always true: a sequence must have a name.</summary>
         public override bool NameRequired => true;
 
-        /// <summary>Whether the sequence may be changed now: not while its system is switched on, and not while somebody else holds the editor.</summary>
-        public bool Editable => !SwitchIsOn && Editor.Holder == null;
+        /// <summary>
+        /// Whether the sequence may be changed now: not while its system is switched on, not while somebody else holds the editor,
+        /// and not while a run of it is in its catch or finally.
+        /// </summary>
+        public bool Editable => !SwitchIsOn && Editor.Holder == null && !_cleaning;
 
         /// <summary>Why nothing can be changed, said where the ways to add a step would be; empty while it can.</summary>
         public string LockedText => Editable
             ? ""
             : Editor.Holder != null
                 ? Template.Fill(Editor.Texts.SequenceHeld, "holder", Editor.Holder)
-                : Template.Fill(Editor.Texts.SystemLocked, "name", _sequence.System.Name);
+                : _cleaning
+                    ? Editor.Texts.SequenceCleaning
+                    : Template.Fill(Editor.Texts.SystemLocked, "name", _sequence.System.Name);
 
         /// <summary>The line saying what the sequence is doing.</summary>
         public SequenceBar Bar => _bar;
@@ -267,11 +282,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var state = Editor.Runner.Get(_sequence);
             var tick = Editor.CurrentTick;
 
+            // Looked at on every refresh, as the bar's status is; walks the steps only while a run is under way, and lays the
+            // page out again only as a catch or finally starts or ends.
+            var cleaning = state != null && state.Cleaning;
+            if (cleaning != _cleaning)
+            {
+                _cleaning = cleaning;
+                Arrange(texts);
+            }
+
             var status = SequenceSummary.Status(_sequence, state);
             _bar.Status = status == SequenceStatus.Stopped ? _account.CalledOff(texts, state) : SequenceText.Status(texts, status);
             _bar.JustRan = state != null && state.LastFiredTick >= 0 && tick - state.LastFiredTick < JustRanTicks;
             _bar.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(state, tick));
-            _bar.Skipped = _account.Skips(texts, state?.SkippedCount ?? 0, state?.RefusedCount ?? 0);
+            _bar.Skipped = _account.Skips(texts, state?.SkippedCount ?? 0, state?.RefusedCount ?? 0, state?.HeldBy);
 
             if (recount)
                 Mark();
@@ -297,10 +321,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             if (_abort != null)
                 _abort.Hang();
+
+            if (_values != null)
+                _values.Hang();
         }
 
         /// <summary>The chip of the first part of <paramref name="step" />'s row that is a <typeparamref name="TSlot" />, or null where its row shows none.</summary>
         Element Chip<TSlot>(Step step) where TSlot : SentenceSlot
+        {
+            return Chip(step, slot => slot is TSlot);
+        }
+
+        /// <summary>The chip of the first part of <paramref name="step" />'s row saying values that are <paramref name="holds" /> to it, or null where its row shows none.</summary>
+        Element Chip(Step step, ArgumentRole holds)
+        {
+            return Chip(step, slot => (slot as ArgumentsSlot)?.Holds == holds);
+        }
+
+        /// <summary>The chip of the first part of <paramref name="step" />'s row that <paramref name="wanted" /> takes, or null where its row shows none.</summary>
+        Element Chip(Step step, Func<SentenceSlot, bool> wanted)
         {
             var row = _rows == null || !_keys.Contains(step) ? null : _rows[step];
             if (row == null)
@@ -308,7 +347,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             foreach (var slot in row.Slots)
             {
-                if (slot is TSlot)
+                if (wanted(slot))
                     return row.ChipOf(slot);
             }
 
@@ -324,7 +363,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _account.Forget();
 
             var editable = Editable;
-            _add.Show(new AddOption(texts.SequenceStep, null, Kinds(texts, _sequence.Steps.Count)));
+            _add.Show(new AddOption(texts.SequenceStep, null, Last(texts)));
             _locked.IsVisible = !editable;
             _locked.Text = LockedText;
 
@@ -332,7 +371,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 ? ""
                 : Editor.Holder != null
                     ? Template.Fill(texts.SequenceHeld, "holder", Editor.Holder)
-                    : texts.Codex.SystemTurnOffToEdit;
+                    : _cleaning
+                        ? texts.SequenceCleaning
+                        : texts.Codex.SystemTurnOffToEdit;
 
             var ends = new Dictionary<Step, object>();
             _keys.Clear();
@@ -340,7 +381,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < _sequence.Steps.Count; i++)
             {
                 var step = _sequence.Steps[i];
-                if (editable && (step is Else || step is EndIf))
+                if (editable && (step is Else || step is EndIf || step is Handler))
                 {
                     object end;
                     if (!_ends.TryGetValue(step, out end))
@@ -353,6 +394,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
                 _keys.Add(step);
                 _shown.Add(i);
+            }
+
+            // The last catch or finally ends at its own way to add a step, as a branch does.
+            if (editable && _sequence.HandlersAt < _sequence.Steps.Count)
+            {
+                _keys.Add(_handlersEnd);
+                _shown.Add(_sequence.Steps.Count);
             }
 
             _ends = ends;
@@ -376,9 +424,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
                 var branch = step is Else;
                 var closes = step is EndIf;
+                var handler = step is Handler;
 
                 if ((branch || closes) && depth > 0)
                     depth--;
+
+                // A catch or finally stands at the sequence's own level, its steps under it.
+                if (handler)
+                    depth = 0;
 
                 if (step is If && step.IsOff && index > offTo)
                     offTo = _sequence.EndOf(index);
@@ -391,19 +444,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Slots.Clear();
                 Word(row, step);
                 row.Deletes = closes ? null : Changes(CommandKind.DeleteStep, () => _stepwork.Remove(index));
-                row.Copies = closes || branch && Kind(step) != StepKind.OtherwiseIf
+                row.Copies = closes || handler || branch && Kind(step) != StepKind.OtherwiseIf
                     ? null
                     : Changes(CommandKind.DuplicateStep, () => _stepwork.Duplicate(index));
                 row.IsOff = step.IsOff || index <= offTo;
-                row.Pauses = branch || closes ? null : Changes(CommandKind.SwitchStep, () => _stepwork.SwitchStep(index));
-                row.DragHandle.CanDrag = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
+                row.Pauses = branch || closes || handler ? null : Changes(CommandKind.SwitchStep, () => _stepwork.SwitchStep(index));
+                row.DragHandle.CanDrag = editable && !closes && !handler && (!branch || Kind(step) == StepKind.OtherwiseIf);
                 Branches(row, texts, step, index);
                 row.Locked = locked;
 
                 // The end of an if holds nothing but its ways to add, which only an editable sequence offers.
                 row.IsVisible = !closes || editable;
 
-                if (step is If || branch)
+                if (step is If || branch || handler)
                     depth++;
             }
 
@@ -449,6 +502,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             kinds.Add(new AddOption(SentenceText.SetStateWords, texts.Codex.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
             kinds.Add(new AddOption(SentenceText.IfWord, texts.Codex.TermIf, Changes(CommandKind.AddIf, () => _stepwork.AddIf(at))));
             return kinds;
+        }
+
+        /// <summary>
+        /// What the sequence's last way to add offers: every kind of step, added at its end, while it has no catch or finally;
+        /// and each of those it has not got yet.
+        /// </summary>
+        List<AddOption> Last(Texts texts)
+        {
+            var options = _sequence.HandlersAt < _sequence.Steps.Count ? new List<AddOption>() : Kinds(texts, _sequence.Steps.Count);
+            if (_sequence.CatchAt < 0)
+            {
+                // A catch comes before a finally.
+                var at = _sequence.FinallyAt;
+                options.Add(new AddOption(SentenceText.CatchWords, texts.Codex.TermCatch,
+                    Changes(CommandKind.AddHandler, () => Editor.Do(_sequence, new AddStep(ChangeKind.AddStep, at < 0 ? _sequence.Steps.Count : at, new Catch())))));
+            }
+
+            if (_sequence.FinallyAt < 0)
+            {
+                options.Add(new AddOption(SentenceText.FinallyWord, texts.Codex.TermFinally,
+                    Changes(CommandKind.AddHandler, () => Editor.Do(_sequence, new AddStep(ChangeKind.AddStep, _sequence.Steps.Count, new Finally())))));
+            }
+
+            return options;
         }
 
         /// <summary>Gives the row closing an if, or an otherwise, its plus for adding a branch or a test.</summary>
@@ -527,7 +604,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>A command made only while the sequence may be changed, and null while it may not.</summary>
         ICommand Changes(CommandKind kind, Action action)
         {
-            return SwitchIsOn ? null : Editor.Act(kind, action);
+            return SwitchIsOn || _cleaning ? null : Editor.Act(kind, action);
         }
 
         /// <summary>Gives a step's row the parts of its sentence, each pressed to open the question it was answered with.</summary>
@@ -573,7 +650,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 var called = _sequence.System?.FindSequence(run.Number);
                 row.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name,
-                    Changes(CommandKind.StepSlot, () => _stepwork.ChangeRun(run))));
+                    Changes(CommandKind.StepSlot, () => _stepwork.Rerun(run))));
                 return;
             }
 
@@ -587,7 +664,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (verb.Length != 0)
             {
                 row.Kind = StepKind.Enable;
-                row.Slots.Add(ArgumentsSlot.Switching(verb, Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Arguments))));
+                row.Slots.Add(ArgumentsSlot.Switching(verb, Changes(CommandKind.StepSlot, () => _stepwork.Switch(act))));
             }
 
             row.Slots.Add(new ActionSlot(chosen, Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.What))));
@@ -605,9 +682,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            ArgumentsSlot.Lay(row.Slots, entities, chosen.Join, act.Arguments, fields,
-                Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Arguments)),
-                act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options,
+            var holds = act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options;
+            ArgumentsSlot.Lay(row.Slots, entities, chosen.Join, act.Arguments, fields, Changes(CommandKind.StepSlot, () => Give(act, fields, holds)), holds,
                 names => new EntitiesSlot(Editor.Blocks(_sequence.System, names), names, true, MarkText.OfSlots(_sequence.System, names),
                     Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Target))));
         }
@@ -637,7 +713,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             };
             var parameters = ComparisonQuestion.Parameters(value);
             var taking = !ComparisonQuestion.SaysAny(parameters, test.Arguments) ? null : new ArgumentsSlot(test.Arguments, parameters,
-                Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Arguments)), ArgumentRole.ReadWith);
+                Changes(CommandKind.StepSlot, () => Compare(step, test, parameters, ArgumentRole.ReadWith)), ArgumentRole.ReadWith);
             shape.Lay(row.Slots, reading, named, targets, taking);
 
             if (value == null)
@@ -647,8 +723,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var plural = shape.IsPlural;
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, fields.GetRange(0, 1),
                 Changes(CommandKind.StepSlot, () => _stepwork.Relate(step, test, fields[0], plural)), ArgumentRole.Compared, plural));
-            row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields.GetRange(1, fields.Count - 1),
-                Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Arguments)), ArgumentRole.Checked));
+            var checks = fields.GetRange(1, fields.Count - 1);
+            row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, checks,
+                Changes(CommandKind.StepSlot, () => Compare(step, test, checks, ArgumentRole.Checked)), ArgumentRole.Checked));
         }
 
         /// <summary>Gives the row of a step setting one of the system's states its parts: the state, and what it is set to.</summary>
@@ -656,7 +733,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var opens = Changes(CommandKind.StepSlot, () => _stepwork.ChangeSetState(set));
             row.Slots.Add(new SystemStateSlot(set.State, opens));
-            row.Slots.Add(StateValueQuestion.Part(_sequence.System, set.State, set.Value, set.From, opens, ArgumentRole.NewValue));
+            row.Slots.Add(StateValueQuestion.Part(_sequence.System, set.State, set.Value, set.From,
+                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set)), ArgumentRole.NewValue));
         }
 
         /// <summary>Gives the row of an if, or of a branch, that tests one of the system's states the parts of its test.</summary>
@@ -666,7 +744,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Slots.Add(new SystemStateSlot(test.State, opens));
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
                 Changes(CommandKind.StepSlot, () => _stepwork.RelateState(step, test)), ArgumentRole.Compared));
-            row.Slots.Add(StateValueQuestion.Part(_sequence.System, test.State, test.Value, test.Other, opens, ArgumentRole.Checked));
+            row.Slots.Add(StateValueQuestion.Part(_sequence.System, test.State, test.Value, test.Other,
+                Changes(CommandKind.StepSlot, () => _stepwork.CompareState(step, test)), ArgumentRole.Checked));
         }
 
         /// <summary>A row for a step, whose opening words explain their term with the codex's page on it.</summary>
@@ -702,6 +781,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 case StepKind.Abort:
                     page = CodexPages.Abort;
                     break;
+                case StepKind.Catch:
+                    page = CodexPages.Catch;
+                    break;
+                case StepKind.Finally:
+                    page = CodexPages.Finally;
+                    break;
                 case StepKind.Run:
                 case StepKind.Stop:
                     page = CodexPages.RunAndStop;
@@ -715,6 +800,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         static StepKind Kind(Step step)
         {
+            if (step is Catch)
+                return StepKind.Catch;
+
+            if (step is Finally)
+                return StepKind.Finally;
+
             if (step is Wait)
                 return StepKind.Wait;
 
@@ -759,6 +850,68 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _length = new LengthQuestion(Editor, wait.Length, false, () => Chip<DurationSlot>(wait),
                 (length, cancelled) => _stepwork.Closed(wait, length, added, cancelled));
             _length.Hang();
+        }
+
+        /// <summary>
+        /// Opens the panel the values <paramref name="act" /> gives, asked for by <paramref name="fields" />, are given in, hung
+        /// from the part of its row saying them, which are <paramref name="holds" /> to it; the selector where a value is chosen
+        /// on a screen of its own.
+        /// </summary>
+        void Give(Act act, List<Field> fields, ArgumentRole holds)
+        {
+            if (ValuesQuestion.Chooses(fields))
+            {
+                _stepwork.EditStep(act, OpeningColumn.Arguments);
+                return;
+            }
+
+            Action<string, bool> answered = (said, cancelled) => _stepwork.Closed(act, FieldSet.Read(said, fields), cancelled);
+            _stepwork.Repaired(act, delegate
+            {
+                if (ValuesQuestion.Offer(Editor, fields, act.Arguments, said => answered(said, false)))
+                    return;
+
+                if (_values != null)
+                    _values.Finish(true);
+
+                _values = new ValuesQuestion(Editor, fields, act.Arguments, () => Chip(act, holds), answered);
+                _values.Hang();
+            });
+        }
+
+        /// <summary>
+        /// Opens the panel the values <paramref name="test" />, the test of <paramref name="step" />, takes are given in, asked
+        /// for by <paramref name="fields" />: what it compares with where they are <paramref name="holds" />
+        /// <see cref="ArgumentRole.Checked" />, what it reads with otherwise; hung from the part saying them, and changing the test
+        /// as one edit as it closes. The selector where a value is chosen on a screen of its own.
+        /// </summary>
+        void Compare(Step step, Comparison test, List<Field> fields, ArgumentRole holds)
+        {
+            if (ValuesQuestion.Chooses(fields))
+            {
+                _stepwork.EditTest(step, test, OpeningColumn.Arguments);
+                return;
+            }
+
+            var checks = holds == ArgumentRole.Checked;
+            var given = checks ? new[] { test.Value } : test.Arguments;
+            Action<string, bool> answered = (said, cancelled) =>
+            {
+                if (cancelled)
+                    return;
+
+                var now = test.Copy();
+                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields), checks, value => now.Value = value);
+                _stepwork.Retest(step, test, now);
+            };
+            if (ValuesQuestion.Offer(Editor, fields, given, said => answered(said, false)))
+                return;
+
+            if (_values != null)
+                _values.Finish(true);
+
+            _values = new ValuesQuestion(Editor, fields, given, () => Chip(step, holds), answered);
+            _values.Hang();
         }
 
         /// <summary>Opens the panel what <paramref name="abort" /> says is given in, hung from the part of its row saying it.</summary>

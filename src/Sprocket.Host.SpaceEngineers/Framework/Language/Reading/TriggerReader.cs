@@ -41,7 +41,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             trigger.Annotation = statement.Annotation;
-            trigger.Attributes = ScriptAttributes.Unused(statement);
+            trigger.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Category);
+            SystemReader.Category(statement, trigger, trouble);
             system.AddTrigger(trigger);
         }
 

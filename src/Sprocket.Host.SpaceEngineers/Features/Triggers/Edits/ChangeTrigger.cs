@@ -26,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
             _now = now;
             _now.Does = was.Does;
             _now.Annotation = was.Annotation;
+            _now.Category = was.Category;
 
             var wasMoment = was as MomentTrigger;
             var nowMoment = now as MomentTrigger;

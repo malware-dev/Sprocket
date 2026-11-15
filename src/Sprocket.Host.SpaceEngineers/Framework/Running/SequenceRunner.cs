@@ -3,6 +3,8 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using System;
+using System.Collections.Generic;
+using Sandbox.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
 {
@@ -315,7 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </remarks>
         public void Switched()
         {
-            if (IsRunning && _owner.Live && !CanRun)
+            if (IsRunning && _owner.Live && !CanRun && !Cleaning)
                 Interrupt(StopCause.Switch, 0);
         }
 
@@ -333,7 +335,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return;
             }
 
-            if (!CanRun)
+            // Its catch and finally run on, switched off, to their end.
+            if (!CanRun && !Cleaning)
             {
                 Interrupt(StopCause.Switch, 0);
                 return;
@@ -464,8 +467,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 SkippedCount++;
                 LastSkippedTick = tick;
                 _owner.Log?.Refused(this, tick, RunRefusal.Busy);
+                HeldBy = null;
                 return;
             }
+
+            if (Held(tick))
+                return;
 
             _memory.ByHand = byHand;
             Start(tick, byHand ? RunStart.Hand : RunStart.Call);
@@ -497,21 +504,82 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 SkippedCount++;
                 LastSkippedTick = tick;
                 _owner.Log?.Refused(this, tick, RunRefusal.Busy);
+                HeldBy = null;
                 return;
             }
+
+            if (Held(tick))
+                return;
 
             _memory.ByHand = false;
             Start(tick, RunStart.Trigger);
         }
 
         /// <summary>
-        /// Ends the run, and calls off what it had in flight.
+        /// Ends the run, and calls off what it had in flight; where it has a finally it has not reached, the run goes on there
+        /// instead.
         /// </summary>
         public void Stop()
+        {
+            if (!Handle(false))
+                End();
+        }
+
+        /// <summary>Ends the run where it fails: in its catch where it has one it has not reached, then its finally; or at once.</summary>
+        void Fail()
+        {
+            if (!Handle(true))
+                End();
+        }
+
+        /// <summary>Ends the run at once, and calls off what it had in flight.</summary>
+        void End()
         {
             Called();
             Finish();
             _owner.Forced.Release(this);
+        }
+
+        /// <summary>
+        /// Whether the run is in its catch or finally, which run on to their end though what it runs on is switched off.
+        /// </summary>
+        /// <remarks>Walks the lines, so it is asked as something switches off or ends the run, never every tick.</remarks>
+        public bool Cleaning => IsRunning && _memory.Step >= _sequence.HandlersAt;
+
+        /// <summary>
+        /// Takes the run, ending where it <paramref name="fails" /> or not, on into its catch, where it fails before reaching it,
+        /// or else its finally, where it has not reached that; calls off what it had in flight first. False where there is
+        /// neither to go to, and the run is to end.
+        /// </summary>
+        bool Handle(bool fails)
+        {
+            if (!IsRunning)
+                return false;
+
+            var at = _memory.Step;
+            var finallyAt = _sequence.FinallyAt;
+            if (finallyAt >= 0 && at > finallyAt)
+                return false;
+
+            var catchAt = _sequence.CatchAt;
+            var caught = catchAt >= 0 && at > catchAt;
+            int to;
+            if (fails && catchAt >= 0 && !caught)
+                to = catchAt + 1;
+            else if (finallyAt >= 0)
+                to = finallyAt + 1;
+            else
+                return false;
+
+            Called();
+            Release();
+            _memory.Started.Clear();
+            _memory.Holding = false;
+            IsWaiting = false;
+            Go(to);
+            _owner.Log?.Handling(this, _owner.CurrentTick, to - 1);
+            _rota.At(_busy, _owner.CurrentTick + 1);
+            return true;
         }
 
         /// <summary>
@@ -611,8 +679,47 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _workings.Listed(_workings.Compile(step, _bindings));
         }
 
+        /// <summary>
+        /// Whether another sequence with the same <c>exclusive</c> id runs in the same instance, which skips this start, as a
+        /// start while it runs is skipped, and keeps which sequence held it.
+        /// </summary>
+        /// <remarks>Asked only as a run is asked to start; walks the system's sequences only where this one names an id.</remarks>
+        bool Held(int tick)
+        {
+            var id = _sequence.Exclusive;
+            if (id.Length == 0 || _sequence.System == null)
+                return false;
+
+            var sequences = _sequence.System.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                var other = sequences[i];
+                if (other == _sequence || other.Exclusive != id)
+                    continue;
+
+                var run = _owner.Get(other, _instance);
+                if (run == null || !run.IsRunning)
+                    continue;
+
+                SkippedCount++;
+                LastSkippedTick = tick;
+                HeldBy = other;
+                _owner.Log?.Refused(this, tick, RunRefusal.Held);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// The sequence whose run skipped the last start of this one, with the same <c>exclusive</c> id, or null where the last
+        /// start went ahead or was skipped for another reason; not kept in what the world saves.
+        /// </summary>
+        public Sequence HeldBy { get; private set; }
+
         void Start(int tick, RunStart how)
         {
+            HeldBy = null;
             _owner.Log?.Started(this, tick, how);
             LastFiredTick = tick;
             FiredCount++;
@@ -730,7 +837,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     if (!IsRunning)
                         return;
 
-                    if (!CanRun)
+                    if (!CanRun && !Cleaning)
                     {
                         Interrupt(StopCause.Switch, 0);
                         return;
@@ -778,6 +885,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     continue;
                 }
 
+                // Reached from its own steps, which went well: the catch is passed over, to the finally or the end.
+                if (step is Catch)
+                {
+                    var after = _sequence.FinallyAt;
+                    if (after < 0)
+                        break;
+
+                    Go(after + 1);
+                    continue;
+                }
+
+                if (step is Finally)
+                {
+                    Step();
+                    continue;
+                }
+
                 if (step is Await)
                 {
                     // A block gone while it is waited on ends the run here, as one gone when its step is reached. Looked
@@ -804,9 +928,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         var quit = ConflictsDue() ? Troubled() : SequenceFault.None;
                         if (quit.Exists)
                         {
-                            Stop();
                             _faults.Quit = quit;
                             _owner.Log?.Faulted(this, _memory.Looked, quit);
+                            Fail();
                             return;
                         }
 
@@ -1001,16 +1125,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return;
             }
 
-            Stop();
+            // A warning is a failure, and a note an ending.
             _faults.Quit = said;
+            if (abort.Level == AbortLevel.Warning)
+                Fail();
+            else
+                Stop();
         }
 
-        /// <summary>Ends the run at a step it cannot do, keeping why, and has what it runs on switched off.</summary>
+        /// <summary>Ends the run at a step it cannot do, or takes it on into its catch or finally, keeping why, and has what it runs on switched off.</summary>
         void Meet(SequenceFault fault)
         {
-            Stop();
             _faults.Met(fault);
             _owner.Log?.Faulted(this, _memory.Looked, fault);
+            Fail();
             _owner.Faulted(_sequence, _instance, fault);
         }
 
@@ -1081,6 +1209,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return;
 
             var compiled = _workings.Compile(step, _bindings);
+            Begin(compiled);
             foreach (var acted in compiled.Acts)
             {
                 // Done again, so what its blocks said of the last time is no answer for this one.
@@ -1102,6 +1231,40 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
                 acted.Entity.Asked();
             }
+        }
+
+        /// <summary>Tells each action of <paramref name="compiled" /> that asks for them every block it is done on, once, before it is done on any.</summary>
+        /// <remarks>Once as a step starts, never on a tick; a list made only for an action that asks, such as pistons sharing a speed.</remarks>
+        static void Begin(CompiledAct compiled)
+        {
+            var acts = compiled.Acts;
+            for (var i = 0; i < acts.Count; i++)
+            {
+                var bound = acts[i].Bound;
+                if (bound == null || !bound.Begins || Earlier(acts, i, bound))
+                    continue;
+
+                var blocks = new List<IMyTerminalBlock>();
+                for (var j = i; j < acts.Count; j++)
+                {
+                    if (acts[j].Bound == bound)
+                        blocks.Add(acts[j].Entity.Block);
+                }
+
+                bound.Begin(blocks);
+            }
+        }
+
+        /// <summary>Whether an act before <paramref name="at" /> in <paramref name="acts" /> already shares <paramref name="bound" />.</summary>
+        static bool Earlier(List<ActTarget> acts, int at, BoundAction bound)
+        {
+            for (var i = 0; i < at; i++)
+            {
+                if (acts[i].Bound == bound)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>The first block an act at <paramref name="step" /> was refused by as it was done, with the block's reason; none where every block did it.</summary>

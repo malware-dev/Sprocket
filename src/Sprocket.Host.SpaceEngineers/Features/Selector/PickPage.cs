@@ -344,8 +344,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             var arguments = _arguments.Read(said);
 
             // Toggle on a switch is the game's toggle for it, which takes nothing.
-            if (_picked.Form == ReachKind.Value && arguments.Count == 1 && arguments[0].Kind == ValueKind.Text
-                && arguments[0].Text == EntityAction.Toggle)
+            if (Vocabulary.Toggles(_picked.Form, arguments))
             {
                 var toggle = Vocabulary.Toggle(Editor.World, _picked.Blocks, _picked.Member) ?? _picked.Member;
                 Finish(new PickAnswer(_picked.Blocks, toggle, _picked.Reading, new List<Literal>(), ReachKind.Action, Facet));

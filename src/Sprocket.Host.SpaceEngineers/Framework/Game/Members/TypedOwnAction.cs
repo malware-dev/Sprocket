@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         public TypedOwnAction(Func<IList<Literal>, TOptions> options, Action<T, TOptions, ReaderMemory> does, Reading until,
             Func<T, TOptions, ReaderMemory, bool> done, Func<T, TOptions, ReaderMemory, BlockTrouble> trouble, Action<T> stop,
             Func<T, TOptions, int> expected,
-            Func<TOptions, bool> forced = null)
+            Func<TOptions, bool> forced = null, Action<IList<T>, TOptions> begins = null)
         {
             _options = options;
             _until = until;
@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             Stops = stop;
             Takes = expected;
             Forced = forced;
+            Begun = begins;
         }
 
         /// <summary>What the action does to a block.</summary>
@@ -40,6 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         /// <summary>Whether the action is forced by its options, or null where it never is.</summary>
         public Func<TOptions, bool> Forced { get; private set; }
+
+        /// <summary>What the action is told of every block of a step together, as the step starts, or null where it needs nothing.</summary>
+        public Action<IList<T>, TOptions> Begun { get; private set; }
 
         /// <summary>How many ticks the action is expected to take on a block, or null where it cannot say.</summary>
         public Func<T, TOptions, int> Takes { get; private set; }

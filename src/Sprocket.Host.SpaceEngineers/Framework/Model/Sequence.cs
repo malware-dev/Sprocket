@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
     /// <summary>
     /// Something the machine does: the ordered steps a trigger, or a step of another sequence, runs.
     /// </summary>
-    public sealed class Sequence
+    public sealed class Sequence : ICategorized, IExclusive
     {
         readonly List<Step> _steps = new List<Step>();
 
@@ -42,6 +42,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>What the player calls this, such as "Let me out", or empty.</summary>
         public string Name { get; set; }
 
+        /// <summary>The category the sequence is listed under on the Sequences tab, with the sequences beside it under the same one, or empty for none.</summary>
+        public string Category { get; set; } = "";
+
+        /// <summary>
+        /// The id of the sequences of its system it runs one at a time with, in each instance, or empty where it runs whenever it is
+        /// started.
+        /// </summary>
+        public string Exclusive { get; set; } = "";
+
         /// <summary>Whether somebody has given it a name.</summary>
         public bool HasName => !string.IsNullOrEmpty(Name);
 
@@ -62,6 +71,41 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public bool CanRun(SystemInstance instance)
         {
             return (System == null || System.Enabled) && (instance == null || instance.Enabled);
+        }
+
+        /// <summary>The line of its <see cref="Catch" />, or -1 where it has none.</summary>
+        /// <remarks>Walks the lines, so it is asked as a run fails or ends, never every tick.</remarks>
+        public int CatchAt => Find<Catch>();
+
+        /// <summary>The line of its <see cref="Finally" />, or -1 where it has none.</summary>
+        /// <remarks>Walks the lines, so it is asked as a run fails or ends, never every tick.</remarks>
+        public int FinallyAt => Find<Finally>();
+
+        /// <summary>Where its own steps end: the line of its first <see cref="Handler" />, or the number of lines where it has none.</summary>
+        /// <remarks>Walks the lines, so it is asked as a run fails or ends, never every tick.</remarks>
+        public int HandlersAt
+        {
+            get
+            {
+                for (var i = 0; i < _steps.Count; i++)
+                {
+                    if (_steps[i] is Handler)
+                        return i;
+                }
+
+                return _steps.Count;
+            }
+        }
+
+        int Find<T>() where T : Handler
+        {
+            for (var i = 0; i < _steps.Count; i++)
+            {
+                if (_steps[i] is T)
+                    return i;
+            }
+
+            return -1;
         }
 
         /// <summary>The line that ends the branch opened at <paramref name="at" />: the next <see cref="Else" /> of its <see cref="If" />, or its <see cref="EndIf" />.</summary>

@@ -595,29 +595,60 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             pen.Blank();
             pen.Note(sequence.Annotation);
+            if (sequence.Category.Length > 0)
+                pen.AttributeText(ScriptAttributes.Category, sequence.Category);
+
             pen.Attributes(sequence.Attributes);
             pen.Start(Keyword.Sequence).Whole(sequence.Number);
             if (sequence.HasName)
                 pen.Says(Keyword.As).Word(sequence.Name);
 
+            if (sequence.Exclusive.Length > 0)
+                pen.Word(SequenceWords.Exclusive).Word(sequence.Exclusive);
+
             pen.Body();
 
             var steps = sequence.Steps;
+            var handling = false;
             for (var i = 0; i < steps.Count; i++)
             {
                 var opens = steps[i] as If;
                 var branch = steps[i] as Else;
+                var handler = steps[i] as Handler;
                 if (opens != null)
                     WriteIf(pen, sequence.System, opens);
                 else if (branch != null)
                     WriteElse(pen, sequence.System, branch);
                 else if (steps[i] is EndIf)
                     pen.Shut();
+                else if (handler != null)
+                {
+                    if (handling)
+                        pen.Shut();
+
+                    WriteHandler(pen, handler);
+                    handling = true;
+                }
                 else
                     WriteStep(pen, sequence.System, steps[i]);
             }
 
+            if (handling)
+                pen.Shut();
+
             pen.Shut();
+        }
+
+        /// <summary><c>catch {</c> or <c>finally {</c>: the line a part run as the run ends starts, and its block opened.</summary>
+        static void WriteHandler(ScriptWriter pen, Handler step)
+        {
+            if (step.Annotation.Length > 0)
+                pen.Blank();
+
+            pen.Note(step.Annotation);
+            pen.Attributes(step.Attributes);
+            pen.Head(step is Catch ? SequenceWords.Catch : SequenceWords.Finally);
+            pen.Body();
         }
 
         /// <summary><c>if all ext.filled on [ vent ] == on then {</c>: the line an if starts, and its block opened.</summary>
@@ -733,6 +764,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             pen.Blank();
             pen.Note(trigger.Annotation);
+            if (trigger.Category.Length > 0)
+                pen.AttributeText(ScriptAttributes.Category, trigger.Category);
+
             pen.Attributes(trigger.Attributes);
 
             var needed = trigger as SignalTrigger;

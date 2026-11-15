@@ -345,6 +345,14 @@ sequence 1 as Cycle {
 * **Naming:** May declare an optional name (`as <name>`).
 * **Concurrency:** Steps execute sequentially. An asynchronous action or sequence execution starts immediately, allowing the script to proceed to the next statement without blocking unless paused by `await` or `wait`.
 * `await`, `wait`, `if` and `abort` belong to sequences alone.
+* **Mutual exclusion (`exclusive`):** `sequence <n> [as <name>] exclusive <id> { ... }`. Sequences of a system that name the same id run one at a time in each instance: a start while another of them runs is skipped, as a start of a sequence already running is, and the skipped sequence says which one holds it. A sequence names at most one id. The id is an identifier or a quoted name, compared exactly, and shares no namespace with anything else.
+
+```sprocket
+#@ category: "Drilling"
+sequence 2 as 'Shallow Drill' exclusive Drilling {
+    wait 1s
+}
+```
 
 ### 11.2 Steps
 
@@ -353,7 +361,7 @@ sequence 1 as Cycle {
 | `call <member>[(<args>)] on [ <names> ]` | Invokes an action on all blocks identified by `<names>`. |
 | `set <member> on [ <names> ] to <value>` | Assigns a writable host block property. Where an id names both an action and a value, `set` always means the value. |
 | `set <state> to <value>` | Updates a system state within the current instance. Value must be a valid choice, flag, or another state of identical type. |
-| `run <sequence>` | Starts a sequence of the same system asynchronously. If already running, does nothing. Self-recursion or cyclical invocation chains produce an error. |
+| `run <sequence>` | Starts a sequence of the same system asynchronously. If it is already running, or another sequence with the same `exclusive` id is, does nothing. Self-recursion or cyclical invocation chains produce an error. |
 | `stop <sequence>` | Halts a sequence of the same system if running. A sequence can stop itself, terminating execution immediately. |
 | `abort [saying <text>] [as <level>]` | Ends the sequence it is in, at once. `saying` gives the reason the sequence shows, as written. `as` says how it shows: `note`, the default; `warning`; or `problem`, which also switches off the installation it ran on, with the reason. |
 | `await` | Blocks the sequence until all actions and sequences started above it in the current sequence have completed. |
@@ -380,6 +388,27 @@ sequence 1 as Cycle {
 
 * Disabled steps are fully validated by the parser but perform no runtime operation.
 * Only steps inside sequences can be switched off using `//`.
+
+### 11.5 Failure and Cleanup (`catch`, `finally`)
+
+```sprocket
+sequence 2 as Deploy {
+    set busy to on
+    call Gearbox.extend on [ piston ]
+    await
+    catch {
+        call Gearbox.retract on [ piston ]
+    }
+    finally {
+        set busy to off
+    }
+}
+```
+
+* **Placement:** At most one `catch` and one `finally`, each optional, last in the sequence's own body, `catch` first. Never inside an `if`.
+* `catch` runs when the sequence fails: a fault that ends the run, or an `abort` as `warning` or `problem`. An `abort` as `note`, a `stop`, and switching the installation off end the run without failing it.
+* `finally` runs whenever the run ends, after `catch` where that ran, switching off included. While it runs, the sequence counts as running; `stop` ends it at once.
+* Both hold any steps, `wait` and `await` included. A failure inside a `catch` or `finally` is a fault, as if no `catch` were written; neither runs again.
 
 ---
 

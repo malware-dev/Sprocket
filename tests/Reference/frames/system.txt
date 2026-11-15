@@ -81,4 +81,5 @@ on screen     Airlock
 074  Text       at {X:1431.37 Y:183.6399} scale 0.694  #A2C3CDFF  "Installation panel"
 075  SetClip    {X:256 Y:230 W:1408 H:790}
 076  Text       at {X:272 Y:247.2255} scale 0.833  #A2C3CDFF  "+ trigger"
-077  ClearClip  
+077  Text       at {X:383.0067 Y:247.2255} scale 0.833  #A2C3CDFF  "+ category"
+078  ClearClip  

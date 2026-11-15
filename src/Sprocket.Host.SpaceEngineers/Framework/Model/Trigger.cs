@@ -4,7 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
     /// <summary>
     /// Something that starts a step: runs or stops a sequence, or acts on some parts itself.
     /// </summary>
-    public abstract class Trigger
+    public abstract class Trigger : ICategorized
     {
         /// <summary>A trigger with nothing written about it yet.</summary>
         protected Trigger()
@@ -57,6 +57,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// What somebody wrote about this trigger, in their own words, or empty.
         /// </summary>
         public string Annotation { get; set; }
+
+        /// <summary>The category the trigger is listed under on the Triggers tab, with the triggers beside it under the same one, or empty for none.</summary>
+        public string Category { get; set; } = "";
 
         /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
         public KeptAttributes Attributes { get; set; }

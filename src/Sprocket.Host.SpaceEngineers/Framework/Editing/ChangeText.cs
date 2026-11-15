@@ -163,9 +163,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
                 case ChangeKind.ChooseVersion: return texts.ChangeChooseVersion;
                 case ChangeKind.MoveSlot: return texts.ChangeMoveSlot;
                 case ChangeKind.MoveCategory: return texts.ChangeMoveCategory;
+                case ChangeKind.MoveSequence: return texts.ChangeMoveSequence;
+                case ChangeKind.MoveSequenceCategory: return texts.ChangeMoveSequenceCategory;
+                case ChangeKind.MoveTrigger: return texts.ChangeMoveTrigger;
+                case ChangeKind.MoveTriggerCategory: return texts.ChangeMoveTriggerCategory;
                 case ChangeKind.AddCategory: return texts.ChangeAddCategory;
                 case ChangeKind.RenameCategory: return texts.ChangeRenameCategory;
                 case ChangeKind.RemoveCategory: return texts.ChangeRemoveCategory;
+                case ChangeKind.CategoryOneAtATime: return texts.ChangeCategoryOneAtATime;
                 case ChangeKind.AddType: return texts.ChangeAddType;
                 case ChangeKind.RenameType: return texts.ChangeRenameType;
                 case ChangeKind.RemoveType: return texts.ChangeRemoveType;
@@ -178,6 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
                 case ChangeKind.RemoveState: return texts.ChangeRemoveState;
                 case ChangeKind.MoveState: return texts.ChangeMoveState;
                 case ChangeKind.ChangeStart: return texts.ChangeChangeStart;
+                case ChangeKind.ChangeNow: return texts.ChangeChangeNow;
                 case ChangeKind.OptimizeSlots: return texts.ChangeOptimizeSlots;
                 case ChangeKind.RemoveSlot: return texts.ChangeRemoveSlot;
                 default: return "";

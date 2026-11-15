@@ -22,6 +22,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         readonly List<SystemEdit> _starting = new List<SystemEdit>();
         readonly List<Trigger> _copies = new List<Trigger>();
         Trigger _replaced;
+
+        // Where a new trigger is put among the others, or null for after them all, under no category.
+        Func<Trigger, Arrangement> _placed;
         int _replacedAt;
 
         /// <summary>The triggers made in <paramref name="editor" />.</summary>
@@ -33,6 +36,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <summary>Asks the questions a new sequence needs, one screen at a time.</summary>
         public void StartSequence(AutomationSystem system, Trigger trigger)
         {
+            StartSequence(system, trigger, null);
+        }
+
+        /// <summary>
+        /// Asks the questions a new sequence needs, one screen at a time, and puts the trigger made where <paramref name="placed" />
+        /// says among the others, as one step back with making it; after them all, under no category, where that is null.
+        /// </summary>
+        public void StartSequence(AutomationSystem system, Trigger trigger, Func<Trigger, Arrangement> placed)
+        {
+            _placed = placed;
             _starting.Clear();
             _replaced = null;
 
@@ -236,15 +249,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 _editor.Do(system, start);
         }
 
+        /// <summary>
+        /// <paramref name="add" />, adding <paramref name="trigger" /> after the others in <paramref name="system" />, with the
+        /// trigger then put where the standing placing says, as one edit.
+        /// </summary>
+        SystemEdit Placed(AutomationSystem system, Trigger trigger, AddTrigger add)
+        {
+            var was = Arrangement.Of(system.TriggerList);
+            was.Order.Add(trigger);
+            was.Placed.Add(trigger.Category);
+            return new WithMade(add, new Rearrange(ChangeKind.AddTrigger, owner => owner.TriggerList, was, _placed(trigger), trigger, null));
+        }
+
         /// <summary>Makes <paramref name="trigger" /> do <paramref name="does" />: added to <paramref name="system" /> where it is <paramref name="fresh" />, and otherwise changed as one edit with <paramref name="start" />.</summary>
         void Points(AutomationSystem system, Trigger trigger, Step does, bool fresh, Sequence made, SystemEdit start)
         {
             if (fresh)
             {
                 trigger.Does = does;
-                _editor.Do(system, new AddTrigger(_editor.Program, trigger, made, _starting, _replaced, _replacedAt));
+                var add = new AddTrigger(_editor.Program, trigger, made, _starting, _replaced, _replacedAt);
+                _editor.Do(system, _placed == null || _replaced != null ? add : Placed(system, trigger, add));
                 _starting.Clear();
                 _replaced = null;
+                _placed = null;
                 _editor.Invalidate();
                 return;
             }

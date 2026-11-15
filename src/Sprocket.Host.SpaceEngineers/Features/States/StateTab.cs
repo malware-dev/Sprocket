@@ -29,6 +29,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         readonly List<DeclaredType> _types = new List<DeclaredType>();
         readonly List<State> _states = new List<State>();
 
+        // Whether the values shown now can be changed by hand, as last offered; null where the rows were just made again.
+        bool? _holdable;
+
         /// <summary>
         /// The State tab of <paramref name="system" />, shown in <paramref name="panel" />, its changes made through commands
         /// <paramref name="changes" /> makes, and <paramref name="locked" /> saying why nothing can be changed where it cannot.
@@ -82,23 +85,64 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 ArrangeType(texts, _typeRows[type], type, editable, locked);
 
             _stateRows.Show(_states);
+            _holdable = null;
             foreach (var state in _states)
                 ArrangeState(texts, _stateRows[state], state, editable, locked);
 
             Live();
         }
 
-        /// <summary>Says what the installation shown holds now in each state, changing only the words that changed.</summary>
-        /// <remarks>Called every tick while the tab is showing: a lookup per state.</remarks>
+        /// <summary>
+        /// Says what the installation shown holds now in each state, changing only the words that changed, each pressed to
+        /// change it by hand while the installation or its logic system is switched off.
+        /// </summary>
+        /// <remarks>Called every tick while the tab is showing: a lookup per state, and the presses made again only as a switch turns.</remarks>
         public void Live()
         {
             var shown = _editor.StandIn(_system);
+            var holdable = shown != null && (!_system.Enabled || !shown.Enabled);
+            var turned = _holdable != holdable;
+            _holdable = holdable;
             foreach (var state in _states)
             {
                 var now = _editor.Runner.States.Read(_system, shown, state).Said;
                 var row = _stateRows[state];
                 if (row.Now != now)
                     row.Now = now;
+
+                if (!turned)
+                    continue;
+
+                var held = state;
+                row.Current.Command = holdable ? _editor.Act(CommandKind.ChangeNow, () => Hold(held)) : null;
+                row.Current.Set(LookStates.Still, row.Current.Command == null);
+            }
+        }
+
+        /// <summary>
+        /// Offers the values <paramref name="state" /> can hold in a menu under what the installation shown holds now, that one
+        /// marked, and gives it the one chosen, by hand, as one edit.
+        /// </summary>
+        void Hold(State state)
+        {
+            var shown = _editor.StandIn(_system);
+            if (shown == null)
+                return;
+
+            Func<Literal> read = () => _editor.Runner.States.Read(_system, shown, state);
+            Action<Literal> write = value => _editor.Hold(_system, shown, state, value);
+            var now = read();
+            _editor.AskHere("");
+            foreach (var word in StateValueQuestion.Words(_system, state))
+            {
+                Literal value;
+                StateValueQuestion.Read(_system, state, word, out value);
+                var marked = StateMentions.Same(now, value);
+                _editor.Answer(word, delegate
+                {
+                    if (!marked)
+                        _editor.Do(_system, new ChangeNow(shown, state, value, read, write));
+                }, marked);
             }
         }
 

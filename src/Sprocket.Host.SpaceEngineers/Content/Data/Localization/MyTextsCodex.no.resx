@@ -26,7 +26,7 @@
     <value>**Installasjonspanelet** er der du setter opp en [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) og velger blokkene og [![](mark:signal)&amp;nbsp;signalene](Term.Signal class=term) for hver av [plassene](Term.Slot class=term) dens. Åpne det fra installasjonens rad på startskjermen. Fanen `Installasjonspanel` i [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) er der du velger hva hvert panel viser.</value>
   </data>
   <data name="Sprocket.Term.Category" xml:space="preserve">
-    <value>En **kategori** er en overskrift på [installasjonspanelet](Term.InstallationPanel class=term) som samler [plassene](Term.Slot class=term) som dras inn under den.</value>
+    <value>En **kategori** er en overskrift på [installasjonspanelet](Term.InstallationPanel class=term) eller på fanene Sekvenser og Utløsere som samler [plassene](Term.Slot class=term), [![](mark:sequence)&amp;nbsp;sekvensene](Term.Sequence class=term) eller [![](mark:trigger)&amp;nbsp;utløserne](Term.Trigger class=term) som dras inn under den. En kategori av sekvenser kan settes til å kjøre dem én om gangen.</value>
   </data>
   <data name="Sprocket.Term.Slot" xml:space="preserve">
     <value>En **plass** er et navngitt sted i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term), som den indre døra, som hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) fyller med sine egne blokker eller sitt eget [![](mark:signal)&amp;nbsp;signal](Term.Signal class=term). En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel class=term).</value>
@@ -44,7 +44,7 @@
     <value>En ![](mark:sequence)&amp;nbsp;**sekvens** er en liste med [steg](Term.Step class=term) et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) kjører ovenfra og ned. I en [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) må den være ferdig før den kan starte igjen, så en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) som utløses mens den kjører, går tapt.</value>
   </data>
   <data name="Sprocket.Term.Step" xml:space="preserve">
-    <value>Et **steg** er én linje i en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term). Trykk på en av delene for å endre den i en [velger](Term.Selector class=term) eller en meny.</value>
+    <value>Et **steg** er én linje i en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term). Trykk på en av delene for å endre den i en [velger](Term.Selector class=term), en meny eller et panel.</value>
   </data>
   <data name="Sprocket.Term.Action" xml:space="preserve">
     <value>En ![](mark:action)&amp;nbsp;**handling** er noe en blokk kan gjøre, som å åpne en dør eller skyve ut et stempel.</value>
@@ -72,6 +72,12 @@
   </data>
   <data name="Sprocket.Term.Abort" xml:space="preserve">
     <value>Et **abort** er et [steg](Term.Step class=term) som avslutter [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) sin med en gang. Det kan gi en melding som sier hvorfor, vist som en merknad, en advarsel eller et problem, og et problem slår også av [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) den kjørte i.</value>
+  </data>
+  <data name="Sprocket.Term.Catch" xml:space="preserve">
+    <value>**if it fails** har [steg](Term.Step class=term) som kjører når [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) feiler: en blokk kan ikke gjøre et steg, eller sekvensen [avbrytes](Term.Abort class=term) med en advarsel eller et problem. Den kjører ikke når sekvensen stoppes, slås av eller avbrytes med en merknad.</value>
+  </data>
+  <data name="Sprocket.Term.Finally" xml:space="preserve">
+    <value>**finally** har [steg](Term.Step class=term) som kjører når [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) slutter, uansett hvordan, etter **if it fails** der den kjørte, og også når den slås av. Mens de kjører, vises sekvensen som i gang, og stopp avslutter dem med en gang.</value>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
     <value>Et **hvis**, også kjent som en *betinget setning*, er et [steg](Term.Step class=term) som sjekker blokker, eller en av [![](mark:state)&amp;nbsp;tilstandene](Term.LogicSystemStates class=term) til [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), og kjører stegene under seg bare når [betingelsen](Term.Condition class=term) er oppfylt.</value>
@@ -449,7 +455,7 @@
     <value>Et [steg](Term.Step class=term), et [hvis](Term.If class=term) eller en [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) bruker denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term), så [tilstandstypen](Term.Type class=term) kan ikke byttes.</value>
   </data>
   <data name="Sprocket.State.NowAbout" xml:space="preserve">
-    <value>Verdien denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term) har akkurat nå i [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) som vises.</value>
+    <value>Verdien denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term) har akkurat nå i [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) som vises. Mens [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) eller installasjonen er slått av, kan du trykke på den for å endre den for hånd; ingenting som følger med på tilstanden, reagerer.</value>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
     <value>Navnet på denne installasjonen.</value>
@@ -611,6 +617,18 @@
   <data name="Sprocket.Category.Remove" xml:space="preserve">
     <value>Fjern kategorien. [Plassene](Term.Slot class=term) blir, uten kategori.</value>
   </data>
+  <data name="Sprocket.Category.RemoveSequences" xml:space="preserve">
+    <value>Fjern kategorien. [![](mark:sequence)&amp;nbsp;Sekvensene](Term.Sequence class=term) blir, uten kategori.</value>
+  </data>
+  <data name="Sprocket.Category.RemoveTriggers" xml:space="preserve">
+    <value>Fjern kategorien. [![](mark:trigger)&amp;nbsp;Utløserne](Term.Trigger class=term) blir, uten kategori.</value>
+  </data>
+  <data name="Sprocket.Category.Open" xml:space="preserve">
+    <value>Gi kategorien nytt navn, eller la [![](mark:sequence)&amp;nbsp;sekvensene](Term.Sequence class=term) i den kjøre én om gangen.</value>
+  </data>
+  <data name="Sprocket.Category.OneAtATimeAbout" xml:space="preserve">
+    <value>Når den er på, kjører bare én [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term) i denne kategorien om gangen. En start mens en annen kjører, går tapt.</value>
+  </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
     <value>Reduser [plassene](Term.Slot class=term) til så få som [stegene](Term.Step class=term) og [![](mark:trigger)&amp;nbsp;utløserne](Term.Trigger class=term) trenger.</value>
   </data>
@@ -620,8 +638,20 @@
   <data name="Sprocket.Category.Drag" xml:space="preserve">
     <value>Dra for å flytte kategorien med [plassene](Term.Slot class=term) sine.</value>
   </data>
+  <data name="Sprocket.Category.DragSequences" xml:space="preserve">
+    <value>Dra for å flytte kategorien med [![](mark:sequence)&amp;nbsp;sekvensene](Term.Sequence class=term) sine.</value>
+  </data>
+  <data name="Sprocket.Category.DragTriggers" xml:space="preserve">
+    <value>Dra for å flytte kategorien med [![](mark:trigger)&amp;nbsp;utløserne](Term.Trigger class=term) sine.</value>
+  </data>
   <data name="Sprocket.Slot.Drag" xml:space="preserve">
     <value>Dra for å flytte plassen. Nederst i en [kategori](Term.Category class=term) drar du til høyre for å legge den inn, eller til venstre for å holde den utenfor.</value>
+  </data>
+  <data name="Sprocket.Sequence.Drag" xml:space="preserve">
+    <value>Dra for å flytte sekvensen. Slipp den over slutten av en [kategori](Term.Category class=term) for å legge den inn.</value>
+  </data>
+  <data name="Sprocket.Trigger.Drag" xml:space="preserve">
+    <value>Dra for å flytte utløseren. Slipp den over slutten av en [kategori](Term.Category class=term) for å legge den inn.</value>
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
     <value>Hvilken sort blokk som kan fylle denne [plassen](Term.Slot class=term). Trykk for å velge en annen.</value>
@@ -3605,6 +3635,9 @@
   <data name="Sprocket.Member.Option.Piston.Speed" xml:space="preserve">
     <value>Hvor fort stempelet beveger seg, i meter per sekund: over 0 og opp til det raskeste stempelet kan.</value>
     <comment>Codex entry on the option "speed" of Piston, shown as its tooltip in the picker.</comment>
+  </data>
+  <data name="Sprocket.Member.Option.Piston.SpeedFor" xml:space="preserve">
+    <value>`each` flytter hvert stempel med farten som er gitt. `in total` deler farten mellom stemplene i steget, etter hvor langt hvert har igjen, slik at de til sammen beveger seg med den farten og kommer fram samtidig: enden av en kjede av stempler beveger seg med farten som er gitt.</value>
   </data>
   <data name="Sprocket.Member.Option.Rotor.Direction" xml:space="preserve">
     <value>Hvilken vei rotoren dreier: `directly` tar korteste vei, `clockwise` og `counter-clockwise` dreier den veien rundt.</value>

@@ -422,6 +422,13 @@ namespace Sprocket.Host.SpaceEngineers
                 _handover.Run(id, sequence, instance, stops);
             };
 
+            // Kept on the server; the copy shows it at once.
+            copy.Editor.HeldElsewhere = (system, instance, held, value) =>
+            {
+                _handover.Keep(id, copy);
+                _handover.Hold(id, system, instance, held, value);
+            };
+
             // The program that wants the button reaches the server first.
             copy.Editor.Wire = panel =>
             {

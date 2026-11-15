@@ -105,6 +105,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 made.Annotation = sequence.Annotation;
                 made.Attributes = Kept(sequence.Attributes);
                 made.Name = sequence.Name;
+                made.Category = sequence.Category;
+                made.Exclusive = sequence.Exclusive;
                 foreach (var step in sequence.Steps)
                     made.Steps.Add(Step(step));
             }
@@ -166,6 +168,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 copy = new StateTrigger(((StateTrigger)trigger).Test.Copy());
 
             copy.Annotation = trigger.Annotation;
+            copy.Category = trigger.Category;
             copy.Attributes = Kept(trigger.Attributes);
             copy.Does = Step(trigger.Does);
             return copy;
@@ -223,6 +226,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             if (step is EndIf)
                 return new EndIf();
+
+            if (step is Catch)
+                return new Catch();
+
+            if (step is Finally)
+                return new Finally();
 
             var sets = (SetState)step;
             return new SetState { State = sets.State, Value = sets.Value, From = sets.From };

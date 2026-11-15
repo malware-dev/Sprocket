@@ -271,8 +271,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             part.Short = attribute.Value.Word;
         }
 
-        /// <summary><c>#@ category: "Doors"</c> on a slot: the category it is shown under with the slots beside it under the same one, text.</summary>
-        static void Category(Statement statement, Part part, ScriptTrouble trouble)
+        /// <summary><c>#@ category: "Doors"</c> on a slot or a sequence: the category it is listed under with those beside it under the same one, text.</summary>
+        public static void Category(Statement statement, ICategorized item, ScriptTrouble trouble)
         {
             ScriptAttribute attribute;
             if (!ScriptAttributes.Find(statement, ScriptAttributes.Category, out attribute))
@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
-            part.Category = attribute.Value.Word;
+            item.Category = attribute.Value.Word;
         }
 
         static void ReadSlot(Statement statement, AutomationSystem system, ScriptTrouble trouble)
@@ -372,7 +372,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             var sequence = program.Restore(system, (int)number.Whole, null);
             sequence.Annotation = statement.Annotation;
-            sequence.Attributes = ScriptAttributes.Unused(statement);
+            sequence.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Category);
+            Category(statement, sequence, trouble);
 
             var at = 1;
             if (statement.Says(1, Keyword.As))
@@ -384,8 +385,68 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 at = 3;
             }
 
+            if (statement.ValueAt(at).Form == ValueForm.Identifier && statement.Word(at) == SequenceWords.Exclusive)
+            {
+                sequence.Exclusive = ScriptQuotes.Named(statement.ValueAt(at + 1)) ? statement.Word(at + 1) : "";
+                if (sequence.Exclusive.Length == 0)
+                    trouble.Say(statement, "expected the id of the sequences it runs one at a time with after 'exclusive', like exclusive drilling.");
+
+                at += 2;
+            }
+
             ScriptQuotes.Ends(statement, at, trouble);
-            StepReader.ReadSteps(statement.Body, sequence.Steps, system, program, trouble);
+            ReadBody(statement.Body, sequence, system, program, trouble);
+        }
+
+        /// <summary>
+        /// The steps of <paramref name="sequence" />, then its <c>catch</c> and <c>finally</c>, each with its steps after it; trouble
+        /// where anything stands after them, or where they come twice or out of order.
+        /// </summary>
+        static void ReadBody(IList<Statement> body, Sequence sequence, AutomationSystem system, Automation program, ScriptTrouble trouble)
+        {
+            var own = 0;
+            while (own < body.Count && !SequenceWords.Handles(body[own]))
+                own++;
+
+            var steps = new List<Statement>(own);
+            for (var i = 0; i < own; i++)
+                steps.Add(body[i]);
+
+            StepReader.ReadSteps(steps, sequence.Steps, system, program, trouble);
+
+            Handler last = null;
+            for (var i = own; i < body.Count; i++)
+            {
+                var statement = body[i];
+                if (!SequenceWords.Handles(statement))
+                {
+                    trouble.Say(statement, $"unexpected {ScriptQuotes.Headed(statement)}; catch and finally come last in a sequence.");
+                    continue;
+                }
+
+                var catches = statement.Head == SequenceWords.Catch;
+                if (statement.IsOff)
+                    trouble.Say(statement, $"unexpected '//'; a {statement.Head} cannot be switched off.");
+
+                if (last is Finally || (catches && last != null))
+                {
+                    trouble.Say(statement, $"unexpected '{statement.Head}'; a sequence has one catch and one finally, the catch first.");
+                    continue;
+                }
+
+                ScriptQuotes.Ends(statement, 0, trouble);
+                if (!statement.HasBlock)
+                {
+                    trouble.Say(statement, "expected '{' to open the block.");
+                    continue;
+                }
+
+                last = catches ? (Handler)new Catch() : new Finally();
+                last.Annotation = statement.Annotation;
+                last.Attributes = ScriptAttributes.Unused(statement);
+                sequence.Steps.Add(last);
+                StepReader.ReadSteps(statement.Body, sequence.Steps, system, program, trouble);
+            }
         }
 
         /// <summary>

@@ -179,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>Whether <paramref name="state" /> can hold <paramref name="value" /> as it is declared now.</summary>
-        static bool Fits(AutomationSystem system, State state, Literal value)
+        public static bool Fits(AutomationSystem system, State state, Literal value)
         {
             if (state.IsFlag)
                 return value.Kind == ValueKind.Flag;

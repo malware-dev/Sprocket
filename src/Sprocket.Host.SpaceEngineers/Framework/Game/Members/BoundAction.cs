@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
@@ -8,6 +9,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
     {
         /// <summary>Whether this does anything itself, rather than leaving the act to the game's own action.</summary>
         public abstract bool Acts { get; }
+
+        /// <summary>Whether it is told every block of its step together, as the step starts, before it is done on any of them.</summary>
+        public virtual bool Begins => false;
+
+        /// <summary>Tells it <paramref name="blocks" />, every block its step does it on, as the step starts and before <see cref="Do" />.</summary>
+        public virtual void Begin(IList<IMyTerminalBlock> blocks)
+        {
+        }
 
         /// <summary>Tells <paramref name="block" /> to do it.</summary>
         public abstract void Do(IMyTerminalBlock block, ReaderMemory seen);

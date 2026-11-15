@@ -779,6 +779,45 @@ public class HandoverTests : IDisposable
         Assert.False(run.IsRunning, "the sequence did not stop on the server");
     }
 
+    /// <summary>A state changed by hand on a copy, while its logic system is switched off, is changed on the server, which keeps it.</summary>
+    [Fact]
+    public void AClientChangesAStateOnTheServerWhileOff()
+    {
+        var sequence = Waiting();
+        var system = sequence.System;
+        system.States.Add(new State("cycling", "", Literal.Of(false)));
+        _sim.Editor.Program.Edited();
+        _sim.Tick();
+        var (anna, hers, copy) = Lent();
+        var theirs = copy.Editor.Program.Systems[0];
+
+        _wire.As(anna, () => hers.Hold(_block, theirs, theirs.First, theirs.FindState("cycling"), Literal.Of(true)));
+        _wire.Settle();
+        _sim.Tick();
+
+        Assert.True(_sim.Runner.States.Read(system, system.First, system.FindState("cycling")).Flag, "the server did not take the state");
+    }
+
+    /// <summary>The server refuses a state changed by hand while the logic system and the installation are both switched on.</summary>
+    [Fact]
+    public void TheServerRefusesAStateChangedWhileOn()
+    {
+        var sequence = Waiting();
+        var system = sequence.System;
+        system.States.Add(new State("cycling", "", Literal.Of(false)));
+        system.Enabled = true;
+        _sim.Editor.Program.Edited();
+        _sim.Tick();
+        var (anna, hers, copy) = Lent();
+        var theirs = copy.Editor.Program.Systems[0];
+
+        _wire.As(anna, () => hers.Hold(_block, theirs, theirs.First, theirs.FindState("cycling"), Literal.Of(true)));
+        _wire.Settle();
+        _sim.Tick();
+
+        Assert.False(_sim.Runner.States.Read(system, system.First, system.FindState("cycling")).Flag, "the server took a state changed while on");
+    }
+
     /// <summary>Paused automation resumed on a copy is resumed on the server, which runs it again.</summary>
     [Fact]
     public void AClientResumesPausedAutomationOnTheServer()

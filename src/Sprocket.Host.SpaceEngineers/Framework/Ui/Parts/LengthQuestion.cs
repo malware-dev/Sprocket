@@ -19,7 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         readonly SprocketEditor _editor;
         readonly DurationPanel _panel;
         readonly Popup _window;
-        readonly Func<Element> _chip;
         readonly Action<Duration?, bool> _answered;
 
         bool _done;
@@ -32,11 +31,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         public LengthQuestion(SprocketEditor editor, Duration start, bool rate, Func<Element> chip, Action<Duration?, bool> answered)
         {
             _editor = editor;
-            _chip = chip;
             _answered = answered;
 
             _panel = new DurationPanel(editor.Texts, editor.Input, start) { Cautions = rate };
-            _panel.Submitted += () => Finish(false);
+            _panel.Submitted += Accept;
             _panel.Cancelled += () => Finish(true);
             _panel.Switched += editor.Prefer;
 
@@ -54,12 +52,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                             Style = Styles.Primary,
                             Text = editor.Texts.ChromeDone,
                             Align = Align.Right | Align.Bottom,
-                            Command = new RelayCommand(() => Finish(false))
+                            Command = new RelayCommand(Accept)
                         }
                     }
                 }
             };
-            _window.Closed += _ => Finish(true);
+            _window.FnAnchor = chip;
+            _window.Closed += reason => Finish(reason != CloseReason.Accepted);
         }
 
         /// <summary>The panel the length is given in.</summary>
@@ -68,22 +67,31 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>Whether it is still waiting for its answer.</summary>
         public bool IsOpen => !_done;
 
-        /// <summary>Hangs the panel from its chip, once the chip is on a screen; nothing where it hangs already or is answered.</summary>
+        /// <summary>Hangs the panel from its chip, once the chip is on a screen, and follows the chip made again; nothing once answered.</summary>
+        /// <remarks>Called every tick: one look for the chip.</remarks>
         public void Hang()
         {
-            if (_done || _window.IsOpen)
+            if (_done)
                 return;
 
-            var chip = _chip();
-            if (chip == null || chip.Windows == null)
+            var opening = !_window.IsOpen;
+            _window.Hang();
+            if (!opening || !_window.IsOpen)
                 return;
 
-            _window.Anchor = chip;
-            _window.Open();
             if (_editor.Input != null)
                 _editor.Input.Focus(_panel.Box);
 
             _panel.Box.SelectAll();
+        }
+
+        /// <summary>Answers with what the panel says, closing it as finished with.</summary>
+        void Accept()
+        {
+            if (_window.IsOpen)
+                _window.Accept();
+            else
+                Finish(false);
         }
 
         /// <summary>Puts the panel away and answers with what it says, or that it was put away where <paramref name="cancelled" />.</summary>

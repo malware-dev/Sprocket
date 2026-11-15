@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
@@ -202,6 +203,28 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         public static string Key(Field field, int at)
         {
             return string.IsNullOrEmpty(field.Name) ? $"#{Ordinal(at)}" : field.Name;
+        }
+
+        /// <summary>
+        /// The values <paramref name="said" />, written as a line of values, gives for <paramref name="fields" />: a word chosen
+        /// where a name is wanted as that name, and everything else as the line reads.
+        /// </summary>
+        /// <remarks>The answer comes as a line of text, which carries a chosen word as a bare word, and a bare word reads as text.</remarks>
+        public static List<Literal> Read(string said, IList<Field> fields)
+        {
+            var values = new List<Literal>();
+            ValueLine.Read(said, values);
+
+            var at = 0;
+            for (var f = 0; f < fields.Count && at < values.Count; f++)
+            {
+                if (!fields[f].TakesSlots && fields[f].Entry == FieldInput.Name && values[at].Kind == ValueKind.Text)
+                    values[at] = Literal.Name(values[at].Text);
+
+                at += fields[f].Covers;
+            }
+
+            return values;
         }
 
         /// <summary>Asks for <paramref name="fields" />, one line each, holding <paramref name="filled" /> or what each says is usual, its notes in <paramref name="texts" />.</summary>
@@ -502,7 +525,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             if (!_seen[at] && string.IsNullOrEmpty(said))
                 return "";
 
-            return _wanted[at].Refuses(_language, Called(at), said);
+            return _wanted[at].Refuses(_language, SentenceText.Capitalised(Called(at)), said);
         }
 
         static string Ordinal(int at)

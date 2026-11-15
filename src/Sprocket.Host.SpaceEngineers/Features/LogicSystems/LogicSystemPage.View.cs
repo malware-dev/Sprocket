@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Slots;
 using Sprocket.Host.SpaceEngineers.Features.States;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
@@ -32,12 +33,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Label _lockedText;
         VStack _addTriggers;
         PlusMenu _addTrigger;
-        VStack _triggerList;
+        CategoryList _triggerList;
+        Button _newTriggerCategory;
         VStack _addSequence;
         Button _newSequence;
         Label _noSequences;
         VStack _head;
-        VStack _sequenceList;
+        CategoryList _sequenceList;
+        Button _newSequenceCategory;
 
         /// <inheritdoc />
         protected override Element CreateView()
@@ -99,12 +102,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                                 IsVisible = false,
                                                 Children = { new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noTriggers) }
                                             }.As(out _noTriggersLine),
-                                            new VStack { Base = { Spacing = Gaps.Items } }.As(out _triggerList),
+                                            new CategoryList { Base = { Spacing = Gaps.Items, IndentWidth = Sizes.Indent } }.As(out _triggerList),
                                             new VStack
                                             {
                                                 Children =
                                                 {
-                                                    new HStack { Children = { new PlusMenu().As(out _addTrigger) } }
+                                                    new HStack
+                                                    {
+                                                        Base = { Spacing = Gaps.Parts },
+                                                        Children =
+                                                        {
+                                                            new PlusMenu().As(out _addTrigger),
+                                                            new Button { Style = Styles.Start }.As(out _newTriggerCategory)
+                                                        }
+                                                    }
                                                 }
                                             }.As(out _addTriggers)
                                         }
@@ -124,10 +135,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                         Children =
                                         {
                                             new Label { Style = Styles.Empty, TextWrapping = TextWrapping.Wrap }.As(out _noSequences),
-                                            new VStack { Base = { Spacing = Gaps.Items } }.As(out _sequenceList),
+                                            new CategoryList { Base = { Spacing = Gaps.Items, IndentWidth = Sizes.Indent } }.As(out _sequenceList),
                                             new VStack
                                             {
-                                                Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
+                                                Children =
+                                                {
+                                                    new HStack
+                                                    {
+                                                        Base = { Spacing = Gaps.Parts },
+                                                        Children =
+                                                        {
+                                                            new Button { Style = Styles.Start }.As(out _newSequence),
+                                                            new Button { Style = Styles.Start }.As(out _newSequenceCategory)
+                                                        }
+                                                    }
+                                                }
                                             }.As(out _addSequence)
                                         }
                                     }

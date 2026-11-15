@@ -152,6 +152,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         /// <summary>Adding an if.</summary>
         AddIf,
 
+        /// <summary>Adding the part of a sequence that runs when it fails, or the one that runs however it ends.</summary>
+        AddHandler,
+
         /// <summary>Adding a step that sets one of the logic system's states.</summary>
         AddSetState,
 
@@ -166,6 +169,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>Moving a slot, or a category with its slots, to another place on the installation panel.</summary>
         MoveSlot,
+
+        /// <summary>Moving a sequence, or a category with its sequences, on the Sequences tab.</summary>
+        MoveSequence,
+
+        /// <summary>Moving a trigger, or a category with its triggers, on the Triggers tab.</summary>
+        MoveTrigger,
 
         /// <summary>Adding a category of slots to the installation panel.</summary>
         AddCategory,
@@ -214,6 +223,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>Changing the value a state starts at, and with it what the state holds.</summary>
         ChangeStart,
+
+        /// <summary>Changing by hand the value a state has now, while the installation or its logic system is switched off.</summary>
+        ChangeNow,
 
         /// <summary>Deleting a step.</summary>
         DeleteStep,

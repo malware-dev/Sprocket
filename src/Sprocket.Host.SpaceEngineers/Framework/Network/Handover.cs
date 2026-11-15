@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using System;
@@ -100,7 +101,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
                 .UsingModel<UnwiringRequest>(UnwiringRequest.SizeOf, UnwiringRequest.Read, UnwiringRequest.Write)
                 .UsingModel<PlayerPreference>(PlayerPreference.SizeOf, PlayerPreference.Read, PlayerPreference.Write)
                 .UsingModel<SettingsRuling>(SettingsRuling.SizeOf, SettingsRuling.Read, SettingsRuling.Write)
-                .UsingModel<ResumeOrder>(ResumeOrder.SizeOf, ResumeOrder.Read, ResumeOrder.Write);
+                .UsingModel<ResumeOrder>(ResumeOrder.SizeOf, ResumeOrder.Read, ResumeOrder.Write)
+                .UsingModel<StateOrder>(StateOrder.SizeOf, StateOrder.Read, StateOrder.Write);
         }
 
         /// <summary>Starts hearing what arrives on <paramref name="channel" />, which is built with <see cref="Carry" />.</summary>
@@ -112,6 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
             _channel.ListenFor<EditRelease>(Released);
             _channel.ListenFor<ProgramChange>(Changed);
             _channel.ListenFor<RunOrder>(Ordered);
+            _channel.ListenFor<StateOrder>(Stated);
             _channel.ListenFor<WiringRequest>(Wired);
             _channel.ListenFor<UnwiringRequest>(Unwired);
             _channel.ListenFor<PlayerPreference>(Preferred);
@@ -198,6 +201,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
                 Instance = instance.Number,
                 Sequence = sequence.Number,
                 Stops = stops
+            }, true);
+        }
+
+        /// <summary>
+        /// Asks the server to give <paramref name="state" /> of <paramref name="instance" /> of <paramref name="system" /> the
+        /// value <paramref name="value" />, by hand, on the Sprocket on <paramref name="block" />.
+        /// </summary>
+        public void Hold(long block, AutomationSystem system, SystemInstance instance, State state, Literal value)
+        {
+            if (instance == null)
+                return;
+
+            GameLog.Say($"asking the server to make state {state.Name} of {system.Identity:N} #{instance.Number} {value.Said} on block {block}");
+            _channel.SendToServer(new StateOrder
+            {
+                Block = block,
+                System = system.Identity,
+                Instance = instance.Number,
+                State = state.Name,
+                Choice = value.Kind == ValueKind.Name ? value.Text : "",
+                Flag = value.Kind == ValueKind.Flag && value.Flag
             }, true);
         }
 
@@ -521,6 +545,30 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
 
             GameLog.Say(said);
             unit.Order(order.System, order.Instance, order.Sequence, order.Stops);
+        }
+
+        /// <summary>A state changed by hand arriving at the server, which it takes only from whoever holds that Sprocket.</summary>
+        void Stated(ushort channel, StateOrder order, ulong sender, bool fromServer)
+        {
+            if (!NetworkChannel.Network.IsServer)
+                return;
+
+            var said = $"{Who(sender)} asked to make state {order.State} of {order.System:N} #{order.Instance} {(order.Choice.Length > 0 ? order.Choice : order.Flag ? "on" : "off")} on block {order.Block}";
+            if (!Holds(order.Block, sender))
+            {
+                GameLog.Say($"{said}, and was ignored: they do not hold it");
+                return;
+            }
+
+            SprocketUnit unit = _find(order.Block);
+            if (unit == null)
+            {
+                GameLog.Say($"{said}, which carries no Sprocket here");
+                return;
+            }
+
+            GameLog.Say(said);
+            unit.Hold(order.System, order.Instance, order.State, order.Choice.Length > 0 ? Literal.Name(order.Choice) : Literal.Of(order.Flag));
         }
 
         void Resumed(ushort channel, ResumeOrder order, ulong sender, bool fromServer)

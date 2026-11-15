@@ -6,9 +6,9 @@ using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Slots
+namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging
 {
-    /// <summary>A category of slots on the installation panel: its name over the slots under it, with a grip that carries them all, and a bin.</summary>
+    /// <summary>A category in a list of a system's things, such as its slots or sequences: its name over those under it, with a grip that carries them all, and a bin.</summary>
     public partial class CategoryRow : HStack, IReorderable, IDragged
     {
         string _category = "";
@@ -42,6 +42,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             }
         }
 
+        /// <summary>
+        /// What pressing the name does where it opens the category's panel, its name and settings, rather than letting the name be
+        /// typed in place; drawn as a button, with no pencil. Set instead of <see cref="Renames" />.
+        /// </summary>
+        public ICommand Opens
+        {
+            set
+            {
+                _name.Command = value;
+                _name.CanRename = false;
+                _name.Boxed = value != null;
+            }
+        }
+
         /// <summary>What pressing the name does, said where the pointer rests on it; null for nothing.</summary>
         public string RenamesAbout
         {
@@ -70,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
         /// <summary>
         /// Whether it can be changed at all: where it cannot, it shows its name alone, with no grip and no bin, its words
-        /// standing where a slot's mark does.
+        /// standing where a row's mark does.
         /// </summary>
         public bool Arranged
         {
@@ -106,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             }
         }
 
-        /// <summary>How many slots stand under it, which go with it when it is carried.</summary>
+        /// <summary>How many rows stand under it, which go with it when it is carried.</summary>
         public int DraggedWithCount { get; set; }
 
     }

@@ -40,9 +40,11 @@ public class PistonTests
 
         var asked = new List<Field>();
         kind.FindAction(Blocks.Piston.MoveTo, ReachKind.Native)!.Fields(asked);
-        Assert.Equal(2, asked.Count);
+        Assert.Equal(3, asked.Count);
         Assert.Equal("0", asked[0].Least);
         Assert.Equal("10", asked[0].Most);
+        Assert.True(asked[2].MayBeLeftOut, "a move written before it could share its speed no longer reads");
+        Assert.Equal(new[] { "each", "in total" }, asked[2].Words);
     }
 
     [Fact]
@@ -189,14 +191,46 @@ public class PistonTests
         return SequenceSummary.Fault(runner.Get(sequence));
     }
 
+    /// <summary>
+    /// Pistons moved at a speed in total share it out by how far each has left, so the end of the chain moves at that speed
+    /// and they arrive together: four metres and two at one in total take six seconds, where each at one takes four.
+    /// </summary>
+    [Theory]
+    [InlineData(true, 355, 370)]
+    [InlineData(false, 235, 250)]
+    public void PistonsMovedInTotalShareTheSpeed(bool total, int least, int most)
+    {
+        var ship = new Rigged();
+        var low = ship.Piston(1, "Low");
+        var high = ship.Piston(3, "High");
+        var lamp = ship.Light(2, "Lamp");
+        high.Stand(2f);
+
+        var given = total
+            ? new[] { Literal.Of(4L), Literal.Of(1L), Literal.Name(Blocks.PistonMove.Total) }
+            : new[] { Literal.Of(4L), Literal.Of(1L) };
+        var frames = Run(ship, new[] { low, high }, lamp, Blocks.Piston.MoveTo, given);
+
+        Assert.Equal(4f, low.Position, 2);
+        Assert.Equal(4f, high.Position, 2);
+        Assert.InRange(frames, least, most);
+    }
+
     /// <summary>Runs the one act on the piston, and counts the frames until the step after it runs.</summary>
     static int Run(Rigged ship, Piston piston, Lamp lamp, string actionId, params Literal[] given)
+    {
+        return Run(ship, new[] { piston }, lamp, actionId, given);
+    }
+
+    /// <summary>Runs the one act on the pistons together, and counts the frames until the step after it runs.</summary>
+    static int Run(Rigged ship, Piston[] pistons, Lamp lamp, string actionId, params Literal[] given)
     {
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
         var act = new Act(actionId);
-        act.Targets.Add(automation.Declare(ship.World, ship.Entity(piston.Id)).Name);
+        foreach (var piston in pistons)
+            act.Targets.Add(automation.Declare(ship.World, ship.Entity(piston.Id)).Name);
         foreach (var value in given)
             act.Arguments.Add(value);
         sequence.Steps.Add(act);

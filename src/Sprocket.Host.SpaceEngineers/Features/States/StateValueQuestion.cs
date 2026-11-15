@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using System;
 using System.Collections.Generic;
 using Lumel.Input;
 using Lumel.Text;
@@ -81,6 +82,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             var state = system?.FindState(named);
             var words = state == null ? new List<string>() : Words(system, state);
             return new ArgumentsSlot(new[] { value }, new[] { Field.Among(named, words, words) }, opens, role);
+        }
+
+        /// <summary>
+        /// Offers the values the state <paramref name="named" /> of <paramref name="system" /> can hold in a menu under the part
+        /// pressed, <paramref name="value" /> marked where <paramref name="other" /> is empty, then the value of another state where
+        /// there is one to take, marked where <paramref name="other" /> is not empty. <paramref name="chosen" /> is given a value
+        /// chosen other than the one it has; <paramref name="picks" /> opens the selector, at once where the state is not the system's.
+        /// </summary>
+        public static void Offer(SprocketEditor editor, AutomationSystem system, string named, Literal value, string other, Action<Literal> chosen,
+            Action picks)
+        {
+            var state = system?.FindState(named);
+            if (state == null)
+            {
+                picks();
+                return;
+            }
+
+            var taken = string.IsNullOrEmpty(other);
+            editor.AskHere("");
+            foreach (var word in Words(system, state))
+            {
+                Literal now;
+                Read(system, state, word, out now);
+                var marked = taken && now.Said == value.Said;
+                editor.Answer(word, delegate
+                {
+                    if (!marked)
+                        chosen(now);
+                }, marked);
+            }
+
+            if (!taken || Others(system, state).Count != 0)
+                editor.Answer(editor.Texts.PickStateValueOf, picks, !taken);
         }
 
         /// <summary>A flag starting off, which a state made new starts as.</summary>

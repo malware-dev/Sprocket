@@ -13,7 +13,7 @@ public class AttributeTests
 {
     /// <summary>A program with an attribute Sprocket does not use on every kind of statement that can carry one.</summary>
     const string Everywhere = "#@ headerNote: 1\n"
-        + "sprocket 1 alpha 26\n\n"
+        + "sprocket 1 alpha 27\n\n"
         + "#@ doorNote: [ 1, 2 ]\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n"
         + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n"
@@ -43,7 +43,7 @@ public class AttributeTests
 
     /// <summary>Every attribute Sprocket does not use is written back as it was, above the statement it was above.</summary>
     [Theory]
-    [InlineData("#@ headerNote: 1\nsprocket 1 alpha 26\n")]
+    [InlineData("#@ headerNote: 1\nsprocket 1 alpha 27\n")]
     [InlineData("#@ doorNote: [ 1, 2 ]\nlet door1 = ")]
     [InlineData("#@ bellNote: 600t\nlet bell = ")]
     [InlineData("# The airlock.\n#@ systemNote: \"one\"\nsystem blueprint ")]
@@ -174,6 +174,43 @@ public class AttributeTests
         var written = ProgramWriter.Save(program, new Values());
         Assert.Contains("    required slot inner expects Door\n    #@ category: \"Calls\"\n    optional slot button expects signal\n", written);
         Assert.DoesNotContain("categories", written);
+    }
+
+    /// <summary>A sequence's <c>category</c> is read as the category it is listed under, and written back on the sequence, before its other attributes.</summary>
+    [Fact]
+    public void ASequencesCategoryIsReadAndWrittenBack()
+    {
+        var text = Everywhere.Replace("    #@ sequenceNote: MalTek.Thing\n", "    #@ category: \"Cycling\"\n    #@ sequenceNote: MalTek.Thing\n");
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(text, program, new Values()));
+
+        var sequence = program.Systems[0].Sequences[0];
+        Assert.Equal("Cycling", sequence.Category);
+        Assert.Equal("", program.Systems[0].FindPart("button")!.Category);
+
+        var written = ProgramWriter.Save(program, new Values());
+        Assert.Contains("    #@ category: \"Cycling\"\n    #@ sequenceNote: MalTek.Thing\n    sequence 1 as Cycle {\n", written);
+        var copy = new Automation();
+        ProgramCopy.Into(program, new Values(), copy, new Values());
+        Assert.Equal("Cycling", copy.Systems[0].Sequences[0].Category);
+    }
+
+    /// <summary>A trigger's category is read from the attribute before it, written back there, and copied with it.</summary>
+    [Fact]
+    public void ATriggersCategoryIsReadAndWrittenBack()
+    {
+        var text = Everywhere.Replace("    #@ triggerNote: 2.5\n", "    #@ category: \"Buttons\"\n    #@ triggerNote: 2.5\n");
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(text, program, new Values()));
+
+        Assert.Equal("Buttons", program.Systems[0].Triggers[0].Category);
+        Assert.Equal("", program.Systems[0].Sequences[0].Category);
+
+        var written = ProgramWriter.Save(program, new Values());
+        Assert.Contains("    #@ category: \"Buttons\"\n    #@ triggerNote: 2.5\n    whenever button then run 1\n", written);
+        var copy = new Automation();
+        ProgramCopy.Into(program, new Values(), copy, new Values());
+        Assert.Equal("Buttons", copy.Systems[0].Triggers[0].Category);
     }
 
     /// <summary>

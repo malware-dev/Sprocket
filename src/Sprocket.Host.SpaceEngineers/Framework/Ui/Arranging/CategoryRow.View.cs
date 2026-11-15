@@ -5,7 +5,7 @@ using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Slots
+namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging
 {
     partial class CategoryRow
     {
@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         void CreateView()
         {
             Base.Spacing = Gaps.Parts;
-            // A category starts a group among the slots, which stand Items apart, so it holds the rest of a Sections gap over it.
+            // A category starts a group among the rows, which stand Items apart, so it holds the rest of a Sections gap over it.
             Base.Padding = new Thickness(0f, Gaps.Sections - Gaps.Items, 0f, 0f);
 
             Children.Add(new DragHandle { Placement = FixedSize.Size(24f, 24f) }.As(out _grip));

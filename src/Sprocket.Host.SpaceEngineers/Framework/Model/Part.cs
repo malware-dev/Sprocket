@@ -6,7 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
     /// Something a system needs a construct to provide, and what may answer it.
     /// </summary>
     /// <remarks>A part nothing acts on is left out when the program is written, and so is every instance's answer to it.</remarks>
-    public sealed class Part
+    public sealed class Part : ICategorized
     {
         /// <summary>A required slot called <paramref name="id" />, expecting any block.</summary>
         public Part(string id)

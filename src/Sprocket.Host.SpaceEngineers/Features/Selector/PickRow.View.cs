@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             {
                 Style = Styles.PickBox,
                 Placement = FixedSize.Width(40f),
-                Align = Align.Tall,
+                Align = Align.FillHeight,
                 Base = { Padding = new Thickness(MarkInset, 0f, 8f, 0f) },
                 IsVisible = false
             }.As(out _mark));

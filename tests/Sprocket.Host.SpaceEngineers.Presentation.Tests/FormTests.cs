@@ -71,7 +71,7 @@ public class FormTests
     public void TwoLinesPutsTheFieldUnderTheLabelAcrossTheWholeWidth()
     {
         Label label, field;
-        var form = new Form { Rows = { { new Label { Text = "text" }.As(out label), new Label { Text = "Hello", Align = Align.Wide }.As(out field), FormLabelPlacement.Above } } };
+        var form = new Form { Rows = { { new Label { Text = "text" }.As(out label), new Label { Text = "Hello", Align = Align.FillWidth }.As(out field), FormLabelPlacement.Above } } };
 
         _ = new Easel(form, Wide, High);
 

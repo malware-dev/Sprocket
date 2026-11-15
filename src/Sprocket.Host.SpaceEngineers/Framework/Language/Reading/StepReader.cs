@@ -335,6 +335,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (statement.Key == Keyword.None && statement.Head == AbortWords.Abort)
                 return Aborted(statement, trouble);
 
+            if (SequenceWords.Handles(statement))
+            {
+                trouble.Say(statement, $"unexpected '{statement.Head}'; a catch or finally stands last in the sequence's own body, never inside an if.");
+                return null;
+            }
+
             trouble.Say(statement, $"unexpected {ScriptQuotes.Headed(statement)}; expected call, set, run, stop, await, wait or abort.");
             return null;
         }

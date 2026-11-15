@@ -1,11 +1,13 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using System.Collections.Generic;
+using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -14,7 +16,7 @@ using Lumel;
 namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 {
     /// <summary>One trigger as the sentence it reads as: when it happens, then what it does, each part pressed to change it.</summary>
-    public partial class TriggerRow : HStack
+    public partial class TriggerRow : HStack, IReorderable, IDragged, IStandsIn
     {
         readonly List<SlotChip> _starts = new List<SlotChip>();
         readonly List<Label> _joins = new List<Label>();
@@ -41,6 +43,54 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
         /// <summary>What starts it: the blocks and the moment, or how often it comes round.</summary>
         public List<SentenceSlot> Starts { get; }
+
+        /// <summary>Whether its place among the triggers can be changed at all: where it can, it shows a grip.</summary>
+        public bool Arranged
+        {
+            set { _grip.IsVisible = value; }
+        }
+
+        /// <summary>Whether it stands under a category, which the list it stands in sets it in by.</summary>
+        public bool Indented
+        {
+            get { return _indented; }
+            set
+            {
+                if (_indented == value)
+                    return;
+
+                _indented = value;
+                InvalidateArrange();
+            }
+        }
+
+        bool _indented;
+
+        /// <summary>The whole row, as a sequence's is, so a spine beside it stays out of it.</summary>
+        public bool SetsInWhole => true;
+
+        /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
+        public void Grips(bool can, string about)
+        {
+            _grip.CanDrag = can;
+            _grip.Base.Color = can ? Palette.Faint : Palette.Dim;
+            _grip.Tip = KeptTip.For(_grip.Tip, about);
+        }
+
+        /// <inheritdoc />
+        public DragHandle DragHandle => _grip;
+
+        /// <inheritdoc />
+        public bool IsDragging { get; private set; }
+
+        /// <inheritdoc />
+        bool IDragged.IsDragging
+        {
+            set { IsDragging = value; }
+        }
+
+        /// <summary>None: a trigger goes alone.</summary>
+        public int DraggedWithCount => 0;
 
         /// <summary>The words between the two halves, "then run" or "then", as the program writes them.</summary>
         public string DoesLead { get; set; }

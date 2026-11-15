@@ -47,9 +47,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>An action on a <typeparamref name="T" /> with options of its own, read into a <typeparamref name="TOptions" />.</summary>
         public static OwnAction Of<T, TOptions>(Func<IList<Literal>, TOptions> options, Action<T, TOptions, ReaderMemory> does = null,
             Reading until = null, Func<T, TOptions, ReaderMemory, bool> done = null, Func<T, TOptions, ReaderMemory, BlockTrouble> trouble = null,
-            Action<T> stop = null, Func<T, TOptions, int> expected = null, Func<TOptions, bool> forced = null) where T : class
+            Action<T> stop = null, Func<T, TOptions, int> expected = null, Func<TOptions, bool> forced = null,
+            Action<IList<T>, TOptions> begins = null) where T : class
         {
-            return new TypedOwnAction<T, TOptions>(options, does, until, done, trouble, stop, expected, forced);
+            return new TypedOwnAction<T, TOptions>(options, does, until, done, trouble, stop, expected, forced, begins);
         }
 
         static object Nothing(IList<Literal> arguments)

@@ -10,6 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>The sequence, its logic system or its installation is switched off.</summary>
         Off,
         /// <summary>A slot it needs is empty.</summary>
-        EmptySlot
+        EmptySlot,
+        /// <summary>Another sequence with the same <c>exclusive</c> id is running in the same instance.</summary>
+        Held
     }
 }

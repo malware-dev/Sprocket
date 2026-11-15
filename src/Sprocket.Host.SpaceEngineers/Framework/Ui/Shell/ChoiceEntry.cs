@@ -24,5 +24,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>The tip on an action at the foot of the screen, or empty for none.</summary>
         public string About { get; set; } = "";
+
+        /// <summary>A line between the answers before it and those after it, in a menu of answers, which says and does nothing.</summary>
+        public static ChoiceEntry Rule()
+        {
+            return new ChoiceEntry("", false, null) { IsRule = true };
+        }
+
+        /// <summary>Whether it is a line between answers rather than an answer.</summary>
+        public bool IsRule { get; private set; }
     }
 }

@@ -71,6 +71,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 case RunRefusal.Off:
                     _line.Append("it is switched off");
                     break;
+                case RunRefusal.Held:
+                    _line.Append("another sequence with its exclusive id is running");
+                    break;
                 default:
                     _line.Append("a slot it needs is empty");
                     break;
@@ -163,6 +166,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             Numbered(Of(run, tick), step).Append(" done waiting, after ").Append((tick - since).ToString(CultureInfo.InvariantCulture))
                 .Append(" ticks");
+            End();
+        }
+
+        /// <summary><paramref name="run" /> went on into its catch or finally, which starts at <paramref name="step" />.</summary>
+        public void Handling(SequenceRunner run, int tick, int step)
+        {
+            Numbered(Of(run, tick), step).Append(run.Sequence.Steps[step] is Catch ? " catch" : " finally");
             End();
         }
 

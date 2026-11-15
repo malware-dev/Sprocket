@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             (piston, seen) => Why(piston, piston.Status == PistonStatus.Retracted, -1, seen), Stop, Inwards);
 
         static readonly OwnAction Moves = OwnAction.Of<IMyPistonBase, PistonMove>(PistonMove.Read, Moved, Arrived, null,
-            (piston, move, seen) => Why(piston, AtLimit(piston), 0, seen), Stop, Expected);
+            (piston, move, seen) => Why(piston, AtLimit(piston), 0, seen), Stop, Expected, begins: (pistons, move) => move.Share(pistons));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         {
             kind.WithAction(Extend, "extend", Extends, "Extend").LastingAnnounced().In(Category.Movement)
                 .WithAction(Retract, "retract", Retracts, "Retract").LastingAnnounced().In(Category.Movement)
-                .WithAction(MoveTo, "move", Moves, AskedPosition(block), AskedSpeed(block)).LastingAnnounced().Listed("move to")
+                .WithAction(MoveTo, "move", Moves, AskedPosition(block), AskedSpeed(block), PistonMove.Asked()).LastingAnnounced().Listed("move to")
                 .In(Category.Movement)
                 .Hiding("SetAndMove", "ResetVelocity")
                 .Renaming("Reverse", false, "reverse")
@@ -190,9 +190,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 return;
 
             if (Math.Abs(piston.CurrentPosition - move.Position) <= float.Epsilon)
-                Hold(piston, move.Position, move.Speed);
+                Hold(piston, move.Position, move.SpeedOf(piston));
             else
-                piston.MoveToPosition(move.Position, move.Speed);
+                piston.MoveToPosition(move.Position, move.SpeedOf(piston));
 
             MotionWatch.Began(piston.CurrentPosition, seen);
         }
@@ -263,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             if (!move.Given)
                 return GridEntity.Unestimated;
 
-            return Ticks(Math.Abs(move.Position - piston.CurrentPosition), move.Speed);
+            return Ticks(Math.Abs(move.Position - piston.CurrentPosition), move.SpeedOf(piston));
         }
 
         static int Ticks(float distance, float speed)

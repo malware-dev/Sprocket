@@ -56,6 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             }
         }
 
+        /// <summary>What the arguments are to what holds them.</summary>
+        public ArgumentRole Holds => _holds;
+
         readonly Color? _sample;
 
         /// <summary>

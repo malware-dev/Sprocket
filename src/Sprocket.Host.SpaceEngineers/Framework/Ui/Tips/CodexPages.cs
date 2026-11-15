@@ -53,6 +53,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Tips
         /// <summary>The term page of the step that ends its sequence.</summary>
         public const string Abort = "Term.Abort";
 
+        /// <summary>The term page of the part of a sequence that runs when it fails.</summary>
+        public const string Catch = "Term.Catch";
+
+        /// <summary>The term page of the part of a sequence that runs however it ends.</summary>
+        public const string Finally = "Term.Finally";
+
         /// <summary>The name links give the page on the steps running and stopping a sequence.</summary>
         public const string RunAndStop = "Term.RunAndStop";
 

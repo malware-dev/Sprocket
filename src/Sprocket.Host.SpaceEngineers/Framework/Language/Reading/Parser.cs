@@ -338,10 +338,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return statement;
             }
 
-            // Only a system, a sequence, an instance, an if and an else hold statements. The body is still read, so the braces
-            // stay counted.
+            // Only a system, a sequence, an instance, an if, an else, a catch and a finally hold statements. The body is still read,
+            // so the braces stay counted.
             if (key != Keyword.System && key != Keyword.Sequence && key != Keyword.Instance && key != Keyword.If
-                && key != Keyword.Else)
+                && key != Keyword.Else && head != SequenceWords.Catch && head != SequenceWords.Finally)
                 Fail("unexpected '{'.");
 
             Step();

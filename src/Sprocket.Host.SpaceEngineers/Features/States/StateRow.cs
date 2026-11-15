@@ -52,6 +52,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             set { _now.Text = value ?? ""; }
         }
 
+        /// <summary>What the installation shown holds now, pressed to change it while the installation or its logic system is switched off.</summary>
+        public Button Current => _now;
+
         /// <summary>What the state holds, pressed to choose another type where it can be changed.</summary>
         public Button TypeButton => _holds;
 

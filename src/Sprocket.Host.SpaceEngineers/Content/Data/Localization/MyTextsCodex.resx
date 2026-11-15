@@ -33,7 +33,7 @@
     <comment>Codex page on "Installation panel", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Category" xml:space="preserve">
-    <value>A **category** is a heading on the [installation panel](Term.InstallationPanel class=term) that groups the [slots](Term.Slot class=term) dragged under it.</value>
+    <value>A **category** is a heading on the [installation panel](Term.InstallationPanel class=term) or a logic system's Sequences or Triggers tab that groups the [slots](Term.Slot class=term), [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term) or [![](mark:trigger)&amp;nbsp;triggers](Term.Trigger class=term) dragged under it. A category of sequences can be set to run them one at a time.</value>
     <comment>Codex page on "Category", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Slot" xml:space="preserve">
@@ -57,7 +57,7 @@
     <comment>Codex page on "Sequence", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Step" xml:space="preserve">
-    <value>A **step** is one line of a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term). Press one of its parts to change it in a [selector](Term.Selector class=term) or a menu.</value>
+    <value>A **step** is one line of a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term). Press one of its parts to change it in a [selector](Term.Selector class=term), a menu or a panel.</value>
     <comment>Codex page on "Step", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Action" xml:space="preserve">
@@ -95,6 +95,14 @@
   <data name="Sprocket.Term.Abort" xml:space="preserve">
     <value>An **abort** is a [step](Term.Step class=term) that ends its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) at once. It can give a message saying why, shown as a note, a warning or a problem, and a problem also switches off the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) it ran on.</value>
     <comment>Codex page on "Abort", shown in a tip. It says what the term is, naming it in bold with its mark where it has one. "abort" is the step's word in the script, and note, warning and problem are its levels.</comment>
+  </data>
+  <data name="Sprocket.Term.Catch" xml:space="preserve">
+    <value>**if it fails** holds [steps](Term.Step class=term) that run when its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) fails: a block can't do a step, or the sequence [aborts](Term.Abort class=term) with a warning or a problem. It doesn't run when the sequence is stopped, is switched off, or aborts with a note.</value>
+    <comment>Codex page on "if it fails", shown in a tip: the part of a sequence that runs when the sequence fails. It says what the term is, naming it in bold. "if it fails" is how the screen shows the script's catch.</comment>
+  </data>
+  <data name="Sprocket.Term.Finally" xml:space="preserve">
+    <value>**finally** holds [steps](Term.Step class=term) that run whenever its [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) ends, after **if it fails** where that ran, and when it is switched off too. While they run, the sequence shows as running, and stop ends them at once.</value>
+    <comment>Codex page on "finally", shown in a tip: the part of a sequence that runs however the sequence ends. It says what the term is, naming it in bold.</comment>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
     <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, or one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
@@ -593,8 +601,8 @@
     <comment>Said where the pointer rests on what a state holds, on its row on a logic system's State tab, while a step or a trigger uses the state, so its state type cannot be changed.</comment>
   </data>
   <data name="Sprocket.State.NowAbout" xml:space="preserve">
-    <value>The value this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) has right now in the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) shown.</value>
-    <comment>Tooltip on what the installation shown holds in a state, on its row on a logic system's State tab.</comment>
+    <value>The value this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) has right now in the [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) shown. While the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) or that installation is switched off, press it to change it by hand; nothing watching the state reacts.</value>
+    <comment>Tooltip on what the installation shown holds in a state, on its row on a logic system's State tab. Pressed while the logic system or the installation is switched off, it offers the values the state can hold, to change it by hand.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
     <value>This installation's name.</value>
@@ -808,6 +816,22 @@
     <value>Remove this category. Its [slots](Term.Slot class=term) stay, under no category.</value>
     <comment>Tooltip on the bin beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
   </data>
+  <data name="Sprocket.Category.RemoveSequences" xml:space="preserve">
+    <value>Remove this category. Its [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term) stay, under no category.</value>
+    <comment>Tooltip on the bin beside a category&apos;s name on a logic system&apos;s Sequences tab.</comment>
+  </data>
+  <data name="Sprocket.Category.RemoveTriggers" xml:space="preserve">
+    <value>Remove this category. Its [![](mark:trigger)&amp;nbsp;triggers](Term.Trigger class=term) stay, under no category.</value>
+    <comment>Tooltip on the bin beside a category&apos;s name on a logic system&apos;s Triggers tab.</comment>
+  </data>
+  <data name="Sprocket.Category.Open" xml:space="preserve">
+    <value>Rename this category, or have its [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term) run one at a time.</value>
+    <comment>Tooltip on a category's name on a logic system's Sequences tab. Pressing it opens a panel with the category's name and the "One at a time" switch.</comment>
+  </data>
+  <data name="Sprocket.Category.OneAtATimeAbout" xml:space="preserve">
+    <value>Where it is on, only one [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) in this category runs at a time. A start while another one runs is missed.</value>
+    <comment>Tooltip on the "One at a time" switch in the panel a category of sequences opens, on a logic system's Sequences tab.</comment>
+  </data>
   <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
     <value>Reduce the [slots](Term.Slot class=term) to as few as the [steps](Term.Step class=term) and [![](mark:trigger)&amp;nbsp;triggers](Term.Trigger class=term) need.</value>
     <comment>Tooltip on the Optimize slots button on the installation panel tab of a logic system's screen, at the right end of the SLOTS heading, while the logic system is switched off and the slots can be changed.</comment>
@@ -820,9 +844,25 @@
     <value>Drag to move the category with its [slots](Term.Slot class=term).</value>
     <comment>Tooltip on the grip beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
   </data>
+  <data name="Sprocket.Category.DragSequences" xml:space="preserve">
+    <value>Drag to move the category with its [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term).</value>
+    <comment>Tooltip on the grip beside a category&apos;s name on a logic system&apos;s Sequences tab.</comment>
+  </data>
+  <data name="Sprocket.Category.DragTriggers" xml:space="preserve">
+    <value>Drag to move the category with its [![](mark:trigger)&amp;nbsp;triggers](Term.Trigger class=term).</value>
+    <comment>Tooltip on the grip beside a category&apos;s name on a logic system&apos;s Triggers tab.</comment>
+  </data>
   <data name="Sprocket.Slot.Drag" xml:space="preserve">
     <value>Drag to move the slot. At the bottom of a [category](Term.Category class=term), drag right to put it in or left to leave it out.</value>
     <comment>Tooltip on the grip beside a slot's name on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Drag" xml:space="preserve">
+    <value>Drag to move the sequence. Drop it above a [category](Term.Category class=term)&apos;s end to put it in.</value>
+    <comment>Tooltip on the grip beside a sequence on a logic system&apos;s Sequences tab.</comment>
+  </data>
+  <data name="Sprocket.Trigger.Drag" xml:space="preserve">
+    <value>Drag to move the trigger. Drop it above a [category](Term.Category class=term)&apos;s end to put it in.</value>
+    <comment>Tooltip on the grip beside a trigger on a logic system&apos;s Triggers tab.</comment>
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
     <value>The kind of block that can fill this [slot](Term.Slot class=term). Press it to choose another.</value>
@@ -3815,6 +3855,10 @@
   <data name="Sprocket.Member.Option.Piston.Speed" xml:space="preserve">
     <value>How fast the piston moves, in meters per second: above 0, up to the piston's fastest.</value>
     <comment>Codex entry on the option "speed" of Piston, shown as its tooltip in the picker.</comment>
+  </data>
+  <data name="Sprocket.Member.Option.Piston.SpeedFor" xml:space="preserve">
+    <value>`each` moves every piston at the speed given. `in total` shares the speed out among the pistons of the step, each by how far it has left, so together they move at that speed and arrive at once: the end of a chain of pistons moves at the speed given.</value>
+    <comment>Codex entry on the option "speed for" of Piston, shown as its tooltip in the picker. `each` and `in total` are the words the option is chosen with, kept as they are.</comment>
   </data>
   <data name="Sprocket.Member.Option.Rotor.Direction" xml:space="preserve">
     <value>Which way the rotor turns: `directly` takes the shortest way, `clockwise` and `counter-clockwise` turn that way round.</value>

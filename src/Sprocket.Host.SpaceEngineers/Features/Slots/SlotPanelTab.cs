@@ -1,9 +1,11 @@
 using Sprocket.Host.SpaceEngineers.Features.Installations;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Slots.Edits;
+using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
@@ -34,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         readonly List<string> _used = new List<string>();
         readonly List<string> _marks = new List<string>();
         readonly SlotFill _fill;
-        readonly SlotArranger _arranger;
+        readonly Arranger _arranger;
         readonly OptimizeQuestion _optimizing;
 
         Element _focused;
@@ -53,15 +55,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             _changes = changes;
             _locked = locked;
             _fill = new SlotFill(editor, system);
-            _arranger = new SlotArranger(editor, system);
+            _arranger = new Arranger(editor, system, owner => owner.SlotList, ChangeKind.MoveSlot, ChangeKind.MoveCategory);
             _optimizing = new OptimizeQuestion(editor);
             editor.Codex.Explain(panel.SlotsHeading);
 
             var slots = panel.Slots;
             _slotRows = new KeyedChildren<object, Element>(slots.Children, SlotRow);
-            slots.FnAllowedDropIndexes = index => SlotArranger.Landings(_slotKeys, index);
-            slots.FnCanIndent = (from, to) => SlotArranger.Nests(_slotKeys, from, to);
-            slots.FnIsIndented = index => SlotArranger.StandsIn(_slotKeys, index);
+            slots.FnAllowedDropIndexes = index => Arranger.Landings(_slotKeys, index);
+            slots.FnCanIndent = (from, to) => Arranger.Nests(_slotKeys, from, to);
+            slots.FnIsIndented = index => Arranger.StandsIn(_slotKeys, index);
             slots.Base.IndentWidth = Sizes.Indent;
             slots.Reordered += moved =>
             {
@@ -179,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             {
                 var heading = _slotKeys[i] as CategoryHeading;
                 if (heading != null)
-                    ArrangeCategory(texts, (CategoryRow)_slotRows[heading], heading, SlotArranger.Carries(_slotKeys, i));
+                    ArrangeCategory(texts, (CategoryRow)_slotRows[heading], heading, Arranger.Carries(_slotKeys, i));
             }
 
             foreach (var part in _parts)
@@ -269,7 +271,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             {
                 Name = name,
                 NameRequired = true,
-                Accepts = SlotArranger.Accepts,
+                Accepts = Arranger.Accepts,
                 Renames = wanted => _arranger.Rename(heading, wanted)
             }));
             row.RenamesAbout = editable ? texts.Codex.CategoryRenameAbout : locked;
