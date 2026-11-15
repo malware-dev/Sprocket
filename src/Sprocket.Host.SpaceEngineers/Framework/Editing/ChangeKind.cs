@@ -161,6 +161,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         RemoveCategory,
         /// <summary>Switching whether the sequences under a category run one at a time.</summary>
         CategoryOneAtATime,
+        /// <summary>Adding a slot from the installation panel, made from what was selected.</summary>
+        AddSlot,
 
         /// <summary>Adding a type to a logic system.</summary>
         AddType,

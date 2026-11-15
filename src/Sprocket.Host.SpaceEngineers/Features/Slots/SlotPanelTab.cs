@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Features.Installations;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Slots.Edits;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -159,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             _slotKeys.Clear();
             _system.Acted(_used);
             if (shown != null)
-                PartList.Listed(_system, _parts, _slotKeys, true);
+                PartList.Listed(_system, _parts, _slotKeys, true, editable);
 
             var add = _panel.AddCategory;
             var optimize = _panel.Optimize;
@@ -170,6 +171,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             // A category just added opens its name for typing once its row stands.
             add.Command = _changes(CommandKind.AddCategory, () => _naming = _arranger.Add(_editor.Texts));
             add.Tip = CodexTip.For(add.Tip, texts.Codex.TermCategory);
+            _panel.AddSlot.IsVisible = editable && shown != null;
+            if (shown != null)
+                _panel.AddSlot.Show(Adds(texts, shown, "", null));
+
             optimize.Text = texts.SlotOptimize;
             optimize.Command = _changes(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system));
             optimize.Tip = editable ? CodexTip.For(optimize.Tip, texts.Codex.SlotOptimizeAbout) : KeptTip.For(optimize.Tip, locked);
@@ -182,6 +187,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 var heading = _slotKeys[i] as CategoryHeading;
                 if (heading != null)
                     ArrangeCategory(texts, (CategoryRow)_slotRows[heading], heading, Arranger.Carries(_slotKeys, i));
+
+                var end = _slotKeys[i] as CategoryEnd;
+                if (end != null)
+                {
+                    var at = i;
+                    var row = (CategoryEndRow)_slotRows[end];
+                    row.Category = end.Name;
+                    row.Adds.Show(Adds(texts, shown, end.Name, made => _arranger.Placed(_slotKeys, at, made)));
+                }
             }
 
             foreach (var part in _parts)
@@ -253,7 +267,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             if (key is Part)
                 return new PartRow(_editor.Texts);
 
-            return new CategoryRow();
+            return key is CategoryEnd ? (Element)new CategoryEndRow() : new CategoryRow();
+        }
+
+        /// <summary>
+        /// The kinds of slot that can be added, in <paramref name="texts" />, each made from what is selected for
+        /// <paramref name="shown" />, under <paramref name="category" />, and placed by <paramref name="placed" />, or after every slot where that is null.
+        /// </summary>
+        AddOption Adds(Texts texts, SystemInstance shown, string category, Func<Part, Arrangement> placed)
+        {
+            return new AddOption(texts.SlotAdd, null, new[]
+            {
+                new AddOption(texts.SlotAddBlocks, texts.Codex.SlotAddBlocksAbout,
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, null, category, placed))),
+                new AddOption(texts.SlotAddSignal, texts.Codex.SlotAddSignalAbout,
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, true, null, category, placed))),
+                new AddOption(texts.SlotAddScreen, texts.Codex.SlotAddScreenAbout,
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Returned("screen"), category, placed))),
+                new AddOption(texts.SlotAddInventory, texts.Codex.SlotAddInventoryAbout,
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Returned("inventory"), category, placed)))
+            });
         }
 
         /// <summary>Shows the category <paramref name="heading" /> heads over the <paramref name="carries" /> slots under it, renamed, removed and carried while the system may be changed.</summary>

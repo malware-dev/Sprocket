@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// <inheritdoc />
         public override void UpdateOnceBeforeFrame()
         {
-            if (MyAPIGateway.Utilities == null)
+            if (MyAPIGateway.Utilities == null || SprocketSession.StandsDown)
                 return;
 
             // A control added before the block type has fully spawned makes the vanilla controls vanish; the first update is

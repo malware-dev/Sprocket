@@ -1435,18 +1435,6 @@
   <data name="Sprocket.Library.MakeLeave" xml:space="preserve">
     <value>Avbryt</value>
   </data>
-  <data name="Sprocket.Library.AddQuestion" xml:space="preserve">
-    <value>Legge plantegningen til på denne konstruksjonen?</value>
-  </data>
-  <data name="Sprocket.Library.AddBecomes" xml:space="preserve">
-    <value>Den blir et logikksystem her, med en tom installasjon klar til å fylles.</value>
-  </data>
-  <data name="Sprocket.Library.AddConfirm" xml:space="preserve">
-    <value>Legg til</value>
-  </data>
-  <data name="Sprocket.Library.AddLeave" xml:space="preserve">
-    <value>Avbryt</value>
-  </data>
   <data name="Sprocket.Library.CopyQuestion" xml:space="preserve">
     <value>Kopiere logikksystemet?</value>
   </data>
@@ -2179,6 +2167,21 @@
   <data name="Sprocket.Category.Default" xml:space="preserve">
     <value>Kategori {number}</value>
   </data>
+  <data name="Sprocket.Slot.Add" xml:space="preserve">
+    <value>plass</value>
+  </data>
+  <data name="Sprocket.Slot.AddBlocks" xml:space="preserve">
+    <value>blokker</value>
+  </data>
+  <data name="Sprocket.Slot.AddSignal" xml:space="preserve">
+    <value>et signal</value>
+  </data>
+  <data name="Sprocket.Slot.AddScreen" xml:space="preserve">
+    <value>en skjerm</value>
+  </data>
+  <data name="Sprocket.Slot.AddInventory" xml:space="preserve">
+    <value>et inventar</value>
+  </data>
   <data name="Sprocket.Category.Name" xml:space="preserve">
     <value>Navn</value>
   </data>
@@ -2503,6 +2506,9 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   </data>
   <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
     <value>Fjernet kategorien &quot;{thing}&quot;</value>
+  </data>
+  <data name="Sprocket.Change.AddSlot" xml:space="preserve">
+    <value>La til en plass</value>
   </data>
   <data name="Sprocket.Change.CategoryOneAtATime" xml:space="preserve">
     <value>Endret om kategorien &quot;{thing}&quot; kjører én om gangen</value>

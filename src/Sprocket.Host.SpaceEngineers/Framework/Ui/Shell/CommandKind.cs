@@ -155,6 +155,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         /// <summary>Adding the part of a sequence that runs when it fails, or the one that runs however it ends.</summary>
         AddHandler,
 
+        /// <summary>Adding a slot on the installation panel.</summary>
+        AddSlot,
+
         /// <summary>Adding a step that sets one of the logic system's states.</summary>
         AddSetState,
 

@@ -264,13 +264,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Confirm(texts.LibraryMakeQuestion, texts.LibraryMakeKept, system.Name, texts.LibraryMakeConfirm, texts.LibraryMakeLeave, () => Shelve(system));
         }
 
-        /// <summary>Asks before <paramref name="putOn" /> adds the blueprint called <paramref name="named" /> to this construct; leaving it is the answer Enter takes.</summary>
-        public void AskPutOn(string named, Action putOn)
-        {
-            var texts = _editor.Texts;
-            Confirm(texts.LibraryAddQuestion, texts.LibraryAddBecomes, named, texts.LibraryAddConfirm, texts.LibraryAddLeave, putOn);
-        }
-
         /// <summary>Asks before <paramref name="copy" /> makes a copy of the logic system called <paramref name="named" />; leaving it is the answer Enter takes.</summary>
         public void AskCopy(string named, Action copy)
         {

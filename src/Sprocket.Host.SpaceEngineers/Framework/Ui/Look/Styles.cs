@@ -755,7 +755,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>The words of a codex page in a tip: its terms brighter than the words around them, lit and hovered while the tip is pinned.</summary>
         public static readonly IStyle<RichText> TipPage = new RichTextStyle(Tip)
         {
-            Base = { LinkColor = Palette.Ink, Links = { [CodexPages.TermClass] = { Underline = UnderlineStyle.Dotted, UnderlineThickness = 0f, Presses = false } } },
+            Base = { LinkColor = Palette.Ink, Links = { [CodexPages.TermClass] = { Underline = UnderlineStyle.Dotted, UnderlineThickness = 0f, Presses = false } }, Spans = { [CodexPages.HintClass] = { Color = Palette.Link } } },
             [Lumel.CodexTip.Pinned] = { LinkColor = Palette.Link, Links = { [CodexPages.TermClass] = { UnderlineThickness = TermLine } } }
         };
 
@@ -990,12 +990,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
             [State.FocusVisible] = { Background = Palette.Panel, Border = Palette.Muted },
             [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
-        };
-
-        /// <summary>A drop-down standing in a column's heading, as tall as the heading's words so nothing under it moves.</summary>
-        public static readonly IStyle<DropDown> ListBoxInHeading = new DropDownStyle(ListBox)
-        {
-            Base = { Padding = new Thickness(12f, 0f) }
         };
 
         /// <summary>A color's panel hanging from the box that opened it, close under it.</summary>

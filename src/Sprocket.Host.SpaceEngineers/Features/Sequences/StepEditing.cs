@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void Open(Func<bool, PickPage> make, IList<string> replacing)
         {
             var source = new SourceSwitch(_editor, (choice, slots) => Sourced(make(slots), choice, slots, replacing), null);
-            _editor.Push(source.Open(PickSource.Blocks));
+            _editor.Push(source.Open(source.Usual));
         }
 
         /// <summary>
@@ -414,7 +414,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     return page;
                 });
 
-            _editor.Push(source.Open(was is StateTest ? PickSource.States : PickSource.Blocks));
+            _editor.Push(source.Open(was is StateTest ? PickSource.States : was != null ? PickSource.Blocks : source.Usual));
         }
 
         /// <summary>

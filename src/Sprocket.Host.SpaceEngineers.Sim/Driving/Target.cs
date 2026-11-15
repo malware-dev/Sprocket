@@ -117,9 +117,19 @@ namespace Sprocket.Sim.Driving
         /// <summary>Has the pick on the screen list <paramref name="source" /> in its first column, as its Source box offers it, by typing into the box as a person would.</summary>
         public static void ChooseSource(this SprocketEditor editor, string source)
         {
-            var box = Within(editor.Pick().Stages[0]).OfType<ListField>().First(field => field.Text == editor.Texts.PickSourceBlocks);
+            var box = SourceBox(editor);
             for (var i = 0; i < 4 && box.Text != source; i++)
                 ((IInputTarget)box).Text(source[0]);
+        }
+
+        /// <summary>The source the selector's first column is on, in the words its box says it in.</summary>
+        public static string Source(this SprocketEditor editor) => SourceBox(editor).Text;
+
+        static ListField SourceBox(SprocketEditor editor)
+        {
+            var texts = editor.Texts;
+            var sources = new[] { texts.PickSourceBlocks, texts.PickSourceSlots, texts.PickSourceStates };
+            return Within(editor.Pick().Stages[0]).OfType<ListField>().First(field => sources.Contains(field.Text));
         }
 
         /// <summary>The parts of the blueprint the editor is on, one row each.</summary>

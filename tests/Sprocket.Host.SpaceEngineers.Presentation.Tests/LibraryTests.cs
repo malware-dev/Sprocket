@@ -334,8 +334,6 @@ public class LibraryTests
 
         ToConstruct(page).Command!.Execute();
         rig.Tick();
-        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
-        rig.Tick();
 
         var arrived = Assert.Single(rig.Editor.Program.Systems);
         Assert.Equal(lost.Identity, arrived.Identity);
@@ -359,8 +357,6 @@ public class LibraryTests
         Assert.Equal(rig.Texts.Codex.LibraryPutOn, Says(add));
 
         add.Command!.Execute();
-        rig.Tick();
-        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
         rig.Tick();
 
         Assert.Equal(lost.Identity, Assert.Single(rig.Editor.Program.Systems).Identity);
@@ -477,8 +473,6 @@ public class LibraryTests
 
         ToConstruct(page).Command!.Execute();
         rig.Tick();
-        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
-        rig.Tick();
 
         var arrived = Assert.Single(rig.Editor.Program.Systems);
         Assert.Equal(lost.Identity, arrived.Identity);
@@ -496,8 +490,6 @@ public class LibraryTests
         var rig = WithLost(out _, out var page);
         ChooseLost(rig, page);
         ToConstruct(page).Command!.Execute();
-        rig.Tick();
-        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
         rig.Tick();
 
         Choose(rig, page, "Airlock");
@@ -518,8 +510,6 @@ public class LibraryTests
         var rig = WithLost(out _, out var page);
         ChooseLost(rig, page);
         ToConstruct(page).Command!.Execute();
-        rig.Tick();
-        rig.Editor.PressChoice(rig.Texts.LibraryAddConfirm);
         rig.Tick();
 
         // Renamed, which the screen stamps with the time now, after the backup's date.
@@ -606,23 +596,18 @@ public class LibraryTests
         Assert.Empty(rig.Shelf.All);
     }
 
-    /// <summary>Putting a blueprint on this construct asks first, naming the chosen backup, and leaving it puts nothing on.</summary>
+    /// <summary>Putting a blueprint on a construct with no logic system made from it asks nothing: it is on at once.</summary>
     [Fact]
-    public void PuttingABlueprintOnAsksAndLeavingItPutsNothingOn()
+    public void PuttingABlueprintOnAsksNothing()
     {
         var rig = WithLost(out _, out var page);
         ChooseLost(rig, page);
 
         ToConstruct(page).Command!.Execute();
         rig.Tick();
-        Assert.StartsWith(rig.Texts.LibraryAddQuestion, rig.Editor.Question());
-        Assert.Contains("Airlock", rig.Editor.Question());
 
-        rig.Editor.PressChoice(rig.Texts.LibraryAddLeave);
-        rig.Tick();
-
-        Assert.Empty(rig.Editor.Program.Systems);
-        Assert.Single(rig.Backups.All);
+        Assert.Equal("Airlock", Assert.Single(rig.Editor.Program.Systems).Name);
+        Assert.False(rig.Editor.Screen.HasQuestion);
     }
 
     /// <summary>Making a copy asks first, naming the chosen logic system, and leaving it makes no copy.</summary>

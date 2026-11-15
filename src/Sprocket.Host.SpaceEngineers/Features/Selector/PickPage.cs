@@ -136,6 +136,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             _memberOnly = true;
         }
 
+        /// <summary>
+        /// The type of the slot the pick fills, where it fills one, so it asks only which of the blocks' screens, or whatever else
+        /// of that type, it holds, never what the slot's step does there; null otherwise.
+        /// </summary>
+        public HostType FacetOnly { get; set; }
+
+        /// <summary>
+        /// Whether the blocks picked share any of whatever the member the pick is about acts on, such as screens, so a slot
+        /// filled with them shows which it holds.
+        /// </summary>
+        bool AsksFacet
+        {
+            get
+            {
+                var type = FacetOnly ?? Vocabulary.TypeOf(Editor.World, _picked.Blocks, _picked.Member);
+                var shared = type == null ? null : Facets.Shared(Editor.World, _picked.Blocks, type);
+                return shared != null && shared.Count > 0;
+            }
+        }
+
         /// <summary>The slot the pick names where it names one, and otherwise the picker's own name.</summary>
         public override string Title => _slotHeading != null ? _slotHeading.Text : _title;
 
@@ -233,7 +253,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             }
         }
 
+        // A slot of a type no step acts on yet is filled by its blocks alone, and the facet among them.
         bool IsComplete => _picked.Blocks.Count > 0 && (_fits != null || PicksSignal && (_aim == null || _aim.Chosen)
+            || FacetOnly != null && string.IsNullOrEmpty(_arrived.Member)
             || !string.IsNullOrEmpty(_picked.Member)
             && _members.ReadinessOf(_picked.Member, _picked.Form) == Readiness.Ready
             && (_aim == null || _aim.Chosen));
@@ -260,7 +282,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         string AnswerId => _picked.Slot == null ? _picked.Member : _picked.Slot.EventId;
 
         /// <summary>The facet the chosen member acts on, or empty where it is no member of a type the host provides.</summary>
-        string Facet => Vocabulary.TypeOf(Editor.World, _picked.Blocks, _picked.Member) == null ? "" : _picked.Facet;
+        string Facet => FacetOnly == null && Vocabulary.TypeOf(Editor.World, _picked.Blocks, _picked.Member) == null ? "" : _picked.Facet;
 
         /// <inheritdoc />
         public override bool TakeRetitle()
@@ -406,7 +428,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             }
 
             if (_members.Column != null)
-                _members.Fill(SlotType, _memberOnly ? _arrived.Member : null);
+            {
+                _members.Fill(SlotType, _memberOnly ? _arrived.Member : null, FacetOnly);
+
+                // Filling a slot shows the column only where there is a screen, or whatever else, to choose; it still works out
+                // what the slot holds.
+                _members.Column.IsVisible = FacetOnly == null || AsksFacet;
+            }
 
             // What the trigger does, beside what happens, once what happens is chosen or a signal slot is picked.
             var does = _aim != null && (PicksSignal || _members.Column != null && !string.IsNullOrEmpty(_picked.Member));

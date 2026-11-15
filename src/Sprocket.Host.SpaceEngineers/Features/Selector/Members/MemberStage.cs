@@ -141,9 +141,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
         /// <summary>
         /// Lists what is on offer, only the members of <paramref name="slotType" /> where it is given, and only the member
-        /// <paramref name="only" /> where it is given.
+        /// <paramref name="only" /> where it is given; where <paramref name="facets" /> is given, it shows only the choice of the
+        /// blocks' facets of that type, such as their screens, even where there is one.
         /// </summary>
-        public void Fill(HostType slotType, string only)
+        public void Fill(HostType slotType, string only, HostType facets)
         {
             // Words read again in another language since the column was made are said again; once, not on every fill.
             if (_worded != _editor.Rewordings)
@@ -189,6 +190,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                 _picked.Form = _droppedForm;
                 _dropped = "";
             }
+
+            // A signal with no other to choose is taken, and shown taken: a press that chooses nothing is not asked for.
+            if (_forEvents && _picked.Member.Length == 0 && _offers.Ids.Count == 1)
+                Take(_offers.Ids[0], _offers.Forms[0]);
 
             var chosen = _picked.Member;
 
@@ -242,14 +247,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             // Which of the blocks' screens, or of whatever else of a type the host provides, its members act on is chosen
             // first: a drop box heads them where the blocks share more than one, and each stands in under it.
             var first = _forEvents ? -1 : FirstTyped();
-            var type = first < 0 ? null : _offers.Types[_rows[first]];
+            var type = facets ?? (first < 0 ? null : _offers.Types[_rows[first]]);
             var shared = type == null || slotType != null ? null : Facets.Shared(_editor.World, selection, type);
             if (shared != null)
                 Keep(shared);
 
-            var facets = shared != null && shared.Count > 1;
-            if (facets)
+            // Filling a slot shows even one, taken, so what the slot holds is seen.
+            var chooses = shared != null && (shared.Count > 1 || facets != null && shared.Count == 1);
+            if (chooses && facets == null)
                 _whatShown.Insert(first, FacetsKey);
+
+            // Filling a slot asks only which of the blocks' screens, or whatever else, it holds: what the slot's step does there
+            // is the step's, and is not chosen here.
+            if (facets != null)
+            {
+                _whatShown.Clear();
+                if (chooses)
+                    _whatShown.Add(FacetsKey);
+            }
 
             // The slots of a toolbar a person presses open under its line once it is chosen.
             var pressed = SlotOccupancy.Pressing(_editor.World, selection, _picked.Member);
@@ -263,13 +278,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             else
                 _slots = null;
 
-            if (facets)
+            if (chooses)
                 _facets.Show(shared, _picked.Facet, Facets.Showing(_editor.World, selection, type, _picked.Facet));
             else
                 _facets = null;
 
             var lastIndented = -1;
-            for (var i = 0; facets && i < _rows.Count; i++)
+            for (var i = 0; chooses && i < _rows.Count; i++)
             {
                 if (_rows[i] >= 0 && _offers.Types[_rows[i]] == type)
                     lastIndented = i;
@@ -278,11 +293,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             for (var i = 0; i < _rows.Count; i++)
             {
                 var at = _rows[i];
-                var row = (PickRow)_whatRows[_whatKeys[i]];
+
+                // Not shown where the column asks only which screen.
+                var row = _whatRows[_whatKeys[i]] as PickRow;
+                if (row == null)
+                    continue;
+
                 row.Many = false;
                 row.HasPicture = false;
                 row.Secondary = "";
-                row.Indented = facets && at >= 0 && _offers.Types[at] == type;
+                row.Indented = chooses && at >= 0 && _offers.Types[at] == type;
                 row.EndsSpine = i == lastIndented;
 
                 if (at < 0)
@@ -472,6 +492,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
         void Choose(string id, ReachKind form)
         {
+            Take(id, form);
+            _editor.Invalidate();
+        }
+
+        /// <summary>Makes <paramref name="id" />, reached as <paramref name="form" />, the choice, with a free slot of the toolbar it presses where it presses one.</summary>
+        void Take(string id, ReachKind form)
+        {
             var pressed = form == ReachKind.Native ? SlotOccupancy.Pressing(_editor.World, _picked.Blocks, id) : null;
             if (pressed == null)
                 _picked.Slot = null;
@@ -481,7 +508,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             _picked.Member = id;
             _picked.Form = form;
             _dropped = "";
-            _editor.Invalidate();
         }
 
         void OnWhatSearch(string value)

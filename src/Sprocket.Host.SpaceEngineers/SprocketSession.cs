@@ -21,6 +21,7 @@ using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
+using VRage.Utils;
 using Lumel.Drawing;
 using Lumel.Text;
 using Mal.MdkModMixin.Network;
@@ -186,9 +187,40 @@ namespace Sprocket.Host.SpaceEngineers
             _current?._motion.Still(surface);
         }
 
+        /// <summary>
+        /// Whether this copy of the mod stands down for the Bleeding Edge copy in the same world, and does nothing at all: two
+        /// copies would both run every construct and both draw the editor.
+        /// </summary>
+        /// <remarks>
+        /// Static because the block components and screen apps that ask it reach the session no other way, as with the session
+        /// itself; it is decided as each world loads and cleared as it unloads.
+        /// </remarks>
+        public static bool StandsDown { get; private set; }
+
+        // What a Bleeding Edge copy's name holds, in the world's list of mods and as its own.
+        const string BleedingEdge = "(Bleeding Edge)";
+
+        /// <summary>Whether this copy is not Bleeding Edge, and the world also holds a copy that is.</summary>
+        bool Yields()
+        {
+            if (ModContext != null && ModContext.ModName != null && ModContext.ModName.Contains(BleedingEdge))
+                return false;
+
+            foreach (var mod in MyAPIGateway.Session.Mods)
+            {
+                if (mod.FriendlyName != null && mod.FriendlyName.Contains(BleedingEdge))
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Puts the automation button where a programmable block's controls are shown.</summary>
         public override void BeforeStart()
         {
+            if (StandsDown)
+                return;
+
             // MyAPIGateway.TerminalControls does not exist yet in LoadData. Subscribing adds nothing to
             // the block type, so it is safe before any programmable block has come alive.
             MyAPIGateway.TerminalControls.CustomControlGetter += SprocketControls.Arrange;
@@ -272,6 +304,14 @@ namespace Sprocket.Host.SpaceEngineers
         /// <inheritdoc />
         public override void LoadData()
         {
+            StandsDown = Yields();
+            if (StandsDown)
+            {
+                SetUpdateOrder(MyUpdateOrder.NoUpdate);
+                MyLog.Default.WriteLineAndConsole("Sprocket Automation stands down: Sprocket Automation (Bleeding Edge) is in this world.");
+                return;
+            }
+
             // Space Engineers hands a session component to nothing, so terminal controls, screen hosts and
             // block components reach it only through this static.
             _current = this;
@@ -801,6 +841,9 @@ namespace Sprocket.Host.SpaceEngineers
         /// <inheritdoc />
         public override void UpdateAfterSimulation()
         {
+            if (StandsDown)
+                return;
+
             if (MyAPIGateway.Session == null)
                 return;
 
@@ -893,6 +936,9 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         public override MyObjectBuilder_SessionComponent GetObjectBuilder()
         {
+            if (StandsDown)
+                return base.GetObjectBuilder();
+
             _roster.Flush();
             Remember();
             Carry();
@@ -935,6 +981,12 @@ namespace Sprocket.Host.SpaceEngineers
         /// <inheritdoc />
         protected override void UnloadData()
         {
+            if (StandsDown)
+            {
+                StandsDown = false;
+                return;
+            }
+
             if (MyAPIGateway.TerminalControls != null)
             {
                 MyAPIGateway.TerminalControls.CustomControlGetter -= SprocketControls.Arrange;

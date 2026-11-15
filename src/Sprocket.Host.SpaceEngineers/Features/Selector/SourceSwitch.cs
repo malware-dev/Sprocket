@@ -33,6 +33,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 _offered.Add(PickSource.States);
         }
 
+        /// <summary>The source last switched to in any selector, where this one offers it, and blocks otherwise: where something new is looked for first.</summary>
+        public PickSource Usual
+        {
+            get
+            {
+                var last = (PickSource)_editor.Habits.Source;
+                return _offered.Contains(last) ? last : PickSource.Blocks;
+            }
+        }
+
         /// <summary>The selector for <paramref name="source" />, to be opened first.</summary>
         public EditorPage Open(PickSource source)
         {
@@ -48,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             foreach (var offered in _offered)
                 words.Add(offered == PickSource.Blocks ? texts.PickSourceBlocks : offered == PickSource.Slots ? texts.PickSourceSlots : texts.PickSourceStates);
 
-            var box = new ListField(words) { Style = Styles.ListBoxInHeading, Text = words[_offered.IndexOf(source)], Tip = CodexTip.For(null, texts.Codex.PickSourceAbout) };
+            var box = new ListField(words) { Style = Styles.ListBox, Text = words[_offered.IndexOf(source)], Tip = CodexTip.For(null, texts.Codex.PickSourceAbout) };
             box.Edited += delegate
             {
                 var at = words.IndexOf(box.Text);
@@ -67,6 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>Puts the selector for <paramref name="source" /> in place of the one showing.</summary>
         void Swap(PickSource source)
         {
+            _editor.Habits.Source = (int)source;
             _editor.Pop();
             _editor.Push(Open(source));
         }

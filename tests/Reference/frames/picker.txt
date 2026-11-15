@@ -23,12 +23,12 @@ on screen     block slot 1
 016  Sprite     Lumel_Fill            {X:256 Y:118 W:1 H:902}  #5B737BFF
 017  Sprite     Lumel_Fill            {X:715 Y:118 W:1 H:902}  #5B737BFF
 018  Text       at {X:272 Y:135.6399} scale 0.694  #85A1A9FF  "SOURCE"
-019  Sprite     Lumel_Fill            {X:343 Y:138 W:123 H:20}  #20272DFF
-020  Sprite     Lumel_Fill            {X:343 Y:138 W:123 H:1}  #5B737BFF
-021  Sprite     Lumel_Fill            {X:343 Y:157 W:123 H:1}  #5B737BFF
-022  Sprite     Lumel_Fill            {X:343 Y:138 W:1 H:20}  #5B737BFF
-023  Sprite     Lumel_Fill            {X:465 Y:138 W:1 H:20}  #5B737BFF
-024  Text       at {X:355.35 Y:135.6399} scale 0.694  #DCF5FDFF  "Blocks"
+019  Sprite     Lumel_Fill            {X:343 Y:134 W:123 H:28}  #20272DFF
+020  Sprite     Lumel_Fill            {X:343 Y:134 W:123 H:1}  #5B737BFF
+021  Sprite     Lumel_Fill            {X:343 Y:161 W:123 H:1}  #5B737BFF
+022  Sprite     Lumel_Fill            {X:343 Y:134 W:1 H:28}  #5B737BFF
+023  Sprite     Lumel_Fill            {X:465 Y:134 W:1 H:28}  #5B737BFF
+024  Text       at {X:355.35 Y:139.6399} scale 0.694  #DCF5FDFF  "Blocks"
 025  Sprite     Lumel_Fill            {X:440 Y:146 W:10 H:3}  #A2C3CDFF
 026  Sprite     Lumel_Fill            {X:446 Y:146 W:10 H:3}  #A2C3CDFF
 027  Text       at {X:676.1563 Y:136.5141} scale 0.401  #A2C3CDFF  "H"

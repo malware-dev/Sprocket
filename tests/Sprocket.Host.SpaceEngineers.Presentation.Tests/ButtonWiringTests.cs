@@ -274,6 +274,20 @@ public class ButtonWiringTests
     /// A logic system started from Airlock Button, made a blueprint, with a second blockset switched off and open on the
     /// installation panel, and a second button on the construct.
     /// </summary>
+    /// <summary>A button slot filled with a panel of one button arrives with its press already chosen, so Done needs no press of it.</summary>
+    [Fact]
+    public void APanelOfOneButtonArrivesWithItsPressChosen()
+    {
+        var sim = Blueprinted();
+
+        sim.Editor.Parts()[0].Fills!.Execute();
+        sim.Tick();
+        sim.Editor.PressBlock("Port Button");
+        sim.Tick();
+
+        Assert.Contains(sim.Editor.Pick().Stages.SelectMany(stage => stage.Entries()), entry => entry.Text == "button is pressed" && entry.IsChosen);
+    }
+
     static Simulation Blueprinted()
     {
         var sim = Simulation.Fresh();

@@ -391,6 +391,11 @@ public class MoveItemsScreenTests
         screen.Run(2);
         editor.PressAdd("if");
         screen.Run(2);
+
+        // A new selector opens on the source last chosen.
+        Assert.Equal(editor.Texts.PickSourceSlots, editor.Source());
+        editor.ChooseSource(editor.Texts.PickSourceBlocks);
+        screen.Run(1);
         editor.PressBlock("Cargo 1");
         screen.Run(2);
         offered = editor.Members();

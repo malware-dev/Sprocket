@@ -19,11 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <summary>
         /// Puts into <paramref name="parts" /> every slot of <paramref name="system" />, in its order, and into
         /// <paramref name="rows" /> the same slots with a <see cref="CategoryHeading" /> before each run of them under one category;
-        /// a category with no slot is headed too, where it stands, where <paramref name="empties" />.
+        /// a category with no slot is headed too, where it stands, where <paramref name="empties" />; and a <see cref="CategoryEnd" /> after
+        /// each category where <paramref name="ends" />.
         /// </summary>
-        public static void Listed(AutomationSystem system, List<Part> parts, List<object> rows, bool empties)
+        public static void Listed(AutomationSystem system, List<Part> parts, List<object> rows, bool empties, bool ends)
         {
-            Listed(system.SlotList, rows, empties);
+            Listed(system.SlotList, rows, empties, ends);
             parts.Clear();
             foreach (var row in rows)
             {

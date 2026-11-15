@@ -151,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             {
                 var backed = entry.Read;
                 if (backed != null)
-                    Run(CommandKind.PutOn, () => _editor.Holdings.AskPutOn(backed.Name, () => Refusal = _editor.Holdings.PutOn(backed)));
+                    Run(CommandKind.PutOn, () => Refusal = _editor.Holdings.PutOn(backed));
 
                 return;
             }
@@ -159,13 +159,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (entry.Share != null)
             {
                 var shared = entry.Share;
-                Run(CommandKind.PutOn, () => _editor.Holdings.AskPutOn(shared.Name, () => Refusal = _editor.Holdings.PutOnShared(shared)));
+                Run(CommandKind.PutOn, () => Refusal = _editor.Holdings.PutOnShared(shared));
                 return;
             }
 
             var volume = _editor.Shelf?.Find(entry.Identity);
             if (volume != null)
-                Run(CommandKind.PutOn, () => _editor.Holdings.AskPutOn(volume.Name, () => Refusal = _editor.Holdings.PutOn(volume)));
+                Run(CommandKind.PutOn, () => Refusal = _editor.Holdings.PutOn(volume));
         }
 
         /// <summary>Puts a copy of the chosen logic system on the construct, as a logic system of its own, and opens it to be changed, after asking.</summary>

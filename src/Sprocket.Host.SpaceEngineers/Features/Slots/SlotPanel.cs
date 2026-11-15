@@ -49,6 +49,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <summary>The button that adds a category.</summary>
         public Button AddCategory => _addCategory;
 
+        /// <summary>The way to add a slot, made from what is selected, under every other.</summary>
+        public PlusMenu AddSlot => _addSlot;
+
         /// <summary>The button that tidies the slots.</summary>
         public Button Optimize => _optimize;
     }

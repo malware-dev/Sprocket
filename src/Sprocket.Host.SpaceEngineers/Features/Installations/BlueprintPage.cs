@@ -385,7 +385,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
         void Collect()
         {
             _system.Acted(_used);
-            PartList.Listed(_system, _parts, _rows, false);
+            PartList.Listed(_system, _parts, _rows, false, false);
 
             _parts.RemoveAll(part => !_used.Contains(part.Id));
             _rows.RemoveAll(row => row is Part && !_used.Contains(((Part)row).Id));

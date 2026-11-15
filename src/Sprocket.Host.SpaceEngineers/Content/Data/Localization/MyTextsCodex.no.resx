@@ -122,7 +122,7 @@
     <value>Lukk editoren</value>
   </data>
   <data name="Sprocket.Chrome.PinHint" xml:space="preserve">
-    <value>Hold Alt for å utforske</value>
+    <value>[Hold Alt for å utforske]{.hint}</value>
   </data>
   <data name="Sprocket.Chrome.Tips" xml:space="preserve">
     <value>Vis færre tips.</value>
@@ -622,6 +622,18 @@
   </data>
   <data name="Sprocket.Category.RemoveTriggers" xml:space="preserve">
     <value>Fjern kategorien. [![](mark:trigger)&amp;nbsp;Utløserne](Term.Trigger class=term) blir, uten kategori.</value>
+  </data>
+  <data name="Sprocket.Slot.AddBlocksAbout" xml:space="preserve">
+    <value>Velg blokker å lage en ny [plass](Term.Slot class=term) av, fylt med dem i denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term).</value>
+  </data>
+  <data name="Sprocket.Slot.AddSignalAbout" xml:space="preserve">
+    <value>Velg et signal, som et knappetrykk, å lage en ny [plass](Term.Slot class=term) av, fylt med det i denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term).</value>
+  </data>
+  <data name="Sprocket.Slot.AddScreenAbout" xml:space="preserve">
+    <value>Velg skjermen til en blokk å lage en ny [plass](Term.Slot class=term) av, fylt med den i denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term).</value>
+  </data>
+  <data name="Sprocket.Slot.AddInventoryAbout" xml:space="preserve">
+    <value>Velg inventaret til en blokk å lage en ny [plass](Term.Slot class=term) av, fylt med det i denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term).</value>
   </data>
   <data name="Sprocket.Category.Open" xml:space="preserve">
     <value>Gi kategorien nytt navn, eller la [![](mark:sequence)&amp;nbsp;sekvensene](Term.Sequence class=term) i den kjøre én om gangen.</value>

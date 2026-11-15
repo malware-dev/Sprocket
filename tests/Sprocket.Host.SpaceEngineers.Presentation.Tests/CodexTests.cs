@@ -416,6 +416,22 @@ public class CodexTests
     static IEnumerable<string> Names(IReadOnlyList<Block> blocks) =>
         blocks.SelectMany(block => block.Classes.Concat(Names(block.Blocks)));
 
+    /// <summary>The line saying how to explore a tip is one span of the hint class, in English and in Norwegian, which the tip's style colors.</summary>
+    [Theory]
+    [InlineData("", "Hold Alt to explore")]
+    [InlineData("no", "Hold Alt for å utforske")]
+    public void TheExploreLineIsAHint(string language, string said)
+    {
+        var screen = Screen.Fresh();
+        if (language.Length > 0)
+            screen.Scene.Speak(language);
+
+        var runs = Markdown.Parse(screen.Editor.Texts.Codex.ChromePinHint, true).Blocks.SelectMany(block => block.Runs).Where(run => !run.IsBreak).ToList();
+
+        Assert.Equal(said, string.Concat(runs.Select(run => run.Text)));
+        Assert.All(runs, run => Assert.Equal(CodexPages.HintClass, run.Class));
+    }
+
     /// <summary>The target of every link in <paramref name="blocks" />, inside tables, quotes and boxes too.</summary>
     static IEnumerable<string> Targets(IReadOnlyList<Block> blocks) =>
         blocks.SelectMany(block => block.Runs.OfType<LinkRun>().Select(run => run.Link.Target).Concat(Targets(block.Blocks)));

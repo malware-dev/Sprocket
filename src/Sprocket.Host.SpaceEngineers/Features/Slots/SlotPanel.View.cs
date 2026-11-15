@@ -19,6 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         Section _slotting;
         RichText _slotsHeading;
         PartList _slots;
+        PlusMenu _addSlot;
         Button _addCategory;
         Button _optimize;
 
@@ -62,7 +63,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                         Children =
                         {
                             new PartList { Base = { Spacing = Gaps.Items } }.As(out _slots),
-                            new Button { Style = Styles.Start, Align = Align.Left }.As(out _addCategory)
+                            new HStack
+                            {
+                                Base = { Spacing = Gaps.Parts },
+                                Children =
+                                {
+                                    new PlusMenu().As(out _addSlot),
+                                    new Button { Style = Styles.Start }.As(out _addCategory)
+                                }
+                            }
                         }
                     }
                 }

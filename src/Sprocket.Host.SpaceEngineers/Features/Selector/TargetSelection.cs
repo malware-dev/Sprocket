@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 Replacing = _replaces,
                 Avoiding = avoiding
             }, null);
-            _editor.Push(source.Open(PickSource.Blocks));
+            _editor.Push(source.Open(source.Usual));
         }
 
         /// <summary>The slots <paramref name="said" /> names, comma by comma.</summary>

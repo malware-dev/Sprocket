@@ -171,6 +171,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
                 case ChangeKind.RenameCategory: return texts.ChangeRenameCategory;
                 case ChangeKind.RemoveCategory: return texts.ChangeRemoveCategory;
                 case ChangeKind.CategoryOneAtATime: return texts.ChangeCategoryOneAtATime;
+                case ChangeKind.AddSlot: return texts.ChangeAddSlot;
                 case ChangeKind.AddType: return texts.ChangeAddType;
                 case ChangeKind.RenameType: return texts.ChangeRenameType;
                 case ChangeKind.RemoveType: return texts.ChangeRemoveType;

@@ -50,7 +50,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging
                 Style = Styles.Panel,
                 Content = new VStack
                 {
-                    Placement = FixedSize.Width(Sizes.Popup),
                     Base = { Spacing = Gaps.Items },
                     Children =
                     {

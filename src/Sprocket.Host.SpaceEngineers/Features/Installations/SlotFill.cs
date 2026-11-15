@@ -6,21 +6,71 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Features.Slots.Edits;
+using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Installations
 {
-    /// <summary>Asks, in the picker, which of the construct's blocks fill one of a blueprint's slots for one installation, and fills it with them.</summary>
+    /// <summary>
+    /// Asks, in the picker, which of the construct's blocks fill one of a blueprint's slots for one installation, and fills it with
+    /// them; or makes a new slot from what is picked.
+    /// </summary>
     public sealed class SlotFill
     {
         readonly SprocketEditor _editor;
         readonly AutomationSystem _system;
+
+        // The slot being made from the pick under way, and where it is put once made; null while a slot that exists is filled.
+        Part _making;
+        Func<Part, Arrangement> _placed;
 
         /// <summary>Fills the slots of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
         public SlotFill(SprocketEditor editor, AutomationSystem system)
         {
             _editor = editor;
             _system = system;
+        }
+
+        /// <summary>
+        /// Opens the picker on a new slot under <paramref name="category" />, for <paramref name="chosen" />: of a signal where
+        /// <paramref name="signal" />, of <paramref name="holds" /> where that is given, such as a screen, and of blocks otherwise.
+        /// What is picked makes the slot and fills it, placed by <paramref name="placed" />, or after every slot where that is null,
+        /// as one change.
+        /// </summary>
+        public void New(SystemInstance chosen, bool signal, HostType holds, string category, Func<Part, Arrangement> placed)
+        {
+            var part = new Part(_editor.Picks.NewSlotName(_system, "", signal, holds)) { IsSignal = signal, Category = category };
+            if (holds != null)
+                part.Holds = holds.Id;
+
+            _making = part;
+            _placed = placed;
+            Ask(part, chosen);
+        }
+
+        /// <summary>
+        /// <paramref name="fill" />, filling <paramref name="part" /> for <paramref name="chosen" />, together with making it where it
+        /// is the slot being made, and putting it in its place.
+        /// </summary>
+        SystemEdit Made(Part part, SystemInstance chosen, SystemEdit fill)
+        {
+            if (part != _making)
+                return fill;
+
+            _making = null;
+            var reslot = new Reslot(_system, chosen);
+            reslot.Make(part, new List<string>());
+            SystemEdit edit = new WithMade(new ChangeSlots(ChangeKind.AddSlot, reslot), fill);
+            if (_placed == null)
+                return edit;
+
+            var was = Arrangement.Of(_system.SlotList);
+            was.Order.Add(part);
+            was.Placed.Add(part.Category);
+            was.Held.Add(Arrangement.HeldOf(part));
+            return new WithMade(edit, new Rearrange(ChangeKind.AddSlot, owner => owner.SlotList, was, _placed(part), part, null));
         }
 
         /// <summary>Opens the picker on <paramref name="part" /> for <paramref name="chosen" />.</summary>
@@ -51,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
                 var step = _system.ActingOn(part.Id);
                 _editor.Push(new PickPage(_editor, part.Id, targets, step == null ? "" : step.ActionId,
                     step == null ? ReachKind.Native : step.Form, _editor.Picks.Facet(_system, chosen, new[] { part.Id }),
-                    block => block.Kind.Facets(type).Count > 0, answer => Held(part, chosen, type, answer)));
+                    block => block.Kind.Facets(type).Count > 0, answer => Held(part, chosen, type, answer)) { FacetOnly = type });
                 return;
             }
 
@@ -72,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
             var kept = new List<ToolbarSlot>();
             _editor.Starts.Picked(answer, names, kept);
             _editor.Claims.Filling(_system, part, chosen, answer.Targets, _editor.Claims.Pressed(answer),
-                () => new FillSlot(chosen, part.Id, names, kept), Done);
+                () => Made(part, chosen, new FillSlot(chosen, part.Id, names, kept)), Done);
         }
 
         /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back.</summary>
@@ -88,7 +138,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
                         names.Add(_editor.Program.Declare(_editor.World, block).Name);
                 }
 
-                return new FillSlot(chosen, part.Id, names, (IList<ToolbarSlot>)null);
+                // A slot of blocks made from them expects what they all are.
+                if (part == _making)
+                    part.Expects = Expected(ids);
+
+                return Made(part, chosen, new FillSlot(chosen, part.Id, names, (IList<ToolbarSlot>)null));
             }, Done);
         }
 
@@ -109,8 +163,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
                     numbers.Add(SlotsFromPicks.Numbered(block.Kind.Facets(type), answer.Facet));
                 }
 
-                return new FillSlot(chosen, part.Id, names, numbers);
+                return Made(part, chosen, new FillSlot(chosen, part.Id, names, numbers));
             }, Done);
+        }
+
+        /// <summary>The nearest type every block of <paramref name="ids" /> the world finds is.</summary>
+        string Expected(IList<long> ids)
+        {
+            var lineages = new List<IList<string>>();
+            foreach (var id in ids)
+            {
+                var block = _editor.World.FindEntity(id);
+                if (block != null)
+                    lineages.Add(block.Kind.Lineage);
+            }
+
+            return lineages.Count == 0 ? "" : Part.Nearest(lineages);
         }
 
         /// <summary>Goes back to the screen the picker was opened from.</summary>

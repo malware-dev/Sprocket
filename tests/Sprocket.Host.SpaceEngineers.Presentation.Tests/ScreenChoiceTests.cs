@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
@@ -114,7 +115,10 @@ public class ScreenChoiceTests
         Assert.Null(system.First.Facets(slot));
     }
 
-    /// <summary>Another installation fills the slot of screens on the installation panel: the step's member alone, the screen chosen under it, and no values asked.</summary>
+    /// <summary>
+    /// Another installation fills the slot of screens on the installation panel: the screen alone is chosen, with nothing of
+    /// what the slot's step does there, and no values asked.
+    /// </summary>
     [Fact]
     public void AnotherInstallationChoosesItsOwnScreen()
     {
@@ -131,7 +135,7 @@ public class ScreenChoiceTests
         screen.Run(2);
         screen.Editor.PressBlock("Status Board");
         screen.Run(2);
-        Assert.Equal(new[] { "show text" }, screen.Editor.Pick().Stages.Last().Entries().Where(row => !row.IsHeading).Select(row => row.Text));
+        Assert.DoesNotContain(screen.Editor.Pick().Stages.Last().Entries(), row => row.IsVisible);
         screen.Editor.Facets()!.Choose("Back");
         screen.Run(2);
         Assert.Null(screen.Editor.Pick().Arguments);
@@ -140,6 +144,69 @@ public class ScreenChoiceTests
 
         Assert.Equal(new[] { 1 }, system.Instances[0].Facets(slot));
         Assert.Equal(new[] { 2 }, system.Instances[1].Facets(slot));
+    }
+
+    /// <summary>Another installation filling the slot with a block of one screen is shown that screen, already chosen.</summary>
+    [Fact]
+    public void ABlockOfOneScreenShowsItTaken()
+    {
+        var (screen, _) = Picking(rig => rig.TextPanel(41, "Hangar Sign"));
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+        var system = screen.Editor.Program.Systems[0];
+        var slot = ((Act)system.Sequences[0].Steps[0]).Targets[0];
+        screen.Editor.GoToRoot();
+        screen.Run(2);
+        screen.Editor.AddInstallation(0);
+        screen.Run(2);
+
+        screen.Editor.Parts().Single(row => row.Name == slot).Fills!.Execute();
+        screen.Run(2);
+        screen.Editor.PressBlock("Hangar Sign");
+        screen.Run(2);
+
+        Assert.NotNull(screen.Editor.Facets());
+        Assert.DoesNotContain(screen.Editor.Pick().Stages.Last().Entries(), row => row.IsVisible);
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+        Assert.Equal("Hangar Sign", system.Instances[1].FilledWith(slot)![0]);
+    }
+
+    /// <summary>A screen slot added on the installation panel asks which of a block's screens it holds, as filling one does.</summary>
+    [Fact]
+    public void ANewScreenSlotAsksWhichScreen()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        editor.GoToRoot();
+        screen.Run(2);
+        system.Enabled = false;
+        editor.Program.Edited();
+        editor.OpenBlueprintSystem(0);
+        screen.Run(5);
+        editor.PressTab(editor.Texts.SystemInstallationPanel);
+        screen.Run(5);
+
+        var page = (LogicSystemPage)editor.Current!;
+        var add = page.View.Within().OfType<PlusMenu>().First(menu => menu.Choices.Any(choice => choice.Text == editor.Texts.SlotAddScreen));
+        add.Choices.Single(choice => choice.Text == editor.Texts.SlotAddScreen).Adds!.Execute();
+        screen.Run(2);
+        editor.PressBlock("Status Board");
+        screen.Run(2);
+
+        editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        editor.PressPrimary();
+        screen.Run(5);
+
+        var made = system.Parts.Last();
+        Assert.Equal(HostTypes.Returned("screen")!.Id, made.Holds);
+        Assert.Equal(new[] { 2 }, system.First!.Facets(made.Id));
     }
 
     /// <summary>A check of a screen's setting chooses its screen the same way, and checks it on a slot of screens of its own.</summary>
@@ -543,10 +610,11 @@ public class ScreenChoiceTests
         Assert.Equal("Stock", screen.Editor.Screen.Title());
     }
 
-    static (Screen Screen, Billboard Board) Picking()
+    static (Screen Screen, Billboard Board) Picking(Action<Rig>? also = null)
     {
         var rig = Rig.Demo();
         var board = rig.Weld(new Billboard(40, "Status Board"));
+        also?.Invoke(rig);
         var screen = Screen.On(rig);
         screen.Editor.NewButtonSystem("Airlock");
         screen.Run(2);

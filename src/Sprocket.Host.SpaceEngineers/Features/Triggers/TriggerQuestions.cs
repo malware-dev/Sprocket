@@ -258,6 +258,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             var was = Arrangement.Of(system.TriggerList);
             was.Order.Add(trigger);
             was.Placed.Add(trigger.Category);
+            was.Held.Add(Arrangement.HeldOf(trigger));
             return new WithMade(add, new Rearrange(ChangeKind.AddTrigger, owner => owner.TriggerList, was, _placed(trigger), trigger, null));
         }
 
@@ -398,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                     return page;
                 });
 
-            var opened = source.Open(was is StateTrigger ? PickSource.States : PickSource.Blocks);
+            var opened = source.Open(fresh ? source.Usual : was is StateTrigger ? PickSource.States : PickSource.Blocks);
             _editor.Push(opened);
             if (!action)
                 return;

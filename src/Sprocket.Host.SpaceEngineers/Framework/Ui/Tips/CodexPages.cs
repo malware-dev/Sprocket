@@ -160,6 +160,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Tips
         /// <summary>The class of link a term is: hovered for its page, and never pressed.</summary>
         public const string TermClass = "term";
 
+        /// <summary>The class of span a hint is, such as the line saying how to explore a tip: said in the color terms light up in.</summary>
+        public const string HintClass = "hint";
+
         /// <summary>The markdown-lite for <paramref name="words" /> as a term whose tip is the page <paramref name="id" />.</summary>
         public static string Term(string words, string id)
         {

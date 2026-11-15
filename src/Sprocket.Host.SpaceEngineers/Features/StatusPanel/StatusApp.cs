@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel
         public override void Run()
         {
             base.Run();
-            if (!OnGameThread())
+            if (SprocketSession.StandsDown || !OnGameThread())
                 return;
 
             _ran++;

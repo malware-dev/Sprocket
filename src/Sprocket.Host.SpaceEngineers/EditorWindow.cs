@@ -193,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers
 
         void SayPinHint()
         {
-            _codex.PinHint = Markdown.Parse(_editor.Texts.Codex.ChromePinHint);
+            _codex.PinHint = Markdown.Parse(_editor.Texts.Codex.ChromePinHint, true);
         }
 
         /// <summary>The workspace's input root, which the editor's pages and popups share.</summary>
