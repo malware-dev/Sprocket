@@ -41,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _rota = owner.Rota;
             _memory = memory;
             _workings = new CompiledRun(sequence, instance, owner, memory, Heard);
+            _on = CanRun;
 
             var kept = memory.Busy != null;
             if (!kept)
@@ -124,6 +125,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </summary>
         /// <remarks>Three switches, all of which have to be on: the sequence's, its system's, and this instance's.</remarks>
         bool CanRun => _sequence.CanRun(_instance);
+
+        // Whether it could run when last told of a switch, so switching it back on is told from any other pass.
+        bool _on;
 
         Bindings _bindings;
 
@@ -283,7 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
-        /// How often the trigger fired while the sequence was already running.
+        /// How often the trigger fired while the sequence was already running, since it was last switched on.
         /// </summary>
         /// <remarks>A trigger that fires while the sequence runs is skipped, never queued.</remarks>
         public int SkippedCount
@@ -300,7 +304,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
-        /// How often something called this sequence while it was switched off.
+        /// How often something called this sequence while it was switched off, since it was last switched on.
         /// </summary>
         /// <remarks>Calls only: its own trigger firing while it is off is not counted.</remarks>
         public int RefusedCount
@@ -317,6 +321,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </remarks>
         public void Switched()
         {
+            // Switched back on, it counts the starts it misses and refuses afresh, as the reason it was off goes too.
+            var on = CanRun;
+            if (on && !_on)
+            {
+                SkippedCount = 0;
+                RefusedCount = 0;
+            }
+
+            _on = on;
             if (IsRunning && _owner.Live && !CanRun && !Cleaning)
                 Interrupt(StopCause.Switch, 0);
         }

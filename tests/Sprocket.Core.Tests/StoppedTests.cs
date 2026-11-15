@@ -188,6 +188,29 @@ public class StoppedTests
         Assert.Equal(1, a.State.RefusedCount);
     }
 
+    /// <summary>Switching back on clears the starts refused while off, and what is refused after counts afresh.</summary>
+    [Fact]
+    public void SwitchingBackOnClearsTheStartsRefused()
+    {
+        var a = new Airlock();
+        a.Cycle.System.Enabled = false;
+        a.Tick(5);
+        a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
+        a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
+        a.Tick(5);
+        Assert.Equal(2, a.State.RefusedCount);
+
+        a.Cycle.System.Enabled = true;
+        a.Tick(5);
+        Assert.Equal(0, a.State.RefusedCount);
+
+        a.Cycle.System.Enabled = false;
+        a.Tick(5);
+        a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
+        a.Tick(5);
+        Assert.Equal(1, a.State.RefusedCount);
+    }
+
     /// <summary>The next run forgets the stop, and a sequence stopped while at rest has nothing to say.</summary>
     [Fact]
     public void TheNextRunForgetsTheStop()
