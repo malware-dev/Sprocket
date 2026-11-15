@@ -44,26 +44,69 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         }
 
         /// <summary>
-        /// Gives the first id among <paramref name="keys" /> the id of <paramref name="entity" />, leaving
-        /// every key where the program put it, and answers whether that changed it.
+        /// Brings the first id, the first path and the first name among <paramref name="keys" /> up to date with
+        /// <paramref name="entity" />, the block they surely found, leaving every key where the program put it, and answers
+        /// whether any changed.
         /// </summary>
-        /// <remarks>For a block found by its path after its id found nothing.</remarks>
-        public bool Renumber(GridEntity entity, List<EntityKey> keys)
+        /// <remarks>
+        /// A key that no longer fits goes unnoticed while a stronger one finds the block, until the day it is needed: a copy
+        /// has new ids and finds its blocks by their paths, so a path gone stale as the grid changed leaves the copy finding
+        /// them by name alone. Walking a path asks one cell of each grid on it; a new path is searched for only where the old
+        /// one no longer leads to the block, and a path is kept where none leads there now, as while a joint is detached.
+        /// </remarks>
+        public bool Renew(GridEntity entity, List<EntityKey> keys)
         {
+            var changed = false;
+            bool id = false, path = false, name = false;
             for (var i = 0; i < keys.Count; i++)
             {
-                if (keys[i].Cells != null || keys[i].Kind != ValueKind.Integer)
-                    continue;
+                var key = keys[i];
+                if (key.Cells != null)
+                {
+                    if (path)
+                        continue;
 
-                long had;
-                if (_world.Values.TryInteger(keys[i].Kind, keys[i].Value, out had) && had == entity.Id)
-                    return false;
+                    path = true;
+                    var walked = key.Cells.Length == 0 ? null : Walk(key.Cells);
+                    if (walked != null && walked.Id == entity.Id)
+                        continue;
 
-                keys[i] = new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id));
-                return true;
+                    Vector3I[] cells = Path(entity);
+                    if (cells == null)
+                        continue;
+
+                    keys[i] = new EntityKey(cells);
+                    changed = true;
+                }
+                else if (key.Kind == ValueKind.Integer)
+                {
+                    if (id)
+                        continue;
+
+                    id = true;
+                    long had;
+                    if (_world.Values.TryInteger(key.Kind, key.Value, out had) && had == entity.Id)
+                        continue;
+
+                    keys[i] = new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id));
+                    changed = true;
+                }
+                else if (key.Kind == ValueKind.Text)
+                {
+                    if (name)
+                        continue;
+
+                    name = true;
+                    string had;
+                    if (_world.Values.TryText(key.Kind, key.Value, out had) && had == entity.Name)
+                        continue;
+
+                    keys[i] = new EntityKey(ValueKind.Text, _world.Values.Text(entity.Name));
+                    changed = true;
+                }
             }
 
-            return false;
+            return changed;
         }
 
         /// <summary>The block the first of <paramref name="keys" /> that finds one finds, with which key it was in <paramref name="matched" />, or null where none does.</summary>

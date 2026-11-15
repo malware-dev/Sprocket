@@ -131,12 +131,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
                 // The keys are tried in the order the program lists them, and the first to find a block decides. An id or
                 // a path found further down still says which block was meant; a name further down only proposes one,
-                // since two blocks can share it. Found by its path alone, it is a copy's block, and its id key takes the
-                // new id in the place it already has.
+                // since two blocks can share it. A block surely found has its other keys brought up to date: a copy's
+                // block found by its path takes its new id, and a block found by its id takes its path and name as they
+                // are now, so a later copy finds it by where it stands.
                 var key = declared.Keys[matched];
                 var sure = matched == 0 || key.Cells != null || key.Kind == ValueKind.Integer;
                 _states[declared.Name] = sure ? RefState.Bound : RefState.Adrift;
-                if (key.Cells != null && world.Keys.Renumber(found, declared.Keys))
+                if (sure && world.Keys.Renew(found, declared.Keys))
                     rekeyed = true;
             }
 

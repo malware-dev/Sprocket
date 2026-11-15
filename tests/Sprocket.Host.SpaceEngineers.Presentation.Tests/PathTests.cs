@@ -108,6 +108,51 @@ public class PathTests
         Assert.Equal(RefState.Bound, sim.Runner.Bindings.State(declared.Name));
     }
 
+    /// <summary>
+    /// A block found by its id takes its path as it is now, so a copy made after its grid changed still finds it by where
+    /// it stands.
+    /// </summary>
+    [Fact]
+    public void ACopyMadeAfterTheGridChangedFindsItsBlocks()
+    {
+        var rig = new Rig();
+        Door door = rig.Door(2, "Airlock Inner Door");
+        var sim = Simulation.On(rig);
+        sim.Tick();
+        var declared = Declared(sim, door);
+
+        door.Cell = new Vector3I(5, 1, -13);
+        rig.Door(3, "Hangar Door");
+        sim.Tick();
+
+        Assert.Equal(new[] { new Vector3I(5, 1, -13) }, declared.Keys[1].Cells);
+
+        Copied(rig, door, 7);
+        sim.Tick();
+
+        Assert.Equal(7, sim.Runner.Bindings.Entity(declared.Name)!.Id);
+        Assert.Equal(RefState.Bound, sim.Runner.Bindings.State(declared.Name));
+    }
+
+    /// <summary>A block found by its id takes its new name, so its name key names it as it is called now.</summary>
+    [Fact]
+    public void ARenamedBlockIsKeyedByItsNewName()
+    {
+        var rig = new Rig();
+        Door door = rig.Door(2, "Airlock Inner Door");
+        var sim = Simulation.On(rig);
+        sim.Tick();
+        var declared = Declared(sim, door);
+
+        door.Name = "Airlock Door";
+        sim.Tick();
+
+        string name;
+        sim.World.Values.TryText(declared.Keys[2].Kind, declared.Keys[2].Value, out name);
+        Assert.Equal("Airlock Door", name);
+        Assert.Equal(RefState.Bound, sim.Runner.Bindings.State(declared.Name));
+    }
+
     /// <summary>A block found by its name alone is a suggestion, not a match: two blocks can share one.</summary>
     [Fact]
     public void ABlockFoundByItsNameAloneIsOnlySuggested()
