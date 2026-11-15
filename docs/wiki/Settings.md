@@ -1,14 +1,17 @@
-Sprocket has three settings.
+Sprocket has four settings.
 
 | Setting | Values | Default |
 |---|---|---|
 | `fastestUpdate` | 1, 10 or 100 | 1 |
 | `developerMode` | true or false | false |
 | `debugLog` | true or false | false |
+| `shareLimit` | 0, 10, 25, 50, 100 or 250 | 100 |
 
 **fastestUpdate** is how often, in ticks, timers and block checks can repeat. Button presses, other game events and timed waits aren't affected. Any other number gets rounded to the nearest of 1, 10 or 100, with a warning in the game's log.
 
 **developerMode** shows each automation's script as text you can edit and adds extra tools to the screens. It's for testing and making content, not normal play.
+
+**shareLimit** is how many blueprints each player may share in a world. 0 means nobody can share. Any other number gets rounded to the nearest of the ones listed.
 
 **debugLog** writes everything every automation does to the Space Engineers log. That can slow the game down, so only switch it on while you're tracking down a problem, then send the log along with your report. You get what started each run, each step as written in the script, what each block was told to do, which way each if went and what the blocks read, waits, faults with the step and block, skipped starts and why, and how each run ended or what stopped it. Every line starts with `[Sprocket]` and gives the tick, construct, logic system and installation, and sequence:
 

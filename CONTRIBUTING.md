@@ -24,6 +24,11 @@ describes.
 
 [MDK² Project Configuration Guide](https://malforge.github.io/spaceengineers/mdk2/MDK%C2%B2-Project-Configuration-Guide.html).
 
+## The font mods
+
+The simulator, and so the tests, draw with the font mods Sprocket requires, read from Steam's Workshop folder. Load a
+world with Sprocket in the game once and Steam downloads them; without them the simulator stops and says so.
+
 ## Building and testing
 
 ```
@@ -32,10 +37,6 @@ dotnet build src/Sprocket.Host.SpaceEngineers -p:MdkBuildConfiguration=none  # b
 dotnet test -p:MdkBuildConfiguration=none                                    # every test project
 ```
 
-## LLM skills
+## Agents
 
-- [csharp-standards](.claude/skills/csharp-standards/SKILL.md): naming, documentation, comments, structure and idiom,
-  for C# anywhere.
-- [sprocket-standards](.claude/skills/sprocket-standards/SKILL.md): what is true of this repository alone, such as the
-  C# 6 ceiling the game compiles the mod with.
-
+Agents working on Sprocket read their rules from [AGENTS.md](AGENTS.md).
