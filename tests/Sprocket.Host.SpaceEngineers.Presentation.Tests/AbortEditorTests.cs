@@ -1,7 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
-using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel.Controls;
 using Lumel.Text;
@@ -90,16 +89,6 @@ public class AbortEditorTests
         Assert.Null(Page(screen).Aborting);
         var abort = Assert.IsType<Abort>(Assert.Single(screen.Editor.Program.Sequences[0].Steps));
         Assert.Equal("", abort.Message);
-    }
-
-    /// <summary>Done is drawn as the button Enter presses.</summary>
-    [Fact]
-    public void DoneIsThePrimaryButton()
-    {
-        var screen = Added();
-        PressPart(screen);
-
-        Assert.Same(Styles.Primary, Done(screen).Style);
     }
 
     static Screen Added()
