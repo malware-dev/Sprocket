@@ -1904,14 +1904,6 @@
     <value>Leave it</value>
     <comment>In the library, the answer to the question whether to make a copy of a logic system that leaves things as they are; Enter gives it.</comment>
   </data>
-  <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
-    <value>Run which sequence?</value>
-    <comment>Heading, in the editor's heading bar, of the screen listing the logic system's other sequences, shown when adding or changing a step that starts another sequence.</comment>
-  </data>
-  <data name="Sprocket.Sequence.RunNone" xml:space="preserve">
-    <value>This system has no other sequence to run.</value>
-    <comment>Shown on the screen for choosing which sequence a step starts, in place of the list, when the logic system has no other sequence.</comment>
-  </data>
   <data name="Sprocket.Sequence.Branch" xml:space="preserve">
     <value>branch</value>
     <comment>Button on the row closing an if on a sequence's screen, after a plus sign meaning add. It opens the add-branch menu, offering otherwise if and otherwise.</comment>
@@ -1934,11 +1926,7 @@
   </data>
   <data name="Sprocket.Sequence.RemoveHandler" xml:space="preserve">
     <value>Delete this part of the sequence?</value>
-    <comment>Question asked on a sequence's screen when the bin on its "if it fails" or "finally" line is pressed and that part holds steps. The answers are to keep its steps, which then join the steps above, or to delete them too.</comment>
-  </data>
-  <data name="Sprocket.Sequence.StopQuestion" xml:space="preserve">
-    <value>Stop which sequence?</value>
-    <comment>Heading, in the editor's heading bar, of the screen listing the logic system's other sequences, shown when adding or changing a step that stops another sequence.</comment>
+    <comment>Question asked on a sequence's screen when the bin on its "if it fails" or "finally" line is pressed and that part holds steps. The answers are to keep its steps, which then join the part of the sequence before that line, or to delete them too.</comment>
   </data>
   <data name="Sprocket.Sequence.StopNone" xml:space="preserve">
     <value>This system has no other sequence to stop.</value>

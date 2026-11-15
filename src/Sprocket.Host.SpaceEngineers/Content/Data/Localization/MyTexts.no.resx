@@ -1447,12 +1447,6 @@
   <data name="Sprocket.Library.CopyLeave" xml:space="preserve">
     <value>Avbryt</value>
   </data>
-  <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
-    <value>Kjøre hvilken sekvens?</value>
-  </data>
-  <data name="Sprocket.Sequence.RunNone" xml:space="preserve">
-    <value>Dette systemet har ingen annen sekvens å kjøre.</value>
-  </data>
   <data name="Sprocket.Sequence.Branch" xml:space="preserve">
     <value>gren</value>
   </data>
@@ -1470,9 +1464,6 @@
   </data>
   <data name="Sprocket.Sequence.RemoveHandler" xml:space="preserve">
     <value>Slette denne delen av sekvensen?</value>
-  </data>
-  <data name="Sprocket.Sequence.StopQuestion" xml:space="preserve">
-    <value>Stoppe hvilken sekvens?</value>
   </data>
   <data name="Sprocket.Sequence.StopNone" xml:space="preserve">
     <value>Dette systemet har ingen annen sekvens å stoppe.</value>
