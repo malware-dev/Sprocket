@@ -492,6 +492,9 @@ namespace Sprocket.Host.SpaceEngineers
             }
         }
 
+        /// <summary>How the player at the screen stands, shown at the editor's foot: the game's own reading unless a host gives another.</summary>
+        public IVitals Vitals { get; set; } = new CharacterVitals();
+
         /// <summary>How somebody is working in this editor, as against what they are building in it: which list of what to do they read, and where they keep the codex.</summary>
         /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
         public EditorHabits Habits

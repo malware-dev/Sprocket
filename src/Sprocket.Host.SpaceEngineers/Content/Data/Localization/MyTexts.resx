@@ -2864,6 +2864,22 @@
     <value>Category {number}</value>
     <comment>The name a new category of slots is given on a logic system's Installation panel tab. {number} is filled with the first number no category is using, counting on from the categories there are.</comment>
   </data>
+  <data name="Sprocket.Vitals.Health" xml:space="preserve">
+    <value>Health</value>
+    <comment>The word beside a bar at the foot of the editor showing the player's health, as a share of the most.</comment>
+  </data>
+  <data name="Sprocket.Vitals.Energy" xml:space="preserve">
+    <value>Energy</value>
+    <comment>The word beside a bar at the foot of the editor showing the energy in the player's suit, as a share of the most.</comment>
+  </data>
+  <data name="Sprocket.Vitals.Oxygen" xml:space="preserve">
+    <value>Oxygen</value>
+    <comment>The word beside a bar at the foot of the editor showing the oxygen in the player's suit, shown only where the world has oxygen, as a share of the most.</comment>
+  </data>
+  <data name="Sprocket.Vitals.Food" xml:space="preserve">
+    <value>Food</value>
+    <comment>The word beside a bar at the foot of the editor showing how fed the player is, shown only where the world has hunger, as a share of the most.</comment>
+  </data>
   <data name="Sprocket.Slot.Add" xml:space="preserve">
     <value>slot</value>
     <comment>The words of the button under the slots on a logic system's installation panel tab, and at the end of each category of slots, after a plus: it opens a menu of the kinds of slot to add.</comment>

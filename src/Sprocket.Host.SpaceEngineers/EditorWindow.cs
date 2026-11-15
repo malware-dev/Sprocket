@@ -49,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers
         readonly ScrollView _scroll;
         readonly VStack _body;
         readonly VStack _foot;
+        readonly VitalsStrip _vitals;
         readonly HStack _actions;
 
         readonly RelayCommand _undoes;
@@ -157,14 +158,23 @@ namespace Sprocket.Host.SpaceEngineers
                     }.As(out _page)
                 }
             });
-            // Shown only while the screen has actions, which only developer mode gives it.
+            // The player's vitals on the left, and on the right the screen's actions, which only developer mode gives it.
             root.Children.Add(new VStack
             {
                 IsVisible = false,
                 Children =
                 {
                     new Separator(),
-                    new HStack { Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, Padding = new Thickness(16f, 8f) }}.As(out _actions)
+                    new HStack
+                    {
+                        Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, Padding = new Thickness(16f, 8f) },
+                        Children =
+                        {
+                            new VitalsStrip { Align = Align.Center }.As(out _vitals),
+                            new HStack { Placement = Flex.Spacer },
+                            new HStack { Base = { Spacing = Gaps.Parts } }.As(out _actions)
+                        }
+                    }
                 }
             }.As(out _foot));
 
@@ -276,6 +286,13 @@ namespace Sprocket.Host.SpaceEngineers
                 Show(screen);
 
             _banner.Show(_editor.Notice);
+
+            // The vitals move slowly and reading them asks the game, so they are read twice a second rather than every frame.
+            if (_editor.CurrentTick % 30 == 0)
+            {
+                _vitals.Show(_editor.Vitals, _editor.Texts);
+                _foot.IsVisible = _vitals.IsVisible || _actions.Children.Count > 0;
+            }
 
             if (screen.Revision == _seen)
                 return;
@@ -605,7 +622,7 @@ namespace Sprocket.Host.SpaceEngineers
         void ShowActions(EditorScreen screen)
         {
             var actions = screen.Actions;
-            _foot.IsVisible = actions.Count > 0;
+            _foot.IsVisible = actions.Count > 0 || _vitals.IsVisible;
             if (Same(actions))
                 return;
 

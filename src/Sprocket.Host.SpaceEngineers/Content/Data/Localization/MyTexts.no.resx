@@ -2167,6 +2167,18 @@
   <data name="Sprocket.Category.Default" xml:space="preserve">
     <value>Kategori {number}</value>
   </data>
+  <data name="Sprocket.Vitals.Health" xml:space="preserve">
+    <value>Helse</value>
+  </data>
+  <data name="Sprocket.Vitals.Energy" xml:space="preserve">
+    <value>Energi</value>
+  </data>
+  <data name="Sprocket.Vitals.Oxygen" xml:space="preserve">
+    <value>Oksygen</value>
+  </data>
+  <data name="Sprocket.Vitals.Food" xml:space="preserve">
+    <value>Mat</value>
+  </data>
   <data name="Sprocket.Slot.Add" xml:space="preserve">
     <value>plass</value>
   </data>

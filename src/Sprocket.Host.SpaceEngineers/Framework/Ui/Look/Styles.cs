@@ -599,6 +599,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Disabled = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, Track = Palette.Well }
         };
 
+        /// <summary>A bar of the player's vitals at the editor's foot: ink on a well, amber when low, red as it blinks nearly gone.</summary>
+        public static readonly IStyle<ProgressBar> Vital = new ProgressBarStyle
+        {
+            Base = { Background = Palette.Well, Fill = Palette.Ink },
+            [LookStates.Warned] = { Fill = Palette.Notice },
+            [LookStates.Broken] = { Fill = Palette.Problem }
+        };
+
         /// <summary>A logic system's or an installation's switch, its thumb amber while off, as the row or heading bar holding it is washed.</summary>
         public static readonly IStyle<Switch> SystemSwitch = new SwitchStyle(Switch)
         {
