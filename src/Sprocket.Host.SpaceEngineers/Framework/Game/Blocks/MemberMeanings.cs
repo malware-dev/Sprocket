@@ -61,10 +61,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 In(kind, "UseAntenna", Category.Signals);
             }
 
-            // Its pulse is fired by discharging it.
-            if (Claimed<MicroEmitter>(kind))
-                In(kind, "Discharge", Category.Weapons);
-
             // Arming is what a sequence does to a warhead beside detonating it, and its countdown is how long that takes.
             if (block is IMyWarhead)
             {
@@ -75,10 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             // Whether the zone is up is whether it runs.
             if (block is IMySafeZoneBlock)
                 In(kind, "SafeZoneCreate", Category.Power);
-
-            // A charge lets go of the grid it holds.
-            if (Claimed<SeparationCharge>(kind))
-                In(kind, "Detach", Category.Locking);
 
             // How strongly it turns the ship.
             if (block is IMyGyro)

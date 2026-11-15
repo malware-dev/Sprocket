@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -50,6 +51,66 @@ public class UpgradeTests
         + "        }\n"
         + "    }\n"
         + "}\n";
+
+    /// <summary>
+    /// An alpha 27 program's members of a block's component are Sprocket's own: a separation charge's Detach, by a slot or a
+    /// declaration, and a micro emitter's countdown set, checked and its discharge. A rotor's Detach stays the game's.
+    /// </summary>
+    [Fact]
+    public void AComponentsMembersAreMadeSprocketsOwn()
+    {
+        const string text = "sprocket 1 alpha 27\n\n"
+            + "let charge = block 'FunctionalBlock/LargeBlockSeparationCharge' [ 5, \"Charge\" ]\n"
+            + "let rotor = block 'MotorStator/LargeStator' [ 6, \"Rotor\" ]\n"
+            + "let emitter = block 'FunctionalBlock/LargeBlockPrototechMicroEmitter' [ 7, \"Emitter\" ]\n\n"
+            + "system blueprint \"9c3e5a7b-4d6f-4e80-ab12-3f5a7b9d1e43\" as MalTek.Stage {\n"
+            + "    required slot stage\n"
+            + "    required slot arm\n\n"
+            + "    sequence 1 as Separate {\n"
+            + "        call Detach on [ stage ]\n"
+            + "        call Detach on [ arm ]\n"
+            + "    }\n"
+            + "}\n\n"
+            + "instance 1 of MalTek.Stage {\n"
+            + "    stage = [ charge ]\n"
+            + "    arm = [ rotor ]\n"
+            + "}\n\n"
+            + "system \"0d4f6b8c-5e7a-4f91-bc23-4a6b8c0e2f54\" as MalTek.Pod {\n"
+            + "    sequence 1 as Eject {\n"
+            + "        call Detach on [ charge ]\n"
+            + "        set Countdown on [ emitter ] to 5\n"
+            + "        if any Countdown on [ emitter ] >= 5 then {\n"
+            + "            call Discharge on [ emitter ]\n"
+            + "        }\n"
+            + "    }\n"
+            + "}\n";
+
+        var values = new Values();
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(text, program, values));
+
+        var stage = (Act)program.Systems[0].Sequences[0].Steps[0];
+        var arm = (Act)program.Systems[0].Sequences[0].Steps[1];
+        var pod = (Act)program.Systems[1].Sequences[0].Steps[0];
+        foreach (var detach in new[] { stage, pod })
+        {
+            Assert.Equal(SeparationCharge.Detach, detach.ActionId);
+            Assert.Equal(ReachKind.Native, detach.Form);
+            Assert.Equal(BlockKinds.Own, detach.Provider);
+        }
+
+        Assert.Equal("Detach", arm.ActionId);
+        Assert.Equal(ReachKind.Action, arm.Form);
+
+        var written = ProgramWriter.Save(program, values);
+        Assert.StartsWith($"sprocket 1 alpha {ScriptFormat.Draft}", written);
+        Assert.Contains("call ext.detach on [ stage ]", written);
+        Assert.Contains("call Detach on [ arm ]", written);
+        Assert.Contains("call ext.detach on [ charge ]", written);
+        Assert.Contains("set ext.countdown on [ emitter ] to 5", written);
+        Assert.Contains("if any ext.countdown on [ emitter ] >= 5 then", written);
+        Assert.Contains("call ext.discharge on [ emitter ]", written);
+    }
 
     /// <summary>An assembler's mode, set, checked and watched as alpha 21 called it, says disassembling.</summary>
     [Fact]
@@ -320,7 +381,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith("sprocket 1 alpha 27", written);
+        Assert.StartsWith($"sprocket 1 alpha {ScriptFormat.Draft}", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -366,7 +427,7 @@ public class UpgradeTests
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
-    [InlineData("sprocket 1 alpha 28")]
+    [InlineData("sprocket 1 alpha 29")]
     [InlineData("sprocket 2 alpha 14")]
     [InlineData("sprocket 1")]
     public void AnyOtherFormatIsRefused(string header)

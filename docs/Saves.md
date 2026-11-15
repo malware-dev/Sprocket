@@ -22,7 +22,7 @@ read whole or not at all.
 ## The program
 
 A program is a script in Sprocket's [language](Language.md), written by `ProgramWriter.Save` and read by
-`ProgramReader.Load` (`Framework/Language`). Its first line says which format wrote it, such as `sprocket 1 alpha 27`.
+`ProgramReader.Load` (`Framework/Language`). Its first line says which format wrote it, such as `sprocket 1 alpha 28`.
 A text that won't read, or comes from a format this build neither writes nor upgrades, is kept exactly as it was and
 never written over, until a person deals with it. Format changes are in [Upgrades](Upgrades.md).
 

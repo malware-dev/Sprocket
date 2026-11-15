@@ -2968,6 +2968,42 @@
     <value>Blows the charge, splitting the ship where it was.</value>
     <comment>Codex entry on the block member "detach" of SeparationCharge, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.MicroEmitter.Discharge" xml:space="preserve">
+    <value>Fires the emitter's pulse, once it has charged.</value>
+    <comment>Codex entry on the block member "discharge" of MicroEmitter, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.MicroEmitter.StartCountdown" xml:space="preserve">
+    <value>Starts the emitter's countdown.</value>
+    <comment>Codex entry on the block member "start countdown" of MicroEmitter, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.MicroEmitter.StopCountdown" xml:space="preserve">
+    <value>Stops the emitter's countdown.</value>
+    <comment>Codex entry on the block member "stop countdown" of MicroEmitter, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.MicroEmitter.CountingDown" xml:space="preserve">
+    <value>Whether the emitter's countdown is running.</value>
+    <comment>Codex entry on the block member "counting down" of MicroEmitter, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.MicroEmitter.Countdown" xml:space="preserve">
+    <value>The emitter's countdown, in seconds.</value>
+    <comment>Codex entry on the block member "countdown" of MicroEmitter, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.FarmPlot.Color" xml:space="preserve">
+    <value>The color of the light.</value>
+    <comment>Codex entry on the block member "color" of FarmPlot, the farm plot's light, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.FarmPlot.Intensity" xml:space="preserve">
+    <value>How bright the light is.</value>
+    <comment>Codex entry on the block member "intensity" of FarmPlot, the farm plot's light, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.FarmPlot.Radius" xml:space="preserve">
+    <value>How far the light reaches, in meters.</value>
+    <comment>Codex entry on the block member "radius" of FarmPlot, the farm plot's light, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.FarmPlot.Falloff" xml:space="preserve">
+    <value>How the light fades away from the block: 1 is linear, 2 is quadratic, and so on.</value>
+    <comment>Codex entry on the block member "falloff" of FarmPlot, the farm plot's light, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.Warhead.Armed" xml:space="preserve">
     <value>Met while the warhead is armed.</value>
     <comment>Codex entry on the block member "armed" of Warhead, shown in the picker when it is chosen.</comment>

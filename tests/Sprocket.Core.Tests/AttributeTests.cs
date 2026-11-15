@@ -13,7 +13,7 @@ public class AttributeTests
 {
     /// <summary>A program with an attribute Sprocket does not use on every kind of statement that can carry one.</summary>
     const string Everywhere = "#@ headerNote: 1\n"
-        + "sprocket 1 alpha 27\n\n"
+        + "sprocket 1 alpha 28\n\n"
         + "#@ doorNote: [ 1, 2 ]\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n"
         + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n"
@@ -43,7 +43,7 @@ public class AttributeTests
 
     /// <summary>Every attribute Sprocket does not use is written back as it was, above the statement it was above.</summary>
     [Theory]
-    [InlineData("#@ headerNote: 1\nsprocket 1 alpha 27\n")]
+    [InlineData("#@ headerNote: 1\nsprocket 1 alpha 28\n")]
     [InlineData("#@ doorNote: [ 1, 2 ]\nlet door1 = ")]
     [InlineData("#@ bellNote: 600t\nlet bell = ")]
     [InlineData("# The airlock.\n#@ systemNote: \"one\"\nsystem blueprint ")]

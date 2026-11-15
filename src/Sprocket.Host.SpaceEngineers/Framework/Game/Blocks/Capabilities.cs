@@ -79,6 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             new SafeZone(),
             new SeparationCharge(),
             new MicroEmitter(),
+            new FarmPlot(),
             new ServicesTerminal()
         };
 

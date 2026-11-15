@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format
         public const int Version = 1;
 
         /// <summary>The draft of the format's version this build writes, the number after <c>alpha</c> on a script's first line.</summary>
-        public const int Draft = 27;
+        public const int Draft = 28;
 
         /// <summary>The function this host names a signal with: a slot on a block's toolbar.</summary>
         /// <remarks>Persisted in every program with a trigger.</remarks>

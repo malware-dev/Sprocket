@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Door = Sprocket.Sim.Machine.Door;
 using Sandbox.ModAPI;
 using Sprocket.Sim.Fakes;
@@ -249,9 +250,12 @@ public class CommonMembersTests
             Assert.False(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is vetted");
     }
 
-    /// <summary>A separation charge's detach is vetted in the game's words.</summary>
+    /// <summary>
+    /// A separation charge's detach is Sprocket's own, under Locking, and standing in for the game's Detach where the game
+    /// offers one: the Mod API never finds the game's on a server.
+    /// </summary>
     [Fact]
-    public void ASeparationChargesDetachIsVetted()
+    public void ASeparationChargesDetachIsItsOwn()
     {
         var ship = new Ship();
         var charge = Functional(ship, 3, "Charge", "LargeBlockSeparationCharge")
@@ -259,15 +263,37 @@ public class CommonMembersTests
             .Offering("Detach", "Detach");
         var kind = ship.Rig.Entity(charge.Id).Kind;
 
-        var detach = kind.FindAction("Detach", ReachKind.Action)!;
-        Assert.True(detach.Vetted);
-        Assert.False(detach.Renamed);
-        Assert.False(kind.FindAction("OnOff_On", ReachKind.Action)!.Vetted);
+        var detach = kind.FindAction(SeparationCharge.Detach, ReachKind.Native)!;
+        Assert.Equal(Category.Locking, detach.Category);
+        Assert.True(kind.FindAction("Detach", ReachKind.Action)!.Hidden);
     }
 
-    /// <summary>A micro emitter's discharge, its countdown's start and stop, and the countdown are vetted, and the countdown's steps are not.</summary>
+    /// <summary>A step detaching a separation charge tells its component to detach, once.</summary>
     [Fact]
-    public void AMicroEmittersDischargeAndCountdownAreVetted()
+    public void DetachingASeparationChargeTellsItsComponent()
+    {
+        var ship = new Ship();
+        var detached = 0;
+        var charge = Functional(ship, 3, "Charge", "LargeBlockSeparationCharge")
+            .Holding(Pretend.To<IMyDestroyBlockComponent>().Does("Detach", _ => detached++).Done());
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var detach = new Act(SeparationCharge.Detach) { Form = ReachKind.Native, Provider = BlockKinds.Own };
+        detach.Targets.Add(ship.Name(charge));
+        cycle.Steps.Add(detach);
+
+        ship.Start();
+        ship.Runner.Call(cycle, cycle.System.First);
+        ship.Tick();
+
+        Assert.Equal(1, detached);
+    }
+
+    /// <summary>
+    /// A micro emitter's discharge, its countdown's start and stop, the countdown and whether it is counting down are
+    /// Sprocket's own, standing in for the game's where the game offers them: the Mod API never finds the game's on a server.
+    /// </summary>
+    [Fact]
+    public void AMicroEmittersPulseIsItsOwn()
     {
         var ship = new Ship();
         var emitter = Functional(ship, 3, "Emitter", "LargeBlockPrototechMicroEmitter")
@@ -280,13 +306,88 @@ public class CommonMembersTests
             .Offering("DecreaseCountdown", "Decrease Countdown");
         var kind = ship.Rig.Entity(emitter.Id).Kind;
 
-        foreach (var id in new[] { "Discharge", "StartCountdown", "StopCountdown" })
-            Assert.True(kind.FindAction(id, ReachKind.Action)!.Vetted, id + " is not vetted");
+        foreach (var id in new[] { "discharge", "start_countdown", "stop_countdown" })
+            Assert.Equal(Category.Weapons, kind.FindAction(id, ReachKind.Native)!.Category);
 
-        Assert.True(kind.FindAction("Countdown", ReachKind.Value)!.Vetted);
+        foreach (var id in new[] { "countdown", "counting_down" })
+            Assert.Equal(Category.Weapons, kind.FindAction(id, ReachKind.Value)!.Category);
 
-        foreach (var id in new[] { "IncreaseCountdown", "DecreaseCountdown" })
-            Assert.False(kind.FindAction(id, ReachKind.Action)!.Vetted, id + " is vetted");
+        foreach (var id in new[] { "Discharge", "StartCountdown", "StopCountdown", "IncreaseCountdown", "DecreaseCountdown" })
+            Assert.True(kind.FindAction(id, ReachKind.Action)!.Hidden, id + " is listed");
+
+        Assert.True(kind.FindAction("Countdown", ReachKind.Value)!.Hidden);
+    }
+
+    /// <summary>
+    /// A farm plot's light is Sprocket's own, in a light's words under Appearance, each set held to the farm plot light's
+    /// bounds in the game's data.
+    /// </summary>
+    [Fact]
+    public void AFarmPlotsLightIsItsOwn()
+    {
+        var ship = new Ship();
+        var plot = Functional(ship, 3, "Plot", "LargeBlockFarmPlot")
+            .Holding(Pretend.To<IMyLightingComponent>().Done());
+        var kind = ship.Rig.Entity(plot.Id).Kind;
+
+        foreach (var id in new[] { "color", "intensity", "radius", "falloff" })
+            Assert.Equal(Category.Appearance, kind.FindAction(id, ReachKind.Value)!.Category);
+
+        var fields = new List<Field>();
+        kind.FindAction("radius", ReachKind.Value)!.Fields(fields);
+        var radius = Assert.Single(fields);
+        Assert.Equal("2", radius.Least);
+        Assert.Equal("20", radius.Most);
+    }
+
+    /// <summary>A step setting a farm plot's light radius sets its component's.</summary>
+    [Fact]
+    public void SettingAFarmPlotsRadiusTellsItsComponent()
+    {
+        var ship = new Ship();
+        var radius = 0f;
+        var plot = Functional(ship, 3, "Plot", "LargeBlockFarmPlot")
+            .Holding(Pretend.To<IMyLightingComponent>().Does("set_Radius", given => radius = (float)given[0]).Done());
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var set = new Act("radius") { Form = ReachKind.Value, Provider = BlockKinds.Own };
+        set.Targets.Add(ship.Name(plot));
+        set.Arguments.Add(Literal.Of(8.0));
+        cycle.Steps.Add(set);
+
+        ship.Start();
+        ship.Runner.Call(cycle, cycle.System.First);
+        ship.Tick();
+
+        Assert.Equal(8f, radius);
+    }
+
+    /// <summary>A micro emitter's steps reach its component: a countdown set is the component's, and a discharge fires it.</summary>
+    [Fact]
+    public void AMicroEmittersStepsTellItsComponent()
+    {
+        var ship = new Ship();
+        var fired = 0;
+        var countdown = 0f;
+        var emitter = Functional(ship, 3, "Emitter", "LargeBlockPrototechMicroEmitter")
+            .Holding(Pretend.To<IMyEmpEntityComponent>()
+                .Does("Discharge", _ => fired++)
+                .Does("set_Countdown", given => countdown = (float)given[0])
+                .Done());
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var set = new Act("countdown") { Form = ReachKind.Value, Provider = BlockKinds.Own };
+        set.Targets.Add(ship.Name(emitter));
+        set.Arguments.Add(Literal.Of(5.0));
+        cycle.Steps.Add(set);
+        var discharge = new Act("discharge") { Form = ReachKind.Native, Provider = BlockKinds.Own };
+        discharge.Targets.Add(ship.Name(emitter));
+        cycle.Steps.Add(discharge);
+
+        ship.Start();
+        ship.Runner.Call(cycle, cycle.System.First);
+        ship.Tick();
+
+        Assert.Equal(5f, countdown);
+        Assert.Equal(1, fired);
     }
 
     /// <summary>
