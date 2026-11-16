@@ -22,6 +22,11 @@ The mod API gives no way to share them through the Workshop, so sharing happens 
 [h2]Getting started[/h2]
 Find any programmable block in the terminal and press [b]Automation[/b]. That's it. Not sure what something does? Rest the pointer on it for a tip. Hold Alt and the tip stays open, so you can dig into the words it links.
 
+[h2]Admin settings[/h2]
+Admins get an [b]Admin[/b] button at the top of Sprocket's home screen. To see it, you need to be an admin (in single player, you always are) with creative tools switched on in the admin menu (Alt+F10), or be in a creative world.
+
+That's where you keep Sprocket in check on your world or server: how hard it may work and what players may share. If Sprocket is costing your server too much, that's the place to look. It's also where you switch on logging, if we're trying to track down a problem. Keep logging [i]off[/i] during normal play though, at least on servers, so it doesn't put pressure on performance. Settings can be made for this world or as defaults for every world.
+
 [h2]Why I made it[/h2]
 I want more players to have a go at complex automation, programmer or not. Timer chains get fragile fast, and the programmable block wants you to write [i]code[/i]. That's a pretty steep wall if all you want is an airlock that cycles itself. Honestly? I'd love for Keen to take a look at this, and maybe take Space Engineers somewhere similar.
 
