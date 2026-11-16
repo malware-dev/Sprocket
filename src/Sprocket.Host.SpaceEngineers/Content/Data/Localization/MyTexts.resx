@@ -2935,6 +2935,14 @@ Rich text is plain text with a few marks typed into it, taken from Markdown, tha
 
 **bold**  *italic*  ***both***  `code`
 
+## Colors
+
+`[Danger]{color=red}  [Caution]{color=#E8B323}`
+
+[Danger]{color=red}  [Caution]{color=#E8B323}
+
+A color is a name or a hex code: `#rrggbb`, or `#aarrggbb` with its transparency first. The names are black, white, gray, silver, red, maroon, orange, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia and purple. Anything else is left as written, brackets and all.
+
 ## Headings
 
 `# Large`

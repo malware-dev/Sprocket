@@ -2223,6 +2223,14 @@ Formatert tekst er vanlig tekst med noen få merker skrevet inn, hentet fra Mark
 
 **fet**  *kursiv*  ***begge***  `kode`
 
+## Farger
+
+`[Fare]{color=red}  [Forsiktig]{color=#E8B323}`
+
+[Fare]{color=red}  [Forsiktig]{color=#E8B323}
+
+En farge er et navn eller en heksadesimal kode: `#rrggbb`, eller `#aarrggbb` med gjennomsiktigheten først. Navnene er black, white, gray, silver, red, maroon, orange, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia og purple. Alt annet blir stående som skrevet, med klammer og alt.
+
 ## Overskrifter
 
 `# Stor`

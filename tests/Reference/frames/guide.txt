@@ -125,185 +125,200 @@ on screen     Airlock
 118  SetClip    {X:964 Y:159 W:700 H:811}
 119  Sprite     Lumel_Fill            {X:984 Y:267 W:640 H:1}  #5B737BFF
 120  Sprite     Lumel_Fill            {X:984 Y:368 W:640 H:1}  #5B737BFF
-121  Sprite     Lumel_Fill            {X:984 Y:489 W:640 H:1}  #5B737BFF
-122  Sprite     Lumel_Fill            {X:984 Y:534 W:640 H:1}  #5B737BFF
-123  Sprite     Lumel_Fill            {X:984 Y:619 W:640 H:1}  #5B737BFF
-124  Sprite     Lumel_Fill            {X:984 Y:692 W:640 H:1}  #5B737BFF
-125  Sprite     Lumel_Fill            {X:998 Y:797 W:4 H:4}  #5B737BFF
-126  Sprite     Lumel_Fill            {X:998 Y:825 W:4 H:4}  #5B737BFF
-127  Sprite     Lumel_Fill            {X:984 Y:937 W:640 H:1}  #5B737BFF
-128  Sprite     Lumel_Fill            {X:984 Y:974 W:3 H:20}  #5B737BFF
-129  Sprite     Lumel_Fill            {X:984 Y:1038 W:640 H:1}  #5B737BFF
-130  Sprite     Lumel_Fill            {X:984 Y:1085 W:640 H:1}  #5B737BFF
-131  Sprite     Lumel_Fill            {X:984 Y:1139 W:640 H:1}  #5B737BFF
+121  Sprite     Lumel_Fill            {X:984 Y:537 W:640 H:1}  #5B737BFF
+122  Sprite     Lumel_Fill            {X:984 Y:658 W:640 H:1}  #5B737BFF
+123  Sprite     Lumel_Fill            {X:984 Y:703 W:640 H:1}  #5B737BFF
+124  Sprite     Lumel_Fill            {X:984 Y:788 W:640 H:1}  #5B737BFF
+125  Sprite     Lumel_Fill            {X:984 Y:861 W:640 H:1}  #5B737BFF
+126  Sprite     Lumel_Fill            {X:998 Y:966 W:4 H:4}  #5B737BFF
+127  Sprite     Lumel_Fill            {X:998 Y:994 W:4 H:4}  #5B737BFF
+128  Sprite     Lumel_Fill            {X:984 Y:1106 W:640 H:1}  #5B737BFF
+129  Sprite     Lumel_Fill            {X:984 Y:1143 W:3 H:20}  #5B737BFF
+130  Sprite     Lumel_Fill            {X:984 Y:1207 W:640 H:1}  #5B737BFF
+131  Sprite     Lumel_Fill            {X:984 Y:1254 W:640 H:1}  #5B737BFF
 132  Sprite     Lumel_Fill            {X:984 Y:1308 W:640 H:1}  #5B737BFF
-133  Sprite     Lumel_Fill            {X:984 Y:1433 W:129 H:1}  #5B737BFF
-134  Sprite     Lumel_Fill            {X:984 Y:1885 W:640 H:1}  #5B737BFF
-135  Sprite     Lumel_Fill            {X:984 Y:1957 W:640 H:1}  #5B737BFF
-136  Sprite     Lumel_Fill            {X:984 Y:2086 W:640 H:1}  #5B737BFF
+133  Sprite     Lumel_Fill            {X:984 Y:1477 W:640 H:1}  #5B737BFF
+134  Sprite     Lumel_Fill            {X:984 Y:1602 W:129 H:1}  #5B737BFF
+135  Sprite     Lumel_Fill            {X:984 Y:2054 W:640 H:1}  #5B737BFF
+136  Sprite     Lumel_Fill            {X:984 Y:2126 W:640 H:1}  #5B737BFF
 137  Sprite     Lumel_Fill            {X:984 Y:2255 W:640 H:1}  #5B737BFF
-138  Text       at {X:984 Y:180.9279} scale 0.694  #A2C3CDFF  "Rich text is plain text with a few marks typed into it, taken from Markdown, that turn it into"
-139  Text       at {X:984 Y:200.9279} scale 0.694  #A2C3CDFF  "headings, lists, tables, and bold or italic words. This page shows each mark, and what it gives."
-140  Text       at {X:984 Y:236.5135} scale 0.833  #DCF5FDFF  "Bold, italic and code"
-141  Sprite     Lumel_Fill            {X:984 Y:277 W:377 H:18}  #FFFFFF0A
-142  Text       at {X:988 Y:273.9279} scale 0.694  #A2C3CDFF  "**bold**  *italic*  ***both***  `code`"
-143  Text       at {X:984 Y:301.9279} scale 0.694  #A2C3CDFF  "bold  "
-144  Text       at {X:1030.487 Y:301.9279} scale 0.694  #A2C3CDFF  "italic  "
-145  Text       at {X:1078.595 Y:301.9279} scale 0.694  #A2C3CDFF  "both  "
-146  Sprite     Lumel_Fill            {X:1126 Y:305 W:46 H:18}  #FFFFFF0A
-147  Text       at {X:1129.622 Y:301.9279} scale 0.694  #A2C3CDFF  "code"
-148  Text       at {X:984 Y:337.5135} scale 0.833  #DCF5FDFF  "Headings"
-149  Sprite     Lumel_Fill            {X:984 Y:378 W:76 H:18}  #FFFFFF0A
-150  Text       at {X:988 Y:374.9279} scale 0.694  #A2C3CDFF  "# Large"
-151  Sprite     Lumel_Fill            {X:984 Y:398 W:95 H:18}  #FFFFFF0A
-152  Text       at {X:988 Y:394.9279} scale 0.694  #A2C3CDFF  "## Middle"
-153  Sprite     Lumel_Fill            {X:984 Y:418 W:95 H:18}  #FFFFFF0A
-154  Text       at {X:988 Y:414.9279} scale 0.694  #A2C3CDFF  "### Small"
-155  Text       at {X:984 Y:449.6847} scale 1.111  #DCF5FDFF  "Large"
-156  Text       at {X:984 Y:503.5135} scale 0.833  #DCF5FDFF  "Middle"
-157  Text       at {X:984 Y:548.5135} scale 0.833  #DCF5FDFF  "Small"
-158  Text       at {X:984 Y:588.5135} scale 0.833  #DCF5FDFF  "Lines and paragraphs"
-159  Text       at {X:984 Y:625.9279} scale 0.694  #A2C3CDFF  "Enter starts a new line, and a blank line between two lines starts a new paragraph."
-160  Text       at {X:984 Y:661.5135} scale 0.833  #DCF5FDFF  "Lists"
-161  Sprite     Lumel_Fill            {X:984 Y:702 W:124 H:18}  #FFFFFF0A
-162  Text       at {X:988 Y:698.9279} scale 0.694  #A2C3CDFF  "- Inner door"
-163  Sprite     Lumel_Fill            {X:984 Y:722 W:124 H:18}  #FFFFFF0A
-164  Text       at {X:988 Y:718.9279} scale 0.694  #A2C3CDFF  "- Outer door"
-165  Sprite     Lumel_Fill            {X:984 Y:742 W:231 H:18}  #FFFFFF0A
-166  Text       at {X:988 Y:738.9279} scale 0.694  #A2C3CDFF  "1. Close the inner door"
-167  Sprite     Lumel_Fill            {X:984 Y:762 W:270 H:18}  #FFFFFF0A
-168  Text       at {X:988 Y:758.9279} scale 0.694  #A2C3CDFF  "2. Depressurize the airlock"
-169  Text       at {X:1016 Y:786.9279} scale 0.694  #A2C3CDFF  "Inner door"
-170  Text       at {X:1016 Y:814.9279} scale 0.694  #A2C3CDFF  "Outer door"
-171  Text       at {X:984 Y:842.9279} scale 0.694  #A2C3CDFF  "1."
-172  Text       at {X:1016 Y:842.9279} scale 0.694  #A2C3CDFF  "Close the inner door"
-173  Text       at {X:984 Y:870.9279} scale 0.694  #A2C3CDFF  "2."
-174  Text       at {X:1016 Y:870.9279} scale 0.694  #A2C3CDFF  "Depressurize the airlock"
-175  Text       at {X:984 Y:906.5135} scale 0.833  #DCF5FDFF  "Quotes"
-176  Sprite     Lumel_Fill            {X:984 Y:947 W:348 H:18}  #FFFFFF0A
-177  Text       at {X:988 Y:943.9279} scale 0.694  #A2C3CDFF  "> Wear a helmet before cycling out."
-178  Text       at {X:1016 Y:971.9279} scale 0.694  #A2C3CDFF  "Wear a helmet before cycling out."
-179  Text       at {X:984 Y:1007.513} scale 0.833  #DCF5FDFF  "Dividing lines"
-180  Sprite     Lumel_Fill            {X:984 Y:1048 W:37 H:18}  #FFFFFF0A
-181  Text       at {X:988 Y:1044.928} scale 0.694  #A2C3CDFF  "---"
-182  Text       at {X:984 Y:1108.514} scale 0.833  #DCF5FDFF  "Centered and right"
-183  Sprite     Lumel_Fill            {X:984 Y:1149 W:105 H:18}  #FFFFFF0A
-184  Text       at {X:988 Y:1145.928} scale 0.694  #A2C3CDFF  "::: center"
-185  Sprite     Lumel_Fill            {X:984 Y:1169 W:85 H:18}  #FFFFFF0A
-186  Text       at {X:988 Y:1165.928} scale 0.694  #A2C3CDFF  "Hangar 2"
-187  Sprite     Lumel_Fill            {X:984 Y:1189 W:37 H:18}  #FFFFFF0A
-188  Text       at {X:988 Y:1185.928} scale 0.694  #A2C3CDFF  ":::"
-189  Text       at {X:1273.603 Y:1213.928} scale 0.694  #A2C3CDFF  "Hangar 2"
-190  Sprite     Lumel_Fill            {X:984 Y:1245 W:95 H:18}  #FFFFFF0A
-191  Text       at {X:988 Y:1241.928} scale 0.694  #A2C3CDFF  "::: right"
-192  Text       at {X:1079.027 Y:1241.928} scale 0.694  #A2C3CDFF  " puts the lines between on the right the same way."
-193  Text       at {X:984 Y:1277.514} scale 0.833  #DCF5FDFF  "Tables"
-194  Sprite     Lumel_Fill            {X:984 Y:1318 W:163 H:18}  #FFFFFF0A
-195  Text       at {X:988 Y:1314.928} scale 0.694  #A2C3CDFF  "| Room | Vents |"
-196  Sprite     Lumel_Fill            {X:984 Y:1338 W:95 H:18}  #FFFFFF0A
-197  Text       at {X:988 Y:1334.928} scale 0.694  #A2C3CDFF  "|:--|--:|"
-198  Sprite     Lumel_Fill            {X:984 Y:1358 W:153 H:18}  #FFFFFF0A
-199  Text       at {X:988 Y:1354.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
-200  Sprite     Lumel_Fill            {X:984 Y:1378 W:144 H:18}  #FFFFFF0A
-201  Text       at {X:988 Y:1374.928} scale 0.694  #A2C3CDFF  "| Hangar | 4 |"
-202  Text       at {X:984 Y:1402.928} scale 0.694  #DCF5FDFF  "Room"
-203  Text       at {X:1064.567 Y:1402.928} scale 0.694  #DCF5FDFF  "Vents"
-204  Text       at {X:984 Y:1438.928} scale 0.694  #A2C3CDFF  "Airlock"
-205  Text       at {X:1104.568 Y:1438.928} scale 0.694  #A2C3CDFF  "1"
-206  Text       at {X:984 Y:1458.928} scale 0.694  #A2C3CDFF  "Hangar"
-207  Text       at {X:1104.568 Y:1458.928} scale 0.694  #A2C3CDFF  "4"
-208  Text       at {X:984 Y:1486.928} scale 0.694  #A2C3CDFF  "The second line says how each column lines up: "
-209  Sprite     Lumel_Fill            {X:1303 Y:1490 W:37 H:18}  #FFFFFF0A
-210  Text       at {X:1307.217 Y:1486.928} scale 0.694  #A2C3CDFF  ":--"
-211  Text       at {X:1339.865 Y:1486.928} scale 0.694  #A2C3CDFF  " left, "
-212  Sprite     Lumel_Fill            {X:1373 Y:1490 W:37 H:18}  #FFFFFF0A
-213  Text       at {X:1376.675 Y:1486.928} scale 0.694  #A2C3CDFF  ":-:"
-214  Text       at {X:1409.324 Y:1486.928} scale 0.694  #A2C3CDFF  " centered, "
-215  Sprite     Lumel_Fill            {X:1479 Y:1490 W:37 H:18}  #FFFFFF0A
-216  Text       at {X:1483.047 Y:1486.928} scale 0.694  #A2C3CDFF  "--:"
-217  Text       at {X:1515.696 Y:1486.928} scale 0.694  #A2C3CDFF  " right."
-218  Text       at {X:984 Y:1514.928} scale 0.694  #A2C3CDFF  "To leave out the heading, start the table with a row of empty cells:"
-219  Sprite     Lumel_Fill            {X:984 Y:1546 W:56 H:18}  #FFFFFF0A
-220  Text       at {X:988 Y:1542.928} scale 0.694  #A2C3CDFF  "| | |"
-221  Sprite     Lumel_Fill            {X:984 Y:1566 W:95 H:18}  #FFFFFF0A
-222  Text       at {X:988 Y:1562.928} scale 0.694  #A2C3CDFF  "|:--|--:|"
-223  Sprite     Lumel_Fill            {X:984 Y:1586 W:153 H:18}  #FFFFFF0A
-224  Text       at {X:988 Y:1582.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
-225  Sprite     Lumel_Fill            {X:984 Y:1606 W:144 H:18}  #FFFFFF0A
-226  Text       at {X:988 Y:1602.928} scale 0.694  #A2C3CDFF  "| Hangar | 4 |"
-227  Text       at {X:984 Y:1630.928} scale 0.694  #A2C3CDFF  "Airlock"
-228  Text       at {X:1064.567 Y:1630.928} scale 0.694  #A2C3CDFF  "1"
-229  Text       at {X:984 Y:1650.928} scale 0.694  #A2C3CDFF  "Hangar"
-230  Text       at {X:1064.567 Y:1650.928} scale 0.694  #A2C3CDFF  "4"
-231  Text       at {X:984 Y:1678.928} scale 0.694  #A2C3CDFF  "A table is as wide as its cells. Add a star into a column's dashes, as in "
-232  Sprite     Lumel_Fill            {X:1440 Y:1682 W:46 H:18}  #FFFFFF0A
-233  Text       at {X:1444.407 Y:1678.928} scale 0.694  #A2C3CDFF  ":--*"
-234  Text       at {X:1486.785 Y:1678.928} scale 0.694  #A2C3CDFF  ", to stretch the table"
-235  Text       at {X:984 Y:1698.928} scale 0.694  #A2C3CDFF  "across the page, that column taking a share of it. Stars set the shares: "
-236  Sprite     Lumel_Fill            {X:1445 Y:1702 W:114 H:18}  #FFFFFF0A
-237  Text       at {X:1448.693 Y:1698.928} scale 0.694  #A2C3CDFF  "|:--*|:--*|"
-238  Text       at {X:1559.18 Y:1698.928} scale 0.694  #A2C3CDFF  " gives"
-239  Text       at {X:984 Y:1718.928} scale 0.694  #A2C3CDFF  "two columns half each, while "
-240  Sprite     Lumel_Fill            {X:1178 Y:1722 W:134 H:18}  #FFFFFF0A
-241  Text       at {X:1182.39 Y:1718.928} scale 0.694  #A2C3CDFF  "|:--*|:--***|"
-242  Text       at {X:1312.336 Y:1718.928} scale 0.694  #A2C3CDFF  " gives one column a quarter and the other"
-243  Text       at {X:984 Y:1738.928} scale 0.694  #A2C3CDFF  "three quarters. A column without a star keeps the width of its cells, and the starred ones share"
-244  Text       at {X:984 Y:1758.928} scale 0.694  #A2C3CDFF  "what is left."
-245  Sprite     Lumel_Fill            {X:984 Y:1790 W:163 H:18}  #FFFFFF0A
-246  Text       at {X:988 Y:1786.928} scale 0.694  #A2C3CDFF  "| Room | Vents |"
-247  Sprite     Lumel_Fill            {X:984 Y:1810 W:105 H:18}  #FFFFFF0A
-248  Text       at {X:988 Y:1806.928} scale 0.694  #A2C3CDFF  "|:--*|--:|"
-249  Sprite     Lumel_Fill            {X:984 Y:1830 W:153 H:18}  #FFFFFF0A
-250  Text       at {X:988 Y:1826.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
-251  Text       at {X:984 Y:1854.928} scale 0.694  #DCF5FDFF  "Room"
-252  Text       at {X:1575.892 Y:1854.928} scale 0.694  #DCF5FDFF  "Vents"
-253  Text       at {X:984 Y:1890.928} scale 0.694  #A2C3CDFF  "Airlock"
-254  Text       at {X:1615.893 Y:1890.928} scale 0.694  #A2C3CDFF  "1"
-255  Text       at {X:984 Y:1926.514} scale 0.833  #DCF5FDFF  "Writing a mark as itself (escape character)"
-256  Sprite     Lumel_Fill            {X:984 Y:1967 W:144 H:18}  #FFFFFF0A
-257  Text       at {X:988 Y:1963.928} scale 0.694  #A2C3CDFF  "\*Inner door\*"
-258  Text       at {X:984 Y:1991.928} scale 0.694  #A2C3CDFF  "*Inner door*"
-259  Text       at {X:984 Y:2019.928} scale 0.694  #A2C3CDFF  "A backslash before a mark shows the mark as it is typed."
-260  Text       at {X:984 Y:2055.513} scale 0.833  #DCF5FDFF  "Keeping words together"
-261  Sprite     Lumel_Fill            {X:984 Y:2096 W:105 H:18}  #FFFFFF0A
-262  Text       at {X:988 Y:2092.928} scale 0.694  #A2C3CDFF  "10&nbsp;SC"
-263  Text       at {X:984 Y:2120.928} scale 0.694  #A2C3CDFF  "10 SC"
-264  Sprite     Lumel_Fill            {X:984 Y:2152 W:66 H:18}  #FFFFFF0A
-265  Text       at {X:988 Y:2148.928} scale 0.694  #A2C3CDFF  "&nbsp;"
-266  Text       at {X:1049.838 Y:2148.928} scale 0.694  #A2C3CDFF  " is a space a line never breaks at, so the words either side of it stay on one line. It"
-267  Text       at {X:984 Y:2168.928} scale 0.694  #A2C3CDFF  "keeps a mark with the link after it too: "
-268  Sprite     Lumel_Fill            {X:984 Y:2192 W:465 H:18}  #FFFFFF0A
-269  Text       at {X:988 Y:2188.928} scale 0.694  #A2C3CDFF  "![](mark:trigger)&nbsp;[triggers](Term.Trigger)"
-270  Text       at {X:1448.757 Y:2188.928} scale 0.694  #A2C3CDFF  "."
-271  Text       at {X:984 Y:2224.513} scale 0.833  #DCF5FDFF  "Writing a character by its name or number"
-272  Sprite     Lumel_Fill            {X:984 Y:2265 W:309 H:18}  #FFFFFF0A
-273  Text       at {X:988 Y:2261.928} scale 0.694  #A2C3CDFF  "&lt;Inner door&gt; &amp; &#169;"
-274  Text       at {X:984 Y:2289.928} scale 0.694  #A2C3CDFF  "<Inner door> & ©"
-275  Sprite     Lumel_Fill            {X:984 Y:2321 W:56 H:18}  #FFFFFF0A
-276  Text       at {X:988 Y:2317.928} scale 0.694  #A2C3CDFF  "&amp;"
-277  Text       at {X:1040.108 Y:2317.928} scale 0.694  #A2C3CDFF  ", "
-278  Sprite     Lumel_Fill            {X:1047 Y:2321 W:46 H:18}  #FFFFFF0A
-279  Text       at {X:1051.488 Y:2317.928} scale 0.694  #A2C3CDFF  "&lt;"
-280  Text       at {X:1093.866 Y:2317.928} scale 0.694  #A2C3CDFF  ", "
-281  Sprite     Lumel_Fill            {X:1101 Y:2321 W:46 H:18}  #FFFFFF0A
-282  Text       at {X:1105.246 Y:2317.928} scale 0.694  #A2C3CDFF  "&gt;"
-283  Text       at {X:1147.625 Y:2317.928} scale 0.694  #A2C3CDFF  ", "
-284  Sprite     Lumel_Fill            {X:1155 Y:2321 W:66 H:18}  #FFFFFF0A
-285  Text       at {X:1159.005 Y:2317.928} scale 0.694  #A2C3CDFF  "&quot;"
-286  Text       at {X:1220.843 Y:2317.928} scale 0.694  #A2C3CDFF  " and "
-287  Sprite     Lumel_Fill            {X:1254 Y:2321 W:66 H:18}  #FFFFFF0A
-288  Text       at {X:1258.096 Y:2317.928} scale 0.694  #A2C3CDFF  "&apos;"
-289  Text       at {X:1319.934 Y:2317.928} scale 0.694  #A2C3CDFF  " write &, <, >, " and '. Any character can be"
-290  Text       at {X:984 Y:2337.928} scale 0.694  #A2C3CDFF  "written by its number, as "
-291  Sprite     Lumel_Fill            {X:1151 Y:2341 W:66 H:18}  #FFFFFF0A
-292  Text       at {X:1155.33 Y:2337.928} scale 0.694  #A2C3CDFF  "&#169;"
-293  Text       at {X:1217.168 Y:2337.928} scale 0.694  #A2C3CDFF  " or "
-294  Sprite     Lumel_Fill            {X:1239 Y:2341 W:66 H:18}  #FFFFFF0A
-295  Text       at {X:1243.445 Y:2337.928} scale 0.694  #A2C3CDFF  "&#xA9;"
-296  Text       at {X:1305.282 Y:2337.928} scale 0.694  #A2C3CDFF  " for ©. An "
-297  Sprite     Lumel_Fill            {X:1375 Y:2341 W:17 H:18}  #FFFFFF0A
-298  Text       at {X:1379.359 Y:2337.928} scale 0.694  #A2C3CDFF  "&"
-299  Text       at {X:1392.548 Y:2337.928} scale 0.694  #A2C3CDFF  " that starts none of these is written"
-300  Text       at {X:984 Y:2357.928} scale 0.694  #A2C3CDFF  "as it is typed."
-301  Sprite     Lumel_Fill            {X:1652 Y:159 W:12 H:293}  #5F7278FF
-302  ClearClip  
+138  Sprite     Lumel_Fill            {X:984 Y:2424 W:640 H:1}  #5B737BFF
+139  Text       at {X:984 Y:180.9279} scale 0.694  #A2C3CDFF  "Rich text is plain text with a few marks typed into it, taken from Markdown, that turn it into"
+140  Text       at {X:984 Y:200.9279} scale 0.694  #A2C3CDFF  "headings, lists, tables, and bold or italic words. This page shows each mark, and what it gives."
+141  Text       at {X:984 Y:236.5135} scale 0.833  #DCF5FDFF  "Bold, italic and code"
+142  Sprite     Lumel_Fill            {X:984 Y:277 W:377 H:18}  #FFFFFF0A
+143  Text       at {X:988 Y:273.9279} scale 0.694  #A2C3CDFF  "**bold**  *italic*  ***both***  `code`"
+144  Text       at {X:984 Y:301.9279} scale 0.694  #A2C3CDFF  "bold  "
+145  Text       at {X:1030.487 Y:301.9279} scale 0.694  #A2C3CDFF  "italic  "
+146  Text       at {X:1078.595 Y:301.9279} scale 0.694  #A2C3CDFF  "both  "
+147  Sprite     Lumel_Fill            {X:1126 Y:305 W:46 H:18}  #FFFFFF0A
+148  Text       at {X:1129.622 Y:301.9279} scale 0.694  #A2C3CDFF  "code"
+149  Text       at {X:984 Y:337.5135} scale 0.833  #DCF5FDFF  "Colors"
+150  Sprite     Lumel_Fill            {X:984 Y:378 W:445 H:18}  #FFFFFF0A
+151  Text       at {X:988 Y:374.9279} scale 0.694  #A2C3CDFF  "[Danger]{color=red}  [Caution]{color=#E8B323}"
+152  Text       at {X:984 Y:402.9279} scale 0.694  #FF0000FF  "Danger  "
+153  Text       at {X:1040.887 Y:402.9279} scale 0.694  #E8B323FF  "Caution"
+154  Text       at {X:984 Y:430.9279} scale 0.694  #A2C3CDFF  "A color is a name or a hex code: "
+155  Sprite     Lumel_Fill            {X:1200 Y:434 W:76 H:18}  #FFFFFF0A
+156  Text       at {X:1203.56 Y:430.9279} scale 0.694  #A2C3CDFF  "#rrggbb"
+157  Text       at {X:1275.128 Y:430.9279} scale 0.694  #A2C3CDFF  ", or "
+158  Sprite     Lumel_Fill            {X:1301 Y:434 W:95 H:18}  #FFFFFF0A
+159  Text       at {X:1304.664 Y:430.9279} scale 0.694  #A2C3CDFF  "#aarrggbb"
+160  Text       at {X:1395.691 Y:430.9279} scale 0.694  #A2C3CDFF  " with its transparency first. The"
+161  Text       at {X:984 Y:450.9279} scale 0.694  #A2C3CDFF  "names are black, white, gray, silver, red, maroon, orange, yellow, olive, lime, green, aqua, teal,"
+162  Text       at {X:984 Y:470.9279} scale 0.694  #A2C3CDFF  "blue, navy, fuchsia and purple. Anything else is left as written, brackets and all."
+163  Text       at {X:984 Y:506.5135} scale 0.833  #DCF5FDFF  "Headings"
+164  Sprite     Lumel_Fill            {X:984 Y:547 W:76 H:18}  #FFFFFF0A
+165  Text       at {X:988 Y:543.9279} scale 0.694  #A2C3CDFF  "# Large"
+166  Sprite     Lumel_Fill            {X:984 Y:567 W:95 H:18}  #FFFFFF0A
+167  Text       at {X:988 Y:563.9279} scale 0.694  #A2C3CDFF  "## Middle"
+168  Sprite     Lumel_Fill            {X:984 Y:587 W:95 H:18}  #FFFFFF0A
+169  Text       at {X:988 Y:583.9279} scale 0.694  #A2C3CDFF  "### Small"
+170  Text       at {X:984 Y:618.6847} scale 1.111  #DCF5FDFF  "Large"
+171  Text       at {X:984 Y:672.5135} scale 0.833  #DCF5FDFF  "Middle"
+172  Text       at {X:984 Y:717.5135} scale 0.833  #DCF5FDFF  "Small"
+173  Text       at {X:984 Y:757.5135} scale 0.833  #DCF5FDFF  "Lines and paragraphs"
+174  Text       at {X:984 Y:794.9279} scale 0.694  #A2C3CDFF  "Enter starts a new line, and a blank line between two lines starts a new paragraph."
+175  Text       at {X:984 Y:830.5135} scale 0.833  #DCF5FDFF  "Lists"
+176  Sprite     Lumel_Fill            {X:984 Y:871 W:124 H:18}  #FFFFFF0A
+177  Text       at {X:988 Y:867.9279} scale 0.694  #A2C3CDFF  "- Inner door"
+178  Sprite     Lumel_Fill            {X:984 Y:891 W:124 H:18}  #FFFFFF0A
+179  Text       at {X:988 Y:887.9279} scale 0.694  #A2C3CDFF  "- Outer door"
+180  Sprite     Lumel_Fill            {X:984 Y:911 W:231 H:18}  #FFFFFF0A
+181  Text       at {X:988 Y:907.9279} scale 0.694  #A2C3CDFF  "1. Close the inner door"
+182  Sprite     Lumel_Fill            {X:984 Y:931 W:270 H:18}  #FFFFFF0A
+183  Text       at {X:988 Y:927.9279} scale 0.694  #A2C3CDFF  "2. Depressurize the airlock"
+184  Text       at {X:1016 Y:955.9279} scale 0.694  #A2C3CDFF  "Inner door"
+185  Text       at {X:1016 Y:983.9279} scale 0.694  #A2C3CDFF  "Outer door"
+186  Text       at {X:984 Y:1011.928} scale 0.694  #A2C3CDFF  "1."
+187  Text       at {X:1016 Y:1011.928} scale 0.694  #A2C3CDFF  "Close the inner door"
+188  Text       at {X:984 Y:1039.928} scale 0.694  #A2C3CDFF  "2."
+189  Text       at {X:1016 Y:1039.928} scale 0.694  #A2C3CDFF  "Depressurize the airlock"
+190  Text       at {X:984 Y:1075.514} scale 0.833  #DCF5FDFF  "Quotes"
+191  Sprite     Lumel_Fill            {X:984 Y:1116 W:348 H:18}  #FFFFFF0A
+192  Text       at {X:988 Y:1112.928} scale 0.694  #A2C3CDFF  "> Wear a helmet before cycling out."
+193  Text       at {X:1016 Y:1140.928} scale 0.694  #A2C3CDFF  "Wear a helmet before cycling out."
+194  Text       at {X:984 Y:1176.514} scale 0.833  #DCF5FDFF  "Dividing lines"
+195  Sprite     Lumel_Fill            {X:984 Y:1217 W:37 H:18}  #FFFFFF0A
+196  Text       at {X:988 Y:1213.928} scale 0.694  #A2C3CDFF  "---"
+197  Text       at {X:984 Y:1277.514} scale 0.833  #DCF5FDFF  "Centered and right"
+198  Sprite     Lumel_Fill            {X:984 Y:1318 W:105 H:18}  #FFFFFF0A
+199  Text       at {X:988 Y:1314.928} scale 0.694  #A2C3CDFF  "::: center"
+200  Sprite     Lumel_Fill            {X:984 Y:1338 W:85 H:18}  #FFFFFF0A
+201  Text       at {X:988 Y:1334.928} scale 0.694  #A2C3CDFF  "Hangar 2"
+202  Sprite     Lumel_Fill            {X:984 Y:1358 W:37 H:18}  #FFFFFF0A
+203  Text       at {X:988 Y:1354.928} scale 0.694  #A2C3CDFF  ":::"
+204  Text       at {X:1273.603 Y:1382.928} scale 0.694  #A2C3CDFF  "Hangar 2"
+205  Sprite     Lumel_Fill            {X:984 Y:1414 W:95 H:18}  #FFFFFF0A
+206  Text       at {X:988 Y:1410.928} scale 0.694  #A2C3CDFF  "::: right"
+207  Text       at {X:1079.027 Y:1410.928} scale 0.694  #A2C3CDFF  " puts the lines between on the right the same way."
+208  Text       at {X:984 Y:1446.514} scale 0.833  #DCF5FDFF  "Tables"
+209  Sprite     Lumel_Fill            {X:984 Y:1487 W:163 H:18}  #FFFFFF0A
+210  Text       at {X:988 Y:1483.928} scale 0.694  #A2C3CDFF  "| Room | Vents |"
+211  Sprite     Lumel_Fill            {X:984 Y:1507 W:95 H:18}  #FFFFFF0A
+212  Text       at {X:988 Y:1503.928} scale 0.694  #A2C3CDFF  "|:--|--:|"
+213  Sprite     Lumel_Fill            {X:984 Y:1527 W:153 H:18}  #FFFFFF0A
+214  Text       at {X:988 Y:1523.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
+215  Sprite     Lumel_Fill            {X:984 Y:1547 W:144 H:18}  #FFFFFF0A
+216  Text       at {X:988 Y:1543.928} scale 0.694  #A2C3CDFF  "| Hangar | 4 |"
+217  Text       at {X:984 Y:1571.928} scale 0.694  #DCF5FDFF  "Room"
+218  Text       at {X:1064.567 Y:1571.928} scale 0.694  #DCF5FDFF  "Vents"
+219  Text       at {X:984 Y:1607.928} scale 0.694  #A2C3CDFF  "Airlock"
+220  Text       at {X:1104.568 Y:1607.928} scale 0.694  #A2C3CDFF  "1"
+221  Text       at {X:984 Y:1627.928} scale 0.694  #A2C3CDFF  "Hangar"
+222  Text       at {X:1104.568 Y:1627.928} scale 0.694  #A2C3CDFF  "4"
+223  Text       at {X:984 Y:1655.928} scale 0.694  #A2C3CDFF  "The second line says how each column lines up: "
+224  Sprite     Lumel_Fill            {X:1303 Y:1659 W:37 H:18}  #FFFFFF0A
+225  Text       at {X:1307.217 Y:1655.928} scale 0.694  #A2C3CDFF  ":--"
+226  Text       at {X:1339.865 Y:1655.928} scale 0.694  #A2C3CDFF  " left, "
+227  Sprite     Lumel_Fill            {X:1373 Y:1659 W:37 H:18}  #FFFFFF0A
+228  Text       at {X:1376.675 Y:1655.928} scale 0.694  #A2C3CDFF  ":-:"
+229  Text       at {X:1409.324 Y:1655.928} scale 0.694  #A2C3CDFF  " centered, "
+230  Sprite     Lumel_Fill            {X:1479 Y:1659 W:37 H:18}  #FFFFFF0A
+231  Text       at {X:1483.047 Y:1655.928} scale 0.694  #A2C3CDFF  "--:"
+232  Text       at {X:1515.696 Y:1655.928} scale 0.694  #A2C3CDFF  " right."
+233  Text       at {X:984 Y:1683.928} scale 0.694  #A2C3CDFF  "To leave out the heading, start the table with a row of empty cells:"
+234  Sprite     Lumel_Fill            {X:984 Y:1715 W:56 H:18}  #FFFFFF0A
+235  Text       at {X:988 Y:1711.928} scale 0.694  #A2C3CDFF  "| | |"
+236  Sprite     Lumel_Fill            {X:984 Y:1735 W:95 H:18}  #FFFFFF0A
+237  Text       at {X:988 Y:1731.928} scale 0.694  #A2C3CDFF  "|:--|--:|"
+238  Sprite     Lumel_Fill            {X:984 Y:1755 W:153 H:18}  #FFFFFF0A
+239  Text       at {X:988 Y:1751.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
+240  Sprite     Lumel_Fill            {X:984 Y:1775 W:144 H:18}  #FFFFFF0A
+241  Text       at {X:988 Y:1771.928} scale 0.694  #A2C3CDFF  "| Hangar | 4 |"
+242  Text       at {X:984 Y:1799.928} scale 0.694  #A2C3CDFF  "Airlock"
+243  Text       at {X:1064.567 Y:1799.928} scale 0.694  #A2C3CDFF  "1"
+244  Text       at {X:984 Y:1819.928} scale 0.694  #A2C3CDFF  "Hangar"
+245  Text       at {X:1064.567 Y:1819.928} scale 0.694  #A2C3CDFF  "4"
+246  Text       at {X:984 Y:1847.928} scale 0.694  #A2C3CDFF  "A table is as wide as its cells. Add a star into a column's dashes, as in "
+247  Sprite     Lumel_Fill            {X:1440 Y:1851 W:46 H:18}  #FFFFFF0A
+248  Text       at {X:1444.407 Y:1847.928} scale 0.694  #A2C3CDFF  ":--*"
+249  Text       at {X:1486.785 Y:1847.928} scale 0.694  #A2C3CDFF  ", to stretch the table"
+250  Text       at {X:984 Y:1867.928} scale 0.694  #A2C3CDFF  "across the page, that column taking a share of it. Stars set the shares: "
+251  Sprite     Lumel_Fill            {X:1445 Y:1871 W:114 H:18}  #FFFFFF0A
+252  Text       at {X:1448.693 Y:1867.928} scale 0.694  #A2C3CDFF  "|:--*|:--*|"
+253  Text       at {X:1559.18 Y:1867.928} scale 0.694  #A2C3CDFF  " gives"
+254  Text       at {X:984 Y:1887.928} scale 0.694  #A2C3CDFF  "two columns half each, while "
+255  Sprite     Lumel_Fill            {X:1178 Y:1891 W:134 H:18}  #FFFFFF0A
+256  Text       at {X:1182.39 Y:1887.928} scale 0.694  #A2C3CDFF  "|:--*|:--***|"
+257  Text       at {X:1312.336 Y:1887.928} scale 0.694  #A2C3CDFF  " gives one column a quarter and the other"
+258  Text       at {X:984 Y:1907.928} scale 0.694  #A2C3CDFF  "three quarters. A column without a star keeps the width of its cells, and the starred ones share"
+259  Text       at {X:984 Y:1927.928} scale 0.694  #A2C3CDFF  "what is left."
+260  Sprite     Lumel_Fill            {X:984 Y:1959 W:163 H:18}  #FFFFFF0A
+261  Text       at {X:988 Y:1955.928} scale 0.694  #A2C3CDFF  "| Room | Vents |"
+262  Sprite     Lumel_Fill            {X:984 Y:1979 W:105 H:18}  #FFFFFF0A
+263  Text       at {X:988 Y:1975.928} scale 0.694  #A2C3CDFF  "|:--*|--:|"
+264  Sprite     Lumel_Fill            {X:984 Y:1999 W:153 H:18}  #FFFFFF0A
+265  Text       at {X:988 Y:1995.928} scale 0.694  #A2C3CDFF  "| Airlock | 1 |"
+266  Text       at {X:984 Y:2023.928} scale 0.694  #DCF5FDFF  "Room"
+267  Text       at {X:1575.892 Y:2023.928} scale 0.694  #DCF5FDFF  "Vents"
+268  Text       at {X:984 Y:2059.928} scale 0.694  #A2C3CDFF  "Airlock"
+269  Text       at {X:1615.893 Y:2059.928} scale 0.694  #A2C3CDFF  "1"
+270  Text       at {X:984 Y:2095.513} scale 0.833  #DCF5FDFF  "Writing a mark as itself (escape character)"
+271  Sprite     Lumel_Fill            {X:984 Y:2136 W:144 H:18}  #FFFFFF0A
+272  Text       at {X:988 Y:2132.928} scale 0.694  #A2C3CDFF  "\*Inner door\*"
+273  Text       at {X:984 Y:2160.928} scale 0.694  #A2C3CDFF  "*Inner door*"
+274  Text       at {X:984 Y:2188.928} scale 0.694  #A2C3CDFF  "A backslash before a mark shows the mark as it is typed."
+275  Text       at {X:984 Y:2224.513} scale 0.833  #DCF5FDFF  "Keeping words together"
+276  Sprite     Lumel_Fill            {X:984 Y:2265 W:105 H:18}  #FFFFFF0A
+277  Text       at {X:988 Y:2261.928} scale 0.694  #A2C3CDFF  "10&nbsp;SC"
+278  Text       at {X:984 Y:2289.928} scale 0.694  #A2C3CDFF  "10 SC"
+279  Sprite     Lumel_Fill            {X:984 Y:2321 W:66 H:18}  #FFFFFF0A
+280  Text       at {X:988 Y:2317.928} scale 0.694  #A2C3CDFF  "&nbsp;"
+281  Text       at {X:1049.838 Y:2317.928} scale 0.694  #A2C3CDFF  " is a space a line never breaks at, so the words either side of it stay on one line. It"
+282  Text       at {X:984 Y:2337.928} scale 0.694  #A2C3CDFF  "keeps a mark with the link after it too: "
+283  Sprite     Lumel_Fill            {X:984 Y:2361 W:465 H:18}  #FFFFFF0A
+284  Text       at {X:988 Y:2357.928} scale 0.694  #A2C3CDFF  "![](mark:trigger)&nbsp;[triggers](Term.Trigger)"
+285  Text       at {X:1448.757 Y:2357.928} scale 0.694  #A2C3CDFF  "."
+286  Text       at {X:984 Y:2393.513} scale 0.833  #DCF5FDFF  "Writing a character by its name or number"
+287  Sprite     Lumel_Fill            {X:984 Y:2434 W:309 H:18}  #FFFFFF0A
+288  Text       at {X:988 Y:2430.928} scale 0.694  #A2C3CDFF  "&lt;Inner door&gt; &amp; &#169;"
+289  Text       at {X:984 Y:2458.928} scale 0.694  #A2C3CDFF  "<Inner door> & ©"
+290  Sprite     Lumel_Fill            {X:984 Y:2490 W:56 H:18}  #FFFFFF0A
+291  Text       at {X:988 Y:2486.928} scale 0.694  #A2C3CDFF  "&amp;"
+292  Text       at {X:1040.108 Y:2486.928} scale 0.694  #A2C3CDFF  ", "
+293  Sprite     Lumel_Fill            {X:1047 Y:2490 W:46 H:18}  #FFFFFF0A
+294  Text       at {X:1051.488 Y:2486.928} scale 0.694  #A2C3CDFF  "&lt;"
+295  Text       at {X:1093.866 Y:2486.928} scale 0.694  #A2C3CDFF  ", "
+296  Sprite     Lumel_Fill            {X:1101 Y:2490 W:46 H:18}  #FFFFFF0A
+297  Text       at {X:1105.246 Y:2486.928} scale 0.694  #A2C3CDFF  "&gt;"
+298  Text       at {X:1147.625 Y:2486.928} scale 0.694  #A2C3CDFF  ", "
+299  Sprite     Lumel_Fill            {X:1155 Y:2490 W:66 H:18}  #FFFFFF0A
+300  Text       at {X:1159.005 Y:2486.928} scale 0.694  #A2C3CDFF  "&quot;"
+301  Text       at {X:1220.843 Y:2486.928} scale 0.694  #A2C3CDFF  " and "
+302  Sprite     Lumel_Fill            {X:1254 Y:2490 W:66 H:18}  #FFFFFF0A
+303  Text       at {X:1258.096 Y:2486.928} scale 0.694  #A2C3CDFF  "&apos;"
+304  Text       at {X:1319.934 Y:2486.928} scale 0.694  #A2C3CDFF  " write &, <, >, " and '. Any character can be"
+305  Text       at {X:984 Y:2506.928} scale 0.694  #A2C3CDFF  "written by its number, as "
+306  Sprite     Lumel_Fill            {X:1151 Y:2510 W:66 H:18}  #FFFFFF0A
+307  Text       at {X:1155.33 Y:2506.928} scale 0.694  #A2C3CDFF  "&#169;"
+308  Text       at {X:1217.168 Y:2506.928} scale 0.694  #A2C3CDFF  " or "
+309  Sprite     Lumel_Fill            {X:1239 Y:2510 W:66 H:18}  #FFFFFF0A
+310  Text       at {X:1243.445 Y:2506.928} scale 0.694  #A2C3CDFF  "&#xA9;"
+311  Text       at {X:1305.282 Y:2506.928} scale 0.694  #A2C3CDFF  " for ©. An "
+312  Sprite     Lumel_Fill            {X:1375 Y:2510 W:17 H:18}  #FFFFFF0A
+313  Text       at {X:1379.359 Y:2506.928} scale 0.694  #A2C3CDFF  "&"
+314  Text       at {X:1392.548 Y:2506.928} scale 0.694  #A2C3CDFF  " that starts none of these is written"
+315  Text       at {X:984 Y:2526.928} scale 0.694  #A2C3CDFF  "as it is typed."
+316  Sprite     Lumel_Fill            {X:1652 Y:159 W:12 H:272}  #5F7278FF
+317  ClearClip  
