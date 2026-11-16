@@ -47,3 +47,6 @@ Want to change something? The source is on GitHub: https://github.com/malware-de
 Before you publish your own copy though, please consider contributing there instead. Several copies of the same mod just leave people confused about which one has which bug, and every author involved, original or copy, ends up getting reports about bugs that aren't theirs.
 
 [i]Many thanks go to Enenra, who was invaluable in helping me test and develop the UX for Sprocket.[/i]
+
+[url=https://github.com/malware-dev/Sprocket/issues][img]https://raw.githubusercontent.com/malware-dev/Sprocket/main/Workshop/bug-report-card.png[/img][/url]
+Report a bug: https://github.com/malware-dev/Sprocket/issues
