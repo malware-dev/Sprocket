@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
 using Sprocket.Host.SpaceEngineers.Features.StatusPanel.Messages;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Copies;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
@@ -197,18 +198,15 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         public static bool StandsDown { get; private set; }
 
-        // What a Bleeding Edge copy's name holds, in the world's list of mods and as its own.
-        const string BleedingEdge = "(Bleeding Edge)";
-
-        /// <summary>Whether this copy is not Bleeding Edge, and the world also holds a copy that is.</summary>
+        /// <summary>Whether this copy is not Sprocket's Bleeding Edge, and the world also holds a copy that is.</summary>
         bool Yields()
         {
-            if (ModContext != null && ModContext.ModName != null && ModContext.ModName.Contains(BleedingEdge))
+            if (ModContext != null && BleedingEdge.IsRunning(ModContext.ModName, ModContext.ModId))
                 return false;
 
             foreach (var mod in MyAPIGateway.Session.Mods)
             {
-                if (mod.FriendlyName != null && mod.FriendlyName.Contains(BleedingEdge))
+                if (BleedingEdge.Is(mod.FriendlyName, mod.PublishedFileId))
                     return true;
             }
 
