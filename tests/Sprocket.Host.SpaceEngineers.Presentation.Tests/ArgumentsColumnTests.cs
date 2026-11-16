@@ -172,7 +172,7 @@ public class ArgumentsColumnTests
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 25 62");
 
         Assert.True(screen.Scene.IsQuestioning, "leaving asked nothing");
-        Assert.True(screen.Shows("Keep your changes?"), "the question is not about changes");
+        Assert.True(screen.Shows("Save your changes?"), "the question is not about changes");
     }
 
     /// <summary>And nothing about a step only looked at, although its values show differently in their field.</summary>

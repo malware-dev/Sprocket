@@ -83,19 +83,19 @@
     <comment>Button on a logic system's heading row on the home screen, shown where two versions of the logic system met when two constructs joined. Pressing it asks which version to keep.</comment>
   </data>
   <data name="Sprocket.Conflict.Question" xml:space="preserve">
-    <value>Which version of **{name}** do you keep?</value>
+    <value>Which version of **{name}** do you want?</value>
     <comment>First line of a question dialog asked from the Choose a version button, or from the switch of a logic system that came in two versions when two constructs joined. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Conflict.Explains" xml:space="preserve">
-    <value>Two constructs joined, each with its own version. The installations of both move to the one you keep, and the other is deleted.</value>
+    <value>Two constructs joined, each with its own version. The installations of both move to the one you choose, and the other is deleted.</value>
     <comment>Second paragraph of the question dialog asking which version of a logic system to keep.</comment>
   </data>
   <data name="Sprocket.Conflict.Keep" xml:space="preserve">
-    <value>Keep the one changed {date}</value>
+    <value>Use the one changed {date}</value>
     <comment>An answer in the question dialog asking which version of a logic system to keep. {date} is when that version was last changed, as a date and a time.</comment>
   </data>
   <data name="Sprocket.Conflict.KeepUndated" xml:space="preserve">
-    <value>Keep the undated one</value>
+    <value>Use the undated one</value>
     <comment>An answer in the question dialog asking which version of a logic system to keep, for a version that says nothing of when it was last changed.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
@@ -264,7 +264,7 @@
   </data>
 
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
-    <value>Keep it</value>
+    <value>Don't delete</value>
     <comment>Answer in the question dialog asked before deleting a blueprint from storage or forgetting a backup in the library: deletes nothing. It is the answer Enter takes.</comment>
   </data>
   <data name="Sprocket.Delete.Confirm" xml:space="preserve">
@@ -477,11 +477,11 @@
     <comment>Entry at the top of the list of kinds of block in the picker's column of blocks, which narrows to no kind at all; also the word on the line that opens that list while no kind is chosen.</comment>
   </data>
   <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
-    <value>Keep your changes?</value>
+    <value>Save your changes?</value>
     <comment>Question dialog asked on leaving the picker by going back after changing what it opened on, and on leaving the page where a screen's text or a block's Custom Data is written by going back after changing the text.</comment>
   </data>
   <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
-    <value>Keep them</value>
+    <value>Save them</value>
     <comment>Answer in the question dialog asked on leaving the picker, or the page a screen's text or a block's Custom Data is written on, after changing what it opened on; it keeps the changes and finishes, and is the answer the Enter key gives.</comment>
   </data>
   <data name="Sprocket.Pick.DiscardThem" xml:space="preserve">
@@ -1597,7 +1597,7 @@
     <comment>The tooltip on the button in a programmable block's terminal that opens the automation editor.</comment>
   </data>
   <data name="Sprocket.Terminal.Hero" xml:space="preserve">
-    <value>Keeps the automation</value>
+    <value>Stores the automation</value>
     <comment>A label in the terminal of the programmable block that keeps the construct's automation, shown only in developer mode.</comment>
   </data>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
@@ -1797,7 +1797,7 @@
     <comment>An answer in the second dialog when a logic system changed after its blueprint in the library is taken off the construct from the home screen: takes it off and leaves the blueprint in the library as it was. The answer Enter takes.</comment>
   </data>
   <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
-    <value>Keep it</value>
+    <value>Don't remove</value>
     <comment>An answer in the dialog that opens when the minus in a logic system's heading row on the home screen is pressed: closes the dialog and leaves the logic system on the construct. It is the answer Enter takes.</comment>
   </data>
   <data name="Sprocket.Library.TakeOffConfirm" xml:space="preserve">
@@ -1817,7 +1817,7 @@
     <comment>An answer in the dialog that opens before a logic system is replaced by its newer blueprint in the library: replaces it.</comment>
   </data>
   <data name="Sprocket.Library.RenewKeep" xml:space="preserve">
-    <value>Keep it</value>
+    <value>Don't replace</value>
     <comment>An answer in the dialog that opens before a logic system is replaced by its blueprint in the library, both to update it from a newer blueprint and to reset it to its blueprint: closes the dialog and leaves the logic system as it is. It is the answer Enter takes.</comment>
   </data>
   <data name="Sprocket.Library.ResetQuestion" xml:space="preserve">
@@ -1845,7 +1845,7 @@
     <comment>An answer in the dialog that opens before a logic system replaces its blueprint in the library: replaces the blueprint with the logic system as it is now.</comment>
   </data>
   <data name="Sprocket.Library.UpdateKeep" xml:space="preserve">
-    <value>Keep the blueprint</value>
+    <value>Don't update</value>
     <comment>An answer in the dialog that opens before a logic system replaces its blueprint in the library: closes the dialog and leaves the blueprint as it is. It is the answer Enter takes.</comment>
   </data>
   <data name="Sprocket.Library.OnAlready" xml:space="preserve">
@@ -1853,11 +1853,11 @@
     <comment>In the library, shown in the chosen blueprint's details after the button that puts it on the construct is pressed, where a logic system made from that blueprint is on the construct already.</comment>
   </data>
   <data name="Sprocket.Library.KeepBackupQuestion" xml:space="preserve">
-    <value>Keep this backup in the library?</value>
+    <value>Save this backup to the library?</value>
     <comment>The question in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is in the library already. The backup's name follows it in bold.</comment>
   </data>
   <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
-    <value>The library has the blueprint it was made from. Update that blueprint from it, or keep it as a new blueprint?</value>
+    <value>The library has the blueprint it was made from. Update that blueprint from it, or save it as a new blueprint?</value>
     <comment>The line at the bottom of the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is in the library already.</comment>
   </data>
   <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
@@ -1865,7 +1865,7 @@
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: replaces that blueprint with the backup.</comment>
   </data>
   <data name="Sprocket.Library.KeepBackupNew" xml:space="preserve">
-    <value>Keep as a new blueprint</value>
+    <value>Save as a new blueprint</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: keeps the backup as a separate new blueprint beside it.</comment>
   </data>
   <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
@@ -1877,7 +1877,7 @@
     <comment>In the library, the question asked when the right-pointing arrow in the strip between its panes is pressed while a logic system with no blueprint is chosen. The logic system's name follows in bold.</comment>
   </data>
   <data name="Sprocket.Library.MakeKept" xml:space="preserve">
-    <value>A copy of it is kept in the library, where any construct can use it.</value>
+    <value>A copy of it is saved in the library, where any construct can use it.</value>
     <comment>In the library, the line under the question whether to make a blueprint of a logic system, saying what making it does.</comment>
   </data>
   <data name="Sprocket.Library.MakeConfirm" xml:space="preserve">
@@ -3242,7 +3242,7 @@ A backslash before a mark shows the mark as it is typed.
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is copying a trigger. {thing} is the trigger's sentence. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
-    <value>Kept one version of the logic system &quot;{thing}&quot;</value>
+    <value>Chose one version of the logic system &quot;{thing}&quot;</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, as its own line after the word Undo or Redo. Shows when the change to be undone or redone is keeping one of two versions of a logic system that met when two constructs joined. {thing} is the logic system's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
@@ -3386,7 +3386,7 @@ A backslash before a mark shows the mark as it is typed.
     <comment>Line in the library blueprint detail saying the player has shared this blueprint with chosen players. {count} is how many.</comment>
   </data>
   <data name="Sprocket.Library.KeepCopy" xml:space="preserve">
-    <value>Keep a copy</value>
+    <value>Save a copy</value>
     <comment>Button in the detail of a blueprint shared with the player; puts a copy of it in the player's own library.</comment>
   </data>
   <data name="Sprocket.Library.KeepCopyAbout" xml:space="preserve">
@@ -3508,7 +3508,7 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <comment>Under a blueprint in the library that this player shares with one chosen player.</comment>
   </data>
   <data name="Sprocket.Change.ListedOn" xml:space="preserve">
-    <value>Keep to one block</value>
+    <value>Listed only on this block</value>
     <comment>Keeping a logic system to one programmable block's list.</comment>
   </data>
   <data name="Sprocket.Systems.KeepHere" xml:space="preserve">

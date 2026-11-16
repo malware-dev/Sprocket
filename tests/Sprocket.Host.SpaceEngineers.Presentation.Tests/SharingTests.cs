@@ -79,7 +79,7 @@ public class SharingTests
         Assert.DoesNotContain(page.Rows.OfType<Lumel.Text.Label>(), label => label.Text == "SHARED WITH YOU");
     }
 
-    /// <summary>The arrow into the library, while a shared blueprint is chosen, cannot be pressed and has no tip, since Keep a copy is what keeps it.</summary>
+    /// <summary>The arrow into the library, while a shared blueprint is chosen, cannot be pressed and has no tip, since Save a copy is what saves it.</summary>
     [Fact]
     public void TheArrowIntoTheLibrarySaysNothingOfASharedBlueprint()
     {

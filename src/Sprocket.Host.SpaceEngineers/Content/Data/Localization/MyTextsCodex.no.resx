@@ -180,7 +180,7 @@
     <value>Åpne [installasjonspanelet](Term.InstallationPanel class=term) for **{name}**.</value>
   </data>
   <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
-    <value>Ta vare på en kopi av dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) i [biblioteket](Term.Library class=term) som en [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term).</value>
+    <value>Lagre en kopi av dette [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) i [biblioteket](Term.Library class=term) som en [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term).</value>
   </data>
   <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
     <value>To [konstruksjoner](Term.Construct class=term) ble satt sammen, hver med sin egen versjon av {name}. Begge forblir slått av til du velger én.</value>
@@ -350,7 +350,7 @@
     <value>{block}: {screen}</value>
   </data>
   <data name="Sprocket.Chrome.DoneAbout" xml:space="preserve">
-    <value>Behold eventuelle endringer og gå tilbake.</value>
+    <value>Lagre eventuelle endringer og gå tilbake.</value>
   </data>
   <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
     <value>Velg noe i hver kolonne først.</value>
@@ -509,7 +509,7 @@
     <value>Stopp denne sekvensen der den er</value>
   </data>
   <data name="Sprocket.Withheld.Events" xml:space="preserve">
-    <value>*Spillet holder denne blokkens hendelser unna mods. Still dette inn i terminalen.*</value>
+    <value>*Spillet skjuler denne blokkens hendelser for mods. Still dette inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Withheld.Camera" xml:space="preserve">
     <value>*Å velge kamera her er ikke tilgjengelig ennå. Still det inn i terminalen.*</value>

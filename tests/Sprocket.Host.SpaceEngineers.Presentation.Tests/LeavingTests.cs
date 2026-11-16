@@ -24,7 +24,7 @@ public class LeavingTests
     {
         var picker = Screen.Fresh((Filled + " " + Back).Split(' '));
 
-        Assert.True(picker.Shows("Keep your changes?"), "leaving asked nothing");
+        Assert.True(picker.Shows("Save your changes?"), "leaving asked nothing");
         Assert.True(picker.Scene.IsQuestioning, "the question does not own the screen");
 
         // Enter keeps them, because a key pressed without reading must not be the one that loses
@@ -44,7 +44,7 @@ public class LeavingTests
         picker.Editor.PressChoice("Discard them");
         picker.Run(2);
 
-        Assert.False(picker.Shows("Keep your changes?"), "the question is still up");
+        Assert.False(picker.Shows("Save your changes?"), "the question is still up");
         Assert.Empty(picker.Editor.Program.Systems[0].Sequences);
     }
 
@@ -55,7 +55,7 @@ public class LeavingTests
         var picker = Screen.Fresh(("60 196 type Airlock enter press trigger press when " + Back).Split(' '));
 
         Assert.False(picker.Scene.IsQuestioning, "leaving an untouched picker asked something");
-        Assert.False(picker.Shows("Keep your changes?"), "it asked anyway");
+        Assert.False(picker.Shows("Save your changes?"), "it asked anyway");
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class LeavingTests
     {
         var picker = Screen.Fresh((WantsValues + " 1348 276 clear " + Back).Split(' '));
 
-        Assert.True(picker.Shows("Keep your changes?"), "leaving asked nothing");
+        Assert.True(picker.Shows("Save your changes?"), "leaving asked nothing");
 
         picker.Scene.TakeDefault();
         picker.Run(2);

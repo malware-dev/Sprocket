@@ -41,7 +41,7 @@
     <comment>Codex page on "Slot", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value>A [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s ![](mark:state)&amp;nbsp;**states** are what it remembers between jobs. Each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) keeps its own. A state holds one value at a time. Most are on or off, and others, like an airlock's cycle state, hold a choice from a custom [state type](Term.Type class=term).</value>
+    <value>A [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s ![](mark:state)&amp;nbsp;**states** are what it remembers between jobs. Each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) has its own. A state holds one value at a time. Most are on or off, and others, like an airlock's cycle state, hold a choice from a custom [state type](Term.Type class=term).</value>
     <comment>Codex page on "Logic system states", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
@@ -77,7 +77,7 @@
     <comment>Codex page on "Value", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Awaitable" xml:space="preserve">
-    <value>An ![](mark:awaited)&amp;nbsp;**awaitable** is an [![](mark:action)&amp;nbsp;action](Term.Action class=term) that keeps working for several [ticks](Term.Tick class=term), like a door closing, and that a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) can [wait for](Term.Await class=term). Most actions are done at once, and of those that keep working, only the awaitables can be waited for.</value>
+    <value>An ![](mark:awaited)&amp;nbsp;**awaitable** is an [![](mark:action)&amp;nbsp;action](Term.Action class=term) that goes on working for several [ticks](Term.Tick class=term), like a door closing, and that a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) can [wait for](Term.Await class=term). Most actions are done at once, and of those that go on working, only the awaitables can be waited for.</value>
     <comment>Codex page on "Awaitable", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
@@ -145,7 +145,7 @@
     <comment>Codex page on "Backup", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Blueprint" xml:space="preserve">
-    <value>A ![](mark:blueprint)&amp;nbsp;**blueprint** is a copy of a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) kept in the [library](Term.Library class=term), ready to put on another [construct](Term.Construct class=term). It has no blocks of its own: each construct fills its [slots](Term.Slot class=term) with its own blocks.</value>
+    <value>A ![](mark:blueprint)&amp;nbsp;**blueprint** is a copy of a [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) saved in the [library](Term.Library class=term), ready to put on another [construct](Term.Construct class=term). It has no blocks of its own: each construct fills its [slots](Term.Slot class=term) with its own blocks.</value>
     <comment>Codex page on "Blueprint", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Construct" xml:space="preserve">
@@ -237,7 +237,7 @@
     <comment>Tooltip on an installation's row on the home screen, under its logic system; pressing the row opens that installation's installation panel. {name} is filled with the installation's name.</comment>
   </data>
   <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
-    <value>Keep a copy of this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) in the [library](Term.Library class=term) as a [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term).</value>
+    <value>Save a copy of this [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) in the [library](Term.Library class=term) as a [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term).</value>
     <comment>Tooltip on the button that makes a blueprint of a logic system, on its heading row on the home screen, and in the library on the right-pointing arrow in the strip between its panes, shown while the library holds no blueprint of the chosen logic system or backup.</comment>
   </data>
   <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
@@ -461,7 +461,7 @@
     <comment>One line of the list in the tooltip on a slot of screens a step or a trigger names, on a sequence's screen and a logic system's screen: a block the installation shown fills the slot with, and the screen of it the slot holds. {block} is the block's name, {screen} the screen's name as the block calls it, such as Front.</comment>
   </data>
   <data name="Sprocket.Chrome.DoneAbout" xml:space="preserve">
-    <value>Keep any changes and return.</value>
+    <value>Save any changes and go back.</value>
     <comment>Tooltip on the Done button in the editor's heading bar on a logic system's screen, a sequence's screen, the installation panel and a blueprint slot's screen, where every change is kept as soon as it is made.</comment>
   </data>
   <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
@@ -673,7 +673,7 @@
     <comment>Tooltip on the stop button in the editor's heading bar on a sequence's screen, and on the stop button of each sequence's row on a logic system's screen, while the sequence is running; pressing it stops the sequence and leaves every block as it is.</comment>
   </data>
   <data name="Sprocket.Withheld.Events" xml:space="preserve">
-    <value>*The game keeps this block's events from mods. Set this in the terminal.*</value>
+    <value>*The game hides this block's events from mods. Set this in the terminal.*</value>
     <comment>Tooltip on a dimmed member in the picker that cannot be chosen, because the game keeps this block's events from mods.</comment>
   </data>
   <data name="Sprocket.Withheld.Camera" xml:space="preserve">
@@ -1157,7 +1157,7 @@
     <comment>Codex entry on the block member "being hacked" of Terminal, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Terminal.CustomData" xml:space="preserve">
-    <value>The text kept in the block's custom data.</value>
+    <value>The text stored in the block's custom data.</value>
     <comment>Codex entry on the block member "custom data" of Terminal, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Terminal.ShowOnHUD" xml:space="preserve">

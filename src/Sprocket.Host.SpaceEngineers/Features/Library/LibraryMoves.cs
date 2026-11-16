@@ -81,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var shelves = backed && kept != null && !same;
             _outs.CanExecute = shelf != null && (makes || updates || shelves);
 
-            // A shared blueprint is kept by the Keep a copy button in its detail, so the arrow has nothing to say of it.
+            // A shared blueprint is saved by the Save a copy button in its detail, so the arrow has nothing to say of it.
             _out.Tip = KeptTip.For(_out.Tip, same ? codex.LibrarySame
                 : backed ? codex.LibraryPromoteAbout
                 : entry != null && entry.Section == LibrarySection.Kept && live == null ? codex.LibraryInLibrary

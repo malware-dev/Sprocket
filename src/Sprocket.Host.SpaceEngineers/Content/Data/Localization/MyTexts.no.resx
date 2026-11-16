@@ -65,16 +65,16 @@
     <value>Velg en versjon</value>
   </data>
   <data name="Sprocket.Conflict.Question" xml:space="preserve">
-    <value>Hvilken versjon av **{name}** vil du beholde?</value>
+    <value>Hvilken versjon av **{name}** vil du ha?</value>
   </data>
   <data name="Sprocket.Conflict.Explains" xml:space="preserve">
-    <value>To konstruksjoner ble satt sammen, hver med sin egen versjon. Installasjonene fra begge flyttes til den du beholder, og den andre slettes.</value>
+    <value>To konstruksjoner ble satt sammen, hver med sin egen versjon. Installasjonene fra begge flyttes til den du velger, og den andre slettes.</value>
   </data>
   <data name="Sprocket.Conflict.Keep" xml:space="preserve">
-    <value>Behold den som ble endret {date}</value>
+    <value>Bruk den som ble endret {date}</value>
   </data>
   <data name="Sprocket.Conflict.KeepUndated" xml:space="preserve">
-    <value>Behold den udaterte</value>
+    <value>Bruk den udaterte</value>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>installasjon</value>
@@ -203,7 +203,7 @@
   </data>
 
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
-    <value>Behold den</value>
+    <value>Ikke slett</value>
   </data>
   <data name="Sprocket.Delete.Confirm" xml:space="preserve">
     <value>Slett den</value>
@@ -369,10 +369,10 @@
     <value>Hva som helst</value>
   </data>
   <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
-    <value>Beholde endringene?</value>
+    <value>Lagre endringene?</value>
   </data>
   <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
-    <value>Behold dem</value>
+    <value>Lagre dem</value>
   </data>
   <data name="Sprocket.Pick.DiscardThem" xml:space="preserve">
     <value>Forkast dem</value>
@@ -1217,7 +1217,7 @@
     <value>Åpne automasjonseditoren.</value>
   </data>
   <data name="Sprocket.Terminal.Hero" xml:space="preserve">
-    <value>Har automasjonen</value>
+    <value>Lagrer automasjonen</value>
   </data>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
     <value>Automasjonssignal</value>
@@ -1367,7 +1367,7 @@
     <value>La plantegningen være</value>
   </data>
   <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
-    <value>Behold det</value>
+    <value>Ikke fjern</value>
   </data>
   <data name="Sprocket.Library.TakeOffConfirm" xml:space="preserve">
     <value>Ta det bort</value>
@@ -1382,7 +1382,7 @@
     <value>Oppdater</value>
   </data>
   <data name="Sprocket.Library.RenewKeep" xml:space="preserve">
-    <value>Behold det</value>
+    <value>Ikke erstatt</value>
   </data>
   <data name="Sprocket.Library.ResetQuestion" xml:space="preserve">
     <value>Tilbakestille dette logikksystemet til plantegningen sin?</value>
@@ -1403,22 +1403,22 @@
     <value>Oppdater</value>
   </data>
   <data name="Sprocket.Library.UpdateKeep" xml:space="preserve">
-    <value>Behold plantegningen</value>
+    <value>Ikke oppdater</value>
   </data>
   <data name="Sprocket.Library.OnAlready" xml:space="preserve">
     <value>Et logikksystem laget fra denne plantegningen er allerede på denne konstruksjonen. Vil du ha ett til av samme slag, legg til en installasjon i det.</value>
   </data>
   <data name="Sprocket.Library.KeepBackupQuestion" xml:space="preserve">
-    <value>Ta vare på denne sikkerhetskopien i biblioteket?</value>
+    <value>Lagre denne sikkerhetskopien i biblioteket?</value>
   </data>
   <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
-    <value>Biblioteket har plantegningen denne ble laget fra. Vil du oppdatere den plantegningen, eller ta vare på sikkerhetskopien som en ny plantegning?</value>
+    <value>Biblioteket har plantegningen denne ble laget fra. Vil du oppdatere den plantegningen, eller lagre sikkerhetskopien som en ny plantegning?</value>
   </data>
   <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
     <value>Oppdater plantegningen</value>
   </data>
   <data name="Sprocket.Library.KeepBackupNew" xml:space="preserve">
-    <value>Ta vare på som ny plantegning</value>
+    <value>Lagre som ny plantegning</value>
   </data>
   <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
     <value>La den være</value>
@@ -2481,7 +2481,7 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
     <value>Duplikerte utløseren &quot;{thing}&quot;</value>
   </data>
   <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
-    <value>Beholdt én versjon av logikksystemet &quot;{thing}&quot;</value>
+    <value>Valgte én versjon av logikksystemet &quot;{thing}&quot;</value>
   </data>
   <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
     <value>Flyttet plassen &quot;{thing}&quot;</value>
@@ -2589,7 +2589,7 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
     <value>Delt med {count} spillere</value>
   </data>
   <data name="Sprocket.Library.KeepCopy" xml:space="preserve">
-    <value>Behold en kopi</value>
+    <value>Lagre en kopi</value>
   </data>
   <data name="Sprocket.Library.KeepCopyAbout" xml:space="preserve">
     <value>Legger din egen kopi i biblioteket ditt, til bruk i alle verdener.
@@ -2681,7 +2681,7 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
     <value>Delt med 1 spiller</value>
   </data>
   <data name="Sprocket.Change.ListedOn" xml:space="preserve">
-    <value>Hold på én blokk</value>
+    <value>Vist bare på denne blokken</value>
   </data>
   <data name="Sprocket.Systems.KeepHere" xml:space="preserve">
     <value>Vis bare på denne blokken</value>
