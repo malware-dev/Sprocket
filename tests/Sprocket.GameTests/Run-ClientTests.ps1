@@ -16,6 +16,7 @@ param(
     [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count', 'Sprocket Move Items', 'Sprocket Status Pages'),
     [int]$TimeoutSeconds = 900,
     # The parts to play, of scene, kept, pages, editor, menus, move, remote and banner; every part where none is named.
+    # hailstone plays only when named, with -Template a copy of Mal's world holding Hailstone Station.
     [string[]]$Only = @()
 )
 $ErrorActionPreference = 'Stop'

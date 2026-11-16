@@ -261,6 +261,14 @@ namespace Sprocket.GameTests
                     yield return editor.Current;
             }
 
+            // Played only when named: it needs Mal's Hailstone Station world as the run's template, not the test world.
+            if (Named("hailstone"))
+            {
+                var hailstone = new HailstoneClientTest(tour).Run();
+                while (hailstone.MoveNext())
+                    yield return hailstone.Current;
+            }
+
             if (Wants("menus"))
             {
                 var menus = new EditorShotClientTest(tour, _report).Menus("Kept Automation");
@@ -280,6 +288,12 @@ namespace Sprocket.GameTests
         bool Wants(string part)
         {
             return _only == null || Array.IndexOf(_only, part) >= 0;
+        }
+
+        /// <summary>Whether SPROCKET_CLIENTTEST_ONLY names the part called <paramref name="part" />, for a part a run plays only when asked.</summary>
+        bool Named(string part)
+        {
+            return _only != null && Array.IndexOf(_only, part) >= 0;
         }
 
         /// <summary>Closes the welcome and the consent dialogs the main menu opens for new user data, answering neither.</summary>
