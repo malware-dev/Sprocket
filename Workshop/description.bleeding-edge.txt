@@ -1,6 +1,6 @@
 [h1]Sprocket Automation (Bleeding Edge)[/h1]
 
-Heads-up: this is the [b]Bleeding Edge[/b] version. New features and bug fixes show up here first, before they're done. So yeah, it [i]will[/i] break now and then. Looking for the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=STABLE_ITEM_ID]stable one[/url]?
+Heads-up: this is the [b]Bleeding Edge[/b] version. New features and bug fixes show up here first, before they're done. So yeah, it [i]will[/i] break now and then. Looking for the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3841033860]stable one[/url]?
 
 Event controllers, timer blocks, sensors... sure, there's already a way to automate stuff in Space Engineers. But it takes up a whole bunch of space, it's limited in what it can do, and it's fragile. One railgun shot to your automation bay and you get to set [i]everything[/i] up again. Yay.
 
@@ -34,8 +34,10 @@ It's not just for beginners though. Even if you can write scripts, writing one f
 
 Oh, and you shouldn't have to dig through code to figure out what a machine does. In Sprocket the description [i]is[/i] the program. What you read is exactly what runs.
 
+Not everything I had in mind made it into this first release. I'm still working on it, so more is coming, both from my own ideas and from your feedback, if you like what I've done.
+
 [h2]Stable release[/h2]
-Want something steadier? [url=https://steamcommunity.com/sharedfiles/filedetails/?id=STABLE_ITEM_ID]Sprocket Automation[/url] is the stable release, updated when a version is done.
+Want something steadier? [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3841033860]Sprocket Automation[/url] is the stable release, updated when a version is done.
 
 [h2]License[/h2]
 Released under the Malforge Attribution License for Space Engineers Mods v1.0 (BRUTAL variant), which is included in the mod's files. The short version, in plain words: https://github.com/malforge/licenses/blob/main/MAL-SEMods-1.0-summary.md

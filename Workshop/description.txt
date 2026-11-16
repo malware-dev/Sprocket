@@ -32,6 +32,8 @@ It's not just for beginners though. Even if you can write scripts, writing one f
 
 Oh, and you shouldn't have to dig through code to figure out what a machine does. In Sprocket the description [i]is[/i] the program. What you read is exactly what runs.
 
+Not everything I had in mind made it into this first release. I'm still working on it, so more is coming, both from my own ideas and from your feedback, if you like what I've done.
+
 [h2]Bleeding Edge[/h2]
 Want to help out with Sprocket? Happy to test unstable, half-finished features, or waiting on a fix for a bug you found? Then [b]Sprocket Automation (Bleeding Edge)[/b] is for you. It's the development build, updated as work lands. Fair warning: stuff [i]will[/i] break there now and then. https://steamcommunity.com/sharedfiles/filedetails/?id=3807234771
 
