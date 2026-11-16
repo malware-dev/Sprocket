@@ -51,6 +51,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Mal.MdkModMixin.Network" Version="1.0.0" />
+    <PackageReference Include="Mal.MdkModMixin.Lumel" Version="1.0.0-beta.1" />
     <PackageReference Include="Mal.Mdk2.References" Version="2.2.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -71,5 +72,4 @@
     <None Remove="thumb.png" />
     <None Remove="LICENSE.txt" />
   </ItemGroup>
-  <Import Project="..\Lumel\Lumel.projitems" Label="Shared" />
 </Project>

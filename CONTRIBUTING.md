@@ -8,14 +8,10 @@
 
 [MDK2](https://malforge.github.io/spaceengineers/mdk2/) builds and packs the mods.
 
-## Getting the code
-
-Lumel, the user interface framework, is a submodule at `src/Lumel`, from the private `malware-dev/Lumel` repository.
-Clone with `git clone --recursive`, or fetch it into an existing clone with `git submodule update --init`.
-
 ## The malforge package feed
 
-The mixin packages, such as `Mal.MdkModMixin.Network`, come from malforge's feed on GitHub, which asks for a GitHub
+The mixin packages, `Mal.MdkModMixin.Network` and Lumel, the user interface framework (`Mal.MdkModMixin.Lumel` and
+`Mal.MdkModMixin.Lumel.Sim`), come from malforge's feed on GitHub, which asks for a GitHub
 login. A machine is set up for it once, as
 [Setting Up GitHub Packages as a NuGet Source](https://github.com/malforge/mdk2-packages/blob/main/docs/Setting-Up-GitHub-Packages.md)
 describes.

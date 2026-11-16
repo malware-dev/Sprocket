@@ -51,18 +51,29 @@
     </ItemGroup>
     <!-- The LCD images, materials and pictures packed into the mod, its own and Lumel's, which the harness draws as the game does. -->
     <ItemGroup>
-        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\LCDTextures*.sbc;..\Sprocket.Host.SpaceEngineers\Content\Data\TransparentMaterials*.sbc;..\Lumel\Content\Data\*TransparentMaterials*.sbc">
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\LCDTextures*.sbc;..\Sprocket.Host.SpaceEngineers\Content\Data\TransparentMaterials*.sbc;$(LumelContent)Data\*TransparentMaterials*.sbc">
             <Link>Content\Mods\Sprocket\Data\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Textures\**\*.dds;..\Lumel\Content\Textures\**\*.dds">
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Textures\**\*.dds;$(LumelContent)Textures\**\*.dds">
             <Link>Content\Mods\Sprocket\Textures\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
+    <!-- Lumel's own content, from the package the mod compiles Lumel from. Only its folder is used here: the
+         harness has Lumel's code through the mod's assembly. -->
+    <ItemGroup>
+        <PackageReference Include="Mal.MdkModMixin.Lumel" Version="1.0.0-beta.1" GeneratePathProperty="true" ExcludeAssets="all" PrivateAssets="all" />
+    </ItemGroup>
+    <PropertyGroup>
+        <LumelContent>$(PkgMal_MdkModMixin_Lumel)\contentFiles\cs\any\Shared\Content\</LumelContent>
+    </PropertyGroup>
+
     <!-- The game's screen drawn on a desktop, shared through Lumel with every mod's harness. -->
-    <Import Project="..\Lumel\Sim\Lumel.Sim.projitems" Label="Shared" />
+    <ItemGroup>
+        <PackageReference Include="Mal.MdkModMixin.Lumel.Sim" Version="1.0.0-beta.1" />
+    </ItemGroup>
 
     <ItemGroup>
         <!-- Impersonates the game's interfaces at runtime, so the harness answers the dozen members

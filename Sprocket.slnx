@@ -4,7 +4,6 @@
     <Project Path="src/Sprocket.Host.SpaceEngineers.Sim/Sprocket.Host.SpaceEngineers.Sim.csproj" />
     <Project Path="src/Sprocket.Localization.Generator/Sprocket.Localization.Generator.csproj" />
     <Project Path="src/Sprocket.Standards/Sprocket.Standards.csproj" />
-    <Project Path="src/Lumel/Lumel.shproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sprocket.Benchmarks/Sprocket.Benchmarks.csproj" />

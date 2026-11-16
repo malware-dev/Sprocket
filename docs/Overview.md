@@ -24,8 +24,6 @@ screen that shows it.
 
 ## Beside it
 
-- `src/Lumel`: the user interface framework, a shared project that knows nothing of Sprocket. A submodule of
-  `malware-dev/Lumel`.
 - `src/Sprocket.Host.SpaceEngineers.Sim`: the simulator. It runs the real mod outside the game over made-up blocks and
   draws its screens to pictures. The tests go through it.
 - `src/Sprocket.Localization.Generator`: writes `Texts` and `Codex` from the text files at build time.
