@@ -118,6 +118,7 @@ Every member exposed by a host on a block is an **action**, a **value**, a **fun
   * Parentheses are written **only** when arguments are present. Writing empty parentheses `()` is a syntax error.
   * Argument counts and types must match the member's parameter signature. Supplying incompatible types or an integer exceeding parameter limits is an error.
   * A parameter may take slots. Its argument is a list of slot names in square brackets: `call Gearbox.move_items([ cargo ], "Ingot/Iron", 100) on [ output ]`. The parameter's signature says what the slots must hold, blocks or things of a host type.
+  * Wherever a member is given a value, as an argument or as the value of a `set`, a setting may stand in its place, written as a list holding the setting: `call Gearbox.rotate_to([ 'Open angle' ], 2) on [ hinge ]`, `set Gearbox.color on [ lamp ] to [ 'Light color' ]`. Each instance supplies its own value. The setting's type must suit the parameter, as a value given there would.
 * **Return Types:** Values and functions return a flag, integer, real, text, color, or a host choice name.
 
 ### 5.2 Host Types
@@ -212,6 +213,8 @@ optional slot lamp expects LightingBlock
 optional slot button expects signal
 optional slot display expects Gearbox.screen
 optional slot generic
+optional slot 'Open angle' expects real = 45
+required slot mode expects side
 ```
 
 * **Cardinality:** Must be declared as either `required` or `optional`. An instance may leave an optional slot unassigned. Leaving a required slot unassigned marks the instance as missing that slot.
@@ -221,7 +224,9 @@ optional slot generic
   * **`signal`:** For slots bound to functions returning signals.
   * **Host Type:** A qualified host type identifier (e.g., `Gearbox.screen`), for slots answered by functions that return one. `optional slot output expects Gearbox.inventory`, answered by `Gearbox.inventory(2) on [ refinery ]`, holds that inventory of the block.
   * **Omitted:** A slot declared with no `expects` clause accepts any block.
+  * **Value:** A built-in value type (`flag`, `text`, `integer`, `real`, `duration`, `color`) or a type the system declares (§9.1). The slot is a **setting**: each instance answers it with one value of that type instead of blocks.
 * When a slot is populated from multiple blocks, it expects the nearest common ancestor type shared by all assigned blocks.
+* **Settings:** An `optional` setting gives a default after `=`, a literal of its type: `optional slot 'Open angle' expects real = 45`. An instance that leaves it unassigned uses the default. A `required` setting gives none, and every instance must answer it. An optional setting without a default, or a required one with a default, is an error.
 
 ---
 
@@ -348,7 +353,6 @@ sequence 1 as Cycle {
 * **Mutual exclusion (`exclusive`):** `sequence <n> [as <name>] exclusive <id> { ... }`. Sequences of a system that name the same id run one at a time in each instance: a start while another of them runs is skipped, as a start of a sequence already running is, and the skipped sequence says which one holds it. A sequence names at most one id. The id is an identifier or a quoted name, compared exactly, and shares no namespace with anything else.
 
 ```sprocket
-#@ category: "Drilling"
 sequence 2 as 'Shallow Drill' exclusive Drilling {
     wait 1s
 }
@@ -447,8 +451,9 @@ else if where == outside then {
 }
 ```
 
-* **Syntax:** `if <state> <comparison> <value> then { ... }`
+* **Syntax:** `if <state or setting> <comparison> <value> then { ... }`
 * Evaluates equality (`==` or `!=`) against a choice, flag, or another state of matching type; comparing with a value of another type is an error.
+* A setting is tested the same way, on the instance's value: `if 'Outer light' == on then { ... }`.
 * Block conditions and state conditions may be freely mixed within the same `if / else if / else` chain.
 
 ---
@@ -493,7 +498,8 @@ instance 1 of MalTek.Airlock as 'Port Airlock' {
 ```
 
 * **Identification:** Designated by a numeric ID (`instance <n> of <blueprint>`) and an optional name (`as '<name>'`).
-* **Slot Assignment (`<slot> = [ <answers> ]`):**
+* **Slot Assignment (`<slot> = [ <answers> ]`, `<setting> = <value>`):**
   * Populated by variables, inline host functions returning host types, or signals.
   * A slot may receive multiple answers. For a slot expecting `signal`, supplying multiple answers indicates that a signal from **any** of the answers triggers the associated automation.
   * Leaving a `required` slot unassigned marks the instance as missing that slot.
+  * A setting is answered with one value of its type, written as a value, not a list: `'Open angle' = 85`.
