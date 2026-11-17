@@ -57,9 +57,6 @@ Requires an installed copy of Space Engineers, .NET, [MDK2](https://malforge.git
 account for the malforge package feed. How a machine is set up, built and tested is in
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
-How the repository is put together, and how its parts work, is in the developer guide, starting at
-[docs/Overview.md](docs/Overview.md).
-
 ## License
 
 Released under the Malforge Attribution License for Space Engineers Mods v1.0 (BRUTAL variant), in [LICENSE.txt](src/Sprocket.Host.SpaceEngineers/LICENSE.txt). The short version, in plain words: [the summary](https://github.com/malforge/licenses/blob/main/MAL-SEMods-1.0-summary.md).

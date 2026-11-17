@@ -113,10 +113,9 @@ profile restyles every file.
   language, or otherwise removed from it. A removed text shows in English until it is translated, and the build lists
   it (`LOC006`). A translation is never left saying what the English no longer says.
 - A change a player can see keeps the codex true, in every language it has.
-- `docs/` is for people and describes the code as it is. A change to something a page or `README.md` describes fixes
-  the page in the same change. Planning goes in issues. Agent rules live in this file, never only in
-  `docs/`; the spec is the one document both share.
-- Only rules the maintainer decided go into this file and `docs/`. A decision no rule covers is told to
+- `docs/Language.md` is the one document in the repository beside `README.md` and `CONTRIBUTING.md`. A change to
+  something one of them describes fixes it in the same change. Planning goes in issues. Agent rules live in this file.
+- Only rules the maintainer decided go into this file. A decision no rule covers is told to
   the developer as a judgement call, never written in here as a rule.
 
 ## Keen's game
