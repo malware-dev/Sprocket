@@ -84,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
         public static List<SharedText> Read(string text)
         {
             var found = new List<SharedText>();
-            if (text.TrimStart().StartsWith(Keywords.Name(Keyword.Sprocket) + " ", StringComparison.Ordinal))
+            if (text.TrimStart().StartsWith(ScriptFormat.Header + " ", StringComparison.Ordinal))
             {
                 found.Add(new SharedText { Blueprint = text.Trim() });
                 return found;

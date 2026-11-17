@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static readonly string[] Names =
         {
             "",
-            "sprocket", "block", "system", "instance", "of", "sequence",
+            "block", "system", "instance", "of", "sequence",
             "when", "every", "then", "trigger", "to", "run", "set",
             "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last",
             "running", "step", "stop", "call", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",

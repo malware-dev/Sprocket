@@ -66,7 +66,7 @@ public class IfRunTests
 
         public Comparison Closed(Door door, bool closed)
         {
-            var test = Test("status", "ext", door, Literal.Name("closed"));
+            var test = Test("status", "sprocket", door, Literal.Name("closed"));
             test.Relation = closed ? Relation.Is : Relation.IsNot;
             return test;
         }
@@ -280,7 +280,7 @@ public class IfRunTests
     public void ATestOfAMemberTheBlocksLackIsAFault()
     {
         var a = new Airlock();
-        a.Add(new If(a.Test("pressurized", "ext", a.Outer, Literal.Of(true))), a.Do("open", a.Inner), new EndIf(), new Await());
+        a.Add(new If(a.Test("pressurized", "sprocket", a.Outer, Literal.Of(true))), a.Do("open", a.Inner), new EndIf(), new Await());
         a.Program.Edited();
         a.Runner = new AutomationRunner(a.Program, a.Rig.World);
         a.Runner.Tick(1);

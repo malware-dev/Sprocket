@@ -1020,6 +1020,14 @@
     <value>This step is missing its {name}.</value>
     <comment>Problem on a step that lacks an option its action needs; {name} is the option, such as speed. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
   </data>
+  <data name="Sprocket.Problem.Ambiguous" xml:space="preserve">
+    <value>This step's {name} could be its setting or the action's own {name}.</value>
+    <comment>Problem on a step that names a setting where its action also has a choice of the same name, so it can't tell which is meant; {name} is the name both share, such as closed. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Stopped.Ambiguous" xml:space="preserve">
+    <value>its {name} could be its setting or the action's own {name}.</value>
+    <comment>Reason a run stopped: a step named a setting where its action also has a choice of the same name; {name} is the name both share, such as closed. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
   <data name="Sprocket.Problem.OptionWrong" xml:space="preserve">
     <value>This step's {name} doesn't fit its action.</value>
     <comment>Problem on a step given an option of the wrong kind for its action; {name} is the option, such as speed. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>

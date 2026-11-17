@@ -314,9 +314,9 @@ public class ProgramTextTests
 
         var saved = Save(program);
         Assert.Contains("call Reverse on [ rotor ]", saved);
-        Assert.Contains("call ext.rotate_to(90, 2.5) on [ rotor ]", saved);
+        Assert.Contains("call sprocket.rotate_to(90, 2.5) on [ rotor ]", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
-        Assert.Contains("call ext.close on [ inner ]\n", saved);
+        Assert.Contains("call sprocket.close on [ inner ]\n", saved);
         Assert.DoesNotContain("with", saved);
         Assert.Contains("set Radius on [ light ] to 4.5", saved);
 

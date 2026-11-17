@@ -2,7 +2,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
     /// A trigger started each time a signal is sent: <c>whenever button then run 1</c>, or a signal written in place,
-    /// <c>whenever ext.finishes_closing on [ inner ] then run 2</c>.
+    /// <c>whenever sprocket.finishes_closing on [ inner ] then run 2</c>.
     /// </summary>
     public sealed class SignalTrigger : MomentTrigger
     {

@@ -143,7 +143,7 @@ public class StepDuplicatingTests
     static Comparison Closed(Simulation rig)
     {
         var door = rig.World.Entities.First(entity => entity.Name == "Airlock Outer Door");
-        var test = new Comparison { MemberId = "status", Provider = "ext", Value = Literal.Name("closed") };
+        var test = new Comparison { MemberId = "status", Provider = "sprocket", Value = Literal.Name("closed") };
         test.Targets.Add(rig.Editor.Program.Declare(rig.World, door).Name);
         return test;
     }

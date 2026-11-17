@@ -16,9 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// </summary>
     public sealed class BlockKinds
     {
-        /// <summary>What Sprocket's own members and moments are qualified by: <c>ext.close</c>.</summary>
+        /// <summary>What Sprocket's own members and moments are qualified by: <c>sprocket.close</c>.</summary>
         /// <remarks>Persisted in every program that uses one.</remarks>
-        public const string Own = "ext";
+        public const string Own = "sprocket";
 
         const string GamePrefix = "MyObjectBuilder_";
 
@@ -474,6 +474,30 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 return sort ?? "";
 
             return sort.StartsWith(GamePrefix, StringComparison.Ordinal) ? sort : GamePrefix + sort;
+        }
+
+        /// <summary>
+        /// Whether <paramref name="name" />, written without its <c>MyObjectBuilder_</c> prefix, is one of the game's block types:
+        /// a name in the root namespace, as a slot expecting it writes it, <c>Door</c>.
+        /// </summary>
+        /// <remarks>Asked by the game's register of its kinds of object, which it fills as it starts; a name it lacks is none.</remarks>
+        public static bool IsGameType(string name)
+        {
+            MyObjectBuilderType type;
+            if (string.IsNullOrEmpty(name) || name.IndexOf('/') >= 0 || !MyObjectBuilderType.TryParse(GamePrefix + name, out type))
+                return false;
+
+            Type at = type;
+            var reflection = MyAPIGateway.Reflection;
+            while (at != null && reflection != null)
+            {
+                if (at == typeof(MyObjectBuilder_CubeBlock))
+                    return true;
+
+                at = reflection.BaseTypeOf(at);
+            }
+
+            return reflection == null;
         }
 
         /// <summary>

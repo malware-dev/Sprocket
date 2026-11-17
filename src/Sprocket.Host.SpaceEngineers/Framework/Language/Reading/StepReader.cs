@@ -49,10 +49,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// The member at <paramref name="index" />, bare or qualified by <c>ext</c>, its arguments and its blocks; or false and
+        /// The member at <paramref name="index" />, bare or qualified by <c>sprocket</c>, its arguments and its blocks; or false and
         /// trouble where it is not one, <paramref name="what" /> saying what was expected.
         /// </summary>
-        public static bool Member(Statement statement, int index, string what, ScriptTrouble trouble, out string provider, out string id,
+        public static bool Member(Statement statement, AutomationSystem system, int index, string what, ScriptTrouble trouble, out string provider, out string id,
             IList<Literal> arguments, IList<string> targets)
         {
             provider = id = "";
@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             if (qualified && member[0].Word != BlockKinds.Own)
             {
-                trouble.Say(statement, $"no namespace '{member[0].Word}'; expected a member, bare or qualified by ext.");
+                trouble.Say(statement, $"no namespace '{member[0].Word}'; expected a member, bare or qualified by {BlockKinds.Own}.");
                 return false;
             }
 
@@ -90,6 +90,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                         return false;
 
                     arguments.Add(Literal.Slots(slots));
+                    continue;
+                }
+
+                var setting = SettingReader.Referenced(statement, given[i], system);
+                if (setting != null)
+                {
+                    if (!SettingReader.Owe(statement, setting, system, null, null, trouble))
+                        return false;
+
+                    arguments.Add(Literal.Setting(setting, given[i].Form == ValueForm.Qualified));
                     continue;
                 }
 
@@ -118,7 +128,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <paramref name="value" />; or false and trouble where they are not that, or a number is wanted and not given.
         /// </summary>
         /// <remarks>An ordering compares numbers, and so does a sum, so either is given one.</remarks>
-        public static bool Compared(Statement statement, int at, Quantifier quantifier, ScriptTrouble trouble, out Relation relation,
+        public static bool Compared(Statement statement, AutomationSystem system, int at, Quantifier quantifier, ScriptTrouble trouble, out Relation relation,
             out Literal value)
         {
             value = default(Literal);
@@ -129,11 +139,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             var written = statement.ValueAt(at + 1);
+            var ordered = relation != Relation.Is && relation != Relation.IsNot;
+            var setting = SettingReader.Referenced(statement, written, system);
+            if (setting != null)
+            {
+                value = Literal.Setting(setting, written.Form == ValueForm.Qualified);
+                return ordered || quantifier == Quantifier.Sum
+                    ? SettingReader.Owe(statement, setting, system, SettingReader.Numeric, "a number", trouble)
+                    : SettingReader.Owe(statement, setting, system, null, null, trouble);
+            }
+
             if (!Argument(statement, written, trouble))
                 return false;
 
             value = Given(written);
-            var ordered = relation != Relation.Is && relation != Relation.IsNot;
+
             if ((ordered || quantifier == Quantifier.Sum) && value.Kind != ValueKind.Integer && value.Kind != ValueKind.Real)
             {
                 trouble.Say(statement, $"expected a number after '{Keywords.Name(ProgramWriter.Said(relation))}'.");
@@ -228,12 +248,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>all ext.filled on [ vent ] == on then</c> or <c>where == inside then</c>, from <paramref name="at" />: what an
+        /// <c>all sprocket.filled on [ vent ] == on then</c> or <c>where == inside then</c>, from <paramref name="at" />: what an
         /// <c>if</c> or an <c>else if</c> tests, or null and trouble where it is not that.
         /// </summary>
         static BranchTest Tested(Statement statement, int at, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
-            if (ScriptQuotes.Named(statement.ValueAt(at)))
+            if (StateReader.Called(statement, statement.ValueAt(at)) != null)
                 return StateTested(statement, at, system, trouble);
 
             var test = new Comparison();
@@ -242,13 +262,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
 
             string provider, id;
-            if (!Member(statement, at + 1, "a value on a list of names, like ext.closed on [ inner ]", trouble, out provider,
+            if (!Member(statement, system, at + 1, "a value on a list of names, like sprocket.closed on [ inner ]", trouble, out provider,
                     out id, test.Arguments, test.Targets))
                 return null;
 
             Relation relation;
             Literal value;
-            if (!Compared(statement, at + 2, quantifier, trouble, out relation, out value))
+            if (!Compared(statement, system, at + 2, quantifier, trouble, out relation, out value))
                 return null;
 
             if (!statement.Says(at + 4, Keyword.Then))
@@ -316,21 +336,30 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 if (Lasting(statement.ValueAt(0), 0, out length))
                     return ScriptQuotes.Ends(statement, 1, trouble) ? Noted(new Wait(length), statement) : null;
 
-                trouble.Say(statement, "expected a duration after 'wait', like 60t.");
+                var name = SettingReader.Referenced(statement, statement.ValueAt(0), system);
+                if (name != null)
+                {
+                    if (!SettingReader.Owe(statement, name, system, SettingReader.Lasting, "a duration", trouble))
+                        return null;
+
+                    return ScriptQuotes.Ends(statement, 1, trouble) ? Noted(new Wait(0) { Setting = name }, statement) : null;
+                }
+
+                trouble.Say(statement, "expected a duration after 'wait', like 60t, or a setting holding one.");
                 return null;
             }
 
             if (statement.Key == Keyword.Call)
-                return Acted(statement, trouble);
+                return Acted(statement, system, trouble);
 
-            if (statement.Key == Keyword.Set && !statement.IsMember(0) && ScriptQuotes.Named(statement.ValueAt(0)))
+            if (statement.Key == Keyword.Set && StateReader.Called(statement, statement.ValueAt(0)) != null)
             {
                 var sets = StateReader.Set(statement, system, trouble);
                 return sets == null ? null : Noted(sets, statement);
             }
 
             if (statement.Key == Keyword.Set)
-                return ReadSet(statement, trouble);
+                return ReadSet(statement, system, trouble);
 
             if (statement.Key == Keyword.None && statement.Head == AbortWords.Abort)
                 return Aborted(statement, trouble);
@@ -380,14 +409,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>call ext.close on [ inner ]</c> or <c>call SetColor(255, 0, 0) on [ light ]</c>: an action, bare or qualified by
+        /// <c>call sprocket.close on [ inner ]</c> or <c>call SetColor(255, 0, 0) on [ light ]</c>: an action, bare or qualified by
         /// its namespace, on some blocks, given its arguments.
         /// </summary>
-        static Step Acted(Statement statement, ScriptTrouble trouble)
+        static Step Acted(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var act = new Act("");
             string provider, id;
-            if (!Member(statement, 0, "an action on a list of names after 'call', like ext.close on [ inner ]", trouble,
+            if (!Member(statement, system, 0, "an action on a list of names after 'call', like sprocket.close on [ inner ]", trouble,
                     out provider, out id, act.Arguments, act.Targets))
                 return null;
 
@@ -404,11 +433,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         /// <summary><c>set Radius on [ light ] to 4.5</c>: one of the block's own values.</summary>
         /// <remarks>The value is taken by position, so a flag written <c>on</c> is a value.</remarks>
-        static Step ReadSet(Statement statement, ScriptTrouble trouble)
+        static Step ReadSet(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var act = new Act("");
             string provider, id;
-            if (!Member(statement, 0, "a value on a list of names after 'set', like Radius on [ light ]", trouble,
+            if (!Member(statement, system, 0, "a value on a list of names after 'set', like Radius on [ light ]", trouble,
                     out provider, out id, act.Arguments, act.Targets))
                 return null;
 
@@ -430,13 +459,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
             }
 
-            if (!ScriptQuotes.Ends(statement, 3, trouble) || !Argument(statement, statement.ValueAt(2), trouble))
+            if (!ScriptQuotes.Ends(statement, 3, trouble))
+                return null;
+
+            var setting = SettingReader.Referenced(statement, statement.ValueAt(2), system);
+            if (setting != null ? !SettingReader.Owe(statement, setting, system, null, null, trouble) : !Argument(statement, statement.ValueAt(2), trouble))
                 return null;
 
             act.ActionId = id;
             act.Form = ReachKind.Value;
             act.Provider = provider;
-            act.Arguments.Add(Given(statement.ValueAt(2)));
+            act.Arguments.Add(setting != null ? Literal.Setting(setting, statement.ValueAt(2).Form == ValueForm.Qualified) : Given(statement.ValueAt(2)));
             return Noted(act, statement);
         }
 

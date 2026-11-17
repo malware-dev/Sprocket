@@ -5,7 +5,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
     /// <summary>
     /// Something a system needs a construct to provide, and what may answer it.
     /// </summary>
-    /// <remarks>A part nothing acts on is left out when the program is written, and so is every instance's answer to it.</remarks>
+    /// <remarks>
+    /// A slot for blocks or a signal that nothing acts on is left out when the program is written, and so is every
+    /// instance's answer to it; a setting is written whether anything uses it or not.
+    /// </remarks>
     public sealed class Part : ICategorized
     {
         /// <summary>A required slot called <paramref name="id" />, expecting any block.</summary>
@@ -32,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public bool IsSignal { get; set; }
 
         /// <summary>
-        /// The id of the type the host provides that this part holds, as a part expecting it names it, <c>ext.screen</c>; or
+        /// The id of the type the host provides that this part holds, as a part expecting it names it, <c>sprocket.screen</c>; or
         /// empty for a part holding blocks or a signal.
         /// </summary>
         public string Holds { get; set; } = "";
@@ -45,6 +48,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <c>Type/Subtype</c> for one exact block.
         /// </remarks>
         public string Expects { get; set; }
+
+        /// <summary>
+        /// For a setting, answered by each installation with one value rather than blocks, the type of that value: a built-in
+        /// one, <c>flag</c>, <c>text</c>, <c>integer</c>, <c>real</c>, <c>duration</c> or <c>color</c>, or the name of a
+        /// type the system declares; empty for a part answered by blocks or a signal.
+        /// </summary>
+        public string Setting { get; set; } = "";
+
+        /// <summary>Whether this part is a setting, answered by one value rather than by blocks.</summary>
+        public bool IsSetting => Setting.Length > 0;
+
+        /// <summary>Whether this setting has a default, the value of an installation that leaves it unanswered.</summary>
+        /// <remarks>An optional setting has one and a required one has none.</remarks>
+        public bool HasDefault { get; set; }
+
+        /// <summary>The value of an installation that leaves this setting unanswered, where <see cref="HasDefault" />.</summary>
+        public Literal Default { get; set; }
 
         /// <summary>
         /// What somebody wrote about this part, in their own words, or empty; never its name.

@@ -10,6 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly List<ToolbarSlot> _positions;
         readonly string _note;
         readonly KeptAttributes _kept;
+        readonly bool _answered;
+        readonly Literal _setting;
 
         SlotAnswer(SystemInstance instance, string slot)
         {
@@ -22,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             _positions = positions == null ? null : new List<ToolbarSlot>(positions);
             _note = instance.NoteOn(slot);
             _kept = instance.KeptOn(slot);
+            _answered = instance.AnswerTo(slot, out _setting);
         }
 
         /// <summary>The installation that answers the slot.</summary>
@@ -31,12 +34,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public static SlotAnswer Of(SystemInstance instance, string slot)
         {
             var answer = new SlotAnswer(instance, slot);
-            return answer._blocks == null && answer._note.Length == 0 && answer._kept == null ? null : answer;
+            return answer._blocks == null && !answer._answered && answer._note.Length == 0 && answer._kept == null ? null : answer;
         }
 
         /// <summary>Has the installation answer <paramref name="slot" /> as it did when this was taken.</summary>
         public void Put(string slot)
         {
+            if (_answered)
+                Instance.Answer(slot, _setting);
+
             if (_positions != null)
                 Instance.Fill(slot, _blocks ?? new List<string>(), _positions);
             else if (_facets != null)

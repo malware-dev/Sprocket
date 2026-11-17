@@ -23,7 +23,7 @@ public class CockpitTests
         if (!sits)
             seat.Sit("Mal");
 
-        var heard = SignalTrigger.Written("ext", signal);
+        var heard = SignalTrigger.Written("sprocket", signal);
         heard.Sources.Add(automation.Declare(ship.World, ship.Entity(seat.Id)).Name);
         var sequence = automation.AddSequence(heard);
         var act = Given.Power(false);

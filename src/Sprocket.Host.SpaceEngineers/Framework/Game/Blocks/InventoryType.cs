@@ -6,7 +6,7 @@ using Sandbox.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 {
-    /// <summary>A block's inventory, the type this host provides as <c>ext.inventory</c>: items are moved out of it into other inventories.</summary>
+    /// <summary>A block's inventory, the type this host provides as <c>sprocket.inventory</c>: items are moved out of it into other inventories.</summary>
     /// <remarks>Each member receives its inventory first, counted from 1, ahead of the step's own values.</remarks>
     public sealed partial class InventoryType : HostType
     {

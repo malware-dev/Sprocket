@@ -2760,4 +2760,10 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Share.CopyAbout" xml:space="preserve">
     <value>Kopierer plantegningen til utklippstavlen, til å importere på en annen konstruksjon, i denne verdenen eller en annen.</value>
   </data>
+  <data name="Sprocket.Problem.Ambiguous" xml:space="preserve">
+    <value>I dette steget kan {name} være stegets innstilling eller handlingens egen {name}.</value>
+  </data>
+  <data name="Sprocket.Stopped.Ambiguous" xml:space="preserve">
+    <value>{name} kan være stegets innstilling eller handlingens egen {name}.</value>
+  </data>
 </root>

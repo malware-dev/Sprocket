@@ -9,8 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>No keyword: a word the format gives no meaning to.</summary>
         None = 0,
 
-        /// <summary>The first statement of a program, saying which format it is written in.</summary>
-        Sprocket,
         /// <summary>One actual block on the program's construct.</summary>
         Block,
         /// <summary>A logic system, or a system blueprint after <c>blueprint</c>.</summary>

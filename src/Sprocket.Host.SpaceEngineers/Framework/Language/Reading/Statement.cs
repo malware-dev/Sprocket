@@ -196,6 +196,32 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             };
         }
 
+        /// <summary>Has the name in parts or the member <paramref name="value" />, of this statement's reading, start with the name <paramref name="first" /> in place of its first part.</summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public void Respell(Value value, string first)
+        {
+            if (value.Form == ValueForm.Qualified || value.Form == ValueForm.Reference)
+                _reading.Parts.Set(value.From, new Value(ValueForm.Identifier, first));
+        }
+
+        /// <summary>Has the name at <paramref name="index" /> written qualified by <paramref name="space" /> in its place: <c>states.home</c> for <c>home</c>.</summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public void Qualify(int index, string space)
+        {
+            var name = ValueAt(index);
+            var parts = _reading.Parts;
+            var from = parts.Count;
+            parts.Add(new Value(ValueForm.Identifier, space));
+            parts.Add(new Value(ValueForm.Identifier, name.Word));
+            _reading.Values.Set(_from + index, Value.Qualified(from, 2));
+        }
+
+        /// <summary>The parts of the name in parts <paramref name="value" />, <c>settings.'Open angle'</c>, or none where it is no such name.</summary>
+        public ValueRange PartsOf(Value value)
+        {
+            return value.Form == ValueForm.Qualified ? new ValueRange(_reading.Parts, value.From, value.Count) : new ValueRange();
+        }
+
         /// <summary>The items of a list at a position, or none where there is no list there.</summary>
         public ValueRange Items(int index)
         {

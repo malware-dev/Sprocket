@@ -759,7 +759,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _owner.Log?.Entered(this, _owner.CurrentTick, _memory.Step);
             var wait = _sequence.Steps[_memory.Step] as Wait;
             if (wait != null)
-                _memory.WaitTicks = wait.Ticks;
+                _memory.WaitTicks = wait.TicksIn(_instance);
         }
 
         /// <summary>
@@ -1068,7 +1068,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 if (test.Quantifier == Quantifier.Average)
                     total /= tested.Reads.Count;
 
-                return Relations.Holds(Literal.Of(total), test.Relation, test.Value);
+                return Relations.Holds(Literal.Of(total), test.Relation, tested.Value);
             }
 
             var all = test.Quantifier == Quantifier.All;

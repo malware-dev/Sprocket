@@ -111,12 +111,12 @@ public class BlueprintTextTests
     [Fact]
     public void ARepeatedNameIsShort()
     {
-        var once = TokenCode.Encode("call ext.move_items on [ 'Cargo One' ]");
-        var twice = TokenCode.Encode("call ext.move_items on [ 'Cargo One' ] on [ 'Cargo One' ]");
+        var once = TokenCode.Encode("call sprocket.move_items on [ 'Cargo One' ]");
+        var twice = TokenCode.Encode("call sprocket.move_items on [ 'Cargo One' ] on [ 'Cargo One' ]");
 
         // on, [, the name pointed back to in two bytes, and ].
         Assert.Equal(once.Length + 5, twice.Length);
-        Assert.Equal("call ext . move_items on [ 'Cargo One' ] on [ 'Cargo One' ]", TokenCode.Decode(twice));
+        Assert.Equal("call sprocket . move_items on [ 'Cargo One' ] on [ 'Cargo One' ]", TokenCode.Decode(twice));
     }
 
     /// <summary><paramref name="script" /> read as a blueprint and written again, as the library stores it.</summary>
@@ -171,8 +171,8 @@ system blueprint ""4f739dd7-7258-4165-b562-d13b22f56316"" as Engineer.Amounts
 changed ""2026-11-17T06:31:16Z""
 {
     required slot 'signal slot 1' expects signal
-    required slot 'inventory slot 2' expects ext.inventory
-    required slot 'inventory slot 1' expects ext.inventory
+    required slot 'inventory slot 2' expects sprocket.inventory
+    required slot 'inventory slot 1' expects sprocket.inventory
     required slot 'signal slot 2' expects signal
     required slot 'signal slot 3' expects signal
     required slot 'signal slot 4' expects signal
@@ -187,24 +187,24 @@ changed ""2026-11-17T06:31:16Z""
     whenever 'signal slot 4' then run 4
 
     sequence 1 as 'Sequence 1' {
-        call ext.move_items([ 'inventory slot 2' ], ""Ingot/Iron"", 100, 0) on [ 'inventory slot 1' ]
+        call sprocket.move_items([ 'inventory slot 2' ], ""Ingot/Iron"", 100, 0) on [ 'inventory slot 1' ]
         await
     }
 
     sequence 2 as 'Sequence 2' {
-        call ext.move_items([ 'inventory slot 2' ], ""Component/SteelPlate"", 2.5, 0) on [ 'inventory slot 1' ]
+        call sprocket.move_items([ 'inventory slot 2' ], ""Component/SteelPlate"", 2.5, 0) on [ 'inventory slot 1' ]
         await
     }
 
     sequence 3 as 'Sequence 3' {
-        call ext.move_items([ 'inventory slot 2' ], """", """", 0) on [ 'inventory slot 1' ]
+        call sprocket.move_items([ 'inventory slot 2' ], """", """", 0) on [ 'inventory slot 1' ]
         await
     }
 
     sequence 4 as 'Sequence 4' {
-        call ext.move_items([ 'inventory slot 2' ], ""Ingot/Iron"", 100, 1) on [ 'inventory slot 1' ]
+        call sprocket.move_items([ 'inventory slot 2' ], ""Ingot/Iron"", 100, 1) on [ 'inventory slot 1' ]
         await
-        set ext.power on [ 'block slot 1' ] to on
+        set sprocket.power on [ 'block slot 1' ] to on
     }
 }
 ";

@@ -109,7 +109,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 }
             }
 
+            // The slots first, so every step and state knows which names are settings, and of what type, wherever they are
+            // written; a setting may hold a type declared below it.
             var body = statement.Body;
+            var declared = DeclaredTypes(body);
+            var slots = new List<Statement>();
+            var parts = new List<Part>();
+            for (var i = 0; i < body.Count && blueprint; i++)
+            {
+                var inner = body[i];
+                if (inner.IsOff || inner.Key != Keyword.Required && inner.Key != Keyword.Optional)
+                    continue;
+
+                var part = ReadSlot(inner, system, declared, trouble);
+                if (part != null)
+                {
+                    slots.Add(inner);
+                    parts.Add(part);
+                }
+            }
+
             for (var i = 0; i < body.Count; i++)
             {
                 var inner = body[i];
@@ -120,8 +139,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 }
 
                 if ((inner.Key == Keyword.Required || inner.Key == Keyword.Optional) && blueprint)
-                    ReadSlot(inner, system, trouble);
-                else if (inner.Key == Keyword.Required || inner.Key == Keyword.Optional)
+                    continue;
+
+                if (inner.Key == Keyword.Required || inner.Key == Keyword.Optional)
                     trouble.Say(inner, $"unexpected {ScriptQuotes.Headed(inner)}; only a system blueprint has slots.");
                 else if (inner.Key == Keyword.Type)
                     StateReader.ReadType(inner, system, trouble);
@@ -134,6 +154,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 else
                     trouble.Say(inner, $"unexpected {ScriptQuotes.Headed(inner)}{(blueprint ? "; expected required, optional, type, let, whenever, when, every or sequence." : "; expected type, let, whenever, when, every or sequence.")}");
             }
+
+            // Its types are all read now, so a setting's default can be read as one of their choices.
+            for (var i = 0; i < slots.Count; i++)
+                SettingReader.Slot(slots[i], parts[i], system, trouble);
 
             Earlier(statement, system);
             Resolve(system, statement, trouble);
@@ -287,26 +311,35 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             item.Category = attribute.Value.Word;
         }
 
-        static void ReadSlot(Statement statement, AutomationSystem system, ScriptTrouble trouble)
+        /// <summary>
+        /// <c>required slot inner expects Door</c> or <c>optional slot 'Open angle' expects real = 45</c>: a slot of
+        /// <paramref name="system" />, or null and trouble where it is not one.
+        /// </summary>
+        /// <remarks>
+        /// A slot expecting a built-in value type, or one of <paramref name="declared" />, the names of the system's types, is
+        /// a setting; its default is read once the whole system is, by <see cref="SettingReader.Slot" />. A bare name that is
+        /// one of the game's block types is the game's; the system's type of that name is written <c>types.Door</c>.
+        /// </remarks>
+        static Part ReadSlot(Statement statement, AutomationSystem system, ICollection<string> declared, ScriptTrouble trouble)
         {
             var optional = statement.Key == Keyword.Optional;
             if (!statement.Says(0, Keyword.Slot))
             {
                 trouble.Say(statement, optional ? "expected 'slot' after 'optional'." : "expected 'slot' after 'required'.");
-                return;
+                return null;
             }
 
             var name = statement.ValueAt(1);
             if (!ScriptQuotes.Named(name))
             {
                 trouble.Say(statement, "expected the slot's name.");
-                return;
+                return null;
             }
 
             if (system.FindPart(name.Word) != null)
             {
                 trouble.Say(statement, $"slot '{name.Word}' is already declared.");
-                return;
+                return null;
             }
 
             var part = system.PartFor(name.Word);
@@ -319,20 +352,54 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (!statement.Says(2, Keyword.Expects))
             {
                 ScriptQuotes.Ends(statement, 2, trouble);
-                return;
+                return part;
             }
 
             var one = statement.ValueAt(3);
             if (one.Says(Keyword.Signal))
                 part.IsSignal = true;
+            else if (one.Form == ValueForm.Qualified && statement.Parts(3)[0].Word == Namespaces.Types)
+                Declared(statement, part, declared, trouble);
             else if (one.Form == ValueForm.Qualified)
                 Holding(statement, part, trouble);
+            else if (ScriptQuotes.Named(one) && (SettingReader.IsBuiltIn(one.Word) || declared.Contains(one.Word) && !BlockKinds.IsGameType(one.Word)))
+                part.Setting = one.Word;
             else if (ScriptQuotes.Named(one))
                 part.Expects = one.Word;
             else
                 trouble.Say(statement, "expected signal, one block type or a type the host provides after 'expects'.");
 
-            ScriptQuotes.Ends(statement, 4, trouble);
+            // A default is read with the setting it belongs to.
+            if (!statement.Says(4, Keyword.Equals) || !ScriptQuotes.Named(one) && !part.IsSetting)
+                ScriptQuotes.Ends(statement, 4, trouble);
+
+            return part;
+        }
+
+        /// <summary><c>types.side</c> at 3: one of <paramref name="declared" />, the names of the system's types, held by the setting <paramref name="part" />; or trouble.</summary>
+        static void Declared(Statement statement, Part part, ICollection<string> declared, ScriptTrouble trouble)
+        {
+            var parts = statement.Parts(3);
+            if (parts.Count != 2 || !declared.Contains(parts[1].Word))
+            {
+                trouble.Say(statement, $"no type '{(parts.Count == 2 ? parts[1].Word : ScriptQuotes.Spelling(parts))}' in the system.");
+                return;
+            }
+
+            part.Setting = parts[1].Word;
+        }
+
+        /// <summary>The names of the types the statements of a system's body declare, whether or not they read.</summary>
+        static HashSet<string> DeclaredTypes(IList<Statement> body)
+        {
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var inner in body)
+            {
+                if (inner.Key == Keyword.Type && !inner.IsOff && ScriptQuotes.Named(inner.ValueAt(0)))
+                    names.Add(inner.Word(0));
+            }
+
+            return names;
         }
 
         /// <summary>The type the host provides that the slot <paramref name="part" /> expects, written qualified at 3, or trouble.</summary>

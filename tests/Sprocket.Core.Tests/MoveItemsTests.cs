@@ -200,7 +200,7 @@ public class MoveItemsTests
         var values = new Values();
 
         var text = ProgramWriter.Save(program, values);
-        Assert.Contains("ext.move_items([ 'to' ], \"Ingot/Iron\", 100) on [ 'from' ]", text);
+        Assert.Contains("sprocket.move_items([ 'to' ], \"Ingot/Iron\", 100) on [ 'from' ]", text);
 
         var read = new Automation();
         Assert.Equal("", ProgramReader.Load(text, read, values));

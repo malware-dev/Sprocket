@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
             {
-                if (parts[i].IsSignal || !used.Contains(parts[i].Id))
+                if (parts[i].IsSignal || parts[i].IsSetting || !used.Contains(parts[i].Id))
                     continue;
 
                 if (Misfits(bindings, instance, parts[i]))
@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <summary>Whether a block <paramref name="instance" /> fills the block slot <paramref name="part" /> with is of a kind the slot's type no longer takes.</summary>
         static bool Misfits(Bindings bindings, SystemInstance instance, Part part)
         {
-            if (part.IsSignal || part.Holds.Length != 0)
+            if (part.IsSignal || part.IsSetting || part.Holds.Length != 0)
                 return false;
 
             var filled = instance.FilledWith(part.Id);

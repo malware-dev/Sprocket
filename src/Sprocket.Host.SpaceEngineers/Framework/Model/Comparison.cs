@@ -51,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return copy;
         }
 
-        /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>ext</c>, the block's own where it is bare; null where it names none.</summary>
+        /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>sprocket</c>, the block's own where it is bare; null where it names none.</summary>
         public EntityAction Names(IList<EntityAction> actions)
         {
             return EntityAction.Value(actions, Provider, MemberId);

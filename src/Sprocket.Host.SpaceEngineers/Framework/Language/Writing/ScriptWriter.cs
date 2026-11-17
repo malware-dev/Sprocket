@@ -172,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A thing of the type <paramref name="type" /> on some blocks, by number from 1: <c>ext.screen(1) on [ board ]</c>.</summary>
+        /// <summary>A thing of the type <paramref name="type" /> on some blocks, by number from 1: <c>sprocket.screen(1) on [ board ]</c>.</summary>
         /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
         public ScriptWriter Facet(HostType type, IList<string> blocks, int number)
         {
@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A signal sent from a toolbar slot on some blocks: <c>ext.toolbar(1, 1, 4) on [ panel1 ]</c>.</summary>
+        /// <summary>A signal sent from a toolbar slot on some blocks: <c>sprocket.toolbar(1, 1, 4) on [ panel1 ]</c>.</summary>
         /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
         public ScriptWriter Signal(IList<string> blocks, ToolbarSlot at)
         {
@@ -419,6 +419,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             }
 
             Spell(into, space);
+
             into.Append('.');
             Spell(into, name);
         }

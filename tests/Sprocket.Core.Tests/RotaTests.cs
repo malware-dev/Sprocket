@@ -296,7 +296,7 @@ public class RotaTests
 
         vent.Enabled = false;
 
-        var on = SignalTrigger.Written("ext", "finishes_filling");
+        var on = SignalTrigger.Written("sprocket", "finishes_filling");
         on.Sources.Add(automation.Declare(ship.World, ship.Entity(vent.Id)).Name);
         var sequence = automation.AddSequence(on);
         Then(sequence, Given.Power(true, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name));
@@ -436,7 +436,7 @@ public class RotaTests
             var watched = automation.Declare(ship.World, ship.Entity(door.Id)).Name;
             for (var i = 0; i < 10; i++)
             {
-                var opened = SignalTrigger.Written("ext", "finishes_opening");
+                var opened = SignalTrigger.Written("sprocket", "finishes_opening");
                 opened.Sources.Add(watched);
                 var sequence = automation.AddSequence(opened);
                 Then(sequence, "close", watched);

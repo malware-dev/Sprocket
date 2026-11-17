@@ -421,7 +421,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             var fills = new List<List<long>>();
             foreach (var part in system.Parts)
             {
-                if (part.IsSignal || part.Holds.Length != 0)
+                if (part.IsSignal || part.IsSetting || part.Holds.Length != 0)
                     continue;
 
                 var filled = Ids(shown.FilledWith(part.Id));

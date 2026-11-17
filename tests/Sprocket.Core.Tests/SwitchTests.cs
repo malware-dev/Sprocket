@@ -77,7 +77,7 @@ public class SwitchTests
         ship.Airlock.AddInstance();
 
 
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
+        var opened = SignalTrigger.Written("sprocket", "finishes_opening");
         opened.Sources.Add(ship.Ref(ship.Inner));
 
         ship.Secure = ship.Program.AddSequence(ship.Airlock, opened);

@@ -143,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             // A different version or draft is refused whole; a header that will not parse is damage like any other.
             string refused = null;
-            var header = constructs.Count > 0 && constructs[0].Key == Keyword.Sprocket ? constructs[0] : null;
+            var header = constructs.Count > 0 && IsHeader(constructs[0], saved) ? constructs[0] : null;
             if (header == null && parser.Trouble.Length == 0)
                 refused = $"{(constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0]))}expected sprocket <format>.";
             else if (header != null && !IsCurrent(header) && !FormatUpgrades.From(header.Whole(0), DraftOf(header)))
@@ -201,6 +201,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return trouble.What;
         }
 
+        /// <summary>Whether <paramref name="statement" />, the first of <paramref name="script" />, is its version line: the name <c>sprocket</c>, unquoted.</summary>
+        static bool IsHeader(Statement statement, string script)
+        {
+            return statement.Key == Keyword.None && statement.Head == ScriptFormat.Header && statement.At < script.Length
+                && script[statement.At] != '\'';
+        }
+
         /// <summary>Says what is wrong with the shape of <paramref name="header" />: whole numbers, and nothing after them.</summary>
         static void Header(Statement header, ScriptTrouble trouble)
         {
@@ -256,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>let door1 = block '…' [ … ]</c> or <c>let button = ext.toolbar(1, 1, 4) on [ panel1 ]</c>: a variable, holding a
+        /// <c>let door1 = block '…' [ … ]</c> or <c>let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]</c>: a variable, holding a
         /// block or a signal.
         /// </summary>
         static void ReadLet(Statement statement, Automation program, Values values, ScriptTrouble trouble)
@@ -293,7 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             if (!statement.Says(2, Keyword.Block) || !ScriptQuotes.Named(statement.ValueAt(3)) || statement.ValueAt(4).Form != ValueForm.List)
             {
-                trouble.Say(statement, "expected a block, like block '<type>/<subtype>' [ <keys> ], or a signal, like ext.toolbar(1, 1, 4) on [ panel1 ].");
+                trouble.Say(statement, "expected a block, like block '<type>/<subtype>' [ <keys> ], or a signal, like sprocket.toolbar(1, 1, 4) on [ panel1 ].");
                 return;
             }
 
@@ -311,7 +318,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// The signal the member <paramref name="value" /> gives back: this host's <c>ext.toolbar</c>, a slot on the
+        /// The signal the member <paramref name="value" /> gives back: this host's <c>sprocket.toolbar</c>, a slot on the
         /// toolbars of the blocks variables above hold, each added to <paramref name="blocks" />; or trouble.
         /// </summary>
         static bool Signal(Statement statement, Value value, Automation program, ScriptTrouble trouble, IList<string> blocks,
@@ -321,14 +328,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var member = statement.Member(value);
             if (member.Count != 2 || member[0].Word != BlockKinds.Own || member[1].Word != ScriptFormat.Toolbar)
             {
-                trouble.Say(statement, $"no function {ScriptQuotes.Spelling(member)} giving back a signal; expected ext.toolbar(<toolbar>, <page>, <slot>).");
+                trouble.Say(statement, $"no function {ScriptQuotes.Spelling(member)} giving back a signal; expected sprocket.toolbar(<toolbar>, <page>, <slot>).");
                 return false;
             }
 
             var given = statement.Arguments(value);
             if (given.Count != 3 || Statement.Counted(given[0]) == 0 || Statement.Counted(given[1]) == 0 || Statement.Counted(given[2]) == 0)
             {
-                trouble.Say(statement, "expected ext.toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
+                trouble.Say(statement, "expected sprocket.toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
                 return false;
             }
 
@@ -474,23 +481,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     continue;
                 }
 
-                if (inner.Key != Keyword.None || !inner.Says(0, Keyword.Equals) || inner.ValueAt(1).Form != ValueForm.List)
+                Part part = inner.Key == Keyword.None && inner.Says(0, Keyword.Equals) ? system.FindPart(inner.Head) : null;
+                var setting = part != null && part.IsSetting;
+                if (!setting && (inner.Key != Keyword.None || !inner.Says(0, Keyword.Equals) || inner.ValueAt(1).Form != ValueForm.List))
                 {
-                    trouble.Say(inner, "expected <slot> = [ <answers> ].");
+                    trouble.Say(inner, "expected <slot> = [ <answers> ], or <setting> = <value>.");
                     continue;
                 }
 
-                if (!ScriptQuotes.Ends(inner, 2, trouble))
+                if (!setting && !ScriptQuotes.Ends(inner, 2, trouble))
                     continue;
 
-                Part part = system.FindPart(inner.Head);
                 if (part == null)
                 {
                     trouble.Say(inner, $"system blueprint '{system.Name}' has no slot '{inner.Head}'.");
                     continue;
                 }
 
-                if (instance.FilledWith(inner.Head) != null)
+                Literal answered;
+                if (instance.FilledWith(inner.Head) != null || instance.AnswerTo(inner.Head, out answered))
                 {
                     trouble.Say(inner, $"slot '{inner.Head}' is already answered.");
                     continue;
@@ -498,6 +507,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
                 instance.Note(inner.Head, inner.Annotation);
                 instance.Keep(inner.Head, ScriptAttributes.Unused(inner));
+
+                if (setting)
+                {
+                    SettingReader.Answer(inner, part, system, instance, trouble);
+                    continue;
+                }
 
                 if (part.IsSignal)
                 {
@@ -527,7 +542,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>status = [ ext.screen(1) on [ board ] ]</c>: what answers a slot of the type <paramref name="type" /> in one use of
+        /// <c>status = [ sprocket.screen(1) on [ board ] ]</c>: what answers a slot of the type <paramref name="type" /> in one use of
         /// a blueprint, each written in place by the function returning one, a thing of each block it is on.
         /// </summary>
         static void Facets(Statement statement, HostType type, SystemInstance instance, Automation program, ScriptTrouble trouble)
@@ -583,7 +598,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>button = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]</c>: the signals that answer a signal slot in one use of a
+        /// <c>button = [ sprocket.toolbar(1, 1, 4) on [ panel1 ] ]</c>: the signals that answer a signal slot in one use of a
         /// blueprint, each written in place or named by a variable above.
         /// </summary>
         static void Answered(Statement statement, AutomationSystem system, SystemInstance instance, Automation program,
@@ -614,7 +629,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
                 if (items[i].Form != ValueForm.Reference)
                 {
-                    trouble.Say(statement, "expected signals in the list, like [ ext.toolbar(1, 1, 4) on [ panel1 ] ].");
+                    trouble.Say(statement, "expected signals in the list, like [ sprocket.toolbar(1, 1, 4) on [ panel1 ] ].");
                     return;
                 }
 

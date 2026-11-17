@@ -105,7 +105,7 @@ public class ScriptTests
         Assert.Equal("", Load(Version + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n"
             + "let spare = block 'Door/LargeBlockDoor' [ 2 ]\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
-            + "let button = ext.toolbar(1, 1, 4) on [ panel1 ]\n\n" + Using, after));
+            + "let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\n\n" + Using, after));
 
         var text = Save(after);
         Assert.Contains("let door1 = ", text);
@@ -116,7 +116,7 @@ public class ScriptTests
 
     /// <summary>A system closing <c>door1</c>, written as the writer writes it, so a variable written above it is kept.</summary>
 
-    const string Using = "system \"" + Identity + "\" as Airlock\n{\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
+    const string Using = "system \"" + Identity + "\" as Airlock\n{\n    sequence 1 {\n        call sprocket.close on [ door1 ]\n    }\n}\n";
 
     /// <summary>Gives <paramref name="program" /> a system that closes <paramref name="name" />, since a variable nothing names is not written.</summary>
     static void Uses(Automation program, string name)
@@ -167,15 +167,15 @@ public class ScriptTests
             "    # The door onto the ship.\n" +
             "    required slot inner expects Door\n" +
             "\n" +
-            "    when any ext.pressed on [ inner ] == on then run 1\n" +
+            "    when any sprocket.pressed on [ inner ] == on then run 1\n" +
             "\n" +
             "    sequence 1 as 'Let me out' {\n" +
-            "        call ext.close on [ inner ]\n" +
+            "        call sprocket.close on [ inner ]\n" +
             "        await\n" +
             "        wait 60t\n" +
             "\n" +
             "        # The vent needs the full cycle.\n" +
-            "        call ext.open on [ inner ]\n" +
+            "        call sprocket.open on [ inner ]\n" +
             "        await\n" +
             "    }\n" +
             "}\n" +
@@ -221,13 +221,13 @@ public class ScriptTests
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934 ]\n" +
             "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 74857693847562937 ]\n" +
-            "let button = ext.toolbar(1, 1, 4) on [ panel1 ]\n" +
+            "let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\n" +
             "\n" +
             "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n{\n" +
             "    whenever button then run 1\n" +
             "\n" +
             "    sequence 1 {\n" +
-            "        call ext.close on [ inner ]\n" +
+            "        call sprocket.close on [ inner ]\n" +
             "    }\n" +
             "}\n";
         Assert.Equal(written, Save(program));
@@ -534,8 +534,8 @@ public class ScriptTests
         Assert.Equal("", Load(
             Blueprint + "MalTek.Airlock {\n" +
             "    required slot inside\n    required slot inner\n    required slot outer\n\n" +
-            "    when any ext.pressed on [ inside ] == on then run 1\n" +
-            "    when all ext.status on [ inner, outer ] == closed then run 1\n" +
+            "    when any sprocket.pressed on [ inside ] == on then run 1\n" +
+            "    when all sprocket.status on [ inner, outer ] == closed then run 1\n" +
             "    every 600t run 2\n\n" +
             "    sequence 1 {\n    }\n\n" +
             "    sequence 2 {\n    }\n" +
@@ -564,20 +564,20 @@ public class ScriptTests
 
         // And it all comes back the same way.
         var text = Save(after);
-        Assert.Contains("    when any ext.pressed on [ inside ] == on then run 1\n", text);
-        Assert.Contains("    when all ext.status on [ inner, outer ] == closed then run 1\n", text);
+        Assert.Contains("    when any sprocket.pressed on [ inside ] == on then run 1\n", text);
+        Assert.Contains("    when all sprocket.status on [ inner, outer ] == closed then run 1\n", text);
         Assert.Contains("    every 600t run 2\n", text);
     }
 
     [Theory]
-    [InlineData("when any ext.pressed [ inside ] run 1")]
+    [InlineData("when any sprocket.pressed [ inside ] run 1")]
     [InlineData("when pressed [ inside ] then run 1")]
-    [InlineData("when any ext.pressed on [ inside ] == on then run")]
+    [InlineData("when any sprocket.pressed on [ inside ] == on then run")]
     [InlineData("every 600 run 1")]
     [InlineData("every 600t")]
-    [InlineData("when any ext.pressed [ inside ] every 30 then run 1")]
-    [InlineData("when any ext.pressed on [ inside ] == on every 0t then run 1")]
-    [InlineData("when any ext.on on [ inside ] == on then run 1")]
+    [InlineData("when any sprocket.pressed [ inside ] every 30 then run 1")]
+    [InlineData("when any sprocket.pressed on [ inside ] == on every 0t then run 1")]
+    [InlineData("when any sprocket.on on [ inside ] == on then run 1")]
     [InlineData("whatever [ inside ]")]
     [InlineData("whenever inside then run 1")]
     [InlineData("on button run 1")]
@@ -596,8 +596,8 @@ public class ScriptTests
     /// <summary>A line in a sequence that is no step is trouble, and so is a step that does not say what it needs to.</summary>
     [Theory]
     [InlineData("close [ inner ]")]
-    [InlineData("call ext.close [ inner ]")]
-    [InlineData("act ext.close on [ inner ]")]
+    [InlineData("call sprocket.close [ inner ]")]
+    [InlineData("act sprocket.close on [ inner ]")]
     [InlineData("call on [ inner ]")]
     [InlineData("stop")]
     public void ALineThatIsNoStepIsTrouble(string line)
@@ -638,16 +638,16 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.Equal("", Load(Blueprint + "MalTek.Airlock {\n    required slot vent\n    required slot inner\n\n"
-            + "    when any ext.room_status on [ vent ] == full every 30t then run 1\n"
-            + "    when any ext.status on [ inner ] == closed then run 1\n\n    sequence 1 {\n    }\n}\n", after));
+            + "    when any sprocket.room_status on [ vent ] == full every 30t then run 1\n"
+            + "    when any sprocket.status on [ inner ] == closed then run 1\n\n    sequence 1 {\n    }\n}\n", after));
 
         var triggers = after.Systems[0].Triggers;
         Assert.Equal(30, Assert.IsType<WhenTrigger>(triggers[0]).IntervalTicks);
         Assert.Equal(0, Assert.IsType<WhenTrigger>(triggers[1]).IntervalTicks);
 
         var text = Save(after);
-        Assert.Contains("    when any ext.room_status on [ vent ] == full every 30t then run 1\n", text);
-        Assert.Contains("    when any ext.status on [ inner ] == closed then run 1\n", text);
+        Assert.Contains("    when any sprocket.room_status on [ vent ] == full every 30t then run 1\n", text);
+        Assert.Contains("    when any sprocket.status on [ inner ] == closed then run 1\n", text);
     }
 
     /// <summary>A trigger the construct provides is a slot that expects one, and an <c>on</c> says what it does.</summary>
@@ -701,13 +701,13 @@ public class ScriptTests
     {
         const string written = "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 2 ]\n"
-            + "let halt = ext.toolbar(1, 3, 1) on [ panel2 ]\n";
+            + "let halt = sprocket.toolbar(1, 3, 1) on [ panel2 ]\n";
 
         var after = new Automation();
         Assert.Equal("", Load(Version + written + "\n"
             + "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n    optional slot button expects signal\n\n"
             + "    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n\n"
-            + "instance 1 of MalTek.Airlock {\n    button = [ ext.toolbar(1, 1, 4) on [ panel1 ], ext.toolbar(1, 2, 3) on [ panel2 ], halt ]\n}\n", after));
+            + "instance 1 of MalTek.Airlock {\n    button = [ sprocket.toolbar(1, 1, 4) on [ panel1 ], sprocket.toolbar(1, 2, 3) on [ panel2 ], halt ]\n}\n", after));
 
         var instance = after.Systems[0].Instances[0];
         Assert.Equal(new[] { "panel1", "panel2", "panel2" }, instance.FilledWith("button"));
@@ -719,22 +719,22 @@ public class ScriptTests
 
         var text = Save(after);
         Assert.Contains(written, text);
-        Assert.Contains("    button = [ ext.toolbar(1, 1, 4) on [ panel1 ], ext.toolbar(1, 2, 3) on [ panel2 ], halt ]\n", text);
+        Assert.Contains("    button = [ sprocket.toolbar(1, 1, 4) on [ panel1 ], sprocket.toolbar(1, 2, 3) on [ panel2 ], halt ]\n", text);
     }
 
     /// <summary>A signal slot answered by anything but a signal is trouble, and so is a slot for a block answered by one.</summary>
     [Theory]
     [InlineData("button = [ panel1 ]")]
-    [InlineData("button = [ ext.toolbar(1, 1) on [ panel1 ] ]")]
-    [InlineData("button = [ ext.toolbar(0, 1, 4) on [ panel1 ] ]")]
+    [InlineData("button = [ sprocket.toolbar(1, 1) on [ panel1 ] ]")]
+    [InlineData("button = [ sprocket.toolbar(0, 1, 4) on [ panel1 ] ]")]
     [InlineData("button = [ panel1:shelf(1, 1, 4) ]")]
-    [InlineData("button = [ ext.toolbar(1, 1, 4) on [ panel9 ] ]")]
-    [InlineData("inner = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]")]
+    [InlineData("button = [ sprocket.toolbar(1, 1, 4) on [ panel9 ] ]")]
+    [InlineData("inner = [ sprocket.toolbar(1, 1, 4) on [ panel1 ] ]")]
     [InlineData("inner = [ halt ]")]
     public void AnAnswerOfTheWrongKindIsTrouble(string line)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load(Version + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n\n"
+        Assert.NotEqual("", Load(Version + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet halt = sprocket.toolbar(1, 1, 2) on [ panel1 ]\n\n"
             + "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n    required slot inner\n    optional slot button expects signal\n\n"
             + "    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n\ninstance 1 of MalTek.Airlock {\n    " + line + "\n}\n", after));
         Assert.False(after.Intact);
@@ -746,7 +746,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.Equal("", Load(Version + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n"
-            + "let button = ext.toolbar(1, 1, 4) on [ panel1 ]\n\n"
+            + "let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Airlock\n{\n    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n", after));
 
         var started = Assert.IsType<SignalTrigger>(Assert.Single(after.Systems[0].Triggers));
@@ -760,9 +760,9 @@ public class ScriptTests
     [Theory]
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    whenever button then run 1\n")]
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    whenever panel1 then run 1\n")]
-    [InlineData("let button = ext.toolbar(1, 1, 4) on [ panel1 ]\nlet panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    whenever button then run 1\n")]
-    [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet button = ext.toolbar(1, 1, 4) on [ panel1 ]\n", "    whenever ext.finishes_closing on [ button ] then run 1\n")]
-    [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet button = ext.toolbar(1, 1, 4) on [ panel1 ]\n", "    every 600t call ext.close on [ button ]\n")]
+    [InlineData("let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\nlet panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    whenever button then run 1\n")]
+    [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\n", "    whenever sprocket.finishes_closing on [ button ] then run 1\n")]
+    [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\n", "    every 600t call sprocket.close on [ button ]\n")]
     public void ATriggerVariableThatIsNoneIsTrouble(string lets, string trigger)
     {
         var after = new Automation();
@@ -776,10 +776,10 @@ public class ScriptTests
     public void AStepSwitchedOffIsReadAndWrittenWhole()
     {
         var text = Blueprint + "MalTek.Airlock {\n    required slot inner\n\n    sequence 1 {\n"
-            + "        call ext.close on [ inner ]\n"
+            + "        call sprocket.close on [ inner ]\n"
             + "        await\n\n"
             + "        # Not yet\n"
-            + "        // call ext.open(2) on [ inner ]\n"
+            + "        // call sprocket.open(2) on [ inner ]\n"
             + "        // await\n"
             + "        wait 60t\n"
             + "    }\n}\n";
@@ -798,7 +798,7 @@ public class ScriptTests
         Assert.True(steps[3].IsOff);
         Assert.False(steps[4].IsOff);
 
-        Assert.Contains("        # Not yet\n        // call ext.open(2) on [ inner ]\n        // await\n        wait 60t\n", Save(after));
+        Assert.Contains("        # Not yet\n        // call sprocket.open(2) on [ inner ]\n        // await\n        wait 60t\n", Save(after));
     }
 
     /// <summary>A trigger does one step, written as a sequence writes it: run, stop, call or set.</summary>
@@ -808,10 +808,10 @@ public class ScriptTests
         var after = new Automation();
         Assert.Equal("", Load(Blueprint + "MalTek.Airlock {\n    required slot outer\n    required slot light\n"
             + "    optional slot open expects signal\n    optional slot dim expects signal\n    optional slot halt expects signal\n\n"
-            + "    whenever open then call ext.open on [ outer ]\n"
+            + "    whenever open then call sprocket.open on [ outer ]\n"
             + "    whenever dim then set Radius on [ light ] to 4.5\n"
             + "    whenever halt then stop 'Cycle'\n\n"
-            + "    when all ext.status on [ outer ] == closed then call Reverse(2) on [ outer ]\n\n"
+            + "    when all sprocket.status on [ outer ] == closed then call Reverse(2) on [ outer ]\n\n"
             + "    every 600t stop 1\n\n"
             + "    sequence 1 as Cycle {\n    }\n}\n", after));
 
@@ -835,10 +835,10 @@ public class ScriptTests
         Assert.True(Assert.IsType<EveryTrigger>(triggers[4]).Stops);
 
         var text = Save(after);
-        Assert.Contains("    whenever open then call ext.open on [ outer ]\n", text);
+        Assert.Contains("    whenever open then call sprocket.open on [ outer ]\n", text);
         Assert.Contains("    whenever dim then set Radius on [ light ] to 4.5\n", text);
         Assert.Contains("    whenever halt then stop 1\n", text);
-        Assert.Contains("    when all ext.status on [ outer ] == closed then call Reverse(2) on [ outer ]\n", text);
+        Assert.Contains("    when all sprocket.status on [ outer ] == closed then call Reverse(2) on [ outer ]\n", text);
         Assert.Contains("    every 600t stop 1\n", text);
     }
 
@@ -848,8 +848,8 @@ public class ScriptTests
     [InlineData("whenever button then wait 60t")]
     [InlineData("on button then")]
     [InlineData("whenever button then run 9")]
-    [InlineData("whenever ext.finishes_closing on [ outer ] then stop 'Nothing'")]
-    [InlineData("on ext.finishes_closing on [ outer ] then")]
+    [InlineData("whenever sprocket.finishes_closing on [ outer ] then stop 'Nothing'")]
+    [InlineData("on sprocket.finishes_closing on [ outer ] then")]
     [InlineData("every 600t await")]
     [InlineData("every 600t call on [ outer ]")]
     public void ATriggerWhoseStepStartsNothingIsTrouble(string line)
@@ -1311,7 +1311,7 @@ public class ScriptTests
 
         var text = Save(program);
         Assert.Contains("call 'every' on [ thing ]\n", text);
-        Assert.Contains("call ext.'every' on [ thing ]\n", text);
+        Assert.Contains("call sprocket.'every' on [ thing ]\n", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
@@ -1377,8 +1377,8 @@ public class ScriptTests
     public void AStatementTheLanguageDoesNotKnowIsTrouble()
     {
         var text = Save(Airlock())
-            .Replace("        call ext.close on [ inner ]\n",
-                "        call ext.close on [ inner ]\n" +
+            .Replace("        call sprocket.close on [ inner ]\n",
+                "        call sprocket.close on [ inner ]\n" +
                 "        every 3 {\n" +
                 "            whatever [ inner ]\n" +
                 "        }\n");
@@ -1480,12 +1480,12 @@ public class ScriptTests
     /// with an error in it is trusted in no part, so nothing of it runs.
     /// </remarks>
     [Theory]
-    [InlineData("        call ext.close on [ inner\n")]
+    [InlineData("        call sprocket.close on [ inner\n")]
     [InlineData("        close \"inner ]\n")]
-    [InlineData("        call ext.close on [ inner ] !\n")]
+    [InlineData("        call sprocket.close on [ inner ] !\n")]
     public void TroubleIsReportedAndTheProgramWillNotBeSavedOverTheSave(string line)
     {
-        var text = Save(Airlock()).Replace("        call ext.close on [ inner ]\n", line);
+        var text = Save(Airlock()).Replace("        call sprocket.close on [ inner ]\n", line);
 
         var after = new Automation();
         var trouble = Load(text, after);

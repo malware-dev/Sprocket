@@ -187,8 +187,8 @@ public class ValuesPanelTests
             + "let 'Arm Piston' = block 'ExtendedPistonBase/LargePistonBase' [ 50, [ (50 0 0) ], \"Arm Piston\" ]\n\n"
             + "system \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Arm\n{\n"
             + "    sequence 1 {\n"
-            + "        call ext.move_to(10, 0.3, total) on [ 'Arm Piston' ]\n"
-            + "        call ext.move_to(10, 0.3) on [ 'Arm Piston' ]\n"
+            + "        call sprocket.move_to(10, 0.3, total) on [ 'Arm Piston' ]\n"
+            + "        call sprocket.move_to(10, 0.3) on [ 'Arm Piston' ]\n"
             + "    }\n"
             + "}\n";
         Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));

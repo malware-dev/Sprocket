@@ -40,7 +40,7 @@ namespace Sprocket.GameTests
 
             string program;
             var kept = automation.Storage != null && automation.Storage.TryGetValue(OldAirlockGameTest.ProgramKey, out program) ? program ?? "" : "";
-            _report.Check("an upgraded program read back from a saved world", kept.StartsWith("sprocket 2 alpha 1") && kept.Contains("ext.move_to("),
+            _report.Check("an upgraded program read back from a saved world", kept.StartsWith("sprocket 2 alpha 1") && kept.Contains("sprocket.move_to("),
                 $"the block holds a program of {kept.Length} characters, starting \"{(kept.Length > 20 ? kept.Substring(0, 20) : kept)}\"");
 
             // The piston last stood at 2 m, so the cycle closes the door, moves nothing and opens it.

@@ -239,7 +239,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (set.From.Length > 0 && from == null)
                 return;
 
+            // A setting with no value in the installation sets nothing; the sequence's check says so before it runs.
             var value = from == null ? set.Value : _states.Read(system, instance, from);
+            if (value.IsSetting && (instance == null || !instance.Gives(value.Text, out value)))
+                return;
 
             // What held before the set, of each when on the state, so only what came to hold is started.
             List<StateTrigger> watching = null;
@@ -563,7 +566,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             // A slot or an option is named as it is; a block by the name it goes by.
             var block = fault.Which == null || fault.Problem == SequenceProblem.EmptySlot
-                || fault.Problem == SequenceProblem.Unfilled || fault.Problem == SequenceProblem.Mistyped
+                || fault.Problem == SequenceProblem.Unfilled || fault.Problem == SequenceProblem.Mistyped || fault.Problem == SequenceProblem.Ambiguous
                 || fault.Problem == SequenceProblem.AbortedProblem
                 ? fault.Which
                 : _automation.Called(fault.Which, _world.Values);

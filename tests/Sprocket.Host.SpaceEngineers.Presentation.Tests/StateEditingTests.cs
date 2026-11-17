@@ -148,7 +148,7 @@ public class StateEditingTests
     public void AnIfOnBlocksBecomesAnIfOnAState()
     {
         var screen = OnSequence(Head.Replace("system ", "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n\nsystem ")
-            + "    sequence 1 {\n        if all ext.status on [ door1 ] == closed then {\n            set where to outside\n        }\n    }\n}\n", out var sequence);
+            + "    sequence 1 {\n        if all sprocket.status on [ door1 ] == closed then {\n            set where to outside\n        }\n    }\n}\n", out var sequence);
         var editor = screen.Editor;
 
         var row = editor.StepRows()[0];

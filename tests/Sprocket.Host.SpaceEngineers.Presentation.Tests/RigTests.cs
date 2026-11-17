@@ -52,7 +52,7 @@ public class RigTests
         // would be Sprocket claiming it watches the button.
         var program = store.GetValue(BlockStorage.ProgramKey);
         Assert.Contains("whenever 'signal slot 1' then run 1", program);
-        Assert.Contains("'signal slot 1' = [ ext.toolbar(1, 1, 1) on [ 'Airlock Button' ] ]", program);
+        Assert.Contains("'signal slot 1' = [ sprocket.toolbar(1, 1, 1) on [ 'Airlock Button' ] ]", program);
         Assert.DoesNotContain("when ", program);
 
 
@@ -467,7 +467,7 @@ public class RigTests
         rig.Tick();
 
         var program = "sprocket 1 alpha 18\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
-            + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
+            + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n    sequence 1 {\n        call sprocket.close on [ door1 ]\n    }\n}\n";
 
         Assert.Equal("", ProgramReader.Load(program, rig.Editor.Program, rig.World.Values));
 

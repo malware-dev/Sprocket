@@ -378,6 +378,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     RenameIn(steps[i], was, name);
             }
 
+            SettingMentions.Rename(this, was, name);
             foreach (var instance in _instances)
                 instance.RenameSlot(was, name);
         }
@@ -555,7 +556,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return count;
         }
 
-        /// <summary>Puts into <paramref name="into" /> every slot its triggers and steps name, each once.</summary>
+        /// <summary>Puts into <paramref name="into" /> every slot its triggers and steps name, each once, and every setting its states start at.</summary>
         public void Acted(List<string> into)
         {
             into.Clear();
@@ -574,6 +575,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 for (var s = 0; s < sequence.Steps.Count; s++)
                     GatherFrom(sequence.Steps[s], into);
             }
+
+            SettingMentions.Named(this, into);
         }
 
         /// <summary>Puts into <paramref name="into" /> every list of names its triggers and steps hold, the lists themselves, leaving out empty ones.</summary>

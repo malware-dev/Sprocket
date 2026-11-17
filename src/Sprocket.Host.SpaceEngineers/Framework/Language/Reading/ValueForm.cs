@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         Qualified,
 
         /// <summary>
-        /// A member and the blocks it is read on or done to, <c>ext.toolbar(1, 1, 4) on [ panel1 ]</c>: the name's parts, the
+        /// A member and the blocks it is read on or done to, <c>sprocket.toolbar(1, 1, 4) on [ panel1 ]</c>: the name's parts, the
         /// arguments as a list and the names as a list, a run of <see cref="ScriptValues.Parts" />.
         /// </summary>
         Reference

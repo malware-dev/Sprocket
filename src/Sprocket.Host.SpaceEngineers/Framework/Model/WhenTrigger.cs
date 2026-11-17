@@ -6,7 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
     /// A comparison Sprocket watches for itself, which fires as it comes to hold: "when all of these doors are closed",
-    /// which the script writes <c>when all ext.status on [ doors ] == closed</c>.
+    /// which the script writes <c>when all sprocket.status on [ doors ] == closed</c>.
     /// </summary>
     public sealed class WhenTrigger : MomentTrigger
     {
@@ -38,7 +38,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>How often the blocks are looked at, in ticks, or 0 where the program leaves it to the default.</summary>
         public int IntervalTicks => Interval.Ticks;
 
-        /// <summary>The namespace the member is qualified by: <c>ext</c> for Sprocket's own, or empty for one of the block's.</summary>
+        /// <summary>The setting whose length of time is how often the blocks are looked at, each installation's own, or empty where <see cref="Interval" /> says.</summary>
+        public string IntervalSetting { get; set; } = "";
+
+        /// <summary>The namespace the member is qualified by: <c>sprocket</c> for Sprocket's own, or empty for one of the block's.</summary>
         public string Provider { get; set; } = BlockKinds.Own;
 
         /// <summary>A copy of this trigger, to change one thing of as an edit; what it starts is the edit's to carry over.</summary>
@@ -50,6 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 Relation = Relation,
                 Value = Value,
                 Interval = Interval,
+                IntervalSetting = IntervalSetting,
                 Provider = Provider
             };
 
@@ -60,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return copy;
         }
 
-        /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>ext</c>, the block's own where it is bare; null where it names none.</summary>
+        /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>sprocket</c>, the block's own where it is bare; null where it names none.</summary>
         public EntityAction Names(IList<EntityAction> actions)
         {
             return EntityAction.Value(actions, Provider, EventId);

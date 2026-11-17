@@ -36,7 +36,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             foreach (var test in Tests(system))
             {
-                if (test.Other.Length == 0 && OfType(system, test.State, type) && Same(test.Value, named))
+                if (test.Other.Length == 0 && Tests(system, test, type) && Same(test.Value, named))
+                    return true;
+            }
+
+            foreach (var part in system.Parts)
+            {
+                if (part.Setting == type && (part.HasDefault && Same(part.Default, named) || Answers(system, part.Id, named)))
                     return true;
             }
 
@@ -49,12 +55,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return false;
         }
 
-        /// <summary>Whether any state of <paramref name="system" /> holds the type called <paramref name="type" />.</summary>
+        /// <summary>Whether any state or setting of <paramref name="system" /> holds the type called <paramref name="type" />.</summary>
         public static bool Holds(AutomationSystem system, string type)
         {
             foreach (var state in system.States)
             {
                 if (state.Type == type)
+                    return true;
+            }
+
+            foreach (var part in system.Parts)
+            {
+                if (part.Setting == type)
                     return true;
             }
 
@@ -85,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>
         /// Changes every mention of the choice <paramref name="was" /> of <paramref name="type" /> to <paramref name="now" />:
-        /// the starting values, the values set, and the values compared with.
+        /// the starting values, the values set, the values compared with, and the settings' defaults and answers.
         /// </summary>
         /// <remarks>Run after the type's own choice is renamed, as it reads each state's type off the system.</remarks>
         public static void RenameChoice(AutomationSystem system, string type, string was, string now)
@@ -100,8 +112,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             foreach (var test in Tests(system))
             {
-                if (test.Other.Length == 0 && OfType(system, test.State, type) && Same(test.Value, old))
+                if (test.Other.Length == 0 && Tests(system, test, type) && Same(test.Value, old))
                     test.Value = renamed;
+            }
+
+            foreach (var part in system.Parts)
+            {
+                if (part.Setting != type)
+                    continue;
+
+                if (part.HasDefault && Same(part.Default, old))
+                    part.Default = renamed;
+
+                foreach (var instance in system.Instances)
+                {
+                    Literal answer;
+                    if (instance.AnswerTo(part.Id, out answer) && Same(answer, old))
+                        instance.Answer(part.Id, renamed);
+                }
             }
 
             foreach (var sets in Sets(system))
@@ -111,7 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             }
         }
 
-        /// <summary>Changes the type every state of the type <paramref name="was" /> holds to <paramref name="now" />.</summary>
+        /// <summary>Changes the type every state and setting of the type <paramref name="was" /> holds to <paramref name="now" />.</summary>
         public static void RenameType(AutomationSystem system, string was, string now)
         {
             foreach (var state in system.States)
@@ -119,15 +147,57 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 if (state.Type == was)
                     state.Type = now;
             }
+
+            foreach (var part in system.Parts)
+            {
+                if (part.Setting == was)
+                    part.Setting = now;
+            }
         }
 
-        /// <summary>Whether two values of a state are the same: the same flag, or the same choice.</summary>
+        /// <summary>Whether two values a state or a setting holds are the same: the same flag, choice, text, number, color, length of time, or setting standing in for one.</summary>
+        /// <remarks>A length of time is the same however it is written: <c>1s</c> is <c>60t</c>.</remarks>
         public static bool Same(Literal one, Literal other)
         {
             if (one.Kind != other.Kind)
                 return false;
 
-            return one.Kind == ValueKind.Flag ? one.Flag == other.Flag : one.Text == other.Text;
+            switch (one.Kind)
+            {
+                case ValueKind.Flag:
+                    return one.Flag == other.Flag;
+                case ValueKind.Text:
+                case ValueKind.Name:
+                case ValueKind.Setting:
+                    return one.Text == other.Text;
+                case ValueKind.Duration:
+                    return one.Length.Ticks == other.Length.Ticks;
+            }
+
+            return one.Value.Bits == other.Value.Bits;
+        }
+
+        /// <summary>Whether an installation of <paramref name="system" /> answers the setting <paramref name="setting" /> with <paramref name="value" />.</summary>
+        static bool Answers(AutomationSystem system, string setting, Literal value)
+        {
+            foreach (var instance in system.Instances)
+            {
+                Literal answer;
+                if (instance.AnswerTo(setting, out answer) && Same(answer, value))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether what <paramref name="test" /> tests, a state or a setting, holds the type <paramref name="type" />.</summary>
+        static bool Tests(AutomationSystem system, StateTest test, string type)
+        {
+            if (test.Setting.Length == 0)
+                return OfType(system, test.State, type);
+
+            var part = system.FindPart(test.Setting);
+            return part != null && part.Setting == type;
         }
 
         /// <summary>Whether the state called <paramref name="state" /> holds the type <paramref name="type" />.</summary>

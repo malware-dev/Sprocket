@@ -123,6 +123,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             copy.IsSignal = part.IsSignal;
             copy.Holds = part.Holds;
             copy.Expects = part.Expects;
+            copy.Setting = part.Setting;
+            copy.HasDefault = part.HasDefault;
+            copy.Default = part.Default;
         }
 
         static DeclaredType Type(DeclaredType type)
@@ -151,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var when = trigger as WhenTrigger;
             var signal = trigger as SignalTrigger;
             if (every != null)
-                copy = new EveryTrigger(every.Interval);
+                copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting };
             else if (when != null)
                 copy = when.Copy();
             else if (signal != null)
@@ -203,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var wait = step as Wait;
             if (wait != null)
-                return new Wait(wait.Length);
+                return new Wait(wait.Length) { Setting = wait.Setting };
 
             var run = step as Run;
             if (run != null)
@@ -266,6 +269,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     copy.Fill(slot, blocks, new List<int>(facets));
                 else
                     copy.Fill(slot, blocks);
+            }
+
+            foreach (var setting in instance.Answered)
+            {
+                Literal value;
+                instance.AnswerTo(setting, out value);
+                copy.Answer(setting, value);
+                copy.Note(setting, instance.NoteOn(setting));
+                copy.Keep(setting, Kept(instance.KeptOn(setting)));
             }
         }
 

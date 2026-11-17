@@ -25,6 +25,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>The value at <paramref name="index" />.</summary>
         public Value this[int index] => _chunks[index >> Shift][index & Mask];
 
+        /// <summary>Puts <paramref name="value" /> in place of the value at <paramref name="index" />.</summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public void Set(int index, Value value)
+        {
+            _chunks[index >> Shift][index & Mask] = value;
+        }
+
         /// <summary>Adds <paramref name="value" /> after the last.</summary>
         public void Add(Value value)
         {

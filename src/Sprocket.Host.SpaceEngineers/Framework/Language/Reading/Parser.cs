@@ -423,7 +423,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 case TokenKind.Keyword:
                     Step();
 
-                    // A name spelled like a keyword is quoted, beside a dot as anywhere: ext.'on'.
+                    // A name spelled like a keyword is quoted, beside a dot as anywhere: sprocket.'on'.
                     if (_token.Kind == TokenKind.Dot)
                     {
                         Fail($"unexpected '{Keywords.Name(token.Keyword)}' before '.'; a name spelled like a keyword is quoted.");
@@ -577,7 +577,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// A member and the blocks it is read on or done to, <c>ext.amount("Ingot/Iron") on [ cargo ]</c>, having read the
+        /// A member and the blocks it is read on or done to, <c>sprocket.amount("Ingot/Iron") on [ cargo ]</c>, having read the
         /// member's name already.
         /// </summary>
         /// <remarks>

@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
     /// <remarks>Part of what names a member, with its id: a switch's value and the game's act that flips it share one id.</remarks>
     public enum ReachKind
     {
-        /// <summary>One of Sprocket's own actions, written qualified by what adds it: <c>ext.close</c>.</summary>
+        /// <summary>One of Sprocket's own actions, written qualified by what adds it: <c>sprocket.close</c>.</summary>
         Native,
 
         /// <summary>One of the game's actions, written by the game's own id alone.</summary>

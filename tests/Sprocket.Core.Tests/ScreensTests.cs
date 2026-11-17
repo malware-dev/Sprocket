@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Sprocket.Tests;
 
-/// <summary>A block's screens, the type the host provides as ext.screen: each member acts on the screen its slot holds.</summary>
+/// <summary>A block's screens, the type the host provides as sprocket.screen: each member acts on the screen its slot holds.</summary>
 public class ScreensTests
 {
     static (Rigged Ship, Billboard Board) Built()
@@ -256,7 +256,7 @@ public class ScreensTests
         Assert.True(Probe.Of(entity, BlockKinds.Own, "alignment", new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("right"), facet: 2)!.Holds());
     }
 
-    /// <summary>A slot of screens is written as one that expects ext.screen, each installation's answer a screen of each block, and read back the same.</summary>
+    /// <summary>A slot of screens is written as one that expects sprocket.screen, each installation's answer a screen of each block, and read back the same.</summary>
     [Fact]
     public void ASlotOfScreensReadsAndWritesBackAsItWas()
     {
@@ -265,8 +265,8 @@ public class ScreensTests
         var values = new Values();
 
         var text = ProgramWriter.Save(program, values);
-        Assert.Contains("slot status expects ext.screen", text);
-        Assert.Contains("status = [ ext.screen(2) on [ ", text);
+        Assert.Contains("slot status expects sprocket.screen", text);
+        Assert.Contains("status = [ sprocket.screen(2) on [ ", text);
 
         var read = new Automation();
         Assert.Equal("", ProgramReader.Load(text, read, values));
@@ -283,8 +283,8 @@ public class ScreensTests
         var (ship, board) = Built();
         var (program, _, _, _) = Slotted(ship, board, 2, ScreenType.ShowText, Literal.Of("Docked"));
         var values = new Values();
-        var text = ProgramWriter.Save(program, values).Replace("expects ext.screen", "expects ext.window");
+        var text = ProgramWriter.Save(program, values).Replace("expects sprocket.screen", "expects sprocket.window");
 
-        Assert.Contains("no type 'ext.window' the host provides", ProgramReader.Load(text, new Automation(), values));
+        Assert.Contains("no type 'sprocket.window' the host provides", ProgramReader.Load(text, new Automation(), values));
     }
 }

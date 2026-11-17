@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>A variable holding a signal: the one sent from a slot on the toolbars of the blocks other variables hold.</summary>
-    /// <remarks>Written <c>let button = ext.toolbar(1, 1, 4) on [ panel1 ]</c>.</remarks>
+    /// <remarks>Written <c>let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]</c>.</remarks>
     public sealed class SignalRef
     {
         readonly List<string> _blocks = new List<string>();

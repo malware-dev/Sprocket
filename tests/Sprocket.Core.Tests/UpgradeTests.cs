@@ -104,12 +104,12 @@ public class UpgradeTests
 
         var written = ProgramWriter.Save(program, values);
         Assert.StartsWith($"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}", written);
-        Assert.Contains("call ext.detach on [ stage ]", written);
+        Assert.Contains("call sprocket.detach on [ stage ]", written);
         Assert.Contains("call Detach on [ arm ]", written);
-        Assert.Contains("call ext.detach on [ charge ]", written);
-        Assert.Contains("set ext.countdown on [ emitter ] to 5", written);
-        Assert.Contains("if any ext.countdown on [ emitter ] >= 5 then", written);
-        Assert.Contains("call ext.discharge on [ emitter ]", written);
+        Assert.Contains("call sprocket.detach on [ charge ]", written);
+        Assert.Contains("set sprocket.countdown on [ emitter ] to 5", written);
+        Assert.Contains("if any sprocket.countdown on [ emitter ] >= 5 then", written);
+        Assert.Contains("call sprocket.discharge on [ emitter ]", written);
     }
 
     /// <summary>An assembler's mode, set, checked and watched as alpha 21 called it, says disassembling.</summary>
@@ -275,8 +275,8 @@ public class UpgradeTests
 
         var written = ProgramWriter.Save(program, ship.World.Values);
 
-        Assert.Contains("expects ext.screen", written);
-        Assert.Contains("ext.screen(2) on [ board ]", written);
+        Assert.Contains("expects sprocket.screen", written);
+        Assert.Contains("sprocket.screen(2) on [ board ]", written);
         Assert.DoesNotContain("\"Back\"", written);
         var again = new Automation();
         Assert.Equal("", ProgramReader.Load(written, again, ship.World.Values));
@@ -382,8 +382,8 @@ public class UpgradeTests
         var written = ProgramWriter.Blueprint(read!);
 
         Assert.StartsWith($"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}", written);
-        Assert.DoesNotContain("ext.'on'", written);
-        Assert.DoesNotContain("ext.'off'", written);
+        Assert.DoesNotContain("sprocket.'on'", written);
+        Assert.DoesNotContain("sprocket.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
         Assert.Equal(written, ProgramWriter.Blueprint(again!));
     }

@@ -23,7 +23,7 @@ public class IfStepTests
         var opens = Assert.IsType<If>(sequence.Steps[before]);
         Assert.IsType<EndIf>(sequence.Steps[before + 1]);
         Assert.Equal("status", opens.Compared.MemberId);
-        Assert.Equal("ext", opens.Compared.Provider);
+        Assert.Equal("sprocket", opens.Compared.Provider);
         Assert.Equal(Relation.Is, opens.Compared.Relation);
         Assert.Equal("closed", opens.Compared.Value.Text);
     }
@@ -183,7 +183,7 @@ public class IfStepTests
             + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n"
             + "    sequence 1 {\n"
-            + "        if all ext.status on [ door1 ] == closed then {\n"
+            + "        if all sprocket.status on [ door1 ] == closed then {\n"
             + "        }\n"
             + "    }\n"
             + "}\n");
@@ -417,7 +417,7 @@ public class IfStepTests
     static Comparison Closed(Simulation rig)
     {
         var door = rig.World.Entities.First(entity => entity.Name == "Airlock Outer Door");
-        var test = new Comparison { MemberId = "status", Provider = "ext", Value = Literal.Name("closed") };
+        var test = new Comparison { MemberId = "status", Provider = "sprocket", Value = Literal.Name("closed") };
         test.Targets.Add(rig.Editor.Program.Declare(rig.World, door).Name);
         return test;
     }

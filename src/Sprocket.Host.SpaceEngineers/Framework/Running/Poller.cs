@@ -40,6 +40,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         ReadingMemory[] _reads = new ReadingMemory[0];
         int _generation;
 
+        // What a when compares with and gives its member on this installation, each setting standing there given its value.
+        Literal _value;
+        IList<Literal> _arguments;
+
+        // The length of the setting a trigger looks or starts as often as, in ticks, and the program's edit it was looked up at.
+        int _intervalTicks;
+        int _intervalEdits = int.MinValue;
+
         int _compiledBindings = -1;
         int _compiledEdits = -1;
         bool _announced;
@@ -108,16 +116,38 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 var when = _trigger as WhenTrigger;
                 if (when != null)
                 {
-                    asked = when.IntervalTicks > 0 ? when.IntervalTicks : Default;
+                    var ticks = IntervalTicks();
+                    asked = ticks > 0 ? ticks : Default;
                 }
                 else
                 {
                     var every = _trigger as EveryTrigger;
-                    asked = every == null || every.IntervalTicks < 1 ? Default : every.IntervalTicks;
+                    var ticks = IntervalTicks();
+                    asked = every == null || ticks < 1 ? Default : ticks;
                 }
 
                 return asked < _owner.FastestUpdate ? _owner.FastestUpdate : asked;
             }
+        }
+
+        /// <summary>How often it looks, or how long between starts, in ticks: what the program says, or the length the setting it names has on this installation; 0 where neither says.</summary>
+        /// <remarks>Asked on each look; a setting is looked up again only once the program has changed.</remarks>
+        int IntervalTicks()
+        {
+            var when = _trigger as WhenTrigger;
+            var every = _trigger as EveryTrigger;
+            var setting = when != null ? when.IntervalSetting : every != null ? every.IntervalSetting : "";
+            if (setting.Length == 0)
+                return when != null ? when.IntervalTicks : every != null ? every.IntervalTicks : 0;
+
+            var edits = _owner.Program.Edits;
+            if (edits == _intervalEdits)
+                return _intervalTicks;
+
+            _intervalEdits = edits;
+            Literal given;
+            _intervalTicks = _instance != null && _instance.Gives(setting, out given) && given.Kind == ValueKind.Duration ? given.Length.Ticks : 0;
+            return _intervalTicks;
         }
 
         /// <summary>What it remembers of <paramref name="block" />, by the name the program gives it; a fresh memory where it remembers nothing.</summary>
@@ -197,6 +227,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             Deafen();
             _generation++;
 
+            if (when != null)
+            {
+                SystemInstance.Settled(_instance, when.Value, out _value);
+                _arguments = SystemInstance.Settled(_instance, when.Arguments);
+            }
+
             Watched(watched.Sources);
             var count = _watched.Count;
             _entities = new GridEntity[count];
@@ -217,7 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 }
 
                 var probe = when != null
-                    ? Probe.Of(entity, when.Provider, when.EventId, when.Arguments, when.Quantifier, when.Relation, when.Value, read,
+                    ? Probe.Of(entity, when.Provider, when.EventId, _arguments, when.Quantifier, when.Relation, _value, read,
                         _owner.Clock, _instance == null ? 0 : _instance.FacetOf(when.Sources, name))
                     : Probe.Watching(entity, signal.Provider, signal.EventId, read, _owner.Clock);
 
@@ -275,7 +311,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return SampleWhen();
 
             var every = _trigger as EveryTrigger;
-            return every != null && SampleEvery(every) ? 1 : 0;
+            return every != null && SampleEvery() ? 1 : 0;
         }
 
         /// <summary>Works out the blocks <paramref name="slots" /> come to, each once.</summary>
@@ -426,7 +462,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     total /= read;
             }
 
-            var holds = readable && Relations.Holds(Literal.Of(total), when.Relation, when.Value);
+            var holds = readable && Relations.Holds(Literal.Of(total), when.Relation, _value);
             Live = holds;
             Missed(lost);
             return Edge(holds);
@@ -445,9 +481,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// Measured in the game's ticks; the next time falls due from when the last one did, so a clock noticed late does not
         /// drift.
         /// </remarks>
-        bool SampleEvery(EveryTrigger every)
+        bool SampleEvery()
         {
-            var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
+            var ticks = IntervalTicks();
+            var interval = ticks < 1 ? 1 : ticks;
             if (_memory.Due < 0 || _tick < _memory.Due)
             {
                 _memory.Due = _tick;

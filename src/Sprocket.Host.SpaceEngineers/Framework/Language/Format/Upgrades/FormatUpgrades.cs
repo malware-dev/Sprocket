@@ -37,7 +37,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
                 new MemberSpelling(),
                 new ComponentMembers(),
             },
-            new FormatChange[0],
+            new FormatChange[]
+            {
+                new OwnNamespace(),
+                new StateNames(),
+            },
         };
 
         /// <summary>Whether a program written for <paramref name="draft" /> of version <paramref name="version" /> is upgraded rather than refused.</summary>

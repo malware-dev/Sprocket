@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return "what follows";
         }
 
-        /// <summary>A name's parts joined as they are written: <c>ext.closed</c>.</summary>
+        /// <summary>A name's parts joined as they are written: <c>sprocket.closed</c>.</summary>
         public static string Spelling(ValueRange parts)
         {
             var joined = "";

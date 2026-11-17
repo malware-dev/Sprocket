@@ -11,6 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
     /// <remarks>Made when somebody writes a sequence, and never on a tick.</remarks>
     public struct Literal
     {
+        // The text of a length of time written in seconds.
+        const string InSeconds = "s";
+
         Literal(ValueKind kind, EntityValue value, string text) : this()
         {
             Kind = kind;
@@ -70,14 +73,45 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return new Literal(ValueKind.Color, EntityValue.Of(r, g, b, a), null);
         }
 
+        /// <summary>A length of time, kept in the unit it was written in.</summary>
+        /// <remarks>Its ticks where it is in ticks, and its seconds where it is in seconds, marked by the text <see cref="InSeconds" />.</remarks>
+        public static Literal Of(Duration length)
+        {
+            return length.InSeconds
+                ? new Literal(ValueKind.Duration, EntityValue.Of(length.Seconds), InSeconds)
+                : new Literal(ValueKind.Duration, EntityValue.Of(length.Ticks), null);
+        }
+
+        /// <summary>
+        /// The setting called <paramref name="name" />, standing in for the value each installation gives it, written qualified,
+        /// <c>settings.'Open angle'</c>, where <paramref name="qualified" /> says.
+        /// </summary>
+        /// <remarks>Where it stands among a member's values the spelling is kept, since only the member's blocks say whether alone it could be one of its words.</remarks>
+        public static Literal Setting(string name, bool qualified = false)
+        {
+            return new Literal(ValueKind.Setting, new EntityValue(qualified ? 1 : 0), name);
+        }
+
         /// <summary>The kind of value it is.</summary>
         public ValueKind Kind { get; private set; }
 
         /// <summary>What it is, for every kind but <see cref="ValueKind.Text" />.</summary>
         public EntityValue Value { get; private set; }
 
-        /// <summary>The text, for <see cref="ValueKind.Text" />, or the name, for <see cref="ValueKind.Name" />, and empty for the rest.</summary>
+        /// <summary>
+        /// The text, for <see cref="ValueKind.Text" />, or the name, for <see cref="ValueKind.Name" /> and <see cref="ValueKind.Setting" />,
+        /// and empty for the rest.
+        /// </summary>
         public string Text { get; private set; }
+
+        /// <summary>Whether it is a setting standing in for a value, rather than a value.</summary>
+        public bool IsSetting => Kind == ValueKind.Setting;
+
+        /// <summary>Whether it is a setting written qualified, <c>settings.'Open angle'</c>.</summary>
+        public bool IsQualified => Kind == ValueKind.Setting && Value.Bits != 0;
+
+        /// <summary>It as a length of time, for <see cref="ValueKind.Duration" />.</summary>
+        public Duration Length => Text == InSeconds ? Duration.OfSeconds(Real) : Duration.OfTicks((int)Whole);
 
         /// <summary>The names, for <see cref="ValueKind.Slots" />, and null for the rest.</summary>
         public IList<string> Names { get; private set; }
@@ -130,8 +164,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             get
             {
-                if (Kind == ValueKind.Text || Kind == ValueKind.Name)
+                if (Kind == ValueKind.Text || Kind == ValueKind.Name || Kind == ValueKind.Setting)
                     return Text;
+
+                if (Kind == ValueKind.Duration)
+                {
+                    var length = Length;
+                    return length.InSeconds
+                        ? $"{length.Seconds.ToString("R", CultureInfo.InvariantCulture)}s"
+                        : $"{length.Ticks.ToString(CultureInfo.InvariantCulture)}t";
+                }
 
                 if (Kind == ValueKind.Slots)
                     return string.Join(", ", Names);

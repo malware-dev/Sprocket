@@ -17,7 +17,7 @@ using IMyTextSurfaceProvider = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 {
     /// <summary>
-    /// A block's screen, the type this host provides as <c>ext.screen</c>: show text or an image on it, set it up, read what it
+    /// A block's screen, the type this host provides as <c>sprocket.screen</c>: show text or an image on it, set it up, read what it
     /// shows and its settings.
     /// </summary>
     /// <remarks>Each member receives its screen first, counted from 1, ahead of the step's own values.</remarks>

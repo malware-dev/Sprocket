@@ -122,7 +122,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             tested = new CompiledTest();
             tested.Problem = Needed(test.Targets, SequenceProblem.MissingGate, out tested.Which, bindings);
+            tested.Value = Settled(test.Value, ref tested.Problem, ref tested.Which);
+            var given = test.Arguments;
+            for (var i = 0; i < given.Count; i++)
+                Settled(given[i], ref tested.Problem, ref tested.Which);
 
+            var arguments = SystemInstance.Settled(_instance, given);
             var reading = ActedOn(test.Targets, bindings);
             foreach (var name in reading)
             {
@@ -136,8 +141,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     if (facet > 0 && member?.Type != null && member.Type.Find(entity.Kind, facet) == null)
                         continue;
 
-                    var probe = Probe.Of(entity, test.Provider, test.MemberId, test.Arguments,
-                        test.Quantifier, test.Relation, test.Value, null, _owner.Clock, facet);
+                    var probe = Probe.Of(entity, test.Provider, test.MemberId, arguments,
+                        test.Quantifier, test.Relation, tested.Value, null, _owner.Clock, facet);
 
                     if (probe != null && !probe.PassedOver)
                         tested.Reads.Add(probe);
@@ -255,6 +260,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             List<Literal> reached = null;
             for (var i = 0; i < given.Count; i++)
             {
+                if (given[i].IsSetting)
+                {
+                    if (reached == null)
+                        reached = new List<Literal>(given);
+
+                    reached[i] = Settled(given[i], ref compiled.Problem, ref compiled.Which);
+                    continue;
+                }
+
                 if (given[i].Kind != ValueKind.Slots)
                     continue;
 
@@ -268,6 +282,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             }
 
             return reached ?? given;
+        }
+
+        /// <summary>
+        /// <paramref name="value" /> as this installation has it, a setting given its value; where it gives that setting none,
+        /// the setting as it is, and why said in <paramref name="problem" /> and <paramref name="which" /> where they say nothing yet.
+        /// </summary>
+        Literal Settled(Literal value, ref SequenceProblem problem, ref string which)
+        {
+            Literal settled;
+            if (SystemInstance.Settled(_instance, value, out settled) || problem != SequenceProblem.None)
+                return settled;
+
+            problem = SequenceSummary.Unanswered(_instance, value.Text);
+            which = value.Text;
+            return settled;
         }
 
         /// <summary>Everything the slots <paramref name="slots" /> hold, each thing once, in the order they hold them.</summary>

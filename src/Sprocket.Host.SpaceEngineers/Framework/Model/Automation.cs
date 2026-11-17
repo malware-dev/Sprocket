@@ -576,7 +576,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var every = trigger as EveryTrigger;
             var when = trigger as WhenTrigger;
             if (every != null)
-                copy = new EveryTrigger(every.Interval);
+                copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting };
             else if (when != null)
             {
                 var made = new WhenTrigger(when.EventId);
@@ -584,6 +584,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 made.Relation = when.Relation;
                 made.Value = when.Value;
                 made.Interval = when.Interval;
+                made.IntervalSetting = when.IntervalSetting;
                 made.Provider = when.Provider;
                 for (var i = 0; i < when.Arguments.Count; i++)
                     made.Arguments.Add(when.Arguments[i]);
@@ -635,7 +636,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var wait = step as Wait;
             if (wait != null)
-                return Annotated(new Wait(wait.Ticks), step);
+                return Annotated(new Wait(wait.Ticks) { Setting = wait.Setting }, step);
 
             var run = step as Run;
             if (run != null)

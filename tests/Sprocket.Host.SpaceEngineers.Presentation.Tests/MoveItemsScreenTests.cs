@@ -23,7 +23,7 @@ public class MoveItemsScreenTests
         screen.Editor.NewButtonSystem("Stock");
         screen.Run(2);
         foreach (var slot in slots)
-            screen.Editor.Program.Systems[0].PartFor(slot).Holds = "ext.inventory";
+            screen.Editor.Program.Systems[0].PartFor(slot).Holds = "sprocket.inventory";
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Refinery 1");
@@ -61,7 +61,7 @@ public class MoveItemsScreenTests
         var act = (Act)steps[at];
         Assert.Equal(ValueKind.Slots, act.Arguments[0].Kind);
         var made = act.Arguments[0].Names[0];
-        Assert.Equal("ext.inventory", system.FindPart(made)!.Holds);
+        Assert.Equal("sprocket.inventory", system.FindPart(made)!.Holds);
         Assert.Equal("Cargo 1", system.First!.FilledWith(made)![0]);
         Assert.IsType<Await>(steps[at + 1]);
         Assert.Contains(made, screen.Dump);
@@ -148,7 +148,7 @@ public class MoveItemsScreenTests
         screen.Editor.PressPrimary();
         screen.Run(4);
 
-        Assert.DoesNotContain(system.Parts, part => part.Holds == "ext.inventory");
+        Assert.DoesNotContain(system.Parts, part => part.Holds == "sprocket.inventory");
     }
 
     /// <summary>The target shows the blocks selected until the step is finished, when the slot is made for them.</summary>

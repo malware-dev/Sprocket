@@ -106,6 +106,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>An abort step ended the run, as a problem; the fault's words are its message.</summary>
         /// <remarks>The installation the run was on is switched off, with the message as the reason.</remarks>
-        AbortedProblem = 23
+        AbortedProblem = 23,
+
+        /// <summary>A setting one of its steps names alone could also be one of the words its member takes, so it is not told which is meant.</summary>
+        /// <remarks>Found when the program is bound; the setting written qualified, <c>settings.closed</c>, mends it.</remarks>
+        Ambiguous = 24
     }
 }

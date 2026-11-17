@@ -87,12 +87,12 @@ public class VocabularyTests
             + "let light = block 'InteriorLight/SmallLight' [ 2 ]\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
-            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
+            + "let button = sprocket.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Airlock\n{\n"
             + "    whenever button then run 1\n\n"
-            + "    whenever ext.finishes_closing on [ door1 ] then run 1\n\n"
-            + "    whenever ext.toolbar(1, 1, 2) on [ panel2 ] then run 1\n\n"
-            + "    when all ext.status on [ door1 ] != closed then run 1\n\n"
+            + "    whenever sprocket.finishes_closing on [ door1 ] then run 1\n\n"
+            + "    whenever sprocket.toolbar(1, 1, 2) on [ panel2 ] then run 1\n\n"
+            + "    when all sprocket.status on [ door1 ] != closed then run 1\n\n"
             + "    when sum Radius on [ light ] >= 2.5 then call SetColor(255, 136, 0) on [ light ]\n\n"
             + "    sequence 1 {\n"
             + "        call SetColor(0, 255, 0) on [ light ]\n"
@@ -100,13 +100,13 @@ public class VocabularyTests
             + "            set Radius on [ light ] to 4\n"
             + "        }\n"
             + "        else if sum Radius on [ light ] > 10 then {\n"
-            + "            call ext.close on [ door1 ]\n"
+            + "            call sprocket.close on [ door1 ]\n"
             + "        }\n"
             + "        else if all Radius on [ light ] <= 2 then {\n"
-            + "            call ext.open on [ door1 ]\n"
+            + "            call sprocket.open on [ door1 ]\n"
             + "        }\n"
             + "        else if average Radius on [ light ] > 3 then {\n"
-            + "            call ext.close on [ door1 ]\n"
+            + "            call sprocket.close on [ door1 ]\n"
             + "        }\n"
             + "    }\n"
             + "}\n";
@@ -133,8 +133,8 @@ public class VocabularyTests
             + "let piston = block 'ExtendedPistonBase/LargePistonBase' [ 1 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Arm\n{\n"
             + "    sequence 1 {\n"
-            + "        call ext.move_to(10, 0.3, total) on [ piston ]\n"
-            + "        call ext.move_to(4, 2) on [ piston ]\n"
+            + "        call sprocket.move_to(10, 0.3, total) on [ piston ]\n"
+            + "        call sprocket.move_to(4, 2) on [ piston ]\n"
             + "    }\n"
             + "}\n";
 
@@ -347,7 +347,7 @@ public class VocabularyTests
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
         var test = new Comparison
         {
-            MemberId = "brighter", Provider = "ext", Quantifier = Quantifier.Any, Relation = Relation.AtLeast,
+            MemberId = "brighter", Provider = "sprocket", Quantifier = Quantifier.Any, Relation = Relation.AtLeast,
             Value = Literal.Of(1.0)
         };
 
@@ -378,7 +378,7 @@ public class VocabularyTests
         cycle.Steps.Add(set);
 
         ship.Start();
-        Assert.Contains("    sequence 1 {\n        set ext.level on [ 'Left Lamp' ] to 3\n",
+        Assert.Contains("    sequence 1 {\n        set sprocket.level on [ 'Left Lamp' ] to 3\n",
             ProgramWriter.Save(ship.Program, new Values()));
 
         ship.Runner.Call(cycle, cycle.System.First);
@@ -455,7 +455,7 @@ public class VocabularyTests
             + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Airlock\n{\n"
             + "    sequence 1 {\n"
-            + "        set ext.speed on [ door1 ] to high\n"
+            + "        set sprocket.speed on [ door1 ] to high\n"
             + "    }\n"
             + "}\n";
 
@@ -568,11 +568,11 @@ public class VocabularyTests
 
     /// <summary>A comparison a block's member cannot be read for is a fault found before anything runs, and a state tested by one of the names its value has is sound.</summary>
     [Theory]
-    [InlineData("ext", "status", Quantifier.Sum, Relation.Is, "closed", SequenceProblem.Mistyped)]
-    [InlineData("ext", "status", Quantifier.Any, Relation.Above, "closed", SequenceProblem.Mistyped)]
-    [InlineData("ext", "status", Quantifier.Any, Relation.Is, "ajar", SequenceProblem.Mistyped)]
+    [InlineData("sprocket", "status", Quantifier.Sum, Relation.Is, "closed", SequenceProblem.Mistyped)]
+    [InlineData("sprocket", "status", Quantifier.Any, Relation.Above, "closed", SequenceProblem.Mistyped)]
+    [InlineData("sprocket", "status", Quantifier.Any, Relation.Is, "ajar", SequenceProblem.Mistyped)]
     [InlineData("", "Radius", Quantifier.Any, Relation.Is, "", SequenceProblem.Mistyped)]
-    [InlineData("ext", "status", Quantifier.Any, Relation.Is, "closed", SequenceProblem.None)]
+    [InlineData("sprocket", "status", Quantifier.Any, Relation.Is, "closed", SequenceProblem.None)]
     public void ATestItsBlockCannotReadIsMistypedAndAStateByItsNameIsSound(string provider, string member, Quantifier quantifier,
         Relation relation, string name, SequenceProblem problem)
     {
@@ -599,7 +599,7 @@ public class VocabularyTests
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
         var test = new Comparison
         {
-            MemberId = "brighter", Provider = "ext", Quantifier = Quantifier.Any, Relation = Relation.AtLeast,
+            MemberId = "brighter", Provider = "sprocket", Quantifier = Quantifier.Any, Relation = Relation.AtLeast,
             Value = Literal.Of(1.0)
         };
 
@@ -664,7 +664,7 @@ public class VocabularyTests
         Assert.Equal("", ProgramReader.Load("sprocket 2 alpha 1\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n\n"
-            + "system \"" + Identity + "\" as MalTek.Bell\n{\n    whenever ext.toolbar(1, 2, 3) on [ panel2 ] then run 1\n\n"
+            + "system \"" + Identity + "\" as MalTek.Bell\n{\n    whenever sprocket.toolbar(1, 2, 3) on [ panel2 ] then run 1\n\n"
             + "    sequence 1 {\n    }\n}\n",
             program, new Values()));
 
@@ -727,7 +727,7 @@ public class VocabularyTests
         Assert.Equal("", ProgramReader.Load("sprocket 2 alpha 1\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
-            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
+            + "let button = sprocket.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Bell\n{\n    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n",
             program, new Values()));
 
@@ -747,7 +747,7 @@ public class VocabularyTests
         Assert.Equal("", ProgramReader.Load("sprocket 2 alpha 1\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
-            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n",
+            + "let button = sprocket.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n",
             program, new Values()));
 
         var picked = program.DeclareSignal("panel1", new ToolbarSlot(1, 1, 4), "panel1 4");
@@ -764,7 +764,7 @@ public class VocabularyTests
         const string head = "sprocket 2 alpha 1\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
-            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
+            + "let button = sprocket.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
             + "system blueprint \"" + Identity + "\" as MalTek.Bell\n{\n    optional slot bell expects signal\n\n"
             + "    whenever bell then run 1\n\n    sequence 1 {\n    }\n}\n\n";
 
@@ -773,10 +773,10 @@ public class VocabularyTests
         Assert.Contains("    bell = [ button ]\n", ProgramWriter.Save(whole, new Values()));
 
         var part = new Automation();
-        Assert.Equal("", ProgramReader.Load(head.Replace("let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n", "")
-            + "instance 1 of MalTek.Bell {\n    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n}\n", part, new Values()));
+        Assert.Equal("", ProgramReader.Load(head.Replace("let button = sprocket.toolbar(1, 1, 4) on [ panel1, panel2 ]\n", "")
+            + "instance 1 of MalTek.Bell {\n    bell = [ sprocket.toolbar(1, 1, 4) on [ panel1 ] ]\n}\n", part, new Values()));
         part.Restore(new SignalRef("button", new[] { "panel1", "panel2" }, new ToolbarSlot(1, 1, 4)));
 
-        Assert.Contains("    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n", ProgramWriter.Save(part, new Values()));
+        Assert.Contains("    bell = [ sprocket.toolbar(1, 1, 4) on [ panel1 ] ]\n", ProgramWriter.Save(part, new Values()));
     }
 }

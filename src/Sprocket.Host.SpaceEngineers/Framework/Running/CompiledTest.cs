@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
@@ -15,5 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>The slot or block that is so, by its reference.</summary>
         public string Which;
+
+        /// <summary>What the member is compared with on this installation: the test's value, or the value it gives the setting standing there.</summary>
+        public Literal Value;
     }
 }

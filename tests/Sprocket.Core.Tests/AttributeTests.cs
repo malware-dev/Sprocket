@@ -18,7 +18,7 @@ public class AttributeTests
         + "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n"
         + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n"
         + "#@ bellNote: 600t\n"
-        + "let bell = ext.toolbar(1, 1, 3) on [ panel1 ]\n\n"
+        + "let bell = sprocket.toolbar(1, 1, 3) on [ panel1 ]\n\n"
         + "# The airlock.\n"
         + "#@ systemNote: \"one\"\n"
         + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n"
@@ -31,7 +31,7 @@ public class AttributeTests
         + "    #@ sequenceNote: MalTek.Thing\n"
         + "    sequence 1 as Cycle {\n"
         + "        #@ stepNote: #FF0000\n"
-        + "        call ext.close on [ inner ]\n"
+        + "        call sprocket.close on [ inner ]\n"
         + "    }\n"
         + "}\n\n"
         + "#@ instanceNote: 3\n"
@@ -50,7 +50,7 @@ public class AttributeTests
     [InlineData("    #@ slotNote: on\n    required slot inner expects Door\n")]
     [InlineData("    #@ triggerNote: 2.5\n    whenever button then run 1\n")]
     [InlineData("    #@ sequenceNote: MalTek.Thing\n    sequence 1 as Cycle {\n")]
-    [InlineData("        #@ stepNote: #FF0000\n        call ext.close on [ inner ]\n")]
+    [InlineData("        #@ stepNote: #FF0000\n        call sprocket.close on [ inner ]\n")]
     [InlineData("#@ instanceNote: 3\ninstance 1 of \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\"")]
     [InlineData("    #@ answerNote: \"door\"\n    inner = [ door1 ]\n")]
     public void AnAttributeNothingUsesIsWrittenBackAsItWas(string line)

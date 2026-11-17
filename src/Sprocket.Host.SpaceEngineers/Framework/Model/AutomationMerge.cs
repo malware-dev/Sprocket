@@ -138,6 +138,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 made.Note(slot, instance.NoteOn(slot));
             }
 
+            foreach (var setting in instance.Answered)
+            {
+                var part = into.FindPart(setting);
+                Literal value;
+                if (part == null || !part.IsSetting || !instance.AnswerTo(setting, out value))
+                    continue;
+
+                made.Answer(setting, value);
+                made.Note(setting, instance.NoteOn(setting));
+            }
+
             foreach (var here in into.Instances)
             {
                 if (here != made && Same(here, made))
@@ -254,6 +265,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var theirs = other.FilledWith(slot);
                 if (theirs == null || !Equal(one.FilledWith(slot), theirs) || !Places(one.Positions(slot), other.Positions(slot))
                     || !Equal(one.Facets(slot), other.Facets(slot)))
+                    return false;
+            }
+
+            var settings = new List<string>(one.Answered);
+            if (settings.Count != new List<string>(other.Answered).Count)
+                return false;
+
+            foreach (var setting in settings)
+            {
+                Literal mine, theirs;
+                one.AnswerTo(setting, out mine);
+                if (!other.AnswerTo(setting, out theirs) || !StateMentions.Same(mine, theirs))
                     return false;
             }
 

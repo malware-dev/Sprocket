@@ -527,7 +527,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         /// <summary>
         /// The value <paramref name="id" /> among <paramref name="actions" />: Sprocket's own where <paramref name="provider" />
-        /// is <c>ext</c>, the block's own where it is empty; null where there is none.
+        /// is <c>sprocket</c>, the block's own where it is empty; null where there is none.
         /// </summary>
         public static EntityAction Value(IList<EntityAction> actions, string provider, string id)
         {

@@ -73,7 +73,7 @@ namespace Sprocket.GameTests
 
             var program = Program(automation);
             _report.Check("an alpha 21 program is kept in the current format", program.StartsWith("sprocket 2 alpha 1")
-                    && program.Contains("ext.move_to(") && program.Contains("ext.finishes_opening"),
+                    && program.Contains("sprocket.move_to(") && program.Contains("sprocket.finishes_opening"),
                 $"the block keeps it as {Header(program)}, its piston step as {Line(program, "move")} and its trigger as {Line(program, "opening")}");
         }
 
@@ -82,8 +82,8 @@ namespace Sprocket.GameTests
         static string Older(string blueprint)
         {
             return blueprint.Replace("sprocket 2 alpha 1", "sprocket 1 alpha 21")
-                .Replace("ext.move_to(", "ext.'move-to'(")
-                .Replace("ext.finishes_opening", "ext.'finishes-opening'");
+                .Replace("sprocket.move_to(", "ext.'move-to'(")
+                .Replace("sprocket.finishes_opening", "ext.'finishes-opening'");
         }
 
         static string Program(IMyTerminalBlock block)

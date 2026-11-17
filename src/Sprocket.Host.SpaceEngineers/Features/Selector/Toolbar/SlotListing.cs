@@ -219,6 +219,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
         /// <summary>Whether the column lists <paramref name="part" />: a block slot always, a signal slot for what starts something, a slot of a type the host provides for what is done or checked.</summary>
         bool Lists(Part part)
         {
+            if (part.IsSetting)
+                return false;
+
             if (part.IsSignal)
                 return _forEvents;
 

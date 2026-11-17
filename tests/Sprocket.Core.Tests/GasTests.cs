@@ -164,7 +164,7 @@ public class GasTests
         sequence.Steps.Add(stockpile);
 
         var saved = ProgramWriter.Save(automation, ship.World.Values);
-        Assert.Contains("call ext.stockpile(off) on [ ", saved);
+        Assert.Contains("call sprocket.stockpile(off) on [ ", saved);
         Assert.Equal("", ProgramReader.Load(saved, new Automation(), ship.World.Values));
     }
 

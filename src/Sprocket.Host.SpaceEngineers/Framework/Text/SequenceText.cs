@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                return $"Every {TimeText.Rate(every.Interval)}";
+                return $"Every {Lasting(every.Interval, every.IntervalSetting, through, true)}";
 
             // A signal trigger naming nothing is answered from the construct's toolbars, so the line says so.
             return trigger is SignalTrigger ? "When something on this construct starts it" : SentenceText.Empty;
@@ -197,6 +197,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
             if (fault.Problem == SequenceProblem.Unfilled && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(fault.Step == SequenceFault.Trigger ? texts.ProblemTriggerOptionMissing : texts.ProblemOptionMissing, "name", fault.Which);
+
+            if (fault.Problem == SequenceProblem.Ambiguous)
+                return Template.Fill(texts.ProblemAmbiguous, "name", fault.Which);
 
             if (fault.Problem == SequenceProblem.Mistyped && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(fault.Step == SequenceFault.Trigger ? texts.ProblemTriggerOptionWrong : texts.ProblemOptionWrong, "name", fault.Which);
@@ -330,6 +333,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 return Template.Fill(texts.StoppedBlockReplaced, "block", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Unfilled)
                 return Template.Fill(texts.StoppedOptionMissing, "name", block);
+            if (problem == SequenceProblem.Ambiguous)
+                return Template.Fill(texts.StoppedAmbiguous, "name", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Mistyped)
                 return Template.Fill(texts.StoppedOptionWrong, "name", block);
             if (problem == SequenceProblem.MissingFacet)
@@ -436,6 +441,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         }
 
 
+        /// <summary>
+        /// A length of time a step or trigger takes, as a <paramref name="rate" /> after "every" or as a duration:
+        /// <paramref name="length" />, or where it takes the setting <paramref name="setting" />, the length
+        /// <paramref name="through" /> gives it, and the setting's name where it gives none.
+        /// </summary>
+        static string Lasting(Duration length, string setting, SystemInstance through, bool rate)
+        {
+            Literal given;
+            if (setting.Length > 0)
+            {
+                if (through == null || !through.Gives(setting, out given) || given.Kind != ValueKind.Duration)
+                    return setting;
+
+                length = given.Length;
+            }
+
+            return rate ? TimeText.Rate(length) : TimeText.Duration(length);
+        }
+
         /// <summary>One numbered line of the sequence, in the words its row reads in; the line closing an if says nothing.</summary>
         /// <remarks>
         /// Its blocks are found through <paramref name="bindings" /> as <paramref name="through" /> fills the slots, or as written
@@ -446,7 +470,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         {
             var wait = step as Wait;
             if (wait != null)
-                return $"{SentenceText.WaitWord} {TimeText.Duration(wait.Length)}";
+                return $"{SentenceText.WaitWord} {Lasting(wait.Length, wait.Setting, through, false)}";
 
             var run = step as Model.Run;
             if (run != null)
