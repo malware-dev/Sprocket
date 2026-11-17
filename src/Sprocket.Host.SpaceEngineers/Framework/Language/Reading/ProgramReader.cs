@@ -146,10 +146,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var header = constructs.Count > 0 && constructs[0].Key == Keyword.Sprocket ? constructs[0] : null;
             if (header == null && parser.Trouble.Length == 0)
                 refused = $"{(constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0]))}expected sprocket <format>.";
-            else if (header != null && header.Whole(0) != ScriptFormat.Version)
-                refused = $"{trouble.Line(header)}written for sprocket {header.Whole(0)}; this reads sprocket {ScriptFormat.Version}.";
-            else if (header != null && DraftOf(header) != ScriptFormat.Draft && !FormatUpgrades.From(ScriptFormat.Version, DraftOf(header)))
-                refused = $"{trouble.Line(header)}written for {(DraftOf(header) < 0 ? "the finished format" : $"alpha {DraftOf(header)}")}; this reads alpha {ScriptFormat.Draft}.";
+            else if (header != null && !IsCurrent(header) && !FormatUpgrades.From(header.Whole(0), DraftOf(header)))
+                refused = $"{trouble.Line(header)}written for {Format(header.Whole(0), DraftOf(header))}; this reads {Format(ScriptFormat.Version, ScriptFormat.Draft)}.";
 
             if (refused != null)
             {
@@ -166,8 +164,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 program.Attributes = ScriptAttributes.Unused(header);
 
                 // Before anything is read, so the readers know only the form this build writes.
-                if (DraftOf(header) != ScriptFormat.Draft)
-                    FormatUpgrades.Statements(DraftOf(header), constructs);
+                if (!IsCurrent(header))
+                    FormatUpgrades.Statements(header.Whole(0), DraftOf(header), constructs);
             }
 
             for (var i = 0; i < constructs.Count; i++)
@@ -192,9 +190,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 program.Unreadable(saved);
                 program.Damaged(trouble.What);
             }
-            else if (header != null && DraftOf(header) != ScriptFormat.Draft)
+            else if (header != null && !IsCurrent(header))
             {
-                var upgraded = FormatUpgrades.Program(DraftOf(header), program, world);
+                var upgraded = FormatUpgrades.Program(header.Whole(0), DraftOf(header), program, world);
                 if (upgraded.Length > 0)
                     GameLog.Say($"upgraded a program from {upgraded}");
             }
@@ -222,8 +220,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static int DraftOf(Statement statement)
         {
             var at = statement.Find(Keyword.Alpha);
-            return at < 0 ? -1 : statement.Whole(at + 1);
+            return at < 0 ? FormatUpgrades.Finished : statement.Whole(at + 1);
         }
+
+        /// <summary>Whether the version line <paramref name="header" /> names the version and draft this build writes.</summary>
+        static bool IsCurrent(Statement header) => header.Whole(0) == ScriptFormat.Version && DraftOf(header) == ScriptFormat.Draft;
+
+        /// <summary>Version <paramref name="version" /> as its line spells it, with <paramref name="draft" /> where it is unfinished.</summary>
+        static string Format(int version, int draft) =>
+            draft == FormatUpgrades.Finished ? $"sprocket {version}" : $"sprocket {version} alpha {draft}";
 
         /// <summary>A list of vectors of whole numbers as cells, or null where it is anything else.</summary>
         static Vector3I[] Cells(ValueRange items, Statement statement)

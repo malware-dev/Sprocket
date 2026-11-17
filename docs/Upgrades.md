@@ -13,7 +13,9 @@ as later than all its drafts: `sprocket 1 alpha 999` is older than `sprocket 1`.
 A reader checks the version line first, and refuses a program from a draft it doesn't know, keeping the text as written.
 So the draft goes up for anything an older build couldn't read safely: a change that makes a program read differently
 or not at all, and every addition too (a keyword, syntax, a member), so an older build refuses it cleanly instead of
-misreading it. The format number goes up only for a change that would break existing programs outright.
+misreading it. The format number goes up when a stable release finishes a version: the stable build writes it without
+`alpha`, and Bleeding Edge moves on to the next version's first draft, `sprocket 2 alpha 1` after a stable `sprocket 1`.
+Each version's changes then stay the permanent upgrade into the next.
 
 ## Upgrades
 

@@ -103,7 +103,7 @@ public class UpgradeTests
         Assert.Equal(ReachKind.Action, arm.Form);
 
         var written = ProgramWriter.Save(program, values);
-        Assert.StartsWith($"sprocket 1 alpha {ScriptFormat.Draft}", written);
+        Assert.StartsWith($"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}", written);
         Assert.Contains("call ext.detach on [ stage ]", written);
         Assert.Contains("call Detach on [ arm ]", written);
         Assert.Contains("call ext.detach on [ charge ]", written);
@@ -381,7 +381,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith($"sprocket 1 alpha {ScriptFormat.Draft}", written);
+        Assert.StartsWith($"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -424,12 +424,27 @@ public class UpgradeTests
         Assert.Equal("on", ((Act)read!.Sequences[0].Steps[0]).Targets[0]);
     }
 
+    /// <summary>
+    /// A program written for finished version 1, or for its last draft, is carried into version 2 and written back in it:
+    /// a finished version counts as later than all of its drafts.
+    /// </summary>
+    [Theory]
+    [InlineData("sprocket 1")]
+    [InlineData("sprocket 1 alpha 28")]
+    public void VersionOneIsCarriedIntoVersionTwo(string header)
+    {
+        var text = Switching.Replace("sprocket 1 alpha 14", header);
+
+        Assert.Equal("", ProgramReader.Lone(text, new Values(), out var read));
+        Assert.StartsWith("sprocket 2 alpha 1", ProgramWriter.Blueprint(read!));
+    }
+
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
     [InlineData("sprocket 1 alpha 29")]
     [InlineData("sprocket 2 alpha 14")]
-    [InlineData("sprocket 1")]
+    [InlineData("sprocket 3")]
     public void AnyOtherFormatIsRefused(string header)
     {
         var text = Switching.Replace("sprocket 1 alpha 14", header);
