@@ -53,8 +53,11 @@ profile restyles every file.
 ## Deploys and the game
 
 - Every build of the mod packs it into the game's Mods folder, including the builds that `dotnet test`, the simulator
-  and `jb inspectcode` start. Pass `MdkBuildConfiguration=none` unless deploying is the point. On `main` the mod
-  deploys as "Sprocket Automation (Bleeding Edge)"; `mdk.ini` maps branches to folders.
+  and `jb inspectcode` start. Pass `MdkBuildConfiguration=none` unless deploying is the point. On `update` and
+  `bleeding-edge` the mod deploys as "Sprocket Automation (Bleeding Edge)", and on `main` as the stable mod; `mdk.ini`
+  maps branches to folders.
+- `main` holds what is published on the stable Workshop item, and `bleeding-edge` what is published on Bleeding Edge,
+  nothing more. New code is made on `update`, and a published branch takes it only as it is published.
 - A pack clears the deployed folder before it writes, so a pack that fails on a file the running game holds leaves the
   mod half deployed. Check the folder after a failed pack.
 - Never close, kill or restart a game the developer is running. After a deploy, say what takes it in: code and the
@@ -90,6 +93,8 @@ profile restyles every file.
   renamed id included, comes with its upgrade in the same commit.
 - Anything else Sprocket writes to disk or a save, and anything added to what a construct's block stores, is agreed
   before it is built, with the maintainer's go-ahead.
+- The stable release writes a finished format version, without `alpha`. When it does, Bleeding Edge moves on to the
+  next version's first draft: a stable `sprocket 1` goes with a Bleeding Edge `sprocket 2 alpha 1`.
 - `docs/Language.md` is the language's spec. A language change lands there first, its exact wording approved, before
   any reader or writer code for it. Where code and spec disagree, the code is suspect: raise it, and never edit the
   spec to match.
