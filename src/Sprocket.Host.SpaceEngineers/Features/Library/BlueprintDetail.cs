@@ -76,16 +76,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             var texts = _editor.Texts;
             var board = _editor.Sharing;
-            var volume = board != null && chosen.Section == LibrarySection.Kept ? _editor.Shelf?.Find(chosen.Identity) : null;
-            var mine = volume == null ? null : board.MineOf(volume.Identity);
+            var volume = chosen.Section == LibrarySection.Kept ? _editor.Shelf?.Find(chosen.Identity) : null;
+            var mine = volume == null || board == null ? null : board.MineOf(volume.Identity);
             var line = chosen.Share;
 
-            var shares = volume != null && system != null && !board.IsBarred && board.Limit > 0;
+            var shares = volume != null && system != null;
+            var inWorld = board != null && !board.IsBarred && board.Limit > 0;
             _share.IsVisible = shares;
             if (shares)
             {
                 _share.Text = mine == null ? texts.LibraryShare : texts.LibraryShareChange;
-                _share.Command = _editor.Act(CommandKind.Expand, () => _editor.Windows?.Open(new ShareDialog(_editor, volume.Name, volume.Text, mine)));
+                _share.Command = _editor.Act(CommandKind.Expand, () => _editor.Windows?.Open(new ShareDialog(_editor, volume.Name, volume.Text, inWorld, mine)));
             }
 
             _withdraw.IsVisible = mine != null;

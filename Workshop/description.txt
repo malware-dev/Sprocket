@@ -15,7 +15,7 @@ Describe your airlock logic [i]once[/i], then add [b]installations[/b] to run th
 [h2]Share[/h2]
 Keep [b]blueprints[/b] of your logic systems in the library, and share them, whether it's just with your best friend, your faction, or everyone.
 
-The mod API gives no way to share them through the Workshop, so sharing happens within a world. To share outside the game, share a grid blueprint holding the logic, or the blueprint files themselves, which live in the game's Storage folder (%AppData%\SpaceEngineers\Storage by default).
+The mod API gives no way to share them through the Workshop, so sharing happens within a world. To share outside the game, open a blueprint's [b]Share...[/b] and pick [b]Copy...[/b]: as plain text, or compact enough to post in a chat. Paste it into a programmable block's Custom Data in any world, and press [b]Import[/b] in the library.
 
 [h2]Getting started[/h2]
 Find any programmable block in the terminal and press [b]Automation[/b]. That's it. Not sure what something does? Rest the pointer on it for a tip. Hold Alt and the tip stays open, so you can dig into the words it links.

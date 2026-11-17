@@ -201,6 +201,12 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>The id of the block the editor was opened from, or 0 where nothing says.</summary>
         public long OpenedFrom { get; set; }
 
+        /// <summary>Answers whether this player is in a faction, or is null where nothing says.</summary>
+        public Func<bool> IsInFaction { get; set; }
+
+        /// <summary>Reads the Custom Data of the block the editor was opened from, or null where there is no such block.</summary>
+        public Func<string> OpenedFromData { get; set; }
+
         /// <summary>
         /// Whether <paramref name="system" /> is listed from the block the editor was opened on: always, unless it is kept to
         /// another block that is surely there and it is working.

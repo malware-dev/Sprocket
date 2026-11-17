@@ -807,6 +807,9 @@ namespace Sprocket.Host.SpaceEngineers
             unit.Shelf = _shelf;
             unit.Editor.PlayerName = Named;
             unit.Editor.OpenedFrom = block.EntityId;
+            unit.Editor.OpenedFromData = () => block.CustomData;
+            unit.Editor.IsInFaction = () => MyAPIGateway.Session?.Player != null &&
+                                            MyAPIGateway.Session.Factions?.TryGetPlayerFaction(MyAPIGateway.Session.Player.IdentityId) != null;
             unit.Editor.Sharing = MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive ? _shares.Board : null;
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);

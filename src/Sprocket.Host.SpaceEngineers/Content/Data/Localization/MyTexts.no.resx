@@ -2628,9 +2628,6 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Share.Title" xml:space="preserve">
     <value>Del {name}</value>
   </data>
-  <data name="Sprocket.Share.Who" xml:space="preserve">
-    <value>Hvem er den for?</value>
-  </data>
   <data name="Sprocket.Share.Everyone" xml:space="preserve">
     <value>Alle</value>
   </data>
@@ -2645,6 +2642,15 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   </data>
   <data name="Sprocket.Share.Cancel" xml:space="preserve">
     <value>Avbryt</value>
+  </data>
+  <data name="Sprocket.Share.Close" xml:space="preserve">
+    <value>Lukk</value>
+  </data>
+  <data name="Sprocket.Share.CopyText" xml:space="preserve">
+    <value>Kopier som tekst</value>
+  </data>
+  <data name="Sprocket.Share.InWorld" xml:space="preserve">
+    <value>Del i denne verdenen</value>
   </data>
   <data name="Sprocket.Admin.ShareLimit" xml:space="preserve">
     <value>Delte plantegninger per spiller</value>
@@ -2699,5 +2705,59 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   </data>
   <data name="Sprocket.Systems.KeepHereAbout" xml:space="preserve">
     <value>Viser dette logikksystemet bare når redigereren åpnes fra denne blokken. Det kjører som vanlig, og vises overalt hvis det svikter eller blokken forsvinner.</value>
+  </data>
+  <data name="Sprocket.Library.Import" xml:space="preserve">
+    <value>Importer</value>
+  </data>
+  <data name="Sprocket.Library.ImportNone" xml:space="preserve">
+    <value>Custom Data på denne blokken har ingen plantegningstekst.</value>
+  </data>
+  <data name="Sprocket.Library.ImportOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Sprocket.Library.ImportUnreadable" xml:space="preserve">
+    <value>Noe av plantegningsteksten i Custom Data på denne blokken kan ikke leses. Den kan være avkortet, eller fra en nyere versjon.</value>
+  </data>
+  <data name="Sprocket.Share.Copied" xml:space="preserve">
+    <value>Kopiert til utklippstavlen. For å importere den, lim den inn i Custom Data på en programmerbar blokk, og trykk **Importer** i plantegningsbiblioteket.</value>
+  </data>
+  <data name="Sprocket.Share.CopiedOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Sprocket.Library.ImportAbout" xml:space="preserve">
+    <value>Legger plantegningene som er limt inn som tekst i Custom Data på denne blokken, i biblioteket ditt.</value>
+  </data>
+  <data name="Sprocket.Share.CopyTextAbout" xml:space="preserve">
+    <value>Kopierer plantegningen som lesbar tekst.</value>
+  </data>
+  <data name="Sprocket.Library.ImportConfirm" xml:space="preserve">
+    <value>Importer</value>
+  </data>
+  <data name="Sprocket.Library.ImportKeep" xml:space="preserve">
+    <value>Ikke importer</value>
+  </data>
+  <data name="Sprocket.Library.ImportQuestion" xml:space="preserve">
+    <value>Importere disse plantegningene fra Custom Data på denne blokken til biblioteket ditt?</value>
+  </data>
+  <data name="Sprocket.Library.ImportHave" xml:space="preserve">
+    <value>**{name}** er i biblioteket ditt allerede, like ny eller nyere, og blir som den er.</value>
+  </data>
+  <data name="Sprocket.Library.ImportUpdates" xml:space="preserve">
+    <value>**{name}**, som oppdaterer den i biblioteket ditt</value>
+  </data>
+  <data name="Sprocket.Share.CopiedPlain" xml:space="preserve">
+    <value>Kopiert til utklippstavlen. For å importere den, lim den inn som eneste tekst i Custom Data på en programmerbar blokk, og trykk **Importer** i plantegningsbiblioteket.</value>
+  </data>
+  <data name="Sprocket.Share.CopyCompact" xml:space="preserve">
+    <value>Kopier kompakt</value>
+  </data>
+  <data name="Sprocket.Share.CopyCompactAbout" xml:space="preserve">
+    <value>Kopierer plantegningen pakket lite, så den passer i en chatmelding.</value>
+  </data>
+  <data name="Sprocket.Share.Copy" xml:space="preserve">
+    <value>Kopier...</value>
+  </data>
+  <data name="Sprocket.Share.CopyAbout" xml:space="preserve">
+    <value>Kopierer plantegningen til utklippstavlen, til å importere på en annen konstruksjon, i denne verdenen eller en annen.</value>
   </data>
 </root>

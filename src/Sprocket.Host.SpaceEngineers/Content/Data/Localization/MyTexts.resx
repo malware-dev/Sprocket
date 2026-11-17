@@ -3435,10 +3435,6 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <value>Share {name}</value>
     <comment>Title of the dialog for sharing a blueprint. {name} is the blueprint.</comment>
   </data>
-  <data name="Sprocket.Share.Who" xml:space="preserve">
-    <value>Who is it for?</value>
-    <comment>Question in the sharing dialog, over the choices of who a blueprint is shared with.</comment>
-  </data>
   <data name="Sprocket.Share.Everyone" xml:space="preserve">
     <value>Everyone</value>
     <comment>Choice in the sharing dialog: share the blueprint with every player.</comment>
@@ -3458,6 +3454,18 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
   <data name="Sprocket.Share.Cancel" xml:space="preserve">
     <value>Cancel</value>
     <comment>Button in the sharing dialog that closes it without sharing.</comment>
+  </data>
+  <data name="Sprocket.Share.Close" xml:space="preserve">
+    <value>Close</value>
+    <comment>Button in the sharing dialog that closes it, where the world offers no sharing with its players.</comment>
+  </data>
+  <data name="Sprocket.Share.CopyText" xml:space="preserve">
+    <value>Copy as text</value>
+    <comment>Button in the sharing dialog that copies the blueprint to the clipboard as text.</comment>
+  </data>
+  <data name="Sprocket.Share.InWorld" xml:space="preserve">
+    <value>Share in this world</value>
+    <comment>Heading in the sharing dialog over sharing with the world's players.</comment>
   </data>
   <data name="Sprocket.Admin.ShareLimit" xml:space="preserve">
     <value>Shared blueprints per player</value>
@@ -3530,5 +3538,77 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
   <data name="Sprocket.Systems.KeepHereAbout" xml:space="preserve">
     <value>Lists this logic system only when the editor is opened from this block. It runs as usual, and shows everywhere if it fails or the block is lost.</value>
     <comment>Keeping a logic system to one programmable block's list.</comment>
+  </data>
+  <data name="Sprocket.Library.Import" xml:space="preserve">
+    <value>Import</value>
+    <comment>Button in the blueprint library that adds the blueprints written as text in this block's Custom Data.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportNone" xml:space="preserve">
+    <value>This block's Custom Data holds no blueprint text.</value>
+    <comment>Message when Import finds no blueprint text.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportOk" xml:space="preserve">
+    <value>OK</value>
+    <comment>Answer that closes a message from Import.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportUnreadable" xml:space="preserve">
+    <value>Some of the blueprint text in this block's Custom Data can't be read. It may be cut short, or from a newer version.</value>
+    <comment>Message when Import finds blueprint text it cannot read.</comment>
+  </data>
+  <data name="Sprocket.Share.Copied" xml:space="preserve">
+    <value>Copied to clipboard. To import it, paste it into a programmable block's Custom Data, then press **Import** in the blueprint library.</value>
+    <comment>Message after a blueprint is copied as text, saying how to bring it back in.</comment>
+  </data>
+  <data name="Sprocket.Share.CopiedOk" xml:space="preserve">
+    <value>OK</value>
+    <comment>Answer that closes the message after copying a blueprint as text.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportAbout" xml:space="preserve">
+    <value>Adds the blueprints pasted as text into this block's Custom Data to your library.</value>
+    <comment>Tip on Import in the blueprint library.</comment>
+  </data>
+  <data name="Sprocket.Share.CopyTextAbout" xml:space="preserve">
+    <value>Copies the blueprint as readable text.</value>
+    <comment>Tip on Copy as text in the sharing dialog.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportConfirm" xml:space="preserve">
+    <value>Import</value>
+    <comment>Answer that imports the blueprints named in the question.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportKeep" xml:space="preserve">
+    <value>Don't import</value>
+    <comment>Answer that imports nothing.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportQuestion" xml:space="preserve">
+    <value>Import these blueprints from this block's Custom Data into your library?</value>
+    <comment>Question before Import adds blueprints; the names follow it.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportHave" xml:space="preserve">
+    <value>**{name}** is in your library already, as new or newer, and is left as it is.</value>
+    <comment>A line in the import question: a blueprint the library has as new or newer. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Library.ImportUpdates" xml:space="preserve">
+    <value>**{name}**, which updates the one in your library</value>
+    <comment>A line in the import question: a blueprint newer than the one with the same identity in the library. {name} is the blueprint's name.</comment>
+  </data>
+  <data name="Sprocket.Share.CopiedPlain" xml:space="preserve">
+    <value>Copied to clipboard. To import it, paste it as the only text in a programmable block's Custom Data, then press **Import** in the blueprint library.</value>
+    <comment>Message after a blueprint is copied as readable text, saying how to bring it back in.</comment>
+  </data>
+  <data name="Sprocket.Share.CopyCompact" xml:space="preserve">
+    <value>Copy compact</value>
+    <comment>Button in the sharing dialog that copies the blueprint to the clipboard packed small.</comment>
+  </data>
+  <data name="Sprocket.Share.CopyCompactAbout" xml:space="preserve">
+    <value>Copies the blueprint packed small, to fit in a chat message.</value>
+    <comment>Tip on Copy compact in the sharing dialog.</comment>
+  </data>
+  <data name="Sprocket.Share.Copy" xml:space="preserve">
+    <value>Copy...</value>
+    <comment>Button in the sharing dialog that opens the ways to copy the blueprint to the clipboard.</comment>
+  </data>
+  <data name="Sprocket.Share.CopyAbout" xml:space="preserve">
+    <value>Copies the blueprint to the clipboard, to import on another construct, in this world or another.</value>
+    <comment>Tip on Copy... in the sharing dialog.</comment>
   </data>
 </root>

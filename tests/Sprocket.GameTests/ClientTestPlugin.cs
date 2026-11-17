@@ -269,6 +269,13 @@ namespace Sprocket.GameTests
                     yield return hailstone.Current;
             }
 
+            if (Wants("sharedtext"))
+            {
+                var shared = new SharedTextClientTest(_report).Run();
+                while (shared.MoveNext())
+                    yield return shared.Current;
+            }
+
             if (Wants("menus"))
             {
                 var menus = new EditorShotClientTest(tour, _report).Menus("Kept Automation");

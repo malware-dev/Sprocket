@@ -1073,8 +1073,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Font = MyFontEnum.White, StrongFont = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted, StrongColor = Palette.Ink }
         };
 
-        /// <summary>A box a list is narrowed by typing into.</summary>
-        public static readonly IStyle<TextBox> Search = new TextBoxStyle(Value);
+        /// <summary>A box a list is narrowed by typing into, sunk and dim while the list cannot be used.</summary>
+        public static readonly IStyle<TextBox> Search = new TextBoxStyle(Value)
+        {
+            Disabled = { Color = Palette.Dim, HintColor = Palette.Dim, Background = Palette.Well }
+        };
 
         /// <summary>The box a long list is searched from: the words and a cross clearing them, as a selector's search has.</summary>
         public static readonly IStyle<SearchBox> ListSearch = new SearchBoxStyle
@@ -1199,6 +1202,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
             PointerOver = { Background = Palette.PanelHot },
             [State.FocusVisible] = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>A box saying whether something has been chosen, with its name after it, pressed by itself and lit under the pointer.</summary>
+        public static readonly IStyle<CheckBox> NamedPickBox = new CheckBoxStyle(PickBoxPressed)
+        {
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink, WordPadding = new Thickness(12f, 0f, 0f, 0f), Padding = new Thickness(8f, 4f) },
+            Disabled = { Color = Palette.Dim, Box = Palette.Dim, Mark = Palette.Dim }
+        };
+
+        /// <summary>A list in a frame of its own, as a dialog holds one.</summary>
+        public static readonly IStyle<ScrollView> FramedList = new ScrollViewStyle(ScrollView)
+        {
+            Base = { Background = Palette.Page, Border = Palette.Line, Padding = new Thickness(4f) }
         };
 
         /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens; dim on a paused step.</summary>

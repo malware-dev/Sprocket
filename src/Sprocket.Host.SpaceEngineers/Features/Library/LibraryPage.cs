@@ -86,6 +86,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _search.Edited += Narrow;
             _hereSearch.Hint = Editor.Texts.PickSearch;
             _hereSearch.Edited += Narrow;
+            _import.Text = Editor.Texts.LibraryImport;
+            _import.Tip = CodexTip.For(null, Editor.Texts.LibraryImportAbout);
+            _import.Command = Editor.Act(CommandKind.Shelve, Editor.Holdings.Import);
             Editor.Sharing?.Look();
             List();
         }

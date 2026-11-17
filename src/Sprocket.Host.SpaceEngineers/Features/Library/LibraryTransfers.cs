@@ -1,11 +1,13 @@
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Sharing.Messages;
+using Sprocket.Host.SpaceEngineers.Features.Sharing.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using System;
+using System.Collections.Generic;
 using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
@@ -179,6 +181,82 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             system.Identity = Guid.NewGuid();
             var kept = _editor.Shelf.Keep(system);
             (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
+            _editor.Invalidate();
+        }
+
+        /// <summary>
+        /// Reads the blueprints written as text in the Custom Data of the block the editor was opened from, names them, and adds
+        /// them to the library, each as the player's own copy, once the player says so; says so where there are none to add.
+        /// </summary>
+        public void Import()
+        {
+            if (_editor.Shelf == null)
+                return;
+
+            var data = _editor.OpenedFromData?.Invoke();
+            var found = data == null ? new List<SharedText>() : BlueprintText.Read(data);
+            var readable = new List<AutomationSystem>();
+            foreach (var text in found)
+            {
+                AutomationSystem system;
+                if (text.Blueprint == null || ProgramReader.Lone(text.Blueprint, _editor.World.Values, out system).Length > 0)
+                    continue;
+
+                if (text.Changed.HasValue)
+                    system.Changed = text.Changed;
+                readable.Add(system);
+            }
+
+            var texts = _editor.Texts;
+            if (found.Count == 0)
+            {
+                _editor.Ask(texts.LibraryImportNone);
+                _editor.Answer(texts.LibraryImportOk, () => { }, true);
+                return;
+            }
+
+            // A blueprint the library has as new or newer is left as it is; the rest are added or update the one kept.
+            // The names go in as arguments, so a name is never read as markup.
+            var arguments = new Arguments();
+            var wanted = new List<AutomationSystem>();
+            var lines = "";
+            for (var i = 0; i < readable.Count; i++)
+            {
+                var system = readable[i];
+                var slot = "name" + i.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                arguments.Set(slot, system.Name);
+                var had = _editor.Shelf.Find(system.Identity);
+                var newer = had == null || (system.Changed ?? DateTime.MinValue) > (had.Changed ?? DateTime.MinValue);
+                if (newer)
+                    wanted.Add(system);
+
+                var line = had == null ? "**{name}**" : newer ? texts.LibraryImportUpdates : texts.LibraryImportHave;
+                lines += "\n" + line.Replace("{name}", "{" + slot + "}");
+            }
+
+            if (readable.Count < found.Count)
+                lines += "\n\n" + texts.LibraryImportUnreadable;
+
+            if (wanted.Count == 0)
+            {
+                _editor.Ask(lines.TrimStart('\n'), arguments);
+                _editor.Answer(texts.LibraryImportOk, () => { }, true);
+                return;
+            }
+
+            _editor.Ask(texts.LibraryImportQuestion + "\n" + lines, arguments);
+            _editor.Answer(texts.LibraryImportConfirm, () => Keep(wanted), true);
+            _editor.Answer(texts.LibraryImportKeep, () => { });
+        }
+
+        void Keep(List<AutomationSystem> systems)
+        {
+            LibraryEntry kept = null;
+            foreach (var system in systems)
+                kept = _editor.Shelf.Import(system);
+
+            if (kept != null)
+                (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
             _editor.Invalidate();
         }
 
