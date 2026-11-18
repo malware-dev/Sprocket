@@ -284,19 +284,19 @@ public class SettingTests
     }
 
     /// <summary>
-    /// A bare name in <c>expects</c> that is one of the game's block types is the game's, in a version 1 program too, where the
-    /// system has a type of that name; the system's own is written <c>type(Door)</c>.
+    /// Where the system has a type named like one of the game's block types, the block type is written <c>block_type(Door)</c> and
+    /// the system's own <c>type(Door)</c>; a version 1 program's bare one, which could only be the block type, reads as it.
     /// </summary>
     [Theory]
     [InlineData("sprocket 1 alpha 28")]
     [InlineData("sprocket 1")]
     [InlineData("sprocket 2 alpha 1")]
-    public void AGameTypeKeepsItsBareName(string version)
+    public void AGameTypeSharingATypesNameIsWrittenWithItsKind(string version)
     {
         // A rig stands behind the game's gateway and its kinds of object, which telling a block type by its name asks.
         _ = new Rigged();
         var text = version + "\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"
-            + "    required slot hatch expects Door\n"
+            + "    required slot hatch expects " + (version.EndsWith("alpha 1") ? "block_type(Door)" : "Door") + "\n"
             + (version.EndsWith("alpha 1") ? "    optional slot mode expects type(Door) = open\n" : "")
             + "\n    type Door = open | shut\n\n"
             + "    sequence 1 {\n        call sprocket.close on [ hatch ]\n    }\n}\n";
@@ -308,7 +308,7 @@ public class SettingTests
         Assert.False(system.FindPart("hatch")!.IsSetting);
 
         var saved = ProgramWriter.Save(program, _store);
-        Assert.Contains("    required slot hatch expects Door\n", saved);
+        Assert.Contains("    required slot hatch expects block_type(Door)\n", saved);
         if (version.EndsWith("alpha 1"))
         {
             Assert.Equal("Door", system.FindPart("mode")!.Setting);

@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
     /// </summary>
     /// <remarks>
     /// A program written before it never gives a state a slot's or a type's name, and never has a setting, so the names that
-    /// can be shared are a type's and a slot's, a sequence's and a choice's with any of them.
+    /// can be shared are a type's and a slot's, a sequence's and a choice's with any of them, and a type's with a type of block a slot expects, written <c>block_type(Door)</c>.
     /// </remarks>
     public sealed class KindNames : FormatChange
     {
@@ -43,6 +43,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
 
                 if (statement.Key == Keyword.Run || statement.Key == Keyword.Stop)
                     Run(statement, 0, names);
+
+                // required slot hatch expects Door: in a program written before it, always a type of block.
+                if ((statement.Key == Keyword.Required || statement.Key == Keyword.Optional) && statement.Says(2, Keyword.Expects)
+                    && ScriptQuotes.Named(statement.ValueAt(3)) && names.Types.ContainsKey(statement.Word(3)))
+                    statement.Kind(3, Kinds.BlockType);
 
                 // whenever button then: a signal slot.
                 if (statement.Key == Keyword.Whenever && ScriptQuotes.Named(statement.ValueAt(0)) && names.IsShared(statement.Word(0)))

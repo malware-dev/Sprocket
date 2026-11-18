@@ -112,7 +112,7 @@ A name is written bare wherever that means one thing, and with more detail where
 
 ### 4.3 Kinds
 
-`<kind>(<thing>)` says what kind of thing `<thing>` is. A kind is a built-in type (`flag`, `text`, `integer`, `real`, `duration`, `color`, `vector`, `list`), a type the system declares (§9.1), a host type (§5.2), or a kind of thing a program names: `slot`, `type`, `state`, `setting` or `sequence`.
+`<kind>(<thing>)` says what kind of thing `<thing>` is. A kind is a built-in type (`flag`, `text`, `integer`, `real`, `duration`, `color`, `vector`, `list`), a type the system declares (§9.1), a host type (§5.2), a block type, written `block_type(Door)`, or a kind of thing a program names: `slot`, `type`, `state`, `setting` or `sequence`.
 
 ```sprocket
 run sequence(cycle)          # the sequence, where a type is also called cycle
@@ -238,7 +238,7 @@ required slot mode expects side
 
 * **Cardinality:** Must be declared as either `required` or `optional`. An instance may leave an optional slot unassigned. Leaving a required slot unassigned marks the instance as missing that slot.
 * **Expectation (`expects`):**
-  * **Game Type:** A game type id with the `MyObjectBuilder_` prefix dropped (e.g., `LightingBlock`, `Door`). Takes every block of that type and of every type the game builds on it, so `LightingBlock` takes interior lights and spotlights alike.
+  * **Game Type:** A game type id with the `MyObjectBuilder_` prefix dropped (e.g., `LightingBlock`, `Door`). Takes every block of that type and of every type the game builds on it, so `LightingBlock` takes interior lights and spotlights alike. Where the system also declares a type of that name, it is written `block_type(Door)`.
   * **Exact Subtype:** A quoted name `'Type/Subtype'`, taking that one exact block.
   * **`signal`:** For slots bound to functions returning signals.
   * **Host Type:** A qualified host type identifier (e.g., `gearbox.screen`), for slots answered by functions that return one. `optional slot output expects gearbox.inventory`, answered by `gearbox.get_inventory(2) on [ refinery ]`, holds that inventory of the block.

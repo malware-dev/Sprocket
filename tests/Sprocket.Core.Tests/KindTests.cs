@@ -83,6 +83,15 @@ public class KindTests
             Load(text.Replace("set state(side) to", "set side to"), new Automation()));
     }
 
+    /// <summary>A bare name in <c>expects</c> that is a block type of the game's and a type of the system's could be either, which is trouble.</summary>
+    [Fact]
+    public void ABareBlockTypeSharingATypesNameIsTrouble()
+    {
+        _ = new Rigged();
+        Assert.Contains("'Door' could be the block type 'Door' or the type 'Door'; write the one meant with its kind: block_type(Door) or type(Door).",
+            Load(Head + "    required slot hatch expects Door\n\n    type Door = open | shut\n}\n", new Automation()));
+    }
+
     /// <summary>A signal slot sharing a type's name is watched with its kind, and alone it could be either, which is trouble.</summary>
     [Fact]
     public void ASignalSlotSharingATypesNameIsWatchedWithItsKind()

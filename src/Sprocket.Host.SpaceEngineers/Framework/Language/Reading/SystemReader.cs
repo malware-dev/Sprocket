@@ -375,13 +375,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var one = statement.ValueAt(3);
             if (one.Says(Keyword.Signal))
                 part.IsSignal = true;
+            else if (Kinds.Named(statement, one, Kinds.BlockType) != null)
+                part.Expects = Kinds.Named(statement, one, Kinds.BlockType);
             else if (one.Form == ValueForm.Kinded)
                 Declared(statement, part, declared, trouble);
             else if (one.Form == ValueForm.Qualified)
                 Holding(statement, part, trouble);
-            else if (ScriptQuotes.Named(one) && declared.Contains(one.Word) && named.Has(one.Word) && !BlockKinds.IsGameType(one.Word))
+            else if (ScriptQuotes.Named(one) && declared.Contains(one.Word) && (named.Has(one.Word) || BlockKinds.IsGameType(one.Word)))
                 Shared(statement, one.Word, named, trouble);
-            else if (ScriptQuotes.Named(one) && (SettingReader.IsBuiltIn(one.Word) || declared.Contains(one.Word) && !BlockKinds.IsGameType(one.Word)))
+            else if (ScriptQuotes.Named(one) && (SettingReader.IsBuiltIn(one.Word) || declared.Contains(one.Word)))
                 part.Setting = one.Word;
             else if (ScriptQuotes.Named(one))
                 part.Expects = one.Word;
@@ -412,8 +414,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// Says that the type <paramref name="type" /> a slot expects, written bare, could also be the slot, state or sequence
-        /// called so, as <paramref name="names" /> has them.
+        /// Says that the type <paramref name="type" /> a slot expects, written bare, could also be the game's block type, or the slot,
+        /// state or sequence called so, as <paramref name="names" /> has them.
         /// </summary>
         static void Shared(Statement statement, string type, DeclaredNames names, ScriptTrouble trouble)
         {
@@ -427,6 +429,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             if (names.Sequences.Contains(type))
                 Kinds.Add(Keywords.Name(Keyword.Sequence), type, meanings, spellings);
+
+            if (BlockKinds.IsGameType(type))
+            {
+                meanings.Add($"the block type '{type}'");
+                spellings.Add(ScriptWriter.KindSpelling(Kinds.BlockType, type));
+            }
 
             Kinds.Add(Keywords.Name(Keyword.Type), type, meanings, spellings);
             Kinds.Ambiguous(statement, type, meanings, spellings, trouble);

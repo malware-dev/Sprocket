@@ -18,6 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>A logic system's states: <c>state(where)</c>.</summary>
         public const string State = "state";
 
+        /// <summary>A game's type of block, as a slot expects it: <c>block_type(Door)</c>.</summary>
+        public const string BlockType = "block_type";
+
         /// <summary>The name <paramref name="written" /> gives a thing of the kind <paramref name="kind" />, <c>where</c> in <c>state(where)</c>; null where it is not written so.</summary>
         public static string Named(Statement statement, Value written, string kind)
         {

@@ -376,6 +376,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 pen.Says(Keyword.Expects).Says(Keyword.Signal);
             else if (part.Holds.Length > 0)
                 pen.Says(Keyword.Expects).Qualified(Space(part.Holds), Name(part.Holds));
+            else if (part.Expects.Length > 0 && system.FindType(part.Expects) != null)
+                pen.Says(Keyword.Expects).Kinded("", Kinds.BlockType, part.Expects);
             else if (part.Expects.Length > 0)
                 pen.Says(Keyword.Expects).Word(part.Expects);
 
