@@ -109,6 +109,36 @@ public class WaitTests
         Assert.Equal(Duration.OfSeconds(1), wait.Length);
     }
 
+    /// <summary>A wait that takes a setting says the setting; a length given in its panel takes the setting's place, and undo gives it back.</summary>
+    [Fact]
+    public void AWaitsSettingIsShownAndALengthTakesItsPlace()
+    {
+        var screen = Added();
+        screen.Editor.Input.Key(MyKeys.Enter, false, false);
+        screen.Run(2);
+
+        var wait = Assert.IsType<Wait>(Assert.Single(screen.Editor.Program.Sequences[0].Steps));
+        wait.Setting = "Pause";
+        screen.Editor.Invalidate();
+        screen.Run(2);
+        Assert.Equal("Pause", Page(screen).View!.Within().OfType<StepRow>().Single().Slots.OfType<DurationSlot>().Single().Setting);
+        Assert.True(screen.Shows("Pause"));
+
+        PressLength(screen);
+        var panel = Panel(screen);
+        panel.Box.SelectAll();
+        panel.Box.Insert("1");
+        screen.Editor.Input.Key(MyKeys.Enter, false, false);
+        screen.Run(2);
+
+        Assert.Equal("", wait.Setting);
+        Assert.Equal(Duration.OfSeconds(1), wait.Length);
+        Assert.True(screen.Shows("1 second"));
+
+        screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);
+        Assert.Equal("Pause", wait.Setting);
+    }
+
     /// <summary>Escape, or a press anywhere else, on the panel of a wait already there closes it and leaves the wait as it was.</summary>
     [Theory]
     [InlineData(true)]

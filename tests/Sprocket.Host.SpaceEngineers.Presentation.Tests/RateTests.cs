@@ -98,6 +98,31 @@ public class RateTests
         Assert.Equal(Duration.OfSeconds(1), every.Interval);
     }
 
+    /// <summary>A repeat that comes round at a setting's rate says the setting; a rate given on its row takes the setting's place, and undo gives it back.</summary>
+    [Fact]
+    public void ARatesSettingIsShownAndARateTakesItsPlace()
+    {
+        var screen = Made();
+        var every = Assert.IsType<EveryTrigger>(System(screen).Triggers[0]);
+        every.IntervalSetting = "Pace";
+        screen.Editor.Invalidate();
+        screen.Run(2);
+        Assert.Equal("Every Pace", screen.Editor.Says(0));
+
+        screen.Editor.PressWhen(0);
+        screen.Run(2);
+        var rate = screen.Editor.RateLengths();
+        rate.Give("1", false);
+        rate.Box.Submit!.Execute();
+        screen.Run(2);
+
+        Assert.Equal("", every.IntervalSetting);
+        Assert.Equal("Every second", screen.Editor.Says(0));
+
+        screen.Editor.Undo(System(screen), System(screen));
+        Assert.Equal("Pace", every.IntervalSetting);
+    }
+
     /// <summary>Escape on a row's rate leaves it as it was.</summary>
     [Fact]
     public void EscapeLeavesARateAsItWas()

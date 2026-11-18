@@ -572,13 +572,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return;
             }
 
-            if (cancelled || !length.HasValue || length.Value == wait.Length)
+            if (cancelled || !length.HasValue || length.Value == wait.Length && wait.Setting.Length == 0)
                 return;
 
             if (added && _editor.Withdraw(_sequence))
                 _editor.Do(_sequence, new AddStep(ChangeKind.AddWait, index, new Wait(length.Value)));
             else
-                _editor.Do(_sequence, new SetWait(index, wait.Length, length.Value));
+                _editor.Do(_sequence, new SetWait(index, wait.Length, wait.Setting, length.Value));
         }
 
         /// <summary>Gives <paramref name="abort" /> the <paramref name="message" /> and <paramref name="level" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>

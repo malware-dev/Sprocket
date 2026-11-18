@@ -359,7 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             {
                 var rate = every.Interval;
                 var timer = new TimerPage(_editor, rate, aim, interval =>
-                    Aimed(system, every, aim, origin, false, interval == rate ? null : new SetCadence(every, rate, interval)));
+                    Aimed(system, every, aim, origin, false, interval == rate && every.IntervalSetting.Length == 0 ? null : new SetCadence(every, rate, every.IntervalSetting, interval)));
 
                 _editor.Push(timer);
                 if (action)

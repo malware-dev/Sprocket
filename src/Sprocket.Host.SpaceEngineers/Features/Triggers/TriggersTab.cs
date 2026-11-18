@@ -194,8 +194,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             _rate = new LengthQuestion(_editor, every.Interval, true, () => RateChip(every),
                 (interval, cancelled) =>
                 {
-                    if (!cancelled && interval.HasValue && interval.Value != every.Interval && _system.IndexOfTrigger(every) >= 0)
-                        _editor.Do(_system, new SetCadence(every, every.Interval, interval.Value));
+                    if (!cancelled && interval.HasValue && (interval.Value != every.Interval || every.IntervalSetting.Length > 0) && _system.IndexOfTrigger(every) >= 0)
+                        _editor.Do(_system, new SetCadence(every, every.Interval, every.IntervalSetting, interval.Value));
                 });
             _rate.Hang();
         }
@@ -243,7 +243,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                row.Starts.Add(new DurationSlot(every.Interval, _changes(CommandKind.OpenTrigger, () => OpenRate(every))));
+                row.Starts.Add(new DurationSlot(every.Interval, every.IntervalSetting, _changes(CommandKind.OpenTrigger, () => OpenRate(every))));
 
             var watch = trigger as StateTrigger;
             if (watch != null)

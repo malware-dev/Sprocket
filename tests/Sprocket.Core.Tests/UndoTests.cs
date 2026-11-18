@@ -191,7 +191,7 @@ public class UndoTests
     {
         Sequence sequence = Build();
         sequence.Steps[1] = new Wait(60);
-        var edit = new SetWait(1, Duration.OfTicks(60), Duration.OfTicks(120));
+        var edit = new SetWait(1, Duration.OfTicks(60), "", Duration.OfTicks(120));
 
         var before = Shape(sequence);
         edit.Apply(sequence);
@@ -300,7 +300,7 @@ public class UndoTests
         var every = new EveryTrigger(60);
         var sequence = program.AddSequence(program.AddSystem(), every);
 
-        RoundTrip(sequence, new SetCadence(every, Duration.OfTicks(60), Duration.OfTicks(600)));
+        RoundTrip(sequence, new SetCadence(every, Duration.OfTicks(60), "", Duration.OfTicks(600)));
     }
 
     /// <summary>

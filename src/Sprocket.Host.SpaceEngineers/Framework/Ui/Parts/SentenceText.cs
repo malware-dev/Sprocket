@@ -171,7 +171,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Rate(duration.Length);
+                return duration.Setting.Length > 0 ? duration.Setting : TimeText.Rate(duration.Length);
 
             return Of(world, slot);
         }
@@ -404,7 +404,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Duration(duration.Length);
+                return duration.Setting.Length > 0 ? duration.Setting : TimeText.Duration(duration.Length);
 
             return Of(world, slot);
         }
@@ -721,7 +721,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Duration(duration.Length);
+                return duration.Setting.Length > 0 ? duration.Setting : TimeText.Duration(duration.Length);
 
             var given = slot as ArgumentsSlot;
             if (given != null)

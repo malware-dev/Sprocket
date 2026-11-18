@@ -634,7 +634,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var wait = step as Wait;
             if (wait != null)
             {
-                row.Slots.Add(new DurationSlot(wait.Length, Changes(CommandKind.StepSlot, () => Open(wait, false))));
+                row.Slots.Add(new DurationSlot(wait.Length, wait.Setting, Changes(CommandKind.StepSlot, () => Open(wait, false))));
                 return;
             }
 
