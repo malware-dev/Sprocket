@@ -22,6 +22,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>What it is called, or empty to leave it numbered.</summary>
         public string Name;
 
+        /// <summary>What it is called on screen, in the language the editor speaks, or null where that is <see cref="Name" />.</summary>
+        public Func<Texts, string> Worded;
+
+        /// <summary>What it is called on screen in <paramref name="texts" />' language.</summary>
+        public string Title(Texts texts)
+        {
+            return Worded != null ? Worded(texts) : Name ?? "";
+        }
+
         /// <summary>The name of the value of the same form whose word decides whether this one is asked for, or null where it always is.</summary>
         public string AskedWith;
 
@@ -357,7 +366,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// </summary>
         public string Label(Texts texts)
         {
-            string name = Name ?? "";
+            string name = Title(texts);
             string takes = Takes(texts);
 
             if (takes.Length == 0)

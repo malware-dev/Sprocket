@@ -536,7 +536,7 @@ public class ActionTests
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
             "the column does not show what the value may be");
 
-        screen.Do("1247", "201");
+        screen.Do("press", "Recharge");
         Assert.Equal("Recharge", Given(screen));
 
         screen.Do("enter");
@@ -556,7 +556,7 @@ public class ActionTests
     public void AStepMadeInTheTerminalViewIsEditedThere()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\" 1247 201 enter").Split(' '));
+            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\" press Recharge enter").Split(' '));
         var editor = screen.Editor;
         Assert.IsType<Act>(editor.Program.Sequences[0].Steps[0]);
 
@@ -587,11 +587,11 @@ public class ActionTests
         // Closed, so none of the six is on the screen and neither is a choice nobody has made.
         Assert.False(screen.Shows("Backward"), "the list is showing while it is shut");
 
-        screen.Do("1316", "201");
+        screen.Do("1316", "209");
         Assert.True(screen.Shows("Backward") && screen.Shows("Down"),
             "pressing the box did not open the list");
 
-        screen.Do("1316", "319");
+        screen.Do("1316", "327");
         Assert.Equal("Left", Given(screen));
         Assert.False(screen.Shows("Down"), "choosing did not put the list away");
 
@@ -635,9 +635,14 @@ public class ActionTests
         screen.Editor.PressChoice("rotate to");
         screen.Run(2);
 
-        var fields = screen.Editor.Pick().Arguments!.Form.Fields;
-        Assert.Equal(3, fields.Count);
-        var ends = fields.Select(field => ((Lumel.Element)field).Bounds).Select(at => at.X + at.Width).ToList();
+        var form = screen.Editor.Pick().Arguments!.Form;
+        Assert.Equal(3, form.Fields.Count);
+
+        // A value that may come from a setting ends with its mark, which is part of it.
+        var ends = Enumerable.Range(0, form.Fields.Count)
+            .Select(i => (Lumel.Element?)form.MarkOf(i) ?? (Lumel.Element)form.Fields[i])
+            .Select(part => part.Bounds.X + part.Bounds.Width)
+            .ToList();
         Assert.All(ends, end => Assert.Equal(ends[0], end, 1));
     }
 

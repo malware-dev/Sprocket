@@ -72,7 +72,7 @@ public class MemberAboutTests
         Assert.DoesNotContain("Opens the door", screen.Editor.Pick().Arguments!.About.Markdown);
     }
 
-    /// <summary>A moment takes no options and is described all the same, and the column carries its name.</summary>
+    /// <summary>A moment takes no options and is described all the same, in a column carrying its name.</summary>
     [Fact]
     public void AMomentIsDescribedUnderItsName()
     {
@@ -80,8 +80,8 @@ public class MemberAboutTests
 
         screen.Editor.PressChoice("finishes opening");
 
-        var does = screen.Editor.Pick().Stages[2];
-        Assert.Equal("FINISHES OPENING", does.Title);
+        Assert.Equal("FINISHES OPENING", screen.Editor.Pick().Arguments!.Title);
+        Assert.Equal("WHAT IT DOES", screen.Editor.Pick().Stages[2].Title);
         Assert.Contains("when the door is fully open", screen.Editor.Pick().Arguments!.About.Markdown);
     }
 
@@ -93,7 +93,8 @@ public class MemberAboutTests
 
         screen.Editor.PressChoice("how far open");
 
-        Assert.Equal("HOW FAR OPEN", screen.Editor.Pick().Stages[2].Title);
+        Assert.Equal("HOW FAR OPEN", screen.Editor.Pick().Arguments!.Title);
+        Assert.Equal("WHAT IT DOES", screen.Editor.Pick().Stages[2].Title);
         Assert.StartsWith("How much of the way", screen.Editor.Pick().Arguments!.About.Markdown);
     }
 

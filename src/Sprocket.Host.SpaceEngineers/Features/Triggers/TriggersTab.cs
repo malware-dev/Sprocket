@@ -179,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (_values != null)
                 _values.Finish(true);
 
-            _values = new ValuesQuestion(_editor, fields, act.Arguments, () => Chip(trigger, false, holds), answered);
+            _values = new ValuesQuestion(_editor, _system, fields, act.Arguments, () => Chip(trigger, false, holds), answered);
             _values.Hang();
         }
 
@@ -191,11 +191,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (_rate != null)
                 _rate.Finish(false);
 
-            _rate = new LengthQuestion(_editor, every.Interval, true, () => RateChip(every),
-                (interval, cancelled) =>
+            _rate = new LengthQuestion(_editor, _system, every.Interval, every.IntervalSetting, true, () => RateChip(every),
+                (interval, setting, cancelled) =>
                 {
-                    if (!cancelled && interval.HasValue && (interval.Value != every.Interval || every.IntervalSetting.Length > 0) && _system.IndexOfTrigger(every) >= 0)
-                        _editor.Do(_system, new SetCadence(every, every.Interval, every.IntervalSetting, interval.Value));
+                    if (cancelled || setting.Length == 0 && !interval.HasValue || _system.IndexOfTrigger(every) < 0)
+                        return;
+
+                    var now = setting.Length > 0 || !interval.HasValue ? every.Interval : interval.Value;
+                    if (now != every.Interval || setting != every.IntervalSetting)
+                        _editor.Do(_system, new SetCadence(every, every.Interval, every.IntervalSetting, now, setting));
                 });
             _rate.Hang();
         }
@@ -274,17 +278,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
                 _changes(CommandKind.OpenTrigger, () => RelateWatch(watch)), ArgumentRole.Compared));
             row.Starts.Add(StateValueQuestion.Part(_system, test.State, test.Value, test.Other,
-                _changes(CommandKind.OpenTrigger, () => CompareWatch(watch)), ArgumentRole.Checked));
+                _changes(CommandKind.OpenTrigger, () => CompareWatch(watch, () => Chip(watch, true, ArgumentRole.Checked))), ArgumentRole.Checked));
         }
 
         /// <summary>
         /// Offers the values the state <paramref name="watch" /> watches can hold in a menu under the part pressed, and changes what
         /// it starts on to the one chosen; the value of another state opens the selector.
         /// </summary>
-        void CompareWatch(StateTrigger watch)
+        void CompareWatch(StateTrigger watch, Func<Element> part)
         {
             var test = watch.Test;
-            StateValueQuestion.Offer(_editor, _system, test.State, test.Value, test.Other, value =>
+            StateValueQuestion.Offer(_editor, _system, test.State, test.Value, test.Other, part, value =>
             {
                 var now = test.Copy();
                 now.Value = value;
@@ -308,10 +312,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// Offers the values the state <paramref name="trigger" /> sets can hold in a menu under the part pressed, and has it set
         /// the one chosen; the value of another state opens the selector.
         /// </summary>
-        void SetStateTo(Trigger trigger)
+        void SetStateTo(Trigger trigger, Func<Element> part)
         {
             var set = trigger.Sets;
-            StateValueQuestion.Offer(_editor, _system, set.State, set.Value, set.From,
+            StateValueQuestion.Offer(_editor, _system, set.State, set.Value, set.From, part,
                 value => _editor.Do(_system, new PointTrigger(_editor.Program, trigger, new SetState { State = set.State, Value = value }, null)),
                 () => _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false));
         }
@@ -396,7 +400,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (_values != null)
                 _values.Finish(true);
 
-            _values = new ValuesQuestion(_editor, fields, given, () => Chip(when, true, holds), answered);
+            _values = new ValuesQuestion(_editor, _system, fields, given, () => Chip(when, true, holds), answered);
             _values.Hang();
         }
 
@@ -493,7 +497,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 row.DoesLead = SentenceText.Then(row.Kind, false, false, true);
                 row.Does.Add(new SystemStateSlot(set.State, opens));
                 row.Does.Add(StateValueQuestion.Part(_system, set.State, set.Value, set.From,
-                    _changes(CommandKind.TriggerTarget, () => SetStateTo(trigger)), ArgumentRole.NewValue));
+                    _changes(CommandKind.TriggerTarget, () => SetStateTo(trigger, () => Chip(trigger, false, ArgumentRole.NewValue))), ArgumentRole.NewValue));
                 return;
             }
 

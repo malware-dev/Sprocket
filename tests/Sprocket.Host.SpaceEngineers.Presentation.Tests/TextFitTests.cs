@@ -126,7 +126,7 @@ public class TextFitTests
             foreach (var member in screen.Editor.Pick().Stages[1].Entries().Where(e => !e.IsHeading).Select(e => e.Text).ToList())
             {
                 screen.Editor.PressChoice(member);
-                screen.Run(2);
+                screen.Run(24);
                 seen++;
                 Look(screen, $"{block} / {member}", found);
             }

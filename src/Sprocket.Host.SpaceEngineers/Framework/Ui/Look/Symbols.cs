@@ -129,6 +129,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <remarks>Drawn on the open eye's frame, so one replaces the other without the toolbar moving.</remarks>
         public const string HiddenHidden = "H";
 
+        /// <summary>Two links of a chain: where a value comes from, a value of its own or a setting.</summary>
+        public const string Link = "J";
+
+        /// <summary>Two horizontal sliders: a setting, a value chosen for each installation.</summary>
+        public const string Setting = "=";
+
         /// <summary>The outline lit round <paramref name="mark" />, or null for a mark that is never lit.</summary>
         public static string OutlineOf(string mark)
         {

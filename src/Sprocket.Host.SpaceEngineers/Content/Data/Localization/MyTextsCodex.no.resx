@@ -50,7 +50,10 @@
     <value>En ![](mark:action)&amp;nbsp;**handling** er noe en blokk kan gjøre, som å åpne en dør eller skyve ut et stempel.</value>
   </data>
   <data name="Sprocket.Term.Option" xml:space="preserve">
-    <value>Et **valg** er en innstilling en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
+    <value>Et **valg** er en verdi en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
+  </data>
+  <data name="Sprocket.Term.Setting" xml:space="preserve">
+    <value>En ![](mark:setting)&amp;nbsp;**innstilling** er en verdi du velger for hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) for seg. Velger du ingen, brukes innstillingens standardverdi. En innstilling uten standardverdi må fylles ut.</value>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
     <value>En **oppgave** er én operasjon: å kjøre eller stoppe en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term), en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker, eller å [sette](Term.Set class=term) en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>
@@ -377,7 +380,7 @@
     <value>Vis bare én sort blokk.</value>
   </data>
   <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Velg hva [steget](Term.Step class=term), [hvis-steget](Term.If class=term) eller [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) arbeider med. `Eksisterende plass` bruker en [plass](Term.Slot class=term) [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) har fra før.</value>
+    <value>Velg hva dette arbeider med.</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>Dette er [![](mark:awaited)&amp;nbsp;avventbart](Term.Awaitable class=term). [![](mark:sequence)&amp;nbsp;Sekvensen](Term.Sequence class=term) går rett videre mens det virker, og et `wait for pending tasks`-[steg](Term.Step class=term) nedenfor venter til det er ferdig.</value>

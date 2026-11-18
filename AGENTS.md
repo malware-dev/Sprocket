@@ -23,6 +23,7 @@ Run from the repository root.
 dotnet build src/Sprocket.Host.SpaceEngineers -p:MdkBuildConfiguration=none   # compile the mod
 dotnet build src/Sprocket.Host.SpaceEngineers                                 # compile it and deploy it into the game
 dotnet test -p:MdkBuildConfiguration=none                                     # every test project in Sprocket.slnx
+./tools/Test.ps1                                                              # the same, split into shards run side by side
 dotnet test tests/Sprocket.Core.Tests -p:MdkBuildConfiguration=none --filter "FullyQualifiedName~AbortTests"
 ```
 

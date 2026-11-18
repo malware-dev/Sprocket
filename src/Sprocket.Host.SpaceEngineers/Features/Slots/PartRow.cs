@@ -151,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             }
         }
 
-        /// <summary>Whether the slot can be taken out here, which shows a bin beside its blocks.</summary>
+        /// <summary>Whether the row shows its bin at its end.</summary>
         public bool Removable
         {
             get { return _remove.IsVisible; }

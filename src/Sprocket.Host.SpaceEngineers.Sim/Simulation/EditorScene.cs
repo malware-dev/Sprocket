@@ -318,7 +318,13 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Moves whatever is under the pointer. Positive scrolls down.</summary>
         public void ScrollBy(Vector2 point, float amount)
         {
-            _workspace.Wheel(point, amount);
+            _workspace.Wheel(point, new Vector2(0f, amount));
+        }
+
+        /// <summary>Turns the wheel sideways over <paramref name="point" />, as Shift and the wheel do in the game. Positive scrolls right.</summary>
+        public void ScrollSideways(Vector2 point, float amount)
+        {
+            _workspace.Wheel(point, new Vector2(amount, 0f));
         }
 
         /// <summary>How many times the screen has written what the editor says onto its controls.</summary>

@@ -448,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 DropDoes();
 
             if (_does != null)
-                _does.Title = string.IsNullOrEmpty(_members.ChosenName) ? Editor.Texts.PickWhatItDoes : _members.ChosenName;
+                _does.Title = !_memberOnly || string.IsNullOrEmpty(_members.ChosenName) ? Editor.Texts.PickWhatItDoes : _members.ChosenName;
 
             // A moment is described and takes nothing; a number watched asks how it compares, and with what, over what the trigger does.
             if (_memberOnly)
@@ -496,6 +496,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         public override void Refresh()
         {
             _strip.Tick();
+            _arguments.Making?.Hang();
         }
 
         /// <summary>Goes straight on to the page after this one as soon as this is built, for a part pressed that stands for something on that page.</summary>

@@ -760,6 +760,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Disabled = { Tint = Palette.Dim }
         };
 
+        /// <summary>The mark choosing where a value comes from: an <see cref="Icon" />, lit in the link's color while a setting gives the value.</summary>
+        public static readonly IStyle<Glyph> Source = new GlyphStyle(Icon)
+        {
+            [LookStates.Chosen] = { Tint = Palette.Link }
+        };
+
         /// <summary>The words of a codex page in a tip: its terms brighter than the words around them, lit and hovered while the tip is pinned.</summary>
         public static readonly IStyle<RichText> TipPage = new RichTextStyle(Tip)
         {

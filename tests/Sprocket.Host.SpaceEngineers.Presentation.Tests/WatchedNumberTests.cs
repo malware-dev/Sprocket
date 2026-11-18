@@ -20,11 +20,11 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class WatchedNumberTests
 {
     /// <summary>
-    /// The numbers are offered after the moments, and one chosen is compared over what the trigger does, in the order the
-    /// sentence says them, every column on the one page.
+    /// The numbers are offered after the moments, and one chosen is compared in a column of its own just before what the trigger
+    /// does, in the order the sentence says them.
     /// </summary>
     [Fact]
-    public void ANumberIsComparedOverWhatItDoes()
+    public void ANumberIsComparedInAColumnBeforeWhatItDoes()
     {
         var rig = Picking("any");
 
@@ -37,11 +37,10 @@ public class WatchedNumberTests
 
         var strip = rig.Editor.Pick();
         Assert.NotNull(strip.Arguments);
-        Assert.True(strip.Arguments!.Nested);
+        Assert.False(strip.Arguments!.Nested);
         Assert.Equal(3, strip.Stages.Count);
-        Assert.Contains(strip.Arguments, strip.Stages[2].Within());
-        Assert.DoesNotContain(strip.Arguments, strip.Children);
-        Assert.Contains(strip.Stages[2], strip.Children);
+        Assert.DoesNotContain(strip.Arguments, strip.Stages[2].Within());
+        Assert.Equal(strip.Children.IndexOf(strip.Stages[2]) - 1, strip.Children.IndexOf(strip.Arguments));
     }
 
     /// <summary>

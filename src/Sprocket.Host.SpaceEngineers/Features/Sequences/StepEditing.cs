@@ -11,6 +11,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using System;
 using System.Collections.Generic;
+using Lumel;
 using Run = Sprocket.Host.SpaceEngineers.Framework.Model.Run;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
@@ -286,11 +287,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>
         /// Offers the values the state <paramref name="test" /> checks can hold in a menu under the part pressed, and changes the
-        /// test to the one chosen as one edit; the value of another state opens the selector.
+        /// test to the one chosen as one edit; the value of another state opens the selector. A new setting is asked in a panel hung
+        /// from what <paramref name="part" /> finds.
         /// </summary>
-        public void CompareState(Step step, StateTest test)
+        public void CompareState(Step step, StateTest test, Func<Element> part)
         {
-            StateValueQuestion.Offer(_editor, _sequence.System, test.State, test.Value, test.Other, value =>
+            StateValueQuestion.Offer(_editor, _sequence.System, test.State, test.Value, test.Other, part, value =>
             {
                 var now = test.Copy();
                 now.Value = value;
@@ -301,11 +303,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>
         /// Offers the values the state <paramref name="step" /> sets can hold in a menu under the part pressed, and sets it to the
-        /// one chosen as one edit; the value of another state opens the selector.
+        /// one chosen as one edit; the value of another state opens the selector. A new setting is asked in a panel hung from what
+        /// <paramref name="part" /> finds.
         /// </summary>
-        public void SetStateTo(SetState step)
+        public void SetStateTo(SetState step, Func<Element> part)
         {
-            StateValueQuestion.Offer(_editor, _sequence.System, step.State, step.Value, step.From, value =>
+            StateValueQuestion.Offer(_editor, _sequence.System, step.State, step.Value, step.From, part, value =>
                 _editor.Do(_sequence, new ChangeSetState(_sequence.Steps.IndexOf(step), step, new SetState { State = step.State, Value = value })),
                 () => ChangeSetState(step));
         }
@@ -559,8 +562,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _editor.PushNamed(new SequencePage(_editor, made));
         }
 
-        /// <summary>Gives <paramref name="wait" /> the <paramref name="length" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
-        public void Closed(Wait wait, Duration? length, bool added, bool cancelled)
+        /// <summary>
+        /// Gives <paramref name="wait" /> the <paramref name="length" /> its panel closed on, or the setting <paramref name="setting" /> where it
+        /// is not empty, or leaves it as it was where it was <paramref name="cancelled" />.
+        /// </summary>
+        public void Closed(Wait wait, Duration? length, string setting, bool added, bool cancelled)
         {
             var index = _sequence.Steps.IndexOf(wait);
             if (index < 0)
@@ -572,23 +578,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return;
             }
 
-            if (cancelled || !length.HasValue || length.Value == wait.Length && wait.Setting.Length == 0)
+            if (cancelled || setting.Length == 0 && !length.HasValue)
+                return;
+
+            var now = setting.Length > 0 || !length.HasValue ? wait.Length : length.Value;
+            if (now == wait.Length && setting == wait.Setting)
                 return;
 
             if (added && _editor.Withdraw(_sequence))
-                _editor.Do(_sequence, new AddStep(ChangeKind.AddWait, index, new Wait(length.Value)));
+                _editor.Do(_sequence, new AddStep(ChangeKind.AddWait, index, new Wait(now) { Setting = setting }));
             else
-                _editor.Do(_sequence, new SetWait(index, wait.Length, wait.Setting, length.Value));
+                _editor.Do(_sequence, new SetWait(index, wait.Length, wait.Setting, now, setting));
         }
 
-        /// <summary>Gives <paramref name="abort" /> the <paramref name="message" /> and <paramref name="level" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
-        public void Closed(Abort abort, string message, AbortLevel level, bool cancelled)
+        /// <summary>Gives <paramref name="abort" /> the <paramref name="message" />, or the setting <paramref name="setting" /> where it is not empty, and <paramref name="level" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
+        public void Closed(Abort abort, string message, string setting, AbortLevel level, bool cancelled)
         {
             var index = _sequence.Steps.IndexOf(abort);
             if (index < 0 || cancelled)
                 return;
 
-            _editor.Do(_sequence, new SetAbort(index, abort, message, level));
+            _editor.Do(_sequence, new SetAbort(index, abort, message, setting, level));
         }
 
         /// <summary>Deletes the step at <paramref name="index" />; an if, or a branch of one, asks first whether the steps in it go too.</summary>

@@ -3,21 +3,26 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
 {
-    /// <summary>How long a wait step waits: a fixed length, in place of a setting it took.</summary>
+    /// <summary>How long a wait step waits: a fixed length, or a setting.</summary>
     public sealed class SetWait : SequenceEdit
     {
         readonly int _index;
         readonly Duration _was;
         readonly string _wasSetting;
         readonly Duration _now;
+        readonly string _nowSetting;
 
-        /// <summary>The wait at <paramref name="index" /> made <paramref name="now" /> long from <paramref name="was" />, or from the setting <paramref name="wasSetting" /> where it took one.</summary>
-        public SetWait(int index, Duration was, string wasSetting, Duration now)
+        /// <summary>
+        /// The wait at <paramref name="index" /> made <paramref name="now" /> long, or as long as the setting <paramref name="nowSetting" />
+        /// where it is not empty, from <paramref name="was" />, or the setting <paramref name="wasSetting" /> where it took one.
+        /// </summary>
+        public SetWait(int index, Duration was, string wasSetting, Duration now, string nowSetting = "")
         {
             _index = index;
             _was = was;
             _wasSetting = wasSetting;
             _now = now;
+            _nowSetting = nowSetting ?? "";
         }
 
         /// <inheritdoc />
@@ -33,12 +38,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         }
 
         /// <inheritdoc />
-        public override bool Changes => _was != _now || _wasSetting.Length > 0;
+        public override bool Changes => _was != _now || _wasSetting != _nowSetting;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
-            Put(sequence, _now, "");
+            Put(sequence, _now, _nowSetting);
         }
 
         /// <inheritdoc />

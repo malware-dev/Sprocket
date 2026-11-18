@@ -69,6 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             {
                 Base = { Spacing = Gaps.Within },
                 Align = Align.Top,
+                Placement = Flex.Grow,
                 Children =
                 {
                     new HStack
@@ -79,13 +80,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                             new SlotChip(false) { Spacing = Gaps.Within }.As(out _blocks),
                             new SlotChip { IsVisible = false, Align = Align.Top }.As(out _signals),
                             new Label { Style = Styles.ProblemLine, IsVisible = false }.As(out _problem),
-                            new Button { Style = Styles.Button, IsVisible = false, Align = Align.Center }.As(out _accept),
-                            new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)
+                            new Button { Style = Styles.Button, IsVisible = false, Align = Align.Center }.As(out _accept)
                         }
                     },
                     new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _marks)
                 }
             });
+
+            // At the row's end, where a step's and a sequence's rows have theirs.
+            Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Top, Placement = FixedSize.Size(32f, 32f) }.As(out _remove));
         }
     }
 }

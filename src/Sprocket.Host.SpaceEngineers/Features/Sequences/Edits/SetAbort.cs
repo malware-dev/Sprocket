@@ -19,13 +19,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         /// <paramref name="level" />; a message replaces the setting it said, and none keeps it.
         /// </summary>
         public SetAbort(int index, Abort step, string message, AbortLevel level)
+            : this(index, step, message, string.IsNullOrEmpty(message) ? step.Setting : "", level)
+        {
+        }
+
+        /// <summary>
+        /// The abort <paramref name="step" />, at <paramref name="index" />, made to say the text of the setting
+        /// <paramref name="setting" /> where it is not empty, or <paramref name="message" /> otherwise, at <paramref name="level" />.
+        /// </summary>
+        public SetAbort(int index, Abort step, string message, string setting, AbortLevel level)
         {
             _index = index;
             _wasMessage = step.Message;
             _wasSetting = step.Setting;
             _wasLevel = step.Level;
-            _nowMessage = message ?? "";
-            _nowSetting = _nowMessage.Length > 0 ? "" : step.Setting;
+            _nowSetting = setting ?? "";
+            _nowMessage = _nowSetting.Length > 0 ? "" : message ?? "";
             _nowLevel = level;
         }
 

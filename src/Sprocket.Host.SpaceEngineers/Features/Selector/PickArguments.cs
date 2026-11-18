@@ -36,6 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         string _entered;
         string _shown;
         bool _openedArguments;
+        ValuesQuestion _making;
         int _worded;
 
         /// <summary>
@@ -61,6 +62,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             for (var i = 0; i < arguments.Count; i++)
                 _arrivedValues.Add(arguments[i]);
         }
+
+        /// <summary>The panel a new setting is being made in from one of the values' marks, or null where none is open.</summary>
+        public ValuesQuestion Making => _making;
 
         /// <summary>Gives the step the single argument <paramref name="value" /> in place of any it opened with.</summary>
         public void Arrive(Literal value)
@@ -177,7 +181,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// </summary>
         public void Fill(PickStrip strip, StageColumn what, StageColumn does, string chosenName, string about, Func<string> title, ICommand finish)
         {
-            strip.ArgumentsIn = _forEvents ? does ?? what : null;
+            // A trigger's values stand in a column of their own before what it does; the strip scrolls to fit them.
+            strip.ArgumentsIn = _forEvents && does == null ? what : null;
+            strip.ArgumentsBefore = _forEvents ? does : null;
 
             var shown = _complete() ? $"{_picked.Form} {_picked.Member}" : "";
             strip.ShowsArguments = what != null && shown.Length != 0;
@@ -210,8 +216,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 break;
             }
 
+            var system = (_page as PickPage)?.Slotted;
+            strip.Sourced = system != null && system.IsBlueprint ? field => SettingTypes.Of(field) != null : (Func<Field, bool>)null;
             var made = strip.Arguments == null;
             var arguments = strip.Restate(shown, chosenName, fields, Filled, new ColorOffer(colors, _editor.Viewer, _editor.Preferred));
+            if (system != null && _arrivedValues.Count > 0 && _picked.Member == _arrived.Member && _picked.Form == _arrived.Form)
+                SettingSources.Given(arguments.Form, system, fields, _arrivedValues);
+
             Target.Reads(arguments.Form);
             if (_offering)
                 arguments.Form.Offer();
@@ -232,6 +243,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 {
                     if (_editor.Current == _page && finish != null)
                         finish.Execute();
+                };
+
+                arguments.Form.Sourcing += (at, mark) =>
+                {
+                    var slotted = (_page as PickPage)?.Slotted;
+                    if (_editor.Current == _page && slotted != null)
+                        SettingSources.Source(_editor, slotted, arguments.Form, at, mark, question => _making = question);
                 };
 
                 arguments.Form.Selects += field => Target.Select(field, null);

@@ -692,6 +692,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (kept != null)
                 return kept.IsEmpty ? null : Symbols.State;
 
+            var duration = slot as DurationSlot;
+            if (duration != null)
+                return duration.Setting.Length > 0 ? Symbols.Setting : null;
+
+            var values = slot as ArgumentsSlot;
+            if (values != null)
+                return values.Arguments.Count == 1 && values.Arguments[0].IsSetting ? Symbols.Setting : null;
+
             return null;
         }
 

@@ -31,6 +31,7 @@ world with Sprocket in the game once and Steam downloads them; without them the 
 dotnet build src/Sprocket.Host.SpaceEngineers                                # builds and packs into the Mods folder
 dotnet build src/Sprocket.Host.SpaceEngineers -p:MdkBuildConfiguration=none  # builds without packing
 dotnet test -p:MdkBuildConfiguration=none                                    # every test project
+./tools/Test.ps1                                                             # the same, split into shards run side by side
 ```
 
 ## Agents

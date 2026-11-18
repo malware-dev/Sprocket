@@ -217,7 +217,7 @@ public class StateEditingTests
         Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
         screen.Run(1);
         Assert.True(editor.Screen.HasQuestion);
-        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.ValueNewSetting, editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
         Assert.Equal("outside", editor.Screen.Default!.Text);
 
         editor.PressAnswer("inside");
@@ -281,16 +281,16 @@ public class StateEditingTests
         Assert.Equal("", set.From);
     }
 
-    /// <summary>A flag no other state holds the like of is offered on and off alone.</summary>
+    /// <summary>A flag no other state holds the like of is offered on, off and a new setting, and no other state's value.</summary>
     [Fact]
-    public void AFlagsMenuOffersOnAndOffAlone()
+    public void AFlagsMenuOffersNoOtherStatesValue()
     {
         var screen = OnSequence(Head + "    sequence 1 {\n        set cycling to on\n    }\n}\n", out _);
         var editor = screen.Editor;
 
         Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { "on", "off" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "on", "off", editor.Texts.ValueNewSetting }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
     }
 
     /// <summary>The value an if on a state checks is chosen from a menu under it, as one edit.</summary>
@@ -319,14 +319,14 @@ public class StateEditingTests
 
         editor.Triggers()[0].Starts[2].Opens!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.ValueNewSetting, editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
         editor.PressAnswer("inside");
         screen.Run(1);
         Assert.Equal("inside", Assert.IsType<StateTrigger>(system.Triggers[0]).Test.Value.Text);
 
         editor.Triggers()[0].Does[1].Opens!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { "on", "off" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "on", "off", editor.Texts.ValueNewSetting }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
         editor.PressAnswer("on");
         screen.Run(1);
         Assert.Equal("on", Assert.IsType<SetState>(system.Triggers[0].Does).Value.Said);

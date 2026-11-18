@@ -164,7 +164,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
             var add = _panel.AddCategory;
             var optimize = _panel.Optimize;
-            _panel.Slotting.IsVisible = _parts.Count > 0;
+            // Shown while a slot can be added, so the first one can be.
+            _panel.Slotting.IsVisible = _parts.Count > 0 || editable && shown != null;
             _panel.SlotsHeading.Markdown = CodexPages.Term(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
             add.IsVisible = editable;
             add.Text = StatusRow.Plus + texts.CategoryAdd;
@@ -175,6 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             if (shown != null)
                 _panel.AddSlot.Show(Adds(texts, shown, "", null));
 
+            optimize.IsVisible = _parts.Count > 0;
             optimize.Text = texts.SlotOptimize;
             optimize.Command = _changes(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system));
             optimize.Tip = editable ? CodexTip.For(optimize.Tip, texts.Codex.SlotOptimizeAbout) : KeptTip.For(optimize.Tip, locked);
@@ -224,9 +226,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                     : replaced == null ? null : Template.Fill(texts.StoppedBlockReplaced, "block", replaced[0].Name);
                 row.Level = NoticeLevel.Warning;
                 row.Accepts(replaced == null ? null : _changes(CommandKind.FillPart, () => Accept(shown, part, replaced)));
-                row.Removable = unused;
+                row.Removable = true;
                 row.Removes = unused ? _changes(CommandKind.RemoveSlot, () => _editor.Do(_system, ChangeSlots.Removing(_system, shown, part))) : null;
-                row.RemovesAbout = editable ? texts.Codex.SlotRemoveAbout : locked;
+                row.RemovesAbout = !editable ? locked : unused ? texts.Codex.SlotRemoveAbout : texts.SlotKept;
 
                 if (row.Blocks.Count > 0)
                     row.Show(_editor.World);

@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
@@ -11,6 +12,7 @@ using System.Globalization;
 using System.Text;
 using Lumel;
 using Lumel.Controls;
+using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -31,6 +33,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         readonly List<bool> _seen = new List<bool>();
         readonly List<string> _parts = new List<string>();
         readonly List<bool> _texts = new List<bool>();
+        readonly List<bool> _raws = new List<bool>();
+        readonly List<string> _settings = new List<string>();
+        readonly List<Element> _rows = new List<Element>();
+        readonly List<SettingChip> _chips = new List<SettingChip>();
+        readonly List<Glyph> _marks = new List<Glyph>();
         readonly RelayCommand _submit;
 
         bool _judged;
@@ -64,6 +71,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>Raised with the field when text written over several lines is to be written on a page of its own.</summary>
         public event Action<LinesField> Opens;
 
+        /// <summary>Raised with the place of a value and its mark when where the value comes from is to be chosen: a value of its own or a setting.</summary>
+        public event Action<int, Element> Sourcing;
+
+        /// <summary>Whether a value asked for by a field may come from a setting, which gives it a mark to choose that by; none may where it is null.</summary>
+        /// <remarks>Read as the values are shown, so it is set before <see cref="Show" />.</remarks>
+        public Func<Field, bool> Sourced { get; set; }
+
         /// <summary>How many values it asks for.</summary>
         public int Count => _fields.Count;
 
@@ -83,13 +97,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             {
                 _parts.Clear();
                 _texts.Clear();
+                _raws.Clear();
                 for (var i = 0; i < _fields.Count; i++)
                 {
+                    // A setting standing in for the value is written as the language writes it, as one value.
+                    if (Asked(i) && _settings[i].Length > 0)
+                    {
+                        _parts.Add(ScriptWriter.KindSpelling(Kinds.Setting, _settings[i]));
+                        _texts.Add(false);
+                        _raws.Add(true);
+                        continue;
+                    }
+
                     if (_wanted[i].Edits == FieldEditor.Color)
                     {
                         ColorChannels.Spell(Asked(i) ? _fields[i].Text : "", _wanted[i].Covers, _parts);
                         while (_texts.Count < _parts.Count)
                             _texts.Add(false);
+
+                        while (_raws.Count < _parts.Count)
+                            _raws.Add(false);
 
                         continue;
                     }
@@ -104,6 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
                     _parts.Add(_wanted[i].Meaning(text));
                     _texts.Add(_wanted[i].Entry == FieldInput.Text);
+                    _raws.Add(false);
                 }
 
                 if (_parts.Count == 0)
@@ -111,7 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
                 // Text is quoted whatever it spells, so a 42 typed where text is wanted stays text.
                 if (_parts.Count == 1)
-                    return _texts[0] && _parts[0].Length > 0 ? Quoted(_parts[0], true) : _parts[0];
+                    return _raws[0] ? _parts[0] : _texts[0] && _parts[0].Length > 0 ? Quoted(_parts[0], true) : _parts[0];
 
                 if (_parts.TrueForAll(string.IsNullOrEmpty))
                     return "";
@@ -122,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                     if (said.Length > 0)
                         said += " ";
 
-                    said += Quoted(_parts[i], _texts[i] && _parts[i].Length > 0);
+                    said += _raws[i] ? _parts[i] : Quoted(_parts[i], _texts[i] && _parts[i].Length > 0);
                 }
 
                 return said;
@@ -156,7 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             {
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (Asked(i) && string.IsNullOrEmpty(_fields[i].Text) && !_wanted[i].IsOptional)
+                    if (Asked(i) && _settings[i].Length == 0 && string.IsNullOrEmpty(_fields[i].Text) && !_wanted[i].IsOptional)
                         return true;
                 }
 
@@ -176,7 +204,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 for (var i = 0; i < _fields.Count; i++)
                 {
                     var said = _fields[i].Text;
-                    if (Asked(i) && (said.Length == 0 || _wanted[i].Refuses(_language, Called(i), said).Length > 0))
+                    if (Asked(i) && _settings[i].Length == 0 && (said.Length == 0 || _wanted[i].Refuses(_language, Called(i), said).Length > 0))
                         return false;
                 }
 
@@ -191,7 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             {
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (Asked(i) && !string.IsNullOrEmpty(_fields[i].Text))
+                    if (Asked(i) && (_settings[i].Length > 0 || !string.IsNullOrEmpty(_fields[i].Text)))
                         return true;
                 }
 
@@ -239,6 +267,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             _wanted.Clear();
             _fields.Clear();
             _seen.Clear();
+            _settings.Clear();
+            _rows.Clear();
+            _chips.Clear();
+            _marks.Clear();
             _judged = false;
             _offered = false;
 
@@ -250,6 +282,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 var field = Make(_wanted[i], colors, texts);
                 _fields.Add(field);
                 _seen.Add(false);
+                _settings.Add("");
 
                 var said = i < filled.Count ? filled[i] ?? "" : "";
 
@@ -301,7 +334,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         {
             for (var i = 0; i < _fields.Count; i++)
             {
-                ((Element)_fields[i]).IsVisible = Asked(i) && !_wanted[i].Fixed;
+                _rows[i].IsVisible = Asked(i) && !_wanted[i].Fixed;
+                if (_rows[i] != _fields[i])
+                    ((Element)_fields[i]).IsVisible = _settings[i].Length == 0;
+                if (_chips[i] != null)
+                    _chips[i].IsVisible = _settings[i].Length > 0;
+
+                if (_marks[i] != null)
+                    _marks[i].Set(LookStates.Chosen, _settings[i].Length > 0);
                 Measure(i);
             }
         }
@@ -355,7 +395,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             for (var i = 0; i < _fields.Count; i++)
             {
                 var said = _fields[i].Text;
-                if (!Asked(i) || said.Length > 0 && _wanted[i].Refuses(_language, Called(i), said).Length == 0)
+                if (!Asked(i) || _settings[i].Length > 0 || said.Length > 0 && _wanted[i].Refuses(_language, Called(i), said).Length == 0)
                     continue;
 
                 first = i;
@@ -484,14 +524,82 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 if (!string.IsNullOrEmpty(about))
                     named.Tip = CodexTip.For(named.Tip, about);
 
-                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField || IsLong(at, field) ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
+                Rows.Add(named, Sourceable(at, element), field is TypedField || field is LinesField || field is SliderField || IsLong(at, field) ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
                 return;
             }
 
+            var row = Sourceable(at, element);
             if (!color && !(field is TypedField) && !(field is LinesField) && !(field is SliderField) && !(field is WordsField))
-                element.Align = Align.Right;
+                row.Align = Align.Right;
 
-            Rows.Add(element);
+            Rows.Add(row);
+        }
+
+        /// <summary>
+        /// <paramref name="field" />, the field of the value at <paramref name="at" />, with the mark after it that chooses where the value
+        /// comes from, and the chip that stands in its place while a setting gives it, where the value may come from one; the field
+        /// alone otherwise.
+        /// </summary>
+        Element Sourceable(int at, Element field)
+        {
+            if (Sourced == null || !Sourced(_wanted[at]))
+            {
+                _rows.Add(field);
+                _chips.Add(null);
+                _marks.Add(null);
+                return field;
+            }
+
+            var chip = new SettingChip { IsVisible = false };
+            var mark = new Glyph { Style = Styles.Source, Symbol = Symbols.Link, Tip = CodexTip.For(null, _language.ValueSourceAbout) };
+            mark.Command = new RelayCommand(() => Sourcing?.Invoke(at, mark));
+
+            // The field, or the chip in its place, takes the room the mark leaves, as the field alone took the whole row.
+            if (field.Placement == null)
+                field.Placement = Flex.Grow;
+
+            chip.Placement = Flex.Grow;
+            var row = new HStack { Base = { Spacing = Gaps.Parts }, Children = { field, chip, mark } };
+            _rows.Add(row);
+            _chips.Add(chip);
+            _marks.Add(mark);
+            return row;
+        }
+
+        /// <summary>Has the setting <paramref name="setting" /> give the value at <paramref name="at" />, its default said as <paramref name="said" />, or the value its own again where <paramref name="setting" /> is empty.</summary>
+        public void Choose(int at, string setting, string said)
+        {
+            if (at < 0 || at >= _settings.Count || _chips[at] == null)
+                return;
+
+            _settings[at] = setting ?? "";
+            _chips[at].Setting = _settings[at];
+            _chips[at].Default = string.IsNullOrEmpty(said) ? "" : Template.Fill(_language.ValueByDefault, "value", said);
+            Changed();
+        }
+
+        /// <summary>The mark choosing where the value at <paramref name="at" /> comes from, or null where it may come from nowhere else.</summary>
+        public Glyph MarkOf(int at)
+        {
+            return _marks[at];
+        }
+
+        /// <summary>The field asking for the value at <paramref name="at" />.</summary>
+        public Field Field(int at)
+        {
+            return _wanted[at];
+        }
+
+        /// <summary>What the value at <paramref name="at" /> holds of its own, as its field spells it.</summary>
+        public string ValueAt(int at)
+        {
+            return _fields[at].Text;
+        }
+
+        /// <summary>The setting giving the value at <paramref name="at" />, or empty where the value is its own.</summary>
+        public string SettingAt(int at)
+        {
+            return at >= 0 && at < _settings.Count ? _settings[at] : "";
         }
 
         /// <summary>What a value is called beside its field: its name where the field already shows what it takes, its label, or its place where there are several.</summary>
@@ -499,7 +607,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         {
             var edits = _wanted[at].Edits;
             if (edits == FieldEditor.Chosen || edits == FieldEditor.Angle || SliderField.Takes(_wanted[at]))
-                return _wanted[at].Name ?? "";
+                return _wanted[at].Title(_language);
 
             var said = _wanted[at].Label(_language);
             if (said.Length > 0)
@@ -511,14 +619,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>What a refusal calls a value: its name, or its place for a value nobody named.</summary>
         string Called(int at)
         {
-            var name = _wanted[at].Name ?? "";
+            var name = _wanted[at].Title(_language);
             return name.Length > 0 ? name : Template.Fill(_language.ValueNumbered, "number", Ordinal(at));
         }
 
         /// <summary>Why the value at <paramref name="at" /> will not do, or empty, where it is being held to anything at all.</summary>
         string Refuses(int at)
         {
-            if (!_judged)
+            if (!_judged || _settings[at].Length > 0)
                 return "";
 
             var said = _fields[at].Text;

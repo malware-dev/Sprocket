@@ -11,8 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 {
     partial class StageColumn
     {
-        /// <summary>How tall a column's heading line is: as tall as the tallest thing it holds, a link to another view.</summary>
-        public const float HeadHigh = 28f;
+        /// <summary>How tall a column's heading line is: as tall as the tallest thing it holds, the drop-down choosing a selector's source.</summary>
+        public const float HeadHigh = 36f;
 
         RichText _title;
         HStack _heads;

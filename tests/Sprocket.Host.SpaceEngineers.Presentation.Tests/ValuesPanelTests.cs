@@ -1,3 +1,4 @@
+using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
@@ -158,7 +159,10 @@ public class ValuesPanelTests
         screen.Run(2);
         var power = Step(screen).ActionId;
 
-        screen.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().Single(part => part.Holds == ArgumentRole.NewValue).Opens!.Execute();
+        // Pressed where it stands, as a person presses it, so the menu hangs under it.
+        var row = screen.Editor.StepRows()[0];
+        var at = row.ChipOf(row.Slots.OfType<ArgumentsSlot>().Single(part => part.Holds == ArgumentRole.NewValue))!.Bounds.Center;
+        screen.Do(at.X.ToString(CultureInfo.InvariantCulture), at.Y.ToString(CultureInfo.InvariantCulture));
         screen.Run(2);
         Assert.Null(Page(screen).Giving);
         Assert.Equal(new[] { "on", "off", "toggle" }, screen.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
@@ -174,6 +178,158 @@ public class ValuesPanelTests
         screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);
         Assert.Equal(ReachKind.Value, Step(screen).Form);
         Assert.True(Assert.Single(Step(screen).Arguments).Flag);
+    }
+
+    /// <summary>
+    /// A value's mark offers a fixed value, the settings holding what it takes and a new one; a setting chosen stands in the
+    /// value's place, and Enter keeps the step giving the setting, as one change.
+    /// </summary>
+    [Fact]
+    public void AValuesMarkChoosesASettingToStandInItsPlace()
+    {
+        var sim = Arm(out var system, out var sequence);
+        var page = Assert.IsType<SequencePage>(sim.Editor.Current);
+        var form = page.Giving!.Form;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
+        Assert.Equal(4, answers.Length);
+        Assert.Equal(sim.Editor.Texts.ValueFixed, answers[0]);
+        Assert.Equal(sim.Editor.Texts.ValueNewSetting, answers[1]);
+        Assert.True(sim.Editor.Screen.Answers[2].IsRule, "the settings stand apart, after a line");
+        Assert.StartsWith("Reach", answers[3]);
+
+        sim.Editor.PressAnswer(answers[3]);
+        sim.Tick();
+        Assert.NotNull(page.Giving);
+        Assert.Equal("Reach", form.SettingAt(0));
+
+        page.Giving!.Done();
+        sim.Tick();
+        var act = Assert.IsType<Act>(Assert.Single(sequence.Steps));
+        Assert.True(act.Arguments[0].IsSetting);
+        Assert.Equal("Reach", act.Arguments[0].Text);
+
+        sim.Editor.Undo(system, sequence);
+        Assert.False(Assert.IsType<Act>(Assert.Single(sequence.Steps)).Arguments[0].IsSetting);
+    }
+
+    /// <summary>The arm's blueprint, its step moving the piston, with a real setting and a text one, its page open on the step's values panel.</summary>
+    static Simulation Arm(out AutomationSystem system, out Sequence sequence)
+    {
+        var sim = Simulation.Fresh();
+        sim.Machine.Piston(50, "Arm Piston");
+        sim.Tick();
+        const string program = "sprocket 2 alpha 1\n\n"
+            + "let 'Arm Piston' = block 'ExtendedPistonBase/LargePistonBase' [ 50, [ (50 0 0) ], \"Arm Piston\" ]\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Arm\n{\n"
+            + "    required slot arm expects ExtendedPistonBase\n"
+            + "    optional slot Reach expects real = 5\n"
+            + "    optional slot Label expects text = \"x\"\n\n"
+            + "    sequence 1 {\n        call sprocket.move_to(10, 0.3) on [ arm ]\n    }\n}\n\n"
+            + "instance 1 of \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as 'Installation 1' {\n    arm = [ 'Arm Piston' ]\n}\n";
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        system = sim.Editor.Program.Systems[0];
+        sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().First().Opens!.Execute();
+        sim.Tick();
+        return sim;
+    }
+
+    /// <summary>New setting... asks for the setting in a panel of its own, which makes it, as one change, and has it give the value.</summary>
+    [Fact]
+    public void ANewSettingIsMadeToStandInForTheValue()
+    {
+        var sim = Arm(out var system, out _);
+        var page = Assert.IsType<SequencePage>(sim.Editor.Current);
+        var form = page.Giving!.Form;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueNewSetting);
+        sim.Tick();
+
+        var making = page.Giving!.Making;
+        Assert.NotNull(making);
+        Assert.Equal(2, making.Form.Count);
+        making.Done();
+        sim.Tick();
+
+        var made = system.FindPart(sim.Editor.Texts.SettingNumbered);
+        Assert.NotNull(made);
+        Assert.Equal("real", made.Setting);
+        Assert.True(made.Optional);
+        Assert.Equal(10, made.Default.Number);
+        Assert.Equal(made.Id, form.SettingAt(0));
+        Assert.NotNull(page.Giving);
+    }
+
+    /// <summary>A new setting whose default is left empty is one every installation must choose.</summary>
+    [Fact]
+    public void ANewSettingWithNoDefaultIsRequired()
+    {
+        var sim = Arm(out var system, out _);
+        var page = Assert.IsType<SequencePage>(sim.Editor.Current);
+        page.Giving!.Form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueNewSetting);
+        sim.Tick();
+
+        var making = page.Giving!.Making!;
+        making.Form.Fields[1].Text = "";
+        making.Done();
+        sim.Tick();
+
+        var made = system.FindPart(sim.Editor.Texts.SettingNumbered);
+        Assert.NotNull(made);
+        Assert.False(made.Optional);
+        Assert.False(made.HasDefault);
+    }
+
+    /// <summary>A state's values are offered with the settings holding its type, each with its default; one chosen is set, as one change.</summary>
+    [Fact]
+    public void AStateIsSetToASettingOfItsType()
+    {
+        var sim = Simulation.Fresh();
+        const string program = "sprocket 2 alpha 1\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Hatch\n{\n"
+            + "    optional slot Home expects side = outside\n"
+            + "    optional slot Glow expects real = 1.5\n\n"
+            + "    type side = inside | outside\n\n"
+            + "    let where = inside\n\n"
+            + "    sequence 1 {\n        set where to outside\n    }\n}\n";
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().Single(part => part.Holds == ArgumentRole.NewValue).Opens!.Execute();
+        sim.Tick();
+        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToList();
+        Assert.Contains(sim.Editor.Texts.ValueNewSetting, answers);
+        var home = answers.Single(answer => answer.StartsWith("Home"));
+        Assert.DoesNotContain(answers, answer => answer.StartsWith("Glow"));
+
+        sim.Editor.PressAnswer(home);
+        sim.Tick();
+        var set = Assert.IsType<SetState>(Assert.Single(sequence.Steps));
+        Assert.True(set.Value.IsSetting);
+        Assert.Equal("Home", set.Value.Text);
+        sim.Editor.Undo(system, sequence);
+        Assert.Equal(Literal.Name("outside"), Assert.IsType<SetState>(Assert.Single(sequence.Steps)).Value);
     }
 
     /// <summary>A move whose speed is in total says so after the speed; one at each piston's speed says nothing more.</summary>

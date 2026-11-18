@@ -186,11 +186,11 @@ public class OpeningTests
     [Fact]
     public void ADoublePressOnAnotherBlockFinishes()
     {
-        const string anOpenStep = "60 196 type Airlock enter press trigger press when 200 351 560 333 1394 72 "
-            + "press step press task 400 396 press open 1394 72";
+        const string anOpenStep = "60 196 type Airlock enter press trigger press when 200 359 560 341 1394 72 "
+            + "press step press task 400 404 press open 1394 72";
 
         // The step's blocks, then the outer door pressed twice.
-        var screen = Screen.Fresh((anOpenStep + " 270 187 tick 2 double 138 545 tick 2").Split(' '));
+        var screen = Screen.Fresh((anOpenStep + " 270 187 tick 2 double 138 553 tick 2").Split(' '));
 
         Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
         var system = screen.Editor.Program.Systems[0];

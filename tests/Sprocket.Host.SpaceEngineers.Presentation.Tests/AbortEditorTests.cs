@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel.Controls;
 using Lumel.Text;
+using Sprocket.Sim.Machine;
 using VRage.Input;
 using Xunit;
 
@@ -89,6 +90,50 @@ public class AbortEditorTests
         Assert.Null(Page(screen).Aborting);
         var abort = Assert.IsType<Abort>(Assert.Single(screen.Editor.Program.Sequences[0].Steps));
         Assert.Equal("", abort.Message);
+    }
+
+    /// <summary>A blueprint's abort offers its text settings under the message's mark; one chosen says the message, as one change.</summary>
+    [Fact]
+    public void AnAbortsMarkChoosesASettingToSayItsMessage()
+    {
+        var sim = Simulation.Fresh();
+        const string program = "sprocket 2 alpha 1\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Hatch\n{\n"
+            + "    optional slot Why expects text = \"Door jammed\"\n"
+            + "    optional slot Glow expects real = 1.5\n\n"
+            + "    sequence 1 {\n        abort saying \"Stuck\" as warning\n    }\n}\n";
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().Single().Opens!.Execute();
+        sim.Tick();
+        var form = Assert.IsType<SequencePage>(sim.Editor.Current).Aborting!;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
+        Assert.Equal(4, answers.Length);
+        Assert.StartsWith("Why", answers[3]);
+
+        sim.Editor.PressAnswer(answers[3]);
+        sim.Tick();
+        Assert.Equal("Why", form.SettingAt(0));
+        form.Parent!.Within().OfType<Button>().Single(button => button.Text == sim.Editor.Texts.ChromeDone).Command!.Execute();
+        sim.Tick();
+
+        var abort = Assert.IsType<Abort>(Assert.Single(sequence.Steps));
+        Assert.Equal("Why", abort.Setting);
+        Assert.Equal(AbortLevel.Warning, abort.Level);
+        sim.Editor.Undo(system, sequence);
+        Assert.Equal("", abort.Setting);
+        Assert.Equal("Stuck", abort.Message);
     }
 
     static Screen Added()

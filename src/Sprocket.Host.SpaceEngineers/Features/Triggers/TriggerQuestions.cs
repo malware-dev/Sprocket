@@ -314,25 +314,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 Points(system, trigger, act, fresh, null, start);
             });
 
-            if (only != null)
-            {
-                if (aim.Following == null)
-                {
-                    aim.Following = new PickPage(_editor, _editor.Texts.PickSingleTask, false, _editor.Blocks(system, only.Targets),
-                        only.ActionId, only.Form, answer => aim.Finish(answer),
-                        arguments: only.Arguments, opens: aim.Opens, after: aim.Pick, facet: _editor.Picks.Facet(system, only.Targets)) { Slotted = system, Replacing = only.Targets };
-                }
-
-                aim.Following.Arrived(aim.Straight);
-                aim.Straight = false;
-                _editor.Push(aim.Following);
-                return;
-            }
-
             if (aim.Following == null)
             {
-                aim.Following = new PickPage(_editor, _editor.Texts.PickSingleTask, false, new List<long>(), "", ReachKind.Native,
-                    answer => aim.Finish(answer), opens: aim.Opens, after: aim.Pick) { Slotted = system };
+                // Each page the switch makes, on blocks or on slots, is the one the trigger goes on to.
+                var source = new SourceSwitch(_editor, (choice, slots) =>
+                {
+                    var page = only != null
+                        ? new PickPage(_editor, _editor.Texts.PickSingleTask, false, slots ? new List<long>() : _editor.Blocks(system, only.Targets),
+                            only.ActionId, only.Form, answer => aim.Finish(answer),
+                            arguments: only.Arguments, opens: aim.Opens, after: aim.Pick, facet: _editor.Picks.Facet(system, only.Targets))
+                        : new PickPage(_editor, _editor.Texts.PickSingleTask, false, new List<long>(), "", ReachKind.Native,
+                            answer => aim.Finish(answer), opens: aim.Opens, after: aim.Pick);
+                    page.Source = choice;
+                    page.Slotted = system;
+                    page.ListsSlots = slots;
+                    page.Replacing = only?.Targets;
+                    aim.Following = page;
+                    return page;
+                }, null);
+                source.Open(only != null ? PickSource.Blocks : source.Usual);
             }
 
             aim.Following.Arrived(aim.Straight);

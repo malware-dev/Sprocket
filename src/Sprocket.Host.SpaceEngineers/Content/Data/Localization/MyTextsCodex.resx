@@ -65,8 +65,12 @@
     <comment>Codex page on "Action", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Option" xml:space="preserve">
-    <value>An **option** is a setting an [![](mark:action)&amp;nbsp;action](Term.Action class=term) takes, like a piston's position and speed.</value>
+    <value>An **option** is a value an [![](mark:action)&amp;nbsp;action](Term.Action class=term) takes, like a piston's position and speed.</value>
     <comment>Codex page on "Option", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
+  </data>
+  <data name="Sprocket.Term.Setting" xml:space="preserve">
+    <value>A ![](mark:setting)&amp;nbsp;**setting** is a value you choose separately for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term). If you don't choose one, the setting's default is used. A setting with no default must be filled in.</value>
+    <comment>Codex page on "Setting", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
     <value>A **task** is one operation: running or stopping a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term), an [![](mark:action)&amp;nbsp;action](Term.Action class=term) on blocks, or [setting](Term.Set class=term) a [![](mark:value)&amp;nbsp;block value](Term.Value class=term).</value>
@@ -497,8 +501,8 @@
     <comment>Tooltip on the line in the picker's column of blocks that opens the list of kinds of block.</comment>
   </data>
   <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Select what this [step](Term.Step class=term), [if](Term.If class=term) or [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) works with. `Existing slot` uses a [slot](Term.Slot class=term) the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) has already.</value>
-    <comment>Tooltip on the Source box heading the first column of the selector a step, an if, an otherwise if or a when is made with, which chooses what it works with: blocks, a slot the logic system already has (the choice Existing slot, quoted here as the box shows it), or, for all but a step, one of the logic system's states.</comment>
+    <value>Select what this works with.</value>
+    <comment>Tooltip on the Source box heading the first column of a selector, which chooses what the thing being made works with, such as blocks or a slot the logic system already has.</comment>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>This is [![](mark:awaited)&amp;nbsp;awaitable](Term.Awaitable class=term). The [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) goes straight on while it works, and a `wait for pending tasks` [step](Term.Step class=term) below waits for it to finish.</value>

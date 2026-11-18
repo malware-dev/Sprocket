@@ -170,6 +170,10 @@
     <value>Unused</value>
     <comment>Warning beside the blocks of a slot no step, if or trigger names, on the installation panel and on the Installation panel tab of a logic system's screen, before the bin that removes the slot.</comment>
   </data>
+  <data name="Sprocket.Slot.Kept" xml:space="preserve">
+    <value>This slot is in use, so it can't be removed.</value>
+    <comment>Tip on the dimmed bin at the end of a slot's row on the installation panel, where a step, a trigger or another slot's use keeps the slot.</comment>
+  </data>
   <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
     <value>Installations on other constructs or in the library may have blocks that no longer fit. Narrow it?</value>
     <comment>Question asked on Done in the picker of a slot's type, where the type chosen takes fewer kinds of block than the slot takes now. Installations on this construct whose blocks no longer fit are marked to fill the slot again; those elsewhere cannot be checked.</comment>
@@ -527,6 +531,10 @@
   <data name="Sprocket.Pick.NothingDone" xml:space="preserve">
     <value>Those blocks have nothing in common that can be done to them.</value>
     <comment>Shown in the picker's column of what can be done to the chosen blocks, in place of the list, when the chosen blocks have nothing in common that can be done to them.</comment>
+  </data>
+  <data name="Sprocket.Pick.Comparison" xml:space="preserve">
+    <value>comparison</value>
+    <comment>Label beside the choice of how a value is compared, such as is or is not, in the values column of the selector an if or a trigger is made with, and in a state's check.</comment>
   </data>
   <data name="Sprocket.Pick.WhatItDoes" xml:space="preserve">
     <value>What it does</value>
@@ -1583,6 +1591,34 @@
   <data name="Sprocket.Value.Numbered" xml:space="preserve">
     <value>Option {number}</value>
     <comment>What a refusal under the picker's values column calls a value that has no name. {number} is its place in the order, counting from 1.</comment>
+  </data>
+  <data name="Sprocket.Setting.Name" xml:space="preserve">
+    <value>Name</value>
+    <comment>In the panel New setting... opens from a value's link mark, the label of the box the new setting's name is typed in.</comment>
+  </data>
+  <data name="Sprocket.Setting.Numbered" xml:space="preserve">
+    <value>Setting</value>
+    <comment>The name a new setting starts with in the panel New setting... opens, numbered after it where the logic system has a slot or setting called so.</comment>
+  </data>
+  <data name="Sprocket.Setting.Default" xml:space="preserve">
+    <value>Default</value>
+    <comment>In the panel New setting... opens from a value's link mark, the label of the value an installation that chooses none uses. Left empty, every installation must choose the setting.</comment>
+  </data>
+  <data name="Sprocket.Value.Fixed" xml:space="preserve">
+    <value>A fixed value</value>
+    <comment>First choice in the menu under a value's link mark in a values panel: the value is the one typed or chosen in its field, the same for every installation.</comment>
+  </data>
+  <data name="Sprocket.Value.NewSetting" xml:space="preserve">
+    <value>New setting...</value>
+    <comment>Last choice in the menu under a value's link mark in a values panel: opens a form making a new setting for the value.</comment>
+  </data>
+  <data name="Sprocket.Value.ByDefault" xml:space="preserve">
+    <value>{value} by default</value>
+    <comment>Beside a setting's name where it stands in for a value in a values panel, and beside each setting in the menu under the value's link mark. {value} is the setting's default, as the value's field would show it.</comment>
+  </data>
+  <data name="Sprocket.Value.SourceAbout" xml:space="preserve">
+    <value>Select a source for this value.</value>
+    <comment>Tip on the link mark at the end of a value's row in a values panel, which opens the menu choosing where the value comes from.</comment>
   </data>
   <data name="Sprocket.Slot.Short" xml:space="preserve">
     <value>Short name</value>

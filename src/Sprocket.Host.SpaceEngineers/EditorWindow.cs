@@ -420,10 +420,11 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
             }
 
-            if (_shownPage != null && _shownPage.ScrollsItself || !Within(wheel.Target, _frame))
+            // A sideways turn goes on to whatever scrolls sideways under the pointer.
+            if (_shownPage != null && _shownPage.ScrollsItself || wheel.Amount.Y == 0 || !Within(wheel.Target, _frame))
                 return;
 
-            _scroll.ScrollBy(wheel.Amount);
+            _scroll.ScrollBy(wheel.Amount.Y);
             wheel.Handled = true;
         }
 

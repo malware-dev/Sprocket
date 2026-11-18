@@ -364,6 +364,14 @@ namespace Sprocket.Host.SpaceEngineers
             _screen.Ask(question, arguments, false);
         }
 
+        /// <summary>Gives <paramref name="system" /> the setting <paramref name="setting" />, as one change.</summary>
+        public void MakeSetting(AutomationSystem system, Part setting)
+        {
+            var reslot = new Reslot(system, null);
+            reslot.Make(setting, new List<string>());
+            Do(system, new ChangeSlots(ChangeKind.AddSlot, reslot));
+        }
+
         /// <summary>Puts the question <paramref name="question" /> under the control somebody just pressed, to be answered before anything else.</summary>
         public void AskHere(string question)
         {

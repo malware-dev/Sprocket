@@ -130,6 +130,9 @@
   <data name="Sprocket.Slot.Unused" xml:space="preserve">
     <value>Ubrukt</value>
   </data>
+  <data name="Sprocket.Slot.Kept" xml:space="preserve">
+    <value>Denne plassen er i bruk, så den kan ikke fjernes.</value>
+  </data>
   <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
     <value>Installasjoner på andre konstruksjoner eller i biblioteket kan ha blokker som ikke lenger passer. Gjøre den smalere?</value>
   </data>
@@ -406,6 +409,9 @@
   </data>
   <data name="Sprocket.Pick.NothingDone" xml:space="preserve">
     <value>Disse blokkene har ingenting til felles som kan gjøres med dem.</value>
+  </data>
+  <data name="Sprocket.Pick.Comparison" xml:space="preserve">
+    <value>sammenligning</value>
   </data>
   <data name="Sprocket.Pick.WhatItDoes" xml:space="preserve">
     <value>Hva den gjør</value>
@@ -1200,6 +1206,27 @@
   </data>
   <data name="Sprocket.Value.Numbered" xml:space="preserve">
     <value>Valg {number}</value>
+  </data>
+  <data name="Sprocket.Setting.Name" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="Sprocket.Setting.Numbered" xml:space="preserve">
+    <value>Innstilling</value>
+  </data>
+  <data name="Sprocket.Setting.Default" xml:space="preserve">
+    <value>Standardverdi</value>
+  </data>
+  <data name="Sprocket.Value.Fixed" xml:space="preserve">
+    <value>En fast verdi</value>
+  </data>
+  <data name="Sprocket.Value.NewSetting" xml:space="preserve">
+    <value>Ny innstilling...</value>
+  </data>
+  <data name="Sprocket.Value.ByDefault" xml:space="preserve">
+    <value>{value} som standard</value>
+  </data>
+  <data name="Sprocket.Value.SourceAbout" xml:space="preserve">
+    <value>Velg en kilde for denne verdien.</value>
   </data>
   <data name="Sprocket.Slot.Short" xml:space="preserve">
     <value>Kort navn</value>

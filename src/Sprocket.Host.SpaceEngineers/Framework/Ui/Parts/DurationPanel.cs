@@ -1,11 +1,13 @@
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using System;
 using System.Globalization;
 using Lumel;
 using Lumel.Controls;
+using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -39,7 +41,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         readonly Deck _picks;
         readonly HStack _secondsPicks;
         readonly HStack _ticksPicks;
+        readonly SpinBox _spin;
+        readonly HStack _spacer;
+        readonly SettingChip _chip;
+        readonly Glyph _mark;
 
+        string _setting = "";
         bool _inSeconds;
         bool _cautions;
 
@@ -51,21 +58,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             Base.Spacing = Gaps.Parts;
 
             var number = new HStack { Base = { Spacing = Gaps.Parts } };
-            var spin = new SpinBox
+            _spin = new SpinBox
             {
                 Style = Styles.Spin,
                 LessTip = KeptTip.For(null, texts.Codex.WaitShorter),
                 MoreTip = KeptTip.For(null, texts.Codex.WaitLonger)
             };
-            _box = spin.Box;
+            _box = _spin.Box;
             _box.Focusable = true;
             _box.Minimum = 0;
             _box.Widest = Widest;
             _box.Submit = new RelayCommand(() => Raise(Submitted));
             _box.Tip = CodexTip.For(null, texts.Codex.SequenceWaitTypedAbout);
-            number.Children.Add(spin);
+            number.Children.Add(_spin);
+            number.Children.Add(new SettingChip { Placement = Flex.Grow, IsVisible = false }.As(out _chip));
             // At the right end, across from the number it is the unit of.
-            number.Children.Add(new HStack { Placement = Flex.Spacer });
+            number.Children.Add(new HStack { Placement = Flex.Spacer }.As(out _spacer));
             number.Children.Add(new Switch
             {
                 Style = Styles.Switch,
@@ -74,6 +82,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             }.As(out _unit));
             _unit.OnText = texts.WaitInSeconds;
             _unit.OffText = texts.WaitInTicks;
+            number.Children.Add(new Glyph
+            {
+                Style = Styles.Source,
+                Symbol = Symbols.Link,
+                IsVisible = false,
+                Tip = CodexTip.For(null, texts.ValueSourceAbout),
+                Command = new RelayCommand(() => Sourcing?.Invoke(_mark))
+            }.As(out _mark));
             Children.Add(number);
 
             Children.Add(new Label { Style = Styles.WarningLine, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _caution));
@@ -113,6 +129,31 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             Shape(start.InSeconds);
             _box.Text = start.InSeconds ? Said(start.Seconds) : Said(start.Ticks);
+            Show();
+        }
+
+        /// <summary>Raised with the mark when where the length comes from is to be chosen: a length of its own or a setting.</summary>
+        public event Action<Element> Sourcing;
+
+        /// <summary>Whether the length may come from a setting, which gives it a mark to choose that by.</summary>
+        public bool Sourced
+        {
+            get { return _mark.IsVisible; }
+            set { _mark.IsVisible = value; }
+        }
+
+        /// <summary>The setting giving the length, or empty where the length is its own.</summary>
+        public string Setting => _setting;
+
+        /// <summary>The mark choosing where the length comes from.</summary>
+        public Glyph Mark => _mark;
+
+        /// <summary>Has the setting <paramref name="setting" /> give the length, its default said as <paramref name="said" />, or the length its own again where <paramref name="setting" /> is empty.</summary>
+        public void Choose(string setting, string said)
+        {
+            _setting = setting ?? "";
+            _chip.Setting = _setting;
+            _chip.Default = string.IsNullOrEmpty(said) ? "" : Template.Fill(_texts.ValueByDefault, "value", said);
             Show();
         }
 
@@ -222,10 +263,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>Says the length in the other unit and what it costs as a rate, and marks the length to pick that it is.</summary>
         void Show()
         {
-            var length = Length;
-            _other.Text = length.HasValue ? TimeText.Other(_texts, length.Value) : "";
+            var own = _setting.Length == 0;
+            _spin.IsVisible = own;
+            _spacer.IsVisible = own;
+            _unit.IsVisible = own;
+            _picks.IsVisible = own;
+            _chip.IsVisible = !own;
+            _mark.Set(LookStates.Chosen, !own);
 
-            var costly = _cautions && length.HasValue && length.Value.Ticks <= CostlyTicks;
+            var length = Length;
+            _other.Text = own && length.HasValue ? TimeText.Other(_texts, length.Value) : "";
+
+            var costly = own && _cautions && length.HasValue && length.Value.Ticks <= CostlyTicks;
             _caution.IsVisible = costly;
             if (costly)
                 _caution.Text = length.Value.Ticks <= 1 ? _texts.RateEveryTickCost : _texts.RateFastCost;

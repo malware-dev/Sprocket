@@ -22,6 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
     public class ValuesQuestion
     {
         readonly SprocketEditor _editor;
+        readonly AutomationSystem _system;
+        ValuesQuestion _making;
         readonly FieldSet _form;
         readonly Label _why;
         readonly Popup _window;
@@ -34,16 +36,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <paramref name="part" /> finds, and <paramref name="answered" /> with the values it closes on, written as a line of
         /// values, and whether it was put away.
         /// </summary>
-        public ValuesQuestion(SprocketEditor editor, IList<Field> fields, IList<Literal> given, Func<Element> part, Action<string, bool> answered)
+        public ValuesQuestion(SprocketEditor editor, AutomationSystem system, IList<Field> fields, IList<Literal> given, Func<Element> part,
+            Action<string, bool> answered)
         {
             _editor = editor;
+            _system = system;
             _answered = answered;
 
             var texts = editor.Texts;
             var filled = new List<string>();
             ColorChannels.Shown(given, fields, filled);
             _form = new FieldSet();
+            if (system != null && system.IsBlueprint)
+                _form.Sourced = field => SettingTypes.Of(field) != null;
+
             _form.Show(fields, filled, Offered(editor, fields), texts);
+            Given(fields, given);
+            _form.Sourcing += Source;
             _form.Submitted += Done;
             _form.Edited += () => Explain(_form.Wrong);
 
@@ -116,6 +125,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return true;
         }
 
+        /// <summary>The panel a new setting for one of the values is asked in while it is open, or null.</summary>
+        public ValuesQuestion Making => _making;
+
         /// <summary>The form the values are given in.</summary>
         public FieldSet Form => _form;
 
@@ -132,6 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (_done)
                 return;
 
+            _making?.Hang();
             var opening = !_window.IsOpen;
             _window.Hang();
             if (opening && _window.IsOpen)
@@ -146,6 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 return;
 
             _done = true;
+            _making?.Finish(true);
             _window.Close();
             _answered(_form.Answer, cancelled);
         }
@@ -165,6 +179,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 _window.Accept();
             else
                 Finish(false);
+        }
+
+        /// <summary>Shows a chip in place of each of <paramref name="fields" /> that <paramref name="given" /> gives a setting.</summary>
+        void Given(IList<Field> fields, IList<Literal> given)
+        {
+            SettingSources.Given(_form, _system, fields, given);
+        }
+
+        /// <summary>
+        /// Asks under the mark of the value at <paramref name="at" /> where the value comes from: a fixed value, one of the system's
+        /// settings that hold what it takes, or a new setting, made in a panel hung from <paramref name="mark" />.
+        /// </summary>
+        void Source(int at, Element mark)
+        {
+            SettingSources.Source(_editor, _system, _form, at, mark, made => _making = made);
         }
 
         /// <summary>The colors offered where any of <paramref name="fields" /> asks for one: those the player paints with, only ever read.</summary>
