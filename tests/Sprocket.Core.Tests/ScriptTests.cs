@@ -914,6 +914,16 @@ public class ScriptTests
         Assert.False(after.Intact);
     }
 
+    /// <summary>A <c>run</c> or <c>stop</c> naming two sequences called alike could be either, and is trouble that says the numbers.</summary>
+    [Theory]
+    [InlineData("run Cycle", "'Cycle' could be sequence 2 or sequence 3; write the one meant by its number: run 2 or run 3.")]
+    [InlineData("stop Cycle", "'Cycle' could be sequence 2 or sequence 3; write the one meant by its number: stop 2 or stop 3.")]
+    public void ARunNamingTwoSequencesCalledAlikeIsTrouble(string line, string said)
+    {
+        Assert.Contains(said, Load(Head + "MalTek.Airlock {\n    sequence 1 {\n        " + line + "\n    }\n\n"
+            + "    sequence 2 as Cycle {\n    }\n\n    sequence 3 as Cycle {\n    }\n}\n", new Automation()));
+    }
+
     /// <summary>
     /// A statement that stops early is trouble, and never reads the next statement's words.
     /// </summary>

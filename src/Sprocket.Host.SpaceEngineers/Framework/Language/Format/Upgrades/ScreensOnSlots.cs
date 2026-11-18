@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             if (!system.IsBlueprint)
                 return true;
 
-            var type = HostTypes.Returned("screen");
+            var type = HostTypes.Named(ScreenType.TypeId);
             var slot = system.Free(names.Count == 1 ? names[0] : "Screens");
             system.PartFor(slot).Holds = type.Id;
 

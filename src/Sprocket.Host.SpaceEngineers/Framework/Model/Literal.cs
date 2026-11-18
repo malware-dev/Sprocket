@@ -51,6 +51,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return new Literal(ValueKind.Name, new EntityValue(0), name);
         }
 
+        /// <summary>One of the choices of the host type <paramref name="typed" />, written with it: <c>door_status(closed)</c>.</summary>
+        public static Literal Name(string name, ChoiceType typed)
+        {
+            var named = Name(name);
+            named.Typed = typed;
+            return named;
+        }
+
         /// <summary>The slots <paramref name="names" /> name, kept as that list, for a parameter that takes slots.</summary>
         public static Literal Slots(IList<string> names)
         {
@@ -83,13 +91,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         }
 
         /// <summary>
-        /// The setting called <paramref name="name" />, standing in for the value each installation gives it, written qualified,
-        /// <c>settings.'Open angle'</c>, where <paramref name="qualified" /> says.
+        /// The setting called <paramref name="name" />, standing in for the value each installation gives it, written with its
+        /// kind, <c>setting('Open angle')</c>, where <paramref name="kinded" /> says.
         /// </summary>
         /// <remarks>Where it stands among a member's values the spelling is kept, since only the member's blocks say whether alone it could be one of its words.</remarks>
-        public static Literal Setting(string name, bool qualified = false)
+        public static Literal Setting(string name, bool kinded = false)
         {
-            return new Literal(ValueKind.Setting, new EntityValue(qualified ? 1 : 0), name);
+            return new Literal(ValueKind.Setting, new EntityValue(kinded ? 1 : 0), name);
         }
 
         /// <summary>The kind of value it is.</summary>
@@ -107,8 +115,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>Whether it is a setting standing in for a value, rather than a value.</summary>
         public bool IsSetting => Kind == ValueKind.Setting;
 
-        /// <summary>Whether it is a setting written qualified, <c>settings.'Open angle'</c>.</summary>
-        public bool IsQualified => Kind == ValueKind.Setting && Value.Bits != 0;
+        /// <summary>Whether it is a setting written with its kind, <c>setting('Open angle')</c>.</summary>
+        public bool IsKinded => Kind == ValueKind.Setting && Value.Bits != 0;
 
         /// <summary>It as a length of time, for <see cref="ValueKind.Duration" />.</summary>
         public Duration Length => Text == InSeconds ? Duration.OfSeconds(Real) : Duration.OfTicks((int)Whole);
@@ -118,6 +126,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>What the slots hold, for <see cref="ValueKind.Slots" /> in a step that has been worked out, and null otherwise.</summary>
         public IList<HeldThing> Held { get; private set; }
+
+        /// <summary>The host type a choice was written with, or null where it was written alone.</summary>
+        public ChoiceType Typed { get; private set; }
 
         /// <summary>This again, with a list of names of its own where it has one, so editing the copy cannot reach it.</summary>
         public Literal Copied => Kind == ValueKind.Slots ? Slots(new List<string>(Names)) : this;

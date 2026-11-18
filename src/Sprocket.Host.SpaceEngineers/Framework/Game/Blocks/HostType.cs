@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>The type as a slot expecting it names it, qualified: <c>sprocket.screen</c>.</summary>
         public abstract string Id { get; }
 
-        /// <summary>The function that returns one from a block, as an answer writes it: <c>screen</c>, in <c>sprocket.screen(2) on [ board ]</c>.</summary>
+        /// <summary>The function that returns one from a block, as an answer writes it: <c>get_screen</c>, in <c>sprocket.get_screen(2) on [ board ]</c>.</summary>
         public abstract string Function { get; }
 
         /// <summary>Whether a block of this definition has anything of this type.</summary>

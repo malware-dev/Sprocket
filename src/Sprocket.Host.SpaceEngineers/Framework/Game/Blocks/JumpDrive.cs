@@ -19,8 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         const string Unweighed = "Nothing announces a change in the ship's mass, which the drive's reach follows.";
 
 
-        static readonly string[] Statuses = { "charging", "ready", "jumping" };
-
         static readonly Reading Full = Reading.Of<IMyJumpDrive>(Charged);
 
         static readonly OwnAction Recharges = OwnAction.Of<IMyJumpDrive, RechargeOptions>(RechargeOptions.Read,
@@ -28,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             (drive, recharging, seen) => !recharging.Waits,
             (drive, recharging, seen) => recharging.Waits ? Why(drive) : BlockTrouble.None);
 
-        static readonly OwnValue Status = OwnValue.OneOf<IMyJumpDrive>(Statuses, drive => Position(drive.Status));
+        static readonly OwnValue Status = OwnValue.OneOf<IMyJumpDrive>(ChoiceTypes.JumpStatus, drive => Position(drive.Status));
 
         static readonly OwnValue Charge = OwnValue.Number<IMyJumpDrive>(drive =>
             drive.MaxStoredPower > 0f ? drive.CurrentStoredPower / drive.MaxStoredPower * 100.0 : 0.0);

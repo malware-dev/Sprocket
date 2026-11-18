@@ -687,7 +687,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Whether <paramref name="value" /> is a setting written alone that <paramref name="field" /> also takes as one of its words.</summary>
         static bool Takes(Field field, Literal value)
         {
-            if (!value.IsSetting || value.IsQualified)
+            if (!value.IsSetting || value.IsKinded)
                 return false;
 
             var words = field.Means ?? field.Words;

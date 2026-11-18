@@ -234,7 +234,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             for (var n = _system.SlotsAlike(false, "") + _made + 1; ; n++)
             {
                 var name = _numbered(n);
-                if (!_system.TakesInAnyCase(name) && !Taken(name))
+                if (_system.FindPartInAnyCase(name) == null && !Taken(name))
                     return name;
             }
         }

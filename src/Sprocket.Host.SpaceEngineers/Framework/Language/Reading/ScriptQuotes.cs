@@ -38,7 +38,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return $"'{Spelling(statement.Member(value))}'";
 
             if (value.Form == ValueForm.Qualified)
-                return "a qualified name";
+                return $"'{Spelling(statement.PartsOf(value))}'";
+
+            if (value.Form == ValueForm.Kinded)
+                return $"'{Kinded(statement, value)}'";
 
             if (value.Form == ValueForm.Real)
                 return value.Real.ToString(CultureInfo.InvariantCulture);
@@ -72,6 +75,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return $"{value.Whole.ToString(CultureInfo.InvariantCulture)}t";
 
             return "what follows";
+        }
+
+        /// <summary>A thing with its kind as it is written, <c>side(inside)</c>, its kind and thing spelled as trouble names them.</summary>
+        static string Kinded(Statement statement, Value value)
+        {
+            return $"{Bare(statement, statement.KindOf(value))}({Bare(statement, statement.ThingOf(value))})";
+        }
+
+        /// <summary>A value as <see cref="Spelled(Statement, Value)" /> spells it, without the quotes around a name.</summary>
+        static string Bare(Statement statement, Value value)
+        {
+            if (value.Form == ValueForm.Kinded)
+                return Kinded(statement, value);
+
+            if (value.Form == ValueForm.Qualified)
+                return Spelling(statement.PartsOf(value));
+
+            return value.IsWord ? value.Word : Spelled(statement, value);
         }
 
         /// <summary>A name's parts joined as they are written: <c>sprocket.closed</c>.</summary>

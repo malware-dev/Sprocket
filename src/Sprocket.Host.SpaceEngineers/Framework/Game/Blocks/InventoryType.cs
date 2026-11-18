@@ -10,6 +10,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <remarks>Each member receives its inventory first, counted from 1, ahead of the step's own values.</remarks>
     public sealed partial class InventoryType : HostType
     {
+        /// <summary>The type's id, as a slot expecting it names it: <c>sprocket.inventory</c>.</summary>
+        public const string TypeId = BlockKinds.Own + ".inventory";
+
         /// <summary>The action that moves items out of an inventory, which is Sprocket's own.</summary>
         public const string MoveItems = "move_items";
 
@@ -29,10 +32,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly OwnValue Mass = OwnValue.Number<IMyTerminalBlock, Held>(Held.Read, (block, held) => (double)block.GetInventory(held.At).CurrentMass);
 
         /// <inheritdoc />
-        public override string Id => $"{BlockKinds.Own}.{Function}";
+        public override string Id => TypeId;
 
         /// <inheritdoc />
-        public override string Function => "inventory";
+        public override string Function => "get_inventory";
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

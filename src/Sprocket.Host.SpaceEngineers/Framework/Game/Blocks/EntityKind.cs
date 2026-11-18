@@ -611,7 +611,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         {
             switch (being.Kind)
             {
+                case ValueKind.Text:
                 case ValueKind.Name:
+                    if (being.Names.Count == 0)
+                        break;
+
                     var words = new string[being.Names.Count];
                     var means = new string[being.Names.Count];
                     for (var i = 0; i < words.Length; i++)
@@ -621,7 +625,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                     }
 
                     var among = Field.Among(named, words, means);
-                    among.Entry = FieldInput.Name;
+                    among.Entry = being.Kind == ValueKind.Text ? FieldInput.Text : FieldInput.Name;
+                    among.Choices = being.Choices;
                     return among;
                 case ValueKind.Flag:
                     var either = Field.OneOf(named, Literal.Of(true).Said, Literal.Of(false).Said);

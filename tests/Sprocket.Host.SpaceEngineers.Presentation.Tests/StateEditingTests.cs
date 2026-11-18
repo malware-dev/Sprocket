@@ -849,10 +849,11 @@ public class StateEditingTests
         Assert.Equal("place", system.FindState("where")!.Type);
     }
 
-    /// <summary>A state is refused a name a type has in another case, and takes its own name in another case.</summary>
+    /// <summary>A state is refused a name another state has in another case, takes its own name in another case, and may share a type's.</summary>
     [Theory]
-    [InlineData("SIDE", "where")]
+    [InlineData("THERE", "where")]
     [InlineData("Where", "Where")]
+    [InlineData("SIDE", "SIDE")]
     public void AStatesNameIsCheckedInAnyCase(string typed, string after)
     {
         var screen = OnSystem(Program, out var system);

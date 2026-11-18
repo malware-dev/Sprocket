@@ -51,6 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         {
             var field = Field.Among("speed for", new[] { Each, "in total" }, new[] { Each, Total });
             field.Entry = FieldInput.Name;
+            field.Choices = ChoiceTypes.SpeedSplit;
             field.Default = Each;
             field.Quiet = Each;
             field.MayBeLeftOut = true;

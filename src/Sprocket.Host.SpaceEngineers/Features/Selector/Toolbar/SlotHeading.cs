@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
                 _existingAccepts = name =>
                 {
                     var wanted = NameRules.Clean(name);
-                    return wanted.Length > 0 && (_system.FindPartInAnyCase(wanted) == slot || !_system.TakesInAnyCase(wanted));
+                    return wanted.Length > 0 && (_system.FindPartInAnyCase(wanted) == slot || _system.FindPartInAnyCase(wanted) == null);
                 };
                 _existingRenames = _editor.Renaming(name => Rename(slot, NameRules.Clean(name)), _existingAccepts);
             }

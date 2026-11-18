@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             bindings.Refresh(world, program);
 
             var held = 0;
-            var type = HostTypes.Returned("screen");
+            var type = HostTypes.Named(ScreenType.TypeId);
             foreach (var system in program.Systems)
             {
                 if (!system.IsBlueprint)

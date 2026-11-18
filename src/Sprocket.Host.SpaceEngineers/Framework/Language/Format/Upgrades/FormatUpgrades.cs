@@ -41,6 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             {
                 new OwnNamespace(),
                 new StateNames(),
+                new KindNames(),
+                new GetFunctions(),
+                new TextIds(),
             },
         };
 

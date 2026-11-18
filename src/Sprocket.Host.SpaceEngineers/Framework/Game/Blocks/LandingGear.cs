@@ -13,9 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <summary>Landing gear and magnetic plates, read for whether they hold the ship.</summary>
     public sealed partial class LandingGear : Capability
     {
-        static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
-
-        static readonly OwnValue State = OwnValue.OneOf<IMyLandingGear>(Statuses, gear => Position(gear.LockMode));
+        static readonly OwnValue State = OwnValue.OneOf<IMyLandingGear>(ChoiceTypes.LockStatus, gear => Position(gear.LockMode));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

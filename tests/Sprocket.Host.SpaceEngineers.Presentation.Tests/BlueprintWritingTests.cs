@@ -125,18 +125,20 @@ public class BlueprintWritingTests
         Assert.Equal("signal slot 1", part.Id);
     }
 
-    /// <summary>A slot's name is refused where a state or a type has it in any case, and the slot's own name in another case is not.</summary>
+    /// <summary>A slot's name is refused where another slot has it in any case; the slot's own name in another case, and a state's or a type's, are not.</summary>
     [Fact]
-    public void ANameAStateOrATypeHasIsRefused()
+    public void ASlotMayShareAStatesOrATypesName()
     {
         var screen = OnTheSlot();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
+        system.PartFor("Lamp");
         system.States.Add(new Framework.Model.State("Cycling", "", Framework.Model.Literal.Of(false)));
         system.Types.Add(new Framework.Model.DeclaredType("Side"));
 
-        Assert.False(editor.Slot().AcceptsName("cycling"));
-        Assert.False(editor.Slot().AcceptsName("SIDE"));
+        Assert.False(editor.Slot().AcceptsName("LAMP"));
+        Assert.True(editor.Slot().AcceptsName("cycling"));
+        Assert.True(editor.Slot().AcceptsName("SIDE"));
         Assert.True(editor.Slot().AcceptsName("Slot 1"));
     }
 

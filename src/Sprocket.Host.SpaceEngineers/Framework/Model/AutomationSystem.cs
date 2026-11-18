@@ -295,19 +295,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return null;
         }
 
-        /// <summary>Whether one of its slots, types or states is called <paramref name="name" />: the one set of names they share.</summary>
-        public bool Takes(string name)
-        {
-            return FindPart(name) != null || FindType(name) != null || FindState(name) != null;
-        }
-
-        /// <summary>Whether one of its slots, types or states is called <paramref name="name" /> in any case: the names the editor refuses for another.</summary>
-        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
-        public bool TakesInAnyCase(string name)
-        {
-            return FindPartInAnyCase(name) != null || TypeInAnyCase(name) || StateInAnyCase(name);
-        }
-
         /// <summary>The slot called <paramref name="name" /> in any case, or null where it has none.</summary>
         public Part FindPartInAnyCase(string name)
         {
@@ -320,7 +307,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return null;
         }
 
-        bool TypeInAnyCase(string name)
+        /// <summary>Whether one of its types is called <paramref name="name" /> in any case: the names the editor refuses for another type.</summary>
+        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
+        public bool HasTypeInAnyCase(string name)
         {
             foreach (var type in _types)
             {
@@ -331,7 +320,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return false;
         }
 
-        bool StateInAnyCase(string name)
+        /// <summary>Whether one of its states is called <paramref name="name" /> in any case: the names the editor refuses for another state.</summary>
+        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
+        public bool HasStateInAnyCase(string name)
         {
             foreach (var state in _states)
             {
@@ -460,11 +451,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return name;
         }
 
-        /// <summary><paramref name="called" />, numbered where a slot, type or state already has it: Door, Door 2.</summary>
+        /// <summary><paramref name="called" />, numbered where a slot already has it: Door, Door 2.</summary>
         public string Free(string called)
         {
             var name = called;
-            for (var n = 2; Takes(name); n++)
+            for (var n = 2; FindPart(name) != null; n++)
                 name = $"{called} {n}";
 
             return name;

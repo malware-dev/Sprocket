@@ -283,9 +283,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 new AddOption(texts.SlotAddSignal, texts.Codex.SlotAddSignalAbout,
                     _changes(CommandKind.AddSlot, () => _fill.New(shown, true, null, category, placed))),
                 new AddOption(texts.SlotAddScreen, texts.Codex.SlotAddScreenAbout,
-                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Returned("screen"), category, placed))),
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Named(ScreenType.TypeId), category, placed))),
                 new AddOption(texts.SlotAddInventory, texts.Codex.SlotAddInventoryAbout,
-                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Returned("inventory"), category, placed)))
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Named(InventoryType.TypeId), category, placed)))
             });
         }
 

@@ -50,12 +50,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly Reading Empty = Reading.Remembering<IMyAirVent>((vent, seen) =>
             vent.IsWorking && vent.GetOxygenLevel() <= Emptied && !VentFlow.Working(vent, true, seen));
 
-        static readonly string[] Rooms = { "filling", "full", "emptying", "empty", "stopped" };
-
         // Full and empty as the readings above judge them, so a test of the room and a step that fills it agree. A room that
         // is not airtight never fills, and stays filling. Written out rather than asking Air and Empty, which would read
         // whether the vent works and its level once each on every look (BudgetTests.ALookedForMomentIsLookedAtOnItsCadence).
-        static readonly OwnValue Room = OwnValue.OneOf<IMyAirVent>(Rooms, (vent, seen) =>
+        static readonly OwnValue Room = OwnValue.OneOf<IMyAirVent>(ChoiceTypes.RoomStatus, (vent, seen) =>
         {
             if (!vent.IsWorking)
                 return 4;

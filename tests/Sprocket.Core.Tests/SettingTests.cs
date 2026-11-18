@@ -11,7 +11,7 @@ namespace Sprocket.Tests;
 
 /// <summary>
 /// A system blueprint's settings: slots each instance answers with one value of a type, a default for an optional one, and
-/// a setting standing in for a value, by its name or as <c>settings.'Open angle'</c>.
+/// a setting standing in for a value, by its name or as <c>setting('Open angle')</c>.
 /// </summary>
 public class SettingTests
 {
@@ -147,8 +147,8 @@ public class SettingTests
     [InlineData("    required slot angle expects real\n", "    angle = [ 85 ]\n", "is answered with one value, not a list")]
     [InlineData("    required slot angle expects real\n", "    angle = \"far\"\n", "setting 'angle' holds a real")]
     [InlineData("    required slot angle expects real\n", "    angle = 85\n    angle = 90\n", "slot 'angle' is already answered")]
-    [InlineData("    sequence 1 {\n        wait settings.gone\n    }\n", "", "no setting called 'gone'")]
-    [InlineData("    required slot lamp expects InteriorLight\n    sequence 1 {\n        wait settings.lamp\n    }\n", "", "'lamp' is a slot for blocks; expected a setting")]
+    [InlineData("    sequence 1 {\n        wait setting(gone)\n    }\n", "", "no setting called 'gone'")]
+    [InlineData("    required slot lamp expects InteriorLight\n    sequence 1 {\n        wait setting(lamp)\n    }\n", "", "'lamp' is a slot for blocks; expected a setting")]
     [InlineData("    required slot angle expects real\n    sequence 1 {\n        wait angle\n    }\n", "", "setting 'angle' holds a real; expected a duration here")]
     [InlineData("    required slot lamp expects InteriorLight\n    required slot hi expects text\n    sequence 1 {\n        if any Radius on [ lamp ] > hi then {\n        }\n    }\n", "", "setting 'hi' holds text; expected a number here")]
     [InlineData("    required slot on_ expects integer\n    let lit = off\n    sequence 1 {\n        set lit to on_\n    }\n", "", "setting 'on_' holds an integer; expected a flag here")]
@@ -165,21 +165,21 @@ public class SettingTests
     public void APlainSystemNamesNoSetting()
     {
         var text = Version + "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door\n{\n"
-            + "    sequence 1 {\n        wait settings.delay\n    }\n}\n";
+            + "    sequence 1 {\n        wait setting(delay)\n    }\n}\n";
 
         Assert.Contains("only a system blueprint has settings", Load(text, new Automation()));
     }
 
-    /// <summary><c>setting</c> is a namespace and no keyword, so a state, a type and a sequence may be called it, written bare.</summary>
+    /// <summary><c>setting</c> is a kind and no keyword, so a state, a choice and a sequence may be called it; where they share it, each is written with its kind.</summary>
     [Fact]
     public void ANameSpelledSettingIsWrittenBare()
     {
         var text = Version + "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door\n{\n"
             + "    type level = setting | high\n\n"
-            + "    let lvl = level.setting\n"
+            + "    let lvl = level(setting)\n"
             + "    let setting = off\n\n"
             + "    sequence 1 as setting {\n"
-            + "        set setting to on\n"
+            + "        set state(setting) to on\n"
             + "    }\n"
             + "}\n";
 
@@ -190,16 +190,16 @@ public class SettingTests
 
     /// <summary>A name that could mean more than one thing where it stands is trouble, and its qualified forms read.</summary>
     [Theory]
-    [InlineData("        set where to inside\n", "'inside' could be a setting or a choice of side")]
-    [InlineData("        if where == inside then {\n        }\n", "'inside' could be a setting or a choice of side")]
-    [InlineData("        if outside == inside then {\n        }\n", "'inside' could be a setting or a choice of side")]
-    [InlineData("        set where to settings.inside\n        set where to side.inside\n        if outside == side.inside then {\n        }\n", "")]
+    [InlineData("        set where to inside\n", "'inside' could be the setting 'inside' or a choice of side")]
+    [InlineData("        if where == inside then {\n        }\n", "'inside' could be the setting 'inside' or a choice of side")]
+    [InlineData("        if outside == inside then {\n        }\n", "'inside' could be the setting 'inside' or a choice of side")]
+    [InlineData("        set where to setting(inside)\n        set where to side(inside)\n        if outside == side(inside) then {\n        }\n", "")]
     public void AnAmbiguousNameIsTrouble(string steps, string why)
     {
         var text = Blueprint("    optional slot inside expects side = outside\n"
             + "    optional slot outside expects side = inside\n\n"
             + "    type side = inside | outside\n\n"
-            + "    let where = side.outside\n\n"
+            + "    let where = side(outside)\n\n"
             + "    sequence 1 {\n" + steps + "    }\n");
 
         var program = new Automation();
@@ -215,10 +215,10 @@ public class SettingTests
 
     /// <summary>A bare name that could be a state or a choice is trouble, and each reads, and is written back, qualified where it would be.</summary>
     [Theory]
-    [InlineData("        set where to outside\n", "'outside' could be a state or a choice of side; write the one meant qualified: states.outside or side.outside")]
-    [InlineData("        set valve to open\n", "'open' could be a state or a choice of tap")]
-    [InlineData("        set settings.where to side.outside\n", "no state 'settings.where' declared above this line.")]
-    [InlineData("        set where to states.outside\n        set where to side.outside\n        set valve to tap.open\n        set lit to open\n        if where == states.outside then {\n        }\n", "")]
+    [InlineData("        set where to outside\n", "'outside' could be the state 'outside' or a choice of side; write the one meant with its kind: state(outside) or side(outside)")]
+    [InlineData("        set valve to open\n", "'open' could be the state 'open' or a choice of tap")]
+    [InlineData("        set setting(where) to side(outside)\n", "no state 'setting(where)' declared above this line.")]
+    [InlineData("        set where to state(outside)\n        set where to side(outside)\n        set valve to tap(open)\n        set lit to open\n        if where == state(outside) then {\n        }\n", "")]
     public void AStateAndAChoiceOfOneNameAreQualified(string steps, string why)
     {
         var text = Version + "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door\n{\n"
@@ -244,7 +244,7 @@ public class SettingTests
 
     /// <summary>
     /// A version 1 program, a draft or finished, read a bare name that was a state and a choice as the state; it reads so
-    /// still, written <c>states.outside</c>, and runs the same.
+    /// still, written <c>state(outside)</c>, and runs the same.
     /// </summary>
     [Theory]
     [InlineData("sprocket 1 alpha 28")]
@@ -253,8 +253,8 @@ public class SettingTests
     {
         var body = "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door\n{\n"
             + "    type side = inside | outside\n\n"
-            + "    let outside = side.inside\n"
-            + "    let where = side.outside\n"
+            + "    let outside = side(inside)\n"
+            + "    let where = side(outside)\n"
             + "    let same = off\n\n"
             + "    when where == outside then set same to on\n\n"
             + "    sequence 1 {\n"
@@ -276,16 +276,16 @@ public class SettingTests
         Assert.Equal(Literal.Of(true), runner.States.Read(system, system.Uses[0], system.FindState("same")!));
 
         var saved = ProgramWriter.Save(program, _store);
-        Assert.Contains("    when where == states.outside then set same to on\n", saved);
-        Assert.Contains("        set where to states.outside\n", saved);
-        Assert.Contains("        if where != states.outside then {\n", saved);
-        Assert.Contains("            set where to states.outside\n", saved);
+        Assert.Contains("    when where == state(outside) then set same to on\n", saved);
+        Assert.Contains("        set where to state(outside)\n", saved);
+        Assert.Contains("        if where != state(outside) then {\n", saved);
+        Assert.Contains("            set where to state(outside)\n", saved);
         Assert.Equal("", Load(saved, new Automation()));
     }
 
     /// <summary>
     /// A bare name in <c>expects</c> that is one of the game's block types is the game's, in a version 1 program too, where the
-    /// system has a type of that name; the system's own is written <c>types.Door</c>.
+    /// system has a type of that name; the system's own is written <c>type(Door)</c>.
     /// </summary>
     [Theory]
     [InlineData("sprocket 1 alpha 28")]
@@ -297,7 +297,7 @@ public class SettingTests
         _ = new Rigged();
         var text = version + "\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"
             + "    required slot hatch expects Door\n"
-            + (version.EndsWith("alpha 1") ? "    optional slot mode expects types.Door = open\n" : "")
+            + (version.EndsWith("alpha 1") ? "    optional slot mode expects type(Door) = open\n" : "")
             + "\n    type Door = open | shut\n\n"
             + "    sequence 1 {\n        call sprocket.close on [ hatch ]\n    }\n}\n";
 
@@ -312,22 +312,25 @@ public class SettingTests
         if (version.EndsWith("alpha 1"))
         {
             Assert.Equal("Door", system.FindPart("mode")!.Setting);
-            Assert.Contains("    optional slot mode expects types.Door = open\n", saved);
+            Assert.Contains("    optional slot mode expects type(Door) = open\n", saved);
         }
 
         Assert.Equal("", Load(saved, new Automation()));
     }
 
-    /// <summary>A type and a slot may share a name, in a version 1 program too, and the type is then written qualified.</summary>
+    /// <summary>
+    /// A type and a slot may share a name, in a version 1 program too, and each is then written with its kind; a version 1
+    /// program's bare slot reads as the slot.
+    /// </summary>
     [Theory]
-    [InlineData("sprocket 1", "")]
-    [InlineData("sprocket 2 alpha 1", "    optional slot mode expects types.side = inside\n")]
-    public void ATypeAndASlotShareAName(string version, string setting)
+    [InlineData("sprocket 1", "", "side")]
+    [InlineData("sprocket 2 alpha 1", "    optional slot mode expects type(side) = inside\n", "slot(side)")]
+    public void ATypeAndASlotShareAName(string version, string setting, string slot)
     {
         var text = version + "\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"
             + "    required slot side expects Door\n" + setting
             + "\n    type side = inside | outside\n\n"
-            + "    sequence 1 {\n        call sprocket.close on [ side ]\n    }\n}\n";
+            + "    sequence 1 {\n        call sprocket.close on [ " + slot + " ]\n    }\n}\n";
 
         var program = new Automation();
         Assert.Equal("", Load(text, program));
@@ -336,7 +339,7 @@ public class SettingTests
         Assert.Equal("Door", system.FindPart("side")!.Expects);
 
         var saved = ProgramWriter.Save(program, _store);
-        Assert.Contains("        call sprocket.close on [ side ]\n", saved);
+        Assert.Contains("        call sprocket.close on [ slot(side) ]\n", saved);
         if (setting.Length > 0)
             Assert.Contains(setting, saved);
 
@@ -347,7 +350,7 @@ public class SettingTests
     [Fact]
     public void ABareTypeSharingASlotsNameIsTrouble()
     {
-        Assert.Contains("'side' could be the slot 'side' or the type 'side'; write the one meant qualified: types.side",
+        Assert.Contains("'side' could be the slot 'side' or the type 'side'; write the one meant with its kind: slot(side) or type(side)",
             Load(Version + Head + "    required slot side expects Door\n    optional slot mode expects side = inside\n\n"
                 + "    type side = inside | outside\n}\n", new Automation()));
     }
@@ -357,10 +360,10 @@ public class SettingTests
     public void AChoiceOfATypeSharingASlotsNameIsQualifiedTwice()
     {
         var text = Version + Head + "    required slot side expects Door\n"
-            + "    optional slot mode expects types.side = types.side.inside\n\n"
+            + "    optional slot mode expects type(side) = type(side)(inside)\n\n"
             + "    type side = inside | outside\n    type hatch = inside | shut\n\n"
-            + "    let where = types.side.inside\n\n"
-            + "    sequence 1 {\n        set where to types.side.outside\n    }\n}\n";
+            + "    let where = type(side)(inside)\n\n"
+            + "    sequence 1 {\n        set where to type(side)(outside)\n    }\n}\n";
 
         var program = new Automation();
         Assert.Equal("", Load(text, program));
@@ -369,28 +372,28 @@ public class SettingTests
         Assert.Equal("inside", system.FindPart("mode")!.Default.Text);
 
         var saved = ProgramWriter.Save(program, _store);
-        Assert.Contains("    let where = types.side.inside\n", saved);
+        Assert.Contains("    let where = type(side)(inside)\n", saved);
         Assert.Contains("        set where to outside\n", saved);
         Assert.Equal("", Load(saved, new Automation()));
     }
 
     /// <summary>A choice qualified by a bare type that shares a slot's name could be either, and is trouble wherever it stands.</summary>
     [Theory]
-    [InlineData("    optional slot mode expects types.side = side.inside\n", "")]
-    [InlineData("", "    let where = side.inside\n")]
-    [InlineData("", "    let where = types.side.inside\n\n    sequence 1 {\n        set where to side.outside\n    }\n")]
+    [InlineData("    optional slot mode expects type(side) = side(inside)\n", "")]
+    [InlineData("", "    let where = side(inside)\n")]
+    [InlineData("", "    let where = type(side)(inside)\n\n    sequence 1 {\n        set where to side(outside)\n    }\n")]
     public void AChoiceQualifiedByABareTypeSharingASlotsNameIsTrouble(string setting, string body)
     {
-        Assert.Contains("'side' could be the slot 'side' or the type 'side'; write the one meant qualified: types.side.",
+        Assert.Contains("'side' could be the slot 'side' or the type 'side'; write the one meant with its kind: slot(side) or type(side).",
             Load(Version + Head + "    required slot side expects Door\n" + setting
                 + "\n    type side = inside | outside\n\n" + body + "}\n", new Automation()));
     }
 
-    /// <summary>A setting written alone where its member also takes a word of that name is the problem the player sees; written qualified it is the setting.</summary>
+    /// <summary>A setting written alone where its member also takes a word of that name is the problem the player sees; written with its kind it is the setting.</summary>
     [Theory]
     [InlineData("closed", true)]
-    [InlineData("settings.closed", false)]
-    [InlineData("sprocket.status.closed", false)]
+    [InlineData("setting(closed)", false)]
+    [InlineData("door_status(closed)", false)]
     public void ASettingSpelledLikeAMembersWordIsAmbiguous(string written, bool ambiguous)
     {
         var lit = new Lit("    optional slot closed expects text = \"x\"\n\n"
@@ -403,14 +406,15 @@ public class SettingTests
         Assert.Contains("== " + written + " then", ProgramWriter.Save(lit.Program, lit.Rig.Values));
     }
 
-    /// <summary>A member's word qualified by the member is the word: compared with, and written bare where no setting shares its name.</summary>
+    /// <summary>A member's word written with its host type, bare or in the host's namespace, is the word: compared with, and written bare where nothing else shares its name.</summary>
     [Theory]
-    [InlineData("    optional slot closed expects text = \"x\"\n", "sprocket.status.closed")]
-    [InlineData("", "closed")]
-    public void AMembersWordQualifiedByTheMemberIsTheWord(string slots, string saved)
+    [InlineData("    optional slot closed expects text = \"x\"\n", "door_status(closed)", "door_status(closed)")]
+    [InlineData("", "door_status(closed)", "closed")]
+    [InlineData("", "sprocket.door_status(closed)", "closed")]
+    public void AMembersWordWithItsTypeIsTheWord(string slots, string written, string saved)
     {
         var lit = new Lit(slots + "\n    let shut = off\n\n"
-            + "    sequence 1 {\n        if all sprocket.status on [ door ] == sprocket.status.closed then {\n            set shut to on\n        }\n    }\n", "");
+            + "    sequence 1 {\n        if all sprocket.status on [ door ] == " + written + " then {\n            set shut to on\n        }\n    }\n", "");
 
         lit.Run(1);
         lit.Tick(3);
@@ -419,19 +423,30 @@ public class SettingTests
         Assert.Contains("== " + saved + " then", ProgramWriter.Save(lit.Program, lit.Rig.Values));
     }
 
-    /// <summary>A qualified word must be qualified by the member it is given to.</summary>
+    /// <summary>A word written with a host type it is not a choice of is trouble where it is read.</summary>
     [Fact]
-    public void AWordQualifiedByAnotherMemberIsTrouble()
+    public void AWordOfNoneOfItsTypesChoicesIsTrouble()
     {
-        Assert.Contains("expected a value",
-            Load(Blueprint("    required slot door expects Door\n    sequence 1 {\n        if all sprocket.status on [ door ] == sprocket.power.closed then {\n        }\n    }\n"), new Automation()));
+        Assert.Contains("no choice 'jammed' in sprocket.door_status",
+            Load(Blueprint("    required slot door expects Door\n    sequence 1 {\n        if all sprocket.status on [ door ] == door_status(jammed) then {\n        }\n    }\n"), new Automation()));
     }
 
+    /// <summary>A word written with another host type than its member's is the problem the player sees, though the member has a word of that name too.</summary>
+    [Fact]
+    public void AWordOfAnotherTypeThanItsMembersIsTrouble()
+    {
+        var lit = new Lit("    sequence 1 {\n        if all sprocket.status on [ door ] == lock_status(locked) then {\n        }\n    }\n", "");
+
+        lit.Run(1);
+        lit.Tick(2);
+
+        Assert.Equal(SequenceProblem.Mistyped, lit.Of(1).Fault.Problem);
+    }
     /// <summary>A state's starting value that could be a setting or a choice is trouble; a setting alone gives each installation its own start.</summary>
     [Fact]
     public void AStateStartsAtASetting()
     {
-        Assert.Contains("'inside' could be a setting or a choice of side", Load(Blueprint(
+        Assert.Contains("'inside' could be the setting 'inside' or a choice of side", Load(Blueprint(
             "    optional slot inside expects side = outside\n\n    type side = inside | outside\n\n    let where = inside\n"), new Automation()));
 
         var lit = new Lit("    optional slot start expects side = outside\n\n"

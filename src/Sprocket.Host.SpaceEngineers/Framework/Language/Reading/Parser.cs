@@ -418,7 +418,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                             return Value.None;
                     }
 
-                    return Referencing() ? Referenced(name) : name;
+                    if (_token.Kind == TokenKind.VectorOpen)
+                        return Called(name);
+
+                    return Referencing() ? Referenced(name, Value.Listed(0, 0)) : name;
 
                 case TokenKind.Keyword:
                     Step();
@@ -430,7 +433,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                         return Value.None;
                     }
 
-                    return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
+                    var keyword = new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
+                    if (_token.Kind == TokenKind.VectorOpen && Kinds.IsKeyword(token.Keyword))
+                    {
+                        var failures = _failures;
+                        var arguments = Arguments();
+                        return _failures > failures ? Value.None : Kinded(keyword, arguments);
+                    }
+
+                    return keyword;
 
                 case TokenKind.Equals:
                     Step();
@@ -583,17 +594,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <remarks>
         /// The run holds the name's parts, then the arguments as a list, empty where there are none, then the names.
         /// </remarks>
-        Value Referenced(Value member)
+        Value Referenced(Value member, Value arguments)
         {
             var failures = _failures;
-            var arguments = Value.Listed(0, 0);
-            if (_token.Kind == TokenKind.VectorOpen)
-            {
-                arguments = Arguments();
-                if (_failures > failures)
-                    return Value.None;
-            }
-
             if (_token.Kind != TokenKind.Keyword || _token.Keyword != Keyword.On)
             {
                 Fail("expected 'on' and a list of names after the arguments.");
@@ -628,6 +631,49 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             parts.Add(arguments);
             parts.Add(names);
             return Value.Referenced(from, parts.Count - from);
+        }
+
+        /// <summary>
+        /// <c>name(...)</c>, having read the name: a member and its arguments where <c>on</c> and its names follow, or else a
+        /// thing with the name as its kind, <c>side(inside)</c>.
+        /// </summary>
+        Value Called(Value name)
+        {
+            var failures = _failures;
+            var arguments = Arguments();
+            if (_failures > failures)
+                return Value.None;
+
+            return _token.Kind == TokenKind.Keyword && _token.Keyword == Keyword.On ? Referenced(name, arguments) : Kinded(name, arguments);
+        }
+
+        /// <summary>
+        /// A thing with its kind, <paramref name="kind" />, the thing the one value of <paramref name="arguments" />, and any
+        /// kinds written after it: <c>type(side)(inside)</c>.
+        /// </summary>
+        Value Kinded(Value kind, Value arguments)
+        {
+            while (true)
+            {
+                if (arguments.Count != 1)
+                {
+                    Fail("expected one value in a kind's parentheses, like real(4), or 'on' and a list of names after a member's arguments.");
+                    return Value.None;
+                }
+
+                var parts = _reading.Parts;
+                var from = parts.Count;
+                parts.Add(kind);
+                parts.Add(_reading.Items[arguments.From]);
+                kind = Value.Kinded(from);
+                if (_token.Kind != TokenKind.VectorOpen)
+                    return kind;
+
+                var failures = _failures;
+                arguments = Arguments();
+                if (_failures > failures)
+                    return Value.None;
+            }
         }
 
         /// <summary>A vector, its three numbers written into the reading's shared run.</summary>

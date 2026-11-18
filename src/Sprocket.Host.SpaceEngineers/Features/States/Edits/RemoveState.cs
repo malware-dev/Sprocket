@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States.Edits
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
-            return !system.States.Contains(_state) && !system.Takes(_state.Name);
+            return !system.States.Contains(_state) && system.FindState(_state.Name) == null;
         }
 
         /// <inheritdoc />

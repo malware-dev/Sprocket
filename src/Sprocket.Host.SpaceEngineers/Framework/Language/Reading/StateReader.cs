@@ -12,6 +12,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         // The names of the built-in types, which a declared type may not take.
         static readonly string[] BuiltIn = { "flag", "text", "integer", "real", "duration", "color", "vector", "list", "block" };
 
+        /// <summary>Whether <paramref name="name" />, in any case, is a built-in type's, which no declared type may take.</summary>
+        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
+        public static bool IsBuiltInInAnyCase(string name)
+        {
+            foreach (var builtIn in BuiltIn)
+            {
+                if (string.Equals(builtIn, name, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary><c>type side = inside | outside</c>: a type of <paramref name="system" />, its choices in order.</summary>
         /// <remarks>One with fewer than two choices, a choice twice, or a name already taken is trouble and not read.</remarks>
         public static void ReadType(Statement statement, AutomationSystem system, ScriptTrouble trouble)
@@ -29,8 +42,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
-            if (Taken(statement, name.Word, system, false, trouble))
+            if (system.FindType(name.Word) != null)
+            {
+                trouble.Say(statement, $"'{name.Word}' is already the name of a type.");
                 return;
+            }
 
             if (!statement.Says(1, Keyword.Equals))
             {
@@ -84,8 +100,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
-            if (Taken(statement, name.Word, system, true, trouble))
+            if (system.FindState(name.Word) != null)
+            {
+                trouble.Say(statement, $"'{name.Word}' is already the name of a state.");
                 return;
+            }
 
             if (!system.IsBlueprint && (program.FindRef(name.Word) != null || program.FindSignalRef(name.Word) != null))
             {
@@ -114,69 +133,44 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// Whether <paramref name="name" /> is already a type or state of <paramref name="system" />, or a slot where
-        /// <paramref name="slots" />, and trouble where it is.
+        /// A state's starting value at <paramref name="at" />: a flag, a setting holding one or a choice, or a choice and the
+        /// name of its type; or false and trouble where it is none of those.
         /// </summary>
-        /// <remarks>A type and a slot may share a name, and the type is then written qualified, <c>types.side</c>.</remarks>
-        public static bool Taken(Statement statement, string name, AutomationSystem system, bool slots, ScriptTrouble trouble)
-        {
-            if (slots && system.FindPart(name) != null)
-                trouble.Say(statement, $"'{name}' is already the name of a slot.");
-            else if (system.FindType(name) != null)
-                trouble.Say(statement, $"'{name}' is already the name of a type.");
-            else if (system.FindState(name) != null)
-                trouble.Say(statement, $"'{name}' is already the name of a state.");
-            else
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// A state's starting value at <paramref name="at" />: a flag, an empty type, or a choice and the name of its type;
-        /// or false and trouble where it is neither.
-        /// </summary>
-        /// <remarks>A bare choice the system has in more than one type cannot be told apart, and must be qualified.</remarks>
+        /// <remarks>A bare choice the system has in more than one type cannot be told apart, and is written with its type.</remarks>
         static bool Starting(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble, out string type,
             out Literal start)
         {
             type = "";
             start = default(Literal);
             var value = statement.ValueAt(at);
-            if (value.Says(Keyword.On) || value.Says(Keyword.Off))
+            bool flag;
+            if (Flag(statement, value, out flag))
             {
-                start = Literal.Of(value.Says(Keyword.On));
+                start = Literal.Of(flag);
                 return true;
             }
 
-            var setting = SettingReader.Referenced(statement, value, system);
-            var having = new List<string>();
-            if (ScriptQuotes.Named(value))
+            if (value.Form == ValueForm.Kinded)
             {
-                foreach (var declared in system.Types)
+                var setting = Kinds.Named(statement, value, Kinds.Setting);
+                if (setting != null)
+                    return StartingAt(statement, setting, system, trouble, out type, out start);
+
+                if (Kinds.Named(statement, value, Kinds.State) != null)
                 {
-                    if (declared.Has(value.Word))
-                        having.Add(declared.Name);
+                    trouble.Say(statement, $"{ScriptQuotes.Spelled(statement, at)} is a state; a state starts as on, off or one of the system's choices.");
+                    return false;
                 }
+
+                DeclaredType of;
+                string choice;
+                if (!Choice(statement, value, system, trouble, out of, out choice))
+                    return false;
+
+                type = of.Name;
+                start = Literal.Name(choice);
+                return true;
             }
-
-            if (setting != null && value.Form == ValueForm.Qualified && system.FindType(Namespaces.Settings)?.Has(statement.PartsOf(value)[1].Word) == true)
-            {
-                trouble.Say(statement, $"'{Namespaces.Settings}.{setting}' could be a setting or a choice of the type {Namespaces.Settings}; give the type another name.");
-                return false;
-            }
-
-            if (setting != null && having.Count > 0)
-            {
-                SettingReader.Ambiguous(statement, setting, new[] { "a setting", $"a choice of {having[0]}" }, new[] { $"{Namespaces.Settings}.{setting}", $"{having[0]}.{setting}" }, trouble);
-                return false;
-            }
-
-            if (setting != null)
-                return StartingAt(statement, setting, system, trouble, out type, out start);
-
-            if (value.Form == ValueForm.Qualified)
-                return Qualified(statement, at, system, null, trouble, out type, out start);
 
             if (!ScriptQuotes.Named(value))
             {
@@ -184,27 +178,59 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return false;
             }
 
-            if (system.FindState(value.Word) != null)
+            var name = value.Word;
+            var meanings = new List<string>();
+            var spellings = new List<string>();
+            Kinds.Meanings(system, name, meanings, spellings);
+            var having = new List<string>();
+            foreach (var declared in system.Types)
             {
-                trouble.Say(statement, $"'{value.Word}' is a state; a state starts as on, off or one of the system's choices.");
+                if (declared.Has(name))
+                {
+                    having.Add(declared.Name);
+                    meanings.Add($"a choice of {declared.Name}");
+                    spellings.Add(ScriptWriter.KindSpelling(declared.Name, name));
+                }
+            }
+
+            if (meanings.Count > 1)
+            {
+                Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
+                return false;
+            }
+
+            var part = system.FindPart(name);
+            if (part != null && part.IsSetting)
+                return StartingAt(statement, name, system, trouble, out type, out start);
+
+            if (system.FindState(name) != null)
+            {
+                trouble.Say(statement, $"'{name}' is a state; a state starts as on, off or one of the system's choices.");
                 return false;
             }
 
             if (having.Count == 0)
             {
-                trouble.Say(statement, $"no choice '{value.Word}' in the system's types.");
-                return false;
-            }
-
-            if (having.Count > 1)
-            {
-                trouble.Say(statement, $"'{value.Word}' is a choice of {having[0]} and {having[1]}; qualify it, like {having[0]}.{value.Word}.");
+                trouble.Say(statement, $"no choice '{name}' in the system's types.");
                 return false;
             }
 
             type = having[0];
-            start = Literal.Name(value.Word);
+            start = Literal.Name(name);
             return true;
+        }
+
+        /// <summary>
+        /// Whether <paramref name="written" /> is a flag, <c>on</c> or <c>off</c>, bare or with its kind, <c>flag(on)</c>,
+        /// and which into <paramref name="flag" />.
+        /// </summary>
+        static bool Flag(Statement statement, Value written, out bool flag)
+        {
+            if (written.Form == ValueForm.Kinded && statement.KindOf(written).IsWord && statement.KindOf(written).Word == SettingReader.Flag)
+                written = statement.ThingOf(written);
+
+            flag = written.Says(Keyword.On);
+            return flag || written.Says(Keyword.Off);
         }
 
         /// <summary>
@@ -225,69 +251,53 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>side.inside</c> at <paramref name="at" />: a choice qualified by one of the system's types, of the type
-        /// <paramref name="wanted" /> where that is not null; or false and trouble where it is not that.
+        /// The type and the choice of <paramref name="written" />, a choice with its type: <c>side(inside)</c>, or
+        /// <c>type(side)(inside)</c>; or false and trouble where its kind is no type of the system, the choice none of the
+        /// type's, or a bare type's name is also another thing's.
         /// </summary>
-        static bool Qualified(Statement statement, int at, AutomationSystem system, string wanted, ScriptTrouble trouble,
-            out string type, out Literal choice)
+        public static bool Choice(Statement statement, Value written, AutomationSystem system, ScriptTrouble trouble, out DeclaredType type,
+            out string choice)
         {
-            type = "";
-            choice = default(Literal);
-            var parts = statement.Parts(at);
-            string written;
-            if (!ChoiceType(statement, parts, system, trouble, out written))
-                return false;
-
-            var declared = written == null ? null : system.FindType(written);
-            if (declared == null)
+            type = null;
+            choice = null;
+            var kind = statement.KindOf(written);
+            var thing = statement.ThingOf(written);
+            var typed = Kinds.Named(statement, kind, Keywords.Name(Keyword.Type));
+            var bare = typed == null && ScriptQuotes.Named(kind) ? kind.Word : null;
+            var name = typed ?? bare;
+            if (name == null || !ScriptQuotes.Named(thing))
             {
-                trouble.Say(statement, $"no type '{written ?? ScriptQuotes.Spelling(parts)}' in the system.");
+                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, written)}; expected a choice with its type, like side(inside).");
                 return false;
             }
 
-            var chosen = parts[parts.Count - 1].Word;
-            if (!declared.Has(chosen))
+            type = system.FindType(name);
+            if (type == null)
             {
-                trouble.Say(statement, $"no choice '{chosen}' in type '{declared.Name}'.");
+                trouble.Say(statement, $"no type '{name}' in the system.");
                 return false;
             }
 
-            if (wanted != null && declared.Name != wanted)
+            if (bare != null)
             {
-                trouble.Say(statement, $"'{declared.Name}.{chosen}' is of type {declared.Name}; expected a choice of {wanted}.");
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                Kinds.Meanings(system, name, meanings, spellings);
+                if (meanings.Count > 1)
+                {
+                    Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
+                    return false;
+                }
+            }
+
+            choice = thing.Word;
+            if (!type.Has(choice))
+            {
+                trouble.Say(statement, $"no choice '{choice}' in type '{type.Name}'.");
                 return false;
             }
 
-            type = declared.Name;
-            choice = Literal.Name(chosen);
             return true;
-        }
-
-        /// <summary>
-        /// The type <paramref name="parts" />, a choice qualified by its type, names into <paramref name="type" />: <c>side</c>
-        /// in <c>side.inside</c> or <c>types.side.inside</c>, or null where the parts are neither; false and trouble where a
-        /// bare type is also the name of a slot.
-        /// </summary>
-        public static bool ChoiceType(Statement statement, ValueRange parts, AutomationSystem system, ScriptTrouble trouble, out string type)
-        {
-            type = null;
-            if (parts.Count == 3 && parts[0].Word == Namespaces.Types)
-            {
-                type = parts[1].Word;
-                return true;
-            }
-
-            if (parts.Count != 2)
-                return true;
-
-            type = parts[0].Word;
-            if (system.FindType(type) == null || system.FindPart(type) == null)
-                return true;
-
-            SettingReader.Ambiguous(statement, type, new[] { $"the slot '{type}'", $"the type '{type}'" },
-                new[] { ScriptWriter.Spelling(Namespaces.Types, type, parts[1].Word) }, trouble);
-            type = null;
-            return false;
         }
 
         /// <summary>
@@ -309,8 +319,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// none of those.
         /// </summary>
         /// <remarks>
-        /// A bare name may be a state or a setting of any type, or a choice of the type wanted; one that could be more than one is
-        /// trouble, and is written qualified: <c>side.inside</c>, <c>settings.home</c>.
+        /// A bare choice is looked for among the type's choices alone; a bare name that could also be anything else the system
+        /// names is trouble, and is written with its kind: <c>side(inside)</c>, <c>state(home)</c>.
         /// </remarks>
         public static bool Valued(Statement statement, int at, string type, string about, AutomationSystem system,
             ScriptTrouble trouble, out Literal value, out string other)
@@ -320,7 +330,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var written = statement.ValueAt(at);
             var flag = type == SettingReader.Flag;
             var expected = flag ? "on or off" : $"a choice of {type}";
-            if (written.Says(Keyword.On) || written.Says(Keyword.Off))
+            bool on;
+            if (Flag(statement, written, out on))
             {
                 if (!flag)
                 {
@@ -328,75 +339,34 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return false;
                 }
 
-                value = Literal.Of(written.Says(Keyword.On));
+                value = Literal.Of(on);
                 return true;
             }
 
-            var declared = flag ? null : system.FindType(type);
-            string space = null;
-            var name = written.Word;
-            if (written.Form == ValueForm.Qualified)
-            {
-                var parts = statement.PartsOf(written);
-                var typed = parts.Count == 3 && parts[0].Word == Namespaces.Types;
-                if (parts.Count != 2 && !typed)
-                {
-                    trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; expected {expected} or a state of the same type.");
-                    return false;
-                }
+            if (written.Form == ValueForm.Kinded)
+                return Kinded(statement, written, type, about, system, trouble, out value, out other);
 
-                string choiceType;
-                if (!ChoiceType(statement, parts, system, trouble, out choiceType))
-                    return false;
-
-                if (typed)
-                {
-                    if (flag)
-                    {
-                        trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; expected {expected} or a state of the same type.");
-                        return false;
-                    }
-
-                    string of;
-                    return Qualified(statement, at, system, type, trouble, out of, out value);
-                }
-
-                space = parts[0].Word;
-                name = parts[1].Word;
-            }
-            else if (!ScriptQuotes.Named(written))
+            if (!ScriptQuotes.Named(written))
             {
                 trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; expected {expected} or a state of the same type.");
                 return false;
             }
 
-            var named = space == null || space == Namespaces.States ? system.FindState(name) : null;
-            var part = space == null || space == Namespaces.Settings ? system.FindPart(name) : null;
-            var setting = part != null && part.IsSetting;
-            var choice = declared != null && declared.Has(name) && (space == null || space == type);
+            var name = written.Word;
+            var declared = flag ? null : system.FindType(type);
+            var choice = declared != null && declared.Has(name);
             var meanings = new List<string>();
             var spellings = new List<string>();
-            if (named != null)
-            {
-                meanings.Add("a state");
-                spellings.Add($"{Namespaces.States}.{name}");
-            }
-
-            if (setting)
-            {
-                meanings.Add("a setting");
-                spellings.Add($"{Namespaces.Settings}.{name}");
-            }
-
+            Kinds.Meanings(system, name, meanings, spellings);
             if (choice)
             {
                 meanings.Add($"a choice of {type}");
-                spellings.Add($"{type}.{name}");
+                spellings.Add(ScriptWriter.KindSpelling(type, name));
             }
 
             if (meanings.Count > 1)
             {
-                SettingReader.Ambiguous(statement, space == null ? name : $"{space}.{name}", meanings, spellings, trouble);
+                Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
                 return false;
             }
 
@@ -406,67 +376,117 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return true;
             }
 
-            if (named != null && (named.IsFlag ? SettingReader.Flag : named.Type) == type)
-            {
-                other = named.Name;
-                return true;
-            }
+            var named = system.FindState(name);
+            if (named != null)
+                return Other(statement, named, type, about, trouble, out other);
 
-            if (setting)
+            var part = system.FindPart(name);
+            if (part != null && part.IsSetting)
             {
                 value = Literal.Setting(name);
                 return SettingReader.Owe(statement, name, system, held => held == type, SettingReader.Holding(type), trouble);
-            }
-
-            if (named != null)
-            {
-                trouble.Say(statement, $"state '{named.Name}' is of another type than {about}.");
-                return false;
-            }
-
-            if (space == Namespaces.States || space == Namespaces.Settings)
-            {
-                trouble.Say(statement, $"no {(space == Namespaces.States ? "state" : "setting")} called '{name}'.");
-                return false;
-            }
-
-            if (space != null)
-            {
-                if (flag)
-                {
-                    trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; expected {expected} or a state of the same type.");
-                    return false;
-                }
-
-                string of;
-                return Qualified(statement, at, system, type, trouble, out of, out value);
             }
 
             trouble.Say(statement, $"no state or choice '{name}'; {about} holds {expected}.");
             return false;
         }
 
-        /// <summary>The state <paramref name="statement" /> names at <paramref name="at" />, bare or as <c>states.where</c>, or null and trouble where the system has none by that name.</summary>
+        /// <summary>
+        /// What <paramref name="about" />, holding <paramref name="type" />, is set to or compared with where it is written with
+        /// its kind: <c>state(home)</c>, <c>setting(home)</c> or <c>side(inside)</c>; or false and trouble where it is none of those.
+        /// </summary>
+        static bool Kinded(Statement statement, Value written, string type, string about, AutomationSystem system, ScriptTrouble trouble,
+            out Literal value, out string other)
+        {
+            value = default(Literal);
+            other = "";
+            var state = Kinds.Named(statement, written, Kinds.State);
+            if (state != null)
+            {
+                var named = system.FindState(state);
+                if (named != null)
+                    return Other(statement, named, type, about, trouble, out other);
+
+                trouble.Say(statement, $"no state called '{state}'.");
+                return false;
+            }
+
+            var setting = Kinds.Named(statement, written, Kinds.Setting);
+            if (setting != null)
+            {
+                value = Literal.Setting(setting, true);
+                return SettingReader.Owe(statement, setting, system, held => held == type, SettingReader.Holding(type), trouble);
+            }
+
+            if (type == SettingReader.Flag)
+            {
+                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, written)}; expected on or off or a state of the same type.");
+                return false;
+            }
+
+            DeclaredType of;
+            string choice;
+            if (!Choice(statement, written, system, trouble, out of, out choice))
+                return false;
+
+            if (of.Name != type)
+            {
+                trouble.Say(statement, $"{ScriptQuotes.Spelled(statement, written)} is of type {of.Name}; expected a choice of {type}.");
+                return false;
+            }
+
+            value = Literal.Name(choice);
+            return true;
+        }
+
+        /// <summary>The state <paramref name="named" /> into <paramref name="other" />, where it holds <paramref name="type" />; or false and trouble where it holds another type than <paramref name="about" />.</summary>
+        static bool Other(Statement statement, State named, string type, string about, ScriptTrouble trouble, out string other)
+        {
+            other = "";
+            if ((named.IsFlag ? SettingReader.Flag : named.Type) != type)
+            {
+                trouble.Say(statement, $"state '{named.Name}' is of another type than {about}.");
+                return false;
+            }
+
+            other = named.Name;
+            return true;
+        }
+
+        /// <summary>
+        /// The state <paramref name="statement" /> names at <paramref name="at" />, bare or as <c>state(where)</c>, or null and
+        /// trouble where the system has none by that name, or a bare name could also be another thing's.
+        /// </summary>
         public static State Named(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
         {
             var written = statement.ValueAt(at);
-            var parts = statement.PartsOf(written);
-            var name = parts.Count == 2 && parts[0].Word == Namespaces.Settings ? null : Called(statement, written);
+            var name = written.Form == ValueForm.Kinded ? Kinds.Named(statement, written, Kinds.State) : Called(statement, written);
+            if (name != null && written.Form != ValueForm.Kinded)
+            {
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                Kinds.Meanings(system, name, meanings, spellings);
+                if (meanings.Count > 1)
+                {
+                    Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
+                    return null;
+                }
+            }
+
             var state = name == null ? null : system.FindState(name);
             if (state == null)
-                trouble.Say(statement, $"no state '{name ?? ScriptQuotes.Spelling(parts)}' declared above this line.");
+                trouble.Say(statement, $"no state {(name == null ? ScriptQuotes.Spelled(statement, at) : $"'{name}'")} declared above this line.");
 
             return state;
         }
 
-        /// <summary>The name <paramref name="written" /> gives a state or a setting: a bare name, or one qualified by <c>states</c> or <c>settings</c>; null where it is neither.</summary>
+        /// <summary>The name <paramref name="written" /> gives a state or a setting: a bare name, or one with its kind, <c>state(where)</c> or <c>setting(where)</c>; null where it is neither.</summary>
         public static string Called(Statement statement, Value written)
         {
             if (ScriptQuotes.Named(written))
                 return written.Word;
 
-            var parts = statement.PartsOf(written);
-            return parts.Count == 2 && (parts[0].Word == Namespaces.States || parts[0].Word == Namespaces.Settings) ? parts[1].Word : null;
+            return Kinds.Named(statement, written, Kinds.State) ?? Kinds.Named(statement, written, Kinds.Setting);
         }
 
         /// <summary>
@@ -475,7 +495,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// </summary>
         public static StateTest Test(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
         {
-            var setting = SettingReader.Referenced(statement, statement.ValueAt(at), system);
+            var written = statement.ValueAt(at);
+            if (ScriptQuotes.Named(written))
+            {
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                Kinds.Meanings(system, written.Word, meanings, spellings);
+                if (meanings.Count > 1)
+                {
+                    Kinds.Ambiguous(statement, written.Word, meanings, spellings, trouble);
+                    return null;
+                }
+            }
+
+            var setting = SettingReader.Referenced(statement, written, system);
             if (setting != null)
                 return SettingReader.Test(statement, at, setting, system, trouble);
 

@@ -83,64 +83,110 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var given = statement.Arguments(index);
             for (var i = 0; i < given.Count; i++)
             {
-                if (given[i].Form == ValueForm.List)
+                var argument = given[i];
+                if (!Kinds.Literal(statement, ref argument, trouble))
+                    return false;
+
+                if (argument.Form == ValueForm.List)
                 {
                     var slots = new List<string>();
-                    if (!Names(statement.Within(given[i]), slots, statement, trouble))
+                    if (!Names(statement.Within(argument), slots, statement, system, trouble))
                         return false;
 
                     arguments.Add(Literal.Slots(slots));
                     continue;
                 }
 
-                var setting = SettingReader.Referenced(statement, given[i], system);
+                var setting = SettingReader.Referenced(statement, argument, system);
                 if (setting != null)
                 {
                     if (!SettingReader.Owe(statement, setting, system, null, null, trouble))
                         return false;
 
-                    arguments.Add(Literal.Setting(setting, given[i].Form == ValueForm.Qualified));
+                    arguments.Add(Literal.Setting(setting, argument.Form == ValueForm.Kinded));
                     continue;
                 }
 
-                var word = Word(statement, given[i], provider, id);
-                if (word != null)
+                Literal word;
+                bool wrong;
+                if (Word(statement, argument, system, trouble, out word, out wrong))
                 {
-                    arguments.Add(Literal.Name(word));
+                    arguments.Add(word);
                     continue;
                 }
 
-                if (!Argument(statement, given[i], trouble))
+                if (wrong)
                     return false;
 
-                arguments.Add(Given(given[i]));
+                if (!Argument(statement, argument, trouble))
+                    return false;
+
+                arguments.Add(Given(argument));
             }
 
-            return Names(statement.On(index), targets, statement, trouble);
+            return Names(statement.On(index), targets, statement, system, trouble);
         }
 
         /// <summary>
-        /// The word of the member <paramref name="id" /> of <paramref name="provider" /> that <paramref name="written" /> names, qualified
-        /// by the member: <c>sprocket.status.closed</c>; or null where it is not one so written.
+        /// A choice of a host type written with it, <c>door_status(closed)</c> or <c>sprocket.door_status(closed)</c>, into
+        /// <paramref name="word" />; false where <paramref name="written" /> is not written so, and also, with trouble and
+        /// <paramref name="wrong" />, where it names none of the type's choices, or the type's bare name is also a thing of
+        /// <paramref name="system" />'s.
         /// </summary>
-        static string Word(Statement statement, Value written, string provider, string id)
+        static bool Word(Statement statement, Value written, AutomationSystem system, ScriptTrouble trouble, out Literal word, out bool wrong)
         {
-            if (written.Form != ValueForm.Qualified)
-                return null;
+            word = default(Literal);
+            wrong = false;
+            if (written.Form != ValueForm.Kinded)
+                return false;
 
-            var parts = statement.PartsOf(written);
-            var at = provider.Length > 0 ? 1 : 0;
-            if (parts.Count != at + 2 || at == 1 && parts[0].Word != provider || parts[at].Word != id)
-                return null;
+            var kind = statement.KindOf(written);
+            var thing = statement.ThingOf(written);
+            string id = null;
+            if (kind.Form == ValueForm.Qualified)
+            {
+                var parts = statement.PartsOf(kind);
+                if (parts.Count == 2 && parts[0].Word == BlockKinds.Own)
+                    id = parts[1].Word;
+            }
+            else if (ScriptQuotes.Named(kind))
+                id = kind.Word;
 
-            return parts[at + 1].Word;
+            var type = id == null ? null : ChoiceTypes.Named(id);
+            if (type == null)
+                return false;
+
+            wrong = true;
+            if (kind.Form != ValueForm.Qualified)
+            {
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                Kinds.Meanings(system, id, meanings, spellings);
+                if (meanings.Count > 0)
+                {
+                    meanings.Add($"the host's type '{id}'");
+                    spellings.Add($"{BlockKinds.Own}.{id}");
+                    Kinds.Ambiguous(statement, id, meanings, spellings, trouble);
+                    return false;
+                }
+            }
+
+            if (!ScriptQuotes.Named(thing) || !type.Has(thing.Word))
+            {
+                trouble.Say(statement, $"no choice {ScriptQuotes.Spelled(statement, thing)} in {BlockKinds.Own}.{type.Id}.");
+                return false;
+            }
+
+            wrong = false;
+            word = Literal.Name(thing.Word, type);
+            return true;
         }
 
         /// <summary>Whether <paramref name="value" /> is one a member can be given or compared with, and trouble where it is not.</summary>
         static bool Argument(Statement statement, Value value, ScriptTrouble trouble)
         {
             var form = value.Form;
-            if (form != ValueForm.List && form != ValueForm.Vector && form != ValueForm.Reference && form != ValueForm.Qualified)
+            if (form != ValueForm.List && form != ValueForm.Vector && form != ValueForm.Reference && form != ValueForm.Qualified && form != ValueForm.Kinded)
                 return true;
 
             trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, value)}; expected a value.");
@@ -164,26 +210,33 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             var written = statement.ValueAt(at + 1);
+            if (!Kinds.Literal(statement, ref written, trouble))
+                return false;
+
             var ordered = relation != Relation.Is && relation != Relation.IsNot;
             var setting = SettingReader.Referenced(statement, written, system);
             if (setting != null)
             {
-                value = Literal.Setting(setting, written.Form == ValueForm.Qualified);
+                value = Literal.Setting(setting, written.Form == ValueForm.Kinded);
                 return ordered || quantifier == Quantifier.Sum
                     ? SettingReader.Owe(statement, setting, system, SettingReader.Numeric, "a number", trouble)
                     : SettingReader.Owe(statement, setting, system, null, null, trouble);
             }
 
-            var word = Word(statement, written, provider, id);
-            if (word != null)
+            Literal word;
+            bool wrong;
+            if (Word(statement, written, system, trouble, out word, out wrong))
             {
-                value = Literal.Name(word);
+                value = word;
                 if (!ordered && quantifier != Quantifier.Sum)
                     return true;
 
                 trouble.Say(statement, $"expected a number after '{Keywords.Name(ProgramWriter.Said(relation))}'.");
                 return false;
             }
+
+            if (wrong)
+                return false;
 
             if (!Argument(statement, written, trouble))
                 return false;
@@ -364,7 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return ScriptQuotes.Ends(statement, 0, trouble) ? Noted(new Await(), statement) : null;
 
             if (statement.Key == Keyword.Run || statement.Key == Keyword.Stop)
-                return ScriptQuotes.Ends(statement, 1, trouble) ? Called(statement, trouble) : null;
+                return ScriptQuotes.Ends(statement, 1, trouble) ? Called(statement, system, trouble) : null;
 
             if (statement.Key == Keyword.Wait)
             {
@@ -510,16 +563,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (!ScriptQuotes.Ends(statement, 3, trouble))
                 return null;
 
-            var setting = SettingReader.Referenced(statement, statement.ValueAt(2), system);
-            var word = setting == null ? Word(statement, statement.ValueAt(2), provider, id) : null;
-            if (setting != null ? !SettingReader.Owe(statement, setting, system, null, null, trouble) : word == null && !Argument(statement, statement.ValueAt(2), trouble))
+            var given = statement.ValueAt(2);
+            if (!Kinds.Literal(statement, ref given, trouble))
+                return null;
+
+            var setting = SettingReader.Referenced(statement, given, system);
+            var word = default(Literal);
+            var wrong = false;
+            var worded = setting == null && Word(statement, given, system, trouble, out word, out wrong);
+            if (setting != null ? !SettingReader.Owe(statement, setting, system, null, null, trouble) : !worded && (wrong || !Argument(statement, given, trouble)))
                 return null;
 
             act.ActionId = id;
             act.Form = ReachKind.Value;
             act.Provider = provider;
-            act.Arguments.Add(setting != null ? Literal.Setting(setting, statement.ValueAt(2).Form == ValueForm.Qualified)
-                : word != null ? Literal.Name(word) : Given(statement.ValueAt(2)));
+            act.Arguments.Add(setting != null ? Literal.Setting(setting, given.Form == ValueForm.Kinded)
+                : worded ? word : Given(given));
             return Noted(act, statement);
         }
 
@@ -558,11 +617,29 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return step;
         }
 
-        /// <summary><c>run 2</c>, <c>stop 2</c> or <c>run 'Let me out'</c>: another sequence of the same system.</summary>
-        static Step Called(Statement statement, ScriptTrouble trouble)
+        /// <summary>
+        /// <c>run 2</c>, <c>stop 2</c>, <c>run 'Let me out'</c> or <c>run sequence(cycle)</c>: another sequence of the same
+        /// system; trouble where a bare name could also be another thing of <paramref name="system" />.
+        /// </summary>
+        static Step Called(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var stops = statement.Key == Keyword.Stop;
             var named = statement.ValueAt(0);
+            var kinded = Kinds.Named(statement, named, Keywords.Name(Keyword.Sequence));
+            if (kinded != null)
+                named = new Value(ValueForm.Identifier, kinded);
+            else if (ScriptQuotes.Named(named))
+            {
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                Kinds.Meanings(system, named.Word, meanings, spellings);
+                if (meanings.Count > 1)
+                {
+                    Kinds.Ambiguous(statement, named.Word, meanings, spellings, trouble);
+                    return null;
+                }
+            }
+
             if (named.Form == ValueForm.Integer && named.Whole >= 1 && named.Whole <= int.MaxValue)
             {
                 var numbered = new Run((int)named.Whole);
@@ -584,19 +661,42 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return null;
         }
 
-        /// <summary>The names in <paramref name="items" />, into <paramref name="into" />; or false, and trouble, where one is not a name.</summary>
-        public static bool Names(ValueRange items, IList<string> into, Statement statement, ScriptTrouble trouble)
+        /// <summary>
+        /// The names in <paramref name="items" />, bare or as <c>slot(inner)</c>, into <paramref name="into" />; or false, and
+        /// trouble, where one is not a name, or a bare slot's name is also another thing's of <paramref name="system" />.
+        /// </summary>
+        public static bool Names(ValueRange items, IList<string> into, Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             into.Clear();
             for (var i = 0; i < items.Count; i++)
             {
+                var slot = Kinds.Named(statement, items[i], Keywords.Name(Keyword.Slot));
+                if (slot != null)
+                {
+                    into.Add(slot);
+                    continue;
+                }
+
                 if (!ScriptQuotes.Named(items[i]))
                 {
                     trouble.Say(statement, "expected names in the list.");
                     return false;
                 }
 
-                into.Add(items[i].Word);
+                var name = items[i].Word;
+                if (system.FindPart(name) != null)
+                {
+                    var meanings = new List<string>();
+                    var spellings = new List<string>();
+                    Kinds.Meanings(system, name, meanings, spellings);
+                    if (meanings.Count > 1)
+                    {
+                        Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
+                        return false;
+                    }
+                }
+
+                into.Add(name);
             }
 
             return true;

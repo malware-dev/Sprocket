@@ -1,13 +1,12 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
-using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 {
     /// <summary>
     /// Reads a system blueprint's settings: the slots answered by one value, their defaults, the values instances answer them
-    /// with, and every setting standing in for a value, by its name or qualified, <c>settings.'Open angle'</c>.
+    /// with, and every setting standing in for a value, by its name or with its kind, <c>setting('Open angle')</c>.
     /// </summary>
     public static class SettingReader
     {
@@ -60,16 +59,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// The setting <paramref name="written" /> names: <c>settings.'Open angle'</c>, or a bare name of one of
+        /// The setting <paramref name="written" /> names: <c>setting('Open angle')</c>, or a bare name of one of
         /// <paramref name="system" />'s settings; null where it names none.
         /// </summary>
         public static string Referenced(Statement statement, Value written, AutomationSystem system)
         {
-            if (written.Form == ValueForm.Qualified)
-            {
-                var parts = statement.PartsOf(written);
-                return parts.Count == 2 && parts[0].Word == Namespaces.Settings ? parts[1].Word : null;
-            }
+            if (written.Form == ValueForm.Kinded)
+                return Kinds.Named(statement, written, Kinds.Setting);
 
             if (!ScriptQuotes.Named(written))
                 return null;
@@ -149,11 +145,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// The value at <paramref name="at" /> as one of the type <paramref name="part" />, a setting, holds, a whole number
         /// standing for a real one; or false and trouble where it is none.
         /// </summary>
-        /// <remarks>A choice of a declared type is written bare, or qualified by its type.</remarks>
+        /// <remarks>A choice of a declared type is written bare, or with its type as a kind, <c>side(inside)</c>.</remarks>
         public static bool Typed(Statement statement, int at, Part part, AutomationSystem system, ScriptTrouble trouble, out Literal value)
         {
             bool said;
-            if (Typed(statement, at, part.Setting, system, trouble, out said, out value))
+            if (Typed(statement, statement.ValueAt(at), part.Setting, system, trouble, out said, out value))
                 return true;
 
             if (!said)
@@ -163,15 +159,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// The value at <paramref name="at" /> as one of <paramref name="type" />; or false where it is none, with
+        /// <paramref name="written" /> as one of <paramref name="type" />; or false where it is none, with
         /// <paramref name="said" /> true where trouble already says why.
         /// </summary>
-        static bool Typed(Statement statement, int at, string type, AutomationSystem system, ScriptTrouble trouble, out bool said,
+        static bool Typed(Statement statement, Value written, string type, AutomationSystem system, ScriptTrouble trouble, out bool said,
             out Literal value)
         {
             said = false;
             value = default(Literal);
-            var written = statement.ValueAt(at);
+            if (written.Form == ValueForm.Kinded && statement.KindOf(written).IsWord && IsBuiltIn(statement.KindOf(written).Word))
+            {
+                // A built-in kind only says what the thing already is: an integer stands for a real, as written alone.
+                var kind = statement.KindOf(written).Word;
+                if (kind != type && !(kind == Integer && type == Real))
+                    return false;
+
+                var thing = statement.ThingOf(written);
+                Literal checkedAs;
+                return Typed(statement, thing, kind, system, trouble, out said, out checkedAs)
+                    && Typed(statement, thing, type, system, trouble, out said, out value);
+            }
+
             switch (type)
             {
                 case Flag:
@@ -225,18 +233,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return false;
 
             string choice = null;
-            if (written.Form == ValueForm.Qualified)
+            if (written.Form == ValueForm.Kinded)
             {
-                var parts = statement.Parts(at);
-                string qualifier;
-                if (!StateReader.ChoiceType(statement, parts, system, trouble, out qualifier))
+                DeclaredType of;
+                if (!StateReader.Choice(statement, written, system, trouble, out of, out choice))
                 {
                     said = true;
                     return false;
                 }
 
-                if (qualifier == type)
-                    choice = parts[parts.Count - 1].Word;
+                if (of != declared)
+                    return false;
             }
             else if (ScriptQuotes.Named(written))
                 choice = written.Word;
@@ -321,15 +328,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             test.Value = value;
             return test;
-        }
-
-        /// <summary>
-        /// Says that <paramref name="name" /> could mean each of <paramref name="meanings" />, where <paramref name="statement" />
-        /// writes it, and <paramref name="spellings" />, each written qualified.
-        /// </summary>
-        public static void Ambiguous(Statement statement, string name, IList<string> meanings, IList<string> spellings, ScriptTrouble trouble)
-        {
-            trouble.Say(statement, $"'{name}' could be {string.Join(" or ", meanings)}; write the one meant qualified: {string.Join(" or ", spellings)}.");
         }
 
         /// <summary>The setting <paramref name="name" /> of <paramref name="system" />, or null and trouble saying it has none by that name.</summary>

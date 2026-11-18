@@ -144,6 +144,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// </summary>
         public IList<string> Means;
 
+        /// <summary>The host type whose choices <see cref="Words" /> are, or null where they are no host type's.</summary>
+        public ChoiceType Choices;
+
         /// <summary>What the program holds for a word somebody chose.</summary>
         public string Meaning(string word)
         {
@@ -168,6 +171,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         {
             if (Unfilled(given))
                 return true;
+
+            // A choice written with its type, door_status(closed), is only ever one of that type's.
+            if (given.Typed != null && given.Typed != Choices)
+                return false;
 
             var words = Means ?? Words;
             if (!Open && words != null && words.Count > 0 && !words.Contains(given.Said))

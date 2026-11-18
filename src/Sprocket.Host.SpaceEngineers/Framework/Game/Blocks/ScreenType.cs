@@ -35,6 +35,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>The text a screen shows, which is Sprocket's own.</summary>
         public const string TextShown = "text_shown";
 
+        /// <summary>The type's id, as a slot expecting it names it: <c>sprocket.screen</c>.</summary>
+        public const string TypeId = BlockKinds.Own + ".screen";
+
         /// <summary>The app a screen runs, which is Sprocket's own.</summary>
         public const string App = "app";
 
@@ -58,16 +61,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         const string NoApp = "none";
 
         // What a screen shows and how its text lines up, each word beside the game's value for it.
-        static readonly string[] Contents = { "nothing", "text and images", "app" };
+        static readonly string[] Contents = ChoiceTypes.ScreenContent.Choices;
         static readonly ContentType[] ContentTypes = { ContentType.NONE, ContentType.TEXT_AND_IMAGE, ContentType.SCRIPT };
-        static readonly string[] Alignments = { "left", "center", "right" };
+        static readonly string[] Alignments = ChoiceTypes.Alignment.Choices;
         static readonly TextAlignment[] TextAlignments = { TextAlignment.LEFT, TextAlignment.CENTER, TextAlignment.RIGHT };
 
         /// <inheritdoc />
-        public override string Id => $"{BlockKinds.Own}.{Function}";
+        public override string Id => TypeId;
 
         /// <inheritdoc />
-        public override string Function => "screen";
+        public override string Function => "get_screen";
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -112,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 .WithValue(TextShown, "text", OwnValue.Text<IMyTextSurfaceProvider, Picked>(picked,
                     (provider, which) => Surface(provider, which).GetText())).Looked(Unwritten).In(Category.Screen).Of(this);
 
-            Value(kind, "content", OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(Contents, picked,
+            Value(kind, "content", OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(ChoiceTypes.ScreenContent, picked,
                 (provider, which) => Position(ContentTypes, Surface(provider, which).ContentType)));
             kind.WithValue(App, "app", Running(Apps(screens), picked)).Looked(Unwritten).In(Category.Screen).Of(this);
             Value(kind, "text color", OwnValue.Color<IMyTextSurfaceProvider, Picked>(picked,
@@ -123,7 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 (provider, which) => Surface(provider, which).Font));
             Value(kind, "font size", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).FontSize));
-            Value(kind, "alignment", OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(Alignments, picked,
+            Value(kind, "alignment", OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(ChoiceTypes.Alignment, picked,
                 (provider, which) => Position(TextAlignments, Surface(provider, which).Alignment)));
             Value(kind, "padding", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).TextPadding));
@@ -180,8 +183,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         }
 
         /// <summary>
-        /// The app a screen runs, as one of <paramref name="apps" />, each read by the name the game shows for it; no app, or one
-        /// the list does not hold, is none of them.
+        /// The app a screen runs, by its id, which an editor offers among <paramref name="apps" />, each by the name the game shows
+        /// for it; empty where it runs none.
         /// </summary>
         /// <remarks>A look is a pass over the list, made only where an <c>if</c> reads the value or a <c>when</c> watches it.</remarks>
         static OwnValue Running(IList<string> apps, Func<IList<Literal>, Picked> picked)
@@ -194,8 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 named[i] = AppName(apps[i]);
             }
 
-            return OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(ids, picked,
-                (provider, which) => Array.IndexOf(ids, Surface(provider, which).Script)).Saying(named);
+            return OwnValue.TextAmong<IMyTextSurfaceProvider, Picked>(ids, picked, (provider, which) => Surface(provider, which).Script ?? "").Saying(named);
         }
 
         /// <summary>The image to show, from the screen images the terminal lists and by the names it shows them by.</summary>

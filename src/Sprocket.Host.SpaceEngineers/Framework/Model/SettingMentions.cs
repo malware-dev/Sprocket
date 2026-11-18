@@ -124,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         static Literal Walk(Literal value, List<string> into, string was, string now)
         {
-            return value.IsSetting ? Literal.Setting(Walk(value.Text, into, was, now), value.IsQualified) : value;
+            return value.IsSetting ? Literal.Setting(Walk(value.Text, into, was, now), value.IsKinded) : value;
         }
 
         /// <summary>The setting named <paramref name="name" />, added to <paramref name="into" /> where it is not there, and renamed where it is <paramref name="was" />.</summary>

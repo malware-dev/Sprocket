@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
@@ -77,11 +78,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             get
             {
                 var name = Name.Trim();
-                if (name.Length == 0 || _system.TakesInAnyCase(name))
+                if (name.Length == 0 || _system.HasStateInAnyCase(name))
                     return _editor.Texts.PickStateNameTaken;
 
                 var made = TypeMade;
-                return made != null && (made.Name.Length == 0 || _system.TakesInAnyCase(made.Name) || string.Equals(made.Name, name, StringComparison.OrdinalIgnoreCase)) ? _editor.Texts.PickTypeNameTaken : "";
+                return made != null && (made.Name.Length == 0 || _system.HasTypeInAnyCase(made.Name) || StateReader.IsBuiltInInAnyCase(made.Name)) ? _editor.Texts.PickTypeNameTaken : "";
             }
         }
 
@@ -108,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// <summary>Starts a state afresh: a numbered name, on or off, starting off; a type made before is kept to come back to.</summary>
         public void Begin()
         {
-            _name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.TakesInAnyCase);
+            _name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.HasStateInAnyCase);
             _start = StateValueQuestion.Off;
         }
 
@@ -258,8 +259,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             var typeWord = _head.Fields[1].Text ?? "";
             if (typeWord == NewTypeWord && _made == null)
             {
-                var name = Name.Trim();
-                _made = TypeEditing.New(texts, _system.Types.Count, taken => _system.TakesInAnyCase(taken) || string.Equals(taken, name, StringComparison.OrdinalIgnoreCase));
+                _made = TypeEditing.New(texts, _system.Types.Count, taken => _system.HasTypeInAnyCase(taken) || StateReader.IsBuiltInInAnyCase(taken));
             }
 
             var type = typeWord == texts.StateFlag ? "" : typeWord == NewTypeWord ? _made.Name : typeWord;

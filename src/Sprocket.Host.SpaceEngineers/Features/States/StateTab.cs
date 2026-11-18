@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.States.Edits;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
@@ -254,20 +255,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         void RetypeToNew(State state)
         {
             var texts = _editor.Texts;
-            var type = TypeEditing.New(texts, _system.Types.Count, _system.TakesInAnyCase);
+            var type = TypeEditing.New(texts, _system.Types.Count, taken => _system.HasTypeInAnyCase(taken) || StateReader.IsBuiltInInAnyCase(taken));
             var start = StateValueQuestion.Starts(texts, _system, type.Name, type)[0];
             _editor.Do(_system, new WithMade(new AddType(type, _system.Types.Count), new ChangeStart(_system, state, start.Value, start.Type)));
         }
 
         void AddType()
         {
-            var type = TypeEditing.New(_editor.Texts, _system.Types.Count, _system.TakesInAnyCase);
+            var type = TypeEditing.New(_editor.Texts, _system.Types.Count, taken => _system.HasTypeInAnyCase(taken) || StateReader.IsBuiltInInAnyCase(taken));
             _editor.Do(_system, new AddType(type, _system.Types.Count));
         }
 
         void AddState()
         {
-            var name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.TakesInAnyCase);
+            var name = NumberedName.Free(_editor.Texts.StateStateNumbered, _system.States.Count, _system.HasStateInAnyCase);
             _editor.Do(_system, new AddState(new State(name, "", Literal.Of(false)), _system.States.Count));
         }
 
@@ -294,7 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             return TypeEditing.ChoiceNaming(type, choice, wanted => _editor.Do(_system, new RenameChoice(type, choice, wanted)));
         }
 
-        /// <summary>The name of <paramref name="type" />, given where no slot, type or state of the system has it.</summary>
+        /// <summary>The name of <paramref name="type" />, given where no other type of the system has it, nor a built-in type.</summary>
         Naming TypeNaming(DeclaredType type)
         {
             var was = type.Name;
@@ -302,7 +303,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             {
                 Name = was,
                 NameRequired = true,
-                Accepts = wanted => Free(wanted, was),
+                Accepts = wanted => Free(wanted, was, taken => _system.HasTypeInAnyCase(taken) || StateReader.IsBuiltInInAnyCase(taken)),
                 Renames = wanted =>
                 {
                     if (wanted.Trim() != was)
@@ -311,7 +312,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             };
         }
 
-        /// <summary>The name of <paramref name="state" />, given where no slot, type or state of the system has it.</summary>
+        /// <summary>The name of <paramref name="state" />, given where no other state of the system has it.</summary>
         Naming StateNaming(State state)
         {
             var was = state.Name;
@@ -319,7 +320,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             {
                 Name = was,
                 NameRequired = true,
-                Accepts = wanted => Free(wanted, was),
+                Accepts = wanted => Free(wanted, was, _system.HasStateInAnyCase),
                 Renames = wanted =>
                 {
                     if (wanted.Trim() != was)
@@ -328,11 +329,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             };
         }
 
-        /// <summary>Whether <paramref name="wanted" />, trimmed, can stand in place of <paramref name="was" />: the same in any case, or a name no slot, state or type has in any case.</summary>
-        bool Free(string wanted, string was)
+        /// <summary>Whether <paramref name="wanted" />, trimmed, can stand in place of <paramref name="was" />: the same in any case, or a name <paramref name="taken" /> does not refuse.</summary>
+        static bool Free(string wanted, string was, Func<string, bool> taken)
         {
             var name = wanted.Trim();
-            return string.Equals(name, was, StringComparison.OrdinalIgnoreCase) || !_system.TakesInAnyCase(name);
+            return string.Equals(name, was, StringComparison.OrdinalIgnoreCase) || !taken(name);
         }
     }
 }

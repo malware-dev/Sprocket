@@ -15,12 +15,12 @@ namespace Sprocket.Tests;
 /// <summary>What a text panel shows and an emotion controller's face, and a camera's viewer.</summary>
 public class ScreenBlockTests
 {
-    /// <summary>A value of a few names a person reads by other words shows those words, and the program keeps the names.</summary>
+    /// <summary>A text value offering a few ids a person reads by other words shows those words, and the program keeps the ids.</summary>
     [Fact]
     public void AValueReadByOtherWordsKeepsItsNames()
     {
         var kind = new EntityKind("Test/Screen", "Screen");
-        kind.WithValue("app", "app", OwnValue.OneOf<IMyTerminalBlock>(new[] { "TSS_ClockAnalog", "TSS_Weather" }, _ => 0)
+        kind.WithValue("app", "app", OwnValue.TextAmong<IMyTerminalBlock>(new[] { "TSS_ClockAnalog", "TSS_Weather" }, _ => "")
             .Saying(new[] { "Clock Analog", "Weather" }));
         var fields = new List<Field>();
         kind.FindAction("app", ReachKind.Value)!.Fields(fields);
@@ -62,12 +62,12 @@ public class ScreenBlockTests
         panel.App = "TSS_Weather";
 
         Assert.Equal("DOCKED", Ran.Read(ship, panel, ScreenType.TextShown).Text);
-        var screen = HostTypes.Returned("screen");
+        var screen = HostTypes.Returned("get_screen");
         Assert.Same(screen, ship.Entity(panel.Id).Kind.FindAction(ScreenType.TextShown, ReachKind.Value)!.Type);
         Assert.Same(screen, ship.Entity(panel.Id).Kind.FindAction(ScreenType.App, ReachKind.Value)!.Type);
         var app = ship.Entity(panel.Id).Kind.FindAction(ScreenType.App, ReachKind.Value)!.OwnValue!;
         Assert.Equal(new[] { "TSS_ClockAnalog", "TSS_Weather" }, app.Names);
-        Assert.True(app.Is(Literal.Name("TSS_Weather")).Holds(panel.Block, null!));
+        Assert.True(app.Is(Literal.Of("TSS_Weather")).Holds(panel.Block, null!));
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public class ScreenBlockTests
             .Carrying("FontColor", "Font Color", ValueKind.Color)
             .Carrying("ScriptForegroundColor", "Font Color", ValueKind.Color);
         var kind = ship.Entity(panel.Id).Kind;
-        var screen = HostTypes.Returned("screen");
+        var screen = HostTypes.Returned("get_screen");
 
         Assert.True(kind.FindAction("Title", ReachKind.Value)!.Hidden);
         Assert.True(kind.FindAction("FontColor", ReachKind.Value)!.Hidden);

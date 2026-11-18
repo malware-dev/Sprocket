@@ -99,7 +99,7 @@ public class StateScriptTests
             + "        else if all sprocket.status on [ outer ] == closed then {\n"
             + "            set where to home\n"
             + "        }\n"
-            + "        else if where == side.outside then {\n"
+            + "        else if where == side(outside) then {\n"
             + "            await\n"
             + "        }\n"
             + "        else {\n"
@@ -158,11 +158,11 @@ public class StateScriptTests
             + "    type valve = open | shut\n"
             + "    type hatch = open | shut\n"
             + "    type side = inside | outside\n\n"
-            + "    let intake = valve.open\n"
+            + "    let intake = valve(open)\n"
             + "    let outside = off\n"
-            + "    let where = side.outside\n\n"
+            + "    let where = side(outside)\n\n"
             + "    sequence 1 {\n"
-            + "        set where to side.outside\n"
+            + "        set where to side(outside)\n"
             + "        set intake to shut\n"
             + "    }\n"
             + "}\n";
@@ -171,9 +171,9 @@ public class StateScriptTests
         Assert.Equal("", Load(text, program));
 
         var written = Save(program);
-        Assert.Contains("    let intake = valve.open\n", written);
-        Assert.Contains("    let where = side.outside\n", written);
-        Assert.Contains("        set where to side.outside\n", written);
+        Assert.Contains("    let intake = valve(open)\n", written);
+        Assert.Contains("    let where = side(outside)\n", written);
+        Assert.Contains("        set where to side(outside)\n", written);
         Assert.Contains("        set intake to shut\n", written);
 
         var again = new Automation();
@@ -206,14 +206,13 @@ public class StateScriptTests
     [InlineData("    type side = inside outside\n", "expected '|'")]
     [InlineData("    type flag = inside | outside\n", "built-in type")]
     [InlineData("    type side = inside | outside\n    type side = up | down\n", "already the name of a type")]
-    [InlineData("    type side = inside | outside\n    let side = inside\n", "already the name of a type")]
     [InlineData("    let where = nowhere\n", "no choice 'nowhere'")]
     [InlineData("    let where = 5\n", "a state starts as on, off or one of the system's choices")]
     [InlineData("    let where = on\n    let where = off\n", "already the name of a state")]
-    [InlineData("    type valve = open | shut\n    type hatch = open | shut\n    let intake = open\n", "qualify it")]
+    [InlineData("    type valve = open | shut\n    type hatch = open | shut\n    let intake = open\n", "write the one meant with its kind: valve(open) or hatch(open)")]
     [InlineData("    type side = inside | outside\n    let where = inside\n    let home = where\n", "'where' is a state")]
-    [InlineData("    type side = inside | outside\n    let where = side.nowhere\n", "no choice 'nowhere' in type 'side'")]
-    [InlineData("    type side = inside | outside\n    let where = Gearbox.status.closed\n", "no type")]
+    [InlineData("    type side = inside | outside\n    let where = side(nowhere)\n", "no choice 'nowhere' in type 'side'")]
+    [InlineData("    type side = inside | outside\n    let where = Gearbox(closed)\n", "no type 'Gearbox'")]
     [InlineData("    let cycling = off\n    sequence 1 {\n        set nothing to on\n    }\n", "no state 'nothing'")]
     [InlineData("    let cycling = off\n    sequence 1 {\n        set cycling to inside\n    }\n", "holds on or off")]
     [InlineData("    type side = inside | outside\n    let where = inside\n    sequence 1 {\n        set where to on\n    }\n", "not a flag")]

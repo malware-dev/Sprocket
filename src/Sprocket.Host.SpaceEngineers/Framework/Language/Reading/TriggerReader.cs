@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 {
@@ -117,24 +118,42 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (statement.Key == Keyword.Every)
                 return Every(statement, system, trouble);
 
-            if (!statement.Says(1, Keyword.Then) || (!ScriptQuotes.Named(statement.ValueAt(0)) && !statement.IsMember(0)))
+            var slot = Kinds.Named(statement, statement.ValueAt(0), Keywords.Name(Keyword.Slot));
+            if (!statement.Says(1, Keyword.Then) || (slot == null && !ScriptQuotes.Named(statement.ValueAt(0)) && !statement.IsMember(0)))
             {
                 trouble.Say(statement, "expected whenever <signal> then <step>.");
                 return null;
             }
 
+            if (slot != null)
+                return SignalTrigger.Named(slot);
+
             // whenever button then run 1: the signal button, a variable of a system's or a signal slot of a blueprint's.
             if (ScriptQuotes.Named(statement.ValueAt(0)))
-                return SignalTrigger.Named(statement.Word(0));
+            {
+                var name = statement.Word(0);
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                if (system.FindPart(name) != null)
+                    Kinds.Meanings(system, name, meanings, spellings);
 
-            return Written(statement, trouble);
+                if (meanings.Count > 1)
+                {
+                    Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
+                    return null;
+                }
+
+                return SignalTrigger.Named(name);
+            }
+
+            return Written(statement, system, trouble);
         }
 
         /// <summary>
         /// <c>whenever sprocket.finishes_closing on [ inner ] then</c> or <c>whenever sprocket.toolbar(1, 1, 4) on [ panel1 ] then</c>: a signal
         /// written in place, a block's own change or a slot on the blocks' toolbars; or null and trouble where it is neither.
         /// </summary>
-        static Trigger Written(Statement statement, ScriptTrouble trouble)
+        static Trigger Written(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var member = statement.Parts(0);
             if (member.Count != 2 || member[0].Word.Length == 0 || member[1].Word.Length == 0)
@@ -168,7 +187,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
             }
 
-            return StepReader.Names(statement.On(0), written.Sources, statement, trouble) ? written : null;
+            return StepReader.Names(statement.On(0), written.Sources, statement, system, trouble) ? written : null;
         }
 
         static Trigger When(Statement statement, AutomationSystem system, ScriptTrouble trouble)

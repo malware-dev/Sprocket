@@ -392,18 +392,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         public bool Frees(AutomationSystem system, string name)
         {
             var clean = NameRules.Clean(name);
-            return clean.Length > 0 && With(system, () => !system.TakesInAnyCase(clean));
+            return clean.Length > 0 && With(system, () => system.FindPartInAnyCase(clean) == null);
         }
 
         /// <summary><paramref name="called" /> where a new slot of <paramref name="system" /> can take it, and otherwise the numbered slot name free next.</summary>
         string Free(AutomationSystem system, string called, bool signal, HostType holds, string avoiding = "")
         {
             var clean = NameRules.Clean(called ?? "");
-            if (clean.Length > 0 && !system.TakesInAnyCase(clean))
+            if (clean.Length > 0 && system.FindPartInAnyCase(clean) == null)
                 return clean;
 
             return NumberedName.Free(SlotNames.Numbered(_editor.Texts, signal, holds), system.SlotsAlike(signal, holds == null ? "" : holds.Id),
-                name => name == avoiding || system.TakesInAnyCase(name));
+                name => name == avoiding || system.FindPartInAnyCase(name) != null);
         }
 
         /// <summary>The slots <paramref name="shown" /> fills exactly with the blocks <paramref name="picked" />, by entity id, or null.</summary>

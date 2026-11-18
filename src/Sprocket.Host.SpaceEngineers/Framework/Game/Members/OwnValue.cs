@@ -28,8 +28,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>The kind of value it gives back.</summary>
         public abstract ValueKind Kind { get; }
 
-        /// <summary>The names a "one of" value is one of, in order; empty for any other kind.</summary>
+        /// <summary>The names a "one of" value is one of, in order, or the ids a text value offers; empty for any other.</summary>
         public abstract IReadOnlyList<string> Names { get; }
+
+        /// <summary>The type whose choices a "one of" value gives, or null for any other kind.</summary>
+        public ChoiceType Choices { get; private set; }
 
         /// <summary>The words a person reads for <see cref="Names" />, one each in order, or null where each name is read as it is written.</summary>
         public IReadOnlyList<string> Said => _said;
@@ -223,18 +226,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return new FlagOwnValue(flag);
         }
 
-        /// <summary>One of <paramref name="names" />, read off a <typeparamref name="T" /> as a position among them.</summary>
-        public static OwnValue OneOf<T>(string[] names, Func<T, int> position) where T : class
+        /// <summary>One of the choices of <paramref name="type" />, read off a <typeparamref name="T" /> as a position among them.</summary>
+        public static OwnValue OneOf<T>(ChoiceType type, Func<T, int> position) where T : class
         {
-            return new TypedOwnValue<T, object>(ValueKind.Name, names, false, Nothing,
-                (block, options, seen) => Literal.Of(position(block)));
+            return Of(type, new TypedOwnValue<T, object>(ValueKind.Name, type.Choices, false, Nothing,
+                (block, options, seen) => Literal.Of(position(block))));
         }
 
-        /// <summary>One of <paramref name="names" />, read off a <typeparamref name="T" /> as a position among them, remembering between looks.</summary>
-        public static OwnValue OneOf<T>(string[] names, Func<T, ReaderMemory, int> position) where T : class
+        /// <summary>One of the choices of <paramref name="type" />, read off a <typeparamref name="T" /> as a position among them, remembering between looks.</summary>
+        public static OwnValue OneOf<T>(ChoiceType type, Func<T, ReaderMemory, int> position) where T : class
         {
-            return new TypedOwnValue<T, object>(ValueKind.Name, names, true, Nothing,
-                (block, options, seen) => Literal.Of(position(block, seen)));
+            return Of(type, new TypedOwnValue<T, object>(ValueKind.Name, type.Choices, true, Nothing,
+                (block, options, seen) => Literal.Of(position(block, seen))));
+        }
+
+        /// <summary><paramref name="value" />, its choices those of <paramref name="type" />.</summary>
+        static OwnValue Of(ChoiceType type, OwnValue value)
+        {
+            value.Choices = type;
+            return value;
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />.</summary>
@@ -265,6 +275,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 (block, options, seen) => Literal.Of(text(block) ?? ""));
         }
 
+        /// <summary>Text read off a <typeparamref name="T" />, an id the game gives one of <paramref name="offered" /> for, which an editor offers to choose among.</summary>
+        public static OwnValue TextAmong<T>(string[] offered, Func<T, string> text) where T : class
+        {
+            return new TypedOwnValue<T, object>(ValueKind.Text, offered, false, Nothing,
+                (block, options, seen) => Literal.Of(text(block) ?? ""));
+        }
+
+        /// <summary>Text read off a <typeparamref name="T" /> with options read into a <typeparamref name="TOptions" />, an id the game gives one of <paramref name="offered" /> for, which an editor offers to choose among.</summary>
+        public static OwnValue TextAmong<T, TOptions>(string[] offered, Func<IList<Literal>, TOptions> options, Func<T, TOptions, string> text)
+            where T : class
+        {
+            return new TypedOwnValue<T, TOptions>(ValueKind.Text, offered, false, options,
+                (block, given, seen) => Literal.Of(text(block, given) ?? ""));
+        }
+
         /// <summary>A color read off a <typeparamref name="T" />.</summary>
         public static OwnValue Color<T>(Func<T, Color> color) where T : class
         {
@@ -283,12 +308,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 (block, given, seen) => Literal.Of(number(block, given)));
         }
 
-        /// <summary>A function of a <typeparamref name="T" /> giving back one of <paramref name="names" /> as a position among them, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue OneOf<T, TOptions>(string[] names, Func<IList<Literal>, TOptions> options,
+        /// <summary>A function of a <typeparamref name="T" /> giving back one of the choices of <paramref name="type" /> as a position among them, with options read into a <typeparamref name="TOptions" />.</summary>
+        public static OwnValue OneOf<T, TOptions>(ChoiceType type, Func<IList<Literal>, TOptions> options,
             Func<T, TOptions, int> position) where T : class
         {
-            return new TypedOwnValue<T, TOptions>(ValueKind.Name, names, false, options,
-                (block, given, seen) => Literal.Of(position(block, given)));
+            return Of(type, new TypedOwnValue<T, TOptions>(ValueKind.Name, type.Choices, false, options,
+                (block, given, seen) => Literal.Of(position(block, given))));
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a color, with options read into a <typeparamref name="TOptions" />.</summary>

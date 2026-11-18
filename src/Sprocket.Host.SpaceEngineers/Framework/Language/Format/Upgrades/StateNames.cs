@@ -5,8 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
 {
     /// <summary>
     /// Version 2 alpha 1: a bare name that could be a state or a choice is no longer read as the state, and a state may be
-    /// written <c>states.home</c>. A program written before it gets every state it sets a state to or compares one with
-    /// written so, as it read them, <c>set where to home</c> becoming <c>set where to states.home</c>.
+    /// written with its kind, <c>state(home)</c>. A program written before it gets every state it sets a state to or compares one with
+    /// written so, as it read them, <c>set where to home</c> becoming <c>set where to state(home)</c>.
     /// </summary>
     public sealed class StateNames : FormatChange
     {
@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             }
         }
 
-        /// <summary>Writes qualified every state of <paramref name="states" /> that <paramref name="statements" />, and the statements in their blocks, give a state or compare one with.</summary>
+        /// <summary>Writes with its kind every state of <paramref name="states" /> that <paramref name="statements" />, and the statements in their blocks, give a state or compare one with.</summary>
         static void Qualified(IList<Statement> statements, ICollection<string> states)
         {
             foreach (var statement in statements)
@@ -50,18 +50,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
                     // where == home, after an if, an else if or a when.
                     var relation = statement.ValueAt(at + 1);
                     if (State(statement, at, states) && (relation.Says(Keyword.EqualTo) || relation.Says(Keyword.NotEqualTo)) && State(statement, at + 2, states))
-                        statement.Qualify(at + 2, Namespaces.States);
+                        statement.Kind(at + 2, Kinds.State);
                 }
 
                 Qualified(statement.Body, states);
             }
         }
 
-        /// <summary>Writes qualified the state that the state at <paramref name="at" /> is set to, after <c>to</c>.</summary>
+        /// <summary>Writes with its kind the state that the state at <paramref name="at" /> is set to, after <c>to</c>.</summary>
         static void Given(Statement statement, int at, ICollection<string> states)
         {
             if (State(statement, at, states) && statement.Says(at + 1, Keyword.To) && State(statement, at + 2, states))
-                statement.Qualify(at + 2, Namespaces.States);
+                statement.Kind(at + 2, Kinds.State);
         }
 
         /// <summary>Whether the value at <paramref name="at" /> is one of <paramref name="states" />, written bare.</summary>

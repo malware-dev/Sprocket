@@ -8,11 +8,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     {
         const string Unheard = "A drill raises nothing as a pilot takes it up or its mode changes.";
 
-        static readonly string[] Modes = { "mining", "clearing-terrain" };
-
         static readonly OwnValue Drilling = OwnValue.Flag(Reading.Of<IMyShipDrill>(drill => drill.IsActivated));
 
-        static readonly OwnValue Mode = OwnValue.OneOf<IMyShipDrill>(Modes, drill => drill.TerrainClearingMode ? 1 : 0)
+        static readonly OwnValue Mode = OwnValue.OneOf<IMyShipDrill>(ChoiceTypes.DrillMode, drill => drill.TerrainClearingMode ? 1 : 0)
             .Writing<IMyShipDrill>((drill, mode) => drill.TerrainClearingMode = mode.Whole == 1);
 
         /// <inheritdoc />

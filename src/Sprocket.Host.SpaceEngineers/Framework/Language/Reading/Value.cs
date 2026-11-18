@@ -73,6 +73,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return new Value(ValueForm.Reference, null, Run(from, count));
         }
 
+        /// <summary>A thing with its kind, <c>side(inside)</c>, the kind and the thing the two parts of <see cref="ScriptValues.Parts" /> from <paramref name="from" />.</summary>
+        public static Value Kinded(int from)
+        {
+            return new Value(ValueForm.Kinded, null, Run(from, 2));
+        }
+
         static long Run(int from, int count)
         {
             return ((long)from << 32) | (uint)count;

@@ -216,7 +216,7 @@ public class UpgradeTests
 
         var part = Upgraded(OnABlockSlot("TextPanel/LargeTextPanel"), ship, out var system);
 
-        Assert.Equal(HostTypes.Returned("screen")!.Id, part.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, part.Holds);
         Assert.Single(system.Instances[0].Facets("status")!);
         Assert.Equal(new[] { "status" }, ((Act)system.Sequences[0].Steps[0]).Targets);
     }
@@ -258,7 +258,7 @@ public class UpgradeTests
         var system = program.Systems[0];
         var show = (Act)system.Sequences[0].Steps[0];
         var slot = Assert.Single(show.Targets);
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Equal(new[] { 2 }, system.Instances[0].Facets(slot));
         Assert.Equal(new[] { Literal.Of("Docked") }, show.Arguments);
     }
@@ -276,7 +276,7 @@ public class UpgradeTests
         var written = ProgramWriter.Save(program, ship.World.Values);
 
         Assert.Contains("expects sprocket.screen", written);
-        Assert.Contains("sprocket.screen(2) on [ board ]", written);
+        Assert.Contains("sprocket.get_screen(2) on [ board ]", written);
         Assert.DoesNotContain("\"Back\"", written);
         var again = new Automation();
         Assert.Equal("", ProgramReader.Load(written, again, ship.World.Values));
@@ -330,7 +330,7 @@ public class UpgradeTests
 
         var system = program.Systems[0];
         var slot = ((Act)system.Sequences[0].Steps[0]).Targets[0];
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Null(system.Instances[0].FilledWith(slot));
     }
 

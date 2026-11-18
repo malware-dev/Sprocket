@@ -172,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A thing of the type <paramref name="type" /> on some blocks, by number from 1: <c>sprocket.screen(1) on [ board ]</c>.</summary>
+        /// <summary>A thing of the type <paramref name="type" /> on some blocks, by number from 1: <c>sprocket.get_screen(1) on [ board ]</c>.</summary>
         /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
         public ScriptWriter Facet(HostType type, IList<string> blocks, int number)
         {
@@ -237,14 +237,31 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A name in three parts: a member's word, <c>sprocket.status.closed</c>, or a type's choice, <c>types.side.inside</c>.</summary>
-        public ScriptWriter Qualified(string space, string member, string word)
+        /// <summary>A thing with its kind, <c>side(inside)</c>, the kind in <paramref name="space" /> where it is not empty: <c>sprocket.door_status(closed)</c>.</summary>
+        public ScriptWriter Kinded(string space, string kind, string thing)
         {
             Space();
-            Spell(_text, space, member);
-            _text.Append('.');
-            Spell(_text, word);
+            Kind(_text, space, kind, thing);
             return this;
+        }
+
+        /// <summary>A choice with its type, and the type with its kind: <c>type(side)(inside)</c>.</summary>
+        public ScriptWriter Typed(string type, string choice)
+        {
+            Space();
+            Kind(_text, "", Keywords.Name(Keyword.Type), type);
+            _text.Append('(');
+            Spell(_text, choice);
+            _text.Append(')');
+            return this;
+        }
+
+        /// <summary>How a thing with its kind, <c>state(where)</c>, is spelled, exactly as the writer spells it.</summary>
+        public static string KindSpelling(string kind, string thing)
+        {
+            var spelt = new StringBuilder();
+            Kind(spelt, "", kind, thing);
+            return spelt.ToString();
         }
 
         /// <summary>A whole number.</summary>
@@ -415,16 +432,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return spelt.ToString();
         }
 
-        /// <summary>How a name in three parts, <c>types.side.inside</c>, is spelled, exactly as the writer spells it.</summary>
-        public static string Spelling(string space, string name, string word)
-        {
-            var spelt = new StringBuilder();
-            Spell(spelt, space, name);
-            spelt.Append('.');
-            Spell(spelt, word);
-            return spelt.ToString();
-        }
-
         void Write(string id)
         {
             Spell(_text, id);
@@ -445,6 +452,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         }
 
         /// <summary>A name: bare where it can be, in single quotes where it cannot.</summary>
+        /// <summary>Writes <paramref name="thing" /> with its kind, a keyword such as <c>type</c> written bare as the kind it is.</summary>
+        static void Kind(StringBuilder into, string space, string kind, string thing)
+        {
+            if (string.IsNullOrEmpty(space) && Keywords.Taken(kind))
+                into.Append(kind);
+            else
+                Spell(into, space, kind);
+
+            into.Append('(');
+            Spell(into, thing);
+            into.Append(')');
+        }
+
         static void Spell(StringBuilder into, string id)
         {
             if (Keywords.Bare(id))

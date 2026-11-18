@@ -65,7 +65,7 @@ public class ScreensTests
         var (ship, board) = Built();
         board.Carrying("FontSize", "Font size", ValueKind.Real, "0.1", "10");
         var kind = ship.Entity(board.Id).Kind;
-        var screen = HostTypes.Returned("screen");
+        var screen = HostTypes.Returned("get_screen");
 
         Assert.Same(screen, kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Type);
         Assert.True(kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Vetted);
@@ -256,6 +256,20 @@ public class ScreensTests
         Assert.True(Probe.Of(entity, BlockKinds.Own, "alignment", new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("right"), facet: 2)!.Holds());
     }
 
+    /// <summary>A version 1 program names the function returning a screen <c>screen</c>; it reads as <c>get_screen</c>, and is written so.</summary>
+    [Fact]
+    public void AnEarlierProgramsScreenFunctionIsGetScreen()
+    {
+        var (ship, board) = Built();
+        var (program, _, _, _) = Slotted(ship, board, 2, ScreenType.ShowText, Literal.Of("Docked"));
+        var values = new Values();
+        var text = ProgramWriter.Save(program, values).Replace("sprocket 2 alpha 1", "sprocket 1").Replace("sprocket.get_screen(", "sprocket.screen(");
+
+        var read = new Automation();
+        Assert.Equal("", ProgramReader.Load(text, read, values));
+        Assert.Contains("status = [ sprocket.get_screen(2) on [ ", ProgramWriter.Save(read, values));
+    }
+
     /// <summary>A slot of screens is written as one that expects sprocket.screen, each installation's answer a screen of each block, and read back the same.</summary>
     [Fact]
     public void ASlotOfScreensReadsAndWritesBackAsItWas()
@@ -266,7 +280,7 @@ public class ScreensTests
 
         var text = ProgramWriter.Save(program, values);
         Assert.Contains("slot status expects sprocket.screen", text);
-        Assert.Contains("status = [ sprocket.screen(2) on [ ", text);
+        Assert.Contains("status = [ sprocket.get_screen(2) on [ ", text);
 
         var read = new Automation();
         Assert.Equal("", ProgramReader.Load(text, read, values));

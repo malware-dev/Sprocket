@@ -19,9 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly Reading Shut = Reading.Of<IMyDoor>(door => door.Status == DoorStatus.Closed);
 
-        static readonly string[] Statuses = { "open", "closed", "opening", "closing" };
-
-        static readonly OwnValue State = OwnValue.OneOf<IMyDoor>(Statuses, door => Position(door.Status));
+        static readonly OwnValue State = OwnValue.OneOf<IMyDoor>(ChoiceTypes.DoorStatus, door => Position(door.Status));
 
         // The game's ratio is nought to one; the terminal and a sentence say a percentage.
         static readonly OwnValue Ratio = OwnValue.Number<IMyDoor>(door => door.OpenRatio * 100.0);

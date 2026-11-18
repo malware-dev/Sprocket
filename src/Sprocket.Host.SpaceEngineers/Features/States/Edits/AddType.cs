@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States.Edits
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return !system.Types.Contains(_type) && !system.Takes(_type.Name);
+            return !system.Types.Contains(_type) && system.FindType(_type.Name) == null;
         }
 
         /// <inheritdoc />

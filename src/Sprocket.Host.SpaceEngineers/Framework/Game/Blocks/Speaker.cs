@@ -1,7 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
-using System;
 using System.Collections.Generic;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
@@ -82,12 +81,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             words.AddRange(means);
         }
 
-        /// <summary>The sound the block holds ready, as one of <paramref name="sounds" /> by id, which a step can choose.</summary>
+        /// <summary>The sound the block holds ready, by its id, one of <paramref name="sounds" />, which a step can choose.</summary>
         /// <remarks>A look is a pass over the list, made only where an <c>if</c> reads the value or a <c>when</c> watches it.</remarks>
         static OwnValue Holding(string[] sounds)
         {
-            return OwnValue.OneOf<IMySoundBlock>(sounds, block => Array.IndexOf(sounds, block.SelectedSound))
-                .Writing<IMySoundBlock>((block, value) => block.SelectedSound = sounds[(int)value.Whole]);
+            return OwnValue.TextAmong<IMySoundBlock>(sounds, block => block.SelectedSound)
+                .Writing<IMySoundBlock>((block, value) => block.SelectedSound = value.Text);
         }
 
         /// <summary>Plays the sound a step chose, or the one left selected where it chose none.</summary>

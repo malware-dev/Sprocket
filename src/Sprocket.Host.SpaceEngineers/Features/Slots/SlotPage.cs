@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         public override bool AcceptsName(string name)
         {
             var wanted = NameRules.Clean(name);
-            return _system.FindPartInAnyCase(wanted) == _part || !_system.TakesInAnyCase(wanted);
+            return _system.FindPartInAnyCase(wanted) == _part || _system.FindPartInAnyCase(wanted) == null;
         }
 
         /// <summary>Writes what is still being typed into the slot, and where anything was changed here asks whether to keep it.</summary>

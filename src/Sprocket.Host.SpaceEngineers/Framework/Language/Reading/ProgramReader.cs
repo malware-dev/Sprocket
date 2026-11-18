@@ -542,7 +542,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>status = [ sprocket.screen(1) on [ board ] ]</c>: what answers a slot of the type <paramref name="type" /> in one use of
+        /// <c>status = [ sprocket.get_screen(1) on [ board ] ]</c>: what answers a slot of the type <paramref name="type" /> in one use of
         /// a blueprint, each written in place by the function returning one, a thing of each block it is on.
         /// </summary>
         static void Facets(Statement statement, HostType type, SystemInstance instance, Automation program, ScriptTrouble trouble)
@@ -550,13 +550,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var items = statement.Items(1);
             var blocks = new List<string>();
             var facets = new List<int>();
-            var like = $"{type.Id}(1) on [ <block> ]";
+            var called = $"{type.Id.Substring(0, type.Id.IndexOf('.'))}.{type.Function}";
+            var like = $"{called}(1) on [ <block> ]";
             for (var i = 0; i < items.Count; i++)
             {
                 var member = statement.Member(items[i]);
-                if (items[i].Form != ValueForm.Reference || member.Count != 2 || $"{member[0].Word}.{member[1].Word}" != type.Id)
+                if (items[i].Form != ValueForm.Reference || member.Count != 2 || $"{member[0].Word}.{member[1].Word}" != called)
                 {
-                    trouble.Say(statement, $"expected {type.Id} in the list, like [ {like} ].");
+                    trouble.Say(statement, $"expected {called} in the list, like [ {like} ].");
                     return;
                 }
 

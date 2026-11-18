@@ -147,6 +147,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return value.Form == ValueForm.Reference ? Within(_reading.Parts[value.From + value.Count - 1]) : new ValueRange();
         }
 
+        /// <summary>The list of names the member <paramref name="value" /> is on, or none where it is no member.</summary>
+        public Value NamesOf(Value value)
+        {
+            return value.Form == ValueForm.Reference ? _reading.Parts[value.From + value.Count - 1] : Value.None;
+        }
+
         /// <summary>The parts of the name of the member <paramref name="value" />, none where it is no member.</summary>
         public ValueRange Member(Value value)
         {
@@ -204,22 +210,63 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 _reading.Parts.Set(value.From, new Value(ValueForm.Identifier, first));
         }
 
-        /// <summary>Has the name at <paramref name="index" /> written qualified by <paramref name="space" /> in its place: <c>states.home</c> for <c>home</c>.</summary>
+        /// <summary>Has the name of the member <paramref name="value" /> end with <paramref name="last" /> in place of its last part: <c>sprocket.get_screen</c> for <c>sprocket.screen</c>.</summary>
         /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
-        public void Qualify(int index, string space)
+        public void RespellLast(Value value, string last)
         {
-            var name = ValueAt(index);
+            if (value.Form == ValueForm.Reference)
+                _reading.Parts.Set(value.From + value.Count - 3, new Value(ValueForm.Identifier, last));
+        }
+
+        /// <summary>Has the value at <paramref name="index" /> written with the kind <paramref name="kind" /> in its place: <c>state(home)</c> for <c>home</c>.</summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public void Kind(int index, string kind)
+        {
+            _reading.Values.Set(_from + index, Kinded(new Value(ValueForm.Identifier, kind), ValueAt(index)));
+        }
+
+        /// <summary>Has the item at <paramref name="index" /> of the list <paramref name="list" /> written with the kind <paramref name="kind" /> in its place: <c>slot(side)</c> for <c>side</c>.</summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public void KindWithin(Value list, int index, string kind)
+        {
+            var items = _reading.Items;
+            items.Set(list.From + index, Kinded(new Value(ValueForm.Identifier, kind), items[list.From + index]));
+        }
+
+        /// <summary>Has the value at <paramref name="index" /> written as <paramref name="value" /> in its place.</summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public void Put(int index, Value value)
+        {
+            _reading.Values.Set(_from + index, value);
+        }
+
+        /// <summary><paramref name="thing" /> with the kind <paramref name="kind" />, written into this statement's reading.</summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public Value Kinded(Value kind, Value thing)
+        {
             var parts = _reading.Parts;
             var from = parts.Count;
-            parts.Add(new Value(ValueForm.Identifier, space));
-            parts.Add(new Value(ValueForm.Identifier, name.Word));
-            _reading.Values.Set(_from + index, Value.Qualified(from, 2));
+            parts.Add(kind);
+            parts.Add(thing);
+            return Value.Kinded(from);
         }
 
         /// <summary>The parts of the name in parts <paramref name="value" />, <c>settings.'Open angle'</c>, or none where it is no such name.</summary>
         public ValueRange PartsOf(Value value)
         {
             return value.Form == ValueForm.Qualified ? new ValueRange(_reading.Parts, value.From, value.Count) : new ValueRange();
+        }
+
+        /// <summary>The kind of the thing written with its kind <paramref name="value" />, <c>side</c> in <c>side(inside)</c>, or none where it is no such thing.</summary>
+        public Value KindOf(Value value)
+        {
+            return value.Form == ValueForm.Kinded ? _reading.Parts[value.From] : Value.None;
+        }
+
+        /// <summary>The thing written with its kind <paramref name="value" />, <c>inside</c> in <c>side(inside)</c>, or none where it is no such thing.</summary>
+        public Value ThingOf(Value value)
+        {
+            return value.Form == ValueForm.Kinded ? _reading.Parts[value.From + 1] : Value.None;
         }
 
         /// <summary>The items of a list at a position, or none where there is no list there.</summary>

@@ -83,12 +83,12 @@ optional slot button expects signal
 | **Real** | `0.25`, `1E-05` | Floating-point value, denoted by a decimal point or an exponent. An integer may substitute for a real where accepted. |
 | **Duration** | `600t`, `2s`, `1.5s` | Token pairing a numeric scalar with a unit suffix: `t` (game ticks) or `s` (seconds, where `1s = 60t`). Seconds can have fractional parts and round to the nearest whole tick (`0.25s` = 15t, `0.01s` = 1t). |
 | **Flag** | `on`, `off` | Boolean literal values. |
-| **Choice** | `inside`, `side.inside`, `gearbox.status.closed` | Enumerated choice defined by a system `type` or host enum. Can be bare or qualified. |
+| **Choice** | `inside`, `side(inside)`, `gearbox.door_status(closed)` | A choice of a type the system declares (§9.1) or of a host type (§5.2). Written bare, or with its type as a kind (§4.3). |
 | **Color** | `#FF8800`, `#FF8800CC` | Hexadecimal color literal (RGB or RGBA). |
 | **Vector** | `(3 0 -2)` | Three space-separated integers or reals enclosed in parentheses. |
 | **List** | `[ 1, "two", three ]` | Comma-separated elements in square brackets. May nest lists and vectors: `[ 7, [ (0 2 -1), (3 0 0) ] ]`. |
 | **Block** | `block 'Door/LargeBlockDoor' [ … ]` | Concrete hardware block binding descriptor. |
-| **Setting** | `'Open angle'`, `settings.'Open angle'` | Stands in for a literal wherever the language takes one: the value of the named setting (§8), which each instance supplies. The setting's type must suit the place, as a literal there would. |
+| **Setting** | `'Open angle'`, `setting('Open angle')` | Stands in for a literal wherever the language takes one: the value of the named setting (§8), which each instance supplies. The setting's type must suit the place, as a literal there would. |
 
 ### 4.1 Identifiers vs. IDs (References)
 
@@ -101,16 +101,34 @@ Any entity possessing both an ID and a name (such as a sequence or a system blue
 
 Every name in a program lives in the same world: its slots, types, states, sequences and settings, and the host's own members and types. Two things with the same name collide. A type and a sequence both named `cycle` leave `cycle` meaning either.
 
-Namespaces settle such collisions. Every name belongs to a namespace, and a name qualified with its namespace and a dot, as in `gearbox.close`, means only the one in that namespace.
+A name is written bare wherever that means one thing, and with more detail where it could mean more. A name that could mean more than one thing as written is an error. There are two kinds of detail, and they combine:
 
-* Any name may be written bare or qualified, and a reader accepts both. A name that could mean more than one thing is an error.
+* **A namespace**, with a dot: `gearbox.close`. The host's members and types belong to its namespaces.
+* **A kind** (§4.3): `sequence(cycle)`, `side(inside)`.
+
+`closed`, `door_status(closed)` and `gearbox.door_status(closed)` are the same choice, each written with more detail than the one before.
+
 * Each part of a qualified name is judged on its own, so any part spelled like a keyword is quoted: `gearbox.'on'`.
+
+### 4.3 Kinds
+
+`<kind>(<thing>)` says what kind of thing `<thing>` is. A kind is a built-in type (`flag`, `text`, `integer`, `real`, `duration`, `color`, `vector`, `list`), a type the system declares (§9.1), a host type (§5.2), or a kind of thing a program names: `slot`, `type`, `state`, `setting` or `sequence`.
+
+```sprocket
+run sequence(cycle)          # the sequence, where a type is also called cycle
+let home = side(outside)
+if setting('Outer light') == on then { ... }
+```
+
+* A kind only chooses among what `<thing>` could already be, and never turns one thing into another. `real(4)` is the real 4, as `4` already stands for a real; `text(4)` is an error, as `4` is never text.
+* A kind is written like a function call, and is told from one by its name. A function always belongs to a host's namespace, so a function whose name is also a kind's is written with it: `gearbox.side(1)`.
+* A kind may itself have a kind: `type(side)(inside)` is a choice of the type `side` where a slot is also called `side`.
 
 ---
 
 ## 5. Host Integration
 
-The host engine supplies runtime members and types beyond the core language grammar. The examples in this document are written for a host with a namespace called `gearbox` for its members, and one called `settings` for a system's settings.
+The host engine supplies runtime members and types beyond the core language grammar. The examples in this document are written for a host with a namespace called `gearbox` for its members and types.
 
 ### 5.1 Block Members
 
@@ -128,14 +146,14 @@ Every member exposed by a host on a block is an **action**, a **value**, a **fun
   * Parentheses are written **only** when arguments are present. Writing empty parentheses `()` is a syntax error.
   * Argument counts and types must match the member's parameter signature. Supplying incompatible types or an integer exceeding parameter limits is an error.
   * A parameter may take slots. Its argument is a list of slot names in square brackets: `call gearbox.move_items([ cargo ], "Ingot/Iron", 100) on [ output ]`. The parameter's signature says what the slots must hold, blocks or things of a host type.
-  * A setting may stand in for an argument, as for any literal (§4): `call gearbox.rotate_to(settings.'Open angle', 2) on [ hinge ]`.
-* **Return Types:** Values and functions return a flag, integer, real, text, color, or a host choice name.
+  * A setting may stand in for an argument, as for any literal (§4): `call gearbox.rotate_to(setting('Open angle'), 2) on [ hinge ]`.
+* **Return Types:** Values and functions return a flag, integer, real, text, color, or a choice of a host type.
 
 ### 5.2 Host Types
 
 A host may provide non-block object types associated with a block (such as an LCD text surface).
 * Host types are namespaced: `gearbox.screen`.
-* Returned by host functions: `gearbox.screen(1) on [ board ]` is the first screen of the block `board`.
+* Returned by host functions: `gearbox.get_screen(1) on [ board ]` is the first screen of the block `board`.
 * Entities of a host type expose members defined by the host for that type:
   ```sprocket
   call gearbox.'show text'("Docked") on [ status ]
@@ -223,7 +241,7 @@ required slot mode expects side
   * **Game Type:** A game type id with the `MyObjectBuilder_` prefix dropped (e.g., `LightingBlock`, `Door`). Takes every block of that type and of every type the game builds on it, so `LightingBlock` takes interior lights and spotlights alike.
   * **Exact Subtype:** A quoted name `'Type/Subtype'`, taking that one exact block.
   * **`signal`:** For slots bound to functions returning signals.
-  * **Host Type:** A qualified host type identifier (e.g., `gearbox.screen`), for slots answered by functions that return one. `optional slot output expects gearbox.inventory`, answered by `gearbox.inventory(2) on [ refinery ]`, holds that inventory of the block.
+  * **Host Type:** A qualified host type identifier (e.g., `gearbox.screen`), for slots answered by functions that return one. `optional slot output expects gearbox.inventory`, answered by `gearbox.get_inventory(2) on [ refinery ]`, holds that inventory of the block.
   * **Omitted:** A slot declared with no `expects` clause accepts any block.
   * **Value:** A built-in value type (`flag`, `text`, `integer`, `real`, `duration`, `color`) or a type the system declares (§9.1). The slot is a **setting**: each instance answers it with one value of that type instead of blocks.
 * When a slot is populated from multiple blocks, it expects the nearest common ancestor type shared by all assigned blocks.
@@ -249,14 +267,14 @@ type stage = idle | 'cycling in' | 'cycling out'
 
 ### 9.2 Choice Resolution
 
-* Choices can be written bare (`inside`) or qualified by type (`side.inside`).
-* Host enum choices are qualified by namespace and member (`gearbox.status.closed`).
-* If a bare choice is ambiguous (defined across multiple declared types) and its type cannot be told from where it stands, as in a state's starting value, it is an error and must be explicitly qualified:
+* Choices can be written bare (`inside`) or with their type as a kind (`side(inside)`), and a host type's choices with its namespace too (`gearbox.door_status(closed)`).
+* Where the type a value must have is known, a bare choice is looked for among that type's choices alone. A name that could also mean anything else the program names, such as a state, a setting or a slot, is ambiguous whatever its type.
+* Where no type is known, as in a state's starting value, a bare choice that more than one type has is an error, and is written with its type:
   ```sprocket
   type valve = open | shut
   type hatch = open | shut
 
-  let intake = valve.open  # `open` alone is an ambiguous error
+  let intake = valve(open)  # `open` alone is an ambiguous error
   ```
 
 ### 9.3 States
@@ -265,15 +283,15 @@ A state is a persistent, mutable memory cell scoped to an instance of a system o
 
 ```sprocket
 let where = inside
-let home = side.outside
+let home = side(outside)
 let cycling = off
 ```
 
 * **Declaration:** `let <name> = <value>`. The starting value is mandatory.
 * **Typing:** The state's type is inferred entirely from its initial value; a type is never written in the declaration. It must be a flag (`on` or `off`) or a choice of a declared type. Other types are an error.
 * **Scoping:** States must be declared after their associated types and before any statement referencing them.
-* **Namespace Collision:** Slots, types, and states within a single system share one flat namespace. No duplicate names are permitted. In a plain system, a state cannot share a name with a file-level variable. Names in other systems do not count.
-* **Referencing:** States are referenced bare (without block brackets `[]`, `any`, or `all`). They are mutated via `set`, queried via `if`, and watched via `when`.
+* **Names:** Within a single system, no two things of the same kind share a name, except sequences, which are told apart by their numbers (§4.1). Things of different kinds may share one (§4.2). In a plain system, a state cannot share a name with a file-level variable. Names in other systems do not count.
+* **Referencing:** States are referenced by name (without block brackets `[]`, `any`, or `all`). They are mutated via `set`, queried via `if`, and watched via `when`.
 
 ---
 
@@ -453,7 +471,7 @@ else if where == outside then {
 
 * **Syntax:** `if <state or setting> <comparison> <value> then { ... }`
 * Evaluates equality (`==` or `!=`) against a choice, flag, or another state of matching type; comparing with a value of another type is an error.
-* A setting is tested the same way, on the instance's value: `if settings.'Outer light' == on then { ... }`.
+* A setting is tested the same way, on the instance's value: `if setting('Outer light') == on then { ... }`.
 * Block conditions and state conditions may be freely mixed within the same `if / else if / else` chain.
 
 ---

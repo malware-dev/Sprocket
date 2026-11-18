@@ -27,9 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         const string Moving = "A piston raises its position on every tick it moves, too often to listen to, and nothing else as it starts or stops.";
 
-        static readonly string[] Statuses = { "extended", "retracted", "extending", "retracting", "stopped" };
-
-        static readonly OwnValue State = OwnValue.OneOf<IMyPistonBase>(Statuses, piston => Rank(piston.Status));
+        static readonly OwnValue State = OwnValue.OneOf<IMyPistonBase>(ChoiceTypes.PistonStatus, piston => Rank(piston.Status));
 
         static readonly OwnValue Travelled = OwnValue.Number<IMyPistonBase>(piston => piston.CurrentPosition);
 

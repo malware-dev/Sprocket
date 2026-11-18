@@ -82,7 +82,7 @@ public class ScreenChoiceTests
         var system = screen.Editor.Program.Systems[0];
         var act = Assert.IsType<Act>(system.Sequences[0].Steps[0]);
         var slot = Assert.Single(act.Targets);
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Equal(new[] { 2 }, system.First.Facets(slot));
     }
 
@@ -205,7 +205,7 @@ public class ScreenChoiceTests
         screen.Run(5);
 
         var made = system.Parts.Last();
-        Assert.Equal(HostTypes.Returned("screen")!.Id, made.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, made.Holds);
         Assert.Equal(new[] { 2 }, system.First!.Facets(made.Id));
     }
 
@@ -234,7 +234,7 @@ public class ScreenChoiceTests
 
         var system = screen.Editor.Program.Systems[0];
         var slot = Assert.Single(Assert.IsType<If>(system.Sequences[0].Steps[0]).Compared.Targets);
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Equal(new[] { 2 }, system.First.Facets(slot));
     }
 
