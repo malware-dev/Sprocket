@@ -289,6 +289,26 @@ namespace Sprocket.GameTests
                 while (move.MoveNext())
                     yield return move.Current;
             }
+
+            foreach (var local in LocalTests())
+            {
+                if (!Named(local.Part))
+                    continue;
+
+                var steps = local.Run(_blueprints, tour, _report);
+                while (steps.MoveNext())
+                    yield return steps.Current;
+            }
+        }
+
+        /// <summary>Every client test kept in the Local folder of this machine, newly made.</summary>
+        static IEnumerable<ILocalClientTest> LocalTests()
+        {
+            foreach (var type in typeof(ClientTestPlugin).Assembly.GetTypes())
+            {
+                if (!type.IsAbstract && typeof(ILocalClientTest).IsAssignableFrom(type))
+                    yield return (ILocalClientTest)Activator.CreateInstance(type);
+            }
         }
 
         /// <summary>Whether the run plays the part called <paramref name="part" />: every part where SPROCKET_CLIENTTEST_ONLY names none.</summary>

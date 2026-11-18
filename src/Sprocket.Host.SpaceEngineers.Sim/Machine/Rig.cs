@@ -448,6 +448,12 @@ public sealed class Rig
         return Weld(new Vent(id, name, Type<MyObjectBuilder_AirVent>(), "SmallAirVent", "Air Vent"));
     }
 
+    /// <summary>An air vent, named, of the game's <paramref name="subtype" />, such as "" for the large grid's.</summary>
+    public Vent Vent(long id, string name, string subtype)
+    {
+        return Weld(new Vent(id, name, Type<MyObjectBuilder_AirVent>(), subtype, "Air Vent"));
+    }
+
     /// <summary>A button panel, named, with as many buttons as asked for.</summary>
     /// <remarks>
     /// The game fixes the number of buttons by the block's definition, and a kind is described once per definition,
@@ -719,6 +725,9 @@ public sealed class Rig
     /// <summary>The block Sprocket runs in, which is what the mod is handed.</summary>
     public Programmable Sprocket { get; private set; }
 
+    /// <summary>The name the game gives the player at this machine, which a blueprint made here names as its author: the user's own unless set.</summary>
+    public string PlayerName { get; set; } = Environment.UserName;
+
     /// <summary>Every block on every grid of the construct.</summary>
     public IReadOnlyList<Fitting> Fitted
     {
@@ -813,7 +822,7 @@ public sealed class Rig
             .Done();
 
         MyAPIGateway.Multiplayer = Pretend.To<IMyMultiplayer>()
-            .Gives("MyName", () => Environment.UserName)
+            .Gives("MyName", () => PlayerName)
             .Gives("IsServer", () => true)
             .Done();
 
