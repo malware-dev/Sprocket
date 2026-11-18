@@ -119,11 +119,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
 
             Literal value;
-            if (!Typed(statement, 5, type, system, out value))
-            {
-                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, 5)}; setting '{part.Id}' holds {Holding(type)}.");
+            if (!Typed(statement, 5, part, system, trouble, out value))
                 return;
-            }
 
             part.Default = value;
             part.HasDefault = true;
@@ -142,22 +139,37 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
 
             Literal value;
-            if (!Typed(statement, 1, part.Setting, system, out value))
-            {
-                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, 1)}; setting '{part.Id}' holds {Holding(part.Setting)}.");
+            if (!Typed(statement, 1, part, system, trouble, out value))
                 return;
-            }
 
             instance.Answer(part.Id, value);
         }
 
         /// <summary>
-        /// The value at <paramref name="at" /> as one of <paramref name="type" />, a whole number standing for a real one; or
-        /// false where it is none.
+        /// The value at <paramref name="at" /> as one of the type <paramref name="part" />, a setting, holds, a whole number
+        /// standing for a real one; or false and trouble where it is none.
         /// </summary>
         /// <remarks>A choice of a declared type is written bare, or qualified by its type.</remarks>
-        public static bool Typed(Statement statement, int at, string type, AutomationSystem system, out Literal value)
+        public static bool Typed(Statement statement, int at, Part part, AutomationSystem system, ScriptTrouble trouble, out Literal value)
         {
+            bool said;
+            if (Typed(statement, at, part.Setting, system, trouble, out said, out value))
+                return true;
+
+            if (!said)
+                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; setting '{part.Id}' holds {Holding(part.Setting)}.");
+
+            return false;
+        }
+
+        /// <summary>
+        /// The value at <paramref name="at" /> as one of <paramref name="type" />; or false where it is none, with
+        /// <paramref name="said" /> true where trouble already says why.
+        /// </summary>
+        static bool Typed(Statement statement, int at, string type, AutomationSystem system, ScriptTrouble trouble, out bool said,
+            out Literal value)
+        {
+            said = false;
             value = default(Literal);
             var written = statement.ValueAt(at);
             switch (type)
@@ -212,10 +224,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (declared == null)
                 return false;
 
-            var parts = statement.Parts(at);
-            var choice = written.Form == ValueForm.Qualified && parts.Count == 2 && parts[0].Word == type
-                ? parts[1].Word
-                : ScriptQuotes.Named(written) ? written.Word : null;
+            string choice = null;
+            if (written.Form == ValueForm.Qualified)
+            {
+                var parts = statement.Parts(at);
+                string qualifier;
+                if (!StateReader.ChoiceType(statement, parts, system, trouble, out qualifier))
+                {
+                    said = true;
+                    return false;
+                }
+
+                if (qualifier == type)
+                    choice = parts[parts.Count - 1].Word;
+            }
+            else if (ScriptQuotes.Named(written))
+                choice = written.Word;
 
             if (choice == null || !declared.Has(choice))
                 return false;
@@ -292,11 +316,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return test;
             }
 
-            if (!Typed(statement, at + 2, part.Setting, system, out value))
-            {
-                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at + 2)}; setting '{name}' holds {Holding(part.Setting)}.");
+            if (!Typed(statement, at + 2, part, system, trouble, out value))
                 return null;
-            }
 
             test.Value = value;
             return test;

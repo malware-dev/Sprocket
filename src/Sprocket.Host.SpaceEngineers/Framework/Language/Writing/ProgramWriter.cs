@@ -417,7 +417,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             if (system != null && value.Kind == ValueKind.Name && Mistaken(system, value.Text, starting))
             {
-                pen.Qualified(type, value.Text);
+                if (system.FindPart(type) != null)
+                    pen.Qualified(Namespaces.Types, type, value.Text);
+                else
+                    pen.Qualified(type, value.Text);
+
                 return;
             }
 

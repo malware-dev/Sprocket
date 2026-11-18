@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
@@ -233,28 +234,60 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             type = "";
             choice = default(Literal);
             var parts = statement.Parts(at);
-            var declared = parts.Count == 2 ? system.FindType(parts[0].Word) : null;
+            string written;
+            if (!ChoiceType(statement, parts, system, trouble, out written))
+                return false;
+
+            var declared = written == null ? null : system.FindType(written);
             if (declared == null)
             {
-                trouble.Say(statement, $"no type '{(parts.Count == 2 ? parts[0].Word : ScriptQuotes.Spelling(parts))}' in the system.");
+                trouble.Say(statement, $"no type '{written ?? ScriptQuotes.Spelling(parts)}' in the system.");
                 return false;
             }
 
-            if (!declared.Has(parts[1].Word))
+            var chosen = parts[parts.Count - 1].Word;
+            if (!declared.Has(chosen))
             {
-                trouble.Say(statement, $"no choice '{parts[1].Word}' in type '{declared.Name}'.");
+                trouble.Say(statement, $"no choice '{chosen}' in type '{declared.Name}'.");
                 return false;
             }
 
             if (wanted != null && declared.Name != wanted)
             {
-                trouble.Say(statement, $"'{declared.Name}.{parts[1].Word}' is of type {declared.Name}; expected a choice of {wanted}.");
+                trouble.Say(statement, $"'{declared.Name}.{chosen}' is of type {declared.Name}; expected a choice of {wanted}.");
                 return false;
             }
 
             type = declared.Name;
-            choice = Literal.Name(parts[1].Word);
+            choice = Literal.Name(chosen);
             return true;
+        }
+
+        /// <summary>
+        /// The type <paramref name="parts" />, a choice qualified by its type, names into <paramref name="type" />: <c>side</c>
+        /// in <c>side.inside</c> or <c>types.side.inside</c>, or null where the parts are neither; false and trouble where a
+        /// bare type is also the name of a slot.
+        /// </summary>
+        public static bool ChoiceType(Statement statement, ValueRange parts, AutomationSystem system, ScriptTrouble trouble, out string type)
+        {
+            type = null;
+            if (parts.Count == 3 && parts[0].Word == Namespaces.Types)
+            {
+                type = parts[1].Word;
+                return true;
+            }
+
+            if (parts.Count != 2)
+                return true;
+
+            type = parts[0].Word;
+            if (system.FindType(type) == null || system.FindPart(type) == null)
+                return true;
+
+            SettingReader.Ambiguous(statement, type, new[] { $"the slot '{type}'", $"the type '{type}'" },
+                new[] { ScriptWriter.Spelling(Namespaces.Types, type, parts[1].Word) }, trouble);
+            type = null;
+            return false;
         }
 
         /// <summary>
@@ -305,10 +338,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (written.Form == ValueForm.Qualified)
             {
                 var parts = statement.PartsOf(written);
-                if (parts.Count != 2)
+                var typed = parts.Count == 3 && parts[0].Word == Namespaces.Types;
+                if (parts.Count != 2 && !typed)
                 {
                     trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; expected {expected} or a state of the same type.");
                     return false;
+                }
+
+                string choiceType;
+                if (!ChoiceType(statement, parts, system, trouble, out choiceType))
+                    return false;
+
+                if (typed)
+                {
+                    if (flag)
+                    {
+                        trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; expected {expected} or a state of the same type.");
+                        return false;
+                    }
+
+                    string of;
+                    return Qualified(statement, at, system, type, trouble, out of, out value);
                 }
 
                 space = parts[0].Word;

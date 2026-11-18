@@ -237,7 +237,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A word of a member, qualified by the member and its namespace: <c>sprocket.status.closed</c>.</summary>
+        /// <summary>A name in three parts: a member's word, <c>sprocket.status.closed</c>, or a type's choice, <c>types.side.inside</c>.</summary>
         public ScriptWriter Qualified(string space, string member, string word)
         {
             Space();
@@ -412,6 +412,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             var spelt = new StringBuilder();
             Spell(spelt, space, name);
+            return spelt.ToString();
+        }
+
+        /// <summary>How a name in three parts, <c>types.side.inside</c>, is spelled, exactly as the writer spells it.</summary>
+        public static string Spelling(string space, string name, string word)
+        {
+            var spelt = new StringBuilder();
+            Spell(spelt, space, name);
+            spelt.Append('.');
+            Spell(spelt, word);
             return spelt.ToString();
         }
 

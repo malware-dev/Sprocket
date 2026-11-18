@@ -352,6 +352,40 @@ public class SettingTests
                 + "    type side = inside | outside\n}\n", new Automation()));
     }
 
+    /// <summary>A choice qualified by a type sharing a slot's name is read and written with the type qualified too.</summary>
+    [Fact]
+    public void AChoiceOfATypeSharingASlotsNameIsQualifiedTwice()
+    {
+        var text = Version + Head + "    required slot side expects Door\n"
+            + "    optional slot mode expects types.side = types.side.inside\n\n"
+            + "    type side = inside | outside\n    type hatch = inside | shut\n\n"
+            + "    let where = types.side.inside\n\n"
+            + "    sequence 1 {\n        set where to types.side.outside\n    }\n}\n";
+
+        var program = new Automation();
+        Assert.Equal("", Load(text, program));
+        var system = program.Systems[0];
+        Assert.Equal("side", system.FindState("where")!.Type);
+        Assert.Equal("inside", system.FindPart("mode")!.Default.Text);
+
+        var saved = ProgramWriter.Save(program, _store);
+        Assert.Contains("    let where = types.side.inside\n", saved);
+        Assert.Contains("        set where to outside\n", saved);
+        Assert.Equal("", Load(saved, new Automation()));
+    }
+
+    /// <summary>A choice qualified by a bare type that shares a slot's name could be either, and is trouble wherever it stands.</summary>
+    [Theory]
+    [InlineData("    optional slot mode expects types.side = side.inside\n", "")]
+    [InlineData("", "    let where = side.inside\n")]
+    [InlineData("", "    let where = types.side.inside\n\n    sequence 1 {\n        set where to side.outside\n    }\n")]
+    public void AChoiceQualifiedByABareTypeSharingASlotsNameIsTrouble(string setting, string body)
+    {
+        Assert.Contains("'side' could be the slot 'side' or the type 'side'; write the one meant qualified: types.side.",
+            Load(Version + Head + "    required slot side expects Door\n" + setting
+                + "\n    type side = inside | outside\n\n" + body + "}\n", new Automation()));
+    }
+
     /// <summary>A setting written alone where its member also takes a word of that name is the problem the player sees; written qualified it is the setting.</summary>
     [Theory]
     [InlineData("closed", true)]
