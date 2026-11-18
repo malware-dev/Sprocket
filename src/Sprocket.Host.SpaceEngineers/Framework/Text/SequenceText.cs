@@ -498,7 +498,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
             var abort = step as Abort;
             if (abort != null)
-                return $"{SentenceText.AbortWord} {SentenceText.Given(ArgumentsSlot.Aborting(abort.Message, abort.Level, null))}";
+            {
+                Literal given;
+                var answered = abort.Setting.Length > 0 && through != null && through.Gives(abort.Setting, out given) && given.Kind == ValueKind.Text;
+                var setting = answered ? "" : abort.Setting;
+                return $"{SentenceText.AbortWord} {SentenceText.Given(ArgumentsSlot.Aborting(abort.MessageIn(through), setting, abort.Level, null))}";
+            }
 
             var set = step as SetState;
             if (set != null)

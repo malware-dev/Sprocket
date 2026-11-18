@@ -318,10 +318,45 @@ public class SettingTests
         Assert.Equal("", Load(saved, new Automation()));
     }
 
+    /// <summary>A type and a slot may share a name, in a version 1 program too, and the type is then written qualified.</summary>
+    [Theory]
+    [InlineData("sprocket 1", "")]
+    [InlineData("sprocket 2 alpha 1", "    optional slot mode expects types.side = inside\n")]
+    public void ATypeAndASlotShareAName(string version, string setting)
+    {
+        var text = version + "\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"
+            + "    required slot side expects Door\n" + setting
+            + "\n    type side = inside | outside\n\n"
+            + "    sequence 1 {\n        call sprocket.close on [ side ]\n    }\n}\n";
+
+        var program = new Automation();
+        Assert.Equal("", Load(text, program));
+        var system = program.Systems[0];
+        Assert.NotNull(system.FindType("side"));
+        Assert.Equal("Door", system.FindPart("side")!.Expects);
+
+        var saved = ProgramWriter.Save(program, _store);
+        Assert.Contains("        call sprocket.close on [ side ]\n", saved);
+        if (setting.Length > 0)
+            Assert.Contains(setting, saved);
+
+        Assert.Equal("", Load(saved, new Automation()));
+    }
+
+    /// <summary>A type written bare where a slot shares its name could be either, and is trouble.</summary>
+    [Fact]
+    public void ABareTypeSharingASlotsNameIsTrouble()
+    {
+        Assert.Contains("'side' could be the slot 'side' or the type 'side'; write the one meant qualified: types.side",
+            Load(Version + Head + "    required slot side expects Door\n    optional slot mode expects side = inside\n\n"
+                + "    type side = inside | outside\n}\n", new Automation()));
+    }
+
     /// <summary>A setting written alone where its member also takes a word of that name is the problem the player sees; written qualified it is the setting.</summary>
     [Theory]
     [InlineData("closed", true)]
     [InlineData("settings.closed", false)]
+    [InlineData("sprocket.status.closed", false)]
     public void ASettingSpelledLikeAMembersWordIsAmbiguous(string written, bool ambiguous)
     {
         var lit = new Lit("    optional slot closed expects text = \"x\"\n\n"
@@ -332,6 +367,30 @@ public class SettingTests
 
         Assert.Equal(ambiguous, lit.Of(1).Fault.Problem == SequenceProblem.Ambiguous);
         Assert.Contains("== " + written + " then", ProgramWriter.Save(lit.Program, lit.Rig.Values));
+    }
+
+    /// <summary>A member's word qualified by the member is the word: compared with, and written bare where no setting shares its name.</summary>
+    [Theory]
+    [InlineData("    optional slot closed expects text = \"x\"\n", "sprocket.status.closed")]
+    [InlineData("", "closed")]
+    public void AMembersWordQualifiedByTheMemberIsTheWord(string slots, string saved)
+    {
+        var lit = new Lit(slots + "\n    let shut = off\n\n"
+            + "    sequence 1 {\n        if all sprocket.status on [ door ] == sprocket.status.closed then {\n            set shut to on\n        }\n    }\n", "");
+
+        lit.Run(1);
+        lit.Tick(3);
+
+        Assert.Equal(Literal.Of(true), lit.Held("shut"));
+        Assert.Contains("== " + saved + " then", ProgramWriter.Save(lit.Program, lit.Rig.Values));
+    }
+
+    /// <summary>A qualified word must be qualified by the member it is given to.</summary>
+    [Fact]
+    public void AWordQualifiedByAnotherMemberIsTrouble()
+    {
+        Assert.Contains("expected a value",
+            Load(Blueprint("    required slot door expects Door\n    sequence 1 {\n        if all sprocket.status on [ door ] == sprocket.power.closed then {\n        }\n    }\n"), new Automation()));
     }
 
     /// <summary>A state's starting value that could be a setting or a choice is trouble; a setting alone gives each installation its own start.</summary>
@@ -508,6 +567,33 @@ public class SettingTests
 
         lit.Tick(4);
         Assert.Equal(Literal.Of(true), lit.Held("done"));
+    }
+
+    /// <summary>An abort saying a setting says the installation's text, and is written back naming the setting.</summary>
+    [Theory]
+    [InlineData("", "Jammed")]
+    [InlineData("    why = \"Blocked\"\n", "Blocked")]
+    public void AnAbortSaysItsSettingsText(string answers, string said)
+    {
+        var lit = new Lit("    optional slot why expects text = \"Jammed\"\n\n"
+            + "    sequence 1 {\n        abort saying why as warning\n    }\n", answers);
+
+        Assert.Contains("        abort saying why as warning\n", ProgramWriter.Save(lit.Program, lit.Rig.Values));
+
+        lit.Run(1);
+        lit.Tick(3);
+
+        var fault = SequenceSummary.Fault(lit.Of(1));
+        Assert.Equal(SequenceProblem.AbortedWarning, fault.Problem);
+        Assert.Equal(said, fault.Which);
+    }
+
+    /// <summary>A setting an abort says must hold text.</summary>
+    [Fact]
+    public void AnAbortSaysOnlyATextSetting()
+    {
+        Assert.Contains("setting 'angle' holds a real; expected text here",
+            Load(Blueprint("    required slot angle expects real\n    sequence 1 {\n        abort saying angle\n    }\n"), new Automation()));
     }
 
     /// <summary>An if tests a setting as it tests a state, and a state is set to one and compared with one.</summary>

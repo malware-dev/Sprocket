@@ -200,6 +200,29 @@ public class UndoTests
         Assert.Equal(before, Shape(sequence));
     }
 
+    /// <summary>An abort saying a setting keeps it through a change of level, a written message replaces it, and undo brings it back.</summary>
+    [Fact]
+    public void ChangingAnAbortKeepsItsSettingUntilAMessageReplacesIt()
+    {
+        Sequence sequence = Build();
+        var abort = new Abort { Setting = "why" };
+        sequence.Steps[1] = abort;
+
+        var louder = new SetAbort(1, abort, "", AbortLevel.Warning);
+        louder.Apply(sequence);
+        Assert.Equal("why", abort.Setting);
+        Assert.Equal(AbortLevel.Warning, abort.Level);
+
+        var written = new SetAbort(1, abort, "Jammed", AbortLevel.Warning);
+        written.Apply(sequence);
+        Assert.Equal("", abort.Setting);
+        Assert.Equal("Jammed", abort.Message);
+
+        written.Undo(sequence);
+        Assert.Equal("why", abort.Setting);
+        Assert.Equal("", abort.Message);
+    }
+
     [Fact]
     public void RenamingReversesExactly() => RoundTrip(new RenameSequence("Let me out", "Cycle"));
 

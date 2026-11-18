@@ -94,6 +94,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             if (wait != null)
                 wait.Setting = Walk(wait.Setting, into, was, now);
 
+            var abort = step as Abort;
+            if (abort != null)
+                abort.Setting = Walk(abort.Setting, into, was, now);
+
             var sets = step as SetState;
             if (sets != null && sets.From.Length == 0)
                 sets.Value = Walk(sets.Value, into, was, now);

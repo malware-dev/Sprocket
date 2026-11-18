@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
-            if (Taken(statement, name.Word, system, trouble))
+            if (Taken(statement, name.Word, system, false, trouble))
                 return;
 
             if (!statement.Says(1, Keyword.Equals))
@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
-            if (Taken(statement, name.Word, system, trouble))
+            if (Taken(statement, name.Word, system, true, trouble))
                 return;
 
             if (!system.IsBlueprint && (program.FindRef(name.Word) != null || program.FindSignalRef(name.Word) != null))
@@ -112,10 +112,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             system.States.Add(state);
         }
 
-        /// <summary>Whether <paramref name="name" /> is already a slot, type or state of <paramref name="system" />, and trouble where it is.</summary>
-        public static bool Taken(Statement statement, string name, AutomationSystem system, ScriptTrouble trouble)
+        /// <summary>
+        /// Whether <paramref name="name" /> is already a type or state of <paramref name="system" />, or a slot where
+        /// <paramref name="slots" />, and trouble where it is.
+        /// </summary>
+        /// <remarks>A type and a slot may share a name, and the type is then written qualified, <c>types.side</c>.</remarks>
+        public static bool Taken(Statement statement, string name, AutomationSystem system, bool slots, ScriptTrouble trouble)
         {
-            if (system.FindPart(name) != null)
+            if (slots && system.FindPart(name) != null)
                 trouble.Say(statement, $"'{name}' is already the name of a slot.");
             else if (system.FindType(name) != null)
                 trouble.Say(statement, $"'{name}' is already the name of a type.");

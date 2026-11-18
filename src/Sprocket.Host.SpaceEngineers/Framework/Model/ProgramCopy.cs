@@ -217,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var abort = step as Abort;
             if (abort != null)
-                return new Abort { Message = abort.Message, Level = abort.Level };
+                return new Abort { Message = abort.Message, Setting = abort.Setting, Level = abort.Level };
 
             var opens = step as If;
             if (opens != null)

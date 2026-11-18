@@ -34,6 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>Whether a setting of a type holds a length of time.</summary>
         public static readonly Func<string, bool> Lasting = type => type == Duration;
 
+        /// <summary>Whether a setting of a type holds text.</summary>
+        public static readonly Func<string, bool> Worded = type => type == Text;
+
         /// <summary>Whether <paramref name="type" /> is one of the built-in types a setting may hold.</summary>
         public static bool IsBuiltIn(string type)
         {

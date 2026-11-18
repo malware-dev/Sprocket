@@ -103,6 +103,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     continue;
                 }
 
+                var word = Word(statement, given[i], provider, id);
+                if (word != null)
+                {
+                    arguments.Add(Literal.Name(word));
+                    continue;
+                }
+
                 if (!Argument(statement, given[i], trouble))
                     return false;
 
@@ -110,6 +117,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             return Names(statement.On(index), targets, statement, trouble);
+        }
+
+        /// <summary>
+        /// The word of the member <paramref name="id" /> of <paramref name="provider" /> that <paramref name="written" /> names, qualified
+        /// by the member: <c>sprocket.status.closed</c>; or null where it is not one so written.
+        /// </summary>
+        static string Word(Statement statement, Value written, string provider, string id)
+        {
+            if (written.Form != ValueForm.Qualified)
+                return null;
+
+            var parts = statement.PartsOf(written);
+            var at = provider.Length > 0 ? 1 : 0;
+            if (parts.Count != at + 2 || at == 1 && parts[0].Word != provider || parts[at].Word != id)
+                return null;
+
+            return parts[at + 1].Word;
         }
 
         /// <summary>Whether <paramref name="value" /> is one a member can be given or compared with, and trouble where it is not.</summary>
@@ -125,10 +149,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         /// <summary>
         /// The comparison and the value from <paramref name="at" />, into <paramref name="relation" /> and
-        /// <paramref name="value" />; or false and trouble where they are not that, or a number is wanted and not given.
+        /// <paramref name="value" />, a word of the member <paramref name="id" /> of <paramref name="provider" /> written bare or
+        /// qualified by it; or false and trouble where they are not that, or a number is wanted and not given.
         /// </summary>
         /// <remarks>An ordering compares numbers, and so does a sum, so either is given one.</remarks>
-        public static bool Compared(Statement statement, AutomationSystem system, int at, Quantifier quantifier, ScriptTrouble trouble, out Relation relation,
+        public static bool Compared(Statement statement, AutomationSystem system, string provider, string id, int at, Quantifier quantifier, ScriptTrouble trouble, out Relation relation,
             out Literal value)
         {
             value = default(Literal);
@@ -147,6 +172,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return ordered || quantifier == Quantifier.Sum
                     ? SettingReader.Owe(statement, setting, system, SettingReader.Numeric, "a number", trouble)
                     : SettingReader.Owe(statement, setting, system, null, null, trouble);
+            }
+
+            var word = Word(statement, written, provider, id);
+            if (word != null)
+            {
+                value = Literal.Name(word);
+                if (!ordered && quantifier != Quantifier.Sum)
+                    return true;
+
+                trouble.Say(statement, $"expected a number after '{Keywords.Name(ProgramWriter.Said(relation))}'.");
+                return false;
             }
 
             if (!Argument(statement, written, trouble))
@@ -268,7 +304,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             Relation relation;
             Literal value;
-            if (!Compared(statement, system, at + 2, quantifier, trouble, out relation, out value))
+            if (!Compared(statement, system, provider, id, at + 2, quantifier, trouble, out relation, out value))
                 return null;
 
             if (!statement.Says(at + 4, Keyword.Then))
@@ -362,7 +398,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return ReadSet(statement, system, trouble);
 
             if (statement.Key == Keyword.None && statement.Head == AbortWords.Abort)
-                return Aborted(statement, trouble);
+                return Aborted(statement, system, trouble);
 
             if (SequenceWords.Handles(statement))
             {
@@ -374,21 +410,33 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return null;
         }
 
-        /// <summary><c>abort saying "Door jammed" as warning</c>: an abort, its message and its level each given or left out.</summary>
-        static Step Aborted(Statement statement, ScriptTrouble trouble)
+        /// <summary>
+        /// <c>abort saying "Door jammed" as warning</c>: an abort, its message, written or a text setting of
+        /// <paramref name="system" />, and its level each given or left out.
+        /// </summary>
+        static Step Aborted(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var abort = new Abort();
             var at = 0;
             if (statement.ValueAt(0).Form == ValueForm.Identifier && statement.Word(0) == AbortWords.Saying)
             {
                 var message = statement.ValueAt(1);
-                if (message.Form != ValueForm.Text)
+                var setting = message.Form == ValueForm.Text ? null : SettingReader.Referenced(statement, message, system);
+                if (setting != null)
                 {
-                    trouble.Say(statement, "expected text in double quotes after 'saying', like \"Door jammed\".");
+                    if (!SettingReader.Owe(statement, setting, system, SettingReader.Worded, "text", trouble))
+                        return null;
+
+                    abort.Setting = setting;
+                }
+                else if (message.Form == ValueForm.Text)
+                    abort.Message = message.Word ?? "";
+                else
+                {
+                    trouble.Say(statement, "expected text in double quotes after 'saying', like \"Door jammed\", or a setting holding text.");
                     return null;
                 }
 
-                abort.Message = message.Word ?? "";
                 at = 2;
             }
 
@@ -463,13 +511,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
 
             var setting = SettingReader.Referenced(statement, statement.ValueAt(2), system);
-            if (setting != null ? !SettingReader.Owe(statement, setting, system, null, null, trouble) : !Argument(statement, statement.ValueAt(2), trouble))
+            var word = setting == null ? Word(statement, statement.ValueAt(2), provider, id) : null;
+            if (setting != null ? !SettingReader.Owe(statement, setting, system, null, null, trouble) : word == null && !Argument(statement, statement.ValueAt(2), trouble))
                 return null;
 
             act.ActionId = id;
             act.Form = ReachKind.Value;
             act.Provider = provider;
-            act.Arguments.Add(setting != null ? Literal.Setting(setting, statement.ValueAt(2).Form == ValueForm.Qualified) : Given(statement.ValueAt(2)));
+            act.Arguments.Add(setting != null ? Literal.Setting(setting, statement.ValueAt(2).Form == ValueForm.Qualified)
+                : word != null ? Literal.Name(word) : Given(statement.ValueAt(2)));
             return Noted(act, statement);
         }
 

@@ -192,7 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             Relation relation;
             Literal value;
-            if (!StepReader.Compared(statement, system, 2, quantifier, trouble, out relation, out value))
+            if (!StepReader.Compared(statement, system, provider, id, 2, quantifier, trouble, out relation, out value))
                 return null;
 
             when.EventId = id;

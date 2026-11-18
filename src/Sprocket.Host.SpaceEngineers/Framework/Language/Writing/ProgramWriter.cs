@@ -310,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             for (var i = 0; i < parts.Count; i++)
             {
                 if (parts[i].IsSetting || used.Contains(parts[i].Id) || kept && Held(system, parts[i].Id))
-                    WriteSlot(pen, parts[i]);
+                    WriteSlot(pen, system, parts[i]);
             }
 
             if (system.Types.Count > 0)
@@ -344,7 +344,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// What a slot for a block expects is written only where the author said it; nothing means any block. A setting is
         /// written with its type, and its default where it has one: <c>optional slot 'Open angle' expects real = 45</c>.
         /// </remarks>
-        static void WriteSlot(ScriptWriter pen, Part part)
+        static void WriteSlot(ScriptWriter pen, AutomationSystem system, Part part)
         {
             if (part.Annotation.Length > 0)
                 pen.Blank();
@@ -361,7 +361,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
 
             if (part.IsSetting)
             {
-                if (!SettingReader.IsBuiltIn(part.Setting) && BlockKinds.IsGameType(part.Setting))
+                if (!SettingReader.IsBuiltIn(part.Setting) && (BlockKinds.IsGameType(part.Setting) || system.FindPart(part.Setting) != null))
                     pen.Says(Keyword.Expects).Qualified(Namespaces.Types, part.Setting);
                 else
                     pen.Says(Keyword.Expects).Word(part.Setting);
@@ -762,7 +762,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             var compared = test as Comparison;
             if (compared != null)
-                WriteComparison(pen, compared);
+                WriteComparison(pen, system, compared);
             else
                 WriteStateTest(pen, system, (StateTest)test);
         }
@@ -787,24 +787,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             pen.Says(Keyword.Then);
         }
 
-        static void WriteComparison(ScriptWriter pen, Comparison test)
+        static void WriteComparison(ScriptWriter pen, AutomationSystem system, Comparison test)
         {
             pen.Says(Said(test.Quantifier));
-            WriteMember(pen, test.Provider, test.MemberId, test.Arguments, test.Targets);
+            WriteMember(pen, system, test.Provider, test.MemberId, test.Arguments, test.Targets);
             pen.Says(Said(test.Relation));
-            Written(pen, test.Value);
+            Word(pen, system, test.Provider, test.MemberId, test.Value);
             pen.Says(Keyword.Then);
         }
 
         /// <summary><c>sprocket.amount("Ingot/Iron") on [ cargo ]</c>: a member, bare or qualified, with its arguments where it has any, and its blocks.</summary>
-        static void WriteMember(ScriptWriter pen, string provider, string id, IList<Literal> arguments, IList<string> targets)
+        static void WriteMember(ScriptWriter pen, AutomationSystem system, string provider, string id, IList<Literal> arguments, IList<string> targets)
         {
             pen.Qualified(provider, id);
             if (arguments.Count > 0)
             {
                 pen.Open();
                 for (var i = 0; i < arguments.Count; i++)
-                    Written(pen, arguments[i]);
+                    Word(pen, system, provider, id, arguments[i]);
 
                 pen.Close();
             }
@@ -863,7 +863,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 else if (needed.At != null)
                     pen.Signal(needed.Sources, needed.At);
                 else
-                    WriteMember(pen, needed.Provider, needed.EventId, NoArguments, needed.Sources);
+                    WriteMember(pen, system, needed.Provider, needed.EventId, NoArguments, needed.Sources);
 
                 pen.Says(Keyword.Then);
                 WriteDoes(pen, system, trigger.Does);
@@ -885,9 +885,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (when != null)
             {
                 pen.Start(Keyword.When).Says(Said(when.Quantifier));
-                WriteMember(pen, when.Provider, when.EventId, when.Arguments, when.Sources);
+                WriteMember(pen, system, when.Provider, when.EventId, when.Arguments, when.Sources);
                 pen.Says(Said(when.Relation));
-                Written(pen, when.Value);
+                Word(pen, system, when.Provider, when.EventId, when.Value);
                 if (when.IntervalSetting.Length > 0)
                     pen.Says(Keyword.Every).Word(when.IntervalSetting);
                 else if (when.IntervalTicks > 0)
@@ -1011,7 +1011,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var abort = step as Abort;
             if (abort != null)
             {
-                if (abort.Message.Length > 0)
+                if (abort.Setting.Length > 0)
+                    pen.Word(AbortWords.Saying).Word(abort.Setting);
+                else if (abort.Message.Length > 0)
                     pen.Word(AbortWords.Saying).Text(abort.Message);
                 if (abort.Level != AbortLevel.Note)
                     pen.Says(Keyword.As).Word(AbortWords.Name(abort.Level));
@@ -1036,16 +1038,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             {
                 if (act.Form == ReachKind.Value)
                 {
-                    WriteMember(pen, act.Provider, act.ActionId, NoArguments, act.Targets);
+                    WriteMember(pen, system, act.Provider, act.ActionId, NoArguments, act.Targets);
                     if (act.Arguments.Count > 0)
                     {
                         pen.Says(Keyword.To);
-                        Written(pen, act.Arguments[0]);
+                        Word(pen, system, act.Provider, act.ActionId, act.Arguments[0]);
                     }
                 }
                 else
                 {
-                    WriteMember(pen, act.Form == ReachKind.Native ? act.Provider : "", act.ActionId, act.Arguments, act.Targets);
+                    WriteMember(pen, system, act.Form == ReachKind.Native ? act.Provider : "", act.ActionId, act.Arguments, act.Targets);
                 }
 
                 return;
@@ -1065,6 +1067,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var run = step as Run;
             if (run != null)
                 pen.Whole(run.Number);
+        }
+
+        /// <summary>
+        /// Writes <paramref name="value" />, given to or compared with the member <paramref name="id" /> of <paramref name="provider" />,
+        /// back as the kind it is; a word of the member spelled like one of <paramref name="system" />'s settings qualified by the
+        /// member, <c>sprocket.status.closed</c>, so it is read back as the word.
+        /// </summary>
+        static void Word(ScriptWriter pen, AutomationSystem system, string provider, string id, Literal value)
+        {
+            var setting = value.Kind == ValueKind.Name ? system?.FindPart(value.Text) : null;
+            if (setting != null && setting.IsSetting)
+                pen.Qualified(provider, id, value.Text);
+            else
+                Written(pen, value);
         }
 
         /// <summary>Writes <paramref name="value" /> back as the kind it is.</summary>

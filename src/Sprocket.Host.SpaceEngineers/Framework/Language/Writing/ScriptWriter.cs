@@ -237,6 +237,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
+        /// <summary>A word of a member, qualified by the member and its namespace: <c>sprocket.status.closed</c>.</summary>
+        public ScriptWriter Qualified(string space, string member, string word)
+        {
+            Space();
+            Spell(_text, space, member);
+            _text.Append('.');
+            Spell(_text, word);
+            return this;
+        }
+
         /// <summary>A whole number.</summary>
         public ScriptWriter Whole(long value)
         {

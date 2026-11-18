@@ -641,7 +641,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var abort = step as Abort;
             if (abort != null)
             {
-                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
+                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Setting, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
                 return;
             }
 

@@ -113,6 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             // written; a setting may hold a type declared below it.
             var body = statement.Body;
             var declared = DeclaredTypes(body);
+            var named = DeclaredSlots(body);
             var slots = new List<Statement>();
             var parts = new List<Part>();
             for (var i = 0; i < body.Count && blueprint; i++)
@@ -121,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 if (inner.IsOff || inner.Key != Keyword.Required && inner.Key != Keyword.Optional)
                     continue;
 
-                var part = ReadSlot(inner, system, declared, trouble);
+                var part = ReadSlot(inner, system, declared, named, trouble);
                 if (part != null)
                 {
                     slots.Add(inner);
@@ -318,9 +319,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <remarks>
         /// A slot expecting a built-in value type, or one of <paramref name="declared" />, the names of the system's types, is
         /// a setting; its default is read once the whole system is, by <see cref="SettingReader.Slot" />. A bare name that is
-        /// one of the game's block types is the game's; the system's type of that name is written <c>types.Door</c>.
+        /// one of the game's block types is the game's; the system's type of that name is written <c>types.Door</c>. A bare name that
+        /// is one of <paramref name="declared" /> and one of <paramref name="named" />, the names of its slots, could be either, and
+        /// is trouble.
         /// </remarks>
-        static Part ReadSlot(Statement statement, AutomationSystem system, ICollection<string> declared, ScriptTrouble trouble)
+        static Part ReadSlot(Statement statement, AutomationSystem system, ICollection<string> declared, ICollection<string> named,
+            ScriptTrouble trouble)
         {
             var optional = statement.Key == Keyword.Optional;
             if (!statement.Says(0, Keyword.Slot))
@@ -362,6 +366,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 Declared(statement, part, declared, trouble);
             else if (one.Form == ValueForm.Qualified)
                 Holding(statement, part, trouble);
+            else if (ScriptQuotes.Named(one) && declared.Contains(one.Word) && named.Contains(one.Word) && !BlockKinds.IsGameType(one.Word))
+                SettingReader.Ambiguous(statement, one.Word, new[] { $"the slot '{one.Word}'", $"the type '{one.Word}'" },
+                    new[] { ScriptWriter.Spelling(Namespaces.Types, one.Word) }, trouble);
             else if (ScriptQuotes.Named(one) && (SettingReader.IsBuiltIn(one.Word) || declared.Contains(one.Word) && !BlockKinds.IsGameType(one.Word)))
                 part.Setting = one.Word;
             else if (ScriptQuotes.Named(one))
@@ -387,6 +394,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             part.Setting = parts[1].Word;
+        }
+
+        /// <summary>The names of the slots the statements of a system's body declare, whether or not they read.</summary>
+        static HashSet<string> DeclaredSlots(IList<Statement> body)
+        {
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var inner in body)
+            {
+                if ((inner.Key == Keyword.Optional || inner.Key == Keyword.Required) && !inner.IsOff && inner.Says(0, Keyword.Slot) && ScriptQuotes.Named(inner.ValueAt(1)))
+                    names.Add(inner.Word(1));
+            }
+
+            return names;
         }
 
         /// <summary>The names of the types the statements of a system's body declare, whether or not they read.</summary>

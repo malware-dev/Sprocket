@@ -1122,7 +1122,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </summary>
         void Aborted(Abort abort)
         {
-            if (abort.Level == AbortLevel.Note && abort.Message.Length == 0)
+            var message = abort.MessageIn(_instance);
+            if (abort.Level == AbortLevel.Note && message.Length == 0)
             {
                 Stop();
                 return;
@@ -1131,7 +1132,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             var problem = abort.Level == AbortLevel.Problem ? SequenceProblem.AbortedProblem
                 : abort.Level == AbortLevel.Warning ? SequenceProblem.AbortedWarning
                 : SequenceProblem.Aborted;
-            var said = new SequenceFault(problem, _memory.Step, BlockTrouble.None, abort.Message);
+            var said = new SequenceFault(problem, _memory.Step, BlockTrouble.None, message);
             if (abort.Level == AbortLevel.Problem)
             {
                 Meet(said);
