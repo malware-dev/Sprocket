@@ -137,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>Opens <paramref name="callout" /> from <paramref name="anchor" />, which dismisses it for good once pressed.</summary>
         void Hang(Callout callout, Texts texts, Element anchor)
         {
-            var mark = new CoachMark(Template.Fill(texts.CalloutNew, "said", callout.Said(texts))) { Style = Styles.Callout, Anchor = anchor, DismissesOnPressOutside = true };
+            var mark = new CoachMark(Template.Fill(texts.CalloutNew, "said", callout.Said(texts))) { Style = Styles.Callout, Anchor = anchor, AutomationId = callout.Said(texts) };
             mark.Dismissed += () => Dismiss(callout);
             mark.Closed += reason => Lapsed(mark);
             _mark = mark;

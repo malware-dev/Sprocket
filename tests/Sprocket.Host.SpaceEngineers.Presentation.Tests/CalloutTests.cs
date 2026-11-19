@@ -43,14 +43,20 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         Assert.False(screen.Shows(texts.CalloutShare) || screen.Shows(texts.CalloutImport) || screen.Shows(texts.CalloutSettings), screen.Dump);
     }
 
-    /// <summary>One press anywhere dismisses it for good: it is not hung again where the player meets its other anchors.</summary>
+    /// <summary>Presses the callout hanging now, the one way to dismiss it.</summary>
+    static Screen PressBubble(Screen screen)
+    {
+        return screen.Do("press", screen.Editor.Callouts.Shown!.Said(screen.Editor.Texts));
+    }
+
+    /// <summary>One press on it dismisses it for good: it is not hung again where the player meets its other anchors.</summary>
     [Fact]
     public void OnePressDismissesACalloutAtEveryAnchor()
     {
         var screen = Meeting(LogicSystem);
         var texts = screen.Editor.Texts;
 
-        screen.Do("900", "700").Run(3);
+        PressBubble(screen).Run(3);
         Assert.False(screen.Shows(texts.CalloutShare), screen.Dump);
         Assert.True(screen.Player().HasDismissed("share"));
 
@@ -75,18 +81,20 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         Assert.True(screen.Shows(texts.CalloutShare), screen.Dump);
     }
 
-    /// <summary>A press on the bubble itself dismisses it too.</summary>
+    /// <summary>A press anywhere else leaves it hanging and due, and reaches what it lands on as if the bubble were not there.</summary>
     [Fact]
-    public void APressOnTheBubbleDismissesIt()
+    public void APressElsewhereLeavesIt()
     {
         var screen = Meeting(LogicSystem);
         var texts = screen.Editor.Texts;
 
-        var at = screen.Text(texts.CalloutShare).At;
-        screen.Do(((int)at.X + 8).ToString(), ((int)at.Y + 8).ToString()).Run(3);
+        screen.Do("900", "700").Run(3);
+        Assert.True(screen.Shows(texts.CalloutShare), screen.Dump);
 
-        Assert.False(screen.Shows(texts.CalloutShare), screen.Dump);
-        Assert.True(screen.Player().HasDismissed("share"));
+        screen.Do("press", "Installation panel").Run(3);
+        Assert.False(screen.Player().HasDismissed("share"), screen.Dump);
+        Assert.True(screen.Shows(texts.CalloutShare), screen.Dump);
+        Assert.True(screen.Shows(texts.BlueprintParts.ToUpperInvariant()), screen.Dump);
     }
 
     /// <summary>Only one callout hangs at a time, the next once it is dismissed.</summary>
@@ -98,7 +106,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
 
         Assert.True(screen.Shows(texts.CalloutShare), screen.Dump);
 
-        screen.Do("900", "700").Run(3);
+        PressBubble(screen).Run(3);
 
         Assert.False(screen.Shows(texts.CalloutShare), screen.Dump);
         Assert.Equal("import", screen.Editor.Callouts.Shown?.Id);
@@ -119,7 +127,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
     {
         var screen = Meeting(LogicSystem);
         var texts = screen.Editor.Texts;
-        screen.Do("900", "700").Run(2).Do("press", "Installation panel").Run(3);
+        PressBubble(screen).Run(2).Do("press", "Installation panel").Run(3);
 
         Assert.True(screen.Shows(texts.CalloutSettings), screen.Dump);
     }
@@ -132,7 +140,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         Assert.Null(screen.Player().Seen);
         Assert.False(screen.Player().HasDismissed("share"));
 
-        screen.Do("900", "700").Run(2);
+        PressBubble(screen).Run(2);
 
         var file = new MyIni();
         screen.Player().Write(file);
@@ -156,7 +164,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         var texts = screen.Editor.Texts;
 
         // The first session meets the share callout only.
-        screen.Do("900", "700").Run(2);
+        PressBubble(screen).Run(2);
         Assert.Null(screen.Player().Seen);
 
         // The next one still has the import and settings callouts due, and shows import at the library.
@@ -167,7 +175,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
 
         screen.Do("press", "Library").Run(3);
         Assert.Equal("import", screen.Editor.Callouts.Shown?.Id);
-        screen.Do("900", "700").Run(2);
+        PressBubble(screen).Run(2);
         Assert.True(screen.Player().HasDismissed("import"));
         Assert.Null(screen.Player().Seen);
 
@@ -179,7 +187,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
 
         screen.Do("press", "Airlock").Run(3).Do("press", "Installation panel").Run(3);
         Assert.True(screen.Shows(texts.CalloutSettings), screen.Dump);
-        screen.Do("900", "700").Run(2);
+        PressBubble(screen).Run(2);
         Assert.Equal(Release.Number, screen.Player().Seen);
 
         screen.Scene.Reopen();
