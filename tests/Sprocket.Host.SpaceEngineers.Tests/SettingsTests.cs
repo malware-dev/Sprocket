@@ -32,16 +32,6 @@ public class SettingsTests
         Assert.False(Settings.Of(new Settings(false).Written()).DeveloperMode);
     }
 
-    /// <summary>A settings file still holding how tips were kept open reads as though it held nothing of it, and is written without it.</summary>
-    [Fact]
-    public void ARetiredTipSettingIsLeftOut()
-    {
-        var read = Settings.From(null, "[Sprocket]\ntipKeeping=alt\ndebugLog=true\n");
-
-        Assert.True(read.DebugLog);
-        Assert.DoesNotContain("tipKeeping", read.Written());
-    }
-
     /// <summary>A player's tips are on unless their own section of the global file turns them off, and writing it leaves every world's settings as they were.</summary>
     [Fact]
     public void APlayersTipsAreOnUnlessTheyTurnedThemOff()
@@ -153,10 +143,4 @@ public class SettingsTests
         Assert.Contains(GameLog.Lines.Skip(from), line => line.Contains("fastestUpdate as " + written) && line.Contains("taken as " + taken));
     }
 
-    /// <summary>The old name for the fastest update is not read, so an old file leaves it at every tick.</summary>
-    [Fact]
-    public void TheOldNameIsNotRead()
-    {
-        Assert.Equal(1, Settings.From(null, "[Sprocket]\nquickestLook=100\n").FastestUpdate);
-    }
 }

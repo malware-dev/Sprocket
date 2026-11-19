@@ -94,6 +94,7 @@ public sealed class Rig
     public Rig Stocked(GameStock stock)
     {
         Stock = stock;
+        RegisterKinds();
         foreach (var fitting in Fitted)
         {
             if (fitting is Stockroom room)
@@ -766,6 +767,14 @@ public sealed class Rig
         _grid.Journal.Clear();
     }
 
+    /// <summary>Registers the game's kinds of object by name, as the game does at start, so a block type or an item's kind reads from its name.</summary>
+    /// <remarks>Ores, ingots, components and tools are in one assembly; blocks, bottles, datapads and seeds in the other.</remarks>
+    static void RegisterKinds()
+    {
+        MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
+        MyObjectBuilderType.RegisterFromAssembly(typeof(MyObjectBuilder_Refinery).Assembly);
+    }
+
     /// <summary>
     /// Puts the harness behind the statics the mod reaches the world through.
     /// </summary>
@@ -790,11 +799,7 @@ public sealed class Rig
         // The game's log, as the game makes it at start. This one is never opened, so it takes every line and keeps none.
         MyLog.Default ??= new MyLog();
 
-        // The game's kinds of object by name, as the game registers them at start: reading a block type or an item's kind
-        // from its name needs them. Ores, ingots, components and tools are in one assembly; blocks, bottles, datapads and
-        // seeds in the other.
-        MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
-        MyObjectBuilderType.RegisterFromAssembly(typeof(MyObjectBuilder_Refinery).Assembly);
+        RegisterKinds();
 
         MyAPIGateway.GridGroups = Pretend.To<IMyGridGroups>()
             .Does("GetGroup", arguments =>
