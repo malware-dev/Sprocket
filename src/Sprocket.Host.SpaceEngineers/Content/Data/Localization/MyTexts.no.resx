@@ -340,9 +340,6 @@
   <data name="Sprocket.Button.Stops" xml:space="preserve">
     <value>**{block}** stopper allerede {sequence} på {blockset}.</value>
   </data>
-  <data name="Sprocket.Button.Acts" xml:space="preserve">
-    <value>**{block}** gjør allerede en oppgave på {blockset}.</value>
-  </data>
   <data name="Sprocket.Button.Elsewhere" xml:space="preserve">
     <value>Knapp {button} på **{block}** gjør allerede noe annet.</value>
   </data>
@@ -460,12 +457,6 @@
   </data>
   <data name="Sprocket.Plan.SorterList" xml:space="preserve">
     <value>innstilling av listen i en conveyor sorter</value>
-  </data>
-  <data name="Sprocket.Pick.SingleAction" xml:space="preserve">
-    <value>En oppgave på blokker…</value>
-  </data>
-  <data name="Sprocket.Pick.SingleTask" xml:space="preserve">
-    <value>En oppgave på blokker</value>
   </data>
   <data name="Sprocket.Pick.HeadingTask" xml:space="preserve">
     <value>Oppgave</value>

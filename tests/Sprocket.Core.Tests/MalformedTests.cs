@@ -20,7 +20,10 @@ public class MalformedTests
         + "let halt = sprocket.toolbar(1, 1, 2) on [ panel1 ]\n"
         + "let bell = sprocket.toolbar(1, 1, 3) on [ panel1 ]\n\n"
         + "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door\n{\n"
-        + "    whenever halt then call sprocket.open on [ door1 ]\n"
+        + "    whenever halt then run 1\n\n"
+        + "    sequence 1 as Open {\n"
+        + "        call sprocket.open on [ door1 ]\n"
+        + "    }\n"
         + "}\n\n"
         + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n{\n"
         + "    required slot inner expects Door\n"
@@ -60,10 +63,10 @@ public class MalformedTests
     [InlineData("    whenever button then run 1\n", "    whenever button run 1\n")]
     [InlineData("    whenever button then run 1\n", "    whenever inner then run 1\n")]
     [InlineData("    whenever button then run 1\n", "    whenever halt then run 1\n")]
-    [InlineData("    whenever halt then call sprocket.open on [ door1 ]\n", "    whenever door1 then call sprocket.open on [ door1 ]\n")]
-    [InlineData("    whenever halt then call sprocket.open on [ door1 ]\n", "    whenever halt then call sprocket.open on [ halt ]\n")]
-    [InlineData("    whenever halt then call sprocket.open on [ door1 ]\n", "    whenever halt then call sprocket.open on [ inner ]\n")]
-    [InlineData("    whenever halt then call sprocket.open on [ door1 ]\n", "    whenever halt then await\n")]
+    [InlineData("    whenever halt then run 1\n", "    whenever door1 then run 1\n")]
+    [InlineData("        call sprocket.open on [ door1 ]\n", "        call sprocket.open on [ halt ]\n")]
+    [InlineData("        call sprocket.open on [ door1 ]\n", "        call sprocket.open on [ inner ]\n")]
+    [InlineData("    whenever halt then run 1\n", "    whenever halt then await\n")]
     [InlineData("    optional slot button expects signal\n", "    optional slot button expects signal garbage\n")]
     [InlineData("    optional slot button expects signal\n", "    optional block button expects signal\n")]
     [InlineData("    optional slot button expects signal\n", "    optional slot call expects signal\n")]
@@ -85,7 +88,7 @@ public class MalformedTests
     [InlineData("    button = [ sprocket.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ sprocket.toolbar(1, 1, 1) on [ panel1 ], halt ]\n")]
     [InlineData("    button = [ sprocket.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ sprocket.toolbar(1, 1, 2) on [ panel1 ] ]\n")]
     [InlineData("    button = [ sprocket.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ bell, sprocket.toolbar(1, 1, 3) on [ panel1 ] ]\n")]
-    [InlineData("    whenever halt then call sprocket.open on [ door1 ]\n", "    whenever halt then call sprocket.open on [ door1 ]\n    whenever halt then run 1\n")]
+    [InlineData("    whenever halt then run 1\n", "    whenever halt then run 1\n    whenever halt then stop 1\n")]
     [InlineData("    whenever button then run 1\n", "    whenever button then run 1\n    whenever button then stop 1\n")]
     [InlineData("    button = [ sprocket.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ sprocket.toolbar(1, 1) on [ panel1 ] ]\n")]
     [InlineData("    button = [ sprocket.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ sprocket.toolbar(1, 1, 1) on [ door9 ] ]\n")]

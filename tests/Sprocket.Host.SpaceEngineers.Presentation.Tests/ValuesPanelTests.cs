@@ -1,5 +1,4 @@
 using System.Globalization;
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -74,38 +73,6 @@ public class ValuesPanelTests
 
         Assert.Null(Page(screen).Giving);
         Assert.Equal(2, Assert.Single(Step(screen).Arguments).Whole);
-    }
-
-    /// <summary>The values what a trigger does gives are changed in a panel under them too, as one change.</summary>
-    [Fact]
-    public void ATriggersValueIsChangedInItsPanel()
-    {
-        var screen = Falloff();
-        var system = screen.Editor.Program.Systems[0];
-        var trigger = system.Triggers[0];
-        trigger.Does = Automation.Copied(Step(screen));
-        screen.Editor.Program.Edited();
-        screen.Editor.Push(new LogicSystemPage(screen.Editor, system));
-        screen.Run(2);
-
-        screen.Editor.Triggers()[0].Does.OfType<ArgumentsSlot>().Single().Opens!.Execute();
-        screen.Run(2);
-        var page = Assert.IsType<LogicSystemPage>(screen.Editor.Current);
-        var giving = page.Giving;
-        Assert.NotNull(giving);
-        Assert.Equal("2.0", giving.Form.Fields[0].Text);
-        giving.Form.Fields[0].Text = "0.5";
-        giving.Done();
-        screen.Run(2);
-
-        Assert.Null(page.Giving);
-        var act = Assert.IsType<Act>(system.Triggers[0].Does);
-        Assert.Equal(0.5, Assert.Single(act.Arguments).Number);
-        Assert.Equal("Falloff", act.ActionId);
-
-        screen.Editor.Screen.Undo!.Execute();
-        screen.Run(2);
-        Assert.Equal(2, Assert.Single(Assert.IsType<Act>(system.Triggers[0].Does).Arguments).Whole);
     }
 
     /// <summary>What an if compares a number with is changed in a panel under it, as one change.</summary>

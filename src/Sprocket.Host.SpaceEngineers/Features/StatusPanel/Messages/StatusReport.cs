@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel.Messages
             var size = sizeof(long) + ByteData.SizeOfString(report.Name ?? "") + sizeof(int) * 4 + report.KeptBlocks.Length * (sizeof(long) + sizeof(int));
             foreach (var item in report.Items)
             {
-                size += sizeof(int) * 11 + ByteData.SizeOfString(item.Logic ?? "") + ByteData.SizeOfString(item.Installation ?? "")
+                size += sizeof(int) * 10 + ByteData.SizeOfString(item.Logic ?? "") + ByteData.SizeOfString(item.Installation ?? "")
                     + ByteData.SizeOfString(item.Sequence ?? "") + ByteData.SizeOfString(item.Fault.Which ?? "")
                     + ByteData.SizeOfString(item.Fault.Because.About ?? "");
             }
@@ -68,7 +68,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel.Messages
                 ByteData.WriteString(item.Installation ?? "", data, ref offset);
                 ByteData.Write(item.Position, data, ref offset);
                 ByteData.WriteString(item.Sequence ?? "", data, ref offset);
-                ByteData.Write(item.Alone ? 1 : 0, data, ref offset);
                 ByteData.Write(item.Row, data, ref offset);
                 ByteData.Write(item.Halted ? 1 : 0, data, ref offset);
                 ByteData.Write((int)item.Fault.Problem, data, ref offset);
@@ -113,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel.Messages
         /// <summary>One item, as it was written.</summary>
         static StatusItem Item(byte[] data, ref int offset)
         {
-            int level, number, blueprint, position, alone, row, halted, problem, step, unwired, cause;
+            int level, number, blueprint, position, row, halted, problem, step, unwired, cause;
             string logic, installation, sequence, which, about;
             ByteData.TryReadInt32(data, ref offset, out level);
             ByteData.TryReadString(data, ref offset, out logic);
@@ -122,7 +121,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel.Messages
             ByteData.TryReadString(data, ref offset, out installation);
             ByteData.TryReadInt32(data, ref offset, out position);
             ByteData.TryReadString(data, ref offset, out sequence);
-            ByteData.TryReadInt32(data, ref offset, out alone);
             ByteData.TryReadInt32(data, ref offset, out row);
             ByteData.TryReadInt32(data, ref offset, out halted);
             ByteData.TryReadInt32(data, ref offset, out problem);
@@ -147,7 +145,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel.Messages
                 Installation = installation ?? "",
                 Position = position,
                 Sequence = sequence ?? "",
-                Alone = alone != 0,
                 Row = row,
                 Halted = halted != 0,
                 Fault = fault

@@ -1056,14 +1056,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(16f) }
         };
 
-        /// <summary>A column standing for a page of a pick, pressed anywhere down its length to turn to it.</summary>
-        public static readonly IStyle<Stack> Fold = new StackStyle
-        {
-            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(0f, 16f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
-            PointerOver = { Background = Palette.PanelHot },
-            [State.FocusVisible] = { Background = Palette.PanelHot }
-        };
-
 
 
         /// <summary>A quiet line under what a column asks, or about what it lists.</summary>
@@ -1223,7 +1215,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Background = Palette.Page, Border = Palette.Line, Padding = new Thickness(4f) }
         };
 
-        /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens; dim on a paused step.</summary>
+        /// <summary>A mark beside words, muted: the kind of thing they name; dim on a paused step.</summary>
         public static readonly IStyle<Glyph> Waits = new GlyphStyle
         {
             Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Muted },

@@ -206,15 +206,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return _runs.Get(Runners.Key(sequence.Id, instance?.Number ?? 0));
         }
 
-        /// <summary>
-        /// What runs the act a trigger does itself: a sequence with no number and that act for its one step, or null
-        /// where the trigger runs or stops a sequence instead.
-        /// </summary>
-        public Sequence Alone(AutomationSystem system, Trigger trigger)
-        {
-            return _runs.Alone(system, trigger);
-        }
-
         /// <summary>The runners of the program.</summary>
         public Runners Runs => _runs;
 
@@ -294,40 +285,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             Log?.Fired(system, trigger, instance, CurrentTick);
 
-            // A state set by a trigger is set where it stands, as switched on as the system and installation are.
-            var sets = trigger.Sets;
-            if (sets != null)
-            {
-                if (system.Enabled && (instance == null || instance.Enabled))
-                    Set(system, instance, sets);
+            var run = trigger.Does;
+            if (run == null)
+                return;
 
+            var sequence = system.FindSequence(run.Number);
+            if (sequence == null)
+                return;
+
+            if (run.Stops)
+            {
+                Halt(sequence, instance, StopCause.Trigger, 0);
                 return;
             }
 
-            var run = trigger.Does as Run;
-            if (run != null)
-            {
-                var sequence = system.FindSequence(run.Number);
-                if (sequence == null)
-                    return;
-
-                if (run.Stops)
-                {
-                    Halt(sequence, instance, StopCause.Trigger, 0);
-                    return;
-                }
-
-                var runner = Get(sequence, instance);
-                if (runner != null)
-                    runner.Triggered(_bindings, CurrentTick);
-
-                return;
-            }
-
-            var alone = Alone(system, trigger);
-            var acting = alone == null ? null : Get(alone, instance);
-            if (acting != null)
-                acting.Triggered(_bindings, CurrentTick);
+            var runner = Get(sequence, instance);
+            if (runner != null)
+                runner.Triggered(_bindings, CurrentTick);
         }
 
         /// <summary>Starts a named sequence, as a trigger or another sequence would.</summary>
@@ -436,8 +410,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 var instances = system.Uses;
                 var sequences = system.Sequences;
 
-                var triggers = system.Triggers;
-
                 for (var n = 0; n < instances.Count; n++)
                 {
                     for (var q = 0; q < sequences.Count; q++)
@@ -445,14 +417,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         var runner = Get(sequences[q], instances[n]);
                         if (runner != null)
                             Checked(runner, SequenceSummary.Checked(_world, Bindings, sequences[q], instances[n]), afresh);
-                    }
-
-                    for (var t = 0; t < triggers.Count; t++)
-                    {
-                        var alone = Alone(system, triggers[t]);
-                        var runner = alone == null ? null : Get(alone, instances[n]);
-                        if (runner != null)
-                            Checked(runner, SequenceSummary.Checked(_world, Bindings, alone, instances[n]), afresh);
                     }
                 }
 
@@ -487,13 +451,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 var faulted = false;
                 for (var q = 0; q < sequences.Count && !faulted; q++)
                     faulted = Parks(sequences[q], instances[n]);
-
-                var triggers = system.Triggers;
-                for (var t = 0; t < triggers.Count && !faulted; t++)
-                {
-                    var alone = Alone(system, triggers[t]);
-                    faulted = alone != null && Parks(alone, instances[n]);
-                }
             }
         }
 
@@ -509,15 +466,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
-        /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances that may run, and one
-        /// runner for each trigger that acts itself, and retires the rest; and stops each run of what is switched off.
+        /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances that may run and retires the rest; and stops each run of what is switched off.
         /// </summary>
         /// <remarks>Done with the check, when the program or its wiring has changed, and alone when a switch is flipped.</remarks>
         void Match()
         {
             _matchedSwitches = _automation.Switches;
             _watches.Begin();
-            _runs.Begin();
 
             var systems = _automation.Systems;
             for (var s = 0; s < systems.Count; s++)
@@ -529,25 +484,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 for (var t = 0; t < triggers.Count; t++)
                 {
                     var trigger = triggers[t];
-                    _runs.KeepTrigger(trigger);
                     var signal = trigger as SignalTrigger;
                     var watched = trigger is WhenTrigger || trigger is EveryTrigger || (signal != null && signal.IsWatched);
-                    var alone = _runs.Alone(system, trigger);
 
                     for (var n = 0; n < instances.Count; n++)
                     {
                         // Switched off, or waiting to be filled in, it has nothing watched, so it costs no look until it may run.
-                        if (watched && system.Enabled && instances[n].Enabled && !SequenceSummary.Waits(system, trigger, alone, instances[n]))
+                        if (watched && system.Enabled && instances[n].Enabled && !SequenceSummary.Waits(system, trigger, instances[n]))
                             _watches.Keep(system, t, trigger, instances[n]);
-
-                        if (alone != null)
-                            _runs.Keep(system, t, alone, instances[n]);
                     }
                 }
             }
 
             _watches.Sweep();
-            _runs.Sweep();
 
             // A run of what was just switched off stops on the tick of the switch.
             _runs.Switched();

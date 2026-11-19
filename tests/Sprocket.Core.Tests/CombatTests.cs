@@ -187,9 +187,9 @@ public class CombatTests
     public void AWhenOnTargetingFiresAsTheTurretFindsATarget()
     {
         var ship = new Ship();
-        var when = new WhenTrigger("targeting") { Relation = Relation.Is, Value = Literal.Of(true), Does = ship.Off() };
+        var when = new WhenTrigger("targeting") { Relation = Relation.Is, Value = Literal.Of(true) };
         when.Sources.Add(ship.Name(ship.Turret));
-        ship.Program.AddSequence((Trigger)null!).System.AddTrigger(when);
+        ship.Program.AddSequence(when).Steps.Add(ship.Off());
         ship.Start();
         ship.Tick(30);
         Assert.Equal(0, ship.Fired);

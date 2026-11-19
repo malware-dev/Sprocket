@@ -173,7 +173,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             copy.Annotation = trigger.Annotation;
             copy.Category = trigger.Category;
             copy.Attributes = Kept(trigger.Attributes);
-            copy.Does = Step(trigger.Does);
+            copy.Does = Step(trigger.Does) as Run;
             return copy;
         }
 

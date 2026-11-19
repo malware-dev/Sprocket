@@ -334,15 +334,11 @@
   </data>
   <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
     <value>Select what this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) does.</value>
-    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the sequence it starts or the action it does. Pressing the part changes it.</comment>
+    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the sequence it starts or stops. Pressing the part changes it.</comment>
   </data>
   <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
     <value>Change how often it should run.</value>
     <comment>Tooltip on the length in an Every trigger's sentence on a logic system's screen, which says how often the trigger runs. Pressing it opens the length panel.</comment>
-  </data>
-  <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
-    <value>Select which blocks this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) acts on.</value>
-    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the blocks the trigger's own action acts on. Pressing the part changes them.</comment>
   </data>
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
     <value>This sequence's name.</value>
@@ -444,10 +440,6 @@
     <value>Blocks that fire this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term):</value>
     <comment>First line of the tooltip on the blocks a trigger watches, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
   </data>
-  <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
-    <value>Blocks this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) acts on:</value>
-    <comment>First line of the tooltip on the blocks a trigger's own action acts on, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
-  </data>
   <data name="Sprocket.Part.FromSlot" xml:space="preserve">
     <value>From the [slot](Term.Slot class=term) {slots}.</value>
     <comment>In the tooltip on the blocks of a step or a trigger, over the line that heads the list of the blocks: the slot of the logic system the blocks fill. {slots} is the slot's name, in bold.</comment>
@@ -471,14 +463,6 @@
   <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
     <value>Select something in every column first.</value>
     <comment>Tooltip on the Done button in the editor's heading bar in the picker, and on the page choosing how often a timer trigger fires, while it cannot be pressed yet.</comment>
-  </data>
-  <data name="Sprocket.Pick.Back" xml:space="preserve">
-    <value>Back</value>
-    <comment>Tooltip on the narrow folded column at the left edge of the picker, which turns back to the picker's page before.</comment>
-  </data>
-  <data name="Sprocket.Pick.Next" xml:space="preserve">
-    <value>Next</value>
-    <comment>Tooltip on the narrow folded column at the right edge of the picker, which turns on to the picker's page after.</comment>
   </data>
   <data name="Sprocket.Pick.ClearTyped" xml:space="preserve">
     <value>Clear what is typed</value>

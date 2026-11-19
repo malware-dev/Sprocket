@@ -18,7 +18,7 @@ public class UpgradeTests
     const string Switching = "sprocket 1 alpha 14\n\n"
         + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Lamp {\n"
         + "    required slot lamp expects InteriorLight\n\n"
-        + "    every 600t call ext.'off' on [ lamp ]\n\n"
+        + "    every 600t run 1\n\n"
         + "    sequence 1 as Flash {\n"
         + "        call ext.'on' on [ lamp ]\n"
         + "        wait 60t\n"
@@ -353,7 +353,6 @@ public class UpgradeTests
         var steps = read!.Sequences[0].Steps;
         Power((Act)steps[0], true);
         Power((Act)steps[2], false);
-        Power((Act)read.Triggers[0].Does, false);
     }
 
     /// <summary>The power value named switched-on is named power wherever it is set, checked or watched.</summary>

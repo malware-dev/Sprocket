@@ -70,8 +70,7 @@ public class VocabularyTests
 
             var off = Given.Power(false);
             off.Targets.Add(Name(Door));
-            when.Does = off;
-            Program.AddSequence((Trigger)null!).System.AddTrigger(when);
+            Program.AddSequence(when).Steps.Add(off);
             return when;
         }
 
@@ -93,7 +92,7 @@ public class VocabularyTests
             + "    whenever sprocket.finishes_closing on [ door1 ] then run 1\n\n"
             + "    whenever sprocket.toolbar(1, 1, 2) on [ panel2 ] then run 1\n\n"
             + "    when all sprocket.status on [ door1 ] != closed then run 1\n\n"
-            + "    when sum Radius on [ light ] >= 2.5 then call SetColor(255, 136, 0) on [ light ]\n\n"
+            + "    when sum Radius on [ light ] >= 2.5 then run 2\n\n"
             + "    sequence 1 {\n"
             + "        call SetColor(0, 255, 0) on [ light ]\n"
             + "        if any Radius on [ light ] < 4 then {\n"
@@ -108,6 +107,9 @@ public class VocabularyTests
             + "        else if average Radius on [ light ] > 3 then {\n"
             + "            call sprocket.close on [ door1 ]\n"
             + "        }\n"
+            + "    }\n\n"
+            + "    sequence 2 {\n"
+            + "        call SetColor(255, 136, 0) on [ light ]\n"
             + "    }\n"
             + "}\n";
 

@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
     /// <summary>Reads what starts a logic system's sequences out of the script: whenever, when and every.</summary>
     public static class TriggerReader
     {
-        /// <summary><c>whenever</c>, <c>when</c> or <c>every</c>: a trigger of <paramref name="system" /> and the step it does, or trouble where it is none of those.</summary>
+        /// <summary><c>whenever</c>, <c>when</c> or <c>every</c>: a trigger of <paramref name="system" /> and the sequence it runs or stops, or trouble where it is none of those.</summary>
         public static void ReadTrigger(Statement statement, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
             var trigger = Kind(statement, system, trouble);
@@ -19,8 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             trigger.Does = Does(statement, Doing(statement), system, trouble);
             if (trigger.Does == null)
                 return;
-
-            SystemReader.Uses(statement, trigger.Acts, system, program, trouble);
 
             var when = trigger as WhenTrigger;
             for (var i = 0; when != null && i < when.Sources.Count; i++)
@@ -91,16 +89,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>The step a trigger does, which is one a sequence could hold and that starts something: run, stop, call or set.</summary>
-        static Step Does(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
+        static Run Does(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
         {
             var step = statement.Rest(at);
-            if (step.Key != Keyword.Run && step.Key != Keyword.Stop && step.Key != Keyword.Call && step.Key != Keyword.Set)
+            if (step.Key != Keyword.Run && step.Key != Keyword.Stop)
             {
-                trouble.Say(statement, "expected run, stop, call or set.");
+                trouble.Say(statement, "expected run or stop.");
                 return null;
             }
 
-            var does = StepReader.ReadStep(step, system, trouble);
+            var does = StepReader.ReadStep(step, system, trouble) as Run;
             if (does != null)
                 does.Annotation = "";
 

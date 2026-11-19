@@ -614,7 +614,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             }
 
             copy.Annotation = trigger.Annotation;
-            copy.Does = Copied(trigger.Does);
+            copy.Does = Copied(trigger.Does) as Run;
             return copy;
         }
 

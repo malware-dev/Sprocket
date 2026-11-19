@@ -28,9 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <remarks>Saved, and named by buttons, so it never changes once chosen.</remarks>
         public int Number { get; set; }
 
-        /// <summary>Whether this is what the runtime makes to do a trigger's own act, which has no number and is no sequence of the program.</summary>
-        public bool IsAlone => Number <= 0;
-
         /// <summary>
         /// What somebody wrote about this, in their own words, or empty.
         /// </summary>

@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             if (trigger is MomentTrigger || trigger is StateTrigger)
             {
-                Watching(system, trigger, true, aim, origin, OpeningColumn.Blocks, false);
+                Watching(system, trigger, true, aim, origin, OpeningColumn.Blocks);
                 return;
             }
 
@@ -220,12 +220,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         void Aimed(AutomationSystem system, Trigger trigger, OutcomeColumn aim, int origin, bool fresh,
             SystemEdit start)
         {
-            if (aim.Outcome == Outcome.One)
-            {
-                DoOneThing(system, trigger, origin, fresh, start, aim);
-                return;
-            }
-
             _editor.UnwindTo(origin);
 
             if (!fresh && !aim.Moved)
@@ -263,7 +257,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         }
 
         /// <summary>Makes <paramref name="trigger" /> do <paramref name="does" />: added to <paramref name="system" /> where it is <paramref name="fresh" />, and otherwise changed as one edit with <paramref name="start" />.</summary>
-        void Points(AutomationSystem system, Trigger trigger, Step does, bool fresh, Sequence made, SystemEdit start)
+        void Points(AutomationSystem system, Trigger trigger, Run does, bool fresh, Sequence made, SystemEdit start)
         {
             if (fresh)
             {
@@ -294,52 +288,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             _editor.PushNamed(new SequencePage(_editor, sequence));
         }
 
-        /// <summary>Asks for the one thing the trigger does, on the page after its pick, and makes it do that.</summary>
-        void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh,
-            SystemEdit start, OutcomeColumn aim)
-        {
-            var only = fresh ? null : trigger.Acts;
-            aim.Finish = answer => _editor.Picks.Name(system, answer, false, only?.Targets, named =>
-            {
-                var act = new Act(answer.Chosen);
-                act.Form = answer.Form;
-                act.Provider = Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, answer.Form);
-                foreach (var name in named)
-                    act.Targets.Add(name);
-
-                for (var i = 0; i < answer.Arguments.Count; i++)
-                    act.Arguments.Add(answer.Arguments[i]);
-
-                _editor.UnwindTo(origin);
-                Points(system, trigger, act, fresh, null, start);
-            });
-
-            if (aim.Following == null)
-            {
-                // Each page the switch makes, on blocks or on slots, is the one the trigger goes on to.
-                var source = new SourceSwitch(_editor, (choice, slots) =>
-                {
-                    var page = only != null
-                        ? new PickPage(_editor, _editor.Texts.PickSingleTask, false, slots ? new List<long>() : _editor.Blocks(system, only.Targets),
-                            only.ActionId, only.Form, answer => aim.Finish(answer),
-                            arguments: only.Arguments, opens: aim.Opens, after: aim.Pick, facet: _editor.Picks.Facet(system, only.Targets))
-                        : new PickPage(_editor, _editor.Texts.PickSingleTask, false, new List<long>(), "", ReachKind.Native,
-                            answer => aim.Finish(answer), opens: aim.Opens, after: aim.Pick);
-                    page.Source = choice;
-                    page.Slotted = system;
-                    page.ListsSlots = slots;
-                    page.Replacing = only?.Targets;
-                    aim.Following = page;
-                    return page;
-                }, null);
-                source.Open(only != null ? PickSource.Blocks : source.Usual);
-            }
-
-            aim.Following.Arrived(aim.Straight);
-            aim.Straight = false;
-            _editor.Push(aim.Following);
-        }
-
         /// <summary>Takes a trigger out of a system.</summary>
         public void Forget(AutomationSystem system, Trigger trigger)
         {
@@ -347,12 +295,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         }
 
         /// <summary>Opens the picker a trigger was made in, on what starts it and what it does now, and puts the answer in its place.</summary>
-        public void ChangeTrigger(AutomationSystem system, Trigger trigger, OpeningColumn opens, bool action)
+        public void ChangeTrigger(AutomationSystem system, Trigger trigger, OpeningColumn opens)
         {
             var origin = _editor.Depth;
             var aim = new OutcomeColumn(_editor, system, trigger);
-            aim.Opens = action ? opens : OpeningColumn.Blocks;
-            aim.Straight = action;
 
             var every = trigger as EveryTrigger;
             if (every != null)
@@ -362,29 +308,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                     Aimed(system, every, aim, origin, false, interval == rate && every.IntervalSetting.Length == 0 ? null : new SetCadence(every, rate, every.IntervalSetting, interval)));
 
                 _editor.Push(timer);
-                if (action)
-                    timer.GoOn();
-
                 return;
             }
 
             if (trigger is MomentTrigger || trigger is StateTrigger)
-                Watching(system, trigger, false, aim, origin, opens, action);
+                Watching(system, trigger, false, aim, origin, opens);
         }
 
         /// <summary>
         /// Opens the selector of what starts <paramref name="was" />, a new trigger where <paramref name="fresh" />: on blocks, or
         /// on one of the logic system's states where it watches one, its first column's heading switching between those, and the
-        /// slots the logic system already has; going straight on to what it does where <paramref name="action" /> says so.
+        /// slots the logic system already has; and puts the answer in its place.
         /// </summary>
-        void Watching(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens, bool action)
+        void Watching(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens)
         {
             var kept = was as SignalTrigger;
             var keeps = !fresh && kept != null && !kept.IsWritten && system.IsBlueprint ? kept.Part : "";
             var source = new SourceSwitch(_editor,
                 (choice, slots) =>
                 {
-                    var page = OnBlocks(system, was, fresh, aim, origin, opens, action, slots);
+                    var page = OnBlocks(system, was, fresh, aim, origin, opens, slots);
                     page.Source = choice;
                     page.Slotted = system;
                     page.ListsSlots = slots;
@@ -401,16 +344,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             var opened = source.Open(fresh ? source.Usual : was is StateTrigger ? PickSource.States : PickSource.Blocks);
             _editor.Push(opened);
-            if (!action)
-                return;
-
-            var picked = opened as PickPage;
-            if (picked != null)
-                picked.GoOn();
-
-            var stated = opened as StatePage;
-            if (stated != null)
-                stated.GoOn();
         }
 
         /// <summary>The selector of a state <paramref name="was" /> is to start on, as a trigger made new where <paramref name="fresh" />, or changed in place.</summary>
@@ -452,7 +385,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// The selector of the blocks and moment <paramref name="was" /> is to start on, as a trigger made new where
         /// <paramref name="fresh" />, or changed in place; opened on no blocks where it lists the <paramref name="slots" /> already made.
         /// </summary>
-        PickPage OnBlocks(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens, bool action,
+        PickPage OnBlocks(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens,
             bool slots)
         {
             var moment = was as MomentTrigger;
@@ -523,7 +456,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                     });
                 },
                 true, when?.Quantifier ?? Quantifier.Any, compares ? ComparisonQuestion.Opening(when.Arguments, when.Relation, when.Value) : null,
-                opens: action ? OpeningColumn.Nothing : opens, aim: aim);
+                opens: opens, aim: aim);
         }
 
         /// <summary>Whether <paramref name="answer" /> picked a signal slot of <paramref name="system" /> by name, which is the whole of what starts the trigger.</summary>

@@ -310,11 +310,11 @@ public class StateEditingTests
         Assert.Equal(Relation.Is, test.Relation);
     }
 
-    /// <summary>The value a when watches a state for, and the value its trigger sets a state to, are each chosen from a menu under it.</summary>
+    /// <summary>The value a when watches a state for is chosen from a menu under it.</summary>
     [Fact]
-    public void ATriggersStateValuesAreChosenFromMenusUnderThem()
+    public void AWatchedStateValueIsChosenFromAMenuUnderIt()
     {
-        var screen = OnSystem(Head + "    when where == outside then set cycling to off\n\n    sequence 1 {\n    }\n}\n", out var system);
+        var screen = OnSystem(Head + "    when where == outside then run 1\n\n    sequence 1 {\n    }\n}\n", out var system);
         var editor = screen.Editor;
 
         editor.Triggers()[0].Starts[2].Opens!.Execute();
@@ -324,16 +324,9 @@ public class StateEditingTests
         screen.Run(1);
         Assert.Equal("inside", Assert.IsType<StateTrigger>(system.Triggers[0]).Test.Value.Text);
 
-        editor.Triggers()[0].Does[1].Opens!.Execute();
-        screen.Run(1);
-        Assert.Equal(new[] { "on", "off", editor.Texts.ValueNewSetting }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
-        editor.PressAnswer("on");
-        screen.Run(1);
-        Assert.Equal("on", Assert.IsType<SetState>(system.Triggers[0].Does).Value.Said);
-
         editor.Screen.Undo!.Execute();
         screen.Run(1);
-        Assert.Equal("off", Assert.IsType<SetState>(system.Triggers[0].Does).Value.Said);
+        Assert.Equal("outside", Assert.IsType<StateTrigger>(system.Triggers[0]).Test.Value.Text);
     }
 
     /// <summary>When state can watch a state made in its own picker, which is added with the trigger as one undo step.</summary>

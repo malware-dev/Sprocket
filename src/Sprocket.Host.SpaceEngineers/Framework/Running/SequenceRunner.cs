@@ -615,7 +615,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>Ends a run that has done its last step, leaving what it started to carry on.</summary>
-        /// <remarks>A trigger's own act has no wait after it, so what it started is still in flight when the run ends.</remarks>
+        /// <remarks>A last step with no wait after it leaves what it started still in flight when the run ends.</remarks>
         void Finish()
         {
             IsRunning = false;

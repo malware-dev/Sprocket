@@ -137,9 +137,9 @@ public class HandoverTests : IDisposable
     {
         _sim.Editor.NewSystem("Airlock");
         _sim.Editor.PressStart("every");
-        _sim.Editor.DeveloperMode = true;
+        _sim.Editor.PressPrimary();
         _sim.Tick();
-        _sim.Editor.PressChoice("A task on blocks…");
+        _sim.Editor.PressAdd("task");
         _sim.Editor.PressBlock("Airlock Outer Door");
         _sim.Editor.PressChoice("close");
         _sim.Editor.PressPrimary();

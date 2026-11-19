@@ -13,12 +13,11 @@ using Lumel.Layout;
 namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 {
     /// <summary>
-    /// What a trigger is chosen to do, in the column beside what starts it: a single action, a new sequence, or a sequence the
-    /// system has, to run or to stop.
+    /// What a trigger is chosen to do, in the column beside what starts it: a new sequence, or a sequence the system has, to
+    /// run or to stop.
     /// </summary>
     public sealed class OutcomeColumn
     {
-        const string One = "one";
         const string New = "new";
         const string Heading = "#";
 
@@ -50,10 +49,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 Sequence = running.Number;
                 Stops = trigger.Stops;
             }
-            else if (trigger != null && trigger.Acts != null)
-            {
-                Outcome = Outcome.One;
-            }
 
             _was = Outcome;
             _wasSequence = Sequence;
@@ -75,32 +70,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <summary>Whether it says something other than what the trigger did when it opened.</summary>
         public bool Moved => Outcome != _was || Sequence != _wasSequence || Stops != _wasStops;
 
-        /// <summary>Whether the page it is chosen on is finished there, which a single action is not: choosing one goes on to a page of its own.</summary>
-        public bool Finishes => Chosen && Outcome != Outcome.One;
-
-        /// <summary>What choosing a single action goes on to, which is the page after this one.</summary>
-        public Action Onward { get; set; }
-
-        /// <summary>What choosing anything else twice in quick succession does, which is finishing the page as Done would.</summary>
+        /// <summary>What choosing a sequence twice in quick succession does, which is finishing the page as Done would.</summary>
         public Action MovesOn { get; set; }
-
-        /// <summary>The page the single action is chosen on, kept while going back to look at what starts the trigger, and let go once it does something else.</summary>
-        public PickPage Following { get; set; }
-
-        /// <summary>Whether the page after is being gone straight to, because the part pressed to open the pick stands for something on it.</summary>
-        public bool Straight { get; set; }
-
-        /// <summary>The strip what the trigger does is chosen in, which the page the single action is chosen on goes on in.</summary>
-        public PickStrip Pick { get; set; }
-
-        /// <summary>Which column the page the single action is chosen on opens on.</summary>
-        public OpeningColumn Opens { get; set; }
-
-        /// <summary>What finishing the page the single action is chosen on does, as things stand now.</summary>
-        /// <remarks>
-        /// Set again each time that page is gone on to, since what starts the trigger may have changed on the way back.
-        /// </remarks>
-        public Action<PickAnswer> Finish { get; set; }
 
         /// <summary>Says what the trigger may do in <paramref name="stage" />.</summary>
         public void Fill(StageColumn stage)
@@ -129,12 +100,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 _runs.Tip = CodexTip.For(null, Stops ? texts.Codex.PickStopAbout : texts.Codex.PickRunAbout);
             }
 
-            var offersOne = !Stops && (_editor.DeveloperMode || Outcome == Outcome.One);
-
             _keys.Clear();
-            if (offersOne)
-                _keys.Add(One);
-
             if (!Stops)
                 _keys.Add(New);
 
@@ -145,12 +111,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 _keys.Add(Key(sequence.Number));
 
             _rows.Show(_keys);
-
-            if (offersOne)
-            {
-                _rows[One].Mark = Symbols.Action;
-                Show(_rows[One], texts.PickSingleAction, null, Outcome == Outcome.One, false);
-            }
 
             if (!Stops)
             {
@@ -192,20 +152,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             return row;
         }
 
-        /// <summary>Takes what the row under <paramref name="key" /> offers; a single action goes straight on to the page it is chosen on.</summary>
+        /// <summary>Takes what the row under <paramref name="key" /> offers.</summary>
         void Take(string key, int presses)
         {
             Action does;
-            if (key == One)
-            {
-                does = delegate
-                {
-                    Does(Outcome.One, 0);
-                    if (Onward != null)
-                        Onward();
-                };
-            }
-            else if (key == New)
+            if (key == New)
             {
                 does = () => Does(Outcome.New, 0);
             }
@@ -223,7 +174,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 return;
 
             act.Execute();
-            if (presses > 1 && key != One && MovesOn != null)
+            if (presses > 1 && MovesOn != null)
                 MovesOn();
         }
 
@@ -231,9 +182,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         {
             Outcome = outcome;
             Sequence = sequence;
-            if (outcome != Outcome.One)
-                Following = null;
-
             _editor.Invalidate();
         }
 
@@ -243,9 +191,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             Stops = stops;
             if (Outcome != Outcome.Existing)
                 Outcome = stops ? Outcome.None : Outcome.New;
-
-            if (Outcome != Outcome.One)
-                Following = null;
 
             _editor.Invalidate();
         }

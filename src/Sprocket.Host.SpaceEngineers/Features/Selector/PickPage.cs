@@ -28,7 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         readonly Action<PickAnswer> _done;
         readonly OpeningColumn _opens;
         readonly OutcomeColumn _aim;
-        readonly int _base;
         readonly Func<GridEntity, bool> _fits;
         readonly bool _memberOnly;
         readonly PickChoices _picked = new PickChoices();
@@ -38,8 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         readonly PickArguments _arguments;
         readonly PickStrip _strip;
 
-        bool _goesOn;
-        bool _straight;
         bool _selectedTarget;
 
         // Where the pick names slots of a blueprint: its heading.
@@ -51,8 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
         /// <summary>Asks what to point at and what should happen to it, starting from whatever the answer is now.</summary>
         /// <remarks>
-        /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
-        /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
+        /// <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
         /// them. <paramref name="signalsOnly" /> offers only what the construct does to start something, for a signal slot.
         /// <paramref name="forTests" /> offers what an if can test.
         /// <paramref name="facet" /> is the name of the facet the step acts on, where what it does is a member of a type the host
@@ -61,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, ReachKind chosenForm, Action<PickAnswer> done,
             bool asksAll = false, Quantifier quantifier = Quantifier.Any, IList<Literal> arguments = null,
-            OpeningColumn opens = OpeningColumn.Blocks, OutcomeColumn aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
+            OpeningColumn opens = OpeningColumn.Blocks, OutcomeColumn aim = null, Func<GridEntity, bool> admits = null,
             bool signalsOnly = false, bool forTests = false, string facet = "")
             : base(editor)
         {
@@ -69,13 +65,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             _opens = opens;
             _aim = aim;
             if (aim != null)
-            {
-                aim.Onward = Primary;
                 aim.MovesOn = MoveOn;
-            }
 
-            _strip = after ?? new PickStrip(editor.Texts);
-            _base = after == null ? 0 : after.Stages.Count;
+            _strip = new PickStrip(editor.Texts);
 
             _title = title;
             _forEvents = forEvents;
@@ -189,11 +181,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         public override bool Asks => true;
 
         /// <inheritdoc />
-        /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>
-        public override string PrimaryText => _aim == null || _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
+        public override string PrimaryText => Editor.Texts.ChromeDone;
 
         /// <inheritdoc />
-        public override bool CanPrimary => IsComplete && (_aim == null || _aim.Finishes);
+        public override bool CanPrimary => IsComplete;
 
         /// <inheritdoc />
         public override string PrimaryAbout => "";
@@ -219,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <inheritdoc />
         public override bool ScrollsItself => true;
 
-        /// <summary>The strip the pick is drawn in, shared with the pages before and after this one.</summary>
+        /// <summary>The strip the pick is drawn in.</summary>
         public PickStrip Strip => _strip;
 
         /// <summary>
@@ -272,11 +263,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>The slots picked by name, none where blocks are picked.</summary>
         IList<string> PickedSlots => Slots != null ? Slots.Picked : NoSlots;
 
-        /// <summary>The stages this page asks, which are the last in the pick while it is on top.</summary>
-        int Own => (_blocks.Column == null ? 0 : 1) + (_members.Column == null ? 0 : 1) + (_does == null ? 0 : 1);
-
         /// <summary>The stage whose box takes the keyboard when its page is first shown, or minus one where none does.</summary>
-        int Opens => _opens == OpeningColumn.Blocks ? _base : _opens == OpeningColumn.What ? _base + 1 : -1;
+        int Opens => _opens == OpeningColumn.Blocks ? 0 : _opens == OpeningColumn.What ? 1 : -1;
 
         /// <summary>What is chosen as the program names it: the one slot, where a toolbar a person presses is chosen.</summary>
         string AnswerId => _picked.Slot == null ? _picked.Member : _picked.Slot.EventId;
@@ -323,11 +311,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// </remarks>
         public override bool Leaving()
         {
-            if (_base > 0)
-                return _straight ? LeavingStraight() : true;
-
-            var after = _aim?.Following;
-            if (!IsComplete || !Moved && (after == null || !after.Moved))
+            if (!IsComplete || !Moved)
                 return true;
 
             Editor.Ask(Editor.Texts.PickKeepQuestion);
@@ -384,25 +368,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 _picked.Facet = Slots.Facet;
 
             _blocks.Collect(_fits);
-
-            if (_aim != null)
-                _aim.Pick = _strip;
-
-            // Back from a page after this one, whatever that page asked goes with it; and back here from the page before,
-            // what this one asked is put back.
-            _strip.Return(_base, _base + Own);
-            if (_strip.Stages.Count == _base && _blocks.Column != null)
-            {
-                _strip.Add(_blocks.Column);
-                if (_members.Column != null)
-                    _strip.Add(_members.Column);
-
-                if (_does != null)
-                    _strip.Add(_does);
-            }
-
-            _strip.Returns = _base > 0 ? Editor.Act(CommandKind.PageBack, PageBack) : null;
-            _strip.Onward = _aim != null && _aim.Outcome == Outcome.One ? Editor.Act(CommandKind.PageOn, Primary) : null;
 
             if (_finish == null)
                 _finish = Editor.Act(CommandKind.Primary, Primary);
@@ -468,11 +433,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             if (_opens == OpeningColumn.Target)
                 SelectTarget();
 
-            if (!_goesOn)
-                return;
-
-            _goesOn = false;
-            Primary();
         }
 
         /// <summary>Opens the selector of the target the page was opened for; back from it with nothing selected, this page goes too, having never been looked at.</summary>
@@ -488,28 +448,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 return;
 
             Editor.Pop();
-            if (_straight)
-                Editor.Pop();
         }
 
-        /// <summary>Moves the strip's page turning on a tick.</summary>
+        /// <summary>Moves the strip's glide on a tick.</summary>
         public override void Refresh()
         {
             _strip.Tick();
             _arguments.Making?.Hang();
-        }
-
-        /// <summary>Goes straight on to the page after this one as soon as this is built, for a part pressed that stands for something on that page.</summary>
-        /// <remarks>Built first all the same, because the page after carries on from the stages this one asks.</remarks>
-        public void GoOn()
-        {
-            _goesOn = true;
-        }
-
-        /// <summary>Says whether this page is being opened straight onto, rather than paged to.</summary>
-        public void Arrived(bool straight)
-        {
-            _straight = straight;
         }
 
         /// <summary>
@@ -568,7 +513,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// </summary>
         void MoveOn()
         {
-            if (PrimaryText.Length == 0 || !CanPrimary)
+            if (!CanPrimary)
                 return;
 
             var arguments = _strip.Arguments;
@@ -580,33 +525,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
             if (_finish != null)
                 _finish.Execute();
-        }
-
-        /// <summary>Pages back to the page before, which from then on this page was paged to.</summary>
-        void PageBack()
-        {
-            _straight = false;
-            Editor.Pop();
-        }
-
-        /// <summary>Leaves the pick from a page opened straight onto, past the page before that was never looked at, asking first where anything has changed.</summary>
-        bool LeavingStraight()
-        {
-            if (!IsComplete || !Moved)
-            {
-                Editor.Pop();
-                return true;
-            }
-
-            Editor.Ask(Editor.Texts.PickKeepQuestion);
-            Editor.AnswerPrimary(Editor.Texts.PickKeepThem, true);
-            Editor.Answer(Editor.Texts.PickDiscardThem, delegate
-            {
-                Editor.Pop();
-                Editor.Pop();
-            });
-
-            return false;
         }
     }
 }

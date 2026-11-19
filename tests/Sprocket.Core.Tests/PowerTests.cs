@@ -131,8 +131,7 @@ public class PowerTests
         when.Sources.Add(automation.Declare(ship.World, ship.Entity(id)).Name);
         var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
-        when.Does = on;
-        automation.AddSequence((Trigger)null!).System.AddTrigger(when);
+        automation.AddSequence(when).Steps.Add(on);
         automation.Edited();
 
         var runner = new AutomationRunner(automation, ship.World);

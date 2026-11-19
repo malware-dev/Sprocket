@@ -125,27 +125,6 @@ public class StateScriptTests
         Assert.Equal(written, Save(again));
     }
 
-    /// <summary>A when on a state may set a state, and a flag state is compared with a flag.</summary>
-    [Fact]
-    public void AWhenOnAStateMaySetAState()
-    {
-        var text = Version
-            + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n{\n"
-            + "    let cycling = off\n"
-            + "    let alarm = off\n\n"
-            + "    when cycling == on then set alarm to on\n"
-            + "}\n";
-
-        var program = new Automation();
-        Assert.Equal("", Load(text, program));
-
-        var watched = Assert.IsType<StateTrigger>(Assert.Single(program.Systems[0].Triggers));
-        Assert.Equal(Literal.Of(true), watched.Test.Value);
-        Assert.Same(watched.Does, watched.Sets);
-        Assert.Equal("alarm", watched.Sets!.State);
-        Assert.Contains("    when cycling == on then set alarm to on\n", Save(program));
-    }
-
     /// <summary>
     /// A choice is written qualified where alone it would read as something else: where a state has its name, and as a
     /// starting value where another type has it too.

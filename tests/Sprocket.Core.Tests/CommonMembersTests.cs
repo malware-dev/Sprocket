@@ -43,8 +43,7 @@ public class CommonMembersTests
         {
             var when = new WhenTrigger(member) { Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.Is, Value = value };
             when.Sources.Add(Name(Lamp));
-            when.Does = Off();
-            Program.AddSequence((Trigger)null!).System.AddTrigger(when);
+            Program.AddSequence(when).Steps.Add(Off());
         }
 
         /// <summary>A sequence started by the lamp's signal <paramref name="signal" />, which switches the door off.</summary>

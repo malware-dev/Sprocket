@@ -762,7 +762,6 @@ public class ScriptTests
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    whenever panel1 then run 1\n")]
     [InlineData("let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\nlet panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    whenever button then run 1\n")]
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\n", "    whenever sprocket.finishes_closing on [ button ] then run 1\n")]
-    [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet button = sprocket.toolbar(1, 1, 4) on [ panel1 ]\n", "    every 600t call sprocket.close on [ button ]\n")]
     public void ATriggerVariableThatIsNoneIsTrouble(string lets, string trigger)
     {
         var after = new Automation();
@@ -801,51 +800,46 @@ public class ScriptTests
         Assert.Contains("        # Not yet\n        // call sprocket.open(2) on [ inner ]\n        // await\n        wait 60t\n", Save(after));
     }
 
-    /// <summary>A trigger does one step, written as a sequence writes it: run, stop, call or set.</summary>
+    /// <summary>A trigger runs or stops a sequence, written as a sequence writes it.</summary>
     [Fact]
-    public void ATriggerDoesAnyStepThatStartsSomething()
+    public void ATriggerRunsOrStopsASequence()
     {
         var after = new Automation();
         Assert.Equal("", Load(Blueprint + "MalTek.Airlock {\n    required slot outer\n    required slot light\n"
             + "    optional slot open expects signal\n    optional slot dim expects signal\n    optional slot halt expects signal\n\n"
-            + "    whenever open then call sprocket.open on [ outer ]\n"
-            + "    whenever dim then set Radius on [ light ] to 4.5\n"
+            + "    whenever open then run 1\n"
+            + "    whenever dim then run 'Cycle'\n"
             + "    whenever halt then stop 'Cycle'\n\n"
-            + "    when all sprocket.status on [ outer ] == closed then call Reverse(2) on [ outer ]\n\n"
+            + "    when all sprocket.status on [ outer ] == closed then run 1\n\n"
             + "    every 600t stop 1\n\n"
             + "    sequence 1 as Cycle {\n    }\n}\n", after));
 
         var triggers = after.Systems[0].Triggers;
-        var open = Assert.IsType<Act>(triggers[0].Does);
-        Assert.Equal("open", open.ActionId);
-        Assert.Equal(ReachKind.Native, open.Form);
-        Assert.Equal(new[] { "outer" }, open.Targets);
-
-        var dim = Assert.IsType<Act>(triggers[1].Does);
-        Assert.True(dim.Sets);
-        Assert.Equal(4.5, dim.Arguments[0].Real);
+        Assert.Equal(1, triggers[0].Runs);
+        Assert.False(triggers[0].Stops);
+        Assert.Equal(1, triggers[1].Runs);
 
         Assert.Equal(1, triggers[2].Runs);
         Assert.True(triggers[2].Stops);
 
-        var reverse = Assert.IsType<Act>(Assert.IsType<WhenTrigger>(triggers[3]).Does);
-        Assert.Equal(ReachKind.Action, reverse.Form);
-        Assert.Equal(2, reverse.Arguments[0].Whole);
+        Assert.Equal(1, Assert.IsType<WhenTrigger>(triggers[3]).Runs);
 
         Assert.True(Assert.IsType<EveryTrigger>(triggers[4]).Stops);
 
         var text = Save(after);
-        Assert.Contains("    whenever open then call sprocket.open on [ outer ]\n", text);
-        Assert.Contains("    whenever dim then set Radius on [ light ] to 4.5\n", text);
+        Assert.Contains("    whenever open then run 1\n", text);
+        Assert.Contains("    whenever dim then run 1\n", text);
         Assert.Contains("    whenever halt then stop 1\n", text);
-        Assert.Contains("    when all sprocket.status on [ outer ] == closed then call Reverse(2) on [ outer ]\n", text);
+        Assert.Contains("    when all sprocket.status on [ outer ] == closed then run 1\n", text);
         Assert.Contains("    every 600t stop 1\n", text);
     }
 
-    /// <summary>A trigger whose step is not one that starts something, or that names a sequence the system has not got, is trouble.</summary>
+    /// <summary>A trigger whose step does not run or stop a sequence, or that names a sequence the system has not got, is trouble.</summary>
     [Theory]
     [InlineData("whenever button then await")]
     [InlineData("whenever button then wait 60t")]
+    [InlineData("whenever button then call sprocket.open on [ outer ]")]
+    [InlineData("whenever button then set Radius on [ outer ] to 4.5")]
     [InlineData("on button then")]
     [InlineData("whenever button then run 9")]
     [InlineData("whenever sprocket.finishes_closing on [ outer ] then stop 'Nothing'")]

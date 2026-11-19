@@ -440,10 +440,6 @@
     <value>**{block}** already stops {sequence} on {blockset}.</value>
     <comment>Question shown under the picked button after a button is picked for a button trigger or a signal slot, when another trigger already uses it to stop a sequence. {block} is the button panel's name, {sequence} the sequence's name, and {blockset} the logic system's name or the installation's name.</comment>
   </data>
-  <data name="Sprocket.Button.Acts" xml:space="preserve">
-    <value>**{block}** already does a task on {blockset}.</value>
-    <comment>Question shown under the picked button after a button is picked for a button trigger or a signal slot, when another trigger already uses it to act on blocks directly rather than start a sequence. {block} is the button panel's name and {blockset} the logic system's name or the installation's name.</comment>
-  </data>
   <data name="Sprocket.Button.Elsewhere" xml:space="preserve">
     <value>Button {button} of **{block}** already does something else.</value>
     <comment>Question shown under the picked button after a button is picked for a button trigger or a signal slot, when the button's toolbar slot holds something no Sprocket trigger put there, such as the game's own action or another block's automation. {block} is the button panel's name and {button} the button's number, counting from 1.</comment>
@@ -514,7 +510,7 @@
   </data>
   <data name="Sprocket.Pick.NoBlocksDone" xml:space="preserve">
     <value>No block on this construct has an action or a value to set.</value>
-    <comment>Shown in the picker's column of blocks, in place of the list, when nothing on the construct has anything that can be done to it; seen while picking what a step or a trigger's own task does.</comment>
+    <comment>Shown in the picker's column of blocks, in place of the list, when nothing on the construct has anything that can be done to it; seen while picking what a step does.</comment>
   </data>
   <data name="Sprocket.Pick.WhatHappens" xml:space="preserve">
     <value>What happens</value>
@@ -522,7 +518,7 @@
   </data>
   <data name="Sprocket.Pick.WhatToDo" xml:space="preserve">
     <value>What to do</value>
-    <comment>Heading of the picker's column of what can be done to the chosen blocks, seen while picking what a step or a trigger's own task does; shown in capitals.</comment>
+    <comment>Heading of the picker's column of what can be done to the chosen blocks, seen while picking what a step does; shown in capitals.</comment>
   </data>
   <data name="Sprocket.Pick.NothingHappens" xml:space="preserve">
     <value>Those blocks have nothing in common that can happen to them.</value>
@@ -599,14 +595,6 @@
   <data name="Sprocket.Plan.SorterList" xml:space="preserve">
     <value>setting the sorter's list</value>
     <comment>One item in the picker's "Still to come" note over what the chosen blocks offer, naming something not built yet for a conveyor sorter.</comment>
-  </data>
-  <data name="Sprocket.Pick.SingleAction" xml:space="preserve">
-    <value>A task on blocks…</value>
-    <comment>Choice in the picker's column choosing what a trigger does: the trigger does one task on some blocks, chosen on the picker's page after; the trailing ellipsis says a page follows. Offered only in developer mode, or where the trigger already does a task of its own.</comment>
-  </data>
-  <data name="Sprocket.Pick.SingleTask" xml:space="preserve">
-    <value>A task on blocks</value>
-    <comment>Title in the editor's heading bar of the picker page choosing a trigger's own task, shown until something is chosen.</comment>
   </data>
   <data name="Sprocket.Pick.HeadingTask" xml:space="preserve">
     <value>Task</value>

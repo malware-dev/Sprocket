@@ -358,8 +358,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Rename(moment.Sources, was, name);
-
-                RenameIn(trigger.Acts, was, name);
             }
 
             foreach (var sequence in _sequences)
@@ -470,8 +468,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     uses += Count(moment.Sources, slot);
-
-                uses += CountIn(trigger.Acts, slot);
             }
 
             foreach (var sequence in _sequences)
@@ -511,16 +507,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return uses;
         }
 
-        /// <summary>The first action of its triggers and steps that acts on <paramref name="slot" />, or null where none does.</summary>
+        /// <summary>The first action of its steps that acts on <paramref name="slot" />, or null where none does.</summary>
         public Act ActingOn(string slot)
         {
-            foreach (var trigger in _triggers)
-            {
-                var own = trigger.Acts;
-                if (own != null && own.Targets.Contains(slot))
-                    return own;
-            }
-
             foreach (var sequence in _sequences)
             {
                 foreach (var step in sequence.Steps)
@@ -557,8 +546,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Gather(moment.Sources, into);
-
-                GatherFrom(trigger.Acts, into);
             }
 
             foreach (var sequence in _sequences)
@@ -580,8 +567,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null && moment.Sources.Count > 0)
                     into.Add(moment.Sources);
-
-                trigger.Acts?.NameLists(into);
             }
 
             foreach (var sequence in _sequences)

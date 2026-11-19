@@ -275,12 +275,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         /// <summary>Having a trigger have a block do one thing.</summary>
         TriggerDoes,
 
-        /// <summary>Going on to the next page of a list.</summary>
-        PageOn,
-
-        /// <summary>Going back to the previous page of a list.</summary>
-        PageBack,
-
         // Shelve, Unshelve and ForgetBackup change no program, so a copy lent to look at may make them (Gate).
         /// <summary>Putting a blueprint in the library, or bringing it up to date there.</summary>
         Shelve,

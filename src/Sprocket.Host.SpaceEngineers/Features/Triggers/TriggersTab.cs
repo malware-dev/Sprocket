@@ -138,6 +138,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <summary>The panel a timer's rate is being given in, or null while none is open.</summary>
         public DurationPanel Rate => _rate != null && _rate.IsOpen ? _rate.Panel : null;
 
+        /// <summary>The panel the values a trigger starts on are being given in, or null while none is open.</summary>
+        public ValuesQuestion Giving => _values != null && _values.IsOpen ? _values : null;
+
         /// <summary>Keeps the rate's panel under the part it was opened from.</summary>
         /// <remarks>Called every tick.</remarks>
         public void Hang()
@@ -148,42 +151,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (_values != null)
                 _values.Hang();
         }
-
-        /// <summary>The panel the values a trigger's action gives are being given in, or null while none is open.</summary>
-        public ValuesQuestion Giving => _values != null && _values.IsOpen ? _values : null;
-
-        /// <summary>
-        /// Opens the panel the values <paramref name="act" />, what <paramref name="trigger" /> does, gives are given in, asked for
-        /// by <paramref name="fields" />, hung from the part saying them, which are <paramref name="holds" /> to it; the selector
-        /// where a value is chosen on a screen of its own.
-        /// </summary>
-        void Give(Trigger trigger, Act act, List<Field> fields, ArgumentRole holds)
-        {
-            if (ValuesQuestion.Chooses(fields))
-            {
-                _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Arguments, true);
-                return;
-            }
-
-            Action<string, bool> answered = (said, cancelled) =>
-            {
-                if (cancelled || trigger.Does != act || _system.IndexOfTrigger(trigger) < 0)
-                    return;
-
-                var now = Vocabulary.Given(_editor.World, _editor.Blocks(_system, act.Targets), act, FieldSet.Read(said, fields));
-                _editor.Do(_system, new PointTrigger(_editor.Program, trigger, now, null));
-            };
-            if (ValuesQuestion.Offer(_editor, fields, act.Arguments, said => answered(said, false)))
-                return;
-
-            if (_values != null)
-                _values.Finish(true);
-
-            _values = new ValuesQuestion(_editor, _system, fields, act.Arguments, () => Chip(trigger, false, holds), answered);
-            _values.Hang();
-        }
-
-
 
         /// <summary>Opens the panel the rate of <paramref name="every" /> is given in, which changes it as it closes.</summary>
         void OpenRate(EveryTrigger every)
@@ -278,7 +245,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
                 _changes(CommandKind.OpenTrigger, () => RelateWatch(watch)), ArgumentRole.Compared));
             row.Starts.Add(StateValueQuestion.Part(_system, test.State, test.Value, test.Other,
-                _changes(CommandKind.OpenTrigger, () => CompareWatch(watch, () => Chip(watch, true, ArgumentRole.Checked))), ArgumentRole.Checked));
+                _changes(CommandKind.OpenTrigger, () => CompareWatch(watch, () => Chip(watch, ArgumentRole.Checked))), ArgumentRole.Checked));
         }
 
         /// <summary>
@@ -294,30 +261,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 now.Value = value;
                 now.Other = "";
                 _editor.Do(_system, new SetWatch(watch, test, now));
-            }, () => _editor.Starts.ChangeTrigger(_system, watch, OpeningColumn.Blocks, false));
-        }
-
-        /// <summary>
-        /// Offers enable and disable, and toggle where the switch flips, in a menu under the part pressed, the one <paramref name="act" />, what
-        /// <paramref name="trigger" /> does, does marked, and has the trigger do the one chosen.
-        /// </summary>
-        void Switch(Trigger trigger, Act act)
-        {
-            var blocks = _editor.Blocks(_system, act.Targets);
-            SwitchQuestion.Offer(_editor, act, Vocabulary.Toggle(_editor.World, blocks, act.ActionId) != null,
-                values => _editor.Do(_system, new PointTrigger(_editor.Program, trigger, Vocabulary.Given(_editor.World, blocks, act, values), null)));
-        }
-
-        /// <summary>
-        /// Offers the values the state <paramref name="trigger" /> sets can hold in a menu under the part pressed, and has it set
-        /// the one chosen; the value of another state opens the selector.
-        /// </summary>
-        void SetStateTo(Trigger trigger, Func<Element> part)
-        {
-            var set = trigger.Sets;
-            StateValueQuestion.Offer(_editor, _system, set.State, set.Value, set.From, part,
-                value => _editor.Do(_system, new PointTrigger(_editor.Program, trigger, new SetState { State = set.State, Value = value }, null)),
-                () => _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false));
+            }, () => _editor.Starts.ChangeTrigger(_system, watch, OpeningColumn.Blocks));
         }
 
         /// <summary>Offers is and is not in a menu under the part pressed, and changes what <paramref name="watch" /> starts on to the one chosen.</summary>
@@ -379,7 +323,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         {
             if (ValuesQuestion.Chooses(fields))
             {
-                _editor.Starts.ChangeTrigger(_system, when, OpeningColumn.Arguments, false);
+                _editor.Starts.ChangeTrigger(_system, when, OpeningColumn.Arguments);
                 return;
             }
 
@@ -400,21 +344,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (_values != null)
                 _values.Finish(true);
 
-            _values = new ValuesQuestion(_editor, _system, fields, given, () => Chip(when, true, holds), answered);
+            _values = new ValuesQuestion(_editor, _system, fields, given, () => Chip(when, holds), answered);
             _values.Hang();
         }
 
         /// <summary>
-        /// The chip of the first part of <paramref name="trigger" />'s line saying values that are <paramref name="holds" /> to
-        /// it, among what starts it where <paramref name="starts" />, among what it does otherwise; null where its row shows none.
+        /// The chip of the first part of what starts <paramref name="trigger" /> saying values that are <paramref name="holds" /> to
+        /// it; null where its row shows none.
         /// </summary>
-        Element Chip(Trigger trigger, bool starts, ArgumentRole holds)
+        Element Chip(Trigger trigger, ArgumentRole holds)
         {
             var row = Row(trigger);
             if (row == null)
                 return null;
 
-            foreach (var part in starts ? row.Starts : row.Does)
+            foreach (var part in row.Starts)
             {
                 if ((part as ArgumentsSlot)?.Holds == holds)
                     return row.ChipOf(part);
@@ -487,68 +431,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             return Vocabulary.Find(events, eventId);
         }
 
-        /// <summary>Gives <paramref name="row" /> the parts of what <paramref name="trigger" /> does: a state it sets, a sequence it runs or stops, or an action.</summary>
+        /// <summary>Gives <paramref name="row" /> the parts of what <paramref name="trigger" /> does: the sequence it runs or stops.</summary>
         void Doing(TriggerRow row, Trigger trigger)
         {
-            var set = trigger.Sets;
-            if (set != null)
-            {
-                var opens = _changes(CommandKind.TriggerTarget, () => _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false));
-                row.DoesLead = SentenceText.Then(row.Kind, false, false, true);
-                row.Does.Add(new SystemStateSlot(set.State, opens));
-                row.Does.Add(StateValueQuestion.Part(_system, set.State, set.Value, set.From,
-                    _changes(CommandKind.TriggerTarget, () => SetStateTo(trigger, () => Chip(trigger, false, ArgumentRole.NewValue))), ArgumentRole.NewValue));
-                return;
-            }
-
-            var act = trigger.Acts;
-            if (act == null)
-            {
-                var sequence = _system.FindSequence(trigger.Runs);
-                row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, true, false);
-                row.Does.Add(new SequenceSlot(trigger.Runs, sequence == null || !sequence.HasName ? "" : sequence.Name,
-                    _changes(CommandKind.TriggerTarget, () => _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false))));
-
-                return;
-            }
-
-            var chosen = act.Names(_editor.SlotBlocks.Actions(_system, act.Targets));
-
-            var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
-            row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, false, act.Sets && verb.Length == 0);
-            if (verb.Length != 0)
-                row.Does.Add(ArgumentsSlot.Switching(verb, _changes(CommandKind.TriggerTarget, () => Switch(trigger, act))));
-
-            row.Does.Add(new ActionSlot(chosen, Does(trigger, OpeningColumn.What)));
-            var blocks = _editor.Blocks(_system, act.Targets);
-            var entities = new EntitiesSlot(blocks, act.Targets, true, MarkText.OfSlots(_system, act.Targets), Does(trigger, OpeningColumn.Blocks))
-            {
-                Screens = _editor.SlotBlocks.Screens(_system, act.Targets, blocks)
-            };
-            if (verb.Length != 0 || chosen == null || chosen.Wants == 0)
-            {
-                row.Does.Add(entities);
-                return;
-            }
-
-            var fields = new List<Field>();
-            chosen.Fields(fields);
-            var holds = act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options;
-            ArgumentsSlot.Lay(row.Does, entities, chosen.Join, act.Arguments, fields,
-                _changes(CommandKind.TriggerTarget, () => Give(trigger, act, fields, holds)), holds,
-                names => new EntitiesSlot(_editor.Blocks(_system, names), names, true, MarkText.OfSlots(_system, names), Does(trigger, OpeningColumn.Target)));
-        }
-
-        /// <summary>Opens what <paramref name="trigger" /> does at <paramref name="opens" />, while the system may be changed.</summary>
-        ICommand Does(Trigger trigger, OpeningColumn opens)
-        {
-            return _changes(CommandKind.TriggerTarget, () => _editor.Starts.ChangeTrigger(_system, trigger, opens, true));
+            var sequence = _system.FindSequence(trigger.Runs);
+            row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops);
+            row.Does.Add(new SequenceSlot(trigger.Runs, sequence == null || !sequence.HasName ? "" : sequence.Name,
+                _changes(CommandKind.TriggerTarget, () => _editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing))));
         }
 
         /// <summary>Opens what starts <paramref name="trigger" /> at <paramref name="opens" />, while the system may be changed.</summary>
         ICommand Starts(Trigger trigger, OpeningColumn opens)
         {
-            return _changes(CommandKind.OpenTrigger, () => _editor.Starts.ChangeTrigger(_system, trigger, opens, false));
+            return _changes(CommandKind.OpenTrigger, () => _editor.Starts.ChangeTrigger(_system, trigger, opens));
         }
     }
 }

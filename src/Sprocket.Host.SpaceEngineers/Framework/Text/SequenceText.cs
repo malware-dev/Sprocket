@@ -23,17 +23,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
 
         /// <summary>
-        /// What a trigger does: run a sequence, stop one, or the one thing it does itself.
+        /// What a trigger does: run a sequence or stop one.
         /// </summary>
         /// <remarks>
         /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
         /// </remarks>
         public static string Runs(Bindings bindings, AutomationSystem system, Trigger trigger, SystemInstance through)
         {
-            var act = trigger.Acts;
-            if (act != null)
-                return Action(bindings, act, through, false);
-
             Sequence sequence = system?.FindSequence(trigger.Runs);
             if (sequence == null)
                 return trigger.Stops ? "stops a sequence that was deleted" : "runs a sequence that was deleted";
@@ -230,20 +226,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
         public static string Failing(Texts texts, SequenceFault fault, Sequence sequence)
         {
-            return Failing(texts, fault, sequence.HasName ? sequence.Name : "", sequence.IsAlone, Row(sequence, fault.Step));
+            return Failing(texts, fault, sequence.HasName ? sequence.Name : "", Row(sequence, fault.Step));
         }
 
         /// <summary>
         /// What is wrong and where, for a line about the whole of a logic system: in the sequence called
         /// <paramref name="sequence" />, or one with no name where it is empty, at the step whose row is <paramref name="row" />,
-        /// or none where it is 0, or in a trigger's own act where <paramref name="alone" />.
+        /// or none where it is 0.
         /// </summary>
-        public static string Failing(Texts texts, SequenceFault fault, string sequence, bool alone, int row)
+        public static string Failing(Texts texts, SequenceFault fault, string sequence, int row)
         {
-            // A trigger's own act has no steps to count, and no name.
             var problem = Problem(texts, fault, null);
-            if (alone)
-                return problem;
 
             var step = row.ToString(CultureInfo.InvariantCulture);
             if (!string.IsNullOrEmpty(sequence))

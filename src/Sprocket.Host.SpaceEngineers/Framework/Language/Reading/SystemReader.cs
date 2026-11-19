@@ -622,7 +622,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
-                Resolve(system, triggers[i].Does as Run, statement, trouble);
+                Resolve(system, triggers[i].Does, statement, trouble);
         }
 
         /// <summary>Turns the name a <c>run</c> or <c>stop</c> used into the number, or says there is no such sequence.</summary>

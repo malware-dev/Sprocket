@@ -701,7 +701,7 @@ namespace Sprocket.Sim.Driving
         static IEnumerable<StageColumn> Stages(this SprocketEditor editor)
         {
             var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip;
-            return strip == null ? Enumerable.Empty<StageColumn>() : strip.Stages.Skip(strip.Page);
+            return strip == null ? Enumerable.Empty<StageColumn>() : strip.Stages;
         }
 
         /// <summary>The blocks the first column of the pick on the screen offers, as their rows.</summary>

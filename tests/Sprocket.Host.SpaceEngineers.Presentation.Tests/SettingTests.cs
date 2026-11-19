@@ -168,67 +168,6 @@ public class SettingTests
         Assert.False(light.Enabled, "setting the switch to off flipped the light on");
     }
 
-    /// <summary>
-    /// A trigger that sets a value says it the way the step does, value and all.
-    /// </summary>
-    /// <remarks>
-    /// Its line in the trigger list is put together apart from the step's, so it is where the two
-    /// would drift: a trigger that set the charge mode once read as the value and the battery, and
-    /// never said what it was set to.
-    /// </remarks>
-    [Fact]
-    public void ATriggerThatSetsAValueSaysAllOfIt()
-    {
-        var screen = Screen.Fresh();
-        screen.Editor.NewSystem("Power");
-        screen.Editor.PressStart("when");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("button 1 is pressed");
-        screen.Editor.DeveloperMode = true;
-        screen.Run(1);
-        screen.Editor.PressChoice("A task on blocks…");
-        screen.Editor.PressBlock("Standby Battery");
-        screen.Editor.Pick().Stages.Last(s => s.Views.Count > 0).PressView("Terminal");
-        screen.Editor.PressChoice("Charge Mode");
-        screen.Editor.Typed("1");
-        screen.Run(2);
-
-        Assert.Equal("then set Charge Mode on block slot 1 to Recharge", screen.Editor.Doing(0));
-    }
-
-    /// <summary>A trigger that sets a value of Sprocket's own does it in Sprocket's namespace, and says all of it.</summary>
-    [Fact]
-    public void ATriggerThatSetsAnOwnValueSetsItInItsNamespace()
-    {
-        var screen = Screen.Fresh();
-        var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
-        var speed = 0;
-        door.Kind.WithValue("speed", "speed",
-                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType("speed", "low", "middle", "high"), _ => speed)
-                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
-            .Looked("A test value.");
-
-        screen.Editor.NewSystem("Doors");
-        screen.Editor.PressStart("when");
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("button 1 is pressed");
-        screen.Editor.DeveloperMode = true;
-        screen.Run(1);
-        screen.Editor.PressChoice("A task on blocks…");
-        screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("speed");
-        screen.Run(2);
-        screen.Editor.Current!.View.Within().OfType<WordsField>().Single().Within().OfType<Lumel.Controls.Button>()
-            .Single(word => word.Text == "high").Command!.Execute();
-        screen.Editor.PressPrimary();
-        screen.Run(2);
-
-        var set = Assert.IsType<Act>(screen.Editor.Program.Systems[0].Triggers[0].Does);
-        Assert.Equal(BlockKinds.Own, set.Provider);
-        Assert.Equal(Literal.Name("high"), Assert.Single(set.Arguments));
-        Assert.Equal("then set speed on block slot 1 to high", screen.Editor.Doing(0));
-    }
-
     /// <summary>Choosing something else for a step keeps what was given for the new choice.</summary>
     /// <remarks>
     /// A step changed from one value to another is given its new value at the end of the choosing.

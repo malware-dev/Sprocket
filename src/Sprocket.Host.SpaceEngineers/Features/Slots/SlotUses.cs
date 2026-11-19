@@ -33,10 +33,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
             foreach (var trigger in system.Triggers)
             {
-                var missing = Missing(trigger.Acts, actions, system, one);
-                if (missing != null)
-                    return missing;
-
                 var moment = trigger as MomentTrigger;
                 if (moment == null || !moment.Sources.Contains(slot.Id) || moment is SignalTrigger && !((SignalTrigger)moment).IsWritten)
                     continue;

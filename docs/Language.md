@@ -297,7 +297,7 @@ let cycling = off
 
 ## 10. Reactive Automation (Triggers, Watchers, Clocks)
 
-Triggers, watchers, and clocks react to asynchronous conditions and initiate a single step (`run`, `stop`, `call`, or `set`). They have no identifiers.
+Triggers, watchers, and clocks react to asynchronous conditions and run or stop a sequence (`run` or `stop`). They have no identifiers.
 
 ### 10.1 Signal Triggers (`whenever`)
 
@@ -314,7 +314,7 @@ whenever gearbox.closes on [ inner, outer ] then run 2
 ### 10.2 Block Watchers (`when`)
 
 ```sprocket
-when all gearbox.status on [ inner, outer ] == closed then call gearbox.open on [ hangar ]
+when all gearbox.status on [ inner, outer ] == closed then run 3
 when any gearbox.filled on [ vent ] == on every 30t then run 4
 when sum gearbox.amount("Ingot/Iron") on [ cargo ] >= 1000 then run 6
 when average gearbox.fill on [ tank1, tank2 ] < 0.25 then run 7

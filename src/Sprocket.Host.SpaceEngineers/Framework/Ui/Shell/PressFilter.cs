@@ -35,8 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
                 case CommandKind.OpenSystem:
                 case CommandKind.OpenSequence:
                 case CommandKind.OpenSlot:
-                case CommandKind.PageOn:
-                case CommandKind.PageBack:
                 case CommandKind.ShowScript:
                 case CommandKind.CheckMembers:
                 case CommandKind.OpenGuide:
@@ -101,8 +99,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
                 case CommandKind.ReadBlocks:
                 case CommandKind.TriggerStops:
                 case CommandKind.TriggerDoes:
-                case CommandKind.PageOn:
-                case CommandKind.PageBack:
                 case CommandKind.ShowOrganized:
                 case CommandKind.ShowTerminal:
                 case CommandKind.HiddenBlocks:

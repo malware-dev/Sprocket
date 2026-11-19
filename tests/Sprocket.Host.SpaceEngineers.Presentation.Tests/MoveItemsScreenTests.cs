@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.Selector;
-using Sprocket.Host.SpaceEngineers.Features.Triggers;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -100,7 +99,7 @@ public class MoveItemsScreenTests
         Assert.Equal(new[] { "first bin", "second bin" }, act.Arguments[0].Names);
     }
 
-    /// <summary>A trigger's own task selects its target as a step does, on a selector that names the logic system's slots.</summary>
+    /// <summary>A selector that names the logic system's slots selects a target as a step does.</summary>
     [Fact]
     public void AnySelectorNamingSlotsSelectsATarget()
     {
@@ -286,63 +285,6 @@ public class MoveItemsScreenTests
 
         Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
         Assert.Equal(new[] { "inventory slot 2" }, Target(screen).Slots);
-    }
-
-    /// <summary>A trigger's task names its target the same way, and pressing it opens the same selector.</summary>
-    [Fact]
-    public void ATriggersTaskNamesItsTargetTheSameWay()
-    {
-        var row = TriggerMoving(out var screen);
-
-        var target = row.Does.OfType<EntitiesSlot>().Single(slot => slot.IsOption);
-        Assert.Equal("to", target.Joined);
-        Assert.Equal(new[] { Symbols.Inventory }, target.Marks);
-
-        target.Opens!.Execute();
-        screen.Run(3);
-        Assert.Equal(target.Slots[0], screen.Editor.Screen.Title());
-
-        screen.Editor.Back();
-        screen.Run(4);
-        Assert.Equal("Stock", screen.Editor.Screen.Title());
-    }
-
-    /// <summary>A trigger on a clock that moves items, and its row.</summary>
-    static TriggerRow TriggerMoving(out Screen screen)
-    {
-        var rig = Rig.Demo();
-        rig.Refinery(40, "Refinery 1");
-        rig.Cargo(41, "Cargo 1");
-        screen = Screen.On(rig);
-        screen.Editor.NewButtonSystem("Stock");
-        screen.Editor.Back();
-        screen.Run(2);
-        screen.Editor.PressStart("every");
-        screen.Editor.DeveloperMode = true;
-        screen.Run(1);
-        screen.Editor.PressChoice("A task on blocks…");
-        screen.Editor.PressBlock("Refinery 1");
-        screen.Run(2);
-        screen.Editor.PressChoice("move items");
-        screen.Run(2);
-        SelectTarget(screen);
-        screen.Editor.PressPrimary();
-        screen.Run(4);
-        return screen.Editor.Triggers().Last();
-    }
-
-    /// <summary>Opened on what it does and left with nothing changed, a trigger's move goes back without asking.</summary>
-    [Fact]
-    public void LeavingATriggersMoveUnchangedAsksNothing()
-    {
-        var row = TriggerMoving(out var screen);
-
-        row.Does.OfType<EntitiesSlot>().Single(slot => !slot.IsOption).Opens!.Execute();
-        screen.Run(3);
-        screen.Editor.Back();
-        screen.Run(4);
-
-        Assert.Equal("Stock", screen.Editor.Screen.Title());
     }
 
     /// <summary>The line reads as a sentence: what moves, from where, to where, and with no item and no amount it says it moves all items.</summary>

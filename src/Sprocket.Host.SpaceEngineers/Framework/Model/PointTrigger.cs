@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
-    /// What a trigger does: the sequence it runs or stops, or an act of its own.
+    /// What a trigger does: the sequence it runs or stops.
     /// </summary>
     public sealed class PointTrigger : SystemEdit
     {
@@ -12,14 +12,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly Trigger _trigger;
         readonly Sequence _made;
 
-        readonly Step _was;
-        readonly Step _now;
+        readonly Run _was;
+        readonly Run _now;
 
         readonly List<string> _sources;
         readonly string _eventId;
 
         /// <summary>Has <paramref name="trigger" /> do <paramref name="does" />, carrying <paramref name="made" />, the sequence made for it, where one was.</summary>
-        public PointTrigger(Automation program, Trigger trigger, Step does, Sequence made)
+        public PointTrigger(Automation program, Trigger trigger, Run does, Sequence made)
         {
             _program = program;
             _trigger = trigger;
@@ -47,10 +47,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             get
             {
-                var was = _was as Run;
-                var now = _now as Run;
-                if (was != null && now != null)
-                    return was.Number != now.Number || was.Stops != now.Stops;
+                if (_was != null && _now != null)
+                    return _was.Number != _now.Number || _was.Stops != _now.Stops;
 
                 return _was != _now;
             }

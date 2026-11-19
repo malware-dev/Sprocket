@@ -290,62 +290,6 @@ public class RigTests
     }
 
     /// <summary>
-    /// A button whose trigger acts on two blocks itself is Sprocket's to run, keyed by its signal part, and each blockset's
-    /// button acts on that blockset's blocks.
-    /// </summary>
-    [Fact]
-    public void ATriggerThatActsOnSeveralBlocksIsSprocketsToRun()
-    {
-        var rig = new Rig();
-        Panel front = rig.Panel(1, "Front Button");
-        Door frontInner = rig.Door(2, "Front Inner");
-        Door frontOuter = rig.Door(3, "Front Outer");
-        Panel port = rig.Panel(11, "Port Button");
-        Door portInner = rig.Door(12, "Port Inner");
-        Door portOuter = rig.Door(13, "Port Outer");
-
-        Simulation sim = Simulation.On(rig);
-        Automation program = sim.Editor.Program;
-
-        AutomationSystem system = program.AddSystem();
-        system.Name = "Airlock";
-        system.IsBlueprint = true;
-        system.AddInstance();
-
-        var pressed = Pressed.On(program, system, Named(sim, front));
-        var close = new Act("close");
-        close.Targets.Add(Named(sim, frontInner));
-        close.Targets.Add(Named(sim, frontOuter));
-        pressed.Does = close;
-        system.AddTrigger(pressed);
-
-        SystemInstance second = system.AddInstance();
-        second.Fill(pressed.Part, new[] { Named(sim, port) }, new[] { new ToolbarSlot(1, 1, 1) });
-        second.Fill(Named(sim, frontInner), new[] { Named(sim, portInner) });
-        second.Fill(Named(sim, frontOuter), new[] { Named(sim, portOuter) });
-        program.Edited();
-        program.Rewire();
-
-        frontInner.ForceOpen();
-        frontOuter.ForceOpen();
-        portInner.ForceOpen();
-        portOuter.ForceOpen();
-
-        for (var i = 0; i < 5; i++)
-            sim.Tick();
-
-        MyToolbarItemInfo held;
-        Assert.True(port.Toolbar.TryGetItem(0, out held), "the port button holds nothing");
-        Assert.True(SignalAction.IsOurs(held), "two doors went into the slot as the game's own action");
-
-        rig.Forget();
-        sim.Press("Port Button");
-        sim.Tick();
-
-        Assert.Equal(new[] { "Port Inner:close", "Port Outer:close" }, rig.Log.OrderBy(line => line));
-    }
-
-    /// <summary>
     /// A blockset answers the trigger with any button of any panel, and only that button starts it.
     /// </summary>
     [Fact]
@@ -493,7 +437,7 @@ public class RigTests
         return sim.Editor.Program.Declare(sim.World, entity).Name;
     }
 
-    /// <summary>A trigger that does one plain thing itself, on a system, the way the picker makes one; and what the runtime runs that act in.</summary>
+    /// <summary>A system whose trigger runs a sequence of one plain thing, the way the picker makes one; and that sequence.</summary>
     static Sequence PlainTrigger(Simulation rig)
     {
         Automation program = rig.Editor.Program;
@@ -504,12 +448,12 @@ public class RigTests
         open.Targets.Add(program.Declare(rig.World, rig.World.FindEntity(2)).Name);
 
         var pressed = Pressed.On(program, system, program.Declare(rig.World, rig.World.FindEntity(21)).Name);
-        pressed.Does = open;
-        system.AddTrigger(pressed);
+        var sequence = program.AddSequence(system, pressed);
+        sequence.Steps.Add(open);
         program.Edited();
         program.Rewire();
 
-        return rig.Editor.Runner.Alone(system, pressed)!;
+        return sequence;
     }
 
     /// <summary>
@@ -616,9 +560,9 @@ public class RigTests
         throw new InvalidOperationException("no panel called " + name);
     }
 
-    /// <summary>A trigger that does one plain thing is Sprocket's own, and stops when its system is switched off.</summary>
+    /// <summary>A button that starts a sequence of one plain thing is Sprocket's own, and stops when its system is switched off.</summary>
     [Fact]
-    public void ATriggerThatDoesOneThingIsSprocketsOwn()
+    public void AButtonsSequenceIsSprocketsOwnAndStopsWhenItsSystemIsSwitchedOff()
     {
         Simulation rig = Simulation.Fresh();
         rig.Tick();

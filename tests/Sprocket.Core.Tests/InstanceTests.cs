@@ -381,8 +381,7 @@ public class InstanceTests
         low.Sources.Add("tanks");
         var close = new Act("close");
         close.Targets.Add(ship.Ref(2));
-        low.Does = close;
-        ship.Airlock.AddTrigger(low);
+        ship.Program.AddSequence(ship.Airlock, low).Steps.Add(close);
         ship.Program.Edited();
 
         ship.Tick(30);

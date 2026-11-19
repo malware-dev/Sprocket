@@ -35,9 +35,9 @@ public class SettingTests
         + "    let where = inside\n"
         + "    let lit = off\n"
         + "    let start = home\n\n"
-        + "    every delay set lit to on\n\n"
-        + "    when 'Outer light' == lit then set lit to off\n\n"
-        + "    when all Radius on [ lamp ] >= count every delay then set lit to on\n\n"
+        + "    every delay run 2\n\n"
+        + "    when 'Outer light' == lit then run 3\n\n"
+        + "    when all Radius on [ lamp ] >= count every delay then run 4\n\n"
         + "    sequence 1 {\n"
         + "        set Radius on [ lamp ] to 'Open angle'\n"
         + "        set Color on [ lamp ] to tint\n"
@@ -56,6 +56,15 @@ public class SettingTests
         + "        if all Radius on [ lamp ] >= count then {\n"
         + "            await\n"
         + "        }\n"
+        + "    }\n\n"
+        + "    sequence 2 {\n"
+        + "        set lit to on\n"
+        + "    }\n\n"
+        + "    sequence 3 {\n"
+        + "        set lit to off\n"
+        + "    }\n\n"
+        + "    sequence 4 {\n"
+        + "        set lit to on\n"
         + "    }\n"
         + "}\n";
 
@@ -256,12 +265,15 @@ public class SettingTests
             + "    let outside = side(inside)\n"
             + "    let where = side(outside)\n"
             + "    let same = off\n\n"
-            + "    when where == outside then set same to on\n\n"
+            + "    when where == outside then run 2\n\n"
             + "    sequence 1 {\n"
             + "        set where to outside\n"
             + "        if where != outside then {\n"
             + "            set where to outside\n"
             + "        }\n"
+            + "    }\n\n"
+            + "    sequence 2 {\n"
+            + "        set same to on\n"
             + "    }\n"
             + "}\n";
 
@@ -276,7 +288,7 @@ public class SettingTests
         Assert.Equal(Literal.Of(true), runner.States.Read(system, system.Uses[0], system.FindState("same")!));
 
         var saved = ProgramWriter.Save(program, _store);
-        Assert.Contains("    when where == state(outside) then set same to on\n", saved);
+        Assert.Contains("    when where == state(outside) then run 2\n", saved);
         Assert.Contains("        set where to state(outside)\n", saved);
         Assert.Contains("        if where != state(outside) then {\n", saved);
         Assert.Contains("            set where to state(outside)\n", saved);
@@ -473,13 +485,16 @@ public class SettingTests
             + "    optional slot board expects ext.screen\n"
             + "    optional slot press expects signal\n\n"
             + "    whenever ext.finishes_opening on [ door ] then run 1\n"
-            + "    when any ext.status on [ door ] == closed every 30t then call ext.open on [ door ]\n\n"
+            + "    when any ext.status on [ door ] == closed every 30t then run 2\n\n"
             + "    sequence 1 {\n"
             + "        call ext.close on [ door ]\n"
             + "        set ext.power on [ door ] to on\n"
             + "        if all ext.status on [ door ] == closed then {\n"
             + "            call ext.show_text(\"Shut\") on [ board ]\n"
             + "        }\n"
+            + "    }\n\n"
+            + "    sequence 2 {\n"
+            + "        call ext.open on [ door ]\n"
             + "    }\n"
             + "}\n\n"
             + "instance 1 of ext.Airlock {\n"
@@ -497,7 +512,8 @@ public class SettingTests
         Assert.Contains("as ext.Airlock\n", saved);
         Assert.Contains("    optional slot board expects sprocket.screen\n", saved);
         Assert.Contains("    whenever sprocket.finishes_opening on [ door ] then run 1\n", saved);
-        Assert.Contains("    when any sprocket.status on [ door ] == closed every 30t then call sprocket.open on [ door ]\n", saved);
+        Assert.Contains("    when any sprocket.status on [ door ] == closed every 30t then run 2\n", saved);
+        Assert.Contains("        call sprocket.open on [ door ]\n", saved);
         Assert.Contains("        call sprocket.close on [ door ]\n", saved);
         Assert.Contains("        set sprocket.power on [ door ] to on\n", saved);
         Assert.Contains("        if all sprocket.status on [ door ] == closed then {\n", saved);
@@ -697,8 +713,9 @@ public class SettingTests
     {
         var lit = new Lit("    optional slot least expects real = 10\n\n"
             + "    let over = off\n\n"
-            + "    when all Radius on [ lamp ] >= least then set over to on\n\n"
-            + "    sequence 1 {\n        set Radius on [ lamp ] to 5\n    }\n", answers);
+            + "    when all Radius on [ lamp ] >= least then run 2\n\n"
+            + "    sequence 1 {\n        set Radius on [ lamp ] to 5\n    }\n\n"
+            + "    sequence 2 {\n        set over to on\n    }\n", answers);
 
         lit.Tick(20);
         lit.Run(1);
@@ -715,7 +732,8 @@ public class SettingTests
     {
         var lit = new Lit("    optional slot often expects duration = 10s\n\n"
             + "    let done = off\n\n"
-            + "    every often set done to on\n", answers);
+            + "    every often run 1\n\n"
+            + "    sequence 1 {\n        set done to on\n    }\n", answers);
 
         lit.Tick(40);
 
@@ -731,8 +749,9 @@ public class SettingTests
         var lit = new Lit("    optional slot goal expects flag = off\n\n"
             + "    let lit = off\n"
             + "    let seen = off\n\n"
-            + "    when goal == lit then set seen to on\n\n"
-            + "    sequence 1 {\n        set lit to on\n    }\n", answers);
+            + "    when goal == lit then run 2\n\n"
+            + "    sequence 1 {\n        set lit to on\n    }\n\n"
+            + "    sequence 2 {\n        set seen to on\n    }\n", answers);
 
         lit.Run(1);
         lit.Tick(2);

@@ -231,7 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return tests;
         }
 
-        /// <summary>Every step of <paramref name="system" /> that sets a state: in its sequences and in what starts them.</summary>
+        /// <summary>Every step of <paramref name="system" /> that sets a state: in its sequences.</summary>
         static List<SetState> Sets(AutomationSystem system)
         {
             var sets = new List<SetState>();
@@ -245,11 +245,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 }
             }
 
-            foreach (var trigger in system.Triggers)
-            {
-                if (trigger.Sets != null)
-                    sets.Add(trigger.Sets);
-            }
 
             return sets;
         }

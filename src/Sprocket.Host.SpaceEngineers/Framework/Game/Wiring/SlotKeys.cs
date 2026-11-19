@@ -53,23 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             return stops ? $"{key}/stop" : key;
         }
 
-        /// <summary>
-        /// What goes in a slot for a trigger that acts itself: which system, which one of it, and the signal part, or the
-        /// slot and blocks of a signal written in place.
-        /// </summary>
-        /// <remarks>
-        /// Persisted in the slot. Marked <c>part:</c>, because a part may be called anything, <c>2/stop</c> among it, and
-        /// <c>at:</c> for a signal written in place.
-        /// </remarks>
-        public static string KeyOf(AutomationSystem system, SystemInstance instance, SignalTrigger trigger)
-        {
-            var head = $"{system.Identity:D}/{(instance?.Number ?? 0)}";
-            if (!trigger.IsWritten)
-                return $"{head}/part:{trigger.Part}";
-
-            return $"{head}/at:{(trigger.At == null ? "" : trigger.At.EventId)}:{string.Join(",", trigger.Sources)}";
-        }
-
         /// <summary>Runs or stops what <paramref name="key" /> names, a block having fired one of the actions Sprocket put in it.</summary>
         public void Fire(string key)
         {
@@ -88,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
                 return;
             }
 
-            GameLog.Say($"a button fired {key}, {(target.Stops ? "stopping " : "running ")}{(!target.Sequence.IsAlone ? $"sequence {target.Sequence.Number}" : "what its trigger does")}{(target.Instance == null ? "" : $" on {target.Instance.Number}")}");
+            GameLog.Say($"a button fired {key}, {(target.Stops ? "stopping " : "running ")}sequence {target.Sequence.Number}{(target.Instance == null ? "" : $" on {target.Instance.Number}")}");
 
             if (target.Stops)
                 _runner.Halt(target.Sequence, target.Instance, StopCause.Trigger, 0);
@@ -109,20 +92,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
                 AutomationSystem system = _program.Systems[s];
                 var sequences = system.Sequences;
                 var instances = system.Uses;
-
-                var triggers = system.Triggers;
-                for (var t = 0; t < triggers.Count; t++)
-                {
-                    var needed = triggers[t] as SignalTrigger;
-                    var alone = needed == null || needed.IsWatched ? null : _runner.Alone(system, needed);
-                    for (var n = 0; alone != null && n < instances.Count; n++)
-                    {
-                        var target = new Target();
-                        target.Sequence = alone;
-                        target.Instance = instances[n];
-                        _byKey[KeyOf(system, instances[n], needed)] = target;
-                    }
-                }
 
                 for (var q = 0; q < sequences.Count; q++)
                 {

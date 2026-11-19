@@ -164,7 +164,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
             return First(runner, system, system.First, true, true, out fault);
         }
 
-        /// <summary>How many of a system's sequences, and of its triggers' own acts, have something wrong with them on <paramref name="instance" />.</summary>
+        /// <summary>How many of a system's sequences have something wrong with them on <paramref name="instance" />.</summary>
         /// <remarks>Of a blueprint, only what is wrong in that installation. Costs a lookup per run.</remarks>
         public static int Problems(AutomationRunner runner, AutomationSystem system, SystemInstance instance)
         {
@@ -205,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
             return system.IsBlueprint ? fault.IsAboutSystem == ofSystem : !ofSystem;
         }
 
-        /// <summary>The first of a system's sequences, or of its triggers' own acts, whose fault on <paramref name="through" /> <see cref="Counts" />, and that fault.</summary>
+        /// <summary>The first of a system's sequences whose fault on <paramref name="through" /> <see cref="Counts" />, and that fault.</summary>
         static Sequence First(AutomationRunner runner, AutomationSystem system, SystemInstance through, bool ofSystem, bool warning,
             out SequenceFault fault)
         {
@@ -215,15 +215,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 fault = SequenceSummary.Fault(runner.Get(sequences[i], through));
                 if (Counts(system, fault, ofSystem, warning))
                     return sequences[i];
-            }
-
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var alone = runner.Alone(system, triggers[i]);
-                fault = alone == null ? SequenceFault.None : SequenceSummary.Fault(runner.Get(alone, through));
-                if (Counts(system, fault, ofSystem, warning))
-                    return alone;
             }
 
             fault = SequenceFault.None;
@@ -241,27 +232,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                     count++;
             }
 
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var alone = runner.Alone(system, triggers[i]);
-                if (alone != null && Counts(system, SequenceSummary.Fault(runner.Get(alone, through)), ofSystem, warning))
-                    count++;
-            }
-
             return count;
         }
 
         static void CollectEntityNames(Bindings bindings, AutomationSystem system, List<string> result)
         {
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var own = triggers[i].Acts;
-                if (own != null)
-                    AddNames(bindings, SystemInstance.Through(system.First, own.Targets), result);
-            }
-
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
             {

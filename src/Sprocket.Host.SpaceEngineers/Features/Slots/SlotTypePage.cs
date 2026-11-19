@@ -111,7 +111,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             if (_strip.Stages.Count == 0)
                 _strip.Add(_column);
 
-            _strip.Returns = null;
             _strip.ShowsArguments = false;
 
             Choose(_chosen);

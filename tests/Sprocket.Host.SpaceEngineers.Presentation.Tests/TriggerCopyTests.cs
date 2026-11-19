@@ -103,7 +103,7 @@ public class TriggerCopyTests
         Assert.Equal(NoticeLevel.Info, sim.Editor.Triggers()[1].Level);
 
         var copy = system.Triggers[1];
-        sim.Editor.Starts.ChangeTrigger(system, copy, OpeningColumn.Blocks, false);
+        sim.Editor.Starts.ChangeTrigger(system, copy, OpeningColumn.Blocks);
         sim.Tick();
         sim.Editor.PressBlock("Airlock Button");
         sim.Editor.PressChoice("button 1 is pressed");

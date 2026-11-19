@@ -259,9 +259,6 @@
   <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
     <value>Endre hvor ofte den skal kjøre.</value>
   </data>
-  <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
-    <value>Velg hvilke blokker denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) virker på.</value>
-  </data>
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
     <value>Navnet på denne sekvensen.</value>
   </data>
@@ -337,9 +334,6 @@
   <data name="Sprocket.Part.TriggerBlocks" xml:space="preserve">
     <value>Blokker som får denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) til å utløses:</value>
   </data>
-  <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
-    <value>Blokker denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) virker på:</value>
-  </data>
   <data name="Sprocket.Part.FromSlot" xml:space="preserve">
     <value>Fra [plassen](Term.Slot class=term) {slots}.</value>
   </data>
@@ -357,12 +351,6 @@
   </data>
   <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
     <value>Velg noe i hver kolonne først.</value>
-  </data>
-  <data name="Sprocket.Pick.Back" xml:space="preserve">
-    <value>Tilbake</value>
-  </data>
-  <data name="Sprocket.Pick.Next" xml:space="preserve">
-    <value>Neste</value>
   </data>
   <data name="Sprocket.Pick.ClearTyped" xml:space="preserve">
     <value>Tøm det som er skrevet</value>

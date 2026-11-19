@@ -261,7 +261,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel
         {
             item.Fault = fault;
             item.Sequence = sequence.HasName ? sequence.Name : "";
-            item.Alone = sequence.IsAlone;
             item.Row = SequenceText.Row(sequence, fault.Step);
             return item;
         }

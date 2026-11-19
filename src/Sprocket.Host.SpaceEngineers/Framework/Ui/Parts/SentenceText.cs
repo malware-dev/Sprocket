@@ -149,20 +149,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
 
         /// <summary>The words between what starts a trigger and what it does.</summary>
-        public static string Then(TriggerKind kind, bool stops, bool sequence, bool sets)
+        public static string Then(TriggerKind kind, bool stops)
         {
             var clock = kind == TriggerKind.Every;
-
             if (stops)
                 return clock ? "stop" : "then stop";
 
-            if (sequence)
-                return clock ? "run" : "then run";
-
-            if (sets)
-                return clock ? SetWord : "then set";
-
-            return clock ? "" : "then";
+            return clock ? "run" : "then run";
         }
 
 

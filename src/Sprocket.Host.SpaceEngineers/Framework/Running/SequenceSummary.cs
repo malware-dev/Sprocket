@@ -392,12 +392,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return SequenceFault.None;
         }
 
-        /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs or <paramref name="alone" />, waits for a slot <paramref name="through" /> leaves empty.</summary>
+        /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs, waits for a slot <paramref name="through" /> leaves empty.</summary>
         /// <remarks>Asked when the program is checked, and on no tick.</remarks>
-        public static bool Waits(AutomationSystem system, Trigger trigger, Sequence alone, SystemInstance through)
+        public static bool Waits(AutomationSystem system, Trigger trigger, SystemInstance through)
         {
-            var run = trigger.Does as Run;
-            var started = run != null ? system.FindSequence(run.Number) : alone;
+            var started = trigger.Does == null ? null : system.FindSequence(trigger.Does.Number);
             return started != null && Empty(started, through).Exists;
         }
 
@@ -526,7 +525,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         static SequenceFault Circular(Sequence sequence)
         {
             var system = sequence.System;
-            if (system == null || sequence.IsAlone)
+            if (system == null)
                 return SequenceFault.None;
 
             var steps = sequence.Steps;

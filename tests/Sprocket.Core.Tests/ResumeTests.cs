@@ -258,8 +258,7 @@ public class ResumeTests
         opened.Sources.Add(a.Name(a.Outer));
         var close = new Act("close");
         close.Targets.Add(a.Name(a.Inner));
-        opened.Does = close;
-        a.Program.Systems[0].AddTrigger(opened);
+        a.Program.AddSequence(a.Program.Systems[0], opened).Steps.Add(close);
         a.Program.Edited();
         a.Tick(30);
 
@@ -284,8 +283,7 @@ public class ResumeTests
         opened.Sources.Add(a.Name(a.Inner));
         var close = new Act("close");
         close.Targets.Add(a.Name(a.Inner));
-        opened.Does = close;
-        a.Program.Systems[0].AddTrigger(opened);
+        a.Program.AddSequence(a.Program.Systems[0], opened).Steps.Add(close);
         a.Program.Edited();
         a.Outer.ForceOpen();
         a.Tick(30);
@@ -303,8 +301,7 @@ public class ResumeTests
         var every = new EveryTrigger(600);
         var close = new Act("close");
         close.Targets.Add(a.Name(a.Inner));
-        every.Does = close;
-        a.Program.Systems[0].AddTrigger(every);
+        a.Program.AddSequence(a.Program.Systems[0], every).Steps.Add(close);
         a.Program.Edited();
         a.Tick(400);
 
