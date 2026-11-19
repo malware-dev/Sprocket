@@ -491,6 +491,15 @@
   <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
     <value>Tilstander</value>
   </data>
+  <data name="Sprocket.Pick.SourceMods" xml:space="preserve">
+    <value>Mods</value>
+  </data>
+  <data name="Sprocket.Pick.ModCheck" xml:space="preserve">
+    <value>Sjekk</value>
+  </data>
+  <data name="Sprocket.Pick.ModsEmpty" xml:space="preserve">
+    <value>Ingen mods å velge mellom.</value>
+  </data>
   <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
     <value>Eksisterende plass</value>
   </data>
@@ -762,6 +771,9 @@
   </data>
   <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
     <value>Dette steget gjør noe blokkene ikke lenger tilbyr. Erstatt dette steget.</value>
+  </data>
+  <data name="Sprocket.Problem.Uninstalled" xml:space="preserve">
+    <value>Dette steget trenger en mod som ikke er installert: {namespace}. Sekvensen venter på den.</value>
   </data>
   <data name="Sprocket.Problem.Unfilled" xml:space="preserve">
     <value>Dette steget mangler noe det trenger.</value>

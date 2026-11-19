@@ -530,7 +530,7 @@
   </data>
   <data name="Sprocket.Pick.Comparison" xml:space="preserve">
     <value>comparison</value>
-    <comment>Label beside the choice of how a value is compared, such as is or is not, in the values column of the selector an if or a trigger is made with, and in a state's check.</comment>
+    <comment>Label beside the choice of how a value is compared, such as is or is not, in the values column of the selector an if or a trigger is made with, in a state's check, and beside the choice between is installed and is not installed in a mod's check.</comment>
   </data>
   <data name="Sprocket.Pick.WhatItDoes" xml:space="preserve">
     <value>What it does</value>
@@ -630,7 +630,7 @@
   </data>
   <data name="Sprocket.Pick.Source" xml:space="preserve">
     <value>Source</value>
-    <comment>Heading of the first column of the selector a step, an if, an otherwise if or a when is made with, before the box choosing what it is about: blocks, a slot already made, or one of the logic system's states. Shown in capitals.</comment>
+    <comment>Heading of the first column of the selector a step, an if, an otherwise if or a when is made with, before the box choosing what it is about: blocks, a slot already made, one of the logic system's states, or a mod. Shown in capitals.</comment>
   </data>
   <data name="Sprocket.Pick.SourceBlocks" xml:space="preserve">
     <value>Blocks</value>
@@ -639,6 +639,18 @@
   <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
     <value>States</value>
     <comment>Choice in the Source box heading the first column of the selector an if, an otherwise if or a when is made with: it checks or watches one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.Pick.SourceMods" xml:space="preserve">
+    <value>Mods</value>
+    <comment>Choice in the Source box heading the first column of the selector an if or an otherwise if is made with: it checks whether a mod is installed.</comment>
+  </data>
+  <data name="Sprocket.Pick.ModCheck" xml:space="preserve">
+    <value>Check</value>
+    <comment>Heading, shown in capitals, over the choice between is installed and is not installed, in the selector an if or an otherwise if is made with when its Source is Mods.</comment>
+  </data>
+  <data name="Sprocket.Pick.ModsEmpty" xml:space="preserve">
+    <value>No mods to choose from.</value>
+    <comment>Shown in the first column of the selector an if or an otherwise if is made with when its Source is Mods and the column lists no mod, because none is installed that Sprocket can check for or the search finds none.</comment>
   </data>
   <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
     <value>Existing slot</value>
@@ -991,6 +1003,10 @@
   <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
     <value>This step does something its blocks no longer offer. Replace this step.</value>
     <comment>Problem on a step whose action its blocks no longer offer, for example because a block was replaced by another kind or a mod is gone. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Problem.Uninstalled" xml:space="preserve">
+    <value>This step needs a mod that isn't installed: {namespace}. The sequence waits for it.</value>
+    <comment>Problem on a step that does something a mod adds, where that mod is not installed; {namespace} is filled in with the namespace the program names the mod's members by, as written, such as malforge.hover_repulsors; a mod that is not installed has no name to show. The sequence is not switched off and starts nothing until the mod is there. Shown where Sprocket.Problem.Unoffered is.</comment>
   </data>
   <data name="Sprocket.Problem.Unfilled" xml:space="preserve">
     <value>This step is missing something it needs.</value>

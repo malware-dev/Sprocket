@@ -37,7 +37,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
             "when", "every", "then", "trigger", "to", "run", "set",
             "on", "off", "all", "any", "wait", "await", "required", "expects", "changed", "as", "last",
             "running", "step", "stop", "call", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
-            "signal", "sum", "!=", "<", ">", "<=", ">=", "whenever", "from", "average", "type"
+            "signal", "sum", "!=", "<", ">", "<=", ">=", "whenever", "from", "average", "type",
+            "is", "not", "installed"
         };
 
         /// <summary>The bytes of <paramref name="script" />.</summary>
@@ -105,8 +106,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
 
         static void Write(List<byte> bytes, Token token, string spelled, List<string> seen)
         {
+            // A bare name spelled like a contextual keyword is coded as the keyword is, and reads back as it was.
             var kind = token.Kind;
-            if (kind != TokenKind.Identifier && kind != TokenKind.Text && kind != TokenKind.Annotation && kind != TokenKind.Bad)
+            var keyworded = kind == TokenKind.Identifier && token.Keyword != Keyword.None;
+            if (keyworded || (kind != TokenKind.Identifier && kind != TokenKind.Text && kind != TokenKind.Annotation && kind != TokenKind.Bad))
             {
                 var index = Array.IndexOf(Spellings, spelled);
                 if (index >= 0)

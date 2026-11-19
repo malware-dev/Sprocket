@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -11,9 +12,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
     /// <summary>
     /// Writes script text: statements, blocks, lists and annotations.
     /// </summary>
+    /// <remarks>
+    /// A name spelled like a reserved keyword is quoted wherever it stands, and one spelled like a contextual keyword only
+    /// where its construct reads that keyword.
+    /// </remarks>
     public sealed class ScriptWriter
     {
         const string Indent = "    ";
+
+        // The contextual keywords each place reads, which a name standing there and spelled like one is quoted against;
+        // immutable tables, read by every write.
+        static readonly Keyword[] Testing = { Keyword.Any, Keyword.All, Keyword.Sum, Keyword.Average };
+        static readonly Keyword[] Expecting = { Keyword.Signal };
 
         readonly StringBuilder _text = new StringBuilder();
         int _depth;
@@ -151,6 +161,42 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             Space();
             Write(id);
+            return this;
+        }
+
+        /// <summary>A name where a test starts: quoted also where it is spelled like <c>any</c>, <c>all</c>, <c>sum</c> or <c>average</c>, which a test of blocks starts with.</summary>
+        public ScriptWriter Tested(string id)
+        {
+            return Among(id, Testing);
+        }
+
+        /// <summary>A name after <c>expects</c>: quoted also where it is spelled <c>signal</c>, which a slot answered by a signal expects.</summary>
+        public ScriptWriter Expected(string id)
+        {
+            return Among(id, Expecting);
+        }
+
+        /// <summary>A namespace where a test starts, <c>gearbox.lifts</c>, each part spelled on its own, and one of one part as <see cref="Tested" /> spells it.</summary>
+        public ScriptWriter Namespace(string space)
+        {
+            if (space.IndexOf('.') < 0)
+                return Tested(space);
+
+            Space();
+            var dot = space.LastIndexOf('.');
+            SpellHost(_text, space.Substring(0, dot), space.Substring(dot + 1));
+            return this;
+        }
+
+        /// <summary>A name where its construct also reads one of <paramref name="standing" />: quoted where it is spelled like one, or cannot be bare.</summary>
+        ScriptWriter Among(string id, Keyword[] standing)
+        {
+            Space();
+            if (Array.IndexOf(standing, Keywords.Find(id)) >= 0)
+                Quote(_text, id, '\'');
+            else
+                Write(id);
+
             return this;
         }
 
@@ -482,11 +528,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A name: bare where it can be, in single quotes where it cannot.</summary>
         /// <summary>Writes <paramref name="thing" /> with its kind, a keyword such as <c>type</c> written bare as the kind it is.</summary>
         static void Kind(StringBuilder into, string space, string kind, string thing)
         {
-            if (string.IsNullOrEmpty(space) && Keywords.Taken(kind))
+            if (string.IsNullOrEmpty(space) && Kinds.IsKeyword(Keywords.Find(kind)))
                 into.Append(kind);
             else
                 SpellHost(into, space, kind);

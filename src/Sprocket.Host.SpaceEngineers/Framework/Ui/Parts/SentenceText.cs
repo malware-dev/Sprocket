@@ -107,6 +107,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return string.IsNullOrEmpty(message) ? "" : $"\"{message}\"";
         }
 
+        /// <summary>The words a test of the host says after the namespace it holds where the host has: "gearbox.lifts is installed".</summary>
+        public const string InstalledWords = "is installed";
+
+        /// <summary>The words a test of the host says after the namespace it holds where the host lacks: "gearbox.lifts is not installed".</summary>
+        public const string NotInstalledWords = "is not installed";
+
+        /// <summary>A test of the host as its row reads: "gearbox.lifts is installed".</summary>
+        public static string Installed(HostTest test)
+        {
+            return $"{test.Namespace} {(test.Installed ? InstalledWords : NotInstalledWords)}";
+        }
+
         /// <summary>The word joining a value to the blocks it is read or set on.</summary>
         public const string OnWord = "on";
 
@@ -740,6 +752,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var kept = slot as SystemStateSlot;
             if (kept != null)
                 return kept.IsEmpty ? Empty : kept.Name;
+
+            var host = slot as HostSlot;
+            if (host != null)
+                return host.IsEmpty ? Empty : Installed(host.Test);
 
             // A slot kind with no words here; saying nothing would read as an empty slot.
             return $"({slot.GetType().Name})";

@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         int _checkedWiring = -1;
         int _checkedUnstarted = -1;
         int _checkedStarts = -1;
+        int _checkedNamespaces = -1;
         int _matchedSwitches = -1;
         int _lookedBindings = -1;
         int _lookedEdits = -1;
@@ -353,7 +355,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Matches the runners to the program where it gained or lost something, checks it where it or its wiring changed, and matches what is watched where a switch was flipped; nothing otherwise.</summary>
         /// <remarks>
         /// Asked as the program is brought up to date with a change, and by an editor about to show what is wrong; a flag and
-        /// five integer comparisons.
+        /// six integer comparisons. The host gaining or losing a namespace is a change to the program's wiring, so what is
+        /// in that namespace is checked and watched as if the program were bound with the host as it now is.
         /// </remarks>
         public void Checking()
         {
@@ -367,7 +370,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             }
 
             if (_automation.Edits != _checkedEdits || _automation.Wiring != _checkedWiring || _world.Unstartable.Told != _checkedUnstarted
-                || _automation.Starts != _checkedStarts)
+                || _automation.Starts != _checkedStarts || HostNamespaces.Changes != _checkedNamespaces)
             {
                 Check();
             }
@@ -400,6 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _checkedWiring = _automation.Wiring;
             _checkedUnstarted = _world.Unstartable.Told;
             _checkedStarts = _automation.Starts;
+            _checkedNamespaces = HostNamespaces.Changes;
 
             Match();
 

@@ -143,9 +143,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             type = "";
             start = default(Literal);
             var value = statement.ValueAt(at);
-            bool flag;
-            if (Flag(statement, value, out flag))
+            bool flag, bare;
+            if (Kinds.Flag(statement, value, out flag, out bare))
             {
+                if (bare && !Alone(statement, value.Word, system, trouble))
+                    return false;
+
                 start = Literal.Of(flag);
                 return true;
             }
@@ -221,16 +224,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// Whether <paramref name="written" /> is a flag, <c>on</c> or <c>off</c>, bare or with its kind, <c>flag(on)</c>,
-        /// and which into <paramref name="flag" />.
+        /// Whether the bare flag <paramref name="name" /> starting a state means the flag alone; trouble where it could also mean
+        /// a thing of <paramref name="system" /> so named, or a choice of any of its types, no type being known.
         /// </summary>
-        static bool Flag(Statement statement, Value written, out bool flag)
+        static bool Alone(Statement statement, string name, AutomationSystem system, ScriptTrouble trouble)
         {
-            if (written.Form == ValueForm.Kinded && statement.KindOf(written).IsWord && statement.KindOf(written).Word == SettingReader.Flag)
-                written = statement.ThingOf(written);
+            var meanings = new List<string>();
+            var spellings = new List<string>();
+            Kinds.Meanings(system, name, meanings, spellings);
+            foreach (var declared in system.Types)
+            {
+                if (declared.Has(name))
+                {
+                    meanings.Add($"a choice of {declared.Name}");
+                    spellings.Add(ScriptWriter.KindSpelling(declared.Name, name));
+                }
+            }
 
-            flag = written.Says(Keyword.On);
-            return flag || written.Says(Keyword.Off);
+            return Kinds.FlagAlone(statement, name, meanings, spellings, trouble);
         }
 
         /// <summary>
@@ -330,14 +341,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var written = statement.ValueAt(at);
             var flag = type == SettingReader.Flag;
             var expected = flag ? "on or off" : $"a choice of {type}";
-            bool on;
-            if (Flag(statement, written, out on))
+            // A bare on or off is looked for among the type's choices where the type is not a flag, as any bare choice is.
+            bool on, bare;
+            var flagged = Kinds.Flag(statement, written, out on, out bare);
+            if (flagged && (flag || !bare))
             {
                 if (!flag)
                 {
                     trouble.Say(statement, $"{about} holds {expected}, not a flag.");
                     return false;
                 }
+
+                if (bare && !Kinds.FlagAlone(statement, written.Word, system, trouble))
+                    return false;
 
                 value = Literal.Of(on);
                 return true;
@@ -387,7 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return SettingReader.Owe(statement, name, system, held => held == type, SettingReader.Holding(type), trouble);
             }
 
-            trouble.Say(statement, $"no state or choice '{name}'; {about} holds {expected}.");
+            trouble.Say(statement, flagged ? $"{about} holds {expected}, not a flag." : $"no state or choice '{name}'; {about} holds {expected}.");
             return false;
         }
 

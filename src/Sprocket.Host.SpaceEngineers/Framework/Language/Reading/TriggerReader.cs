@@ -107,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         static Trigger Kind(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
-            if (statement.Key == Keyword.When && StateReader.Called(statement, statement.ValueAt(0)) != null)
+            if (statement.Key == Keyword.When && !StepReader.IsQuantifier(statement, 0) && StateReader.Called(statement, statement.ValueAt(0)) != null)
                 return Watched(statement, system, trouble);
 
             if (statement.Key == Keyword.When)

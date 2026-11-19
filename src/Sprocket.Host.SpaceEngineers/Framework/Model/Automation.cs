@@ -683,7 +683,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             if (compared != null)
                 return Copied(compared);
 
-            return ((StateTest)test).Copy();
+            var host = test as HostTest;
+            return host != null ? (BranchTest)host.Copy() : ((StateTest)test).Copy();
         }
 
         /// <summary>A comparison again, deep enough that editing the copy cannot reach the original.</summary>

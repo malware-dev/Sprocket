@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>A real number's value.</summary>
         public double Real { get; private set; }
 
-        /// <summary>Which of the format's words this is, for a <see cref="TokenKind.Keyword" />.</summary>
+        /// <summary>Which of the format's words this is: for a <see cref="TokenKind.Keyword" />, and for a bare identifier spelled like a contextual keyword.</summary>
         public Keyword Keyword { get; private set; }
     }
 }

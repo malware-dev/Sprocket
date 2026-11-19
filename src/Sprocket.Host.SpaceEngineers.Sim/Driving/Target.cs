@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.Installations;
 using Sprocket.Host.SpaceEngineers.Features.Library;
+using Sprocket.Host.SpaceEngineers.Features.Mods;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Selector.Blocks;
@@ -128,7 +129,7 @@ namespace Sprocket.Sim.Driving
         static ListField SourceBox(SprocketEditor editor)
         {
             var texts = editor.Texts;
-            var sources = new[] { texts.PickSourceBlocks, texts.PickSourceSlots, texts.PickSourceStates };
+            var sources = new[] { texts.PickSourceBlocks, texts.PickSourceSlots, texts.PickSourceStates, texts.PickSourceMods };
             return Within(editor.Pick().Stages[0]).OfType<ListField>().First(field => sources.Contains(field.Text));
         }
 
@@ -167,7 +168,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The strip of the pick the editor is on, or an exception naming the screen.</summary>
         public static PickStrip Pick(this SprocketEditor editor)
         {
-            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip;
+            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip ?? (editor.Current as ModsPage)?.Strip;
             return strip ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a pick.");
         }
 
@@ -700,7 +701,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The columns of any pick on the screen, from the page it is on.</summary>
         static IEnumerable<StageColumn> Stages(this SprocketEditor editor)
         {
-            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip;
+            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip ?? (editor.Current as ModsPage)?.Strip;
             return strip == null ? Enumerable.Empty<StageColumn>() : strip.Stages;
         }
 

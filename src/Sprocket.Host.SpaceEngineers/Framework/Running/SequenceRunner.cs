@@ -471,7 +471,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (_faults.Found.Waits)
             {
                 RefusedCount++;
-                _owner.Log?.Refused(this, tick, RunRefusal.EmptySlot);
+                _owner.Log?.Refused(this, tick, _faults.Found.AwaitsNamespace ? RunRefusal.Uninstalled : RunRefusal.EmptySlot);
                 return;
             }
 
@@ -508,7 +508,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             if (!CanRun || _faults.Found.Waits)
             {
-                _owner.Log?.Refused(this, tick, CanRun ? RunRefusal.EmptySlot : RunRefusal.Off);
+                _owner.Log?.Refused(this, tick, !CanRun ? RunRefusal.Off : _faults.Found.AwaitsNamespace ? RunRefusal.Uninstalled : RunRefusal.EmptySlot);
                 return;
             }
 
@@ -1028,6 +1028,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
                     holds = Holds(tested, compared);
                     _owner.Log?.Tested(this, _memory.Looked, at, tested, holds);
+                }
+                else if (test is HostTest)
+                {
+                    holds = ((HostTest)test).Holds;
                 }
                 else
                 {

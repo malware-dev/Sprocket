@@ -10,6 +10,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         Slots,
 
         /// <summary>The logic system's states.</summary>
-        States
+        States,
+
+        /// <summary>The mods the host has, each by the namespace it registered.</summary>
+        Mods
     }
 }

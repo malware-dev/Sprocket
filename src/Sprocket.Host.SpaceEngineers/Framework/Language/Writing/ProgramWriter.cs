@@ -364,7 +364,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 if (!SettingReader.IsBuiltIn(part.Setting) && (BlockKinds.IsGameType(part.Setting) || Meanings(system, part.Setting) > 1))
                     pen.Says(Keyword.Expects).Kinded("", Keywords.Name(Keyword.Type), part.Setting);
                 else
-                    pen.Says(Keyword.Expects).Word(part.Setting);
+                    pen.Says(Keyword.Expects).Expected(part.Setting);
 
                 if (part.HasDefault)
                 {
@@ -379,7 +379,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             else if (part.Expects.Length > 0 && system.FindType(part.Expects) != null)
                 pen.Says(Keyword.Expects).Kinded("", Kinds.BlockType, part.Expects);
             else if (part.Expects.Length > 0)
-                pen.Says(Keyword.Expects).Word(part.Expects);
+                pen.Says(Keyword.Expects).Expected(part.Expects);
 
             pen.End();
         }
@@ -417,6 +417,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// </summary>
         static void Choice(ScriptWriter pen, AutomationSystem system, string type, Literal value, bool starting)
         {
+            if (system != null && value.Kind == ValueKind.Flag && FlagShared(system, Flag(value), starting))
+            {
+                pen.Kinded("", SettingReader.Flag, Flag(value));
+                return;
+            }
+
             if (system != null && value.Kind == ValueKind.Name && Shared(system, type, value.Text, starting))
             {
                 if (Meanings(system, type) > 1)
@@ -439,7 +445,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// <summary>
         /// Whether <paramref name="name" />, written bare where a value of <paramref name="type" /> stands, could mean more than
         /// one thing: a slot, setting, type, state or sequence of <paramref name="system" />, or a choice of that type, or, where
-        /// it is a <paramref name="starting" /> value, of any type.
+        /// it is a <paramref name="starting" /> value, of any type, or the flag where it is spelled like one and a flag could stand.
         /// </summary>
         static bool Shared(AutomationSystem system, string type, string name, bool starting)
         {
@@ -450,7 +456,34 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                     meanings++;
             }
 
+            if (Kinds.SpelledLikeFlag(name) && (starting || type.Length == 0 || type == SettingReader.Flag))
+                meanings++;
+
             return meanings > 1;
+        }
+
+        /// <summary>
+        /// Whether the flag <paramref name="word" />, <c>on</c> or <c>off</c>, written bare where a value stands, could also mean a
+        /// thing of <paramref name="system" /> so named, or, where it is a <paramref name="starting" /> value, a choice of any type.
+        /// </summary>
+        static bool FlagShared(AutomationSystem system, string word, bool starting)
+        {
+            if (Meanings(system, word) > 0)
+                return true;
+
+            foreach (var declared in system.Types)
+            {
+                if (starting && declared.Has(word))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>How <paramref name="value" />, a flag, is spelled: <c>on</c> or <c>off</c>.</summary>
+        static string Flag(Literal value)
+        {
+            return Keywords.Name(value.Flag ? Keyword.On : Keyword.Off);
         }
 
         /// <summary>How many things of <paramref name="system" /> are called <paramref name="name" />: its slot or setting, type, state and sequence.</summary>
@@ -473,11 +506,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 pen.Word(state);
         }
 
-        /// <summary>The state or setting <paramref name="name" />, of the kind <paramref name="kind" />, written with it where alone it could also mean another thing.</summary>
-        static void Named(ScriptWriter pen, AutomationSystem system, string kind, string name)
+        /// <summary>
+        /// The state or setting <paramref name="name" />, of the kind <paramref name="kind" />, written with it where alone it could
+        /// also mean another thing; where it <paramref name="tests" />, it stands where a test starts.
+        /// </summary>
+        static void Named(ScriptWriter pen, AutomationSystem system, string kind, string name, bool tests)
         {
             if (system != null && Meanings(system, name) > 1)
                 pen.Kinded("", kind, name);
+            else if (tests)
+                pen.Tested(name);
             else
                 pen.Word(name);
         }
@@ -771,14 +809,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             pen.Body();
         }
 
-        /// <summary>What a branch tests, then <c>then</c>: a member read on blocks, or one of the system's states.</summary>
+        /// <summary>What a branch tests, then <c>then</c>: a member read on blocks, one of the system's states, or the host.</summary>
         static void WriteTest(ScriptWriter pen, AutomationSystem system, BranchTest test)
         {
             var compared = test as Comparison;
+            var host = test as HostTest;
             if (compared != null)
                 WriteComparison(pen, system, compared);
+            else if (host != null)
+                WriteHostTest(pen, host);
             else
                 WriteStateTest(pen, system, (StateTest)test);
+        }
+
+        /// <summary><c>gearbox.lifts is installed then</c> or <c>gearbox.lifts is not installed then</c>: whether the host has a namespace.</summary>
+        static void WriteHostTest(ScriptWriter pen, HostTest test)
+        {
+            pen.Namespace(test.Namespace).Says(Keyword.Is);
+            if (!test.Installed)
+                pen.Says(Keyword.Not);
+
+            pen.Says(Keyword.Installed).Says(Keyword.Then);
         }
 
         /// <summary>
@@ -788,9 +839,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         static void WriteStateTest(ScriptWriter pen, AutomationSystem system, StateTest test)
         {
             if (test.Setting.Length > 0)
-                Named(pen, system, Kinds.Setting, test.Setting);
+                Named(pen, system, Kinds.Setting, test.Setting, true);
             else
-                Named(pen, system, Kinds.State, test.State);
+                Named(pen, system, Kinds.State, test.State, true);
 
             pen.Says(test.Relation == Relation.IsNot ? Keyword.NotEqualTo : Keyword.EqualTo);
             if (test.Other.Length > 0)
@@ -1040,7 +1091,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var sets = step as SetState;
             if (sets != null)
             {
-                Named(pen, system, Kinds.State, sets.State);
+                Named(pen, system, Kinds.State, sets.State, false);
                 pen.Says(Keyword.To);
                 if (sets.From.Length > 0)
                     State(pen, system, TypeOf(system, sets.State), sets.From);
@@ -1093,9 +1144,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// </summary>
         static void Word(ScriptWriter pen, AutomationSystem system, Literal value)
         {
-            var type = value.Kind == ValueKind.Name && system != null && Meanings(system, value.Text) > 0 ? value.Typed ?? ChoiceTypes.Having(value.Text) : null;
+            if (value.Kind == ValueKind.Flag && system != null && Meanings(system, Flag(value)) > 0)
+            {
+                pen.Kinded("", SettingReader.Flag, Flag(value));
+                return;
+            }
+
+            var type = value.Kind == ValueKind.Name && ((system != null && Meanings(system, value.Text) > 0) || Kinds.SpelledLikeFlag(value.Text)) ? value.Typed ?? ChoiceTypes.Having(value.Text) : null;
             if (type != null)
-                pen.Kinded(Meanings(system, type.Id) > 0 ? type.Namespace : "", type.Id, value.Text);
+                pen.Kinded(system != null && Meanings(system, type.Id) > 0 ? type.Namespace : "", type.Id, value.Text);
             else
                 Written(pen, value);
         }
@@ -1146,6 +1203,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             }
 
             if (value.IsKinded)
+            {
+                pen.Kinded("", Kinds.Setting, value.Text);
+                return;
+            }
+
+            // A setting spelled like a flag is written with its kind, since alone where a value stands it could be the flag.
+            if (value.Kind == ValueKind.Setting && Kinds.SpelledLikeFlag(value.Text))
             {
                 pen.Kinded("", Kinds.Setting, value.Text);
                 return;

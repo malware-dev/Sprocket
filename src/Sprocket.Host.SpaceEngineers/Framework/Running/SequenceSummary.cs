@@ -66,6 +66,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 if (!triggers[i].Stops)
                     starts++;
 
+                // One in a namespace the host lacks never fires, and waits for the namespace without trouble.
+                if (Awaits(triggers[i]))
+                    continue;
+
                 // A signal part left unanswered is said by Empty; whether the slots it is given answer is the
                 // construct's to say below. One that names no part yet is somebody still building it.
                 var required = triggers[i] as SignalTrigger;
@@ -160,6 +164,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return why == null ? SequenceFault.Unstarted(Unwired.Unknown, null) : SequenceFault.Unstarted(why.Why, why.Block);
         }
 
+        /// <summary>Whether <paramref name="trigger" /> watches a signal or a member in a namespace the host lacks, and so never fires until the host has it.</summary>
+        static bool Awaits(Trigger trigger)
+        {
+            var signal = trigger as SignalTrigger;
+            var when = trigger as WhenTrigger;
+            var provider = signal != null ? signal.Provider : when != null ? when.Provider : "";
+            return provider.Length > 0 && !HostNamespaces.Has(provider);
+        }
+
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
         public static int TicksSinceRun(SequenceRunner state, int tick)
         {
@@ -205,6 +218,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             SequenceFault circular = Circular(sequence);
             if (circular.Exists)
                 return circular;
+
+            SequenceFault uninstalled = Uninstalled(sequence);
+            if (uninstalled.Exists)
+                return uninstalled;
 
             SequenceFault unoffered = Unoffered(bindings, sequence, through);
             if (unoffered.Exists)
@@ -392,12 +409,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return SequenceFault.None;
         }
 
-        /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs, waits for a slot <paramref name="through" /> leaves empty.</summary>
+        /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs, waits for a slot <paramref name="through" /> leaves empty, or for a namespace the host lacks.</summary>
         /// <remarks>Asked when the program is checked, and on no tick.</remarks>
         public static bool Waits(AutomationSystem system, Trigger trigger, SystemInstance through)
         {
             var started = trigger.Does == null ? null : system.FindSequence(trigger.Does.Number);
-            return started != null && Empty(started, through).Exists;
+            return started != null && (Empty(started, through).Exists || Uninstalled(started).Exists);
         }
 
         /// <summary>The first slot, of what starts it and then what its steps act on, that <paramref name="through" /> leaves empty and may not, or none.</summary>
@@ -795,13 +812,57 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return SequenceFault.None;
         }
 
+        /// <summary>
+        /// The first step doing something in a namespace the host lacks, outside a branch taken only while the host has it, as
+        /// a fault the sequence waits on; or none.
+        /// </summary>
+        /// <remarks>Asked when the program is checked and when its watches are matched, on no tick; it reads no block.</remarks>
+        static SequenceFault Uninstalled(Sequence sequence)
+        {
+            HashSet<string> assumed = null;
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var provider = ProviderOf(sequence.Steps[i]);
+                if (provider.Length == 0 || HostNamespaces.Has(provider))
+                    continue;
+
+                if (assumed == null)
+                    assumed = new HashSet<string>();
+
+                HostTest.Assumed(sequence.Steps, i, assumed);
+                if (!assumed.Contains(provider))
+                    return SequenceFault.Uninstalled(i, provider);
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>The namespace what <paramref name="step" /> reads or does is in, or empty where it names none or no member.</summary>
+        static string ProviderOf(Step step)
+        {
+            var test = TestOf(step);
+            if (test != null)
+                return test.Provider;
+
+            var act = step as Act;
+            return act != null && act.HasAction ? act.Provider : "";
+        }
+
         /// <summary>The first step whose blocks do not offer what it does, or none.</summary>
-        /// <remarks>Every block the step names has to offer it.</remarks>
+        /// <remarks>
+        /// Every block the step names has to offer it. A step in a namespace the host lacks is <see cref="Uninstalled" />'s
+        /// to say, or is in a branch taken only while the host has it, which is never reached.
+        /// </remarks>
         static SequenceFault Unoffered(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var test = TestOf(sequence.Steps[i]);
+                var act = sequence.Steps[i] as Act;
+                var provider = ProviderOf(sequence.Steps[i]);
+                if (provider.Length > 0 && !HostNamespaces.Has(provider))
+                    continue;
+
                 if (test != null)
                 {
                     var read = SystemInstance.Through(through, test.Targets);
@@ -815,7 +876,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     continue;
                 }
 
-                var act = sequence.Steps[i] as Act;
                 if (act == null || !act.HasAction)
                     continue;
 

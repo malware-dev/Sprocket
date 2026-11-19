@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format
         public const int Version = 2;
 
         /// <summary>The draft of the format's version this build writes, the number after <c>alpha</c> on a script's first line.</summary>
-        public const int Draft = 1;
+        public const int Draft = 2;
 
         /// <summary>The name a script's first line starts with, unquoted, before its version: <c>sprocket 2 alpha 1</c>.</summary>
         /// <remarks>Persisted in every program.</remarks>

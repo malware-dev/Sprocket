@@ -18,6 +18,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         static readonly Dictionary<string, HostNamespace> Registered = new Dictionary<string, HostNamespace>();
 
+        /// <summary>Counts up each time the host gains or loses a namespace.</summary>
+        /// <remarks>
+        /// Static with the list it counts. Each construct's runner compares it on the check it already makes every tick, and
+        /// checks and wires its program again where it moved, so a program behaves as if bound with the host as it now is;
+        /// a count leaves nothing subscribed to outlive the runner that read it.
+        /// </remarks>
+        public static int Changes { get; private set; }
+
         static HostNamespaces()
         {
             Clear();
@@ -37,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 return had.Owner == owner;
 
             Registered.Add(name, new HostNamespace(name, owner, title ?? "", author ?? ""));
+            Changes++;
             return true;
         }
 
@@ -45,7 +54,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         {
             HostNamespace had;
             if (name != BlockKinds.Own && Registered.TryGetValue(name, out had) && had.Owner == owner)
+            {
                 Registered.Remove(name);
+                Changes++;
+            }
         }
 
         /// <summary>Whether <paramref name="name" /> is one of the host's namespaces, spelled exactly so.</summary>
@@ -67,8 +79,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>Forgets every namespace but Sprocket's own, as a session ends.</summary>
         public static void Clear()
         {
+            var gained = Registered.Count > 1;
             Registered.Clear();
             Registered.Add(BlockKinds.Own, new HostNamespace(BlockKinds.Own, Sprocket, Sprocket, "Malware"));
+            if (gained)
+                Changes++;
         }
     }
 }

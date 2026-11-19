@@ -37,7 +37,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>A real number, for one written with a point or an exponent.</summary>
         public double Real { get; private set; }
 
-        /// <summary>Which of the format's words it is, for a keyword.</summary>
+        /// <summary>Which of the format's words it is: for a keyword, and for a bare name spelled like a contextual keyword.</summary>
+        /// <remarks>A quoted name has none.</remarks>
         public Keyword Keyword { get; private set; }
 
         /// <summary>Whether this is a word, bare or quoted, rather than text.</summary>
@@ -84,10 +85,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return ((long)from << 32) | (uint)count;
         }
 
-        /// <summary>Whether this is the bare keyword given, which a quoted word never is.</summary>
+        /// <summary>
+        /// Whether this is the bare keyword given, which a quoted word never is: a reserved one, or a contextual one where the
+        /// construct reading it expects it.
+        /// </summary>
         public bool Says(Keyword keyword)
         {
-            return Form == ValueForm.Keyword && Keyword == keyword;
+            return keyword != Keyword.None && Keyword == keyword && (Form == ValueForm.Keyword || Form == ValueForm.Identifier);
         }
 
         /// <summary>A number, whether it was written 60 or 60.0.</summary>

@@ -2,7 +2,10 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
-    /// <summary>What a branch of an if tests: a member read on blocks, a <see cref="Comparison" />, or one of the logic system's states, a <see cref="StateTest" />.</summary>
+    /// <summary>
+    /// What a branch of an if tests: a member read on blocks, a <see cref="Comparison" />, one of the logic system's states, a
+    /// <see cref="StateTest" />, or whether the host has a namespace, a <see cref="HostTest" />.
+    /// </summary>
     public abstract class BranchTest
     {
         static readonly string[] Nothing = new string[0];

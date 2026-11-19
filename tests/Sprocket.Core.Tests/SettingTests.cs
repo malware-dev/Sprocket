@@ -17,7 +17,7 @@ public class SettingTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 2 alpha 1\n\n";
+    const string Version = "sprocket 2 alpha 2\n\n";
 
     const string Head = "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n";
 
@@ -302,14 +302,14 @@ public class SettingTests
     [Theory]
     [InlineData("sprocket 1 alpha 28")]
     [InlineData("sprocket 1")]
-    [InlineData("sprocket 2 alpha 1")]
+    [InlineData("sprocket 2 alpha 2")]
     public void AGameTypeSharingATypesNameIsWrittenWithItsKind(string version)
     {
         // A rig stands behind the game's gateway and its kinds of object, which telling a block type by its name asks.
         _ = new Rigged();
         var text = version + "\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"
-            + "    required slot hatch expects " + (version.EndsWith("alpha 1") ? "block_type(Door)" : "Door") + "\n"
-            + (version.EndsWith("alpha 1") ? "    optional slot mode expects type(Door) = open\n" : "")
+            + "    required slot hatch expects " + (version.StartsWith("sprocket 2") ? "block_type(Door)" : "Door") + "\n"
+            + (version.StartsWith("sprocket 2") ? "    optional slot mode expects type(Door) = open\n" : "")
             + "\n    type Door = open | shut\n\n"
             + "    sequence 1 {\n        call sprocket.close on [ hatch ]\n    }\n}\n";
 
@@ -321,7 +321,7 @@ public class SettingTests
 
         var saved = ProgramWriter.Save(program, _store);
         Assert.Contains("    required slot hatch expects block_type(Door)\n", saved);
-        if (version.EndsWith("alpha 1"))
+        if (version.StartsWith("sprocket 2"))
         {
             Assert.Equal("Door", system.FindPart("mode")!.Setting);
             Assert.Contains("    optional slot mode expects type(Door) = open\n", saved);
@@ -336,7 +336,7 @@ public class SettingTests
     /// </summary>
     [Theory]
     [InlineData("sprocket 1", "", "side")]
-    [InlineData("sprocket 2 alpha 1", "    optional slot mode expects type(side) = inside\n", "slot(side)")]
+    [InlineData("sprocket 2 alpha 2", "    optional slot mode expects type(side) = inside\n", "slot(side)")]
     public void ATypeAndASlotShareAName(string version, string setting, string slot)
     {
         var text = version + "\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"

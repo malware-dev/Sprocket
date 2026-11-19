@@ -19,6 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
     /// </remarks>
     public static class EarlierSwitches
     {
+        // The word each line of the form starts with.
+        const string Off = "off";
+
+        // The word before the number of the step a reason names.
+        const string Step = "step";
+
         /// <summary>Switches off in <paramref name="program" /> what <paramref name="saved" /> says is off; what is wrong with it, or empty.</summary>
         /// <remarks>Switches that will not read leave the program marked not to be saved over.</remarks>
         public static string Load(string saved, Automation program)
@@ -32,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 
             foreach (var line in lines)
             {
-                if (line.Key == Keyword.Off && !line.IsOff)
+                if (line.Key == Keyword.None && line.Head == Off && !line.IsOff)
                     Switch(line, program, trouble);
                 else
                     trouble.Say(line, "expected 'off'.");
@@ -111,7 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
                 {
                     sequence = Counted(line, ++i);
                 }
-                else if (line.Says(i, Keyword.Step) && i + 1 < line.Count)
+                else if (line.ValueAt(i).Form == ValueForm.Identifier && line.Word(i) == Step && i + 1 < line.Count)
                 {
                     var number = line.ValueAt(++i);
                     if (number.Form == ValueForm.Integer && number.Whole >= 0 && number.Whole <= int.MaxValue)

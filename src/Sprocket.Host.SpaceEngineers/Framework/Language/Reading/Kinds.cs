@@ -67,6 +67,93 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             trouble.Say(statement, $"'{name}' could be {string.Join(" or ", meanings)}; write the one meant with its kind: {string.Join(" or ", spellings)}.");
         }
 
+        /// <summary>
+        /// Whether <paramref name="written" /> is a flag, <c>on</c> or <c>'on'</c> alone, or with its kind, <c>flag(on)</c>, and
+        /// which into <paramref name="on" />; whether it is alone into <paramref name="bare" />, since alone it is a choice that
+        /// may also mean a thing so named.
+        /// </summary>
+        /// <remarks>
+        /// Quoted or not, a choice is the same choice. In a program written before contextual keywords, a flag is a keyword
+        /// and means the flag alone, and a quoted name is a name.
+        /// </remarks>
+        public static bool Flag(Statement statement, Value written, out bool on, out bool bare)
+        {
+            var kinded = written.Form == ValueForm.Kinded;
+            if (kinded)
+            {
+                var kind = statement.KindOf(written);
+                if (!kind.IsWord || kind.Word != SettingReader.Flag)
+                {
+                    on = bare = false;
+                    return false;
+                }
+
+                written = statement.ThingOf(written);
+            }
+
+            var flag = Spells(statement, written, out on);
+            bare = flag && !kinded && written.Form == ValueForm.Identifier;
+            return flag;
+        }
+
+        /// <summary>Whether <paramref name="written" />, standing alone, spells a flag, <c>on</c> or <c>off</c>, bare or quoted, and which into <paramref name="on" />.</summary>
+        /// <remarks>In a program written before contextual keywords only the keyword does, and a quoted name is a name.</remarks>
+        public static bool Spells(Statement statement, Value written, out bool on)
+        {
+            on = false;
+            if (written.Form == ValueForm.Keyword)
+            {
+                on = written.Says(Keyword.On);
+                return on || written.Says(Keyword.Off);
+            }
+
+            if (written.Form != ValueForm.Identifier || (statement.Earlier && written.Keyword == Keyword.None))
+                return false;
+
+            on = written.Word == Keywords.Name(Keyword.On);
+            return on || written.Word == Keywords.Name(Keyword.Off);
+        }
+
+        /// <summary>Whether <paramref name="written" />, standing alone, spells a flag, <c>on</c> or <c>off</c>, bare or quoted.</summary>
+        public static bool Spells(Statement statement, Value written)
+        {
+            bool on;
+            return Spells(statement, written, out on);
+        }
+
+        /// <summary>Whether <paramref name="name" /> is spelled like a flag, <c>on</c> or <c>off</c>, so that a name so called, where a value stands, has the flag for a rival.</summary>
+        public static bool SpelledLikeFlag(string name)
+        {
+            return name == Keywords.Name(Keyword.On) || name == Keywords.Name(Keyword.Off);
+        }
+
+        /// <summary>
+        /// Whether the bare flag <paramref name="name" />, <c>on</c> or <c>off</c>, means the flag alone where
+        /// <paramref name="statement" /> writes it; trouble where it could also mean a thing of <paramref name="system" /> so named.
+        /// </summary>
+        public static bool FlagAlone(Statement statement, string name, AutomationSystem system, ScriptTrouble trouble)
+        {
+            var meanings = new List<string>();
+            var spellings = new List<string>();
+            Meanings(system, name, meanings, spellings);
+            return FlagAlone(statement, name, meanings, spellings, trouble);
+        }
+
+        /// <summary>
+        /// Whether the bare flag <paramref name="name" /> means the flag alone, where it could otherwise mean each of
+        /// <paramref name="meanings" />, written with its kind as <paramref name="spellings" /> says; trouble where it could mean any.
+        /// </summary>
+        public static bool FlagAlone(Statement statement, string name, IList<string> meanings, IList<string> spellings, ScriptTrouble trouble)
+        {
+            if (meanings.Count == 0)
+                return true;
+
+            meanings.Add($"the flag {name}");
+            spellings.Add(ScriptWriter.KindSpelling(SettingReader.Flag, name));
+            Ambiguous(statement, name, meanings, spellings, trouble);
+            return false;
+        }
+
         /// <summary>Adds the thing of the kind <paramref name="kind" /> called <paramref name="name" /> to <paramref name="meanings" />, in words, and to <paramref name="spellings" />, written with its kind.</summary>
         public static void Add(string kind, string name, IList<string> meanings, IList<string> spellings)
         {
@@ -89,7 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return true;
 
             var thing = statement.ThingOf(written);
-            if (!Fits(kind.Word, thing))
+            if (!Fits(statement, kind.Word, thing))
             {
                 trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, written)}; {ScriptQuotes.Spelled(statement, thing)} is not written as a value of {kind.Word}.");
                 return false;
@@ -100,11 +187,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>Whether <paramref name="thing" /> is written as a value of the built-in type <paramref name="kind" /> can be, as it would stand alone.</summary>
-        static bool Fits(string kind, Value thing)
+        static bool Fits(Statement statement, string kind, Value thing)
         {
             switch (kind)
             {
-                case "flag": return thing.Says(Keyword.On) || thing.Says(Keyword.Off);
+                case "flag": return Spells(statement, thing);
                 case "text": return thing.Form == ValueForm.Text;
                 case "integer": return thing.Form == ValueForm.Integer;
                 case "real": return thing.Form == ValueForm.Integer || thing.Form == ValueForm.Real;

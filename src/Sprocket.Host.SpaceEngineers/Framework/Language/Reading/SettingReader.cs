@@ -183,10 +183,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             switch (type)
             {
                 case Flag:
-                    if (!written.Says(Keyword.On) && !written.Says(Keyword.Off))
+                    bool on;
+                    if (!Kinds.Spells(statement, written, out on))
                         return false;
 
-                    value = Literal.Of(written.Says(Keyword.On));
+                    value = Literal.Of(on);
                     return true;
 
                 case Text:

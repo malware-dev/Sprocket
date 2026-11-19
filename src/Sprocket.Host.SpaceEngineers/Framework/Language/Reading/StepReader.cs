@@ -28,6 +28,36 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return true;
         }
 
+        /// <summary>Whether the value at <paramref name="at" /> is a quantifier, <c>any</c>, <c>all</c>, <c>sum</c> or <c>average</c>, which a test of blocks starts with.</summary>
+        /// <remarks>Asked before a bare name there is read as a state's: the test's construct reads these words where it starts.</remarks>
+        public static bool IsQuantifier(Statement statement, int at)
+        {
+            return statement.Says(at, Keyword.Any) || statement.Says(at, Keyword.All) || statement.Says(at, Keyword.Sum)
+                || statement.Says(at, Keyword.Average);
+        }
+
+        /// <summary>
+        /// Whether <paramref name="written" /> is a flag, into <paramref name="value" />; false where it is not, and also, with
+        /// trouble and <paramref name="wrong" />, where a bare one could also mean a thing of <paramref name="system" /> so named.
+        /// </summary>
+        static bool Flagged(Statement statement, Value written, AutomationSystem system, ScriptTrouble trouble, out Literal value, out bool wrong)
+        {
+            value = default(Literal);
+            wrong = false;
+            bool on, bare;
+            if (!Kinds.Flag(statement, written, out on, out bare))
+                return false;
+
+            if (bare && !Kinds.FlagAlone(statement, written.Word, system, trouble))
+            {
+                wrong = true;
+                return false;
+            }
+
+            value = Literal.Of(on);
+            return true;
+        }
+
         /// <summary>The comparison <paramref name="value" /> is, or false where it is none.</summary>
         static bool Related(Value value, out Relation relation)
         {
@@ -78,7 +108,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             for (var i = 0; i < given.Count; i++)
             {
                 var argument = given[i];
-                if (!Kinds.Literal(statement, ref argument, trouble))
+                Literal flag;
+                bool shared;
+                if (Flagged(statement, argument, system, trouble, out flag, out shared))
+                {
+                    arguments.Add(flag);
+                    continue;
+                }
+
+                if (shared || !Kinds.Literal(statement, ref argument, trouble))
                     return false;
 
                 if (argument.Form == ValueForm.List)
@@ -228,10 +266,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             var written = statement.ValueAt(at + 1);
-            if (!Kinds.Literal(statement, ref written, trouble))
+            var ordered = relation != Relation.Is && relation != Relation.IsNot;
+            bool shared;
+            if (Flagged(statement, written, system, trouble, out value, out shared))
+            {
+                if (!ordered && quantifier != Quantifier.Sum)
+                    return true;
+
+                trouble.Say(statement, $"expected a number after '{Keywords.Name(ProgramWriter.Said(relation))}'.");
+                return false;
+            }
+
+            if (shared || !Kinds.Literal(statement, ref written, trouble))
                 return false;
 
-            var ordered = relation != Relation.Is && relation != Relation.IsNot;
             var setting = SettingReader.Referenced(statement, written, system);
             if (setting != null)
             {
@@ -355,12 +403,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// <c>all sprocket.filled on [ vent ] == on then</c> or <c>where == inside then</c>, from <paramref name="at" />: what an
-        /// <c>if</c> or an <c>else if</c> tests, or null and trouble where it is not that.
+        /// <c>all sprocket.filled on [ vent ] == on then</c>, <c>where == inside then</c> or <c>gearbox.lifts is installed then</c>,
+        /// from <paramref name="at" />: what an <c>if</c> or an <c>else if</c> tests, or null and trouble where it is not that.
         /// </summary>
         static BranchTest Tested(Statement statement, int at, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
-            if (StateReader.Called(statement, statement.ValueAt(at)) != null)
+            if (statement.Says(at + 1, Keyword.Is))
+                return HostTested(statement, at, trouble);
+
+            if (!IsQuantifier(statement, at) && StateReader.Called(statement, statement.ValueAt(at)) != null)
                 return StateTested(statement, at, system, trouble);
 
             var test = new Comparison();
@@ -396,6 +447,41 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 SystemReader.Uses(statement, test.Targets[i], system, program, false, trouble);
 
             return test;
+        }
+
+        /// <summary>
+        /// <c>gearbox.lifts is installed then</c> or <c>gearbox.lifts is not installed then</c> from <paramref name="at" />: whether
+        /// the host has a namespace, which an <c>if</c> tests; or null and trouble where it is not that.
+        /// </summary>
+        /// <remarks>A namespace no mod has registered reads all the same: the test is how a program asks.</remarks>
+        static HostTest HostTested(Statement statement, int at, ScriptTrouble trouble)
+        {
+            var written = statement.ValueAt(at);
+            var parts = statement.Parts(at);
+            if ((written.Form != ValueForm.Identifier && written.Form != ValueForm.Qualified) || !ScriptQuotes.Whole(parts))
+            {
+                trouble.Say(statement, "expected a namespace before 'is', like gearbox.lifts is installed.");
+                return null;
+            }
+
+            var lacks = statement.Says(at + 2, Keyword.Not);
+            var installed = at + (lacks ? 3 : 2);
+            if (!statement.Says(installed, Keyword.Installed))
+            {
+                trouble.Say(statement, "expected installed or not installed after 'is'.");
+                return null;
+            }
+
+            if (!statement.Says(installed + 1, Keyword.Then))
+            {
+                trouble.Say(statement, "expected 'then' after 'installed'.");
+                return null;
+            }
+
+            if (!ScriptQuotes.Ends(statement, installed + 2, trouble))
+                return null;
+
+            return new HostTest { Namespace = ScriptQuotes.Spelling(parts), Installed = !lacks };
         }
 
         /// <summary><c>where == inside then</c> from <paramref name="at" />: a state an <c>if</c> tests, or null and trouble where it is not that.</summary>
@@ -576,7 +662,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
 
             var given = statement.ValueAt(2);
-            if (!Kinds.Literal(statement, ref given, trouble))
+            Literal flag;
+            bool shared;
+            if (Flagged(statement, given, system, trouble, out flag, out shared))
+            {
+                act.ActionId = id;
+                act.Form = ReachKind.Value;
+                act.Provider = provider;
+                act.Arguments.Add(flag);
+                return Noted(act, statement);
+            }
+
+            if (shared || !Kinds.Literal(statement, ref given, trouble))
                 return null;
 
             var setting = SettingReader.Referenced(statement, given, system);

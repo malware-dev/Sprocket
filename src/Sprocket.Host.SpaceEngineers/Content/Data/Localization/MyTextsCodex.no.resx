@@ -83,7 +83,7 @@
     <value>**finally** har [steg](Term.Step class=term) som kjører når [![](mark:sequence)&amp;nbsp;sekvensen](Term.Sequence class=term) slutter, uansett hvordan, etter **if it fails** der den kjørte, og også når den slås av. Mens de kjører, vises sekvensen som i gang, og stopp avslutter dem med en gang.</value>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
-    <value>Et **hvis**, også kjent som en *betinget setning*, er et [steg](Term.Step class=term) som sjekker blokker, eller en av [![](mark:state)&amp;nbsp;tilstandene](Term.LogicSystemStates class=term) til [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), og kjører stegene under seg bare når [betingelsen](Term.Condition class=term) er oppfylt.</value>
+    <value>Et **hvis**, også kjent som en *betinget setning*, er et [steg](Term.Step class=term) som sjekker blokker, en av [![](mark:state)&amp;nbsp;tilstandene](Term.LogicSystemStates class=term) til [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term), eller om en mod er installert, og kjører stegene under seg bare når [betingelsen](Term.Condition class=term) er oppfylt.</value>
   </data>
   <data name="Sprocket.Term.Condition" xml:space="preserve">
     <value>En **betingelse** er det et [hvis](Term.If class=term) sjekker, som at en dør er lukket. Er den ikke oppfylt, blir [stegene](Term.Step class=term) under den hoppet over, og neste [gren](Term.Branch class=term), om det finnes en, får sin tur.</value>

@@ -13,7 +13,7 @@ public class AttributeTests
 {
     /// <summary>A program with an attribute Sprocket does not use on every kind of statement that can carry one.</summary>
     const string Everywhere = "#@ headerNote: 1\n"
-        + "sprocket 2 alpha 1\n\n"
+        + "sprocket 2 alpha 2\n\n"
         + "#@ doorNote: [ 1, 2 ]\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n"
         + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n"
@@ -43,7 +43,7 @@ public class AttributeTests
 
     /// <summary>Every attribute Sprocket does not use is written back as it was, above the statement it was above.</summary>
     [Theory]
-    [InlineData("#@ headerNote: 1\nsprocket 2 alpha 1\n")]
+    [InlineData("#@ headerNote: 1\nsprocket 2 alpha 2\n")]
     [InlineData("#@ doorNote: [ 1, 2 ]\nlet door1 = ")]
     [InlineData("#@ bellNote: 600t\nlet bell = ")]
     [InlineData("# The airlock.\n#@ systemNote: \"one\"\nsystem blueprint ")]
@@ -127,15 +127,24 @@ public class AttributeTests
         Assert.NotEqual("", ProgramReader.Load(text, new Automation(), new Values()));
     }
 
-    /// <summary>A name spelled like a keyword is quoted, as everywhere else.</summary>
+    /// <summary>A name spelled like a reserved keyword is quoted, as everywhere else.</summary>
     [Fact]
-    public void AnAttributeNamedLikeAKeywordIsQuoted()
+    public void AnAttributeNamedLikeAReservedKeywordIsQuoted()
     {
-        Assert.NotEqual("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ on:"), new Automation(), new Values()));
+        Assert.NotEqual("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ every:"), new Automation(), new Values()));
 
         var program = new Automation();
-        Assert.Equal("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ 'on':"), program, new Values()));
-        Assert.Contains("#@ 'on': \"one\"\n", ProgramWriter.Save(program, new Values()));
+        Assert.Equal("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ 'every':"), program, new Values()));
+        Assert.Contains("#@ 'every': \"one\"\n", ProgramWriter.Save(program, new Values()));
+    }
+
+    /// <summary>A name spelled like a contextual keyword is bare: no attribute's name is a keyword's place.</summary>
+    [Fact]
+    public void AnAttributeNamedLikeAContextualKeywordIsBare()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ on:"), program, new Values()));
+        Assert.Contains("#@ on: \"one\"\n", ProgramWriter.Save(program, new Values()));
     }
 
     /// <summary>A signal slot's <c>short</c> is the few words shown with its toolbar slots, read as text and written back.</summary>

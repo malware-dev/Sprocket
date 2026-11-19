@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         int _compiledBindings = -1;
         int _compiledEdits = -1;
+        int _compiledNamespaces = -1;
         bool _announced;
         bool _possible;
 
@@ -211,19 +212,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// it reads or when that is ruled out, marking whether all of them do.
         /// </summary>
         /// <remarks>
-        /// Done again only where the blocks the names point at, or the program, have changed since, so a look reads arrays
-        /// and asks nothing by name.
+        /// Done again only where the blocks the names point at, the program, or the host's namespaces have changed since, so a
+        /// look reads arrays and asks nothing by name.
         /// </remarks>
         void Compile()
         {
             var when = _trigger as WhenTrigger;
             var signal = _trigger as SignalTrigger;
             var watched = when != null ? (MomentTrigger)when : signal;
-            if (watched == null || (_bindings.Revision == _compiledBindings && _owner.Program.Edits == _compiledEdits))
+            if (watched == null || (_bindings.Revision == _compiledBindings && _owner.Program.Edits == _compiledEdits
+                    && HostNamespaces.Changes == _compiledNamespaces))
                 return;
 
             _compiledBindings = _bindings.Revision;
             _compiledEdits = _owner.Program.Edits;
+            _compiledNamespaces = HostNamespaces.Changes;
             Deafen();
             _generation++;
 

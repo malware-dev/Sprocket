@@ -232,6 +232,33 @@ public class IfStepTests
         Assert.IsType<If>(sequence.Steps[0]);
     }
 
+    /// <summary>An if testing the host says the namespace and whether it is installed, and is deleted as any if is.</summary>
+    [Theory]
+    [InlineData(true, "gearbox.lifts is installed")]
+    [InlineData(false, "gearbox.lifts is not installed")]
+    public void AnIfTestingTheHostSaysItAndIsDeleted(bool installed, string said)
+    {
+        var rig = Airlock(out var sequence);
+        sequence.Steps.Clear();
+        sequence.Steps.Add(new If(new HostTest { Namespace = "gearbox.lifts", Installed = installed }));
+        sequence.Steps.Add(new Wait(60));
+        sequence.Steps.Add(new EndIf());
+        sequence.Steps.Add(new Wait(30));
+        rig.Editor.Program.Edited();
+        rig.Tick();
+
+        var row = rig.Editor.StepRows()[0];
+        var part = Assert.IsType<HostSlot>(Assert.Single(row.Slots));
+        Assert.Equal(said, SentenceText.InStep(rig.World, part));
+
+        row.Deletes!.Execute();
+        rig.Tick();
+        rig.Editor.PressAnswer(rig.Texts.SequenceDeleteSteps);
+        rig.Tick();
+
+        Assert.Equal(30, Assert.IsType<Wait>(Assert.Single(sequence.Steps)).Ticks);
+    }
+
     /// <summary>Deleting an if can take the steps in it with it.</summary>
     [Fact]
     public void AnIfDeletedTakesItsSteps()

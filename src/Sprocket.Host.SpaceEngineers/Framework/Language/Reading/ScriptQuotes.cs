@@ -130,7 +130,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return true;
         }
 
-        /// <summary>Whether <paramref name="value" /> is a name, bare or quoted, rather than one of the language's words or anything else.</summary>
+        /// <summary>Whether <paramref name="value" /> is a name, bare or quoted, rather than one of the language's reserved words or anything else.</summary>
+        /// <remarks>A bare name spelled like a contextual keyword is one; the construct that reads that keyword asks for it first.</remarks>
         public static bool Named(Value value)
         {
             return value.Form == ValueForm.Identifier && value.Word.Length > 0;

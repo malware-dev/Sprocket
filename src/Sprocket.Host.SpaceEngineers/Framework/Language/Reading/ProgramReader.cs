@@ -404,10 +404,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     into.Add(new EntityKey(ValueKind.Color, EntityValue.Of(r, g, b, a)));
                     return;
 
+                case ValueForm.Identifier:
                 case ValueForm.Keyword:
-                    if (key.Keyword == Keyword.On || key.Keyword == Keyword.Off)
+                    bool on;
+                    if (Kinds.Spells(statement, key, out on))
                     {
-                        into.Add(new EntityKey(ValueKind.Flag, EntityValue.Of(key.Keyword == Keyword.On)));
+                        into.Add(new EntityKey(ValueKind.Flag, EntityValue.Of(on)));
                         return;
                     }
 

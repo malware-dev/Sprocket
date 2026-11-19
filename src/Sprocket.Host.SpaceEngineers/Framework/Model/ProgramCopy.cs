@@ -246,7 +246,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 return null;
 
             var compared = test as Comparison;
-            return compared != null ? (BranchTest)compared.Copy() : ((StateTest)test).Copy();
+            if (compared != null)
+                return compared.Copy();
+
+            var host = test as HostTest;
+            return host != null ? (BranchTest)host.Copy() : ((StateTest)test).Copy();
         }
 
         /// <summary>Puts <paramref name="instance" /> into <paramref name="into" />, its number, name and every answer intact.</summary>

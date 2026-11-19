@@ -621,6 +621,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (kept != null)
                     Tested(row, step, kept);
 
+                var host = branch.Test as HostTest;
+                if (host != null)
+                    row.Slots.Add(new HostSlot(host, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, host, OpeningColumn.Blocks))));
+
                 return;
             }
 

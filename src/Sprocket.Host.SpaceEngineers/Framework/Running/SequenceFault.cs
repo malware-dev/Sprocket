@@ -24,6 +24,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return fault;
         }
 
+        /// <summary>The step at <paramref name="step" /> does something in the namespace <paramref name="space" />, which the host lacks: the sequence waits for it.</summary>
+        public static SequenceFault Uninstalled(int step, string space)
+        {
+            var fault = new SequenceFault(SequenceProblem.Unoffered, step, BlockTrouble.None, space);
+            fault.AwaitsNamespace = true;
+            return fault;
+        }
+
         /// <summary><paramref name="problem" />, at the line <paramref name="step" />, with nothing said by a block.</summary>
         public SequenceFault(SequenceProblem problem, int step) : this(problem, step, BlockTrouble.None)
         {
@@ -45,6 +53,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>The reference of the one block at fault, or null where no one block is; for a trigger nothing can start, the name of the block whose button it is.</summary>
         public string Which { get; private set; }
+
+        /// <summary>
+        /// Whether what the step does is unoffered because the host lacks its namespace, named by <see cref="Which" />, so the
+        /// sequence waits for the namespace rather than being switched off.
+        /// </summary>
+        public bool AwaitsNamespace { get; private set; }
 
         /// <summary>Why nothing can start the sequence, for a <see cref="SequenceProblem.NeverTriggered" /> fault.</summary>
         public Unwired Unwired { get; private set; }
@@ -91,13 +105,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <remarks>A fault that holds a run mid-way, stuck or stalled, is no reason; the world may mend it. Neither is one that waits.</remarks>
         public bool Parks => Exists && !IsWarning && !Waits && Problem != SequenceProblem.Stuck && Problem != SequenceProblem.Stalled;
 
-        /// <summary>Whether the sequence starts nothing until its installation is filled in, an empty slot, rather than being switched off.</summary>
-        public bool Waits => Problem == SequenceProblem.EmptySlot;
+        /// <summary>Whether the sequence starts nothing until its installation is filled in, an empty slot, or the host has a namespace a step needs, rather than being switched off.</summary>
+        public bool Waits => Problem == SequenceProblem.EmptySlot || AwaitsNamespace;
 
         /// <summary>Whether <paramref name="other" /> says the same thing at the same line.</summary>
         public bool Same(SequenceFault other)
         {
-            return Problem == other.Problem && Step == other.Step && Which == other.Which && Unwired == other.Unwired
+            return Problem == other.Problem && Step == other.Step && Which == other.Which && Unwired == other.Unwired && AwaitsNamespace == other.AwaitsNamespace
                 && Because.Same(other.Because);
         }
     }

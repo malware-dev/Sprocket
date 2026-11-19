@@ -48,7 +48,10 @@ Following the mandatory version declaration, a script file may contain:
 * **Brace Placement:** The opening brace `{` of a block may appear either at the end of the statement line or on a new line immediately beneath it.
 * **Statement Heads:** The head of a statement is an unquoted identifier, a quoted name, or a language keyword.
 * **Case Sensitivity:** Identifiers and keywords are strictly case-sensitive (`run` and `Run` are distinct tokens).
-* **Contextual Keywords:** Keywords are contextual. A quoted identifier is never evaluated as a keyword (e.g., an action named `every` must be escaped as `'every'`).
+* **Keywords:** The language has reserved keywords and contextual keywords.
+  * **Reserved:** `system`, `blueprint`, `instance`, `sequence`, `slot`, `type`, `let`, `required`, `optional`, `if`, `else`, `then`, `call`, `run`, `stop`, `set`, `wait`, `await`, `when`, `whenever`, `every`, `is` and `not`. A name spelled like one is always quoted: an action named `every` is written `'every'`.
+  * **Contextual:** Every other word the grammar uses, such as `of`, `as`, `to`, `on`, `expects`, `all` or `installed`, is a keyword only where its construct expects it, and a name anywhere else. It is quoted only where it stands at that place.
+  * A quoted name is never read as a keyword.
 
 ---
 
@@ -82,7 +85,7 @@ optional slot button expects signal
 | **Integer** | `60`, `74857693847562934` | 64-bit signed whole integer. |
 | **Real** | `0.25`, `1E-05` | Floating-point value, denoted by a decimal point or an exponent. An integer may substitute for a real where accepted. |
 | **Duration** | `600t`, `2s`, `1.5s` | Token pairing a numeric scalar with a unit suffix: `t` (game ticks) or `s` (seconds, where `1s = 60t`). Seconds can have fractional parts and round to the nearest whole tick (`0.25s` = 15t, `0.01s` = 1t). |
-| **Flag** | `on`, `off` | Boolean literal values. |
+| **Flag** | `on`, `off` | The two choices of the built-in type `flag`, resolved as any choice is (§9.2). |
 | **Choice** | `inside`, `side(inside)`, `gearbox.door_status(closed)` | A choice of a type the system declares (§9.1) or of a host type (§5.2). Written bare, or with its type as a kind (§4.3). |
 | **Color** | `#FF8800`, `#FF8800CC` | Hexadecimal color literal (RGB or RGBA). |
 | **Vector** | `(3 0 -2)` | Three space-separated integers or reals enclosed in parentheses. |
@@ -108,7 +111,7 @@ A name is written bare wherever that means one thing, and with more detail where
 
 `closed`, `door_status(closed)` and `gearbox.door_status(closed)` are the same choice, each written with more detail than the one before.
 
-* Each part of a qualified name is judged on its own, so any part spelled like a keyword is quoted: `gearbox.'on'`.
+* Each part of a qualified name is judged on its own, so any part spelled like a reserved keyword is quoted: `gearbox.'every'`.
 
 ### 4.3 Kinds
 
@@ -303,6 +306,8 @@ let cycling = off
 
 Triggers, watchers, and clocks react to asynchronous conditions and run or stop a sequence (`run` or `stop`). They have no identifiers.
 
+* A trigger whose signal or member is in a namespace the host lacks (§5.3) never fires, and is not an error. It waits for the namespace.
+
 ### 10.1 Signal Triggers (`whenever`)
 
 ```sprocket
@@ -477,6 +482,22 @@ else if where == outside then {
 * Evaluates equality (`==` or `!=`) against a choice, flag, or another state of matching type; comparing with a value of another type is an error.
 * A setting is tested the same way, on the instance's value: `if setting('Outer light') == on then { ... }`.
 * Block conditions and state conditions may be freely mixed within the same `if / else if / else` chain.
+
+### 12.3 Condition on the Host
+
+```sprocket
+if gearbox.lifts is installed then {
+    call gearbox.lifts.raise on [ pad ]
+}
+else {
+    call gearbox.open on [ hatch ]
+}
+```
+
+* **Syntax:** `if <namespace> is installed then { ... }`, or `is not installed`.
+* Decided when the program is bound to its construct, not when the step is reached, and again whenever the host gains or loses that namespace.
+* Members in that namespace, inside a branch taken only while it is installed, are no error where the host lacks it.
+* Combines with `else if` and `else` as any other condition does.
 
 ---
 

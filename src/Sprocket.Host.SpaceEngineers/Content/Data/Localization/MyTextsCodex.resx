@@ -109,7 +109,7 @@
     <comment>Codex page on "finally", shown in a tip: the part of a sequence that runs however the sequence ends. It says what the term is, naming it in bold.</comment>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
-    <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, or one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
+    <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), or whether a mod is installed, and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
     <comment>Codex page on "If", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Condition" xml:space="preserve">

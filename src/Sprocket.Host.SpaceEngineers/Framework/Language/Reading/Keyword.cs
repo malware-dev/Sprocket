@@ -25,8 +25,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         Every,
         /// <summary>What a trigger does, after what starts it.</summary>
         Then,
-        /// <summary>Which trigger a saved run belongs to.</summary>
-        Trigger,
         /// <summary>The value a step sets.</summary>
         To,
         /// <summary>A step or trigger that runs a sequence.</summary>
@@ -58,12 +56,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         As,
         /// <summary>The highest sequence number a logic system has given out, kept where that sequence is gone.</summary>
         Last,
-
-        /// <summary>A run that was under way when the world was written out.</summary>
-        Running,
-
-        /// <summary>Which step a saved run is at.</summary>
-        Step,
 
         /// <summary>A step or trigger that abandons a run.</summary>
         Stop,
@@ -129,6 +121,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         Bar,
 
         /// <summary>Declares a type of a logic system: <c>type side = inside | outside</c>.</summary>
-        Type
+        Type,
+
+        /// <summary>What a test of the host says of a namespace: <c>gearbox.lifts is installed</c>.</summary>
+        Is,
+
+        /// <summary>A test of the host turned around: <c>gearbox.lifts is not installed</c>.</summary>
+        Not,
+
+        /// <summary>Whether the host has a namespace, after <c>is</c>.</summary>
+        Installed
     }
 }

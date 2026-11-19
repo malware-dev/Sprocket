@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Mods;
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Sequences.Edits;
 using Sprocket.Host.SpaceEngineers.Features.States;
@@ -403,8 +404,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>
         /// Opens the selector a test is made and changed with, its sentence led by <paramref name="lead" />: on blocks, or on the
-        /// logic system's states where <paramref name="was" /> tests a state, its first column's heading switching between the
-        /// two. <paramref name="chosen" /> is given the test made, and the state made for it where one was.
+        /// logic system's states where <paramref name="was" /> tests a state, or on the host's mods where it tests one, its first
+        /// column's heading switching between them. <paramref name="chosen" /> is given the test made, and the state made for it where one was.
         /// </summary>
         void Ask(string lead, BranchTest was, OpeningColumn opens, Action<BranchTest, NewState> chosen)
         {
@@ -415,9 +416,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     var page = StateTestPage(lead, was as StateTest, (test, made) => chosen(test, made));
                     page.Source = choice;
                     return page;
-                });
+                },
+                choice => new ModsPage(_editor, lead, was as HostTest, choice, test => chosen(test, null)));
 
-            _editor.Push(source.Open(was is StateTest ? PickSource.States : was != null ? PickSource.Blocks : source.Usual));
+            _editor.Push(source.Open(was is StateTest ? PickSource.States : was is HostTest ? PickSource.Mods : was != null ? PickSource.Blocks : source.Usual));
         }
 
         /// <summary>

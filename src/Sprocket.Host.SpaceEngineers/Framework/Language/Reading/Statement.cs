@@ -68,6 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>What is inside its braces, empty when it has none.</summary>
         public IList<Statement> Body => _body != null ? (IList<Statement>)_body : Nothing;
 
+        /// <summary>Whether it was read from a script written for a format earlier than <see cref="Keywords.ContextualDraft" />, where a quoted name is never a flag.</summary>
+        public bool Earlier => _reading.Earlier;
+
         /// <summary>Whether it was written with a block, empty or not.</summary>
         public bool HasBlock => _body != null;
 

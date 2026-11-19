@@ -182,6 +182,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
             if (fault.Problem == SequenceProblem.EmptySlot)
                 return Template.Fill(texts.ProblemEmptySlot, "slot", fault.Which);
 
+            if (fault.AwaitsNamespace)
+                return Template.Fill(texts.ProblemUninstalled, "namespace", fault.Which);
+
             if (fault.Problem == SequenceProblem.NeverTriggered)
                 return Unstarted(texts, fault.Unwired, fault.Which);
 
@@ -482,7 +485,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                     return "otherwise";
 
                 var compared = branch.Test as Comparison;
-                var tested = compared != null ? Tested(bindings, compared, through, slotted) : Tested((StateTest)branch.Test);
+                var host = branch.Test as HostTest;
+                var tested = compared != null ? Tested(bindings, compared, through, slotted)
+                    : host != null ? SentenceText.Installed(host) : Tested((StateTest)branch.Test);
                 return (step is If ? "if " : "otherwise if ") + tested;
             }
 

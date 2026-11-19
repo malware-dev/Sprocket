@@ -1,9 +1,11 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Door = Sprocket.Sim.Machine.Door;
 using Vent = Sprocket.Sim.Machine.Vent;
 using Sprocket.Sim.Machine;
@@ -291,6 +293,223 @@ public class IfRunTests
 
         Assert.Equal(SequenceProblem.Unoffered, fault.Problem);
         Assert.Equal(0, fault.Step);
+    }
+
+    /// <summary>
+    /// A task in a namespace the host lacks, in a branch taken only while the host has that namespace, is no fault: in the
+    /// branch of an if testing it is installed, in the branch after one testing it is not, and in an if inside either.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ATaskInABranchTakenOnlyWhileItsNamespaceIsInstalledIsNoFault(bool installed)
+    {
+        var a = new Airlock();
+        var lift = a.Do("lift", a.Inner);
+        lift.Provider = "malforge.hover_repulsors";
+        var guard = new HostTest { Namespace = "malforge.hover_repulsors", Installed = installed };
+        if (installed)
+            a.Add(new If(guard), new If(a.Closed(a.Outer, true)), lift, new EndIf(), new EndIf());
+        else
+            a.Add(new If(guard), a.Do("open", a.Outer), new Else(null!), new If(a.Closed(a.Outer, true)), lift, new EndIf(), new EndIf());
+
+        a.Program.Edited();
+        a.Runner = new AutomationRunner(a.Program, a.Rig.World);
+        a.Runner.Tick(1);
+
+        var fault = SequenceSummary.Checked(a.Rig.World, a.Runner.Bindings, a.Cycle, a.Cycle.System.First);
+
+        Assert.NotEqual(SequenceProblem.Unoffered, fault.Problem);
+    }
+
+    /// <summary>
+    /// A task in a namespace the host lacks is not offered outside the branch its namespace is tested in, after the if and in
+    /// the branch taken where it is not installed, and in another namespace's branch.
+    /// </summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void ATaskOutsideItsNamespacesBranchIsNotOffered(int where)
+    {
+        var a = new Airlock();
+        var lift = a.Do("lift", a.Inner);
+        lift.Provider = "malforge.hover_repulsors";
+        var guard = new HostTest { Namespace = where == 2 ? "malforge.other" : "malforge.hover_repulsors" };
+        if (where == 0)
+            a.Add(new If(guard), a.Do("open", a.Outer), new EndIf(), lift);
+        else if (where == 1)
+            a.Add(new If(guard), a.Do("open", a.Outer), new Else(null!), lift, new EndIf());
+        else
+            a.Add(new If(guard), lift, new EndIf());
+
+        a.Program.Edited();
+        a.Runner = new AutomationRunner(a.Program, a.Rig.World);
+        a.Runner.Tick(1);
+
+        var fault = SequenceSummary.Checked(a.Rig.World, a.Runner.Bindings, a.Cycle, a.Cycle.System.First);
+
+        Assert.Equal(SequenceProblem.Unoffered, fault.Problem);
+        Assert.Equal(a.Cycle.Steps.IndexOf(lift), fault.Step);
+    }
+
+    /// <summary>A test of the host runs the branch it holds in, as the host is when the run reaches it, and the else where it does not.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AHostTestRunsItsBranchWhereTheHostHasTheNamespace(bool registered)
+    {
+        try
+        {
+            if (registered)
+                Assert.True(HostNamespaces.Register("malforge.hover_repulsors", "Hover Repulsors", "Hover Repulsors", "Malforge"));
+
+            var a = new Airlock();
+            a.Add(new If(new HostTest { Namespace = "malforge.hover_repulsors" }), a.Do("open", a.Inner), new Else(null!), a.Do("open", a.Outer),
+                new EndIf());
+
+            a.Start();
+            a.Tick(5);
+
+            Assert.Equal(registered, a.Log.Contains("Inner Door:open"));
+            Assert.Equal(!registered, a.Log.Contains("Outer Door:open"));
+        }
+        finally
+        {
+            HostNamespaces.Clear();
+        }
+    }
+
+    /// <summary>A trigger watching a member or a signal in a namespace the host lacks never fires, and is no fault: it waits for the namespace.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ATriggerInANamespaceTheHostLacksIsNoFault(bool signal)
+    {
+        var a = new Airlock();
+        Trigger trigger;
+        if (signal)
+        {
+            var written = SignalTrigger.Written("malforge.hover_repulsors", "landed");
+            written.Sources.Add(a.Name(a.Inner));
+            trigger = written;
+        }
+        else
+        {
+            var when = new WhenTrigger("hovering") { Provider = "malforge.hover_repulsors", Value = Literal.Of(true) };
+            when.Sources.Add(a.Name(a.Inner));
+            trigger = when;
+        }
+
+        var watched = a.Program.AddSequence(a.Cycle.System, trigger);
+        watched.Steps.Add(a.Do("open", a.Outer));
+        a.Program.Edited();
+        a.Runner = new AutomationRunner(a.Program, a.Rig.World);
+        a.Runner.Tick(1);
+
+        var fault = SequenceSummary.Checked(a.Rig.World, a.Runner.Bindings, watched, watched.System.First);
+
+        Assert.False(fault.Exists, $"{fault.Problem} {fault.Unwired}");
+    }
+
+    /// <summary>
+    /// The host gaining or losing a namespace checks the program again with no reload: a task guarded by its namespace and a
+    /// trigger in it wait while the host lacks it, and are checked as any other once the host has it.
+    /// </summary>
+    /// <remarks>No mod adds members yet, so once checked, both are found wanting; that they are checked at all is what is shown.</remarks>
+    [Fact]
+    public void GainingOrLosingANamespaceChecksTheProgramAgain()
+    {
+        try
+        {
+            var a = new Airlock();
+            var lift = a.Do("lift", a.Inner);
+            lift.Provider = "malforge.hover_repulsors";
+            a.Add(new If(new HostTest { Namespace = "malforge.hover_repulsors" }), lift, new EndIf());
+
+            var when = new WhenTrigger("hovering") { Provider = "malforge.hover_repulsors", Value = Literal.Of(true) };
+            when.Sources.Add(a.Name(a.Inner));
+            var watched = a.Program.AddSequence(a.Cycle.System, when);
+            watched.Steps.Add(a.Do("open", a.Outer));
+
+            a.Program.Edited();
+            a.Runner = new AutomationRunner(a.Program, a.Rig.World);
+            a.Runner.Tick(1);
+            var self = a.Cycle.System.First;
+            Assert.NotEqual(SequenceProblem.Unoffered, SequenceSummary.Fault(a.Runner.Get(a.Cycle, self)).Problem);
+            Assert.False(SequenceSummary.Fault(a.Runner.Get(watched, self)).Exists);
+            var checks = a.Runner.Checks;
+
+            Assert.True(HostNamespaces.Register("malforge.hover_repulsors", "Hover Repulsors", "Hover Repulsors", "Malforge"));
+            a.Runner.Tick(2);
+
+            Assert.Equal(checks + 1, a.Runner.Checks);
+            Assert.Equal(SequenceProblem.Unoffered, SequenceSummary.Fault(a.Runner.Get(a.Cycle, self)).Problem);
+            Assert.Equal(Unwired.NoMoment, SequenceSummary.Fault(a.Runner.Get(watched, self)).Unwired);
+
+            a.Runner.Tick(3);
+            Assert.Equal(checks + 1, a.Runner.Checks);
+        }
+        finally
+        {
+            HostNamespaces.Clear();
+        }
+    }
+
+    /// <summary>
+    /// A sequence with a step in a namespace the host lacks waits for it, as one with an empty slot does: its system stays
+    /// on, it says what it waits for, a call runs none of it, and its clock is not watched; once the host has the namespace it
+    /// is checked again with no reload.
+    /// </summary>
+    /// <remarks>No mod adds members yet, so once checked the step is found unoffered; that it is checked again is what is shown.</remarks>
+    [Fact]
+    public void ASequenceWaitsForANamespaceTheHostLacks()
+    {
+        try
+        {
+            var a = new Airlock();
+            var lift = a.Do("lift", a.Inner);
+            lift.Provider = "malforge.hover_repulsors";
+            a.Add(a.Do("open", a.Outer), lift);
+            var clock = new EveryTrigger(60);
+            clock.Does = new Run(a.Cycle.Number);
+            a.Cycle.System.AddTrigger(clock);
+
+            a.Start();
+            a.Tick(5);
+            var self = a.Cycle.System.First;
+            var fault = SequenceSummary.Fault(a.State);
+
+            Assert.True(fault.Waits);
+            Assert.Equal(SequenceProblem.Unoffered, fault.Problem);
+            Assert.Equal(1, fault.Step);
+            Assert.False(fault.Parks);
+            Assert.True(a.Cycle.System.Enabled);
+            Assert.DoesNotContain("Outer Door:open", a.Log);
+            Assert.True(a.State.RefusedCount > 0);
+            Assert.Null(a.Runner.Watches.Poller(clock, self));
+            Assert.Equal("This step needs a mod that isn't installed: malforge.hover_repulsors. The sequence waits for it.",
+                SequenceText.Problem(new Texts(), fault, a.Cycle));
+
+            // The refusal says why in the run log, with a reason of its own.
+            var lines = new List<string>();
+            a.Runner.Log = new RunLog(lines.Add, () => "Hover Pad");
+            a.Runner.Call(a.Cycle, self);
+            Assert.Contains(lines, line => line.EndsWith("did not start: a step needs a mod that is not installed"));
+            a.Runner.Log = null;
+
+            var checks = a.Runner.Checks;
+            Assert.True(HostNamespaces.Register("malforge.hover_repulsors", "Hover Repulsors", "Hover Repulsors", "Malforge"));
+            a.Tick();
+
+            Assert.Equal(checks + 1, a.Runner.Checks);
+            Assert.False(SequenceSummary.Fault(a.State).Waits);
+            Assert.Equal(SequenceProblem.Unoffered, SequenceSummary.Fault(a.State).Problem);
+        }
+        finally
+        {
+            HostNamespaces.Clear();
+        }
     }
 
     /// <summary>A test of a member its blocks do not have is a fault, found before anything runs.</summary>

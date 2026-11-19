@@ -22,5 +22,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         /// <summary>Every qualified name's parts, each name a run of them.</summary>
         public ValueChunks Parts => _parts;
+
+        /// <summary>
+        /// Whether the script was written for a format earlier than <see cref="Keywords.ContextualDraft" />, where every keyword
+        /// is one wherever it stands and a quoted name is never a flag.
+        /// </summary>
+        public bool Earlier { get; set; }
     }
 }

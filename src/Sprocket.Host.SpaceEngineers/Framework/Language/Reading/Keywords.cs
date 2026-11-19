@@ -3,19 +3,32 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 {
     /// <summary>
-    /// Every bare word the format gives a meaning to, and how to recognize one without making a string.
+    /// Every bare word the format gives a meaning to, and how to recognize one without making a string: the reserved ones,
+    /// a keyword wherever they stand, and the contextual ones, a keyword only where their construct reads them and a name
+    /// anywhere else.
     /// </summary>
     /// <remarks>Persisted: every save spells these words this way.</remarks>
     public static class Keywords
     {
+        /// <summary>The version of the format whose draft <see cref="ContextualDraft" /> is the first with contextual keywords.</summary>
+        public const int ContextualVersion = 2;
+
+        /// <summary>
+        /// The draft of <see cref="ContextualVersion" /> that is the first with contextual keywords, and with <c>is</c>, <c>not</c>
+        /// and <c>installed</c>. A program written for an earlier format reads every other keyword as a keyword wherever it
+        /// stands, and those three as names.
+        /// </summary>
+        public const int ContextualDraft = 2;
+
         static readonly string[] Names =
         {
             "",
             "block", "system", "instance", "of", "sequence",
-            "when", "every", "then", "trigger", "to", "run", "set",
+            "when", "every", "then", "to", "run", "set",
             "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last",
-            "running", "step", "stop", "call", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
-            "signal", "sum", "!=", "<", ">", "<=", ">=", "whenever", "from", "average", "|", "type"
+            "stop", "call", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
+            "signal", "sum", "!=", "<", ">", "<=", ">=", "whenever", "from", "average", "|", "type",
+            "is", "not", "installed"
         };
 
         static readonly Keyword[][] ByLength = Bucket();
@@ -45,19 +58,69 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return Keyword.None;
         }
 
-        /// <summary>Whether <paramref name="word" /> is spelled as a keyword, and so is quoted where it is a name.</summary>
-        public static bool Taken(string word)
+        /// <summary>Which keyword <paramref name="word" /> is spelled as, or <see cref="Keyword.None" />.</summary>
+        public static Keyword Find(string word)
         {
-            return !string.IsNullOrEmpty(word) && Find(new StringSegment(word)) != Keyword.None;
+            return string.IsNullOrEmpty(word) ? Keyword.None : Find(new StringSegment(word));
+        }
+
+        /// <summary>Whether <paramref name="keyword" /> is reserved, a keyword wherever it stands, rather than contextual.</summary>
+        /// <remarks>Persisted: a name spelled like a reserved keyword is quoted in every save.</remarks>
+        public static bool IsReserved(Keyword keyword)
+        {
+            switch (keyword)
+            {
+                case Keyword.System:
+                case Keyword.Blueprint:
+                case Keyword.Instance:
+                case Keyword.Sequence:
+                case Keyword.Slot:
+                case Keyword.Type:
+                case Keyword.Let:
+                case Keyword.Required:
+                case Keyword.Optional:
+                case Keyword.If:
+                case Keyword.Else:
+                case Keyword.Then:
+                case Keyword.Call:
+                case Keyword.Run:
+                case Keyword.Stop:
+                case Keyword.Set:
+                case Keyword.Wait:
+                case Keyword.Await:
+                case Keyword.When:
+                case Keyword.Whenever:
+                case Keyword.Every:
+                case Keyword.Is:
+                case Keyword.Not:
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether <paramref name="keyword" /> arrived with <see cref="ContextualDraft" />, so a program written for an earlier format names things with it as with any other word: <c>is</c>, <c>not</c> or <c>installed</c>.</summary>
+        public static bool ArrivedWithContextual(Keyword keyword)
+        {
+            return keyword == Keyword.Is || keyword == Keyword.Not || keyword == Keyword.Installed;
+        }
+
+        /// <summary>Whether <paramref name="word" /> is spelled as a reserved keyword, and so is quoted wherever it is a name.</summary>
+        public static bool Reserved(string word)
+        {
+            return IsReserved(Find(word));
         }
 
         /// <summary>
         /// Whether a word can be written as it is, or has to be quoted.
         /// </summary>
-        /// <remarks>Persisted: a bare word is a letter, then letters, digits and underscores, and no keyword.</remarks>
+        /// <remarks>
+        /// Persisted: a bare word is a letter, then letters, digits and underscores, and no reserved keyword. A word spelled
+        /// like a contextual keyword is quoted only where its construct reads that keyword, which the writer says there.
+        /// </remarks>
         public static bool Bare(string word)
         {
-            return Shaped(word) && !Taken(word);
+            return Shaped(word) && !Reserved(word);
         }
 
         /// <summary>Whether a word has the shape of a name - a letter, then letters, digits and underscores - keyword or not.</summary>
