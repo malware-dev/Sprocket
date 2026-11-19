@@ -28,7 +28,7 @@ public class SettingRowTests
 
         Assert.Equal(Symbols.Setting, row.Mark);
         Assert.Equal("Speed", row.NameButton.AutomationId);
-        Assert.Equal("1.5 by default", row.ValueChip.Text);
+        Assert.Equal("1.5", row.ValueChip.Text);
         Assert.False(row.ValueChip.IsEmpty);
     }
 
@@ -66,7 +66,7 @@ public class SettingRowTests
         screen.Editor.Undo(System(screen), System(screen));
         screen.Run(2);
         Assert.False(Shown(screen).AnswerTo("Speed", out _));
-        Assert.Equal("1.5 by default", Row(screen, "Speed").ValueChip.Text);
+        Assert.Equal("1.5", Row(screen, "Speed").ValueChip.Text);
     }
 
     /// <summary>"Use the default" takes the installation's own value away, and is offered only where the setting has a default.</summary>
@@ -88,7 +88,7 @@ public class SettingRowTests
         screen.Run(2);
 
         Assert.False(Shown(screen).AnswerTo("Speed", out _));
-        Assert.Equal("1.5 by default", Row(screen, "Speed").ValueChip.Text);
+        Assert.Equal("1.5", Row(screen, "Speed").ValueChip.Text);
 
         Row(screen, "Load").Fills!.Execute();
         screen.Run(2);
@@ -107,7 +107,7 @@ public class SettingRowTests
         screen.Run(2);
 
         var row = Within<PartRow>(screen).Single(part => part.Name == "Speed");
-        Assert.Equal("1.5 by default", row.ValueChip.Text);
+        Assert.Equal("1.5", row.ValueChip.Text);
         Assert.Null(row.NameButton.Command);
         row.Fills!.Execute();
         screen.Run(2);

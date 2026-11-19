@@ -241,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 row.RemovesAbout = !editable ? locked : unused ? texts.Codex.SlotRemoveAbout : texts.SlotKept;
 
                 if (part.IsSetting)
-                    SettingRows.Show(texts, row, part, shown, unused);
+                    SettingRows.Show(row, part, shown, unused);
                 else if (row.Blocks.Count > 0)
                     row.Show(_editor.World);
                 else
