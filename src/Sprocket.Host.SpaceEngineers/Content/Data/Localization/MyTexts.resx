@@ -1641,11 +1641,11 @@
     <comment>In the list of what a new setting holds, the setting holds a length of time.</comment>
   </data>
   <data name="Sprocket.Setting.NewType" xml:space="preserve">
-    <value>New state type...</value>
+    <value>New state type…</value>
     <comment>Last choice in the list of what a new setting holds, after the logic system's own state types: it makes a new state type for the setting to hold.</comment>
   </data>
   <data name="Sprocket.Slot.AddSetting" xml:space="preserve">
-    <value>a setting...</value>
+    <value>a setting</value>
     <comment>On the installation panel tab of a logic system, in the menu of the &quot;+ slot&quot; button under the slots and at the end of each category of slots. It opens the panel that makes a setting.</comment>
   </data>
   <data name="Sprocket.Value.Fixed" xml:space="preserve">
@@ -1653,7 +1653,7 @@
     <comment>First choice in the menu under a value's link mark in a values panel: the value is the one typed or chosen in its field, the same for every installation.</comment>
   </data>
   <data name="Sprocket.Value.NewSetting" xml:space="preserve">
-    <value>New setting...</value>
+    <value>New setting…</value>
     <comment>Last choice in the menu under a value's link mark in a values panel: opens a form making a new setting for the value.</comment>
   </data>
   <data name="Sprocket.Value.ByDefault" xml:space="preserve">

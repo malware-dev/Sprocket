@@ -211,7 +211,7 @@ public class ValuesPanelTests
         return sim;
     }
 
-    /// <summary>New setting... asks for the setting in a panel of its own, which makes it, as one change, and has it give the value.</summary>
+    /// <summary>New setting… asks for the setting in a panel of its own, which makes it, as one change, and has it give the value.</summary>
     [Fact]
     public void ANewSettingIsMadeToStandInForTheValue()
     {

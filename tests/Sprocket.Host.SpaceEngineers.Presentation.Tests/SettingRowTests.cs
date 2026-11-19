@@ -292,7 +292,7 @@ public class SettingRowTests
         Assert.Equal("outside", part.Default.Said);
     }
 
-    /// <summary>"New state type..." makes a type for the setting and chooses it; the type and the setting come as one change.</summary>
+    /// <summary>"New state type…" makes a type for the setting and chooses it; the type and the setting come as one change.</summary>
     [Fact]
     public void ANewStateTypeIsMadeFromHolds()
     {
@@ -437,7 +437,7 @@ public class SettingRowTests
 
     static IEnumerable<T> Within<T>(Screen screen) where T : Element => screen.Editor.Current!.View!.Within().OfType<T>();
 
-    /// <summary>Presses "a setting..." in the menu under the slots, and answers the panel it opens.</summary>
+    /// <summary>Presses "a setting" in the menu under the slots, and answers the panel it opens.</summary>
     static ValuesQuestion Add(Screen screen)
     {
         var add = Page(screen).View!.Within().OfType<PlusMenu>().SelectMany(menu => menu.Choices).First(choice => choice.Text == screen.Editor.Texts.SlotAddSetting);

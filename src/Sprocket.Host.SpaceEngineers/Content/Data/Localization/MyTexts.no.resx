@@ -1244,16 +1244,16 @@
     <value>tidsrom</value>
   </data>
   <data name="Sprocket.Setting.NewType" xml:space="preserve">
-    <value>Ny tilstandstype...</value>
+    <value>Ny tilstandstype…</value>
   </data>
   <data name="Sprocket.Slot.AddSetting" xml:space="preserve">
-    <value>en innstilling...</value>
+    <value>en innstilling</value>
   </data>
   <data name="Sprocket.Value.Fixed" xml:space="preserve">
     <value>En fast verdi</value>
   </data>
   <data name="Sprocket.Value.NewSetting" xml:space="preserve">
-    <value>Ny innstilling...</value>
+    <value>Ny innstilling…</value>
   </data>
   <data name="Sprocket.Value.ByDefault" xml:space="preserve">
     <value>{value} som standard</value>

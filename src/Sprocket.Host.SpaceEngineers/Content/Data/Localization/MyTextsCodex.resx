@@ -830,7 +830,7 @@
   </data>
   <data name="Sprocket.Slot.AddSettingAbout" xml:space="preserve">
     <value>Make a new ![](mark:setting)&amp;nbsp;[setting](Term.Setting class=term), a value each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) gives for itself.</value>
-    <comment>Tooltip on &quot;a setting...&quot; in the menu of the &quot;+ slot&quot; button on a logic system's installation panel tab.</comment>
+    <comment>Tooltip on &quot;a setting&quot; in the menu of the &quot;+ slot&quot; button on a logic system's installation panel tab.</comment>
   </data>
   <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
     <value>Rename this [setting](Term.Setting class=term) or change its default.</value>
