@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using System;
@@ -135,6 +136,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>What opens the blueprint library from this page, or null where it is not offered.</summary>
         public virtual ICommand Library => null;
+
+        /// <summary>What the Share menu in the heading offers of this page's subject, or null where the page has nothing to share.</summary>
+        public virtual ShareOffer Shares => null;
 
         /// <summary>Whether this page is a question asked for the screen under it, rather than a screen of its own.</summary>
         public virtual bool Asks => false;

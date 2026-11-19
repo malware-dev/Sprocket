@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Features.Sharing.Messages;
 using Sprocket.Host.SpaceEngineers.Features.Sharing.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
@@ -6,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System;
 using System.Collections.Generic;
 using Lumel.Text;
@@ -322,8 +324,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _editor.Answer(_editor.Texts.LibraryTakeOffLeave, () => TakeOff(system, false), true);
         }
 
-        /// <summary>Asks before putting the logic system <paramref name="system" /> in place of its blueprint in the library; keeping the blueprint is the answer Enter takes.</summary>
-        public void AskUpdate(AutomationSystem system)
+        /// <summary>Asks before putting the logic system <paramref name="system" /> in place of its blueprint in the library, and goes on with <paramref name="then" /> once it is there; keeping the blueprint is the answer Enter takes, and goes on with nothing.</summary>
+        public void AskUpdate(AutomationSystem system, Action then = null)
         {
             _editor.Stamp(true);
 
@@ -332,7 +334,65 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             _editor.Ask($"{_editor.Texts.LibraryUpdateQuestion}\n\n**{{named}}**\n\n{_editor.Texts.LibraryUpdateReplaced}", arguments);
             _editor.Answer(_editor.Texts.LibraryUpdateKeep, () => { }, true);
-            _editor.Answer(_editor.Texts.LibraryUpdateConfirm, () => Shelve(system));
+            _editor.Answer(_editor.Texts.LibraryUpdateConfirm, delegate
+            {
+                Shelve(system);
+                then?.Invoke();
+            });
+        }
+
+        /// <summary>
+        /// What the Share menu offers of the logic system <paramref name="system" />: the dialog for sharing it, where the world
+        /// allows sharing, and its blueprint as it is on screen to copy.
+        /// </summary>
+        public ShareOffer Offering(AutomationSystem system)
+        {
+            var texts = _editor.Texts;
+            var offer = new ShareOffer
+            {
+                FnName = () => system.Name,
+                FnText = () => ProgramWriter.Blueprint(system, Stored(system) ? system.Origin : system.Identity)
+            };
+
+            if (_editor.Shelf != null && _editor.Sharing != null && _editor.Sharing.CanShare)
+            {
+                offer.Shares = _editor.Act(CommandKind.Shelve, () => Share(system));
+                offer.SharesText = texts.LibraryShare;
+                offer.SharesAbout = texts.Codex.ShareSystemAbout;
+            }
+
+            return offer;
+        }
+
+        /// <summary>
+        /// Opens the dialog for sharing the logic system <paramref name="system" />, once its blueprint in the library is as it is
+        /// on screen: made first where there is none, and after asking where the one there differs.
+        /// </summary>
+        public void Share(AutomationSystem system)
+        {
+            if (Stored(system))
+            {
+                _editor.Stamp(true);
+                var volume = _editor.Shelf.Find(system.Origin);
+                if (volume.Text != ProgramWriter.Blueprint(system, volume.Identity))
+                {
+                    AskUpdate(system, () => OpenShare(system));
+                    return;
+                }
+            }
+            else
+            {
+                Shelve(system);
+            }
+
+            OpenShare(system);
+        }
+
+        /// <summary>Opens the dialog for sharing the blueprint in the library that <paramref name="system" /> is linked to.</summary>
+        void OpenShare(AutomationSystem system)
+        {
+            var volume = _editor.Shelf.Find(system.Origin);
+            _editor.Windows?.Open(new ShareDialog(_editor, volume.Name, volume.Text, _editor.Sharing.MineOf(volume.Identity)));
         }
 
         /// <summary>Asks before making a blueprint of the logic system <paramref name="system" /> in the library; leaving it is the answer Enter takes.</summary>

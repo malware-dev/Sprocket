@@ -2597,10 +2597,10 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
     <value>Ingenting er delt med deg.</value>
   </data>
   <data name="Sprocket.Library.Share" xml:space="preserve">
-    <value>Del...</value>
+    <value>Del…</value>
   </data>
   <data name="Sprocket.Library.ShareChange" xml:space="preserve">
-    <value>Endre deling...</value>
+    <value>Endre deling…</value>
   </data>
   <data name="Sprocket.Library.ShareWithdraw" xml:space="preserve">
     <value>Slutt å dele</value>
@@ -2660,9 +2660,6 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   </data>
   <data name="Sprocket.Share.Cancel" xml:space="preserve">
     <value>Avbryt</value>
-  </data>
-  <data name="Sprocket.Share.Close" xml:space="preserve">
-    <value>Lukk</value>
   </data>
   <data name="Sprocket.Share.CopyText" xml:space="preserve">
     <value>Kopier som tekst</value>
@@ -2724,9 +2721,6 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Systems.KeepHereAbout" xml:space="preserve">
     <value>Viser dette logikksystemet bare når redigereren åpnes fra denne blokken. Det kjører som vanlig, og vises overalt hvis det svikter eller blokken forsvinner.</value>
   </data>
-  <data name="Sprocket.Library.Import" xml:space="preserve">
-    <value>Importer</value>
-  </data>
   <data name="Sprocket.Library.ImportNone" xml:space="preserve">
     <value>Custom Data på denne blokken har ingen plantegningstekst.</value>
   </data>
@@ -2771,12 +2765,6 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   </data>
   <data name="Sprocket.Share.CopyCompactAbout" xml:space="preserve">
     <value>Kopierer plantegningen pakket lite, så den passer i en chatmelding.</value>
-  </data>
-  <data name="Sprocket.Share.Copy" xml:space="preserve">
-    <value>Kopier...</value>
-  </data>
-  <data name="Sprocket.Share.CopyAbout" xml:space="preserve">
-    <value>Kopierer plantegningen til utklippstavlen, til å importere på en annen konstruksjon, i denne verdenen eller en annen.</value>
   </data>
   <data name="Sprocket.Problem.Ambiguous" xml:space="preserve">
     <value>I dette steget kan {name} være stegets innstilling eller handlingens egen {name}.</value>

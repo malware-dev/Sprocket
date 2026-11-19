@@ -132,6 +132,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>Two links of a chain: where a value comes from, a value of its own or a setting.</summary>
         public const string Link = "J";
 
+        /// <summary>An open tray with an arrow up out of it: sharing something with other players, or copying it out as text.</summary>
+        public const string Share = "G";
+
+        /// <summary>An open tray with an arrow down into it: bringing something in, such as a blueprint as text.</summary>
+        public const string Import = "V";
+
         /// <summary>Two horizontal sliders: a setting, a value chosen for each installation.</summary>
         public const string Setting = "=";
 

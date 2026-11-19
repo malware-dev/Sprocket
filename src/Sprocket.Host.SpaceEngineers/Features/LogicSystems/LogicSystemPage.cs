@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Features.Slots;
 using Sprocket.Host.SpaceEngineers.Features.States;
 using Sprocket.Host.SpaceEngineers.Features.Triggers;
@@ -111,6 +112,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Whether the logic system just made is unchanged since it was made.</summary>
         public override bool Untouched => _system.Name == _madeName && _system.Annotation == _madeAbout
             && _system.Enabled == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
+
+        /// <summary>What the Share menu offers of the system: sharing it through the library, and copying it as it is on screen.</summary>
+        public override ShareOffer Shares => Editor.Holdings.Offering(_system);
 
         /// <summary>The command that deletes the system, asking first.</summary>
         public override ICommand Deletes => Editor.Act(CommandKind.DeleteSystem, () => Editor.DeleteSystem(_system));

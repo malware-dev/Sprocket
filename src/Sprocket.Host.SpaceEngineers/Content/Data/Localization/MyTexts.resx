@@ -3402,12 +3402,12 @@ A backslash before a mark shows the mark as it is typed.
     <comment>Shown in the library listing under the shared section when no blueprint is shared with this player.</comment>
   </data>
   <data name="Sprocket.Library.Share" xml:space="preserve">
-    <value>Share...</value>
-    <comment>Button in the library blueprint detail that opens the dialog for sharing the blueprint with other players.</comment>
+    <value>Share…</value>
+    <comment>Item in the Share menu of a blueprint in the library, and of a logic system, that opens the dialog for choosing who the blueprint is shared with.</comment>
   </data>
   <data name="Sprocket.Library.ShareChange" xml:space="preserve">
-    <value>Change sharing...</value>
-    <comment>Button in the library blueprint detail, shown instead of Share when the blueprint is already shared; opens the dialog for changing who it is shared with.</comment>
+    <value>Change sharing…</value>
+    <comment>Item in the Share menu of a blueprint in the library, shown instead of Share… when the blueprint is already shared; opens the dialog for changing who it is shared with.</comment>
   </data>
   <data name="Sprocket.Library.ShareWithdraw" xml:space="preserve">
     <value>Stop sharing</value>
@@ -3449,19 +3449,19 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
   </data>
   <data name="Sprocket.Library.ShareClosed" xml:space="preserve">
     <value>This world doesn't allow sharing.</value>
-    <comment>Shown in the library blueprint detail in place of the Share button when sharing is not allowed in this world.</comment>
+    <comment>Shown in the library blueprint detail in place of the Share… item of the Share menu when sharing is not allowed in this world.</comment>
   </data>
   <data name="Sprocket.Library.ShareBarred" xml:space="preserve">
     <value>You aren't allowed to share.</value>
-    <comment>Shown in the library blueprint detail in place of the Share button when an admin has stopped this player from sharing.</comment>
+    <comment>Shown in the library blueprint detail in place of the Share… item of the Share menu when an admin has stopped this player from sharing.</comment>
   </data>
   <data name="Sprocket.Library.ShareAtLimit" xml:space="preserve">
     <value>You already share {count} blueprints, the most this world allows.</value>
-    <comment>Shown in the library blueprint detail in place of the Share button when the player already shares as many blueprints as the world allows. {count} is that number.</comment>
+    <comment>Shown in the library blueprint detail in place of the Share… item of the Share menu when the player already shares as many blueprints as the world allows. {count} is that number.</comment>
   </data>
   <data name="Sprocket.Library.ShareUnreadable" xml:space="preserve">
     <value>This blueprint can't be read, or it's too long to share.</value>
-    <comment>Shown in the library blueprint detail in place of the Share button when the blueprint cannot be read or is too long to send.</comment>
+    <comment>Shown in the library blueprint detail in place of the Share… item of the Share menu when the blueprint cannot be read or is too long to send.</comment>
   </data>
   <data name="Sprocket.Share.Title" xml:space="preserve">
     <value>Share {name}</value>
@@ -3487,13 +3487,9 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <value>Cancel</value>
     <comment>Button in the sharing dialog that closes it without sharing.</comment>
   </data>
-  <data name="Sprocket.Share.Close" xml:space="preserve">
-    <value>Close</value>
-    <comment>Button in the sharing dialog that closes it, where the world offers no sharing with its players.</comment>
-  </data>
   <data name="Sprocket.Share.CopyText" xml:space="preserve">
     <value>Copy as text</value>
-    <comment>Button in the sharing dialog that copies the blueprint to the clipboard as text.</comment>
+    <comment>Item in the Share menu that copies the blueprint or logic system to the clipboard as text.</comment>
   </data>
   <data name="Sprocket.Share.InWorld" xml:space="preserve">
     <value>Share in this world</value>
@@ -3571,10 +3567,6 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <value>Lists this logic system only when the editor is opened from this block. It runs as usual, and shows everywhere if it fails or the block is lost.</value>
     <comment>Keeping a logic system to one programmable block's list.</comment>
   </data>
-  <data name="Sprocket.Library.Import" xml:space="preserve">
-    <value>Import</value>
-    <comment>Button in the blueprint library that adds the blueprints written as text in this block's Custom Data.</comment>
-  </data>
   <data name="Sprocket.Library.ImportNone" xml:space="preserve">
     <value>This block's Custom Data holds no blueprint text.</value>
     <comment>Message when Import finds no blueprint text.</comment>
@@ -3601,7 +3593,7 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
   </data>
   <data name="Sprocket.Share.CopyTextAbout" xml:space="preserve">
     <value>Copies the blueprint as readable text.</value>
-    <comment>Tip on Copy as text in the sharing dialog.</comment>
+    <comment>Tip on Copy as text in the Share menu.</comment>
   </data>
   <data name="Sprocket.Library.ImportConfirm" xml:space="preserve">
     <value>Import</value>
@@ -3629,18 +3621,10 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
   </data>
   <data name="Sprocket.Share.CopyCompact" xml:space="preserve">
     <value>Copy compact</value>
-    <comment>Button in the sharing dialog that copies the blueprint to the clipboard packed small.</comment>
+    <comment>Item in the Share menu that copies the blueprint or logic system to the clipboard packed small.</comment>
   </data>
   <data name="Sprocket.Share.CopyCompactAbout" xml:space="preserve">
     <value>Copies the blueprint packed small, to fit in a chat message.</value>
-    <comment>Tip on Copy compact in the sharing dialog.</comment>
-  </data>
-  <data name="Sprocket.Share.Copy" xml:space="preserve">
-    <value>Copy...</value>
-    <comment>Button in the sharing dialog that opens the ways to copy the blueprint to the clipboard.</comment>
-  </data>
-  <data name="Sprocket.Share.CopyAbout" xml:space="preserve">
-    <value>Copies the blueprint to the clipboard, to import on another construct, in this world or another.</value>
-    <comment>Tip on Copy... in the sharing dialog.</comment>
+    <comment>Tip on Copy compact in the Share menu.</comment>
   </data>
 </root>

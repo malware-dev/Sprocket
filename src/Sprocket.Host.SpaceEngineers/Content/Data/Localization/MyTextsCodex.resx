@@ -4032,4 +4032,20 @@
     <value>Whether an image keeps its proportions. Used when `content` is `text and images`.</value>
     <comment>Codex entry on the option "keep aspect ratio" of ScreenType, shown as its tooltip in the picker.</comment>
   </data>
+  <data name="Sprocket.Share.SystemTip" xml:space="preserve">
+    <value>Share this logic system, or copy it as text.</value>
+    <comment>Tooltip on the share mark in the editor's heading bar on a logic system's screen, and on a logic system's row on the home screen; it opens the Share menu.</comment>
+  </data>
+  <data name="Sprocket.Share.SystemAbout" xml:space="preserve">
+    <value>Save this logic system as a [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term), then choose who to share it with.</value>
+    <comment>Tooltip on the Share... item of the Share menu of a logic system, which puts the logic system in the library and opens the dialog for choosing who to share it with.</comment>
+  </data>
+  <data name="Sprocket.Share.BlueprintTip" xml:space="preserve">
+    <value>Share this blueprint, or copy it as text.</value>
+    <comment>Tooltip on the Share button in the library blueprint detail; it opens the Share menu.</comment>
+  </data>
+  <data name="Sprocket.Share.BlueprintAbout" xml:space="preserve">
+    <value>Choose who to share this blueprint with.</value>
+    <comment>Tooltip on the Share... item of the Share menu of a blueprint in the library, which opens the dialog for choosing who to share it with.</comment>
+  </data>
 </root>

@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -37,8 +38,7 @@ public class BlueprintImportTests
         var texts = copying.Editor.Texts;
         var identity = copying.Editor.Shelf!.All[0].Identity;
         copying.Do("press", "Hangar Doors").Run(2);
-        copying.Do("press", texts.LibraryShare).Run(2);
-        copying.Do("press", texts.ShareCopy).Run(2);
+        copying.PressDetailShare();
         copying.Do("press", compact ? texts.ShareCopyCompact : texts.ShareCopyText).Run(2);
 
         var copied = copying.Editor.Input.Clipboard.Get();
@@ -47,7 +47,7 @@ public class BlueprintImportTests
 
         var importing = Library(() => compact ? "[another-script]\nspeed=4\n\n" + copied : copied);
         importing.Editor.Shelf!.Forget(importing.Editor.Shelf.All[0]);
-        importing.Do("press", texts.LibraryImport).Run(2);
+        importing.PressImport();
 
         Assert.Empty(importing.Editor.Shelf.All);
         Assert.True(importing.Shows("Hangar Doors"), importing.Dump);
@@ -67,7 +67,7 @@ public class BlueprintImportTests
         screen = Library(() => Newer(screen!.Editor.Shelf!.All[0], "Hangar Doors Mark 2"));
         var texts = screen.Editor.Texts;
 
-        screen.Do("press", texts.LibraryImport).Run(2);
+        screen.PressImport();
         screen.Do("press", texts.LibraryImportConfirm).Run(2);
 
         Assert.Equal("Hangar Doors Mark 2", Assert.Single(screen.Editor.Shelf!.All).Name);
@@ -85,7 +85,7 @@ public class BlueprintImportTests
         screen.Editor.Shelf.Import(Read(kept.Text));
         var texts = screen.Editor.Texts;
 
-        screen.Do("press", texts.LibraryImport).Run(2);
+        screen.PressImport();
 
         Assert.False(screen.Shows(texts.LibraryImportKeep), screen.Dump);
         Assert.Equal(kept.Identity, Assert.Single(screen.Editor.Shelf.All).Identity);
@@ -114,7 +114,7 @@ public class BlueprintImportTests
         var screen = Library(() => copied);
         var texts = screen.Editor.Texts;
 
-        screen.Do("press", texts.LibraryImport).Run(2);
+        screen.PressImport();
         screen.Do("press", texts.LibraryImportKeep).Run(2);
 
         Assert.Equal("Hangar Doors", Assert.Single(screen.Editor.Shelf!.All).Name);
@@ -126,9 +126,20 @@ public class BlueprintImportTests
     {
         var screen = Library(() => "[another-script]\nspeed=4\n");
 
-        screen.Do("press", screen.Editor.Texts.LibraryImport).Run(2);
+        screen.PressImport();
 
         Assert.Single(screen.Editor.Shelf!.All);
         Assert.True(screen.Shows(screen.Editor.Texts.LibraryImportNone), screen.Dump);
+    }
+}
+
+static class ImportPresses
+{
+    /// <summary>Presses the library's import mark, as a person does, and lets the screen settle.</summary>
+    public static Screen PressImport(this Screen screen)
+    {
+        var mark = screen.Marks(Symbols.Import).Single();
+        screen.Scene.Press(Screen.Ui(mark.At.X + 4f, screen.MiddleOf(mark)), 1);
+        return screen.Run(2);
     }
 }

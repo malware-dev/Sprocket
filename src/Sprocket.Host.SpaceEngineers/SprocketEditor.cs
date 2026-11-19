@@ -1016,6 +1016,7 @@ namespace Sprocket.Host.SpaceEngineers
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(CommandKind.Back, Leave) : null;
             _screen.Library = page.Library;
+            _screen.Shares = page.Shares;
             _screen.Flip = page.CanSwitch ? Act(CommandKind.Switch, () => page.Switch(!page.SwitchIsOn)) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 

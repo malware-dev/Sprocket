@@ -3810,4 +3810,16 @@
     <value>Om et bilde beholder proporsjonene sine. Brukes når `content` er `text and images`.</value>
     <comment>Codex entry on the option "keep aspect ratio" of ScreenType, shown as its tooltip in the picker.</comment>
   </data>
+  <data name="Sprocket.Share.SystemTip" xml:space="preserve">
+    <value>Del dette logikksystemet, eller kopier det som tekst.</value>
+  </data>
+  <data name="Sprocket.Share.SystemAbout" xml:space="preserve">
+    <value>Lagre dette logikksystemet som en [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term) i [biblioteket](Term.Library class=term), og velg så hvem du vil dele det med.</value>
+  </data>
+  <data name="Sprocket.Share.BlueprintTip" xml:space="preserve">
+    <value>Del denne plantegningen, eller kopier den som tekst.</value>
+  </data>
+  <data name="Sprocket.Share.BlueprintAbout" xml:space="preserve">
+    <value>Velg hvem du vil dele denne plantegningen med.</value>
+  </data>
 </root>

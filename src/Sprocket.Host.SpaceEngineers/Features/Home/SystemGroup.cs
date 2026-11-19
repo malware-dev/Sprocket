@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Selector.Blocks;
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
@@ -26,6 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly List<SystemInstance> _keys = new List<SystemInstance>();
 
         readonly KeyedChildren<SystemInstance, StatusRow> _rows;
+
+        readonly ShareMenu _shareMenu;
 
         readonly ICommand _takesOff;
 
@@ -69,6 +72,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 editor.Holdings.Shelve(system);
                 editor.OpenLibrary(system.Identity);
             });
+            _shareMenu = new ShareMenu(editor, _heading.SharePart);
+            _heading.Shares = _shareMenu.Toggles;
             _heading.AboutArguments = _named;
             _another.Command = editor.Act(CommandKind.AddInstance, () => page.Another(system));
             editor.Codex.Explain(_installations);
@@ -92,6 +97,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.BinMark = stored ? Symbols.Minus : null;
             _heading.Deletes = stored ? _takesOff : _deletes;
             _heading.DeleteText = stored ? texts.Codex.LibraryTakeOff : texts.Codex.LibraryDeletes;
+
+            _shareMenu.Offer = _editor.Holdings.Offering(_system);
+            _heading.ShareAbout = texts.Codex.ShareSystemTip;
 
             var shelf = _editor.Shelf;
             var newer = stored && !_editor.Holdings.ChangedSince(_system);

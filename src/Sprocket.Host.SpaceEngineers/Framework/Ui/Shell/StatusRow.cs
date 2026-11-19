@@ -39,6 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         readonly Label _problem;
         readonly Switch _switch;
         readonly Glyph _duplicate;
+        readonly Glyph _share;
         readonly Button _button;
         readonly Glyph _delete;
         readonly HStack _detail;
@@ -113,6 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
                         {
                             new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
                             new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _copies }.As(out _duplicate),
+                            new Glyph { Symbol = Symbols.Share, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), IsVisible = false }.As(out _share),
                             new Button { Style = Styles.Button, Command = _offers }.As(out _button),
                             new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f), Command = _bins }.As(out _delete)
@@ -142,6 +144,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>What its button does, or null for a row with no button.</summary>
         public ICommand Offers { get; set; }
+
+        /// <summary>What pressing its share mark does, or null for a row with none.</summary>
+        public ICommand Shares { get; set; }
+
+        /// <summary>What its share mark does, in markdown-lite, said where the pointer rests on it.</summary>
+        public string ShareAbout { get; set; }
 
         /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
@@ -242,6 +250,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>The button, for a press on it that has to hang something under it.</summary>
         public Element ButtonPart => _button;
+
+        /// <summary>The share mark, which the Share menu hangs under.</summary>
+        public Element SharePart => _share;
 
         /// <summary>The bin, for a press on it that has to hang something under it.</summary>
         public Element DeletePart => _delete;
@@ -422,6 +433,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             _duplicate.IsVisible = copies || locked && DuplicateText != null;
             _copies.CanExecute = copies;
             _duplicate.Tip = KeptTip.For(_duplicate.Tip, copies ? DuplicateText : locked ? Locked : null);
+
+            var shares = Shares != null;
+            _share.IsVisible = shares;
+            _share.Command = Shares;
+            _share.Tip = CodexTip.For(_share.Tip, shares ? ShareAbout : null);
 
             var offers = Offers != null;
             _button.IsVisible = offers;

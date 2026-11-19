@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
 using Lumel.Controls;
+using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 
@@ -19,7 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         RichText _secondHeading;
         Label _second;
         HStack _shares;
-        Button _share;
+        VStack _acting;
+        Glyph _share;
         Button _withdraw;
         Button _keep;
         Button _block;
@@ -35,7 +37,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Base = { Spacing = Gaps.Within },
                 Children =
                 {
-                    new Label { Style = Styles.Detail }.As(out _line),
+                    new HStack
+                    {
+                        Base = { Spacing = Gaps.Parts },
+                        Children =
+                        {
+                            new Label { Style = Styles.Detail, Placement = Flex.Grow, Align = Align.Center }.As(out _line),
+                            new Glyph { Symbol = Symbols.Share, Style = Styles.Icon, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _share)
+                        }
+                    },
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _about),
                     new Label { Style = Styles.Diagnostic, TextWrapping = TextWrapping.Wrap }.As(out _trouble)
                 }
@@ -51,14 +61,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                         Base = { Spacing = Gaps.Parts },
                         Children =
                         {
-                            new Button { Style = Styles.Button }.As(out _share),
                             new Button { Style = Styles.Button }.As(out _withdraw),
                             new Button { Style = Styles.Button }.As(out _keep),
                             new Button { Style = Styles.Button }.As(out _block)
                         }
                     }.As(out _shares)
                 }
-            });
+            }.As(out _acting));
             Children.Add(new Section
             {
                 Children =

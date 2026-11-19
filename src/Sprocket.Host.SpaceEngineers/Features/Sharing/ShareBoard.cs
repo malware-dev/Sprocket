@@ -42,6 +42,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing
         /// <summary>Whether this player is stopped from sharing.</summary>
         public bool IsBarred { get; private set; }
 
+        /// <summary>Whether this player may share a blueprint in this world now: not barred, and the world allows some.</summary>
+        public bool CanShare => !IsBarred && Limit > 0;
+
         /// <summary>What the server last said to a blueprint offered, or null where it has said nothing since.</summary>
         public ShareAnswer? Answer { get; private set; }
 

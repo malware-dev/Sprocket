@@ -328,6 +328,7 @@ public class SharingTests
         screen.Editor.OpenLibrary();
         screen.Run(2);
         screen.Do("press", "Hangar").Run(2);
+        screen.PressDetailShare();
         screen.Do("press", texts.LibraryShare).Run(2);
 
         var who = Target.Within(screen.Scene.Workspace.Windows.Top).OfType<ListField>().Single();
@@ -351,6 +352,7 @@ public class SharingTests
         screen.Editor.OpenLibrary();
         screen.Run(2);
         screen.Do("press", "Hangar").Run(2);
+        screen.PressDetailShare();
         screen.Do("press", texts.LibraryShare).Run(2);
 
         var who = Target.Within(screen.Scene.Workspace.Windows.Top).OfType<ListField>().Single();
@@ -369,7 +371,7 @@ public class SharingTests
 
     /// <summary>
     /// With the world's limit set to 0 while the library is open, sharing is refused with the reason the world gives, and the
-    /// share dialog opened again offers only copying as text.
+    /// Share menu opened again offers only the copies.
     /// </summary>
     [Fact]
     public void ALimitOfNoneRefusesWithItsReason()
@@ -397,6 +399,7 @@ public class SharingTests
         screen.Run(2);
 
         _limit = 0;
+        screen.PressDetailShare();
         screen.Do("press", texts.LibraryShare).Run(2);
         screen.Do("press", texts.ShareConfirm).Run(2);
         Assert.True(screen.Shows(texts.LibraryShareClosed), screen.Dump);
@@ -407,9 +410,9 @@ public class SharingTests
         kept = screen.Drawings.Last(drawn => drawn.IsText && drawn.Text == "Airlock");
         screen.Scene.Press(Screen.Ui(kept.At.X + 4f, screen.MiddleOf(kept)), 1);
         screen.Run(2);
-        screen.Do("press", texts.LibraryShare).Run(2);
-        Assert.True(screen.Shows(texts.ShareCopy), screen.Dump);
-        Assert.False(screen.Shows(texts.ShareInWorld), screen.Dump);
+        screen.PressDetailShare();
+        Assert.True(screen.Shows(texts.ShareCopyText), screen.Dump);
+        Assert.False(screen.Shows(texts.LibraryShare), screen.Dump);
     }
 
     /// <summary>Ann offers <paramref name="blueprint" /> for those <paramref name="reach" /> says, through the desk.</summary>

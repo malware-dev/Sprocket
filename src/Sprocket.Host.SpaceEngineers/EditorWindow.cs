@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Admin;
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
@@ -41,6 +42,8 @@ namespace Sprocket.Host.SpaceEngineers
         readonly HazardButton _admin;
         readonly Glyph _close;
         readonly Button _library;
+        readonly Glyph _share;
+        readonly ShareMenu _shares;
         readonly Glyph _run;
         readonly Glyph _delete;
         readonly Label _subtitle;
@@ -131,6 +134,7 @@ namespace Sprocket.Host.SpaceEngineers
                             new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
                             new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _undoes }.As(out _undo),
                             new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _redoes }.As(out _redo),
+                            new Glyph { Symbol = Symbols.Share, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f) }.As(out _share),
                             new Button { Style = Styles.Button, Command = _libraries }.As(out _library),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f), Command = _deletes }.As(out _delete),
                             new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
@@ -195,6 +199,9 @@ namespace Sprocket.Host.SpaceEngineers
             };
             SayPinHint();
             _editor.Reworded += SayPinHint;
+
+            _shares = new ShareMenu(_editor, _share);
+            _share.Command = _shares.Toggles;
 
             _editor.Input = Input;
             _editor.Windows = _workspace.Windows;
@@ -584,6 +591,10 @@ namespace Sprocket.Host.SpaceEngineers
             _library.Text = texts.SystemsLoad;
             _libraries.CanExecute = screen.Library != null;
             _library.Tip = CodexTip.For(_library.Tip, screen.Library != null ? texts.Codex.TermLibrary : null);
+
+            _share.IsVisible = screen.Shares != null;
+            _shares.Offer = screen.Shares;
+            _share.Tip = CodexTip.For(_share.Tip, screen.Shares != null ? texts.Codex.ShareSystemTip : null);
 
             // A play button held back keeps its place, as the bin does.
             var doing = screen.Running ? screen.Stops : screen.Runs;
