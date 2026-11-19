@@ -4,7 +4,6 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System;
 using System.Collections.Generic;
 using Lumel;
-using Lumel.Layout;
 using Lumel.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Callouts
@@ -86,10 +85,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>Hangs the first due callout whose place has an anchor on the screen, if none is hanging, with <paramref name="anchorOf" /> finding the element at a place.</summary>
         public void Offer(Texts texts, Func<CalloutPlace, Element> anchorOf)
         {
-            // A callout stays open while the player turns to another tab of the page it hangs from, so it is put away here.
-            if (_mark != null && _mark.IsOpen && !IsShown(_mark.Anchor))
-                _mark.Close();
-
             if (_due.Count == 0 || _mark != null && _mark.IsOpen)
                 return;
 
@@ -124,19 +119,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
             _hung = null;
         }
 
-        /// <summary>Whether <paramref name="element" /> is in a window, with nothing holding it hidden and no deck holding it turned to another card, so a callout can hang from it.</summary>
+        /// <summary>Whether <paramref name="element" /> is in a window, with nothing holding it hidden and nothing covering it, so a callout can hang from it.</summary>
         public static bool IsShown(Element element)
         {
-            if (element == null || element.Windows == null)
+            if (element == null || element.Windows == null || element.IsCovered)
                 return false;
 
             for (var at = element; at != null; at = at.Parent)
             {
                 if (!at.IsVisible)
-                    return false;
-
-                var deck = at.Parent as Deck;
-                if (deck != null && deck.Top != at)
                     return false;
             }
 
