@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Selector.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
@@ -61,6 +62,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         /// <summary>The box that narrows this construct's list.</summary>
         public TextBox ConstructSearchBox => _hereSearch;
+
+        /// <inheritdoc />
+        public override Element CalloutAnchor(CalloutPlace place)
+        {
+            switch (place)
+            {
+                case CalloutPlace.LibraryImport:
+                    return _import;
+                case CalloutPlace.LibraryShare:
+                    return _detail?.SharePart;
+                default:
+                    return null;
+            }
+        }
 
         /// <summary>The strip of moves between the two lists.</summary>
         public LibraryMoves Moves => _moves;

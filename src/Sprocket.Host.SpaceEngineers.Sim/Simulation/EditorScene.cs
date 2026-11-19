@@ -1,4 +1,6 @@
 using Sprocket.Host.SpaceEngineers;
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
@@ -30,6 +32,9 @@ namespace Sprocket.Sim.Simulation
         readonly Ship _ship;
         readonly SprocketWorkspace _workspace = new SprocketWorkspace();
         EditorWindow _view;
+
+        // The player's choices, as a player already offered this release's callouts has them, so a screen shows none.
+        PlayerSettings _player = new PlayerSettings(true, Release.Number);
 
         Vector2 _at;
 
@@ -69,6 +74,7 @@ namespace Sprocket.Sim.Simulation
         EditorScene(Ship ship)
         {
             _ship = ship;
+            Kept();
             _view = new EditorWindow(_ship.Editor, _workspace);
             _workspace.Open(_view);
         }
@@ -167,9 +173,26 @@ namespace Sprocket.Sim.Simulation
         public void Reopen()
         {
             _view.Close();
+            Kept();
             _view = new EditorWindow(_ship.Editor, _workspace);
             _workspace.Open(_view);
             _ship.Editor.Opened();
+        }
+
+        /// <summary>What the player has chosen, which the editor keeps here where the game keeps it in a file.</summary>
+        public PlayerSettings Player => _player;
+
+        /// <summary>Opens the editor again for a player who has not been offered any callout, as one is after an update.</summary>
+        public void MeetCallouts()
+        {
+            _player = new PlayerSettings(true);
+            Reopen();
+        }
+
+        /// <summary>Has the editor keep the player's choices here.</summary>
+        void Kept()
+        {
+            _ship.Editor.Callouts.Keeping(() => _player, kept => _player = kept);
         }
 
         /// <summary>The frame the ship is on, which the screen is timed by.</summary>

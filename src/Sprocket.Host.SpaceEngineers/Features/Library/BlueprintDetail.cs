@@ -32,6 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             editor.Codex.Explain(_secondHeading);
         }
 
+        /// <summary>The Share mark of the details.</summary>
+        public Element SharePart => _share;
+
         /// <summary>Shows what <paramref name="chosen" /> holds, with <paramref name="refusal" /> where a move on it was just refused.</summary>
         public void Show(LibraryListing chosen, string refusal)
         {

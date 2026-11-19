@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Admin;
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
@@ -74,6 +75,9 @@ namespace Sprocket.Host.SpaceEngineers
         int _seen = -1;
         int _asked;
         bool _hanging;
+
+        // Whether the screen changed since the callouts last looked for a place to hang from.
+        bool _calloutsDue;
 
         Element _raisedBy;
 
@@ -238,11 +242,22 @@ namespace Sprocket.Host.SpaceEngineers
             Input.FocusChanged += Refocused;
             Input.PreviewPointerDown += PressReaching;
             Input.PreviewWheel += Turning;
+            _editor.Callouts.Changed += CalloutsChanged;
+            _editor.Callouts.Begin();
+            _calloutsDue = true;
+        }
+
+        /// <summary>Has the callouts look for a place to hang, as one was dismissed or a place has come into view.</summary>
+        void CalloutsChanged()
+        {
+            _calloutsDue = true;
         }
 
         /// <inheritdoc />
         protected override void OnClosed(CloseReason reason)
         {
+            _editor.Callouts.Changed -= CalloutsChanged;
+            _editor.Callouts.Close();
             _editor.Reworded -= SayPinHint;
             EndRename();
             Input.FocusChanged -= Refocused;
@@ -290,7 +305,10 @@ namespace Sprocket.Host.SpaceEngineers
                 EndRename();
 
             if (_editor.Current != _shownPage)
+            {
                 Show(screen);
+                _calloutsDue = true;
+            }
 
             _banner.Show(_editor.Notice);
 
@@ -301,12 +319,28 @@ namespace Sprocket.Host.SpaceEngineers
                 _foot.IsVisible = _vitals.IsVisible || _actions.Children.Count > 0;
             }
 
-            if (screen.Revision == _seen)
-                return;
+            if (screen.Revision != _seen)
+            {
+                _seen = screen.Revision;
+                Wrote();
+                Dress(screen);
+                _calloutsDue = true;
+            }
 
-            _seen = screen.Revision;
-            Wrote();
-            Dress(screen);
+            if (_calloutsDue)
+            {
+                _calloutsDue = false;
+                _editor.Callouts.Offer(_editor.Texts, CalloutAnchor);
+            }
+        }
+
+        /// <summary>The element a callout hangs from at <paramref name="place" /> on the screen as it stands, or null where there is none.</summary>
+        Element CalloutAnchor(CalloutPlace place)
+        {
+            if (place == CalloutPlace.HeaderShare)
+                return _share;
+
+            return _shownPage?.CalloutAnchor(place);
         }
 
         /// <summary>

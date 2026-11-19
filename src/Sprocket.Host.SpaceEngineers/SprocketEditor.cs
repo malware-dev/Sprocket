@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
@@ -111,6 +112,9 @@ namespace Sprocket.Host.SpaceEngineers
 
         /// <summary>How a trigger is made, changed or copied.</summary>
         public TriggerQuestions Starts => _starts;
+
+        /// <summary>The callouts pointing out what arrived in a release, which the player dismisses.</summary>
+        public CalloutBook Callouts { get; } = new CalloutBook();
 
         /// <summary>Moving logic systems between the construct and the library.</summary>
         public LibraryTransfers Holdings => _holdings;

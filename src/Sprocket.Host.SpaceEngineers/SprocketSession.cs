@@ -820,6 +820,11 @@ namespace Sprocket.Host.SpaceEngineers
                 _choices = Choices.WithTips(on);
                 _choices.Keep();
             };
+            unit.Editor.Callouts.Keeping(() => Choices, kept =>
+            {
+                _choices = kept;
+                kept.Keep();
+            });
             unit.Editor.Preferred = IsServer ? null : (Action)(() => _handover.Prefer(_mine));
             unit.Administers = Administers;
             unit.WorldSettings = () => Asked;

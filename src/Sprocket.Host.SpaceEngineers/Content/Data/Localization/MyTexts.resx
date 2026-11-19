@@ -3695,4 +3695,16 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <value>Copies the blueprint packed small, to fit in a chat message.</value>
     <comment>Tip on Copy compact in the Share menu.</comment>
   </data>
+  <data name="Sprocket.Callout.Share" xml:space="preserve">
+    <value>Share a logic system, or copy it as text, from here.</value>
+    <comment>Callout over the Share mark in the editor's header, on a logic system's row on the home screen, and on a blueprint's details in the library; shown once to a player after an update, until it is pressed.</comment>
+  </data>
+  <data name="Sprocket.Callout.Import" xml:space="preserve">
+    <value>Import a logic system pasted as text into a programmable block's Custom Data.</value>
+    <comment>Callout over the Import mark beside the search in the blueprint library; shown once to a player after an update, until it is pressed.</comment>
+  </data>
+  <data name="Sprocket.Callout.Settings" xml:space="preserve">
+    <value>Settings can be made here too, as slots.</value>
+    <comment>Callout over the plus that adds a slot in the installation panel of a logic system; shown once to a player after an update, until it is pressed.</comment>
+  </data>
 </root>

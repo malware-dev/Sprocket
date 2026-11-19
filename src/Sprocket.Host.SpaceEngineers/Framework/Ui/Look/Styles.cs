@@ -968,6 +968,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
         };
 
+        /// <summary>A callout: the tone every hanging thing shares, edged in the accent, its words quiet, with a tail aimed at what it points out.</summary>
+        public static readonly IStyle<CoachMark> Callout = new CoachMarkStyle(Popup)
+        {
+            Base = { Border = Palette.Accent, Padding = new Thickness(12f, 8f), Gap = 12f, MaxWidth = Sizes.Popup, BodyStyle = Tip }
+        };
+
         /// <summary>A menu hanging open from what opened it, on the tone every hanging thing shares.</summary>
         public static readonly IStyle<Menu> Menu = new MenuStyle(Popup)
         {

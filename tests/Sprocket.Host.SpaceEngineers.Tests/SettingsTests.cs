@@ -47,6 +47,30 @@ public class SettingsTests
         Assert.True(Settings.From(file.ToString(), null).DeveloperMode);
     }
 
+    /// <summary>The callouts a player was offered and dismissed live in their own section of the global file beside their tips, leaving every world's settings as they were.</summary>
+    [Fact]
+    public void APlayerKeepsWhatWasOfferedAndDismissed()
+    {
+        var none = PlayerSettings.From(Ini("[Player]\ntips=false\n"));
+        Assert.Null(none.Seen);
+        Assert.Empty(none.Dismissed);
+
+        var file = Ini("[Sprocket]\ndeveloperMode=true\n");
+        new PlayerSettings(true).WithSeen(3).WithDismissed("share").WithDismissed("import").WithDismissed("share").Write(file);
+
+        Assert.Contains("[Player]", file.ToString());
+        Assert.Contains("seen=3", file.ToString());
+        Assert.Contains("dismissed=share,import", file.ToString());
+
+        var read = PlayerSettings.From(Ini(file.ToString()));
+        Assert.Equal(3, read.Seen);
+        Assert.Equal(new[] { "share", "import" }, read.Dismissed);
+        Assert.True(read.HasDismissed("import"));
+        Assert.False(read.WithTips(false).HasDismissed("settings"));
+        Assert.Equal(3, read.WithTips(false).Seen);
+        Assert.True(Settings.From(file.ToString(), null).DeveloperMode);
+    }
+
     static MyIni Ini(string text)
     {
         var ini = new MyIni();

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Sharing;
@@ -253,6 +254,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Show(false);
         }
 
+        /// <inheritdoc />
+        public override Element CalloutAnchor(CalloutPlace place)
+        {
+            return place == CalloutPlace.SlotAdd && _slotPanel != null ? _slotPanel.AddSlot : null;
+        }
+
         /// <summary>Keeps the rows by trigger and by sequence, and fills the view.</summary>
         protected override void ViewCreated()
         {
@@ -276,7 +283,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (Editor.Habits.Tabs.TryGetValue(_system.Id, out shown))
                 _tabs.SelectedIndex = shown;
 
-            _tabs.SelectionChanged += at => Editor.Habits.Tabs[_system.Id] = at;
+            _tabs.SelectionChanged += at =>
+            {
+                Editor.Habits.Tabs[_system.Id] = at;
+
+                // The plus is on a tab, and shows only while that tab is chosen.
+                Editor.Callouts.Reconsider();
+            };
+
 
             Show(true);
         }

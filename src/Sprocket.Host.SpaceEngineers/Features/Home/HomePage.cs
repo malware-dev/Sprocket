@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.Installations;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
@@ -252,6 +253,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             Editor.Choose(system, instance);
             Editor.Push(new BlueprintPage(Editor, system));
+        }
+
+        /// <inheritdoc />
+        /// <remarks>The Share mark of the first logic system shown.</remarks>
+        public override Element CalloutAnchor(CalloutPlace place)
+        {
+            if (place != CalloutPlace.HomeShare || _groups == null)
+                return null;
+
+            foreach (var system in _systems)
+            {
+                var share = _groups[system].Heading.SharePart;
+                if (CalloutBook.IsShown(share))
+                    return share;
+            }
+
+            return null;
         }
 
         /// <summary>Gives the button its press, keeps the groups by system, and fills the view from the systems as they are.</summary>

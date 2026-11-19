@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
@@ -132,6 +133,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         public virtual bool AcceptsName(string name)
         {
             return true;
+        }
+
+        /// <summary>The element a callout hangs from at <paramref name="place" /> on this page, or null where the page has nothing there.</summary>
+        public virtual Element CalloutAnchor(CalloutPlace place)
+        {
+            return null;
         }
 
         /// <summary>What opens the blueprint library from this page, or null where it is not offered.</summary>
