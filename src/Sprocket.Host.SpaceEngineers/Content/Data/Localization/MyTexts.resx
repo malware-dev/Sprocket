@@ -793,12 +793,12 @@
     <comment>Heading over the list of slots: in capitals on a logic system's screen and on the installation panel, where each slot is filled with blocks, and in the library over the names of a logic system's required slots.</comment>
   </data>
   <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
-    <value>1 still needs a block</value>
-    <comment>On the installation panel, beside the Slots heading, when exactly one slot that needs a block has none.</comment>
+    <value>1 still needs filling in</value>
+    <comment>On the installation panel, beside the Slots heading, when exactly one slot is still empty: a slot that needs a block has none, or a setting with no default has no value.</comment>
   </data>
   <data name="Sprocket.Blueprint.StillMany" xml:space="preserve">
-    <value>{count} still need a block</value>
-    <comment>On the installation panel, beside the Slots heading, when several slots that need a block have none. {count} is how many, always more than one.</comment>
+    <value>{count} still need filling in</value>
+    <comment>On the installation panel, beside the Slots heading, when several slots are still empty: slots that need a block have none, or settings with no default have no value. {count} is how many, always more than one.</comment>
   </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} was lost.</value>
@@ -1607,6 +1607,46 @@
   <data name="Sprocket.Setting.Default" xml:space="preserve">
     <value>Default</value>
     <comment>In the panel New setting... opens from a value's link mark, the label of the value an installation that chooses none uses. Left empty, every installation must choose the setting.</comment>
+  </data>
+  <data name="Sprocket.Setting.Holds" xml:space="preserve">
+    <value>Holds</value>
+    <comment>In the panel a setting is made or opened in, the label of what the setting holds: on or off, a number, text, a length of time or one of the logic system's state types. It can be chosen only while the setting is made from the installation panel, and is shown but not changeable otherwise.</comment>
+  </data>
+  <data name="Sprocket.Setting.DefaultHint" xml:space="preserve">
+    <value>Leave the default empty, and each installation must set its own.</value>
+    <comment>In the panel a setting is made or opened in, under its default, where the default may be left empty.</comment>
+  </data>
+  <data name="Sprocket.Setting.Value" xml:space="preserve">
+    <value>Value</value>
+    <comment>Label of the value in the panel an installation's value of a setting is given in, opened from the setting's row on the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Setting.UseDefault" xml:space="preserve">
+    <value>Use the default</value>
+    <comment>Button in the panel an installation's value of a setting is given in: this installation takes the setting's default again. Shown only for a setting that has a default.</comment>
+  </data>
+  <data name="Sprocket.Setting.KindInteger" xml:space="preserve">
+    <value>whole number</value>
+    <comment>In the list of what a new setting holds, the setting holds a whole number.</comment>
+  </data>
+  <data name="Sprocket.Setting.KindReal" xml:space="preserve">
+    <value>number</value>
+    <comment>In the list of what a new setting holds, the setting holds a number that may have decimals.</comment>
+  </data>
+  <data name="Sprocket.Setting.KindText" xml:space="preserve">
+    <value>text</value>
+    <comment>In the list of what a new setting holds, the setting holds text.</comment>
+  </data>
+  <data name="Sprocket.Setting.KindDuration" xml:space="preserve">
+    <value>length of time</value>
+    <comment>In the list of what a new setting holds, the setting holds a length of time.</comment>
+  </data>
+  <data name="Sprocket.Setting.NewType" xml:space="preserve">
+    <value>New state type...</value>
+    <comment>Last choice in the list of what a new setting holds, after the logic system's own state types: it makes a new state type for the setting to hold.</comment>
+  </data>
+  <data name="Sprocket.Slot.AddSetting" xml:space="preserve">
+    <value>a setting...</value>
+    <comment>On the installation panel tab of a logic system, in the menu of the &quot;+ slot&quot; button under the slots and at the end of each category of slots. It opens the panel that makes a setting.</comment>
   </data>
   <data name="Sprocket.Value.Fixed" xml:space="preserve">
     <value>A fixed value</value>
@@ -3348,6 +3388,18 @@ A backslash before a mark shows the mark as it is typed.
   <data name="Sprocket.Change.AddType" xml:space="preserve">
     <value>Added the state type &quot;{thing}&quot;</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a state type, a named set of choices, to the logic system. {thing} is the state type's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AnswerSetting" xml:space="preserve">
+    <value>Set the setting &quot;{thing}&quot; in {place} to {now}</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is giving a setting a value in one installation. {thing} is the setting's name, {place} the installation's name, {now} the value. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.UseSettingDefault" xml:space="preserve">
+    <value>Set the setting &quot;{thing}&quot; in {place} back to its default</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is having one installation use a setting's default again. {thing} is the setting's name, {place} the installation's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.SettingDefault" xml:space="preserve">
+    <value>Changed the default of the setting &quot;{thing}&quot;</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, as its own line after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is changing a setting's default, or making it one every installation must set. {thing} is the setting's name. The text is a short past-tense statement that stands alone, and reads the same under Undo and under Redo.</comment>
   </data>
   <data name="Sprocket.Change.RenameType" xml:space="preserve">
     <value>Renamed the state type &quot;{was}&quot; to &quot;{now}&quot;</value>

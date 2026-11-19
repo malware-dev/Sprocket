@@ -203,6 +203,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>Whether what this asks for is slots of the logic system, which a step gives as a list of names.</summary>
         public bool TakesSlots;
 
+        /// <summary>Whether its label stands above it, whatever kind of field it is, so a form that changes the kind of one keeps its lines.</summary>
+        public bool Stacked;
+
         /// <summary>Whether its words are a list searched whatever its length, for a list as long as what the game and its mods hold.</summary>
         public bool Searched;
 

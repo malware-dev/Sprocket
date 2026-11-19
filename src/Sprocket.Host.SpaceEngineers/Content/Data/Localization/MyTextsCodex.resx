@@ -69,7 +69,7 @@
     <comment>Codex page on "Option", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Setting" xml:space="preserve">
-    <value>A ![](mark:setting)&amp;nbsp;**setting** is a value you choose separately for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term). If you don't choose one, the setting's default is used. A setting with no default must be filled in.</value>
+    <value>A ![](mark:setting)&amp;nbsp;**setting** is a value you choose separately for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) on the [installation panel](Term.InstallationPanel class=term), where it stands among the slots. If you don't choose one, the setting's default is used. A setting with no default must be filled in.</value>
     <comment>Codex page on "Setting", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
@@ -827,6 +827,22 @@
   <data name="Sprocket.Slot.AddInventoryAbout" xml:space="preserve">
     <value>Select a block's inventory to make a new [slot](Term.Slot class=term) of, filled with it in this [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term).</value>
     <comment>Tooltip on "an inventory" in the menu of the "+ slot" button on a logic system's installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Slot.AddSettingAbout" xml:space="preserve">
+    <value>Make a new ![](mark:setting)&amp;nbsp;[setting](Term.Setting class=term), a value each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) gives for itself.</value>
+    <comment>Tooltip on &quot;a setting...&quot; in the menu of the &quot;+ slot&quot; button on a logic system's installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
+    <value>Rename this [setting](Term.Setting class=term) or change its default.</value>
+    <comment>Tooltip on a setting's name in the slots list on a logic system's installation panel tab, while the logic system can be changed. Pressing the name opens the panel where the setting is renamed and its default changed.</comment>
+  </data>
+  <data name="Sprocket.Setting.ValueAbout" xml:space="preserve">
+    <value>Choose the value this [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) gives the [setting](Term.Setting class=term), or use its default.</value>
+    <comment>Tooltip on a setting's value on an installation panel. Pressing it opens the panel the installation's value is given in.</comment>
+  </data>
+  <data name="Sprocket.Setting.HoldsAbout" xml:space="preserve">
+    <value>What the [setting](Term.Setting class=term) holds. It is chosen when the setting is made.</value>
+    <comment>Tooltip on the label of what a setting holds, in the panel a setting is made or opened in.</comment>
   </data>
   <data name="Sprocket.Category.Open" xml:space="preserve">
     <value>Rename this category, or have its [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term) run one at a time.</value>

@@ -992,7 +992,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Disabled = { Color = Palette.Dim, Mark = Palette.Dim }
         };
 
-        /// <summary>A drop-down saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used.</summary>
+        /// <summary>A drop-down saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used, and dimmed while it cannot be changed.</summary>
         public static readonly IStyle<DropDown> ListBox = new DropDownStyle
         {
             Base =
@@ -1003,7 +1003,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             },
             PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
             [State.FocusVisible] = { Background = Palette.Panel, Border = Palette.Muted },
-            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem },
+            Disabled = { Color = Palette.Dim, HintColor = Palette.Dim, Arrow = Palette.Dim, Background = Palette.Well }
         };
 
         /// <summary>A color's panel hanging from the box that opened it, close under it.</summary>

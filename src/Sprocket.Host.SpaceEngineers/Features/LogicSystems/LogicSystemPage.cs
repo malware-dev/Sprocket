@@ -177,6 +177,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The blueprint's slots, one row each, with the shown installation's blocks for each.</summary>
         public Element.Collection Slots => _slotPanel.Slots.Children;
 
+        /// <summary>The panel a setting is made, opened or given a value in on the installation panel tab while one is open, or null.</summary>
+        public ValuesQuestion Asking => _panelWork?.Asking;
+
         /// <summary>The rows of the Sequences tab, in order: each sequence's, and each category's heading and end.</summary>
         public Element.Collection SequenceRows => _sequenceList.Children;
 

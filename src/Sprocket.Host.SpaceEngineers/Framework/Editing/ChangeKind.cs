@@ -207,6 +207,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         OptimizeSlots,
 
         /// <summary>Taking out a slot nothing uses, with every installation's blocks in it.</summary>
-        RemoveSlot
+        RemoveSlot,
+
+        /// <summary>Giving a setting an installation's own value.</summary>
+        AnswerSetting,
+
+        /// <summary>Having an installation use a setting's default again.</summary>
+        UseSettingDefault,
+
+        /// <summary>Changing the default of a setting, or making it one every installation must set.</summary>
+        SettingDefault
     }
 }

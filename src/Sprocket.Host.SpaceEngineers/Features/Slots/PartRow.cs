@@ -31,6 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         float _wide = PartList.Widest;
         bool _plain;
         string _opensAbout;
+        string _fillsAbout;
         NoticeLevel _level = NoticeLevel.Problem;
 
         /// <summary>A slot saying nothing yet, its words in <paramref name="texts" />.</summary>
@@ -64,6 +65,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 Label();
             }
         }
+
+        /// <summary>The button holding the slot's mark and name.</summary>
+        public Button NameButton => _name;
+
+        /// <summary>The part holding what fills the slot, or the value of a setting.</summary>
+        public SlotChip ValueChip => _blocks;
 
         /// <summary>The mark of what kind of slot it is: the block, or the signal.</summary>
         public string Mark
@@ -266,6 +273,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <remarks>Set before <see cref="Fills" />, which says it.</remarks>
         public string FillsLocked { get; set; } = "";
 
+        /// <summary>What pressing the blocks says where the pointer rests on them, in place of the slot's own words; null for those.</summary>
+        /// <remarks>Set before <see cref="Fills" />, which says it.</remarks>
+        public string FillsAbout
+        {
+            set { _fillsAbout = value; }
+        }
+
         /// <summary>What pressing the blocks does, which is choosing others, or null where they cannot be changed.</summary>
         public ICommand Fills
         {
@@ -274,7 +288,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             {
                 _blocks.Command = value;
                 _signals.Command = value;
-                var about = value != null ? _texts.Codex.PartFillsAbout : FillsLocked;
+                var about = value != null ? _fillsAbout ?? _texts.Codex.PartFillsAbout : FillsLocked;
                 _blocks.Tip = CodexTip.For(_blocks.Tip, about);
                 _signals.Tip = CodexTip.For(_signals.Tip, about);
             }

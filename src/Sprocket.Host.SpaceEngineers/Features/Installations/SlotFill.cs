@@ -8,6 +8,9 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Features.Slots.Edits;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using Sprocket.Host.SpaceEngineers.Features.States.Edits;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Lumel;
 using System;
 using System.Collections.Generic;
 
@@ -62,15 +65,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
             _making = null;
             var reslot = new Reslot(_system, chosen);
             reslot.Make(part, new List<string>());
-            SystemEdit edit = new WithMade(new ChangeSlots(ChangeKind.AddSlot, reslot), fill);
-            if (_placed == null)
+            return Placed(part, new WithMade(new ChangeSlots(ChangeKind.AddSlot, reslot), fill), _placed);
+        }
+
+        /// <summary><paramref name="edit" />, which adds <paramref name="part" />, together with putting it where <paramref name="placed" /> says, or after every slot where that is null.</summary>
+        SystemEdit Placed(Part part, SystemEdit edit, Func<Part, Arrangement> placed)
+        {
+            if (placed == null)
                 return edit;
 
             var was = Arrangement.Of(_system.SlotList);
             was.Order.Add(part);
             was.Placed.Add(part.Category);
             was.Held.Add(Arrangement.HeldOf(part));
-            return new WithMade(edit, new Rearrange(ChangeKind.AddSlot, owner => owner.SlotList, was, _placed(part), part, null));
+            return new WithMade(edit, new Rearrange(ChangeKind.AddSlot, owner => owner.SlotList, was, placed(part), part, null));
+        }
+
+        /// <summary>
+        /// Opens the panel that makes a new setting under <paramref name="category" />, hung from what <paramref name="mark" /> finds,
+        /// placed by <paramref name="placed" />, or after every slot where that is null, together with the state type made for it
+        /// where one was, as one change; <paramref name="closed" /> is called as the panel closes either way.
+        /// </summary>
+        /// <remarks>Its holder hangs it every tick, as any panel.</remarks>
+        public ValuesQuestion NewSetting(string category, Func<Part, Arrangement> placed, Func<Element> mark, Action closed)
+        {
+            return SettingPanel.New(_editor, _system, null, default(Literal), mark, (setting, type) =>
+            {
+                setting.Category = category;
+                var reslot = new Reslot(_system, null);
+                reslot.Make(setting, new List<string>());
+                var edit = Placed(setting, new ChangeSlots(ChangeKind.AddSlot, reslot), placed);
+                _editor.Do(_system, type == null ? edit : new WithMade(new AddType(type, _system.Types.Count), edit));
+            }, closed);
         }
 
         /// <summary>Opens the picker on <paramref name="part" /> for <paramref name="chosen" />.</summary>

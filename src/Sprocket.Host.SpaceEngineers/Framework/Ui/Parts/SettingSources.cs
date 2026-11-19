@@ -1,7 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
-using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using System;
 using System.Collections.Generic;
@@ -83,38 +81,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         public static ValuesQuestion New(SprocketEditor editor, AutomationSystem system, string type, Literal start, Func<Element> mark,
             Action<string> made, Action closed)
         {
-            var texts = editor.Texts;
-            var name = Field.Called(texts.SettingName);
-            name.Entry = FieldInput.Text;
-            name.Needed = true;
-            var fallback = Defaulted(texts, system, type);
-
-            var fields = new[] { name, fallback };
-            var given = new[] { Literal.Of(system.Free(texts.SettingNumbered)), Shown(type, start) };
-            var question = new ValuesQuestion(editor, null, fields, given, mark, (said, cancelled) =>
+            return SettingPanel.New(editor, system, type, start, mark, (part, none) =>
             {
-                closed();
-                if (cancelled)
-                    return;
-
-                var values = FieldSet.Read(said, fields);
-                var part = new Part(system.Free(values.Count > 0 && values[0].Text.Trim().Length > 0 ? values[0].Text.Trim() : texts.SettingNumbered))
-                {
-                    Setting = type,
-                    Optional = values.Count > 1 && (values[1].Kind != ValueKind.Text || values[1].Text.Trim().Length > 0)
-                };
-
-                if (part.Optional)
-                {
-                    part.Default = Held(type, values[1]);
-                    part.HasDefault = true;
-                }
-
                 editor.MakeSetting(system, part);
                 made(part.Id);
-            });
-            question.Hang();
-            return question;
+            }, closed);
         }
 
         /// <summary>The default of the setting <paramref name="setting" /> of <paramref name="system" />, as a person reads it, or empty where it has none.</summary>
@@ -133,46 +104,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var values = new List<Literal>();
             ValueLine.Read(said, values);
             return values.Count == 1 ? values[0] : type == "flag" ? Literal.Of(false) : Literal.Of(0L);
-        }
-
-        /// <summary>The field a new setting of <paramref name="system" /> holding <paramref name="type" /> asks its default in: one of a declared type's choices, a length in seconds.</summary>
-        static Field Defaulted(Texts texts, AutomationSystem system, string type)
-        {
-            var declared = system.FindType(type);
-            if (declared != null)
-            {
-                var among = Field.Among(texts.SettingDefault, declared.Choices, declared.Choices);
-                among.Entry = FieldInput.Name;
-                return among;
-            }
-
-            if (type == "flag")
-            {
-                var either = Field.OneOf(texts.SettingDefault, Literal.Of(true).Said, Literal.Of(false).Said);
-                either.Edits = FieldEditor.Chosen;
-                return either;
-            }
-
-            var box = Field.Called(texts.SettingDefault);
-            // May be left empty, which makes the setting one every installation chooses.
-            box.Default = "";
-            box.Entry = type == "integer" ? FieldInput.Whole : type == "real" || type == "duration" ? FieldInput.Decimal : FieldInput.Text;
-            if (type == "duration")
-                box.Unit = Template.Fill(texts.WaitPickSeconds, "count", "");
-
-            return box;
-        }
-
-        /// <summary><paramref name="start" /> as the default's field shows it: a length in seconds.</summary>
-        static Literal Shown(string type, Literal start)
-        {
-            return type == "duration" && start.Kind == ValueKind.Duration ? Literal.Of(start.Length.Seconds) : start;
-        }
-
-        /// <summary>A default given in its field, <paramref name="given" />, as a value of <paramref name="type" />: a length from its seconds.</summary>
-        static Literal Held(string type, Literal given)
-        {
-            return type == "duration" ? Literal.Of(Duration.OfSeconds(given.Number)) : given;
         }
     }
 }

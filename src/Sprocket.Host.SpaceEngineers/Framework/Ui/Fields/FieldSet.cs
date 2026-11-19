@@ -524,7 +524,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 if (!string.IsNullOrEmpty(about))
                     named.Tip = CodexTip.For(named.Tip, about);
 
-                Rows.Add(named, Sourceable(at, element), field is TypedField || field is LinesField || field is SliderField || IsLong(at, field) ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
+                Rows.Add(named, Sourceable(at, element), field is TypedField || field is LinesField || field is SliderField || _wanted[at].Stacked || IsLong(at, field) ? FormLabelPlacement.Above : FormLabelPlacement.Auto);
                 return;
             }
 

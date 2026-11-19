@@ -26,6 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         ValuesQuestion _making;
         readonly FieldSet _form;
         readonly Label _why;
+        readonly Label _hint;
+        readonly VStack _hintRoom;
+        readonly Button _useDefault;
+        Action _defaulted;
         readonly Popup _window;
         readonly Action<string, bool> _answered;
 
@@ -67,12 +71,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                     {
                         _form,
                         new Label { Style = Styles.Refusal, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _why),
-                        new Button
+                        new VStack { IsVisible = false, Children = { new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Wrap }.As(out _hint) } }.As(out _hintRoom),
+                        new HStack
                         {
-                            Style = Styles.Primary,
-                            Text = texts.ChromeDone,
                             Align = Align.Right,
-                            Command = new RelayCommand(Done)
+                            Base = { Spacing = Gaps.Parts },
+                            Children =
+                            {
+                                new Button { Style = Styles.Button, IsVisible = false, Command = new RelayCommand(UseDefault) }.As(out _useDefault),
+                                new Button { Style = Styles.Primary, Text = texts.ChromeDone, Command = new RelayCommand(Done) }
+                            }
                         }
                     }
                 }
@@ -128,6 +136,28 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>The panel a new setting for one of the values is asked in while it is open, or null.</summary>
         public ValuesQuestion Making => _making;
 
+        /// <summary>Offers <paramref name="text" /> beside Done, which answers that nothing is chosen of its own and carries out <paramref name="chosen" />, or offers nothing where <paramref name="text" /> is null.</summary>
+        public void Defaults(string text, Action chosen)
+        {
+            _defaulted = chosen;
+            _useDefault.IsVisible = text != null;
+            _useDefault.Text = text ?? "";
+        }
+
+        /// <summary>Says <paramref name="words" /> under the values, in a place that keeps its height whether it says anything or not, so the panel does not resize; nothing where null.</summary>
+        public void Hint(string words, float height)
+        {
+            _hintRoom.IsVisible = true;
+            _hintRoom.Placement = FixedSize.Height(height);
+            _hint.Text = words ?? "";
+        }
+
+        /// <summary>The button that has the part give no value of its own, shown only where <see cref="Defaults" /> offers it.</summary>
+        public Button UsesDefault => _useDefault;
+
+        /// <summary>The popup the panel stands in.</summary>
+        public Popup Window => _window;
+
         /// <summary>The form the values are given in.</summary>
         public FieldSet Form => _form;
 
@@ -162,6 +192,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             _making?.Finish(true);
             _window.Close();
             _answered(_form.Answer, cancelled);
+        }
+
+        /// <summary>Puts the panel away, answering that it was put away, and carries out what was offered by <see cref="Defaults" />.</summary>
+        void UseDefault()
+        {
+            var chosen = _defaulted;
+            Finish(true);
+            chosen?.Invoke();
         }
 
         /// <summary>Answers with the values, once each holds what it takes; otherwise says why, and gives the keyboard to the first that fails.</summary>

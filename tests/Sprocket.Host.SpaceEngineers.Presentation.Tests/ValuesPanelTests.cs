@@ -225,7 +225,7 @@ public class ValuesPanelTests
 
         var making = page.Giving!.Making;
         Assert.NotNull(making);
-        Assert.Equal(2, making.Form.Count);
+        Assert.Equal(3, making.Form.Count);
         making.Done();
         sim.Tick();
 
@@ -250,7 +250,7 @@ public class ValuesPanelTests
         sim.Tick();
 
         var making = page.Giving!.Making!;
-        making.Form.Fields[1].Text = "";
+        making.Form.Fields[2].Text = "";
         making.Done();
         sim.Tick();
 

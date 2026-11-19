@@ -53,7 +53,7 @@
     <value>Et **valg** er en verdi en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
   </data>
   <data name="Sprocket.Term.Setting" xml:space="preserve">
-    <value>En ![](mark:setting)&amp;nbsp;**innstilling** er en verdi du velger for hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) for seg. Velger du ingen, brukes innstillingens standardverdi. En innstilling uten standardverdi må fylles ut.</value>
+    <value>En ![](mark:setting)&amp;nbsp;**innstilling** er en verdi du velger for hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) for seg, på [installasjonspanelet](Term.InstallationPanel class=term), der den står blant plassene. Velger du ingen, brukes innstillingens standardverdi. En innstilling uten standardverdi må fylles ut.</value>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
     <value>En **oppgave** er én operasjon: å kjøre eller stoppe en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term), en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker, eller å [sette](Term.Set class=term) en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>
@@ -625,6 +625,18 @@
   </data>
   <data name="Sprocket.Slot.AddInventoryAbout" xml:space="preserve">
     <value>Velg inventaret til en blokk å lage en ny [plass](Term.Slot class=term) av, fylt med det i denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term).</value>
+  </data>
+  <data name="Sprocket.Slot.AddSettingAbout" xml:space="preserve">
+    <value>Lag en ny ![](mark:setting)&amp;nbsp;[innstilling](Term.Setting class=term), en verdi hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) gir for seg selv.</value>
+  </data>
+  <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
+    <value>Gi denne [innstillingen](Term.Setting class=term) et nytt navn, eller endre standardverdien.</value>
+  </data>
+  <data name="Sprocket.Setting.ValueAbout" xml:space="preserve">
+    <value>Velg verdien denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) gir [innstillingen](Term.Setting class=term), eller bruk standardverdien.</value>
+  </data>
+  <data name="Sprocket.Setting.HoldsAbout" xml:space="preserve">
+    <value>Hva [innstillingen](Term.Setting class=term) inneholder. Det velges når innstillingen lages.</value>
   </data>
   <data name="Sprocket.Category.Open" xml:space="preserve">
     <value>Gi kategorien nytt navn, eller la [![](mark:sequence)&amp;nbsp;sekvensene](Term.Sequence class=term) i den kjøre én om gangen.</value>

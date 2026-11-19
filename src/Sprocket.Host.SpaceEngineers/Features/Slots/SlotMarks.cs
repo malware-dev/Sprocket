@@ -10,6 +10,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <summary>What <paramref name="instance" /> still has to do about <paramref name="part" />.</summary>
         public static SlotMark Of(Bindings bindings, SystemInstance instance, Part part)
         {
+            // A setting is still to be set only where it has no default and the installation has given it no value.
+            if (part.IsSetting)
+            {
+                Literal answer;
+                return part.HasDefault || instance.AnswerTo(part.Id, out answer) ? SlotMark.None : SlotMark.New;
+            }
+
             var filled = instance.FilledWith(part.Id);
             if (filled == null || filled.Count == 0)
                 return SlotMark.New;

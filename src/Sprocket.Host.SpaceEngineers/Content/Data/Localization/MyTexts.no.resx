@@ -607,10 +607,10 @@
     <value>Plasser</value>
   </data>
   <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
-    <value>1 mangler fortsatt en blokk</value>
+    <value>1 må fortsatt fylles ut</value>
   </data>
   <data name="Sprocket.Blueprint.StillMany" xml:space="preserve">
-    <value>{count} mangler fortsatt en blokk</value>
+    <value>{count} må fortsatt fylles ut</value>
   </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} gikk tapt.</value>
@@ -1218,6 +1218,36 @@
   </data>
   <data name="Sprocket.Setting.Default" xml:space="preserve">
     <value>Standardverdi</value>
+  </data>
+  <data name="Sprocket.Setting.Holds" xml:space="preserve">
+    <value>Inneholder</value>
+  </data>
+  <data name="Sprocket.Setting.DefaultHint" xml:space="preserve">
+    <value>La standardverdien stå tom, så må hver installasjon velge sin egen.</value>
+  </data>
+  <data name="Sprocket.Setting.Value" xml:space="preserve">
+    <value>Verdi</value>
+  </data>
+  <data name="Sprocket.Setting.UseDefault" xml:space="preserve">
+    <value>Bruk standardverdien</value>
+  </data>
+  <data name="Sprocket.Setting.KindInteger" xml:space="preserve">
+    <value>heltall</value>
+  </data>
+  <data name="Sprocket.Setting.KindReal" xml:space="preserve">
+    <value>tall</value>
+  </data>
+  <data name="Sprocket.Setting.KindText" xml:space="preserve">
+    <value>tekst</value>
+  </data>
+  <data name="Sprocket.Setting.KindDuration" xml:space="preserve">
+    <value>tidsrom</value>
+  </data>
+  <data name="Sprocket.Setting.NewType" xml:space="preserve">
+    <value>Ny tilstandstype...</value>
+  </data>
+  <data name="Sprocket.Slot.AddSetting" xml:space="preserve">
+    <value>en innstilling...</value>
   </data>
   <data name="Sprocket.Value.Fixed" xml:space="preserve">
     <value>En fast verdi</value>
@@ -2556,6 +2586,15 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   </data>
   <data name="Sprocket.Change.AddType" xml:space="preserve">
     <value>La til tilstandstypen &quot;{thing}&quot;</value>
+  </data>
+  <data name="Sprocket.Change.AnswerSetting" xml:space="preserve">
+    <value>Satte innstillingen &quot;{thing}&quot; i {place} til {now}</value>
+  </data>
+  <data name="Sprocket.Change.UseSettingDefault" xml:space="preserve">
+    <value>Satte innstillingen &quot;{thing}&quot; i {place} tilbake til standardverdien</value>
+  </data>
+  <data name="Sprocket.Change.SettingDefault" xml:space="preserve">
+    <value>Endret standardverdien til innstillingen &quot;{thing}&quot;</value>
   </data>
   <data name="Sprocket.Change.RenameType" xml:space="preserve">
     <value>Omdøpte tilstandstypen &quot;{was}&quot; til &quot;{now}&quot;</value>

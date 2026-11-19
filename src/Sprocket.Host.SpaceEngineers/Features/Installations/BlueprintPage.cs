@@ -10,6 +10,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
+using System;
 using System.Collections.Generic;
 using Lumel;
 using Lumel.Layout;
@@ -25,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
         readonly List<object> _rows = new List<object>();
         readonly List<string> _used = new List<string>();
         readonly SlotFill _fill;
+        ValuesQuestion _asking;
 
         SystemInstance _made;
         string _madeName;
@@ -194,6 +196,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
             _madeOn = _made.Enabled;
         }
 
+        /// <summary>The panel an installation's value of a setting is given in while one is open, or null.</summary>
+        public ValuesQuestion Asking => _asking != null && _asking.IsOpen ? _asking : null;
+
         /// <summary>Brings the view up to date.</summary>
         public override void Build()
         {
@@ -205,6 +210,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
         /// <remarks>Every tick, and walks nothing: the slots change only through the screens under it, which rebuild it on the way back.</remarks>
         public override void Refresh()
         {
+            // A panel asked in follows its row, which may be made again.
+            _asking?.Hang();
+
             if (Shape(Editor.StandIn(_system)) != _shape)
             {
                 Editor.Invalidate();
@@ -326,8 +334,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
         }
 
         /// <summary>
-        /// Beside the slots' heading, how many slots changed kind and are to be filled again, or otherwise how many of
-        /// those that need a block still have none; nothing once every one has.
+        /// Beside the slots' heading, how many slots changed kind and are to be filled again, or otherwise how many slots are still empty
+        /// (a block slot with no block, or a setting with no default and no value); nothing once none is.
         /// </summary>
         void Needs(SystemInstance chosen, int unfilled)
         {
@@ -352,17 +360,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
             row.Name = part.Id;
             row.Short = part.IsSignal ? part.Short : "";
             row.Mark = MarkText.OfSlot(part);
+            row.FillsAbout = part.IsSetting ? Editor.Texts.Codex.SettingValueAbout : null;
             row.Described = part.Annotation;
 
             var gone = row.Take(Editor.Runner.Bindings, chosen?.FilledWith(part.Id),
                 chosen == null || !part.IsSignal ? null : chosen.Positions(part.Id));
 
-            row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(CommandKind.FillPart, () => _fill.Ask(part, chosen));
+            row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(CommandKind.FillPart, part.IsSetting
+                ? (Action)(() => _asking = SettingPanel.Value(Editor, _system, chosen, part, () => row.ValueChip))
+                : () => _fill.Ask(part, chosen));
 
             row.Problem = gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
             row.Level = NoticeLevel.Problem;
 
             var changed = chosen != null && SlotMarks.Of(Editor.Runner.Bindings, chosen, part) == SlotMark.Changed;
+
+            if (part.IsSetting)
+            {
+                SettingRows.Show(Editor.Texts, row, part, chosen, false);
+                Literal own;
+                return part.HasDefault || chosen != null && chosen.AnswerTo(part.Id, out own);
+            }
 
             if (row.Blocks.Count > 0)
                 row.Show(Editor.World);

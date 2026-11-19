@@ -93,6 +93,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             _settings[setting] = value;
         }
 
+        /// <summary>Leaves the setting <paramref name="setting" /> unanswered, so its default stands.</summary>
+        public void Unanswer(string setting)
+        {
+            _settings.Remove(setting);
+        }
+
         /// <summary>This installation's own answer to <paramref name="setting" />, and whether it gives one.</summary>
         /// <remarks>Its answer alone: an unanswered setting's default is <see cref="Gives" />'s.</remarks>
         public bool AnswerTo(string setting, out Literal value)
