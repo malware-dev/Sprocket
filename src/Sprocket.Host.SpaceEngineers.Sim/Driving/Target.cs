@@ -318,7 +318,7 @@ namespace Sprocket.Sim.Driving
                 editor.Screen.Flip!.Execute();
         }
 
-        /// <summary>Presses whatever on the screen says <paramref name="text" />: an answer, a choice, or a block in a picker.</summary>
+        /// <summary>Presses whatever on the screen says <paramref name="text" />: an answer or a block in a picker.</summary>
         /// <remarks>
         /// A question hanging over the screen is answered by pressing its words, which is the same act from
         /// where a test stands: something on screen said this, and it was pressed.
@@ -329,13 +329,6 @@ namespace Sprocket.Sim.Driving
             if (answer != null)
             {
                 Run(answer.Command);
-                return;
-            }
-
-            var row = editor.Choices().FirstOrDefault(r => r.Text == text);
-            if (row != null)
-            {
-                row.Command!.Execute();
                 return;
             }
 
@@ -375,16 +368,10 @@ namespace Sprocket.Sim.Driving
             entry.Pick(HeldModifier.Alone, 2);
         }
 
-        /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen: an answer, a choice, or a block in a picker.</summary>
+        /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen: an answer or a block in a picker.</summary>
         public static bool HasChoice(this SprocketEditor editor, string text) =>
             editor.Screen.Answers.Any(e => e.Text == text)
-            || editor.Choices().Any(r => r.Text == text)
             || editor.Stages().Any(p => p.Entries().Any(e => e.Text == text));
-
-        /// <summary>The answers on a question's page, in the order they are offered, or none where the page asks nothing.</summary>
-        /// <remarks>Asks the page for its view first, which is what makes it where nothing has drawn the page yet.</remarks>
-        public static IReadOnlyList<ChoiceRow> Choices(this SprocketEditor editor) =>
-            Asking(editor)?.Answers ?? new ChoiceRow[0];
 
         /// <summary>The panel a wait's length is being given in, on the sequence's page the editor is on.</summary>
         public static DurationPanel Lengths(this SprocketEditor editor) =>
@@ -415,16 +402,6 @@ namespace Sprocket.Sim.Driving
             box.SelectAll();
             box.Insert(said);
             box.Submit!.Execute();
-        }
-
-        /// <summary>The question's page the editor is on, its view made, or null.</summary>
-        static ChoicePage? Asking(SprocketEditor editor)
-        {
-            var page = editor.Current as ChoicePage;
-            if (page != null)
-                _ = page.View;
-
-            return page;
         }
 
         /// <summary>The rows of a logic system's sequences, as its page draws them, in the order they stand.</summary>
