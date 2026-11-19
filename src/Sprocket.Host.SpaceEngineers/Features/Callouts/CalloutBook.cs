@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System;
 using System.Collections.Generic;
 using Lumel;
+using Lumel.Text;
 using Lumel.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Callouts
@@ -112,11 +113,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>Puts away the callout hanging, without dismissing it.</summary>
         public void Close()
         {
-            if (_mark != null)
-                _mark.Close();
-
+            var mark = _mark;
             _mark = null;
             _hung = null;
+            mark?.Close();
         }
 
         /// <summary>Whether <paramref name="element" /> is in a window, with nothing holding it hidden and nothing covering it, so a callout can hang from it.</summary>
@@ -137,10 +137,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>Opens <paramref name="callout" /> from <paramref name="anchor" />, which dismisses it for good once pressed.</summary>
         void Hang(Callout callout, Texts texts, Element anchor)
         {
-            _mark = new CoachMark(callout.Said(texts)) { Style = Styles.Callout, Anchor = anchor, DismissesOnPressOutside = true };
-            _mark.Dismissed += () => Dismiss(callout);
+            var mark = new CoachMark(Template.Fill(texts.CalloutNew, "said", callout.Said(texts))) { Style = Styles.Callout, Anchor = anchor, DismissesOnPressOutside = true };
+            mark.Dismissed += () => Dismiss(callout);
+            mark.Closed += reason => Lapsed(mark);
+            _mark = mark;
             _hung = callout;
-            _mark.Open();
+            mark.Open();
+        }
+
+        /// <summary>Lets the next place offer what <paramref name="mark" /> held, where it closed by itself, as it does when its anchor goes out of view.</summary>
+        void Lapsed(CoachMark mark)
+        {
+            if (_mark != mark)
+                return;
+
+            _mark = null;
+            _hung = null;
+            Changed?.Invoke();
         }
 
         /// <summary>Records the current release as seen, once nothing of it is left to offer.</summary>

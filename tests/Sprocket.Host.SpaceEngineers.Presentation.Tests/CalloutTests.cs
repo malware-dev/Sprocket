@@ -60,6 +60,21 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         Assert.NotEqual("share", screen.Editor.Callouts.Shown?.Id);
     }
 
+    /// <summary>Escape goes to the editor beneath the bubble and never dismisses it: it hangs again at the next anchor the player meets.</summary>
+    [Fact]
+    public void EscapeLeavesTheCalloutDue()
+    {
+        var screen = Meeting(LogicSystem);
+        var texts = screen.Editor.Texts;
+
+        screen.Do("escape").Run(3);
+
+        Assert.False(screen.Player().HasDismissed("share"));
+        Assert.False(screen.Editor.Screen.CanGoBack, screen.Dump);
+        Assert.Equal("share", screen.Editor.Callouts.Shown?.Id);
+        Assert.True(screen.Shows(texts.CalloutShare), screen.Dump);
+    }
+
     /// <summary>A press on the bubble itself dismisses it too.</summary>
     [Fact]
     public void APressOnTheBubbleDismissesIt()

@@ -85,15 +85,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             return editor != null ? editor.TipFor(tip) : tip;
         }
 
-        /// <summary>Closes the window on top where it is not the editor, and says whether one closed.</summary>
+        /// <summary>Closes the topmost window over the editor that takes Escape, and says whether one closed.</summary>
         public bool CloseOverEditor()
         {
-            var top = Windows.Top;
-            if (top == null || top == _editor)
-                return false;
+            for (var i = Windows.Count - 1; i >= 0; i--)
+            {
+                var window = Windows[i];
+                if (window == _editor)
+                    return false;
 
-            top.Close();
-            return true;
+                // Lumel's coach mark leaves keys and Escape to the window beneath it.
+                if (window is CoachMark)
+                    continue;
+
+                window.Close();
+                return true;
+            }
+
+            return false;
         }
     }
 }

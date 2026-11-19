@@ -2832,4 +2832,7 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Callout.Settings" xml:space="preserve">
     <value>Innstillinger kan også lages her, som plasser.</value>
   </data>
+  <data name="Sprocket.Callout.New" xml:space="preserve">
+    <value>**Nytt:** {said}</value>
+  </data>
 </root>

@@ -3707,4 +3707,8 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <value>Settings can be made here too, as slots.</value>
     <comment>Callout over the plus that adds a slot in the installation panel of a logic system; shown once to a player after an update, until it is pressed.</comment>
   </data>
+  <data name="Sprocket.Callout.New" xml:space="preserve">
+    <value>**New:** {said}</value>
+    <comment>Every callout's words, which point out a function an update brought. {said} is the callout's own sentence. The stars make "New:" bold.</comment>
+  </data>
 </root>
