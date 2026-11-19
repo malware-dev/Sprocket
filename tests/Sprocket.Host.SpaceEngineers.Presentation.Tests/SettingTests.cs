@@ -208,7 +208,7 @@ public class SettingTests
         var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
         var speed = 0;
         door.Kind.WithValue("speed", "speed",
-                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType("speed", "low", "middle", "high"), _ => speed)
+                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "speed", "low", "middle", "high"), _ => speed)
                     .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
             .Looked("A test value.");
 

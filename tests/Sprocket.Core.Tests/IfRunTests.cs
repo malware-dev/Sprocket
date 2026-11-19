@@ -275,6 +275,24 @@ public class IfRunTests
         Assert.False(fault.Parks);
     }
 
+    /// <summary>A task in a namespace no mod has registered is not offered, found before anything runs, as any missing member is.</summary>
+    [Fact]
+    public void ATaskInANamespaceNoModRegisteredIsNotOffered()
+    {
+        var a = new Airlock();
+        var lift = a.Do("lift", a.Inner);
+        lift.Provider = "malforge.hover_repulsors";
+        a.Add(lift, new Await());
+        a.Program.Edited();
+        a.Runner = new AutomationRunner(a.Program, a.Rig.World);
+        a.Runner.Tick(1);
+
+        var fault = SequenceSummary.Checked(a.Rig.World, a.Runner.Bindings, a.Cycle, a.Cycle.System.First);
+
+        Assert.Equal(SequenceProblem.Unoffered, fault.Problem);
+        Assert.Equal(0, fault.Step);
+    }
+
     /// <summary>A test of a member its blocks do not have is a fault, found before anything runs.</summary>
     [Fact]
     public void ATestOfAMemberTheBlocksLackIsAFault()

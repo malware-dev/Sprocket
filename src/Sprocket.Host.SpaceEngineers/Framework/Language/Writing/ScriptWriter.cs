@@ -451,6 +451,37 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             Spell(into, name);
         }
 
+        /// <summary>A name in one of the host's namespaces, whose parts are joined by dots in <paramref name="space" />, each part spelled on its own.</summary>
+        static void SpellHost(StringBuilder into, string space, string name)
+        {
+            if (!string.IsNullOrEmpty(space))
+            {
+                foreach (var part in space.Split('.'))
+                {
+                    Spell(into, part);
+                    into.Append('.');
+                }
+            }
+
+            Spell(into, name);
+        }
+
+        /// <summary>How a name in one of the host's namespaces is spelled, <c>malforge.hover_repulsors.lift</c>, exactly as the writer spells it.</summary>
+        public static string HostSpelling(string space, string name)
+        {
+            var spelt = new StringBuilder();
+            SpellHost(spelt, space, name);
+            return spelt.ToString();
+        }
+
+        /// <summary>A name in one of the host's namespaces, <c>malforge.hover_repulsors.lift</c>, or the name alone where it has none.</summary>
+        public ScriptWriter HostQualified(string space, string name)
+        {
+            Space();
+            SpellHost(_text, space, name);
+            return this;
+        }
+
         /// <summary>A name: bare where it can be, in single quotes where it cannot.</summary>
         /// <summary>Writes <paramref name="thing" /> with its kind, a keyword such as <c>type</c> written bare as the kind it is.</summary>
         static void Kind(StringBuilder into, string space, string kind, string thing)
@@ -458,7 +489,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (string.IsNullOrEmpty(space) && Keywords.Taken(kind))
                 into.Append(kind);
             else
-                Spell(into, space, kind);
+                SpellHost(into, space, kind);
 
             into.Append('(');
             Spell(into, thing);

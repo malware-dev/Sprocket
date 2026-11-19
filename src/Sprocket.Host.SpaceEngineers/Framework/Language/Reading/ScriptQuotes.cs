@@ -105,6 +105,31 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return joined;
         }
 
+        /// <summary>The namespace of a qualified name: every part before the last, joined as written, or empty where it has one part.</summary>
+        public static string Namespace(ValueRange parts)
+        {
+            var joined = "";
+            for (var i = 0; i < parts.Count - 1; i++)
+                joined += (i > 0 ? "." : "") + parts[i].Word;
+
+            return joined;
+        }
+
+        /// <summary>Whether every part of a name has a word, so it is a name of one part or more with nothing left out.</summary>
+        public static bool Whole(ValueRange parts)
+        {
+            if (parts.Count == 0)
+                return false;
+
+            for (var i = 0; i < parts.Count; i++)
+            {
+                if (parts[i].Word.Length == 0)
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>Whether <paramref name="value" /> is a name, bare or quoted, rather than one of the language's words or anything else.</summary>
         public static bool Named(Value value)
         {

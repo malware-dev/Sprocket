@@ -375,7 +375,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             else if (part.IsSignal)
                 pen.Says(Keyword.Expects).Says(Keyword.Signal);
             else if (part.Holds.Length > 0)
-                pen.Says(Keyword.Expects).Qualified(Space(part.Holds), Name(part.Holds));
+                pen.Says(Keyword.Expects).HostQualified(Space(part.Holds), Name(part.Holds));
             else if (part.Expects.Length > 0 && system.FindType(part.Expects) != null)
                 pen.Says(Keyword.Expects).Kinded("", Kinds.BlockType, part.Expects);
             else if (part.Expects.Length > 0)
@@ -813,7 +813,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// <summary><c>sprocket.amount("Ingot/Iron") on [ cargo ]</c>: a member, bare or qualified, with its arguments where it has any, and its blocks.</summary>
         static void WriteMember(ScriptWriter pen, AutomationSystem system, string provider, string id, IList<Literal> arguments, IList<string> targets)
         {
-            pen.Qualified(provider, id);
+            pen.HostQualified(provider, id);
             if (arguments.Count > 0)
             {
                 pen.Open();
@@ -1095,7 +1095,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             var type = value.Kind == ValueKind.Name && system != null && Meanings(system, value.Text) > 0 ? value.Typed ?? ChoiceTypes.Having(value.Text) : null;
             if (type != null)
-                pen.Kinded(Meanings(system, type.Id) > 0 ? BlockKinds.Own : "", type.Id, value.Text);
+                pen.Kinded(Meanings(system, type.Id) > 0 ? type.Namespace : "", type.Id, value.Text);
             else
                 Written(pen, value);
         }

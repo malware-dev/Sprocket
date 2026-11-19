@@ -161,6 +161,10 @@ A host may provide non-block object types associated with a block (such as an LC
   where `status` holds screens. A member the host does not provide for that type is an error.
 * Which types a host provides, which functions return each, and which members each has, is the host's to say.
 
+### 5.3 Namespaces the Host Lacks
+
+A host may gain namespaces as it runs, such as one for each extension it loads, and may lack a namespace a program names. A program naming a member, signal or type in a namespace the host lacks reads as written. Such a member is not offered (§5.1) until the host has its namespace.
+
 ---
 
 ## 6. Version Header

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -134,7 +135,7 @@ public class ArgumentsColumnTests
         var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
         var speed = 0;
         door.Kind.WithValue("speed", "speed",
-                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType("speed", "low", "middle", "high"), _ => speed)
+                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "speed", "low", "middle", "high"), _ => speed)
                     .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
             .Looked("A test value.");
         screen.Editor.PressBlock("Airlock Inner Door");

@@ -154,21 +154,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static Trigger Written(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var member = statement.Parts(0);
-            if (member.Count != 2 || member[0].Word.Length == 0 || member[1].Word.Length == 0)
+            if (member.Count < 2 || !ScriptQuotes.Whole(member))
             {
                 trouble.Say(statement, "expected a signal qualified by its namespace, like sprocket.finishes_closing on [ inner ].");
                 return null;
             }
 
-            if (member[0].Word != BlockKinds.Own)
-            {
-                trouble.Say(statement, $"no namespace '{member[0].Word}'; expected a signal qualified by {BlockKinds.Own}.");
-                return null;
-            }
+            var space = ScriptQuotes.Namespace(member);
+            var signal = member[member.Count - 1].Word;
+            // A namespace no mod has registered reads all the same, and its signal is not given until one does.
 
-            var written = SignalTrigger.Written(member[0].Word, member[1].Word);
+            var written = SignalTrigger.Written(space, signal);
             var given = statement.Arguments(0);
-            if (member[1].Word == ScriptFormat.Toolbar)
+            if (space == BlockKinds.Own && signal == ScriptFormat.Toolbar)
             {
                 if (given.Count != 3 || Statement.Counted(given[0]) == 0 || Statement.Counted(given[1]) == 0
                     || Statement.Counted(given[2]) == 0)

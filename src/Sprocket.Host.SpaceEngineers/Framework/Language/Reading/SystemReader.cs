@@ -494,7 +494,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static void Holding(Statement statement, Part part, ScriptTrouble trouble)
         {
             var parts = statement.Parts(3);
-            var type = parts.Count == 2 ? HostTypes.Named($"{parts[0].Word}.{parts[1].Word}") : null;
+            var type = ScriptQuotes.Whole(parts) && parts.Count > 1 ? HostTypes.Named(ScriptQuotes.Spelling(parts)) : null;
             if (type == null)
             {
                 trouble.Say(statement, $"no type '{ScriptQuotes.Spelling(parts)}' the host provides.");

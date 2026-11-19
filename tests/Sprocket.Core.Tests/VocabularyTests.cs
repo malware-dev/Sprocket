@@ -400,7 +400,7 @@ public class VocabularyTests
         var ship = new Ship();
         var at = 0;
         ship.Rig.Entity(ship.Door.Id).Kind.WithValue("speed", "speed",
-                OwnValue.OneOf<IMyTerminalBlock>(new ChoiceType("level", "low", "high"), _ => at).Writing<IMyTerminalBlock>((_, given) => at = (int)given.Whole))
+                OwnValue.OneOf<IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "level", "low", "high"), _ => at).Writing<IMyTerminalBlock>((_, given) => at = (int)given.Whole))
             .Looked("A test value.");
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));

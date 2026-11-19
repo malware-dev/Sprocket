@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Features.Sharing.Messages;
 using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
@@ -987,6 +988,9 @@ namespace Sprocket.Host.SpaceEngineers
                 StandsDown = false;
                 return;
             }
+
+            // The next world may run without the mods that registered namespaces in this one.
+            HostNamespaces.Clear();
 
             if (MyAPIGateway.TerminalControls != null)
             {

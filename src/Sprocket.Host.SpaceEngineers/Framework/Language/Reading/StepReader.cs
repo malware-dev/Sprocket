@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// The member at <paramref name="index" />, bare or qualified by <c>sprocket</c>, its arguments and its blocks; or false and
+        /// The member at <paramref name="index" />, bare or qualified by a namespace, its arguments and its blocks; or false and
         /// trouble where it is not one, <paramref name="what" /> saying what was expected.
         /// </summary>
         public static bool Member(Statement statement, AutomationSystem system, int index, string what, ScriptTrouble trouble, out string provider, out string id,
@@ -63,22 +63,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             var member = statement.Parts(index);
-            var bare = member.Count == 1 && member[0].Word.Length > 0;
-            var qualified = member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0;
-            if (!bare && !qualified)
+            if (!ScriptQuotes.Whole(member))
             {
                 trouble.Say(statement, $"expected {what}.");
                 return false;
             }
 
-            if (qualified && member[0].Word != BlockKinds.Own)
-            {
-                trouble.Say(statement, $"no namespace '{member[0].Word}'; expected a member, bare or qualified by {BlockKinds.Own}.");
-                return false;
-            }
-
-            provider = qualified ? member[0].Word : "";
+            provider = ScriptQuotes.Namespace(member);
             id = member[member.Count - 1].Word;
+            // A namespace no mod has registered reads all the same, and its member is not offered until one does: a mod may
+            // load after the world's programs are read, or not be installed.
 
             var given = statement.Arguments(index);
             for (var i = 0; i < given.Count; i++)
@@ -142,17 +136,41 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             var kind = statement.KindOf(written);
             var thing = statement.ThingOf(written);
+            string space = null;
             string id = null;
             if (kind.Form == ValueForm.Qualified)
             {
                 var parts = statement.PartsOf(kind);
-                if (parts.Count == 2 && parts[0].Word == BlockKinds.Own)
-                    id = parts[1].Word;
+                if (ScriptQuotes.Whole(parts))
+                {
+                    space = ScriptQuotes.Namespace(parts);
+                    id = parts[parts.Count - 1].Word;
+                }
             }
             else if (ScriptQuotes.Named(kind))
                 id = kind.Word;
 
-            var type = id == null ? null : ChoiceTypes.Named(id);
+            if (id == null)
+                return false;
+
+            var type = space != null ? ChoiceTypes.Named(space, id) : ChoiceTypes.Named(id);
+            if (type == null && space == null)
+            {
+                // Bare, and called so in more than one of the host's namespaces.
+                var hosts = new List<string>();
+                ChoiceTypes.Spellings(id, hosts);
+                if (hosts.Count > 1)
+                {
+                    wrong = true;
+                    var meanings = new List<string>();
+                    foreach (var host in hosts)
+                        meanings.Add($"the host's type '{host}'");
+
+                    Kinds.Ambiguous(statement, id, meanings, hosts, trouble);
+                    return false;
+                }
+            }
+
             if (type == null)
                 return false;
 
@@ -165,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 if (meanings.Count > 0)
                 {
                     meanings.Add($"the host's type '{id}'");
-                    spellings.Add($"{BlockKinds.Own}.{id}");
+                    spellings.Add($"{type.Namespace}.{id}");
                     Kinds.Ambiguous(statement, id, meanings, spellings, trouble);
                     return false;
                 }
@@ -173,7 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             if (!ScriptQuotes.Named(thing) || !type.Has(thing.Word))
             {
-                trouble.Say(statement, $"no choice {ScriptQuotes.Spelled(statement, thing)} in {BlockKinds.Own}.{type.Id}.");
+                trouble.Say(statement, $"no choice {ScriptQuotes.Spelled(statement, thing)} in {type.Namespace}.{type.Id}.");
                 return false;
             }
 
@@ -541,12 +559,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (!Member(statement, system, 0, "a value on a list of names after 'set', like Radius on [ light ]", trouble,
                     out provider, out id, act.Arguments, act.Targets))
                 return null;
-
-            if (provider.Length > 0 && provider != BlockKinds.Own)
-            {
-                trouble.Say(statement, $"no value '{ScriptWriter.Spelling(provider, id)}' to set; expected one of the block's own, written bare, or one qualified by {BlockKinds.Own}.");
-                return null;
-            }
 
             if (act.Arguments.Count > 0)
             {

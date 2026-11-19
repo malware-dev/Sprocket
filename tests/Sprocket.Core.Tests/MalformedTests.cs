@@ -137,12 +137,10 @@ public class MalformedTests
     [InlineData("    inner = [ door1 ]\n", "    inner = [ door1 ]\n    inner = [ door1 ]\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.close on [ button ]\n")]
     [InlineData("    whenever sprocket.finishes_closing on [ inner ] then run 1\n", "    whenever sprocket.finishes_closing on [ button ] then run 1\n")]
-    [InlineData("        call sprocket.close on [ inner ]\n", "        call ext.close on [ inner ]\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.on on [ inner ]\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        act sprocket.close on [ inner ]\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.close on [ door1 ]\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.run on [ inner ]\n")]
-    [InlineData("    whenever sprocket.finishes_closing on [ inner ] then run 1\n", "    when any ext.closed on [ inner ] == on then run 1\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.close() on [ inner ]\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.close(1,) on [ inner ]\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.close(1 2) on [ inner ]\n")]
@@ -151,7 +149,6 @@ public class MalformedTests
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.close on [ inner ] with 2\n")]
     [InlineData("        call sprocket.close on [ inner ]\n", "        call sprocket.close on [ inner ], 2\n")]
     [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius(1) on [ inner ] to 4\n")]
-    [InlineData("        set Radius on [ inner ] to 4\n", "        set other.radius on [ inner ] to 4\n")]
     [InlineData("    whenever sprocket.finishes_closing on [ inner ] then run 1\n", "    when any sprocket.closed on [ inner ] then run 1\n")]
     [InlineData("    whenever sprocket.finishes_closing on [ inner ] then run 1\n", "    when any sprocket.closed on [ inner ] == then run 1\n")]
     [InlineData("    whenever sprocket.finishes_closing on [ inner ] then run 1\n", "    when any sprocket.closed on [ inner ] < on then run 1\n")]
@@ -198,18 +195,6 @@ public class MalformedTests
         var program = new Automation();
         Assert.StartsWith("Line 1: ", EarlierSwitches.Load("// off \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\"\n", program));
         Assert.False(program.Intact);
-    }
-
-    /// <summary>A member in a namespace this host has not got is an error.</summary>
-    [Theory]
-    [InlineData("        call sprocket.close on [ inner ]\n", "        call Gearbox.close on [ inner ]\n", "no namespace 'Gearbox'")]
-    [InlineData("        call sprocket.close on [ inner ]\n", "        call Sprocket.close on [ inner ]\n", "no namespace 'Sprocket'")]
-    [InlineData("    whenever sprocket.finishes_closing on [ inner ] then run 1\n", "    when any Gearbox.closed on [ inner ] == on then run 1\n", "no namespace 'Gearbox'")]
-    public void AMemberOrMomentTheHostHasNotGotIsAnError(string was, string now, string said)
-    {
-        var after = new Automation();
-        Assert.Contains(said, ProgramReader.Load(Good.Replace(was, now), after, new Values()));
-        Assert.False(after.Intact);
     }
 
 
