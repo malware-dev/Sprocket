@@ -108,8 +108,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <remarks>The installation the run was on is switched off, with the message as the reason.</remarks>
         AbortedProblem = 23,
 
-        /// <summary>A setting one of its steps names alone could also be one of the words its member takes, so it is not told which is meant.</summary>
-        /// <remarks>Found when the program is bound; the setting written qualified, <c>settings.closed</c>, mends it.</remarks>
+        /// <summary>
+        /// A name one of its steps, tests or triggers writes could mean more than one thing, so it is not told which is meant: a
+        /// setting named alone that its member also takes as one of its words, or a member named alone that more than one
+        /// namespace, the game's included, offers on its blocks.
+        /// </summary>
+        /// <remarks>Found when the program is bound; the fault's words are the name as written, and the name written with more detail mends it.</remarks>
         Ambiguous = 24
     }
 }

@@ -114,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
             if (part.IsSignal)
             {
                 var positions = chosen.Positions(part.Id);
-                var pressed = positions != null && positions.Count > 0 ? positions[0].EventId : "";
+                var pressed = positions != null && positions.Count > 0 ? MemberKey.Bare(positions[0].EventId) : default(MemberKey);
                 _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, ReachKind.Native,
                     answer => Answered(part, chosen, answer),
                     admits: Signaling, signalsOnly: true));
@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
             if (type != null)
             {
                 var step = _system.ActingOn(part.Id);
-                _editor.Push(new PickPage(_editor, part.Id, targets, step == null ? "" : step.ActionId,
+                _editor.Push(new PickPage(_editor, part.Id, targets, step == null ? default(MemberKey) : step.Key,
                     step == null ? ReachKind.Native : step.Form, _editor.Picks.Facet(_system, chosen, new[] { part.Id }),
                     block => block.Kind.Facets(type).Count > 0, answer => Held(part, chosen, type, answer)) { FacetOnly = type });
                 return;

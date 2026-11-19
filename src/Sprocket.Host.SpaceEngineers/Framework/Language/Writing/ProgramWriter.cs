@@ -1115,7 +1115,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 }
                 else
                 {
-                    WriteMember(pen, system, act.Form == ReachKind.Native ? act.Provider : "", act.ActionId, act.Arguments, act.Targets);
+                    WriteMember(pen, system, act.Provider, act.ActionId, act.Arguments, act.Targets);
                 }
 
                 return;

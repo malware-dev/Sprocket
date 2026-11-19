@@ -116,9 +116,9 @@ public class CombatTests
         var kind = ship.Kind(ship.Turret);
 
         foreach (var id in new[] { "firing", "targeting", "on_target", "manually_controlled" })
-            Assert.NotNull(Probe.Value(kind, BlockKinds.Own, id));
+            Assert.NotNull(Probe.Value(kind, new MemberKey(BlockKinds.Own, id)));
 
-        Assert.Null(Probe.Value(kind, BlockKinds.Own, "rounds_left"));
+        Assert.Null(Probe.Value(kind, new MemberKey(BlockKinds.Own, "rounds_left")));
     }
 
     /// <summary>Whether a gun is firing is a state of the gun, read as the gun itself beside its order to open or cease fire.</summary>
@@ -126,7 +126,7 @@ public class CombatTests
     public void FiringIsAStateOfTheGun()
     {
         var ship = new Ship();
-        var firing = Probe.Value(ship.Kind(ship.Turret), BlockKinds.Own, "firing")!;
+        var firing = Probe.Value(ship.Kind(ship.Turret), new MemberKey(BlockKinds.Own, "firing"))!;
 
         Assert.True(firing.IsStatus);
         Assert.Equal("firing", firing.Text);

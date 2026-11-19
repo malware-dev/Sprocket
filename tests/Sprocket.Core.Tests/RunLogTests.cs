@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using BlockKinds = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.BlockKinds;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -65,7 +67,7 @@ public class RunLogTests
 
         public Act Do(string action, Fitting block)
         {
-            var act = new Act(action);
+            var act = new Act(new MemberKey(BlockKinds.Own, action));
             act.Targets.Add(Name(block));
             return Given.Defaults(act);
         }

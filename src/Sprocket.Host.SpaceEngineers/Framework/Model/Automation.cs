@@ -585,7 +585,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 made.Value = when.Value;
                 made.Interval = when.Interval;
                 made.IntervalSetting = when.IntervalSetting;
-                made.Provider = when.Provider;
+                made.Key = when.Key;
                 for (var i = 0; i < when.Arguments.Count; i++)
                     made.Arguments.Add(when.Arguments[i]);
 
@@ -595,7 +595,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             {
                 var signal = (SignalTrigger)trigger;
                 var made = new SignalTrigger(signal.EventId);
-                made.Provider = signal.Provider;
+                made.Key = signal.Key;
                 made.At = signal.At;
                 copy = made;
             }
@@ -624,9 +624,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var act = step as Act;
             if (act != null)
             {
-                var copy = new Act(act.ActionId);
+                var copy = new Act(act.Key);
                 copy.Form = act.Form;
-                copy.Provider = act.Provider;
                 for (var i = 0; i < act.Targets.Count; i++)
                     copy.Targets.Add(act.Targets[i]);
                 for (var i = 0; i < act.Arguments.Count; i++)
@@ -691,8 +690,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         static Comparison Copied(Comparison test)
         {
             var copy = new Comparison();
-            copy.MemberId = test.MemberId;
-            copy.Provider = test.Provider;
+            copy.Key = test.Key;
             copy.Quantifier = test.Quantifier;
             copy.Relation = test.Relation;
             copy.Value = test.Value;

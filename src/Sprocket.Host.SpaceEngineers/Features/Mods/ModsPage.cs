@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Selector.Blocks;
-using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
@@ -238,7 +237,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Mods
             _mods.Clear();
             foreach (var space in HostNamespaces.All)
             {
-                if (space.Name != BlockKinds.Own)
+                if (!HostNamespaces.IsBuiltIn(space))
                     _mods.Add(space);
             }
 

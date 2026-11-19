@@ -160,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             else if (signal != null)
             {
                 var made = new SignalTrigger(signal.EventId);
-                made.Provider = signal.Provider;
+                made.Key = signal.Key;
                 made.At = signal.At;
                 foreach (var source in signal.Sources)
                     made.Sources.Add(source);
@@ -192,9 +192,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var act = step as Act;
             if (act != null)
             {
-                var copy = new Act(act.ActionId);
+                var copy = new Act(act.Key);
                 copy.Form = act.Form;
-                copy.Provider = act.Provider;
                 foreach (var target in act.Targets)
                     copy.Targets.Add(target);
 

@@ -88,10 +88,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             if (!_forTests && !(_forEvents && _picked.Form == ReachKind.Value))
                 return _editor.Fields(selection, _picked.Member, _picked.Form);
 
-            var value = _picked.Member;
-            string state;
-            var stated = _forTests && ComparisonQuestion.Split(_picked.Member, out value, out state);
-            return ComparisonQuestion.Asked(Vocabulary.ValueOf(_editor.World, selection, value), Vocabulary.EventsOf(_editor.World, selection), stated);
+            string value = "", state;
+            var stated = _forTests && ComparisonQuestion.Split(_picked.Member.Id, out value, out state);
+            var read = stated ? _picked.Member.WithId(value) : _picked.Member;
+            return ComparisonQuestion.Asked(Vocabulary.ValueOf(_editor.World, selection, read), Vocabulary.EventsOf(_editor.World, selection), stated);
         }
 
         /// <summary>What the values open holding, where this opened on something that has values.</summary>
@@ -306,7 +306,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             var opened = new List<Literal>();
             foreach (var field in fields)
             {
-                var current = field.OpensOn == null ? null : Vocabulary.Current(_editor.World, _picked.Blocks, field.OpensOn, _picked.Facet);
+                var current = field.OpensOn == null ? null : Vocabulary.Current(_editor.World, _picked.Blocks, MemberKey.Bare(field.OpensOn), _picked.Facet);
                 for (var i = 0; i < field.Covers; i++)
                     opened.Add(current.HasValue && field.Covers == 1 ? Opaque(current.Value) : Literal.Of(""));
             }

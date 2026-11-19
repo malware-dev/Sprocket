@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         /// Whether that trigger is still in the system, saying what it was left saying.
         /// </summary>
         protected static bool Holds(AutomationSystem system, Trigger trigger, IList<string> sources,
-            string eventId)
+            MemberKey? key)
         {
             if (trigger == null || system.IndexOfTrigger(trigger) < 0)
                 return false;
@@ -21,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
             if (moment == null)
                 return true;
 
-            return moment.EventId == eventId && Same(moment.Sources, sources);
+            return key.HasValue && moment.Key == key.Value && Same(moment.Sources, sources);
         }
 
         /// <summary>Waits for the logic system's switch, as making it did.</summary>

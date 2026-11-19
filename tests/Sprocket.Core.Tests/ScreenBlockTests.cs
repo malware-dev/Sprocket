@@ -129,7 +129,7 @@ public class ScreenBlockTests
             Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in colors.Concat(layout).Append("PreserveAspectRatio").Where(id => id != "Rotate"))
-            Assert.False(EntityAction.Value(kind.Actions, "", id)?.Vetted ?? false, id + " is vetted");
+            Assert.False(kind.FindAction(new MemberKey(BlockKinds.Game, id), ReachKind.Value)?.Vetted ?? false, id + " is vetted");
 
         Assert.False(kind.FindAction("PreserveAspectRatio", ReachKind.Action)!.Vetted);
 

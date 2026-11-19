@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
@@ -16,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly Run _now;
 
         readonly List<string> _sources;
-        readonly string _eventId;
+        readonly MemberKey? _key;
 
         /// <summary>Has <paramref name="trigger" /> do <paramref name="does" />, carrying <paramref name="made" />, the sequence made for it, where one was.</summary>
         public PointTrigger(Automation program, Trigger trigger, Run does, Sequence made)
@@ -30,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var moment = trigger as MomentTrigger;
             _sources = moment == null ? null : CopyOf(moment.Sources);
-            _eventId = moment?.EventId;
+            _key = moment?.Key;
         }
 
         /// <inheritdoc />
@@ -57,13 +58,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
-            return _trigger.Does == _now && Holds(system, _trigger, _sources, _eventId);
+            return _trigger.Does == _now && Holds(system, _trigger, _sources, _key);
         }
 
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return _trigger.Does == _was && Holds(system, _trigger, _sources, _eventId);
+            return _trigger.Does == _was && Holds(system, _trigger, _sources, _key);
         }
 
         /// <inheritdoc />

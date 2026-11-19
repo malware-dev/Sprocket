@@ -454,10 +454,10 @@ namespace Sprocket.Host.SpaceEngineers
             Settle();
         }
 
-        /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
-        public List<Field> Fields(IList<long> entityIds, string actionId, ReachKind form)
+        /// <summary>What the values of the member <paramref name="key" /> names ask for, one per value, asked of the blocks it acts on.</summary>
+        public List<Field> Fields(IList<long> entityIds, MemberKey key, ReachKind form)
         {
-            return Vocabulary.Fields(_world, entityIds, actionId, form);
+            return Vocabulary.Fields(_world, entityIds, key, form);
         }
 
         /// <summary>

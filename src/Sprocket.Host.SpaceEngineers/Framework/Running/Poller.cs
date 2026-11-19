@@ -256,9 +256,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 }
 
                 var probe = when != null
-                    ? Probe.Of(entity, when.Provider, when.EventId, _arguments, when.Quantifier, when.Relation, _value, read,
+                    ? Probe.Of(entity, when.Key, _arguments, when.Quantifier, when.Relation, _value, read,
                         _owner.Clock, _instance == null ? 0 : _instance.FacetOf(when.Sources, name))
-                    : Probe.Watching(entity, signal.Provider, signal.EventId, read, _owner.Clock);
+                    : Probe.Watching(entity, signal.Key, read, _owner.Clock);
 
                 var ruling = probe?.RuledOutBy;
                 _entities[i] = entity;

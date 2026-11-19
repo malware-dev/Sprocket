@@ -89,6 +89,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>Stable identifier, referenced by saved sequences.</summary>
         public string Id { get; private set; }
 
+        string _namespace;
+
+        /// <summary>
+        /// The host's namespace this is in: Sprocket's own for its own actions and values, a mod's for one the mod adds, and
+        /// <c>game</c> for the game's own.
+        /// </summary>
+        public string Namespace => _namespace ?? (Form == ReachKind.Native || OwnValue != null ? BlockKinds.Own : BlockKinds.Game);
+
+        /// <summary>What names this in memory: its namespace and its id.</summary>
+        public MemberKey Key => new MemberKey(Namespace, Id);
+
+        /// <summary>Puts this in the host's namespace <paramref name="space" />, such as a mod's, in place of the one its form gives it.</summary>
+        public EntityAction InNamespace(string space)
+        {
+            _namespace = space ?? "";
+            return this;
+        }
+
         /// <summary>How it reads in a sentence, as the instruction that completes "___ the hangar door": "open".</summary>
         public string Text { get; private set; }
 
@@ -525,21 +543,53 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return true;
         }
 
-        /// <summary>
-        /// The value <paramref name="id" /> among <paramref name="actions" />: Sprocket's own where <paramref name="provider" />
-        /// is <c>sprocket</c>, the block's own where it is empty; null where there is none.
-        /// </summary>
-        public static EntityAction Value(IList<EntityAction> actions, string provider, string id)
+        /// <summary>The value among <paramref name="actions" /> that <paramref name="key" />, as a program wrote it, names; null where none does, or a bare name meets more than one.</summary>
+        public static EntityAction Value(IList<EntityAction> actions, MemberKey key)
         {
-            var own = provider == BlockKinds.Own;
+            return Find(actions, key, true);
+        }
+
+        /// <summary>
+        /// The member among <paramref name="actions" /> that <paramref name="key" />, as a program wrote it, names: a value where
+        /// <paramref name="value" /> says so, as a <c>set</c> or a reading does, and an action otherwise, as a <c>call</c> does.
+        /// Null where none does, or where a bare name meets more than one.
+        /// </summary>
+        /// <remarks>Asked where a program is bound or edited, never on a tick.</remarks>
+        public static EntityAction Find(IList<EntityAction> actions, MemberKey key, bool value)
+        {
+            EntityAction found = null;
             for (var i = 0; i < actions.Count; i++)
             {
                 var action = actions[i];
-                if (action.Id == id && action.Form == ReachKind.Value && (action.OwnValue != null) == own)
-                    return action;
+                if ((action.Form == ReachKind.Value) != value || !key.Names(action.Key))
+                    continue;
+
+                if (found != null)
+                    return null;
+
+                found = action;
             }
 
-            return null;
+            return found;
+        }
+
+        /// <summary>
+        /// Whether <paramref name="key" />, as a program wrote it, is a bare name that more than one of <paramref name="actions" />
+        /// answers to, a value where <paramref name="value" /> says so and an action otherwise, which tells it no one member.
+        /// </summary>
+        public static bool Ambiguous(IList<EntityAction> actions, MemberKey key, bool value)
+        {
+            if (!key.IsBare)
+                return false;
+
+            var met = 0;
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if ((actions[i].Form == ReachKind.Value) == value && key.Names(actions[i].Key) && ++met > 1)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>What may be typed into a box for a value of this kind.</summary>

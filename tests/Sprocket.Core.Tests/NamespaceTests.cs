@@ -59,6 +59,7 @@ public class NamespaceTests
             Assert.True(HostNamespaces.Register("malforge.hover_repulsors", "Hover Repulsors", "Hover Repulsors", "Malforge"));
             Assert.False(HostNamespaces.Register("malforge.hover_repulsors", "Someone Else", "Copy", "Someone"));
             Assert.False(HostNamespaces.Register("sprocket", "Someone Else", "Copy", "Someone"));
+            Assert.False(HostNamespaces.Register("game", "Someone Else", "Copy", "Someone"));
 
             HostNamespaces.Unregister("malforge.hover_repulsors", "Someone Else");
             var kept = HostNamespaces.Find("malforge.hover_repulsors")!;
@@ -73,9 +74,9 @@ public class NamespaceTests
         }
     }
 
-    /// <summary>Clearing as a session ends forgets every namespace but Sprocket's own.</summary>
+    /// <summary>Clearing as a session ends forgets every namespace but Sprocket's own and the game's.</summary>
     [Fact]
-    public void ClearingKeepsOnlySprocketsOwn()
+    public void ClearingKeepsOnlySprocketsOwnAndTheGames()
     {
         HostNamespaces.Register("malforge.hover_repulsors", "Hover Repulsors", "Hover Repulsors", "Malforge");
 
@@ -83,5 +84,8 @@ public class NamespaceTests
 
         Assert.False(HostNamespaces.Has("malforge.hover_repulsors"));
         Assert.True(HostNamespaces.Has("sprocket"));
+        Assert.True(HostNamespaces.Has("game"));
+        HostNamespaces.Unregister("game", HostNamespaces.Sprocket);
+        Assert.Equal("Space Engineers", HostNamespaces.Find("game")!.Title);
     }
 }

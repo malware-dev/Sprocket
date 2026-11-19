@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         readonly List<string> _slots = new List<string>();
 
         /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, read from them as <paramref name="quantifier" /> says, with no arguments.</summary>
-        public PickAnswer(IList<long> targets, string chosen, Quantifier quantifier)
+        public PickAnswer(IList<long> targets, MemberKey chosen, Quantifier quantifier)
             : this(targets, chosen, quantifier, null)
         {
         }
@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// reaching the blocks the way <paramref name="form" /> says, on the facet of each called <paramref name="facet" /> where
         /// what was chosen is a member of a type the host provides.
         /// </summary>
-        public PickAnswer(IList<long> targets, string chosen, Quantifier quantifier, IList<Literal> arguments,
+        public PickAnswer(IList<long> targets, MemberKey chosen, Quantifier quantifier, IList<Literal> arguments,
             ReachKind form = ReachKind.Native, string facet = "")
         {
             for (var i = 0; i < targets.Count; i++)
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                     _arguments.Add(arguments[i]);
             }
 
-            Chosen = chosen;
+            Key = chosen;
             Quantifier = quantifier;
             Form = form;
             Facet = facet ?? "";
@@ -59,8 +59,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// </summary>
         public IList<Literal> Arguments => _arguments;
 
-        /// <summary>The event or action that was chosen.</summary>
-        public string Chosen { get; private set; }
+        /// <summary>The member, signal or slot of a toolbar that was chosen, in its namespace.</summary>
+        public MemberKey Key { get; private set; }
+
+        /// <summary>The id of what was chosen, within its namespace.</summary>
+        public string Chosen => Key.Id;
 
         /// <summary>The name, shared by every block, of the facet a member of a type the host provides acts on; empty for any other.</summary>
         public string Facet { get; private set; }

@@ -15,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>A trigger started when the value <paramref name="eventId" /> comes to be on.</summary>
         public WhenTrigger(string eventId) : base(eventId)
         {
+            Key = new MemberKey(BlockKinds.Own, eventId);
             Value = Literal.Of(true);
         }
 
@@ -41,8 +42,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>The setting whose length of time is how often the blocks are looked at, each installation's own, or empty where <see cref="Interval" /> says.</summary>
         public string IntervalSetting { get; set; } = "";
 
-        /// <summary>The namespace the member is qualified by: <c>sprocket</c> for Sprocket's own, or empty for one of the block's.</summary>
-        public string Provider { get; set; } = BlockKinds.Own;
+        /// <summary>The namespace the member is written qualified by, or empty where it is written bare.</summary>
+        /// <remarks>Setting it keeps the id; the member is still named by <see cref="MomentTrigger.Key" />.</remarks>
+        public string Provider
+        {
+            get { return Key.Namespace; }
+            set { Key = new MemberKey(value, Key.Id); }
+        }
 
         /// <summary>A copy of this trigger, to change one thing of as an edit; what it starts is the edit's to carry over.</summary>
         public WhenTrigger Copy()
@@ -54,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 Value = Value,
                 Interval = Interval,
                 IntervalSetting = IntervalSetting,
-                Provider = Provider
+                Key = Key
             };
 
             for (var i = 0; i < Sources.Count; i++)
@@ -64,10 +70,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return copy;
         }
 
-        /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>sprocket</c>, the block's own where it is bare; null where it names none.</summary>
+        /// <summary>The value among <paramref name="actions" /> that the member names; null where it names none, or a bare name meets more than one.</summary>
         public EntityAction Names(IList<EntityAction> actions)
         {
-            return EntityAction.Value(actions, Provider, EventId);
+            return EntityAction.Value(actions, Key);
+        }
+
+        /// <summary>Whether this trigger's bare name meets more than one value among <paramref name="actions" />, so it names none of them.</summary>
+        public bool Ambiguous(IList<EntityAction> actions)
+        {
+            return EntityAction.Ambiguous(actions, Key, true);
         }
     }
 }

@@ -52,7 +52,7 @@ public class UndoTests
 
     static Act StepFor(string actionId, params string[] targets)
     {
-        var step = new Act(actionId);
+        var step = new Act(new MemberKey(BlockKinds.Own, actionId));
         foreach (var target in targets)
             step.Targets.Add(target);
         return Given.Defaults(step);
@@ -165,7 +165,7 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         Sequence sequence = Build();
-        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", ReachKind.Native, BlockKinds.Own, new[] { Literal.Of(4L) }, true));
+        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, new MemberKey(BlockKinds.Own, "lock"), ReachKind.Native, new[] { Literal.Of(4L) }, true));
     }
 
     /// <summary>A step changed to something that takes no time loses the wait after it, and undoing puts that wait back.</summary>
@@ -177,7 +177,7 @@ public class UndoTests
         sequence.Steps.Insert(1, awaited);
         var before = Shape(sequence);
 
-        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "on", ReachKind.Native, BlockKinds.Own, new Literal[0], false);
+        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, new MemberKey(BlockKinds.Own, "on"), ReachKind.Native, new Literal[0], false);
         edit.Apply(sequence);
         Assert.IsNotType<Await>(sequence.Steps[1]);
 
@@ -607,7 +607,7 @@ public class UndoTests
     {
         Sequence sequence = Build();
 
-        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", ReachKind.Native, BlockKinds.Own, new Literal[0], true).Changes);
+        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, new MemberKey(BlockKinds.Own, "close"), ReachKind.Native, new Literal[0], true).Changes);
         Assert.False(new RenameSequence("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
 

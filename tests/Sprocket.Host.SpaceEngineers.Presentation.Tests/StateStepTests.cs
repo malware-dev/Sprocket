@@ -83,7 +83,7 @@ public class StateStepTests
         var toggled = Assert.IsType<Act>(sequence.Steps[0]);
         Assert.Equal(ReachKind.Action, toggled.Form);
         Assert.Empty(toggled.Arguments);
-        Assert.Equal("Stockpile", Vocabulary.Flipped(sim.World, sim.Editor.Blocks(sequence.System, toggled.Targets), toggled.ActionId));
+        Assert.Equal("Stockpile", Vocabulary.Flipped(sim.World, sim.Editor.Blocks(sequence.System, toggled.Targets), toggled.Key)?.Id);
     }
 
     /// <summary>The fueling program in a world with its tank, read in, its system switched off so it can be changed.</summary>

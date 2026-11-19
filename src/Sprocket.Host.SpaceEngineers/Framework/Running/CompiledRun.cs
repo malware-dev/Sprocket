@@ -141,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     if (facet > 0 && member?.Type != null && member.Type.Find(entity.Kind, facet) == null)
                         continue;
 
-                    var probe = Probe.Of(entity, test.Provider, test.MemberId, arguments,
+                    var probe = Probe.Of(entity, test.Key, arguments,
                         test.Quantifier, test.Relation, tested.Value, null, _owner.Clock, facet);
 
                     if (probe != null && !probe.PassedOver)

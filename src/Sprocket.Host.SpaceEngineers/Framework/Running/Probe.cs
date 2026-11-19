@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         public Reading RuledOutBy => Signal != null ? Signal.RuledOutBy : Own?.RuledOutBy;
 
         /// <summary>
-        /// The value <paramref name="id" /> qualified by <paramref name="provider" /> as <paramref name="entity" /> has it,
+        /// The value <paramref name="key" /> names as <paramref name="entity" /> has it,
         /// given <paramref name="arguments" /> and compared by <paramref name="relation" /> with <paramref name="value" />; null
         /// where the block has no such value, or it cannot be compared that way or read the way <paramref name="quantifier" />
         /// asks.
@@ -70,13 +70,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// Only numbers are ordered or summed. A value of a type the host provides reads the facet numbered
         /// <paramref name="facet" />, the first where it names none.
         /// </remarks>
-        public static Probe Of(GridEntity entity, string provider, string id, IList<Literal> arguments, Quantifier quantifier,
+        public static Probe Of(GridEntity entity, MemberKey key, IList<Literal> arguments, Quantifier quantifier,
             Relation relation, Literal value, ReadingMemory kept = null, Func<int> clock = null, int facet = 0)
         {
-            if (entity == null || (provider.Length > 0 && provider != BlockKinds.Own))
+            if (entity == null)
                 return null;
 
-            var written = Value(entity.Kind, provider, id);
+            var written = Value(entity.Kind, key);
             if (written == null)
                 return null;
 
@@ -153,25 +153,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
-        /// The signal <paramref name="id" /> qualified by <paramref name="provider" /> as <paramref name="entity" /> sends it,
+        /// The signal <paramref name="key" /> names as <paramref name="entity" /> sends it,
         /// watched for by Sprocket; null where the block sends no such signal, or one only a toolbar sends.
         /// </summary>
-        public static Probe Watching(GridEntity entity, string provider, string id, ReadingMemory kept = null, Func<int> clock = null)
+        public static Probe Watching(GridEntity entity, MemberKey key, ReadingMemory kept = null, Func<int> clock = null)
         {
-            if (entity == null || provider != BlockKinds.Own)
+            if (entity == null)
                 return null;
 
-            var signal = entity.Kind.FindEvent(id);
+            var signal = entity.Kind.FindEvent(key);
             if (signal == null || signal.Flag == null)
                 return null;
 
             return new Probe(entity, null, Relation.Is, Literal.Of(true), signal, null, kept, clock);
         }
 
-        /// <summary>The value <paramref name="id" /> a block of <paramref name="kind" /> has: Sprocket's own where <paramref name="provider" /> says so, the block's own otherwise.</summary>
-        public static EntityAction Value(EntityKind kind, string provider, string id)
+        /// <summary>The value a block of <paramref name="kind" /> has that <paramref name="key" /> names, or null where it has none, or a bare name meets more than one.</summary>
+        public static EntityAction Value(EntityKind kind, MemberKey key)
         {
-            return EntityAction.Value(kind.Actions, provider, id);
+            return EntityAction.Value(kind.Actions, key);
         }
 
         /// <summary>Whether the comparison holds on the block now, or, for a signal, whether the block is in what it changes to.</summary>

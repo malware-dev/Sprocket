@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
@@ -17,7 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         }
 
         /// <summary>The namespace the signal written in place is qualified by, or empty where the trigger names its signal.</summary>
-        public string Provider { get; set; } = "";
+        /// <remarks>Setting it keeps the id; the signal is still named by <see cref="MomentTrigger.Key" />.</remarks>
+        public string Provider
+        {
+            get { return Key.Namespace; }
+            set { Key = new MemberKey(value, Key.Id); }
+        }
 
         /// <summary>The slot on its blocks' toolbars a signal written in place is sent from, or null for a block's own change.</summary>
         public ToolbarSlot At { get; set; }

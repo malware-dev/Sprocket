@@ -152,7 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 return;
             }
 
-            var forecast = Forecast(system, answer.Targets, answer.Chosen, answer.Facet, watched, null, false, replacing, "");
+            var forecast = Forecast(system, answer.Targets, answer.Key, answer.Facet, watched, null, false, replacing, "");
             if (forecast.Matched != null)
             {
                 named(forecast.Matched);
@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <remarks>The trigger's own slot is changed once asked where another trigger uses it too.</remarks>
         public void NameSignal(AutomationSystem system, IList<long> blocks, ToolbarSlot at, string keeps, string called, Action<string> named)
         {
-            var forecast = Forecast(system, blocks, "", "", true, at, true, null, keeps);
+            var forecast = Forecast(system, blocks, default(MemberKey), "", true, at, true, null, keeps);
             if (forecast.Matched != null)
                 named(forecast.Matched[0]);
             else if (forecast.Changes == null)
@@ -210,10 +210,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <paramref name="keeps" />.
         /// </summary>
         /// <remarks>The one prediction the picker's heading shows and the edit made from the pick follows. Walks every slot's blocks, so it is asked as the picks change, never on a tick.</remarks>
-        public SlotForecast Forecast(AutomationSystem system, IList<long> blocks, string chosen, string facet, bool watched, ToolbarSlot at,
+        public SlotForecast Forecast(AutomationSystem system, IList<long> blocks, MemberKey chosen, string facet, bool watched, ToolbarSlot at,
             bool signal, IList<string> replacing, string keeps)
         {
-            var type = watched || signal || facet.Length == 0 || chosen.Length == 0 ? null : Vocabulary.TypeOf(_editor.World, blocks, chosen);
+            var type = watched || signal || facet.Length == 0 || chosen.IsEmpty ? null : Vocabulary.TypeOf(_editor.World, blocks, chosen);
             SystemInstance shown = system != null && system.IsBlueprint ? _editor.StandIn(system) : null;
             if (shown == null)
                 return new SlotForecast(null, null, false, signal, type);

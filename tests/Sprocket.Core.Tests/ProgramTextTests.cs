@@ -291,7 +291,7 @@ public class ProgramTextTests
         reverse.Targets.Add("rotor");
         sequence.Steps.Add(reverse);
 
-        var rotate = new Act(Blocks.Rotor.RotateTo) { Form = ReachKind.Native };
+        var rotate = new Act(new MemberKey(BlockKinds.Own, Blocks.Rotor.RotateTo)) { Form = ReachKind.Native };
         rotate.Targets.Add("rotor");
         rotate.Arguments.Add(Literal.Of(90L));
         rotate.Arguments.Add(Literal.Of(2.5));
@@ -302,7 +302,7 @@ public class ProgramTextTests
         speed.Arguments.Add(Literal.Of(5.0));
         sequence.Steps.Add(speed);
 
-        var shut = new Act("close");
+        var shut = new Act(new MemberKey(BlockKinds.Own, "close"));
         shut.Targets.Add("inner");
         sequence.Steps.Add(shut);
 

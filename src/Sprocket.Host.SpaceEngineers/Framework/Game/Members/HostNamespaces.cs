@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 {
     /// <summary>
     /// The namespaces this host's members, signals and types belong to, each registered by one owner with the name and author
-    /// a player sees: Sprocket's own, and each a mod registers.
+    /// a player sees: Sprocket's own, the game's, and each a mod registers.
     /// </summary>
     /// <remarks>
     /// Static, as one list for the whole host: a program is read where no world is at hand, in the library and on import.
@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
     /// </remarks>
     public static class HostNamespaces
     {
-        /// <summary>The owner Sprocket's own namespace is registered under.</summary>
+        /// <summary>The owner Sprocket's own namespace and the game's are registered under.</summary>
         public const string Sprocket = "Sprocket";
 
         static readonly Dictionary<string, HostNamespace> Registered = new Dictionary<string, HostNamespace>();
@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         public static void Unregister(string name, string owner)
         {
             HostNamespace had;
-            if (name != BlockKinds.Own && Registered.TryGetValue(name, out had) && had.Owner == owner)
+            if (Registered.TryGetValue(name, out had) && had.Owner != Sprocket && had.Owner == owner)
             {
                 Registered.Remove(name);
                 Changes++;
@@ -73,15 +73,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return Registered.TryGetValue(name, out found) ? found : null;
         }
 
-        /// <summary>Every namespace registered, Sprocket's own among them.</summary>
+        /// <summary>Every namespace registered, Sprocket's own and the game's among them.</summary>
         public static IEnumerable<HostNamespace> All => Registered.Values;
 
-        /// <summary>Forgets every namespace but Sprocket's own, as a session ends.</summary>
+        /// <summary>Whether <paramref name="space" /> is one of the namespaces the host has from the start, Sprocket's own or the game's, rather than a mod's.</summary>
+        public static bool IsBuiltIn(HostNamespace space) => space.Owner == Sprocket;
+
+        /// <summary>Forgets every namespace but Sprocket's own and the game's, as a session ends.</summary>
         public static void Clear()
         {
-            var gained = Registered.Count > 1;
+            var gained = Registered.Count > 2;
             Registered.Clear();
             Registered.Add(BlockKinds.Own, new HostNamespace(BlockKinds.Own, Sprocket, Sprocket, "Malware"));
+            Registered.Add(BlockKinds.Game, new HostNamespace(BlockKinds.Game, Sprocket, "Space Engineers", "Keen Software House"));
             if (gained)
                 Changes++;
         }

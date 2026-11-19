@@ -3,7 +3,6 @@ using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Sequences.Edits;
 using Sprocket.Host.SpaceEngineers.Features.States;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
-using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -155,10 +154,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var world = _editor.World;
             var blocks = _editor.Blocks(_sequence.System, step.Targets);
             var now = Vocabulary.Given(world, blocks, step, values);
-            var awaited = now.ActionId == step.ActionId && now.Form == step.Form
+            var awaited = now.Key == step.Key && now.Form == step.Form
                 ? Waited(index)
-                : Awaited(index, step, Vocabulary.Lasts(world, blocks, now.ActionId, now.Form));
-            _editor.Do(_sequence, new ChangeStep(index, step, now.Targets, now.ActionId, now.Form, now.Provider, now.Arguments, awaited));
+                : Awaited(index, step, Vocabulary.Lasts(world, blocks, now.Key, now.Form));
+            _editor.Do(_sequence, new ChangeStep(index, step, now.Targets, now.Key, now.Form, now.Arguments, awaited));
         }
 
         /// <summary>Opens the picker on <paramref name="step" />, on the column <paramref name="opens" />, to change what it does and to what.</summary>
@@ -167,14 +166,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var index = _sequence.Steps.IndexOf(step);
 
             Open(slots => new PickPage(_editor, _editor.Texts.PickHeadingTask, false,
-                slots ? new List<long>() : _editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
+                slots ? new List<long>() : _editor.Blocks(_sequence.System, step.Targets), step.Key, step.Form,
                 answer => Named(answer, step.Targets, named =>
                 {
-                    var lasts = Vocabulary.Lasts(_editor.World, answer.Targets, answer.Chosen, answer.Form);
+                    var lasts = Vocabulary.Lasts(_editor.World, answer.Targets, answer.Key, answer.Form);
                     _editor.Do(_sequence,
-                        new ChangeStep(index, step, named, answer.Chosen,
-                            answer.Form, Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, answer.Form),
-                            answer.Arguments, Awaited(index, step, lasts)));
+                        new ChangeStep(index, step, named, answer.Key, answer.Form, answer.Arguments, Awaited(index, step, lasts)));
                     _editor.Pop();
                 }), arguments: step.Arguments, opens: opens, facet: _editor.Picks.Facet(_sequence.System, step.Targets)), step.Targets);
         }
@@ -227,19 +224,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var origin = _editor.Depth;
 
             Open(slots => new PickPage(_editor, _editor.Texts.PickHeadingTask, false,
-                new List<long>(), "", ReachKind.Native,
+                new List<long>(), default(MemberKey), ReachKind.Native,
                 answer => Named(answer, null, named =>
                 {
-                    var step = new Act(answer.Chosen);
+                    var step = new Act(answer.Key);
                     step.Form = answer.Form;
-                    step.Provider = Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, answer.Form);
                     foreach (var target in named)
                         step.Targets.Add(target);
 
                     for (var i = 0; i < answer.Arguments.Count; i++)
                         step.Arguments.Add(answer.Arguments[i]);
 
-                    _editor.Do(_sequence, Vocabulary.Lasts(_editor.World, answer.Targets, answer.Chosen, answer.Form)
+                    _editor.Do(_sequence, Vocabulary.Lasts(_editor.World, answer.Targets, answer.Key, answer.Form)
                         ? new AddStep(ChangeKind.AddStep, at, step, new Await())
                         : new AddStep(ChangeKind.AddStep, at, step));
                     _editor.UnwindTo(origin);
@@ -282,7 +278,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// </summary>
         public void Switch(Act step)
         {
-            var flips = Vocabulary.Toggle(_editor.World, _editor.Blocks(_sequence.System, step.Targets), step.ActionId) != null;
+            var flips = Vocabulary.Toggle(_editor.World, _editor.Blocks(_sequence.System, step.Targets), step.Key) != null;
             SwitchQuestion.Offer(_editor, step, flips, values => Closed(step, new List<Literal>(values), false));
         }
 
@@ -432,7 +428,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var stated = value != null && value.IsStatus && (test.Relation == Relation.Is || test.Relation == Relation.IsNot);
             return new PickPage(_editor, _editor.Texts.PickHeadingCondition, false,
                 test == null || slots ? new List<long>() : _editor.Blocks(_sequence.System, test.Targets),
-                test == null ? "" : stated ? ComparisonQuestion.Id(test.MemberId, test.Value.Said) : test.MemberId,
+                test == null ? default(MemberKey) : stated ? test.Key.WithId(ComparisonQuestion.Id(test.MemberId, test.Value.Said)) : test.Key,
                 stated ? ReachKind.Native : ReachKind.Value,
                 answer => Named(answer, test?.Targets, named => chosen(Test(answer, named, test))),
                 true, test?.Quantifier ?? Quantifier.Any,
@@ -451,18 +447,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // Read off the blocks picked, since a slot made for them is not filled until the edit is done.
             string id, state;
             var stated = ComparisonQuestion.Split(answer.Chosen, out id, out state);
-            var value = Valued(Vocabulary.ActionsOf(_editor.World, answer.Targets), id);
+            test.Key = stated ? answer.Key.WithId(id) : answer.Key;
+            var value = EntityAction.Value(Vocabulary.ActionsOf(_editor.World, answer.Targets), test.Key);
             var given = answer.Arguments ?? new List<Literal>();
             var taken = ComparisonQuestion.Taken(value);
-            test.MemberId = id;
-            test.Provider = value != null && value.OwnValue != null ? BlockKinds.Own : "";
             test.Relation = given.Count > taken ? ComparisonQuestion.Read(given[taken]) : Relation.Is;
             test.Value = stated ? Stated(state) : given.Count > taken + 1 ? given[taken + 1] : Literal.Of(true);
             for (var i = 0; i < taken && i < given.Count; i++)
                 test.Arguments.Add(given[i]);
 
             // A value the blocks picked lack keeps the arguments it had, since the selector asked for none.
-            if (value != null || was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
+            if (value != null || was == null || was.Key != test.Key)
                 return test;
 
             for (var i = 0; i < was.Arguments.Count; i++)
@@ -480,17 +475,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return state == Literal.Of(false).Said ? Literal.Of(false) : Literal.Name(state);
         }
 
-        /// <summary>The value called <paramref name="id" /> among <paramref name="actions" />, or null where there is none.</summary>
-        static EntityAction Valued(IList<EntityAction> actions, string id)
-        {
-            for (var i = 0; i < actions.Count; i++)
-            {
-                if (actions[i].Id == id && actions[i].Form == ReachKind.Value)
-                    return actions[i];
-            }
-
-            return null;
-        }
         /// <summary>
         /// Offers, in a menu under what was pressed, a new sequence and the system's other sequences to run, or those to stop
         /// where <paramref name="stops" /> says so, and adds the step that does at the line <paramref name="at" />.

@@ -646,9 +646,9 @@ public class ScreenChoiceTests
         var slot = act.Targets[0];
         var board = editor.World.Entities.First(e => e.Name == "Status Board").Id;
 
-        var forecast = editor.Picks.Forecast(system, new[] { board }, act.ActionId, "Back", false, null, false, null, "");
+        var forecast = editor.Picks.Forecast(system, new[] { board }, act.Key, "Back", false, null, false, null, "");
         List<string>? named = null;
-        editor.Picks.Name(system, new PickAnswer(new[] { board }, act.ActionId, Quantifier.Any, null, act.Form, "Back"), false, null,
+        editor.Picks.Name(system, new PickAnswer(new[] { board }, act.Key, Quantifier.Any, null, act.Form, "Back"), false, null,
             names => named = names);
 
         Assert.Equal(new[] { slot }, forecast.Matched);

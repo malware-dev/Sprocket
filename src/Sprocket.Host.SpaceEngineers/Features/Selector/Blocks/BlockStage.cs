@@ -310,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         void FillOptions()
         {
             var asks = _asksAll && (_forTests || _forEvents && !_signalsOnly
-                && (_picked.Member.Length == 0 || Watched() || _picked.Form == ReachKind.Value || _picked.Totals));
+                && (_picked.Member.IsEmpty || Watched() || _picked.Form == ReachKind.Value || _picked.Totals));
             if (!asks)
             {
                 _blocks.Options.Clear();
@@ -355,13 +355,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         /// <summary>Whether what is chosen to start something is a state Sprocket watches the blocks for, rather than a signal they send.</summary>
         bool Watched()
         {
-            if (!_forEvents || _picked.Member.Length == 0)
+            if (!_forEvents || _picked.Member.IsEmpty)
                 return false;
 
             var events = Vocabulary.EventsOf(_editor.World, _picked.Blocks);
             foreach (var entityEvent in events)
             {
-                if (entityEvent.Id == _picked.Member)
+                if (entityEvent.Key == _picked.Member)
                     return !entityEvent.Answered && entityEvent.Value.Length > 0;
             }
 
@@ -374,11 +374,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
             _picked.Reading = quantifier;
 
             string value, state;
-            if (_picked.Totals && _picked.Member.Length > 0
-                && (ComparisonQuestion.Split(_picked.Member, out value, out state)
+            if (_picked.Totals && !_picked.Member.IsEmpty
+                && (ComparisonQuestion.Split(_picked.Member.Id, out value, out state)
                     || !MemberOffers.Number(Vocabulary.ValueOf(_editor.World, _picked.Blocks, _picked.Member))))
             {
-                _picked.Member = "";
+                _picked.Member = default(MemberKey);
             }
 
             _editor.Invalidate();

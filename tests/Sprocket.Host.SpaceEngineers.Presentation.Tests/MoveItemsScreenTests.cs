@@ -111,7 +111,7 @@ public class MoveItemsScreenTests
         screen.Run(2);
         var system = screen.Editor.Program.Systems[0];
         PickAnswer? answered = null;
-        screen.Editor.Push(new PickPage(screen.Editor, "A task on blocks", false, new List<long>(), "", ReachKind.Native, answer => answered = answer)
+        screen.Editor.Push(new PickPage(screen.Editor, "A task on blocks", false, new List<long>(), default(MemberKey), ReachKind.Native, answer => answered = answer)
         {
             Slotted = system
         });

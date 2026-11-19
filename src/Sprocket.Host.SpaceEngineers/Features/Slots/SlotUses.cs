@@ -38,11 +38,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                     continue;
 
                 var when = moment as WhenTrigger;
-                if (when != null && when.Names(actions) != null || Vocabulary.Find(events, moment.EventId) != null)
+                if (when != null && when.Names(actions) != null || Vocabulary.Find(events, moment.Key) != null)
                     continue;
 
                 var said = when?.Names(_editor.SlotBlocks.Actions(system, one));
-                return said != null ? said.Text : Vocabulary.Find(_editor.SlotBlocks.Events(system, one), moment.EventId)?.Text ?? moment.EventId;
+                return said != null ? said.Text : Vocabulary.Find(_editor.SlotBlocks.Events(system, one), moment.Key)?.Text ?? moment.EventId;
             }
 
             foreach (var sequence in system.Sequences)

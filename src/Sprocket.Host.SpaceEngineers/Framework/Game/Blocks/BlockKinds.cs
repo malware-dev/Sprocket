@@ -20,6 +20,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <remarks>Persisted in every program that uses one.</remarks>
         public const string Own = "sprocket";
 
+        /// <summary>What the game's own members are qualified by, where a program writes one qualified: <c>game.Radius</c>.</summary>
+        /// <remarks>Persisted in every program that writes one so.</remarks>
+        public const string Game = "game";
+
         const string GamePrefix = "MyObjectBuilder_";
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();

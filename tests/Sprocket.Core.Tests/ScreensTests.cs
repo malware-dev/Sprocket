@@ -248,12 +248,12 @@ public class ScreensTests
         ship.Tick();
         var entity = ship.Entity(board.Id);
 
-        Assert.True(Probe.Of(entity, BlockKinds.Own, ScreenType.TextShown, new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 2)!.Holds());
-        Assert.False(Probe.Of(entity, BlockKinds.Own, ScreenType.TextShown, new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 1)!.Holds());
-        Assert.True(Probe.Of(entity, BlockKinds.Own, ScreenType.App, new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("TSS_Weather"), facet: 2)!.Holds());
-        Assert.True(Probe.Of(entity, BlockKinds.Own, "font_size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(3.0), facet: 2)!.Holds());
-        Assert.True(Probe.Of(entity, BlockKinds.Own, "font_size", new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(1.0), facet: 1)!.Holds());
-        Assert.True(Probe.Of(entity, BlockKinds.Own, "alignment", new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("right"), facet: 2)!.Holds());
+        Assert.True(Probe.Of(entity, new MemberKey(BlockKinds.Own, ScreenType.TextShown), new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 2)!.Holds());
+        Assert.False(Probe.Of(entity, new MemberKey(BlockKinds.Own, ScreenType.TextShown), new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 1)!.Holds());
+        Assert.True(Probe.Of(entity, new MemberKey(BlockKinds.Own, ScreenType.App), new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("TSS_Weather"), facet: 2)!.Holds());
+        Assert.True(Probe.Of(entity, new MemberKey(BlockKinds.Own, "font_size"), new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(3.0), facet: 2)!.Holds());
+        Assert.True(Probe.Of(entity, new MemberKey(BlockKinds.Own, "font_size"), new Literal[0], Quantifier.Any, Relation.Is, Literal.Of(1.0), facet: 1)!.Holds());
+        Assert.True(Probe.Of(entity, new MemberKey(BlockKinds.Own, "alignment"), new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("right"), facet: 2)!.Holds());
     }
 
     /// <summary>A version 1 program names the function returning a screen <c>screen</c>; it reads as <c>get_screen</c>, and is written so.</summary>

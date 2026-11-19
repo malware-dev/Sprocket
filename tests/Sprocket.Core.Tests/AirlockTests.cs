@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using BlockKinds = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.BlockKinds;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
@@ -83,7 +84,7 @@ public class AirlockTests
     /// <summary>One thing done to some blocks, on its own, with nothing waiting for it.</summary>
     static Act Do(string actionId, params string[] targets)
     {
-        var step = new Act(actionId);
+        var step = new Act(new MemberKey(BlockKinds.Own, actionId));
         foreach (var target in targets)
             step.Targets.Add(target);
         return Given.Defaults(step);

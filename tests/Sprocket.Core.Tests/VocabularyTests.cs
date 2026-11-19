@@ -645,12 +645,12 @@ public class VocabularyTests
         var ship = new Ship();
         var events = new List<EntityEvent>(ship.Rig.Entity(ship.Door.Id).Kind.Events);
 
-        var any = Assert.IsType<SignalTrigger>(Vocabulary.Starter(events, "finishes_closing", false));
+        var any = Assert.IsType<SignalTrigger>(Vocabulary.Starter(events, new MemberKey(BlockKinds.Own, "finishes_closing"), false));
         Assert.True(any.IsWatched);
         Assert.Equal(BlockKinds.Own, any.Provider);
         Assert.Equal("finishes_closing", any.EventId);
 
-        var all = Assert.IsType<WhenTrigger>(Vocabulary.Starter(events, "finishes_closing", true));
+        var all = Assert.IsType<WhenTrigger>(Vocabulary.Starter(events, new MemberKey(BlockKinds.Own, "finishes_closing"), true));
         Assert.Equal("status", all.EventId);
         Assert.Equal(BlockKinds.Own, all.Provider);
         Assert.Equal(Quantifier.All, all.Quantifier);

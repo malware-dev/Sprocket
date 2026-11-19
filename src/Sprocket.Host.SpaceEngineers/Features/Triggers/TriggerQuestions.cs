@@ -97,11 +97,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (answer.Form == ReachKind.Value)
             {
                 var given = answer.Arguments;
-                var provider = Vocabulary.Provider(_editor.World, answer.Targets, answer.Chosen, ReachKind.Value);
-                var taken = ComparisonQuestion.Taken(EntityAction.Value(Vocabulary.ActionsOf(_editor.World, answer.Targets), provider, answer.Chosen));
+                var taken = ComparisonQuestion.Taken(EntityAction.Value(Vocabulary.ActionsOf(_editor.World, answer.Targets), answer.Key));
                 var when = new WhenTrigger(answer.Chosen)
                 {
-                    Provider = provider,
+                    Key = answer.Key,
                     Quantifier = answer.Quantifier,
                     Relation = given.Count > taken ? ComparisonQuestion.Read(given[taken]) : Relation.Is,
                     Value = given.Count > taken + 1 ? given[taken + 1] : Literal.Of(0)
@@ -121,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             }
 
             MomentTrigger made = Vocabulary.Starter(
-                Vocabulary.EventsOf(_editor.World, answer.Targets), answer.Chosen, answer.Quantifier == Quantifier.All);
+                Vocabulary.EventsOf(_editor.World, answer.Targets), answer.Key, answer.Quantifier == Quantifier.All);
 
             var signal = made as SignalTrigger;
             if (signal == null || signal.IsWatched)
@@ -392,7 +391,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (fresh)
             {
                 return new PickPage(_editor, _editor.Texts.PickHeadingTrigger, true,
-                    new List<long>(), moment?.EventId ?? "", ReachKind.Native,
+                    new List<long>(), moment?.Key ?? default(MemberKey), ReachKind.Native,
                     answer => Starter(system, answer, null, null, started =>
                     {
                         var made = started;
@@ -433,7 +432,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             var compares = when != null && Vocabulary.Compares(when, _editor.SlotBlocks.Events(system, when.Sources));
             return new PickPage(_editor, _editor.Texts.PickHeadingTrigger, true,
                 moment == null || slots ? new List<long>() : _editor.Blocks(system, moment.Sources),
-                moment == null ? "" : compares ? when.EventId : Vocabulary.EventOf(_editor.Program, _editor.Runner.Bindings, system, moment, _editor.StandIn(system)),
+                moment == null ? default(MemberKey) : compares ? when.Key : Vocabulary.EventOf(_editor.Program, _editor.Runner.Bindings, system, moment, _editor.StandIn(system)),
                 compares ? ReachKind.Value : ReachKind.Native,
                 answer =>
                 {

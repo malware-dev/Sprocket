@@ -578,6 +578,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             return null;
         }
 
+        /// <summary>The moment <paramref name="key" />, as a program wrote it, names; null where the kind has none, or a bare name meets more than one.</summary>
+        public EntityEvent FindEvent(MemberKey key)
+        {
+            EntityEvent found = null;
+            foreach (var entityEvent in _events)
+            {
+                if (!key.Names(entityEvent.Key))
+                    continue;
+
+                if (found != null)
+                    return null;
+
+                found = entityEvent;
+            }
+
+            return found;
+        }
+
         /// <summary>The signal the one toolbar slot <paramref name="at" /> is among, or null where none of this kind's is.</summary>
         public EntityEvent Signal(ToolbarSlot at)
         {
@@ -601,6 +619,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             foreach (var action in _actions)
             {
                 if (action.Id == actionId && action.Form == form)
+                    return action;
+            }
+            return null;
+        }
+
+        /// <summary>The entry <paramref name="key" /> names exactly, reached as <paramref name="form" />, or null where there is none.</summary>
+        public EntityAction FindAction(MemberKey key, ReachKind form)
+        {
+            foreach (var action in _actions)
+            {
+                if (action.Form == form && action.Key == key)
                     return action;
             }
             return null;

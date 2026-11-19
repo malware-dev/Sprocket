@@ -80,7 +80,7 @@ public class MechanicsTests
             else if (kind.OwnValue.Kind == ValueKind.Text)
                 operand = Literal.Of("");
 
-            var probe = Probe.Of(Rig.Entity(block.Id), BlockKinds.Own, member, new Literal[0], Quantifier.Any, Relation.Is, operand)!;
+            var probe = Probe.Of(Rig.Entity(block.Id), new MemberKey(BlockKinds.Own, member), new Literal[0], Quantifier.Any, Relation.Is, operand)!;
             return probe.Gauge.Read();
         }
     }

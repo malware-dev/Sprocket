@@ -1234,7 +1234,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 acted.Done = false;
 
                 _owner.Forced.Told(acted, this);
-                if (act.Form != ReachKind.Native)
+
+                // The member bound decides how it is done: a bare name may be a host's action as well as the game's.
+                if (acted.Action.Form != ReachKind.Native)
                 {
                     if (acted.Order != null)
                         acted.Order.Give();
@@ -1290,13 +1292,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         SequenceFault Refused(int step)
         {
             var act = (Act)_sequence.Steps[step];
-            if (!act.HasAction || act.Form != ReachKind.Native)
+            if (!act.HasAction || act.Sets)
                 return SequenceFault.None;
 
             var compiled = _workings.Compile(step, _bindings);
             foreach (var acted in compiled.Acts)
             {
-                if (acted.Bound == null || acted.Action.Until != null)
+                if (acted.Bound == null || acted.Action.Form != ReachKind.Native || acted.Action.Until != null)
                     continue;
 
                 var said = acted.Bound.Trouble(acted.Entity.Block, acted.Seen);

@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs;
@@ -72,10 +71,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         }
 
 
-        /// <summary>The words for the moment <paramref name="eventId" /> on <paramref name="sources" />, or an unfilled gap.</summary>
-        static string Happening(Bindings bindings, string eventId, IList<string> sources)
+        /// <summary>The words for the moment <paramref name="key" /> names on <paramref name="sources" />, or an unfilled gap.</summary>
+        static string Happening(Bindings bindings, MemberKey key, IList<string> sources)
         {
-            var happening = Vocabulary.Find(Vocabulary.EventsFor(bindings, sources), eventId);
+            var happening = Vocabulary.Find(Vocabulary.EventsFor(bindings, sources), key);
             return happening == null ? SentenceText.Empty : happening.Text;
         }
 
@@ -522,7 +521,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         static string Tested(Bindings bindings, Comparison test, SystemInstance through, bool slotted)
         {
             var targets = SystemInstance.Through(through, test.Targets);
-            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Provider, test.MemberId);
+            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Key);
             var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || targets.Count > 1, slotted, ComparisonQuestion.Join(value, test.Arguments));
             var blocks = Named(bindings, targets, shape.JoinsAll, slotted ? test.Targets : null);
             if (value == null)
@@ -536,23 +535,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
         /// <summary>
         /// What <paramref name="when" /> compares on the blocks <paramref name="targets" />, as a sentence reads it: the blocks
-        /// and the state they are read for, for one of Sprocket's own, or the value on the blocks and what it is compared with.
+        /// and the state they are read for, for a host's state, or the value on the blocks and what it is compared with.
         /// </summary>
         static string Compared(Bindings bindings, WhenTrigger when, IList<string> targets, IList<string> slots)
         {
             var blocks = Named(bindings, targets, when.Quantifier != Quantifier.Any, slots);
-            if (when.Provider == BlockKinds.Own)
+            bool inState;
+            var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), when.Key, when.Relation, when.Value, out inState);
+            if (state != null)
             {
-                bool inState;
-                var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), when.EventId, when.Relation, when.Value, out inState);
-                if (state != null)
-                {
-                    var said = inState ? state.State : state.Unstate;
-                    return $"{blocks} {(when.Quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said)}";
-                }
+                var said = inState ? state.State : state.Unstate;
+                return $"{blocks} {(when.Quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said)}";
             }
 
-            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), when.Provider, when.EventId);
+            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), when.Key);
             var shape = TestShape.Of(when.Quantifier, true, slots != null || targets.Count > 1, slots != null, ComparisonQuestion.Join(value, when.Arguments));
             var read = Named(bindings, targets, shape.JoinsAll, slots);
 
@@ -578,12 +574,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
             return slots != null ? SentenceText.Slots(slots) : SentenceText.Named(bindings, targets, requiresAll);
         }
 
-        /// <summary>Whether <paramref name="when" /> is a value of Sprocket's own coming to be what one of its signals says it becomes, which reads as that signal.</summary>
+        /// <summary>Whether <paramref name="when" /> is a host's value coming to be what one of its signals says it becomes, which reads as that signal.</summary>
         static bool Watched(Bindings bindings, WhenTrigger when, IList<string> sources)
         {
             bool inState;
-            return when.Provider == BlockKinds.Own
-                   && Vocabulary.Change(Vocabulary.EventsFor(bindings, sources), when.EventId, when.Relation, when.Value, out inState) != null
+            return Vocabulary.Change(Vocabulary.EventsFor(bindings, sources), when.Key, when.Relation, when.Value, out inState) != null
                    && inState;
         }
 

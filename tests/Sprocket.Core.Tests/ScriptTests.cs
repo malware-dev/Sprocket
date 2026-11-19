@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
@@ -71,14 +72,14 @@ public class ScriptTests
         var sequence = program.AddSequence(system, pressed);
         sequence.Name = "Let me out";
 
-        var close = new Act("close");
+        var close = new Act(new MemberKey(BlockKinds.Own, "close"));
         close.Targets.Add("inner");
         sequence.Steps.Add(close);
         sequence.Steps.Add(new Await());
 
         sequence.Steps.Add(new Wait(60));
 
-        var open = new Act("open");
+        var open = new Act(new MemberKey(BlockKinds.Own, "open"));
         open.Targets.Add("inner");
         open.Annotation = "The vent needs the full cycle.";
         sequence.Steps.Add(open);
@@ -122,7 +123,7 @@ public class ScriptTests
     static void Uses(Automation program, string name)
     {
         var system = program.AddSystem();
-        var close = new Act("close");
+        var close = new Act(new MemberKey(BlockKinds.Own, "close"));
         close.Targets.Add(name);
         program.AddSequence(system).Steps.Add(close);
     }
@@ -130,7 +131,7 @@ public class ScriptTests
     /// <summary>Gives the first system of <paramref name="program" /> a step that closes <paramref name="slots" />, since a slot nothing uses is not written.</summary>
     static void Closes(Automation program, params string[] slots)
     {
-        var close = new Act("close");
+        var close = new Act(new MemberKey(BlockKinds.Own, "close"));
         foreach (var slot in slots)
             close.Targets.Add(slot);
         program.AddSequence(program.Systems[0]).Steps.Add(close);
@@ -208,7 +209,7 @@ public class ScriptTests
         system.Name = "Airlock";
 
         var sequence = program.AddSequence(system);
-        var close = new Act("close");
+        var close = new Act(new MemberKey(BlockKinds.Own, "close"));
         close.Targets.Add("inner");
         sequence.Steps.Add(close);
 
@@ -1309,7 +1310,7 @@ public class ScriptTests
         odd.Targets.Add("thing");
         sequence.Steps.Add(odd);
 
-        var own = new Act("every");
+        var own = new Act(new MemberKey(BlockKinds.Own, "every"));
         own.Targets.Add("thing");
         sequence.Steps.Add(own);
 

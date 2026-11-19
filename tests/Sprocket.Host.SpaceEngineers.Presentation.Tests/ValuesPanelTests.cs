@@ -139,7 +139,7 @@ public class ValuesPanelTests
         screen.Run(2);
         var step = Step(screen);
         Assert.Equal(ReachKind.Action, step.Form);
-        Assert.Equal(power, Vocabulary.Flipped(screen.Editor.World, screen.Editor.Blocks(screen.Editor.Program.Systems[0], step.Targets), step.ActionId));
+        Assert.Equal(power, Vocabulary.Flipped(screen.Editor.World, screen.Editor.Blocks(screen.Editor.Program.Systems[0], step.Targets), step.Key)?.Id);
         Assert.Empty(step.Arguments);
 
         screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);

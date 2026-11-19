@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         foreach (var source in sending)
                         {
                             GridEntity block = bindings.Entity(source);
-                            if (block != null && Probe.Watching(block, required.Provider, required.EventId) == null)
+                            if (block != null && Probe.Watching(block, required.Key) == null)
                                 return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
                         }
                     }
@@ -127,6 +127,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 foreach (var source in watched)
                 {
                     GridEntity block = bindings.Entity(source);
+                    if (block != null && when.Ambiguous(block.Kind.Actions))
+                        return new SequenceFault(SequenceProblem.Ambiguous, SequenceFault.Trigger, BlockTrouble.None, when.EventId);
+
                     var asked = block == null ? null : when.Names(block.Kind.Actions)?.OwnValue;
                     var left = asked?.Missing(when.Arguments.Count);
                     if (left != null)
@@ -140,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     if (refused != null)
                         return new SequenceFault(SequenceProblem.Mistyped, SequenceFault.Trigger, BlockTrouble.None, refused);
 
-                    if (block != null && Probe.Of(block, when.Provider, when.EventId, SystemInstance.Settled(through, when.Arguments), when.Quantifier,
+                    if (block != null && Probe.Of(block, when.Key, SystemInstance.Settled(through, when.Arguments), when.Quantifier,
                             when.Relation, Settled(through, when.Value)) == null)
                         return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
 
@@ -771,7 +774,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     return refused;
 
                 var offered = value != null;
-                if (offered && Probe.Of(entity, test.Provider, test.MemberId, SystemInstance.Settled(through, test.Arguments), test.Quantifier,
+                if (offered && Probe.Of(entity, test.Key, SystemInstance.Settled(through, test.Arguments), test.Quantifier,
                         test.Relation, Settled(through, test.Value)) == null)
                     return "";
             }
@@ -848,7 +851,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return act != null && act.HasAction ? act.Provider : "";
         }
 
-        /// <summary>The first step whose blocks do not offer what it does, or none.</summary>
+        /// <summary>The first step whose blocks do not offer what it does, or offer more than one member its bare name could mean; or none.</summary>
         /// <remarks>
         /// Every block the step names has to offer it. A step in a namespace the host lacks is <see cref="Uninstalled" />'s
         /// to say, or is in a branch taken only while the host has it, which is never reached.
@@ -869,6 +872,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     foreach (var source in read)
                     {
                         GridEntity entity = bindings.Entity(source);
+                        if (entity != null && test.Ambiguous(entity.Kind.Actions))
+                            return new SequenceFault(SequenceProblem.Ambiguous, i, BlockTrouble.None, test.MemberId);
+
                         if (entity != null && test.Names(entity.Kind.Actions) == null)
                             return new SequenceFault(SequenceProblem.Unoffered, i);
                     }
@@ -883,6 +889,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 foreach (var target in targets)
                 {
                     GridEntity entity = bindings.Entity(target);
+                    if (entity != null && act.Ambiguous(entity.Kind.Actions))
+                        return new SequenceFault(SequenceProblem.Ambiguous, i, BlockTrouble.None, act.ActionId);
+
                     if (entity != null && act.Names(entity.Kind.Actions) == null)
                         return new SequenceFault(SequenceProblem.Unoffered, i);
                 }

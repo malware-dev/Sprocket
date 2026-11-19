@@ -2818,9 +2818,9 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
     <value>Kopierer plantegningen pakket lite, så den passer i en chatmelding.</value>
   </data>
   <data name="Sprocket.Problem.Ambiguous" xml:space="preserve">
-    <value>I dette steget kan {name} være stegets innstilling eller handlingens egen {name}.</value>
+    <value>Dette stegets {name} kan bety mer enn én ting. Velg hvilken i steget.</value>
   </data>
   <data name="Sprocket.Stopped.Ambiguous" xml:space="preserve">
-    <value>{name} kan være stegets innstilling eller handlingens egen {name}.</value>
+    <value>{name} kan bety mer enn én ting.</value>
   </data>
 </root>

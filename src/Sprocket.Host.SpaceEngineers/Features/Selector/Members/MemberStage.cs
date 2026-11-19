@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         Action _moveOn;
         string _whatSearch = "";
         int _worded;
-        string _dropped = "";
+        MemberKey _dropped;
         ReachKind _droppedForm;
 
         // Whether the column has been shown in the view that lists what the page was opened on, which it is once.
@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         public StageColumn Column => _what;
 
         /// <summary>Whether <paramref name="member" />, reached as <paramref name="form" /> says, can be made into a step, as the offers last listed it.</summary>
-        public Readiness ReadinessOf(string member, ReachKind form) => _offers.ReadinessOf(member, form);
+        public Readiness ReadinessOf(MemberKey member, ReachKind form) => _offers.ReadinessOf(member, form);
 
         /// <summary>The name what is chosen is listed under, or empty where nothing is.</summary>
         public string ChosenName
@@ -144,7 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         /// <paramref name="only" /> where it is given; where <paramref name="facets" /> is given, it shows only the choice of the
         /// blocks' facets of that type, such as their screens, even where there is one.
         /// </summary>
-        public void Fill(HostType slotType, string only, HostType facets)
+        public void Fill(HostType slotType, MemberKey? only, HostType facets)
         {
             // Words read again in another language since the column was made are said again; once, not on every fill.
             if (_worded != _editor.Rewordings)
@@ -177,23 +177,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
             // A choice the blocks can no longer honor is dropped, so Done never shows over a sentence that could not run, and
             // kept aside until something else is chosen: blocks that honor it again bring it back with its values.
-            if (_picked.Member.Length > 0 && _offers.At(_picked.Member, _picked.Form) < 0)
+            if (!_picked.Member.IsEmpty && _offers.At(_picked.Member, _picked.Form) < 0)
             {
                 _dropped = _picked.Member;
                 _droppedForm = _picked.Form;
-                _picked.Member = "";
+                _picked.Member = default(MemberKey);
                 _picked.Form = ReachKind.Native;
             }
-            else if (_picked.Member.Length == 0 && _dropped.Length > 0 && _offers.At(_dropped, _droppedForm) >= 0)
+            else if (_picked.Member.IsEmpty && !_dropped.IsEmpty && _offers.At(_dropped, _droppedForm) >= 0)
             {
                 _picked.Member = _dropped;
                 _picked.Form = _droppedForm;
-                _dropped = "";
+                _dropped = default(MemberKey);
             }
 
             // A signal with no other to choose is taken, and shown taken: a press that chooses nothing is not asked for.
-            if (_forEvents && _picked.Member.Length == 0 && _offers.Ids.Count == 1)
-                Take(_offers.Ids[0], _offers.Forms[0]);
+            if (_forEvents && _picked.Member.IsEmpty && _offers.Keys.Count == 1)
+                Take(_offers.Keys[0], _offers.Forms[0]);
 
             var chosen = _picked.Member;
 
@@ -210,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
                 // What is chosen stays listed whatever the search, as a chosen block does, so a search never hides the
                 // answer this picker opened with.
-                if (EntityQuery.MatchesText(_offers.Names[i], _whatSearch) || _offers.Ids[i] == _picked.Member)
+                if (EntityQuery.MatchesText(_offers.Names[i], _whatSearch) || _offers.Keys[i] == _picked.Member)
                     _matched.Add(i);
             }
 
@@ -235,7 +235,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             {
                 var key = at < 0
                     ? $"#{(-1 - at).ToString(CultureInfo.InvariantCulture)}"
-                    : $"{(_offers.Forms.Count > at ? _offers.Forms[at] : ReachKind.Native)} {_offers.Ids[at]}";
+                    : Key(_offers.Forms.Count > at ? _offers.Forms[at] : ReachKind.Native, _offers.Keys[at]);
 
                 _whatKeys.Add(key);
                 _whatAt[key] = at;
@@ -268,7 +268,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
             // The slots of a toolbar a person presses open under its line once it is chosen.
             var pressed = SlotOccupancy.Pressing(_editor.World, selection, _picked.Member);
-            var under = pressed == null ? -1 : _whatShown.IndexOf($"{ReachKind.Native} {pressed.Id}");
+            var under = pressed == null ? -1 : _whatShown.IndexOf(Key(ReachKind.Native, pressed.Key));
             if (under >= 0)
                 _whatShown.Insert(under + 1, SlotsKey);
 
@@ -323,11 +323,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                 var form = _offers.Forms.Count > at ? _offers.Forms[at] : ReachKind.Native;
 
                 row.Text = _offers.Names[at];
+                row.Secondary = _offers.Owners[at];
                 row.IsHeading = false;
                 row.IsWithheld = ready != Readiness.Ready;
                 row.Why = row.IsWithheld ? _offers.Why[at] : null;
                 row.Status = ReadinessText.Tag(_editor.Texts, ready);
-                row.IsChosen = _offers.Ids[at] == chosen && form == _picked.Form;
+                row.IsChosen = _offers.Keys[at] == chosen && form == _picked.Form;
                 row.Mark = _offers.Marks.Count > at ? _offers.Marks[at] : "";
                 row.About = MarkText.About(texts, row.Mark);
                 row.Show();
@@ -357,7 +358,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                     if (pressed.At(at).Text != words)
                         continue;
 
-                    Chosen($"{ReachKind.Native} {pressed.Id}", 1);
+                    Chosen(Key(ReachKind.Native, pressed.Key), 1);
                     PickSlot(at.Page, at.Slot);
                     return true;
                 }
@@ -365,6 +366,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
             return false;
         }
+
+        /// <summary>The key of the row that offers <paramref name="member" />, reached as <paramref name="form" /> says.</summary>
+        static string Key(ReachKind form, MemberKey member) => $"{form} {member}";
 
         Element WhatRow(string key)
         {
@@ -394,7 +398,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             if (!_whatAt.TryGetValue(key, out at) || at < 0)
                 return;
 
-            var id = _offers.Ids[at];
+            var id = _offers.Keys[at];
             var form = _offers.Forms.Count > at ? _offers.Forms[at] : ReachKind.Native;
             var choose = _editor.Act(CommandKind.PickChoice, () => Choose(id, form));
             if (choose == null)
@@ -409,13 +413,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         /// Shows, the first time the column is filled, the view that lists what the page was opened on, so whatever made a
         /// choice edits it; the view showing stays where it lists it, or where neither does.
         /// </summary>
-        void FindView(string only)
+        void FindView(MemberKey? only)
         {
             if (_viewFound)
                 return;
 
             _viewFound = true;
-            if (_picked.Member.Length == 0 || _offers.At(_picked.Member, _picked.Form) >= 0)
+            if (_picked.Member.IsEmpty || _offers.At(_picked.Member, _picked.Form) >= 0)
                 return;
 
             _editor.ShowsTerminal = !_editor.ShowsTerminal;
@@ -444,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
         void PickSlot(int page, int slot)
         {
-            var whole = ToolbarSlot.Of(_picked.Member);
+            var whole = ToolbarSlot.Of(_picked.Member.Id);
             if (whole == null)
                 return;
 
@@ -490,14 +494,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                 pick.Execute();
         }
 
-        void Choose(string id, ReachKind form)
+        void Choose(MemberKey id, ReachKind form)
         {
             Take(id, form);
             _editor.Invalidate();
         }
 
         /// <summary>Makes <paramref name="id" />, reached as <paramref name="form" />, the choice, with a free slot of the toolbar it presses where it presses one.</summary>
-        void Take(string id, ReachKind form)
+        void Take(MemberKey id, ReachKind form)
         {
             var pressed = form == ReachKind.Native ? SlotOccupancy.Pressing(_editor.World, _picked.Blocks, id) : null;
             if (pressed == null)
@@ -507,7 +511,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
             _picked.Member = id;
             _picked.Form = form;
-            _dropped = "";
+            _dropped = default(MemberKey);
         }
 
         void OnWhatSearch(string value)

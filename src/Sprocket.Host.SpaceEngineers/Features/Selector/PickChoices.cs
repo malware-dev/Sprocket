@@ -10,8 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>The blocks picked, in the order they were picked.</summary>
         public List<long> Blocks { get; } = new List<long>();
 
-        /// <summary>The id of the member chosen, or empty where none is.</summary>
-        public string Member { get; set; } = "";
+        /// <summary>The member chosen, in its namespace, or empty where none is.</summary>
+        public MemberKey Member { get; set; }
 
         /// <summary>How the chosen member is reached.</summary>
         public ReachKind Form { get; set; }
