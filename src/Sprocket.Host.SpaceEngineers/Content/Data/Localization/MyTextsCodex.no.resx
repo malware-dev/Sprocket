@@ -53,7 +53,7 @@
     <value>Et **valg** er en verdi en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
   </data>
   <data name="Sprocket.Term.Setting" xml:space="preserve">
-    <value>En ![](mark:setting)&amp;nbsp;**innstilling** er en verdi du velger for hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) for seg, på [installasjonspanelet](Term.InstallationPanel class=term), der den står blant plassene. Velger du ingen, brukes innstillingens standardverdi. En innstilling uten standardverdi må fylles ut.</value>
+    <value>En ![](mark:setting)&amp;nbsp;**innstilling** lar deg justere et logikksystem for hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) uten å endre stegene, for eksempel hvor lenge en luftsluse venter før den lukkes. Den vises på [installasjonspanelet](Term.InstallationPanel class=term) sammen med de andre plassene.</value>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
     <value>En **oppgave** er én operasjon: å kjøre eller stoppe en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term), en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker, eller å [sette](Term.Set class=term) en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>

@@ -69,7 +69,7 @@
     <comment>Codex page on "Option", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Setting" xml:space="preserve">
-    <value>A ![](mark:setting)&amp;nbsp;**setting** is a value you choose separately for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) on the [installation panel](Term.InstallationPanel class=term), where it stands among the slots. If you don't choose one, the setting's default is used. A setting with no default must be filled in.</value>
+    <value>A ![](mark:setting)&amp;nbsp;**setting** allows you to adjust a logic system for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) without changing its steps, such as how long one airlock waits before it closes. It shows up on the [installation panel](Term.InstallationPanel class=term) alongside the other slots.</value>
     <comment>Codex page on "Setting", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
