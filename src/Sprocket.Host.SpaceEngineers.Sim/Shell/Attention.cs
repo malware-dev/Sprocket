@@ -133,7 +133,7 @@ namespace Sprocket.Sim.Shell
         /// <remarks>
         /// The topmost flag is set and immediately cleared, which is the long-standing way of getting a
         /// window in front of a foreground application one does not own: Windows will not simply hand
-        /// focus over, but it will honour being put at the top of the order and then released.
+        /// focus over, but it will honor being put at the top of the order and then released.
         /// </remarks>
         public static int ComeForward()
         {

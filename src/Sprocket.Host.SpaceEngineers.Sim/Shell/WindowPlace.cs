@@ -46,7 +46,7 @@ namespace Sprocket.Sim.Shell
 
             if (OnAScreen(saved[0], saved[1], saved[2], saved[3]))
             {
-                // Manual placement, or the window manager centres it and the position is overwritten by
+                // Manual placement, or the window manager centers it and the position is overwritten by
                 // the thing that was supposed to be the fallback.
                 window.WindowStartupLocation = WindowStartupLocation.Manual;
                 window.Left = saved[0];

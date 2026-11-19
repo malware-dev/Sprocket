@@ -167,7 +167,7 @@ sealed class Screen
     /// <summary>Every drawn mark of one kind that is on show, in the order they were asked for.</summary>
     /// <remarks>
     /// Judged by the middle of its line rather than its top. The symbol font's line is taller than the
-    /// row a symbol is centred in, so the top of a symbol's line sits above the row's clip while the
+    /// row a symbol is centered in, so the top of a symbol's line sits above the row's clip while the
     /// symbol itself is inside it, and a clip cuts pixels rather than lines.
     /// </remarks>
     public IReadOnlyList<Drawn> Marks(string symbol) =>

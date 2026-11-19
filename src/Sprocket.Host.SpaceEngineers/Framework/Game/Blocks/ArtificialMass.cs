@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("mass", "mass", Mass).Measured(" kg").Announced().In(Category.Behaviour);
+            kind.WithValue("mass", "mass", Mass).Measured(" kg").Announced().In(Category.Behavior);
         }
     }
 }

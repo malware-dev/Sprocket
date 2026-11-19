@@ -15,7 +15,7 @@ using VRage.ObjectBuilders;
 namespace Sprocket.Sim.Machine;
 
 /// <summary>
-/// The ship testers are given, as blocks the game would recognise.
+/// The ship testers are given, as blocks the game would recognize.
 /// </summary>
 /// <remarks>
 /// Chosen to support the three tasks the prototype is meant to answer: open the hangar when a ship
