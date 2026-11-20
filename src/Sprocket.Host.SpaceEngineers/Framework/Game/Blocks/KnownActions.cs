@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             "SetBottom", "SetTop", "SetBack", "SetFront"
         };
 
-        /// <summary>The descriptions of the game's own actions that Sprocket ships, read before any mod's.</summary>
+        /// <summary>The descriptions of the game's own actions that Sprocket ships.</summary>
         public static Descriptions Descriptions()
         {
             var said = new Descriptions();

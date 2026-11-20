@@ -1,43 +1,35 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
-using System.Xml.Serialization;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 {
     /// <summary>
     /// What somebody says one of an action's parameters is.
     /// </summary>
-    /// <remarks>Read by the game's XML serializer from a file a mod ships, so its names are a persisted format.</remarks>
     public sealed class Parameter : ParameterPiece
     {
         /// <summary>What to call it, or empty to leave it numbered.</summary>
-        [XmlAttribute("name")]
         public string Name;
 
         /// <summary>
         /// What it is for, at length, or empty.
         /// </summary>
-        [XmlText]
         public string Note;
 
         /// <summary>
         /// The least it may be, or empty where nobody has said.
         /// </summary>
-        [XmlAttribute("min")]
         public string Least;
 
-        /// <summary>The most it takes, or empty where the file says nothing.</summary>
-        [XmlAttribute("max")]
+        /// <summary>The most it takes, or empty where none is given.</summary>
         public string Most;
 
         /// <summary>
         /// The type the action takes it as, named as .NET names it in lower case - <c>byte</c>,
         /// <c>int32</c>, <c>single</c> - or empty where the action's own declaration stands.
         /// </summary>
-        [XmlAttribute("kind")]
         public string Sort;
 
         /// <summary>The type the action takes it as, or none where nobody has said or the word is not one.</summary>
-        [XmlIgnore]
         public Primitive Holds
         {
             get
@@ -79,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>How many of the action's parameters this covers, which is always one.</summary>
         public override int Span => 1;
 
-        /// <summary>The type the action takes it as, as the file wrote it.</summary>
+        /// <summary>The type the action takes it as, as it is given.</summary>
         public override string Kind => Sort ?? "";
     }
 }

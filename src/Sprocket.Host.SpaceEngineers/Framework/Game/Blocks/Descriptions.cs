@@ -1,17 +1,13 @@
 using System.Collections.Generic;
-using System.Xml.Serialization;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 {
     /// <summary>
-    /// One file's worth of what a mod says about its own blocks.
+    /// Descriptions of the parameters of the game's own actions.
     /// </summary>
-    [XmlRoot("sprocket-definitions")]
     public sealed class Descriptions
     {
         /// <summary>Every action described, each by its id.</summary>
-        [XmlArray("actions")]
-        [XmlArrayItem("action")]
         public List<Description> Actions = new List<Description>();
     }
 }
