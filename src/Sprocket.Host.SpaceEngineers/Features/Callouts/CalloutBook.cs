@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using Lumel;
@@ -17,9 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <remarks>A static: the one list, the same for every editor.</remarks>
         public static readonly IList<Callout> All = new[]
         {
-            new Callout("share", Release.Number, texts => texts.CalloutShare, CalloutPlace.HeaderShare, CalloutPlace.HomeShare, CalloutPlace.LibraryShare),
-            new Callout("import", Release.Number, texts => texts.CalloutImport, CalloutPlace.LibraryImport),
-            new Callout("settings", Release.Number, texts => texts.CalloutSettings, CalloutPlace.SlotAdd)
+            new Callout("share", new ModRelease(1, 1), texts => texts.CalloutShare, CalloutPlace.HeaderShare, CalloutPlace.HomeShare, CalloutPlace.LibraryShare),
+            new Callout("import", new ModRelease(1, 1), texts => texts.CalloutImport, CalloutPlace.LibraryImport),
+            new Callout("settings", new ModRelease(1, 1), texts => texts.CalloutSettings, CalloutPlace.SlotAdd)
         };
 
         readonly IList<Callout> _all;
@@ -74,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
             for (var i = 0; i < _all.Count; i++)
             {
                 var callout = _all[i];
-                var newer = choices.Seen.HasValue ? callout.Release > choices.Seen.Value : callout.Release == Release.Number;
+                var newer = choices.Seen.HasValue ? callout.Release > choices.Seen.Value : callout.Release == ModVersion.Release;
                 if (newer && !choices.HasDismissed(callout.Id))
                     _due.Add(callout);
             }
@@ -160,8 +161,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         void RecordSeen()
         {
             var choices = _read();
-            if (!choices.Seen.HasValue || choices.Seen.Value < Release.Number)
-                _save(choices.WithSeen(Release.Number));
+            if (!choices.Seen.HasValue || choices.Seen.Value < ModVersion.Release)
+                _save(choices.WithSeen(ModVersion.Release));
         }
 
         /// <summary>Records <paramref name="callout" /> as dismissed, so no place offers it again.</summary>

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using VRage.Game.ModAPI.Ingame.Utilities;
@@ -13,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
 
         const string TipsKey = "tips";
 
-        // The number of the highest release whose callouts have all been dismissed.
+        // The highest release whose callouts have all been dismissed, written as 1.1; a file of release 1 has it as a whole number.
         const string SeenKey = "seen";
 
         // The ids of the callouts the player has dismissed, separated by commas.
@@ -26,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
         readonly string[] _dismissed;
 
         /// <summary>The player's choices: tips shown where <paramref name="tips" /> says, callouts dismissed up to release <paramref name="seen" /> where it has a value, and those named by <paramref name="dismissed" /> dismissed.</summary>
-        public PlayerSettings(bool tips, int? seen = null, IEnumerable<string> dismissed = null)
+        public PlayerSettings(bool tips, ModRelease? seen = null, IEnumerable<string> dismissed = null)
         {
             Tips = tips;
             Seen = seen;
@@ -36,8 +37,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
         /// <summary>Whether the screens show tips, and terms look like terms; on until the player turns them off.</summary>
         public bool Tips { get; }
 
-        /// <summary>The number of the highest release whose callouts have all been dismissed, or null where none has.</summary>
-        public int? Seen { get; }
+        /// <summary>The highest release whose callouts have all been dismissed, or null where none has.</summary>
+        public ModRelease? Seen { get; }
 
         /// <summary>The ids of the callouts the player has dismissed.</summary>
         public IEnumerable<string> Dismissed => _dismissed;
@@ -49,10 +50,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
             if (ini == null || !ini.Get(Section, TipsKey).TryGetBoolean(out tips))
                 tips = true;
 
-            int? seen = null;
-            int number;
-            if (ini != null && ini.Get(Section, SeenKey).TryGetInt32(out number))
-                seen = number;
+            ModRelease? seen = null;
+            ModRelease release;
+            if (ini != null && ModRelease.TryRead(ini.Get(Section, SeenKey).ToString(""), out release))
+                seen = release;
 
             var dismissed = NoIds;
             if (ini != null)
@@ -74,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
         }
 
         /// <summary>These choices with the callouts of every release up to <paramref name="release" /> dismissed.</summary>
-        public PlayerSettings WithSeen(int release)
+        public PlayerSettings WithSeen(ModRelease release)
         {
             return new PlayerSettings(Tips, release, _dismissed);
         }
@@ -101,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
             ini.Set(Section, TipsKey, Tips);
 
             if (Seen.HasValue)
-                ini.Set(Section, SeenKey, Seen.Value);
+                ini.Set(Section, SeenKey, Seen.Value.Text);
             else
                 ini.Delete(Section, SeenKey);
 

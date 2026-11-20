@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using Ship = Sprocket.Sim.Machine.Simulation;
@@ -34,7 +35,7 @@ namespace Sprocket.Sim.Simulation
         EditorWindow _view;
 
         // The player's choices, as a player already offered this release's callouts has them, so a screen shows none.
-        PlayerSettings _player = new PlayerSettings(true, Release.Number);
+        PlayerSettings _player = new PlayerSettings(true, ModVersion.Release);
 
         Vector2 _at;
 
