@@ -146,8 +146,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var header = constructs.Count > 0 && IsHeader(constructs[0], saved) ? constructs[0] : null;
             if (header == null && parser.Trouble.Length == 0)
                 refused = $"{(constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0]))}expected sprocket <format>.";
-            else if (header != null && !IsCurrent(header) && !FormatUpgrades.From(header.Whole(0), DraftOf(header)))
-                refused = $"{trouble.Line(header)}written for {ScriptFormat.Spelled(header.Whole(0), DraftOf(header))}; this reads {ScriptFormat.Line}.";
+            else if (header != null && !IsCurrent(header) && !FormatUpgrades.From(header.Integer(0), DraftOf(header)))
+                refused = $"{trouble.Line(header)}written for {ScriptFormat.Spelled(header.Integer(0), DraftOf(header))}; this reads {ScriptFormat.Line}.";
 
             if (refused != null)
             {
@@ -165,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
                 // Before anything is read, so the readers know only the form this build writes.
                 if (!IsCurrent(header))
-                    FormatUpgrades.Statements(header.Whole(0), DraftOf(header), constructs);
+                    FormatUpgrades.Statements(header.Integer(0), DraftOf(header), constructs);
             }
 
             for (var i = 0; i < constructs.Count; i++)
@@ -192,7 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
             else if (header != null && !IsCurrent(header))
             {
-                var upgraded = FormatUpgrades.Program(header.Whole(0), DraftOf(header), program, world);
+                var upgraded = FormatUpgrades.Program(header.Integer(0), DraftOf(header), program, world);
                 if (upgraded.Length > 0)
                     GameLog.Say($"upgraded a program from {upgraded}");
             }
@@ -208,7 +208,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 && script[statement.At] != '\'';
         }
 
-        /// <summary>Says what is wrong with the shape of <paramref name="header" />: whole numbers, and nothing after them.</summary>
+        /// <summary>Says what is wrong with the shape of <paramref name="header" />: integers, and nothing after them.</summary>
         static void Header(Statement header, ScriptTrouble trouble)
         {
             var alpha = header.Says(1, Keyword.Alpha);
@@ -227,12 +227,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static int DraftOf(Statement statement)
         {
             var at = statement.Find(Keyword.Alpha);
-            return at < 0 ? ScriptFormat.Finished : statement.Whole(at + 1);
+            return at < 0 ? ScriptFormat.Finished : statement.Integer(at + 1);
         }
 
         /// <summary>Whether the version line <paramref name="header" /> names the version and draft this build writes.</summary>
-        static bool IsCurrent(Statement header) => header.Whole(0) == ScriptFormat.Version && DraftOf(header) == ScriptFormat.Draft;
-        /// <summary>A list of vectors of whole numbers as cells, or null where it is anything else.</summary>
+        static bool IsCurrent(Statement header) => header.Integer(0) == ScriptFormat.Version && DraftOf(header) == ScriptFormat.Draft;
+        /// <summary>A list of vectors of integers as cells, or null where it is anything else.</summary>
         static Vector3I[] Cells(ValueRange items, Statement statement)
         {
             if (items.Count == 0)
@@ -251,7 +251,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                         return null;
                 }
 
-                cells[i] = new Vector3I((int)numbers[0].Whole, (int)numbers[1].Whole, (int)numbers[2].Whole);
+                cells[i] = new Vector3I((int)numbers[0].Integer, (int)numbers[1].Integer, (int)numbers[2].Integer);
             }
 
             return cells;
@@ -382,7 +382,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return;
 
                 case ValueForm.Integer:
-                    into.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(key.Whole)));
+                    into.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(key.Integer)));
                     return;
 
                 case ValueForm.Real:
@@ -421,7 +421,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static void ReadInstance(Statement statement, Automation program, ScriptTrouble trouble)
         {
             var number = statement.ValueAt(0);
-            if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue
+            if (number.Form != ValueForm.Integer || number.Integer < 1 || number.Integer > int.MaxValue
                 || !statement.Says(1, Keyword.Of))
             {
                 trouble.Say(statement, "expected instance <number> of <system blueprint>.");
@@ -441,9 +441,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
-            if (system.FindInstance((int)number.Whole) != null)
+            if (system.FindInstance((int)number.Integer) != null)
             {
-                trouble.Say(statement, $"instance {number.Whole} of this system is already declared.");
+                trouble.Say(statement, $"instance {number.Integer} of this system is already declared.");
                 return;
             }
 
@@ -464,7 +464,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (!ScriptQuotes.Ends(statement, at, trouble))
                 return;
 
-            var instance = system.Restore((int)number.Whole, name);
+            var instance = system.Restore((int)number.Integer, name);
             instance.Annotation = statement.Annotation;
             instance.Attributes = ScriptAttributes.Unused(statement);
 

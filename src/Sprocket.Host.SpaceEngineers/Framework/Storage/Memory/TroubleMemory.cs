@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
         public bool Ends { get; set; }
 
         /// <summary>The cause, by the number set on its <c>Cause</c> value, or nought for none.</summary>
-        /// <remarks>Stored as a whole number, so a build that does not know a newer cause reads it as none rather than failing.</remarks>
+        /// <remarks>Stored as an integer, so a build that does not know a newer cause reads it as none rather than failing.</remarks>
         [ProtoMember(4)]
         public int Cause { get; set; }
     }

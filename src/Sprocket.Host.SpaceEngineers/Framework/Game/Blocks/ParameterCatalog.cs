@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 {
     /// <summary>
-    /// Everything anybody has said about the parameters of the game's own actions.
+    /// What Sprocket knows of the parameters of the game's own actions.
     /// </summary>
     /// <remarks>Read once, as a world comes up, and asked once per block type, never on a tick.</remarks>
     public sealed class ParameterCatalog
@@ -12,24 +12,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         readonly Dictionary<string, Description> _byBlock = new Dictionary<string, Description>();
         readonly Dictionary<string, Description> _byAction = new Dictionary<string, Description>();
 
-        /// <summary>Takes in what one file says, overriding anything said before it.</summary>
-        public void Add(Descriptions said, string mod)
+        /// <summary>Takes in <paramref name="said" />, overriding anything said before it.</summary>
+        public void Add(Descriptions said)
         {
             if (said == null || said.Actions == null)
                 return;
 
             foreach (var action in said.Actions)
-                Add(action, mod);
+                Add(action);
         }
 
         /// <summary>
         /// Takes in one action's description.
         /// </summary>
-        public void Add(Description description, string mod)
+        public void Add(Description description)
         {
             if (description == null || string.IsNullOrEmpty(description.Id))
             {
-                GameLog.Say(mod, "an action was described with no id, so nothing can be done with it");
+                GameLog.Say("An action was described with no id, so nothing can be done with it.");
                 return;
             }
 

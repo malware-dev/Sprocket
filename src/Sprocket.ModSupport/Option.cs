@@ -10,16 +10,16 @@ namespace Sprocket.ModSupport
         static readonly ISprocketWiring Wiring = new Key();
 
         /// <summary>A real number called <paramref name="name" />.</summary>
-        public static SprocketOption<double> Number(string name) => Number(SprocketText.Of(name));
+        public static SprocketOption<double> Real(string name) => Real(SprocketText.Of(name));
 
         /// <summary>A real number called by the text <paramref name="name" /> names in the mod's own texts.</summary>
-        public static SprocketOption<double> Number(MyStringId name) => Number(SprocketText.Of(name));
+        public static SprocketOption<double> Real(MyStringId name) => Real(SprocketText.Of(name));
 
-        /// <summary>A whole number called <paramref name="name" />.</summary>
-        public static SprocketOption<long> Whole(string name) => Whole(SprocketText.Of(name));
+        /// <summary>An integer called <paramref name="name" />.</summary>
+        public static SprocketOption<long> Integer(string name) => Integer(SprocketText.Of(name));
 
-        /// <summary>A whole number called by the text <paramref name="name" /> names in the mod's own texts.</summary>
-        public static SprocketOption<long> Whole(MyStringId name) => Whole(SprocketText.Of(name));
+        /// <summary>An integer called by the text <paramref name="name" /> names in the mod's own texts.</summary>
+        public static SprocketOption<long> Integer(MyStringId name) => Integer(SprocketText.Of(name));
 
         /// <summary>An on or off called <paramref name="name" />.</summary>
         public static SprocketOption<bool> Flag(string name) => Flag(SprocketText.Of(name));
@@ -53,11 +53,11 @@ namespace Sprocket.ModSupport
         public static SprocketOption<T> Choice<T>(string name, SprocketEnumType<T> type) where T : struct =>
             new SprocketOption<T>(Wiring, SprocketWire.TypeChoice, SprocketText.Of(name), given => type.Value(given as string)).Choosing(type);
 
-        static SprocketOption<double> Number(Func<string> name) =>
-            new SprocketOption<double>(Wiring, SprocketWire.TypeNumber, name, given => given is double ? (double)given : 0.0);
+        static SprocketOption<double> Real(Func<string> name) =>
+            new SprocketOption<double>(Wiring, SprocketWire.TypeReal, name, given => given is double ? (double)given : 0.0);
 
-        static SprocketOption<long> Whole(Func<string> name) =>
-            new SprocketOption<long>(Wiring, SprocketWire.TypeWhole, name, given => given is long ? (long)given : 0L);
+        static SprocketOption<long> Integer(Func<string> name) =>
+            new SprocketOption<long>(Wiring, SprocketWire.TypeInteger, name, given => given is long ? (long)given : 0L);
 
         static SprocketOption<bool> Flag(Func<string> name) =>
             new SprocketOption<bool>(Wiring, SprocketWire.TypeFlag, name, given => given is bool && (bool)given);

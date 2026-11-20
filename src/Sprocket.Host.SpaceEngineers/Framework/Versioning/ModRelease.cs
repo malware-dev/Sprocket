@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Versioning
 
         /// <summary>Whether <paramref name="written" /> is a release, and which.</summary>
         /// <remarks>
-        /// A whole number alone is a release of major version 1, the form a file of release 1 holds, so
+        /// An integer alone is a release of major version 1, the form a file of release 1 holds, so
         /// <c>1</c> reads as 1.1.
         /// </remarks>
         public static bool TryRead(string written, out ModRelease release)

@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     public sealed partial class OxygenFarm : Capability
     {
         // The game gives the output as a fraction of the farm's best; every share Sprocket says is in percent.
-        static readonly OwnValue Effectiveness = OwnValue.Number<IMyOxygenFarm>(farm => farm.GetOutput() * 100.0);
+        static readonly OwnValue Effectiveness = OwnValue.Real<IMyOxygenFarm>(farm => farm.GetOutput() * 100.0);
 
         static readonly OwnValue Able = OwnValue.Flag(Reading.Of<IMyOxygenFarm>(farm => farm.CanProduce));
 

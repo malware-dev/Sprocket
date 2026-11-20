@@ -18,13 +18,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly OwnValue Colored = OwnValue.Color<IMyFunctionalBlock>(block => Lamp(block)?.Color ?? Color.White)
             .Writing<IMyFunctionalBlock>((block, value) => Change(block, lamp => lamp.Color = new Color(value.Red, value.Green, value.Blue, value.Alpha)));
 
-        static readonly OwnValue Intensity = OwnValue.Number<IMyFunctionalBlock>(block => Lamp(block)?.Intensity ?? 0f)
+        static readonly OwnValue Intensity = OwnValue.Real<IMyFunctionalBlock>(block => Lamp(block)?.Intensity ?? 0f)
             .Writing<IMyFunctionalBlock>((block, value) => Change(block, lamp => lamp.Intensity = (float)value.Number));
 
-        static readonly OwnValue Radius = OwnValue.Number<IMyFunctionalBlock>(block => Lamp(block)?.Radius ?? 0f)
+        static readonly OwnValue Radius = OwnValue.Real<IMyFunctionalBlock>(block => Lamp(block)?.Radius ?? 0f)
             .Writing<IMyFunctionalBlock>((block, value) => Change(block, lamp => lamp.Radius = (float)value.Number));
 
-        static readonly OwnValue Falloff = OwnValue.Number<IMyFunctionalBlock>(block => Lamp(block)?.Falloff ?? 0f)
+        static readonly OwnValue Falloff = OwnValue.Real<IMyFunctionalBlock>(block => Lamp(block)?.Falloff ?? 0f)
             .Writing<IMyFunctionalBlock>((block, value) => Change(block, lamp => lamp.Falloff = (float)value.Number));
 
         /// <inheritdoc />

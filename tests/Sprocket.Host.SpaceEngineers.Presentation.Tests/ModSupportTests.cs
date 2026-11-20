@@ -209,7 +209,7 @@ public class ModSupportTests
         {
             var paces = api.DefineType<Pace>().Naming(Pace.Gentle, "rolig").Naming(Pace.Brisk, "rask");
             api.Block(Type(light), Subtype(light)).InGroup(SprocketGroup.Behavior)
-                .Action("rise", Option.Number("height").Unit("m").Range(1, 20), Option.Choice("pace", paces), (_, h, p) =>
+                .Action("rise", Option.Real("height").Unit("m").Range(1, 20), Option.Choice("pace", paces), (_, h, p) =>
                 {
                     height = h;
                     pace = p;
@@ -331,7 +331,7 @@ public class ModSupportTests
         Registered(members, true, api =>
         {
             var lights = api.Block(Type(light)).InGroup("Repulsion");
-            lights.Number("lift", _ => 1.0).Named("lift", "How far it lifts.").Range(0, 10);
+            lights.Real("lift", _ => 1.0).Named("lift", "How far it lifts.").Range(0, 10);
             lights.Subtypes(Subtype(light)).Override("lift").Range(0, 3).Described("It lifts less here.");
             lights.Flag("glowing", _ => true).Named("glowing", "Whether it glows.").Reading("glows", "is dark").InGroup(SprocketGroup.Appearance);
         });
@@ -642,7 +642,7 @@ public class ModSupportTests
     [Fact]
     public void APercentOptionWithNoRangeIsAskedFrom0To100()
     {
-        var plain = new Dictionary<string, object> { { SprocketWire.Type, SprocketWire.TypeNumber }, { SprocketWire.Percent, true } };
+        var plain = new Dictionary<string, object> { { SprocketWire.Type, SprocketWire.TypeReal }, { SprocketWire.Percent, true } };
         var ranged = new Dictionary<string, object>(plain) { { SprocketWire.Most, (Func<IMyTerminalBlock, double>)(_ => 0.5) } };
 
         var fields = ModFields.Asked(new[] { plain, ranged }, null!, new ModMembers());
@@ -1033,7 +1033,7 @@ public class ModSupportTests
         var rig = Rig.Demo();
         var light = rig.Light(40, "Glow Light");
         var members = new ModMembers();
-        Assert.False(Registered(members, true, api => api.Block(Type(light)).Number("lift", _ => 1.0)).IsRegistered);
+        Assert.False(Registered(members, true, api => api.Block(Type(light)).Real("lift", _ => 1.0)).IsRegistered);
         Assert.False(Registered(members, true, api => api.Block(Type(light)).Flag("lit", _ => true).Named("lit", "Lit.")).IsRegistered);
         Assert.False(Registered(members, true, api => api.Block(Type(light)).Awaitable("rise", _ => { }).Named("rise", "Rises.")).IsRegistered);
         Assert.False(members.Claims(light.Block));
@@ -1167,10 +1167,10 @@ public class ModSupportTests
         {
             var lights = api.Block(Type(light));
             lights.Flag("lit", block => (bool)counted("lit", () => true)(block)).Named("lit", "Lit.").Reading("is lit", "is dark");
-            lights.Whole("level", block => (long)counted("level", () => 3L)(block)).Named("level", "Level.");
-            lights.Colored("tint", block => (Color)counted("tint", () => Color.Red)(block)).Named("tint", "Tint.");
+            lights.Integer("level", block => (long)counted("level", () => 3L)(block)).Named("level", "Level.");
+            lights.Color("tint", block => (Color)counted("tint", () => Color.Red)(block)).Named("tint", "Tint.");
             lights.Duration("glow_time", block => (TimeSpan)counted("glow_time", () => TimeSpan.FromSeconds(2))(block)).Named("glow time", "Glow time.");
-            lights.Flag("lit_at", Option.Number("distance"), (block, _) => (bool)counted("lit_at", () => true)(block)).Named("lit at", "Lit at.").Reading("is lit at", "is dark at");
+            lights.Flag("lit_at", Option.Real("distance"), (block, _) => (bool)counted("lit_at", () => true)(block)).Named("lit at", "Lit at.").Reading("is lit at", "is dark at");
         });
 
         var kind = sim.Kinds.For(light.Block);
@@ -1192,7 +1192,7 @@ public class ModSupportTests
         var light = rig.Light(40, "Glow Light");
         var sim = Simulation.On(rig);
         Registered(sim.Kinds.Mods, true, api => api.Block(Type(light))
-            .Number("brightness_at", Option.Number("distance").Unit("m"), (_, distance) => 100 - distance)
+            .Real("brightness_at", Option.Real("distance").Unit("m"), (_, distance) => 100 - distance)
             .Named("brightness at", "How bright the light is at a distance."));
 
         sim.Editor.NewButtonSystem("Glow");

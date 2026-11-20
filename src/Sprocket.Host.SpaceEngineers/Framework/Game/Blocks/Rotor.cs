@@ -47,9 +47,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         // The game's angle is in radians; the terminal says degrees, a rotor's nought to three hundred and sixty and a
         // hinge's a quarter turn either way.
-        static readonly OwnValue RotorAngle = OwnValue.Number<IMyMotorStator>(rotor => Degrees(rotor.Angle));
+        static readonly OwnValue RotorAngle = OwnValue.Real<IMyMotorStator>(rotor => Degrees(rotor.Angle));
 
-        static readonly OwnValue HingeAngle = OwnValue.Number<IMyMotorStator>(rotor => rotor.Angle * 180.0 / Math.PI);
+        static readonly OwnValue HingeAngle = OwnValue.Real<IMyMotorStator>(rotor => rotor.Angle * 180.0 / Math.PI);
 
         static readonly OwnValue Locked = OwnValue.Flag(Held);
 
@@ -167,7 +167,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             }
 
             var size = Field.Among("size", words, means);
-            size.Entry = FieldInput.Whole;
+            size.Entry = FieldInput.Integer;
             size.Needed = true;
             size.Default = Sizes[0];
             return size;
@@ -176,7 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>The game's action for the size of head a step asked for, among <paramref name="heads" />; null where it asked for one the block does not offer.</summary>
         static string Head(IList<Literal> arguments, string[] heads)
         {
-            var at = arguments == null || arguments.Count == 0 ? 0 : arguments[0].Whole;
+            var at = arguments == null || arguments.Count == 0 ? 0 : arguments[0].Integer;
             return at >= 0 && at < heads.Length ? heads[at] : null;
         }
 
@@ -217,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         {
             // The game's own values for MyRotationDirection: shortest way, then clockwise, then counter-clockwise.
             var way = Field.Among("direction", Ways, Directions);
-            way.Entry = FieldInput.Whole;
+            way.Entry = FieldInput.Integer;
             way.Needed = true;
             way.Default = Ways[0];
             return way;
@@ -240,7 +240,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
             var angle = Field.Between("angle", Field.Bound(least), Field.Bound(most));
             angle.Needed = true;
-            angle.Entry = FieldInput.Decimal;
+            angle.Entry = FieldInput.Real;
             angle.Edits = FieldEditor.Angle;
             angle.Lead = "to";
             angle.Unit = "°";
@@ -254,7 +254,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             var speed = Field.Between("speed", "0", Field.Bound(Fastest(block)));
             speed.Needed = true;
             speed.Above = true;
-            speed.Entry = FieldInput.Decimal;
+            speed.Entry = FieldInput.Real;
             speed.Default = "1";
             speed.Lead = "at";
             speed.Unit = " rpm";

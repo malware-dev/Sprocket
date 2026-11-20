@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             NumberField.Bound(field.Scaled(field.Most), out _most);
             _field = field;
             _logarithmic = _least > 0 && _most / _least >= Wide;
-            _format = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##";
+            _format = field.Entry == FieldInput.Integer ? "0" : field.Entry == FieldInput.Real ? "0.0#" : "0.##";
 
             Base.Spacing = Gaps.Parts;
             Children.Add(new Slider { Placement = Flex.Grow }.As(out _slider));

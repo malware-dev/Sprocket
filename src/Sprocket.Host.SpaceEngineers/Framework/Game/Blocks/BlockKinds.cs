@@ -33,12 +33,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         readonly ModCapability _mods;
 
         /// <summary>
-        /// The kinds of block in a world, described from Sprocket's capabilities and what Sprocket and every mod loaded say
-        /// of each block's actions.
+        /// The kinds of block in a world, described from Sprocket's capabilities, what Sprocket knows of the game's own actions, and what
+        /// mods register through Sprocket's mod API.
         /// </summary>
         /// <remarks>
-        /// One for the world, which every construct in it shares: each mod's folder is read once, and each type of block
-        /// described once, however many constructs there are.
+        /// One for the world, which every construct in it shares: each type of block is described once, however many constructs
+        /// there are.
         /// </remarks>
         public BlockKinds()
         {
@@ -49,12 +49,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>The members other mods register for their blocks through Sprocket's mod API.</summary>
         public ModMembers Mods { get; } = new ModMembers();
 
-        /// <summary>What Sprocket and then every mod loaded say of the actions blocks have.</summary>
+        /// <summary>What Sprocket knows of the parameters of the game's own actions.</summary>
         static ParameterCatalog Catalogue()
         {
-            // Sprocket's own descriptions go in first, so a mod may override them.
             var catalogue = new ParameterCatalog();
-            catalogue.Add(KnownActions.Descriptions(), "");
+            catalogue.Add(KnownActions.Descriptions());
             return catalogue;
         }
 

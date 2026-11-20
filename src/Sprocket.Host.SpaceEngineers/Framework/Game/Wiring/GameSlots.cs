@@ -179,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
         /// Everything a value says it may be, where it says so.
         /// </summary>
         /// <remarks>
-        /// The game's combo box reports itself to a mod as a whole number, with its words on the control. Runs once per value
+        /// The game's combo box reports itself to a mod as an integer, with its words on the control. Runs once per value
         /// per block kind while a world is read, so the list handed to the block is reused.
         /// </remarks>
         Offer Listed(ITerminalProperty property, Offer made)
@@ -449,7 +449,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
                         : null;
                 case "Int64":
                     return value.Kind == ValueKind.Integer
-                        ? new GameValueOrder<long>(block, property.As<long>(), value.Whole)
+                        ? new GameValueOrder<long>(block, property.As<long>(), value.Integer)
                         : null;
                 case "Color":
                     return value.Kind == ValueKind.Color
@@ -530,7 +530,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
         /// <summary>
         /// One value whose type nothing says, as the kind it was written as.
         /// </summary>
-        /// <remarks>A whole number goes as 32 bits where it fits: the game's own handlers cast to <c>int</c>, which throws on a boxed 64-bit value.</remarks>
+        /// <remarks>An integer goes as 32 bits where it fits: the game's own handlers cast to <c>int</c>, which throws on a boxed 64-bit value.</remarks>
         public static TerminalActionParameter Given(Literal given)
         {
             if (given.Kind == ValueKind.Flag)
@@ -541,9 +541,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
 
             if (given.Kind == ValueKind.Integer)
             {
-                return given.Whole >= int.MinValue && given.Whole <= int.MaxValue
-                    ? TerminalActionParameter.Get((int)given.Whole)
-                    : TerminalActionParameter.Get(given.Whole);
+                return given.Integer >= int.MinValue && given.Integer <= int.MaxValue
+                    ? TerminalActionParameter.Get((int)given.Integer)
+                    : TerminalActionParameter.Get(given.Integer);
             }
 
             // The game has no parameter value for a color, so it goes as written.

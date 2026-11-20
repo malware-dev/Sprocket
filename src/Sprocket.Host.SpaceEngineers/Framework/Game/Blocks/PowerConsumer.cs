@@ -12,13 +12,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         const string Unheard = "The game raises no event as the most a block can draw changes.";
 
 
-        static readonly OwnValue Use = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.CurrentInputByType(GameResources.Electricity));
+        static readonly OwnValue Use = OwnValue.Real<IMyTerminalBlock>(block => block.ResourceSink.CurrentInputByType(GameResources.Electricity));
 
-        static readonly OwnValue Required = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.RequiredInputByType(GameResources.Electricity));
+        static readonly OwnValue Required = OwnValue.Real<IMyTerminalBlock>(block => block.ResourceSink.RequiredInputByType(GameResources.Electricity));
 
-        static readonly OwnValue Most = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.MaxRequiredInputByType(GameResources.Electricity));
+        static readonly OwnValue Most = OwnValue.Real<IMyTerminalBlock>(block => block.ResourceSink.MaxRequiredInputByType(GameResources.Electricity));
 
-        static readonly OwnValue Supplied = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.SuppliedRatioByType(GameResources.Electricity) * 100d);
+        static readonly OwnValue Supplied = OwnValue.Real<IMyTerminalBlock>(block => block.ResourceSink.SuppliedRatioByType(GameResources.Electricity) * 100d);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

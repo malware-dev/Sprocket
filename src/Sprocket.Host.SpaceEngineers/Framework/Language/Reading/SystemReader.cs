@@ -204,13 +204,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
 
             var number = attribute.Value;
-            if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
+            if (number.Form != ValueForm.Integer || number.Integer < 1 || number.Integer > int.MaxValue)
             {
                 trouble.Say(statement, $"expected a whole number above 0 for the attribute {ScriptAttributes.LastSequence}.");
                 return;
             }
 
-            system.Used((int)number.Whole);
+            system.Used((int)number.Integer);
         }
 
         /// <summary>
@@ -532,19 +532,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static Sequence ReadSequence(Statement statement, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
             var number = statement.ValueAt(0);
-            if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
+            if (number.Form != ValueForm.Integer || number.Integer < 1 || number.Integer > int.MaxValue)
             {
                 trouble.Say(statement, "expected the sequence's number.");
                 return null;
             }
 
-            if (system.FindSequence((int)number.Whole) != null)
+            if (system.FindSequence((int)number.Integer) != null)
             {
-                trouble.Say(statement, $"sequence {number.Whole} is already declared.");
+                trouble.Say(statement, $"sequence {number.Integer} is already declared.");
                 return null;
             }
 
-            var sequence = program.Restore(system, (int)number.Whole, null);
+            var sequence = program.Restore(system, (int)number.Integer, null);
             sequence.Annotation = statement.Annotation;
             sequence.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Category);
             Category(statement, sequence, trouble);

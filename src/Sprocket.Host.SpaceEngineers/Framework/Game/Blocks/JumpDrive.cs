@@ -28,17 +28,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly OwnValue Status = OwnValue.OneOf<IMyJumpDrive>(ChoiceTypes.JumpStatus, drive => Position(drive.Status));
 
-        static readonly OwnValue Charge = OwnValue.Number<IMyJumpDrive>(drive =>
+        static readonly OwnValue Charge = OwnValue.Real<IMyJumpDrive>(drive =>
             drive.MaxStoredPower > 0f ? drive.CurrentStoredPower / drive.MaxStoredPower * 100.0 : 0.0);
 
-        static readonly OwnValue Stored = OwnValue.Number<IMyJumpDrive>(drive => drive.CurrentStoredPower);
+        static readonly OwnValue Stored = OwnValue.Real<IMyJumpDrive>(drive => drive.CurrentStoredPower);
 
-        static readonly OwnValue Capacity = OwnValue.Number<IMyJumpDrive>(drive => drive.MaxStoredPower);
+        static readonly OwnValue Capacity = OwnValue.Real<IMyJumpDrive>(drive => drive.MaxStoredPower);
 
 
-        static readonly OwnValue Shortest = OwnValue.Number<IMyJumpDrive>(drive => drive.MinJumpDistanceMeters / 1000.0);
+        static readonly OwnValue Shortest = OwnValue.Real<IMyJumpDrive>(drive => drive.MinJumpDistanceMeters / 1000.0);
 
-        static readonly OwnValue Longest = OwnValue.Number<IMyJumpDrive>(drive => drive.MaxJumpDistanceMeters / 1000.0);
+        static readonly OwnValue Longest = OwnValue.Real<IMyJumpDrive>(drive => drive.MaxJumpDistanceMeters / 1000.0);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

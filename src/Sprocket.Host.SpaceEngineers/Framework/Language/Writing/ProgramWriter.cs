@@ -98,9 +98,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// <summary>Writes the version line this build writes, with its draft where the version is unfinished.</summary>
         static void Head(ScriptWriter pen)
         {
-            pen.Start(ScriptFormat.Header, false).Whole(ScriptFormat.Version);
+            pen.Start(ScriptFormat.Header, false).Integer(ScriptFormat.Version);
             if (ScriptFormat.IsDraft)
-                pen.Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
+                pen.Says(Keyword.Alpha).Integer(ScriptFormat.Draft);
         }
 
         /// <summary>The blueprint <paramref name="system" /> written out alone under the identity <paramref name="identity" />, as the library stores the blueprint it is linked to.</summary>
@@ -239,9 +239,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
 
             if (key.Kind == ValueKind.Integer)
             {
-                long whole;
-                values.TryInteger(key.Kind, key.Value, out whole);
-                pen.Whole(whole);
+                long integer;
+                values.TryInteger(key.Kind, key.Value, out integer);
+                pen.Integer(integer);
                 return;
             }
 
@@ -583,7 +583,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             pen.Blank();
             pen.Note(instance.Annotation);
             pen.Attributes(instance.Attributes);
-            pen.Start(Keyword.Instance).Whole(instance.Number)
+            pen.Start(Keyword.Instance).Integer(instance.Number)
                 .Says(Keyword.Of).Text(system.Identity.ToString("D"));
 
             if (instance.HasName)
@@ -739,7 +739,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 pen.AttributeText(ScriptAttributes.Category, sequence.Category);
 
             pen.Attributes(sequence.Attributes);
-            pen.Start(Keyword.Sequence).Whole(sequence.Number);
+            pen.Start(Keyword.Sequence).Integer(sequence.Number);
             if (sequence.HasName)
                 pen.Says(Keyword.As).Word(sequence.Name);
 
@@ -1145,7 +1145,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
 
             var run = step as Run;
             if (run != null)
-                pen.Whole(run.Number);
+                pen.Integer(run.Number);
         }
 
         /// <summary>
@@ -1197,7 +1197,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
 
             if (value.Kind == ValueKind.Integer)
             {
-                pen.Whole(value.Whole);
+                pen.Integer(value.Integer);
                 return;
             }
 

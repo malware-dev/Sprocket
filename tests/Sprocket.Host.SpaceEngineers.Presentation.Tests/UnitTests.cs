@@ -44,7 +44,7 @@ public class UnitTests
     {
         var item = Field.Among("item", new[] { "Iron Ore", "Steel Plate" }, new[] { "Ore/Iron", "Component/SteelPlate" });
         var amount = Field.Called("amount");
-        amount.Entry = FieldInput.Decimal;
+        amount.Entry = FieldInput.Real;
         amount.UnitFollows = "item";
         amount.UnitOf = (said, _) => said == "Ore/Iron" ? " kg" : " pieces";
         Assert.Equal("0.##' kg'", Written(item, amount, "Iron Ore"));

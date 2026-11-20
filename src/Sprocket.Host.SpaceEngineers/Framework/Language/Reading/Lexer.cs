@@ -289,7 +289,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// A whole number, or a real told by a dot or an exponent.
+        /// An integer, or a real told by a dot or an exponent.
         /// </summary>
         Token Number()
         {
@@ -335,19 +335,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     : new Token(TokenKind.Real, start.Index, default(StringSegment), 0, value);
             }
 
-            long whole;
-            if (!long.TryParse(body, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
+            long integer;
+            if (!long.TryParse(body, NumberStyles.Integer, CultureInfo.InvariantCulture, out integer))
                 return Bad(start, $"'{body}' is too large for a whole number.");
 
             return Letter(_ptr.Char)
-                ? Duration(start, whole, whole, false)
-                : new Token(TokenKind.Integer, start.Index, default(StringSegment), whole);
+                ? Duration(start, integer, integer, false)
+                : new Token(TokenKind.Integer, start.Index, default(StringSegment), integer);
         }
 
         /// <summary>
-        /// A number that had a unit written against it: ticks, or seconds counted as the nearest whole tick.
+        /// A number that had a unit written against it: ticks, or seconds counted as the nearest integer tick.
         /// </summary>
-        Token Duration(TextPtr start, long whole, double number, bool real)
+        Token Duration(TextPtr start, long integer, double number, bool real)
         {
             var from = _ptr;
 
@@ -363,7 +363,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             {
                 return real
                     ? Bad(start, $"expected a whole number of ticks, not '{Since(start)}'.")
-                    : new Token(TokenKind.Duration, start.Index, unit, whole, number);
+                    : new Token(TokenKind.Duration, start.Index, unit, integer, number);
             }
 
             if (unit.Length != 1 || unit[0] != 's')

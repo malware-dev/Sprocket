@@ -73,11 +73,11 @@ public class SettingsTests
     }
 
     /// <summary>
-    /// A file of release 1 says its release as a whole number, which reads as that release of major version 1 and is
+    /// A file of release 1 says its release as an integer, which reads as that release of major version 1 and is
     /// written back as a version; a release newer than it is still offered.
     /// </summary>
     [Fact]
-    public void AReleaseOneFilesWholeNumberReadsAsAVersion()
+    public void AReleaseOneFilesIntegerReadsAsAVersion()
     {
         var read = PlayerSettings.From(Ini("[Player]\nseen=1\n"));
         Assert.Equal(new ModRelease(1, 1), read.Seen);

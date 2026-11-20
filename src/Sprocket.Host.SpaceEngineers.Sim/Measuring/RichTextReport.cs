@@ -127,15 +127,15 @@ public static class RichTextReport
 
         report.AppendLine(
             Pad(name, 20) +
-            Pad(Whole(source.Length), 8) +
+            Pad(Integer(source.Length), 8) +
             Pad(Micro(parse), 11) +
             Pad(Micro(layout), 11) +
             Pad(Micro(frame), 11) +
-            Pad(Whole(measures), 11) +
+            Pad(Integer(measures), 11) +
             Pad((measures / (double)Math.Max(1, characters)).ToString("0.00", CultureInfo.InvariantCulture), 11) +
             Pad((parseBytes / 1024d).ToString("0.0", CultureInfo.InvariantCulture), 11) +
             Pad((layoutBytes / 1024d).ToString("0.0", CultureInfo.InvariantCulture), 11) +
-            Pad(Whole(frameBytes), 9));
+            Pad(Integer(frameBytes), 9));
     }
 
     static void Parse(StringBuilder report, string name, string source)
@@ -143,7 +143,7 @@ public static class RichTextReport
         var parse = Time(() => Markdown.Parse(source));
         report.AppendLine(
             Pad(name, 20) +
-            Pad(Whole(source.Length), 8) +
+            Pad(Integer(source.Length), 8) +
             Pad(Micro(parse), 11) +
             Pad((parse * 1000d / (source.Length / 1024d)).ToString("0.0", CultureInfo.InvariantCulture), 8));
     }
@@ -172,7 +172,7 @@ public static class RichTextReport
 
             var kilobytes = source.Length / 1024d;
             report.AppendLine(
-                Pad(Whole(source.Length), 10) +
+                Pad(Integer(source.Length), 10) +
                 Pad((parse * 1000d / kilobytes).ToString("0.0", CultureInfo.InvariantCulture), 14) +
                 Pad((layout * 1000d / kilobytes).ToString("0.0", CultureInfo.InvariantCulture), 14));
         }
@@ -334,7 +334,7 @@ public static class RichTextReport
 
     static string Micro(double milliseconds) => (milliseconds * 1000d).ToString("0.0", CultureInfo.InvariantCulture);
 
-    static string Whole(long value) => value.ToString(CultureInfo.InvariantCulture);
+    static string Integer(long value) => value.ToString(CultureInfo.InvariantCulture);
 
     static string Pad(string text, int width) => text.PadLeft(width);
 }

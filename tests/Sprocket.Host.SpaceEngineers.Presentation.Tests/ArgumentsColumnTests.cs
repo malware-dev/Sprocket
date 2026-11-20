@@ -68,7 +68,7 @@ public class ArgumentsColumnTests
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(5L, Assert.Single(act.Arguments).Whole);
+        Assert.Equal(5L, Assert.Single(act.Arguments).Integer);
     }
 
     /// <summary>Done with nothing given, or with a value the field will not take, is refused with the reason at the foot of the column, and the caret goes to the field.</summary>
@@ -136,7 +136,7 @@ public class ArgumentsColumnTests
         var speed = 0;
         door.Kind.WithValue("speed", "speed",
                 OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "speed", "low", "middle", "high"), _ => speed)
-                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
+                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Integer))
             .Looked("A test value.");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("speed");

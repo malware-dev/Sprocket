@@ -13,13 +13,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         public static readonly Value None = new Value(ValueForm.Identifier);
 
         /// <summary>A value written as <paramref name="form" />, carrying what that form carries.</summary>
-        public Value(ValueForm form, string word = null, long whole = 0, double real = 0,
+        public Value(ValueForm form, string word = null, long integer = 0, double real = 0,
             Keyword keyword = Keyword.None) : this()
         {
             Form = form;
             Keyword = keyword;
             Word = keyword != Keyword.None ? Keywords.Name(keyword) : word ?? "";
-            Whole = whole;
+            Integer = integer;
             Real = real;
         }
 
@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>
         /// An integer, a color's four bytes packed red-green-blue-alpha, or where a list's items are.
         /// </summary>
-        public long Whole { get; private set; }
+        public long Integer { get; private set; }
 
         /// <summary>A real number, for one written with a point or an exponent.</summary>
         public double Real { get; private set; }
@@ -45,10 +45,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         public bool IsWord => Form == ValueForm.Identifier || Form == ValueForm.Keyword;
 
         /// <summary>Where a list's items, or a name's parts, start in the reading.</summary>
-        public int From => (int)(Whole >> 32);
+        public int From => (int)(Integer >> 32);
 
         /// <summary>How many items a list holds, or parts a name has.</summary>
-        public int Count => (int)(Whole & 0xFFFFFFFF);
+        public int Count => (int)(Integer & 0xFFFFFFFF);
 
         /// <summary>A list whose items are a run of <see cref="ScriptValues.Items" />.</summary>
         public static Value Listed(int from, int count)
@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         public double Number()
         {
             if (Form == ValueForm.Integer)
-                return Whole;
+                return Integer;
 
             return Form == ValueForm.Real ? Real : 0d;
         }
@@ -106,10 +106,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>A color's red, green, blue and alpha.</summary>
         public void Color(out byte r, out byte g, out byte b, out byte a)
         {
-            r = (byte)((Whole >> 24) & 0xFF);
-            g = (byte)((Whole >> 16) & 0xFF);
-            b = (byte)((Whole >> 8) & 0xFF);
-            a = (byte)(Whole & 0xFF);
+            r = (byte)((Integer >> 24) & 0xFF);
+            g = (byte)((Integer >> 16) & 0xFF);
+            b = (byte)((Integer >> 8) & 0xFF);
+            a = (byte)(Integer & 0xFF);
         }
     }
 }

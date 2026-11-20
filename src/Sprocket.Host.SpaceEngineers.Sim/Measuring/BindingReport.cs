@@ -101,9 +101,9 @@ public static class BindingReport
         var compares = mine.Count;
         var compare = Time(() => Same(mine, theirs));
 
-        report.AppendLine(Pad(name, 15) + Pad(Whole(blocks), 8) + Pad(Whole(refs), 6)
+        report.AppendLine(Pad(name, 15) + Pad(Integer(blocks), 8) + Pad(Integer(refs), 6)
             + Pad(Span(rebind), 12) + Pad(Span(rebind * 1000 / Math.Max(1, refs)), 13)
-            + Pad(Whole(compares), 16) + Pad(Span(compare), 13)
+            + Pad(Integer(compares), 16) + Pad(Span(compare), 13)
             + (rebind <= 0 ? "-" : (compare / rebind).ToString("0.00%", CultureInfo.InvariantCulture)));
     }
 
@@ -166,7 +166,7 @@ public static class BindingReport
             CultureInfo.InvariantCulture);
     }
 
-    static string Whole(long value)
+    static string Integer(long value)
     {
         return value.ToString(CultureInfo.InvariantCulture);
     }

@@ -10,9 +10,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     {
         static readonly Reading Hurt = Reading.Of<IMyTerminalBlock>(block => block.SlimBlock.CurrentDamage > 0);
 
-        static readonly OwnValue Integrity = OwnValue.Number<IMyTerminalBlock>(block => Whole(block.SlimBlock));
+        static readonly OwnValue Integrity = OwnValue.Real<IMyTerminalBlock>(block => Whole(block.SlimBlock));
 
-        static readonly OwnValue Built = OwnValue.Number<IMyTerminalBlock>(block => block.SlimBlock.BuildLevelRatio * 100d);
+        static readonly OwnValue Built = OwnValue.Real<IMyTerminalBlock>(block => block.SlimBlock.BuildLevelRatio * 100d);
 
         static readonly OwnValue Damaged = OwnValue.Flag(Hurt);
 

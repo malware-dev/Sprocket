@@ -11,21 +11,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <remarks>How full and how heavy are read only on a block with one inventory. How much of an item is read on any.</remarks>
     public sealed partial class Inventory : Capability
     {
-        static readonly OwnValue Fill = OwnValue.Number<IMyTerminalBlock>(block => block.GetInventory(0).VolumeFillFactor * 100d);
+        static readonly OwnValue Fill = OwnValue.Real<IMyTerminalBlock>(block => block.GetInventory(0).VolumeFillFactor * 100d);
 
-        static readonly OwnValue Mass = OwnValue.Number<IMyTerminalBlock>(block => (double)block.GetInventory(0).CurrentMass);
+        static readonly OwnValue Mass = OwnValue.Real<IMyTerminalBlock>(block => (double)block.GetInventory(0).CurrentMass);
 
         /// <summary>How much of an item one inventory of a block holds: in kilograms for ore and ingots, and in pieces for the rest.</summary>
         static OwnValue Amount(IMyTerminalBlock block)
         {
-            return OwnValue.Number<IMyTerminalBlock, Asked>(Asked.Of, Held).AnsweredBy<IMyTerminalBlock>(Has)
+            return OwnValue.Real<IMyTerminalBlock, Asked>(Asked.Of, Held).AnsweredBy<IMyTerminalBlock>(Has)
                 .Taking(WhichInventory(block), TheItem(block)).Joined("in", "of").MeasuredBy("item", UnitOf);
         }
 
         /// <summary>How much of an item the inventory a slot holds has, the inventory coming from the slot and only the item asked.</summary>
         public static OwnValue AmountInSlot(IMyTerminalBlock block)
         {
-            return OwnValue.Number<IMyTerminalBlock, Asked>(Asked.Of, Held).AnsweredBy<IMyTerminalBlock>(Has)
+            return OwnValue.Real<IMyTerminalBlock, Asked>(Asked.Of, Held).AnsweredBy<IMyTerminalBlock>(Has)
                 .Taking(TheItem(block)).Joined("in", "of").MeasuredBy("item", UnitOf);
         }
 
@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 : Field.Between("inventory", "1", null);
             field.Least = "1";
             field.Open = true;
-            field.Entry = FieldInput.Whole;
+            field.Entry = FieldInput.Integer;
             field.Needed = true;
             field.IsPart = true;
             field.NumberedLead = "in inventory";

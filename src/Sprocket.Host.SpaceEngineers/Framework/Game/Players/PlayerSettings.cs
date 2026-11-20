@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
 
         const string TipsKey = "tips";
 
-        // The highest release whose callouts have all been dismissed, written as 1.1; a file of release 1 has it as a whole number.
+        // The highest release whose callouts have all been dismissed, written as 1.1; a file of release 1 has it as an integer.
         const string SeenKey = "seen";
 
         // The ids of the callouts the player has dismissed, separated by commas.

@@ -107,9 +107,9 @@ public class SensingTests
         Assert.False(Read(entity, "detecting").Flag);
 
         Assert.True(kind.FindAction("detections", ReachKind.Value)!.LookedBecause.Length > 0);
-        Assert.Equal(2, Read(entity, "detections").Whole);
+        Assert.Equal(2, Read(entity, "detections").Integer);
         things = 0;
-        Assert.Equal(0, Read(entity, "detections").Whole);
+        Assert.Equal(0, Read(entity, "detections").Integer);
 
         Assert.Equal("detect players", kind.FindAction("Detect Players", ReachKind.Value)!.Text);
         var toggle = kind.FindAction("Detect Players", ReachKind.Action)!;
@@ -710,6 +710,6 @@ public class SensingTests
     static string Said(GridEntity entity, string id)
     {
         var value = entity.Kind.FindAction(id, ReachKind.Value)!;
-        return value.OwnValue.Names[(int)Read(entity, id).Whole];
+        return value.OwnValue.Names[(int)Read(entity, id).Integer];
     }
 }

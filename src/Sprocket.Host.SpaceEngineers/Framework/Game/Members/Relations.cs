@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// Measures a reading against an operand of the same kind.
         /// </summary>
         /// <remarks>
-        /// Two whole numbers are compared as whole numbers, never as doubles: past 2^53 a double cannot tell two ids
+        /// Two integers are compared as integers, never as doubles: past 2^53 a double cannot tell two ids
         /// apart.
         /// </remarks>
         public static bool Holds(
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             long here, there;
 
             if (values.TryInteger(kind, reading, out here) && values.TryInteger(kind, operand, out there))
-                return Whole(here, relation, there);
+                return Integer(here, relation, there);
 
             return Real(values.AsNumber(kind, reading), relation, values.AsNumber(kind, operand));
         }
@@ -48,13 +48,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// Measures a reading against an operand, each carrying its own kind.
         /// </summary>
         /// <remarks>
-        /// Two whole numbers are compared as whole numbers and any other two numbers as reals. A flag, a color and text answer
+        /// Two integers are compared as integers and any other two numbers as reals. A flag, a color and text answer
         /// only sameness, and two of different kinds are never the same.
         /// </remarks>
         public static bool Holds(Literal reading, Relation relation, Literal operand)
         {
             if (reading.Kind == ValueKind.Integer && operand.Kind == ValueKind.Integer)
-                return Whole(reading.Whole, relation, operand.Whole);
+                return Integer(reading.Integer, relation, operand.Integer);
 
             var numbers = (reading.Kind == ValueKind.Integer || reading.Kind == ValueKind.Real)
                           && (operand.Kind == ValueKind.Integer || operand.Kind == ValueKind.Real);
@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return Same(reading.Value.Bits == operand.Value.Bits, relation);
         }
 
-        static bool Whole(long here, Relation relation, long there)
+        static bool Integer(long here, Relation relation, long there)
         {
             switch (relation)
             {

@@ -604,9 +604,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             switch (kind)
             {
                 case ValueKind.Integer:
-                    return FieldInput.Whole;
+                    return FieldInput.Integer;
                 case ValueKind.Real:
-                    return FieldInput.Decimal;
+                    return FieldInput.Real;
                 case ValueKind.Text:
                     return FieldInput.Text;
             }
@@ -620,10 +620,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             kind = ValueKind.Text;
             switch (entry)
             {
-                case FieldInput.Whole:
+                case FieldInput.Integer:
                     kind = ValueKind.Integer;
                     return true;
-                case FieldInput.Decimal:
+                case FieldInput.Real:
                     kind = ValueKind.Real;
                     return true;
                 case FieldInput.Text:
@@ -675,10 +675,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 case Primitive.UInt32:
                 case Primitive.Int64:
                 case Primitive.UInt64:
-                    return FieldInput.Whole;
+                    return FieldInput.Integer;
                 case Primitive.Single:
                 case Primitive.Double:
-                    return FieldInput.Decimal;
+                    return FieldInput.Real;
                 case Primitive.Char:
                 case Primitive.String:
                     return FieldInput.Text;
@@ -688,7 +688,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         }
 
         /// <summary>
-        /// Gives a box the bounds of a small whole-number type, where nobody has given it any.
+        /// Gives a box the bounds of a small integer type, where nobody has given it any.
         /// </summary>
         static void Bound(ref Field field, Primitive type)
         {

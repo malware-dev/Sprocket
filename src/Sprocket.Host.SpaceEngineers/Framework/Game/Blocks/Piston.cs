@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly OwnValue State = OwnValue.OneOf<IMyPistonBase>(ChoiceTypes.PistonStatus, piston => Rank(piston.Status));
 
-        static readonly OwnValue Travelled = OwnValue.Number<IMyPistonBase>(piston => piston.CurrentPosition);
+        static readonly OwnValue Travelled = OwnValue.Real<IMyPistonBase>(piston => piston.CurrentPosition);
 
         static readonly Reading Out = Reading.Of<IMyPistonBase>(piston => piston.Status == PistonStatus.Extended);
 
@@ -147,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
             var position = Field.Between("position", Field.Bound(least), Field.Bound(most));
             position.Needed = true;
-            position.Entry = FieldInput.Decimal;
+            position.Entry = FieldInput.Real;
             position.Lead = "to";
             position.Unit = " m";
             return position;
@@ -161,7 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             var speed = Field.Between("speed", "0", Field.Bound(piston?.MaxVelocity ?? 5f));
             speed.Needed = true;
             speed.Above = true;
-            speed.Entry = FieldInput.Decimal;
+            speed.Entry = FieldInput.Real;
             speed.Default = "1";
             speed.Lead = "at";
             speed.Unit = " m/s";

@@ -126,10 +126,10 @@ public class MechanicsTests
         piston.Stand(4.5f);
 
         Assert.Equal(4.5, ship.Read("position", piston).Real, 3);
-        Assert.Equal(2, ship.Read("status", piston).Whole);
+        Assert.Equal(2, ship.Read("status", piston).Integer);
 
         piston.Perform("Retract", null!);
-        Assert.Equal(3, ship.Read("status", piston).Whole);
+        Assert.Equal(3, ship.Read("status", piston).Integer);
     }
 
     /// <summary>A piston reaching the end of its travel is seen on the tick after, since the piston raises it.</summary>

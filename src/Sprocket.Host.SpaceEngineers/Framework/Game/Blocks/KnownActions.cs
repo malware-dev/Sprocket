@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             "SetBottom", "SetTop", "SetBack", "SetFront"
         };
 
-        /// <summary>The descriptions of the game's own actions that Sprocket ships, read before any mod's.</summary>
+        /// <summary>The descriptions of the game's own actions that Sprocket ships.</summary>
         public static Descriptions Descriptions()
         {
             var said = new Descriptions();
@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             said.Actions.Add(Action("SetColorMax", Color()));
 
             // The game's handlers take a number with a fraction as a float, the type of every such value it holds,
-            // and a whole number as either width; int32 is what its own toolbar dialog sends.
+            // and an integer as either width; int32 is what its own toolbar dialog sends.
             said.Actions.Add(Action("SetRadius", Parameter("Radius", Real)));
 
             // A rotor turned to an angle at a speed, which way round as the game numbers it.
@@ -87,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             return group;
         }
 
-        /// <summary>One channel of a color, which the game takes as a whole number from nought to 255.</summary>
+        /// <summary>One channel of a color, which the game takes as an integer from nought to 255.</summary>
         static Parameter Channel(string name)
         {
             var channel = (Parameter)Parameter(name, Integer);

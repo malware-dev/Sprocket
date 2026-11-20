@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         Flag,
 
         /// <summary>
-        /// A whole number, held exactly.
+        /// An integer, held exactly.
         /// </summary>
         /// <remarks>An entity id runs to seventeen digits, past the 2^53 a <c>double</c> holds exactly.</remarks>
         Integer,

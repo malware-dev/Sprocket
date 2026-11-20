@@ -8,15 +8,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <remarks>The game's three shares of wind, 0 to 1, are read as percentages.</remarks>
     public sealed class WindTurbine : Capability
     {
-        static readonly OwnValue Wind = OwnValue.Number<IMyWindTurbine>(turbine => turbine.Effectivity * 100.0);
+        static readonly OwnValue Wind = OwnValue.Real<IMyWindTurbine>(turbine => turbine.Effectivity * 100.0);
 
-        static readonly OwnValue Strength = OwnValue.Number<IMyWindTurbine>(turbine => turbine.WindEffectivity * 100.0);
+        static readonly OwnValue Strength = OwnValue.Real<IMyWindTurbine>(turbine => turbine.WindEffectivity * 100.0);
 
-        static readonly OwnValue Clearance = OwnValue.Number<IMyWindTurbine>(turbine => turbine.PlacementEffectivity * 100.0);
+        static readonly OwnValue Clearance = OwnValue.Real<IMyWindTurbine>(turbine => turbine.PlacementEffectivity * 100.0);
 
-        static readonly OwnValue Output = OwnValue.Number<IMyWindTurbine>(turbine => turbine.CurrentOutput);
+        static readonly OwnValue Output = OwnValue.Real<IMyWindTurbine>(turbine => turbine.CurrentOutput);
 
-        static readonly OwnValue MostOut = OwnValue.Number<IMyWindTurbine>(turbine => turbine.MaxOutput);
+        static readonly OwnValue MostOut = OwnValue.Real<IMyWindTurbine>(turbine => turbine.MaxOutput);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

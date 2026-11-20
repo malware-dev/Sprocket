@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             if (_being.Kind != ValueKind.Name)
                 return read.Said;
 
-            var at = read.Whole;
+            var at = read.Integer;
             return at >= 0 && at < _being.Names.Count ? _being.Names[(int)at] : read.Said;
         }
     }

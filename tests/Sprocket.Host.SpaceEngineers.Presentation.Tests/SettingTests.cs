@@ -81,7 +81,7 @@ public class SettingTests
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Falloff", act.ActionId);
         Assert.True(act.Sets, "a value was picked and the step does not say it sets one");
-        Assert.Equal(2, Assert.Single(act.Arguments).Whole);
+        Assert.Equal(2, Assert.Single(act.Arguments).Integer);
     }
 
     /// <summary>And running it tells the block, which is the whole point of the exercise.</summary>
@@ -191,7 +191,7 @@ public class SettingTests
 
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Radius", act.ActionId);
-        Assert.Equal(4, Assert.Single(act.Arguments).Whole);
+        Assert.Equal(4, Assert.Single(act.Arguments).Integer);
     }
 
     static string Named(Simulation sim, Fitting fitting)
@@ -209,7 +209,7 @@ public class SettingTests
         var speed = 0;
         door.Kind.WithValue("speed", "speed",
                 OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "speed", "low", "middle", "high"), _ => speed)
-                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
+                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Integer))
             .Looked("A test value.");
 
         screen.Editor.PressAdd("task");

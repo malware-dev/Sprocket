@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>Text, in double quotes.</summary>
         Text,
 
-        /// <summary>A whole number.</summary>
+        /// <summary>An integer.</summary>
         Integer,
 
         /// <summary>A number with a point or an exponent.</summary>

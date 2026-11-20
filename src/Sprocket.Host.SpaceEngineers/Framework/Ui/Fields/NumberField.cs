@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 Submit = submit,
                 Placement = FixedSize.Width(wide),
                 Hint = field.SaidEmpty ?? "",
-                IsInteger = field.Entry == FieldInput.Whole,
+                IsInteger = field.Entry == FieldInput.Integer,
                 Minimum = floored ? least : (double?)null,
                 Maximum = ceilinged ? most : (double?)null,
                 FormatString = Formatted(field.Unit)
@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>How the box writes a number of its field, with <paramref name="unit" /> after it.</summary>
         string Formatted(string unit)
         {
-            var number = _field.Entry == FieldInput.Whole ? "0" : _field.Entry == FieldInput.Decimal && _field.UnitOf == null ? "0.0#" : "0.##";
+            var number = _field.Entry == FieldInput.Integer ? "0" : _field.Entry == FieldInput.Real && _field.UnitOf == null ? "0.0#" : "0.##";
             return string.IsNullOrEmpty(unit) ? number : $"{number}'{unit}'";
         }
 
@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>Whether a field takes a number: one it says is whole or decimal, or one with a bound that says nothing else.</summary>
         public static bool Takes(Field field)
         {
-            if (field.Entry == FieldInput.Whole || field.Entry == FieldInput.Decimal)
+            if (field.Entry == FieldInput.Integer || field.Entry == FieldInput.Real)
                 return true;
 
             return field.Entry == FieldInput.Any && Math.Max((field.Least ?? "").Length, (field.Most ?? "").Length) > 0;

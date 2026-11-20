@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly Reading Wheeled = Reading.Of<IMyMotorSuspension>(suspension => suspension.IsAttached);
 
         // The game's steering angle is in radians; the terminal says degrees.
-        static readonly OwnValue Turned = OwnValue.Number<IMyMotorSuspension>(suspension => suspension.SteerAngle * 180.0 / Math.PI);
+        static readonly OwnValue Turned = OwnValue.Real<IMyMotorSuspension>(suspension => suspension.SteerAngle * 180.0 / Math.PI);
 
         static readonly OwnValue Attached = OwnValue.Flag(Wheeled);
 
@@ -87,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
             var height = Field.Between("height", Field.Bound(least), Field.Bound(most));
             height.Needed = true;
-            height.Entry = FieldInput.Decimal;
+            height.Entry = FieldInput.Real;
             height.Lead = "to";
             height.Unit = " m";
             return height;

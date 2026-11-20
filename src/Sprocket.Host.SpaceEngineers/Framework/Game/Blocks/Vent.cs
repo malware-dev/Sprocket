@@ -71,11 +71,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly OwnValue Airtight = OwnValue.Flag(Reading.Of<IMyAirVent>(vent => vent.CanPressurize));
 
         // The game reads the room as a fraction; every fill Sprocket says is in percent.
-        static readonly OwnValue Level = OwnValue.Number<IMyAirVent>(vent => vent.GetOxygenLevel() * 100.0);
+        static readonly OwnValue Level = OwnValue.Real<IMyAirVent>(vent => vent.GetOxygenLevel() * 100.0);
 
-        static readonly OwnValue Into = OwnValue.Number<IMyAirVent>(vent => vent.GasInputPerSecond);
+        static readonly OwnValue Into = OwnValue.Real<IMyAirVent>(vent => vent.GasInputPerSecond);
 
-        static readonly OwnValue OutOf = OwnValue.Number<IMyAirVent>(vent => vent.GasOutputPerSecond);
+        static readonly OwnValue OutOf = OwnValue.Real<IMyAirVent>(vent => vent.GasOutputPerSecond);
 
         static readonly OwnAction Fills = OwnAction.Of<IMyAirVent, Stuck>(Stuck.Read,
             (vent, stuck, seen) => vent.Depressurize = false, Air,
@@ -147,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static Field Asked()
         {
             var field = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { Literal.Of(MoveOn).Said, Literal.Of(Hold).Said });
-            field.Entry = FieldInput.Whole;
+            field.Entry = FieldInput.Integer;
             field.Default = "hold";
             field.Quiet = "hold";
             field.Lead = "or";
@@ -230,7 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 return new Stuck
                 {
                     MovesOn = arguments != null && arguments.Count > 0 && arguments[0].Kind == ValueKind.Integer
-                        && arguments[0].Whole == MoveOn
+                        && arguments[0].Integer == MoveOn
                 };
             }
         }

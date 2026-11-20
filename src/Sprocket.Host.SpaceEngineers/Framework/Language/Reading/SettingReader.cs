@@ -142,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// The value at <paramref name="at" /> as one of the type <paramref name="part" />, a setting, holds, a whole number
+        /// The value at <paramref name="at" /> as one of the type <paramref name="part" />, a setting, holds, an integer
         /// standing for a real one; or false and trouble where it is none.
         /// </summary>
         /// <remarks>A choice of a declared type is written bare, or with its type as a kind, <c>side(inside)</c>.</remarks>
@@ -201,7 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     if (written.Form != ValueForm.Integer)
                         return false;
 
-                    value = Literal.Of(written.Whole);
+                    value = Literal.Of(written.Integer);
                     return true;
 
                 case Real:

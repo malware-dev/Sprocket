@@ -248,24 +248,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />.</summary>
-        public static OwnValue Number<T>(Func<T, double> number) where T : class
+        public static OwnValue Real<T>(Func<T, double> number) where T : class
         {
             return new TypedOwnValue<T, object>(ValueKind.Real, None, false, Nothing,
                 (block, options, seen) => Literal.Of(number(block)));
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />, remembering between looks.</summary>
-        public static OwnValue Number<T>(Func<T, ReaderMemory, double> number) where T : class
+        public static OwnValue Real<T>(Func<T, ReaderMemory, double> number) where T : class
         {
             return new TypedOwnValue<T, object>(ValueKind.Real, None, true, Nothing,
                 (block, options, seen) => Literal.Of(number(block, seen)));
         }
 
-        /// <summary>A whole number read off a <typeparamref name="T" />.</summary>
-        public static OwnValue Whole<T>(Func<T, long> whole) where T : class
+        /// <summary>An integer read off a <typeparamref name="T" />.</summary>
+        public static OwnValue Integer<T>(Func<T, long> integer) where T : class
         {
             return new TypedOwnValue<T, object>(ValueKind.Integer, None, false, Nothing,
-                (block, options, seen) => Literal.Of(whole(block)));
+                (block, options, seen) => Literal.Of(integer(block)));
         }
 
         /// <summary>A length of time read off a <typeparamref name="T" />.</summary>
@@ -308,7 +308,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a real number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, double> number)
+        public static OwnValue Real<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, double> number)
             where T : class
         {
             return new TypedOwnValue<T, TOptions>(ValueKind.Real, None, false, options,
@@ -342,12 +342,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 (block, given, seen) => Literal.Of(flag(block, given)));
         }
 
-        /// <summary>A function of a <typeparamref name="T" /> giving back a whole number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, long> whole)
+        /// <summary>A function of a <typeparamref name="T" /> giving back an integer, with options read into a <typeparamref name="TOptions" />.</summary>
+        public static OwnValue Integer<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, long> integer)
             where T : class
         {
             return new TypedOwnValue<T, TOptions>(ValueKind.Integer, None, false, options,
-                (block, given, seen) => Literal.Of(whole(block, given)));
+                (block, given, seen) => Literal.Of(integer(block, given)));
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back text, with options read into a <typeparamref name="TOptions" />.</summary>

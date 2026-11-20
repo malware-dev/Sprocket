@@ -577,7 +577,7 @@ public class RotorTests
     /// <summary>Turns the rotor, waits for it, then switches the lamp on; answers the tick the lamp came on.</summary>
     static int Run(Rigged ship, Rotor rotor, Lamp lamp, long way, double degrees, double rpm)
     {
-        // Whole where they are whole, as a program reads them: "90" is a whole number and "90.5" is not.
+        // Whole where they are whole, as a program reads them: "90" is an integer and "90.5" is not.
         return Turned(ship, rotor, lamp, Literal.Of(way), Written(degrees), Written(rpm));
     }
 

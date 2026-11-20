@@ -42,11 +42,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 if (arguments.Count > 3 && (arguments[3].Kind == ValueKind.Integer || arguments[3].Kind == ValueKind.Real))
                     move.Amount = arguments[3].Number;
 
-                // Only ore and ingots come in fractions, so a count of anything else is a whole number.
+                // Only ore and ingots come in fractions, so a count of anything else is an integer.
                 if (move.Amount >= 0 && (move.Item == null || !ItemIds.IsWeighed(arguments[2].Text)))
                     move.Amount = System.Math.Floor(move.Amount);
 
-                move.MovesOn = arguments.Count > 4 && arguments[4].Kind == ValueKind.Integer && arguments[4].Whole == MoveOn;
+                move.MovesOn = arguments.Count > 4 && arguments[4].Kind == ValueKind.Integer && arguments[4].Integer == MoveOn;
                 return move;
             }
 

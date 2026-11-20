@@ -348,7 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             else
                 box.Needed = true;
 
-            box.Entry = type == "integer" ? FieldInput.Whole : type == "real" || type == "duration" ? FieldInput.Decimal : FieldInput.Text;
+            box.Entry = type == "integer" ? FieldInput.Integer : type == "real" || type == "duration" ? FieldInput.Real : FieldInput.Text;
             if (type == "duration")
                 box.Unit = Template.Fill(texts.WaitPickSeconds, "count", "");
 

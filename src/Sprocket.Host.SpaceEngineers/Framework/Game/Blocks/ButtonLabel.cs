@@ -18,10 +18,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         {
             var labelled = new ButtonLabel();
             if (arguments == null || arguments.Count == 0 || arguments[0].Kind != ValueKind.Integer
-                || arguments[0].Whole < 1 || arguments[0].Whole > int.MaxValue)
+                || arguments[0].Integer < 1 || arguments[0].Integer > int.MaxValue)
                 return labelled;
 
-            labelled.Button = (int)arguments[0].Whole - 1;
+            labelled.Button = (int)arguments[0].Integer - 1;
             if (arguments.Count > 1)
                 labelled.Text = arguments[1].Text ?? "";
 

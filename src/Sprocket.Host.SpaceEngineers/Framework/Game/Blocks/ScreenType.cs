@@ -124,17 +124,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 (provider, which) => Surface(provider, which).BackgroundColor));
             Value(kind, "font", OwnValue.Text<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).Font));
-            Value(kind, "font size", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "font size", OwnValue.Real<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).FontSize));
             Value(kind, "alignment", OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(ChoiceTypes.Alignment, picked,
                 (provider, which) => Position(TextAlignments, Surface(provider, which).Alignment)));
-            Value(kind, "padding", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "padding", OwnValue.Real<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).TextPadding));
             Value(kind, "app color", OwnValue.Color<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).ScriptForegroundColor));
             Value(kind, "app background color", OwnValue.Color<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).ScriptBackgroundColor));
-            Value(kind, "image interval", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "image interval", OwnValue.Real<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).ChangeInterval));
             Value(kind, "keep aspect ratio", OwnValue.Flag<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which) => Surface(provider, which).PreserveAspectRatio));
@@ -326,7 +326,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static Field Decimal(string name, string least, string most)
         {
             var field = Field.Between(name, least, most);
-            field.Entry = FieldInput.Decimal;
+            field.Entry = FieldInput.Real;
             return field;
         }
 
@@ -406,7 +406,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             /// <summary>The screen its slot holds, first among <paramref name="arguments" />, counted from 1; the first where none is.</summary>
             public static Picked Read(IList<Literal> arguments)
             {
-                var given = arguments != null && arguments.Count > 0 && arguments[0].Kind == ValueKind.Integer ? arguments[0].Whole : 1;
+                var given = arguments != null && arguments.Count > 0 && arguments[0].Kind == ValueKind.Integer ? arguments[0].Integer : 1;
                 return new Picked { Screen = given < 1 || given > int.MaxValue ? 0 : (int)given - 1 };
             }
         }

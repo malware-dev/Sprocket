@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly OwnValue Counting = OwnValue.Flag(Reading.Of<IMyFunctionalBlock>(block => Pulse(block)?.IsCountingDown == true));
 
-        static readonly OwnValue Countdown = OwnValue.Number<IMyFunctionalBlock>(block => Pulse(block)?.Countdown ?? 0f)
+        static readonly OwnValue Countdown = OwnValue.Real<IMyFunctionalBlock>(block => Pulse(block)?.Countdown ?? 0f)
             .Writing<IMyFunctionalBlock>(Set);
 
         /// <inheritdoc />

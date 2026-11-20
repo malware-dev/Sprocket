@@ -73,15 +73,15 @@ public static class StorageReport
 
         report.AppendLine(
             Pad(name, 12) +
-            Pad(Whole(text.Length), 6) +
-            Pad(Whole(Statements(text)), 7) +
+            Pad(Integer(text.Length), 6) +
+            Pad(Integer(Statements(text)), 7) +
             Pad(Span(save), 10) +
             Pad(Span(load), 10) +
             Pad(Span(lex), 10) +
             Pad(Span(parse), 10) +
             Pad(Span(load - parse), 10) +
             Pad(Span(load * Sprockets), 9) +
-            Pad(Whole(bytes / 1024), 10) +
+            Pad(Integer(bytes / 1024), 10) +
             swept);
     }
 
@@ -116,8 +116,8 @@ public static class StorageReport
             var statements = Statements(text);
 
             report.AppendLine(
-                Pad(Whole(statements), 9) +
-                Pad(Whole(text.Length), 10) +
+                Pad(Integer(statements), 9) +
+                Pad(Integer(text.Length), 10) +
                 Pad(Span(load), 10) +
                 Pad(Span(load * 1000 / statements), 10) +
                 Pad(Span(load * Sprockets), 10) +
@@ -268,7 +268,7 @@ public static class StorageReport
             CultureInfo.InvariantCulture);
     }
 
-    static string Whole(long value)
+    static string Integer(long value)
     {
         return value.ToString(CultureInfo.InvariantCulture);
     }

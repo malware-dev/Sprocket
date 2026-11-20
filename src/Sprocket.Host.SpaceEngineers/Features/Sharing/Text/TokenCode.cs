@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
     {
         const byte Newline = 1;
         const byte Spelled = 2;
-        const byte Whole = 3;
+        const byte Integer = 3;
         const byte Identity = 4;
         const byte Name = 5;
         const byte Quoted = 6;
@@ -123,8 +123,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
             switch (kind)
             {
                 case TokenKind.Integer:
-                    bytes.Add(Whole);
-                    WriteNumber(bytes, Zigzag(token.Whole));
+                    bytes.Add(Integer);
+                    WriteNumber(bytes, Zigzag(token.Integer));
                     return;
 
                 case TokenKind.Real:
@@ -136,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
                     if (spelled.EndsWith("t", StringComparison.Ordinal))
                     {
                         bytes.Add(Ticks);
-                        WriteNumber(bytes, Zigzag(token.Whole));
+                        WriteNumber(bytes, Zigzag(token.Integer));
                         return;
                     }
 
@@ -147,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
                 case TokenKind.Color:
                     bytes.Add(Color);
                     for (var shift = 24; shift >= 0; shift -= 8)
-                        bytes.Add((byte)(token.Whole >> shift));
+                        bytes.Add((byte)(token.Integer >> shift));
                     return;
             }
 
@@ -196,7 +196,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
             string real;
             switch (code)
             {
-                case Whole:
+                case Integer:
                     return ReadNumber(bytes, ref at, out number) ? Unzigzag(number).ToString(CultureInfo.InvariantCulture) : null;
 
                 case Ticks:
@@ -259,7 +259,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
 
         /// <summary>
         /// Writes <paramref name="code" /> and <paramref name="value" /> as a decimal floating-point number: its significant
-        /// digits as one whole number and the power of ten they are scaled by, from the shortest text that reads back as the same
+        /// digits as one integer and the power of ten they are scaled by, from the shortest text that reads back as the same
         /// double. Answers false, writing nothing, for a value that has no such text: NaN, the infinities and -0.
         /// </summary>
         static bool WriteReal(List<byte> bytes, byte code, double value)

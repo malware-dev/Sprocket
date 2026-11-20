@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
     /// A line of values as somebody typed it, read into the values they wrote.
     /// </summary>
     /// <remarks>
-    /// The spellings the language uses: a whole number, a real, <c>on</c> and <c>off</c> for a flag, <c>#FF8800</c> for a
+    /// The spellings the language uses: an integer, a real, <c>on</c> and <c>off</c> for a flag, <c>#FF8800</c> for a
     /// color, and double quotes around text that holds a space.
     /// </remarks>
     public static class ValueLine
@@ -137,9 +137,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (word.Length > 1 && word[0] == '#')
                 return Color(word);
 
-            long whole;
-            if (long.TryParse(word, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
-                return Literal.Of(whole);
+            long integer;
+            if (long.TryParse(word, NumberStyles.Integer, CultureInfo.InvariantCulture, out integer))
+                return Literal.Of(integer);
 
             double real;
             if (double.TryParse(word, NumberStyles.Float, CultureInfo.InvariantCulture, out real))

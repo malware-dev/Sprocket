@@ -174,7 +174,7 @@ public sealed class Rig
             .Carrying("Radius", "Radius", ValueKind.Real, "1", "50000"));
 
         // A value that may only be one of a listed few, which is the last shape a block's own value
-        // comes in. The game reports a charge mode as a whole number and keeps its three words on
+        // comes in. The game reports a charge mode as an integer and keeps its three words on
         // the terminal control, and these are the game's own numbers for them.
         rig.Weld(new Plain(14, "Standby Battery", Type<MyObjectBuilder_BatteryBlock>(),
                 "LargeBlockBatteryBlock", "Battery"))

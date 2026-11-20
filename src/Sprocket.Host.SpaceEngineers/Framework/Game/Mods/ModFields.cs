@@ -41,10 +41,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             {
                 case SprocketWire.TypeFlag:
                     return given.Flag;
-                case SprocketWire.TypeNumber:
+                case SprocketWire.TypeReal:
                     return ModWire.Part<bool>(option, SprocketWire.Percent) ? given.Number / 100 : given.Number;
-                case SprocketWire.TypeWhole:
-                    return given.Whole;
+                case SprocketWire.TypeInteger:
+                    return given.Integer;
                 case SprocketWire.TypeColor:
                     return new Color(given.Red, given.Green, given.Blue, given.Alpha);
                 case SprocketWire.TypeDuration:
@@ -61,9 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             {
                 case SprocketWire.TypeFlag:
                     return false;
-                case SprocketWire.TypeNumber:
+                case SprocketWire.TypeReal:
                     return 0.0;
-                case SprocketWire.TypeWhole:
+                case SprocketWire.TypeInteger:
                     return 0L;
                 case SprocketWire.TypeColor:
                     return Color.White;
@@ -103,8 +103,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                     field = Field.OneOf(name, Literal.Of(true).Said, Literal.Of(false).Said);
                     field.Edits = FieldEditor.Chosen;
                     break;
-                case SprocketWire.TypeNumber:
-                case SprocketWire.TypeWhole:
+                case SprocketWire.TypeReal:
+                case SprocketWire.TypeInteger:
                     var least = Bound(ModWire.Part<Func<IMyTerminalBlock, double>>(option, SprocketWire.Least), block, percent);
                     var most = Bound(ModWire.Part<Func<IMyTerminalBlock, double>>(option, SprocketWire.Most), block, percent);
 
@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                     field = percent
                         ? Field.Between(name, least.Length > 0 ? least : "0", most.Length > 0 ? most : "100")
                         : Field.Between(name, least, most);
-                    field.Entry = ModWire.Part<string>(option, SprocketWire.Type) == SprocketWire.TypeWhole ? FieldInput.Whole : FieldInput.Decimal;
+                    field.Entry = ModWire.Part<string>(option, SprocketWire.Type) == SprocketWire.TypeInteger ? FieldInput.Integer : FieldInput.Real;
                     break;
                 case SprocketWire.TypeColor:
                     field = Field.Holding(name, FieldEditor.Color, 1);

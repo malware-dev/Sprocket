@@ -72,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             }
 
             var number = line.ValueAt(2);
-            if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
+            if (number.Form != ValueForm.Integer || number.Integer < 1 || number.Integer > int.MaxValue)
             {
                 trouble.Say(line, "expected the instance's number.");
                 return;
@@ -91,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             var instances = system.Instances;
             for (var i = 0; i < instances.Count; i++)
             {
-                if (instances[i].Number != number.Whole)
+                if (instances[i].Number != number.Integer)
                     continue;
 
                 instances[i].Enabled = false;
@@ -120,8 +120,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
                 else if (line.ValueAt(i).Form == ValueForm.Identifier && line.Word(i) == Step && i + 1 < line.Count)
                 {
                     var number = line.ValueAt(++i);
-                    if (number.Form == ValueForm.Integer && number.Whole >= 0 && number.Whole <= int.MaxValue)
-                        step = (int)number.Whole;
+                    if (number.Form == ValueForm.Integer && number.Integer >= 0 && number.Integer <= int.MaxValue)
+                        step = (int)number.Integer;
                 }
                 else if (line.Says(i, Keyword.Block) && i + 1 < line.Count)
                 {
@@ -142,12 +142,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
                 string.IsNullOrEmpty(block) ? null : block);
         }
 
-        /// <summary>A whole number in the line, or zero where it is not one.</summary>
+        /// <summary>An integer in the line, or zero where it is not one.</summary>
         static int Counted(Statement line, int index)
         {
             var value = line.ValueAt(index);
-            return value.Form == ValueForm.Integer && value.Whole > 0 && value.Whole <= int.MaxValue
-                ? (int)value.Whole
+            return value.Form == ValueForm.Integer && value.Integer > 0 && value.Integer <= int.MaxValue
+                ? (int)value.Integer
                 : 0;
         }
     }

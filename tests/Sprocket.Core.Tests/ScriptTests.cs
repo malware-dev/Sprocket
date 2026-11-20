@@ -793,7 +793,7 @@ public class ScriptTests
         Assert.True(off.IsOff);
         Assert.Equal("open", off.ActionId);
         Assert.Equal(new[] { "inner" }, off.Targets);
-        Assert.Equal(2, off.Arguments[0].Whole);
+        Assert.Equal(2, off.Arguments[0].Integer);
         Assert.Equal("Not yet", off.Annotation);
         Assert.True(steps[3].IsOff);
         Assert.False(steps[4].IsOff);
@@ -947,7 +947,7 @@ public class ScriptTests
     /// A length of time no clock could keep is trouble, rather than the time it wraps onto.
     /// </summary>
     /// <remarks>
-    /// A duration is read into a whole number of ticks, and the number in the text is not bounded by
+    /// A duration is read into an integer count of ticks, and the number in the text is not bounded by
     /// one: <c>every 4294967296t</c> came out as an interval of nothing and ran every tick, and
     /// <c>wait -5t</c> as no wait at all.
     /// </remarks>
@@ -1267,12 +1267,12 @@ public class ScriptTests
         Assert.DoesNotContain(ScriptAttributes.LastSequence, Save(after));
     }
 
-    /// <summary>A <c>lastSequence</c> that is no whole number above 0 is trouble.</summary>
+    /// <summary>A <c>lastSequence</c> that is no integer above 0 is trouble.</summary>
     [Theory]
     [InlineData("\"4\"")]
     [InlineData("0")]
     [InlineData("4.5")]
-    public void ALastSequenceThatIsNoWholeNumberIsTrouble(string value)
+    public void ALastSequenceThatIsNoIntegerIsTrouble(string value)
     {
         var after = new Automation();
         var trouble = Load(Version + "#@ lastSequence: " + value + "\nsystem \"" + Identity + "\" as Airlock\n{\n}\n", after);
@@ -1422,9 +1422,9 @@ public class ScriptTests
     /// Every sort of value a key can be, out and back.
     /// </summary>
     /// <remarks>
-    /// The kind is the syntax here - a whole number reads back as one because that is what it looks
+    /// The kind is the syntax here - an integer reads back as one because that is what it looks
     /// like - so this is the test that the kinds are told apart at all. The integer is the one that
-    /// matters: a double holds whole numbers exactly only to about 9.0x10^15, and an id is longer than
+    /// matters: a double holds integers exactly only to about 9.0x10^15, and an id is longer than
     /// that.
     /// </remarks>
     [Fact]
@@ -1452,9 +1452,9 @@ public class ScriptTests
         var keys = after.Refs[0].Keys;
         Assert.Equal(6, keys.Count);
 
-        long whole;
-        Assert.True(read.TryInteger(keys[0].Kind, keys[0].Value, out whole));
-        Assert.Equal(74857693847562934L, whole);
+        long integer;
+        Assert.True(read.TryInteger(keys[0].Kind, keys[0].Value, out integer));
+        Assert.Equal(74857693847562934L, integer);
 
         double real;
         Assert.True(read.TryReal(keys[1].Kind, keys[1].Value, out real));

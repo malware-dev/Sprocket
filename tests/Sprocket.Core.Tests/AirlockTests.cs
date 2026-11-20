@@ -178,7 +178,7 @@ public class AirlockTests
         var after = new Automation();
         Assert.Equal("", ProgramReader.Load(saved, after, a.World.Values));
         var told = Assert.IsType<Act>(after.Sequences[0].Steps[2]);
-        Assert.Equal(Blocks.Vent.MoveOn, Assert.Single(told.Arguments).Whole);
+        Assert.Equal(Blocks.Vent.MoveOn, Assert.Single(told.Arguments).Integer);
     }
 
     /// <summary>A room whose air has nowhere to go holds the cycle, says why, and keeps the outer door shut, whether it was told to wait or told nothing.</summary>
