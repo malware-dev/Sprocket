@@ -149,7 +149,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             else if (header != null && header.Whole(0) != ScriptFormat.Version)
                 refused = $"{trouble.Line(header)}written for sprocket {header.Whole(0)}; this reads sprocket {ScriptFormat.Version}.";
             else if (header != null && DraftOf(header) != ScriptFormat.Draft && !FormatUpgrades.From(ScriptFormat.Version, DraftOf(header)))
-                refused = $"{trouble.Line(header)}written for {(DraftOf(header) < 0 ? "the finished format" : $"alpha {DraftOf(header)}")}; this reads alpha {ScriptFormat.Draft}.";
+                refused = $"{trouble.Line(header)}written for {ScriptFormat.Spelled(ScriptFormat.Version, DraftOf(header))}; this reads {ScriptFormat.Line}.";
 
             if (refused != null)
             {
@@ -217,12 +217,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// Which draft of the format a program says it was written against, or none where it does not say.
+        /// Which draft of the format a program says it was written against, or <see cref="ScriptFormat.Finished" /> where it names none.
         /// </summary>
         static int DraftOf(Statement statement)
         {
             var at = statement.Find(Keyword.Alpha);
-            return at < 0 ? -1 : statement.Whole(at + 1);
+            return at < 0 ? ScriptFormat.Finished : statement.Whole(at + 1);
         }
 
         /// <summary>A list of vectors of whole numbers as cells, or null where it is anything else.</summary>

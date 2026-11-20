@@ -8,8 +8,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format
         /// <summary>The version of the format this build writes, the number after <c>sprocket</c> on a script's first line.</summary>
         public const int Version = 1;
 
-        /// <summary>The draft of the format's version this build writes, the number after <c>alpha</c> on a script's first line.</summary>
-        public const int Draft = 28;
+        /// <summary>
+        /// The draft of the format's version this build writes, the number after <c>alpha</c> on a script's first line, or
+        /// <see cref="Finished" /> where it writes the finished version.
+        /// </summary>
+        public const int Draft = Finished;
+
+        /// <summary>The draft a finished version is read as: later than every draft of it, and written with no <c>alpha</c>.</summary>
+        public const int Finished = int.MaxValue;
+
+        /// <summary>Whether this build writes a draft rather than the finished version.</summary>
+        /// <remarks>Read only, not const, so code for both cases compiles whichever this build is.</remarks>
+        public static readonly bool IsDraft = Draft != Finished;
+
+        /// <summary>The first line this build writes, such as <c>sprocket 1</c>.</summary>
+        public static readonly string Line = Spelled(Version, Draft);
+
+        /// <summary>Returns version <paramref name="version" /> as a first line spells it, with <paramref name="draft" /> where it is unfinished.</summary>
+        public static string Spelled(int version, int draft) =>
+            draft == Finished ? $"sprocket {version}" : $"sprocket {version} alpha {draft}";
 
         /// <summary>The function this host names a signal with: a slot on a block's toolbar.</summary>
         /// <remarks>Persisted in every program with a trigger.</remarks>
