@@ -125,23 +125,42 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>
-        /// Goes back to the screen the editor opens on, as its back button does, answering any question back asks with its last
-        /// answer, which discards what the page holds and always goes back; keeping it stays on a page whose values are not all given.
+        /// Goes back to the screen the editor opens on, as its back button does. A question back asks is answered by saving the
+        /// page's changes; where saving stays on the page, as it does on one whose values are not all given, back is pressed again
+        /// and the last answer, which discards them, is taken.
         /// </summary>
         public void Home()
         {
             for (var guard = 0; _editor.Screen.CanGoBack && guard < 20; guard++)
             {
+                object page = _editor.Current;
                 Run(_editor.Screen.Back);
-                if (_editor.Screen.HasQuestion)
-                {
-                    dynamic last = null;
-                    foreach (dynamic answer in _editor.Screen.Answers)
-                        last = answer;
-                    if (last != null)
-                        Run(last.Command);
-                }
+                if (!(bool)_editor.Screen.HasQuestion)
+                    continue;
+
+                Take(true);
+                if (!ReferenceEquals(_editor.Current, page))
+                    continue;
+
+                Run(_editor.Screen.Back);
+                if ((bool)_editor.Screen.HasQuestion)
+                    Take(false);
             }
+        }
+
+        /// <summary>Answers the question the editor asks with its first answer where <paramref name="first" />, its last otherwise.</summary>
+        void Take(bool first)
+        {
+            dynamic chosen = null;
+            foreach (dynamic answer in _editor.Screen.Answers)
+            {
+                chosen = answer;
+                if (first)
+                    break;
+            }
+
+            if (chosen != null)
+                Run(chosen.Command);
         }
 
         static void Run(dynamic command)

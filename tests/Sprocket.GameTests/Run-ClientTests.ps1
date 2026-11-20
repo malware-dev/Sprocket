@@ -28,7 +28,7 @@ New-Item -ItemType Directory -Force $work | Out-Null
 if (Get-Process -Name 'SpaceEngineers', 'SevrLoader' -ErrorAction SilentlyContinue) { throw 'Space Engineers is running; it is never closed for a test.' }
 
 # 2. The plugin, and the mod packed as the game would load it, as a local mod of the test's own user data.
-dotnet build "$repo\tests\Sprocket.GameTests" -v q | Out-Null
+dotnet build "$repo\tests\Sprocket.GameTests" -v q -p:MdkBuildConfiguration=none | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'The test plugin did not build.' }
 $pack = Join-Path $work 'pack'
 if (Test-Path $pack) { Remove-Item $pack -Recurse -Force }

@@ -103,6 +103,51 @@ namespace Sprocket.GameTests
                     yield return answered.Current;
             }
 
+            // A percentage, chosen in what the setting holds: its default set with a slider, its row said with its unit.
+            var percent = _tour.Tour(editor, new[] { new[] { "settings percentage panel", "stay", "add:" + add } }, "");
+            while (percent.MoveNext())
+                yield return percent.Current;
+
+            asking = editor.Current.Asking;
+            string percentage = editor.Texts.SettingKindPercent;
+            var chose = false;
+            if (asking != null)
+            {
+                foreach (dynamic item in asking.Form.Fields[1].Items)
+                {
+                    if ((string)item.Text != percentage)
+                        continue;
+
+                    item.Command.Execute();
+                    chose = true;
+                    break;
+                }
+            }
+
+            yield return PluginUpdates.PerSecond;
+            asking = editor.Current.Asking;
+            var slider = asking != null && chose && asking.Form.Fields[2].GetType().Name == "SliderField";
+            _report.Check("settings percentage is slid", slider,
+                $"\"{percentage}\" {(chose ? "was" : "was not")} chosen in what the setting holds, and its default is {(asking == null ? "not asked" : (string)asking.Form.Fields[2].GetType().Name)}");
+            var slid = _tour.Tour(editor, new[] { new[] { "settings percentage slider", "stay" } }, "");
+            while (slid.MoveNext())
+                yield return slid.Current;
+
+            if (asking != null)
+            {
+                asking.Form.Fields[0].Text = "Opening";
+                asking.Form.Fields[2].Text = "50";
+                asking.Done();
+                yield return 2 * PluginUpdates.PerSecond;
+            }
+
+            dynamic opening = RowOf(editor, "Opening");
+            string said = opening == null ? null : opening.ValueChip.Text;
+            _report.Check("settings percentage says its unit", said == "50 %", $"the row of Opening says \"{said ?? "nothing, no row"}\"");
+            var unit = _tour.Tour(editor, new[] { new[] { "settings percentage row", "stay" } }, "");
+            while (unit.MoveNext())
+                yield return unit.Current;
+
             // A step's value given by the setting, through the mark after its field in the selector's arguments.
             var picking = _tour.Tour(editor, new[]
             {
