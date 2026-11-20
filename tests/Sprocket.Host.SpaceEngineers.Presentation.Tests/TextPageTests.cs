@@ -78,9 +78,9 @@ public class TextPageTests
         Assert.IsNotType<PickPage>(screen.Editor.Current);
     }
 
-    /// <summary>Going back from the page after changing the text asks whether to keep it, and discarding leaves the step as it was.</summary>
+    /// <summary>Going back from the page after changing the text asks whether to save it, and discarding leaves the step as it was.</summary>
     [Fact]
-    public void GoingBackAfterAChangeAsksWhetherToKeepIt()
+    public void GoingBackAfterAChangeAsksWhetherToSaveIt()
     {
         var screen = Screen.Fresh(CustomData.Split(' '));
         var lines = (LinesField)screen.Editor.Pick().Arguments!.Form.Fields[0];

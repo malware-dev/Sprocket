@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>
         /// The faults of <paramref name="sequence" /> running for <paramref name="instance" />, owned by <paramref name="owner" />,
-        /// kept in <paramref name="memory" />; taken up from it where <paramref name="restored" /> says the world remembered it.
+        /// stored in <paramref name="memory" />; taken up from it where <paramref name="restored" /> says the world remembered it.
         /// </summary>
         public RunFaults(Sequence sequence, SystemInstance instance, AutomationRunner owner, RunMemory memory, bool restored)
         {
@@ -34,9 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _instance = instance;
             _owner = owner;
             _memory = memory;
-            _quit = KeptReasons.Fault(memory.Quit);
-            _met = KeptReasons.Fault(memory.Met);
-            _found = KeptReasons.Fault(memory.Found);
+            _quit = StoredReasons.Fault(memory.Quit);
+            _met = StoredReasons.Fault(memory.Met);
+            _found = StoredReasons.Fault(memory.Found);
             _restored = restored;
         }
 
@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     _owner.Revise();
 
                 _quit = value;
-                _memory.Quit = KeptReasons.Kept(value);
+                _memory.Quit = StoredReasons.Stored(value);
             }
         }
 
@@ -68,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     _owner.Revise();
 
                 _found = value;
-                _memory.Found = KeptReasons.Kept(value);
+                _memory.Found = StoredReasons.Stored(value);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 _owner.Revise();
 
             _met = fault;
-            _memory.Met = KeptReasons.Kept(fault);
+            _memory.Met = StoredReasons.Stored(fault);
         }
     }
 }

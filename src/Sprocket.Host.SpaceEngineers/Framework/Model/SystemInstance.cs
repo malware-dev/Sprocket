@@ -37,8 +37,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>What somebody wrote above it, or empty.</summary>
         public string Annotation { get; set; } = "";
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
         /// <summary>
         /// Whether this one may run, independently of the others.
@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly Dictionary<string, List<int>> _facets = new Dictionary<string, List<int>>();
 
         readonly Dictionary<string, string> _notes = new Dictionary<string, string>();
-        readonly Dictionary<string, KeptAttributes> _kept = new Dictionary<string, KeptAttributes>();
+        readonly Dictionary<string, UnusedAttributes> _unused = new Dictionary<string, UnusedAttributes>();
 
         readonly Dictionary<string, Literal> _settings = new Dictionary<string, Literal>();
 
@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             _positions.Remove(slot);
             _facets.Remove(slot);
             _notes.Remove(slot);
-            _kept.Remove(slot);
+            _unused.Remove(slot);
         }
 
         /// <summary>What somebody wrote above how <paramref name="slot" /> is answered, or empty.</summary>
@@ -256,7 +256,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return _notes.TryGetValue(slot, out note) ? note : "";
         }
 
-        /// <summary>Keeps <paramref name="annotation" /> as what is written above how <paramref name="slot" /> is answered.</summary>
+        /// <summary>Holds <paramref name="annotation" /> as what is written above how <paramref name="slot" /> is answered.</summary>
         public void Note(string slot, string annotation)
         {
             if (string.IsNullOrEmpty(annotation))
@@ -266,19 +266,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         }
 
         /// <summary>The attributes written above how <paramref name="slot" /> is answered that Sprocket does not use, or null.</summary>
-        public KeptAttributes KeptOn(string slot)
+        public UnusedAttributes UnusedOn(string slot)
         {
-            KeptAttributes kept;
-            return _kept.TryGetValue(slot, out kept) ? kept : null;
+            UnusedAttributes unused;
+            return _unused.TryGetValue(slot, out unused) ? unused : null;
         }
 
-        /// <summary>Keeps <paramref name="kept" /> as the attributes written above how <paramref name="slot" /> is answered.</summary>
-        public void Keep(string slot, KeptAttributes kept)
+        /// <summary>Holds <paramref name="unused" /> as the attributes written above how <paramref name="slot" /> is answered.</summary>
+        public void SetUnused(string slot, UnusedAttributes unused)
         {
-            if (kept == null)
-                _kept.Remove(slot);
+            if (unused == null)
+                _unused.Remove(slot);
             else
-                _kept[slot] = kept;
+                _unused[slot] = unused;
         }
 
         /// <summary>Moves what fills slot <paramref name="was" /> to the slot's new name, <paramref name="now" />.</summary>
@@ -306,11 +306,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 _notes[now] = note;
             }
 
-            KeptAttributes kept;
-            if (_kept.TryGetValue(was, out kept))
+            UnusedAttributes unused;
+            if (_unused.TryGetValue(was, out unused))
             {
-                _kept.Remove(was);
-                _kept[now] = kept;
+                _unused.Remove(was);
+                _unused[now] = unused;
             }
 
             List<int> facets;

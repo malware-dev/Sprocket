@@ -18,7 +18,7 @@ public class TargetTests
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.Name("Cycle");
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         return screen.Run(2);
     }
 

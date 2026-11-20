@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
     /// <summary>The blueprint of one logic system a construct had when it lost its automation, and which construct that was.</summary>
     public sealed class Backup
     {
-        /// <summary>The blueprint in <paramref name="file" /> of the logic system <paramref name="name" />, kept of the construct <paramref name="construct" />.</summary>
+        /// <summary>The blueprint in <paramref name="file" /> of the logic system <paramref name="name" />, stored of the construct <paramref name="construct" />.</summary>
         public Backup(string file, Guid identity, string name, string construct, DateTime lost)
         {
             File = file;
@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             Lost = lost;
         }
 
-        /// <summary>The file in world storage the blueprint is kept in.</summary>
+        /// <summary>The file in world storage the blueprint is stored in.</summary>
         public string File { get; }
 
         /// <summary>The logic system's identity.</summary>

@@ -172,11 +172,11 @@ namespace Sprocket.Host.SpaceEngineers
         /// Where a state's value changed by hand goes as well where it is not the runner here, or null: the logic system, the
         /// installation, the state and its new value.
         /// </summary>
-        /// <remarks>Set on a client's copy: the copy shows the value at once, and the server keeps it.</remarks>
+        /// <remarks>Set on a client's copy: the copy shows the value at once, and the server stores it.</remarks>
         public Action<AutomationSystem, SystemInstance, State, Literal> HeldElsewhere { get; set; }
 
         /// <summary>Where a button somebody has just picked goes to be written into its panel's slots: the panel, by entity id.</summary>
-        /// <remarks>On a client's copy, set by whoever lent it, since the toolbars are written where the Sprocket is kept.</remarks>
+        /// <remarks>On a client's copy, set by whoever lent it, since the toolbars are written where the Sprocket is stored.</remarks>
         public Action<long> Wire { get; set; }
 
         /// <summary>Where paused automation resumed here is resumed for real, or null where this is the automation itself.</summary>
@@ -280,14 +280,14 @@ namespace Sprocket.Host.SpaceEngineers
             }
         }
 
-        /// <summary>Keeps the player's choice of whether tips are shown where the host keeps it, or null for a host that keeps none.</summary>
-        public Action<bool> KeepTips { get; set; }
+        /// <summary>Saves the player's choice of whether tips are shown where the host stores it, or null for a host that stores none.</summary>
+        public Action<bool> SaveTips { get; set; }
 
-        /// <summary>Turns tips off where they are shown and on where they are not, and keeps the choice.</summary>
+        /// <summary>Turns tips off where they are shown and on where they are not, and saves the choice.</summary>
         public void ToggleTips()
         {
             TipsShown = !TipsShown;
-            KeepTips?.Invoke(TipsShown);
+            SaveTips?.Invoke(TipsShown);
         }
 
         /// <summary>The ticks the runner has counted.</summary>
@@ -494,10 +494,10 @@ namespace Sprocket.Host.SpaceEngineers
             return gives;
         }
 
-        /// <summary>The world's backups, which the library lists; null on a machine that does not keep them.</summary>
+        /// <summary>The world's backups, which the library lists; null on a machine that does not store them.</summary>
         public Backups Backups { get; set; }
 
-        /// <summary>The player's library, which keeps blueprints for every world; null on a machine that keeps none.</summary>
+        /// <summary>The player's library, which stores blueprints for every world; null on a machine that stores none.</summary>
         /// <remarks>Setting it links each logic system that links to no blueprint to the library's one of its identity.</remarks>
         public LibraryShelf Shelf
         {
@@ -616,10 +616,10 @@ namespace Sprocket.Host.SpaceEngineers
                 page.Unmake();
         }
 
-        /// <summary>Goes back a page as Done, where the page lets it go, keeping what it was opened on whether or not anything was done to it.</summary>
+        /// <summary>Goes back a page as Done, where the page lets it go, saving what it was opened on whether or not anything was done to it.</summary>
         public void Finish()
         {
-            Keep(Current);
+            Save(Current);
             if (Current.Leaving())
                 Pop();
         }
@@ -690,14 +690,14 @@ namespace Sprocket.Host.SpaceEngineers
             return 0;
         }
 
-        /// <summary>Whether a change made on <paramref name="page" /> still stands, to keep or discard on leaving it.</summary>
+        /// <summary>Whether a change made on <paramref name="page" /> still stands, to save or discard on leaving it.</summary>
         public bool Changed(EditorPage page)
         {
             return _history.MadeBy(page.Opened);
         }
 
-        /// <summary>Keeps every change made on <paramref name="page" />, so leaving it asks nothing about them.</summary>
-        public void Keep(EditorPage page)
+        /// <summary>Saves every change made on <paramref name="page" />, so leaving it asks nothing about them.</summary>
+        public void Save(EditorPage page)
         {
             _history.Disown(page.Opened);
         }
@@ -942,7 +942,7 @@ namespace Sprocket.Host.SpaceEngineers
             BlockSwitches.Put(switches, _program);
 
             _gate.Told = true;
-            _program.Kept();
+            _program.OriginalIsSafe();
             _program.Edited();
             _program.Rewire();
             Invalidate();

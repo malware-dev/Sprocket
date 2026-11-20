@@ -24,7 +24,7 @@ public class AnsweringTests
     {
         var screen = Screen.Fresh(LeavingASequence.Split(' '));
 
-        Assert.Equal(screen.Editor.Texts.PickKeepQuestion, screen.Editor.Question());
+        Assert.Equal(screen.Editor.Texts.PickSaveQuestion, screen.Editor.Question());
         Assert.True(screen.Scene.IsQuestioning, "the question is not the thing owning the screen");
 
         Assert.True(screen.Scene.TakeDefault(), "Enter took no answer");

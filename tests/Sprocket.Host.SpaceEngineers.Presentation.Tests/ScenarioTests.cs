@@ -275,8 +275,8 @@ public class ScenarioTests
         Settle(sim);
 
         Assert.Equal(2, sim.Roster.Count);
-        var fore = sim.Roster.Kept(sim.Machine.Sprocket.Block)!;
-        var aft = sim.Roster.Kept(aftHero.Block)!;
+        var fore = sim.Roster.Stored(sim.Machine.Sprocket.Block)!;
+        var aft = sim.Roster.Stored(aftHero.Block)!;
         Assert.Equal(new[] { "Fore" }, fore.Program.Systems[0].Instances.Select(instance => instance.Name));
         Assert.Equal(new[] { "Aft" }, aft.Program.Systems[0].Instances.Select(instance => instance.Name));
         Cycles(sim, "Fore Button", "Fore Inner Door");
@@ -300,7 +300,7 @@ public class ScenarioTests
         var built = scenario.Build(BlockDefinitions.FromGame());
         var sim = built.Sim;
         var aftHero = built.Deck.Blocks.Single(fitting => fitting.Name == "Aft Automation");
-        var fore = sim.Roster.Kept(sim.Machine.Sprocket.Block)!;
+        var fore = sim.Roster.Stored(sim.Machine.Sprocket.Block)!;
 
         var screen = fore.Editor;
         screen.NewSystem("Lights");
@@ -312,7 +312,7 @@ public class ScenarioTests
         Settle(sim);
 
         Assert.Contains(fore, closed);
-        Assert.Same(fore, sim.Roster.Kept(sim.Machine.Sprocket.Block));
+        Assert.Same(fore, sim.Roster.Stored(sim.Machine.Sprocket.Block));
         Assert.NotSame(screen, fore.Editor);
         Assert.False(fore.Editor.CanUndoConstruct());
     }
@@ -330,7 +330,7 @@ public class ScenarioTests
         var aftHero = built.Deck.Blocks.Single(fitting => fitting.Name == "Aft Automation");
         var parted = sim.Machine.Split(built.Deck.Parts(scenario.Bridge).Single(part => part.Contains(aftHero)));
         Settle(sim);
-        var fore = sim.Roster.Kept(sim.Machine.Sprocket.Block)!;
+        var fore = sim.Roster.Stored(sim.Machine.Sprocket.Block)!;
 
         var screen = fore.Editor;
         screen.NewSystem("Lights");
@@ -480,7 +480,7 @@ public class ScenarioTests
             Assert.Equal("3", (string)battery.Element("CurrentStoredPower"));
     }
 
-    /// <summary>Every button a scenario's program is started from holds Sprocket's action on the block that keeps the automation, as the blueprint writes it.</summary>
+    /// <summary>Every button a scenario's program is started from holds Sprocket's action on the block that stores the automation, as the blueprint writes it.</summary>
     [Theory]
     [MemberData(nameof(All))]
     public void EveryButtonIsWiredInTheBlueprint(string name)

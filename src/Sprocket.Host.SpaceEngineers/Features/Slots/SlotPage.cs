@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             return _system.FindPartInAnyCase(wanted) == _part || _system.FindPartInAnyCase(wanted) == null;
         }
 
-        /// <summary>Writes what is still being typed into the slot, and where anything was changed here asks whether to keep it.</summary>
+        /// <summary>Writes what is still being typed into the slot, and where anything was changed here asks whether to save it.</summary>
         public override bool Leaving()
         {
             Written(_focused);
@@ -109,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             return base.Leaving();
         }
 
-        /// <summary>Keeps every change made here, what is still being typed included, and finishes.</summary>
+        /// <summary>Saves every change made here, what is still being typed included, and finishes.</summary>
         public override void Primary()
         {
             Written(_focused);

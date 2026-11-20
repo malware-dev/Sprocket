@@ -137,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
                 }
             }
 
-            var because = cause == Cause.None ? BlockTrouble.None : BlockTrouble.Kept(cause, string.IsNullOrEmpty(about) ? null : about);
+            var because = cause == Cause.None ? BlockTrouble.None : BlockTrouble.Stored(cause, string.IsNullOrEmpty(about) ? null : about);
             return new Halt(problem, sequence, step, because,
                 string.IsNullOrEmpty(block) ? null : block);
         }

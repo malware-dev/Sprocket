@@ -9,7 +9,7 @@ namespace Sprocket.Sim.Shell
     /// Remembers where the window was and puts it back there next time.
     /// </summary>
     /// <remarks>
-    /// Kept beside the extracted content in <c>%LOCALAPPDATA%\Sprocket</c> rather than in the repository,
+    /// Stored beside the extracted content in <c>%LOCALAPPDATA%\Sprocket</c> rather than in the repository,
     /// for the same reason that is: where somebody likes their window is a property of their desk, not of
     /// the project, and two people working on this would only fight over the file.
     /// <para>

@@ -503,7 +503,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 }
 
                 instance.Note(inner.Head, inner.Annotation);
-                instance.Keep(inner.Head, ScriptAttributes.Unused(inner));
+                instance.SetUnused(inner.Head, ScriptAttributes.Unused(inner));
 
                 if (setting)
                 {

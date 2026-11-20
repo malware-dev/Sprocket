@@ -5,7 +5,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
 {
     /// <summary>What one level of the settings says: each setting it gives a value of, and none for the ones it leaves to the level below.</summary>
-    /// <remarks>Two levels: every world, kept in the global file, and this world, kept in the world's own file, which wins.</remarks>
+    /// <remarks>Two levels: every world, stored in the global file, and this world, stored in the world's own file, which wins.</remarks>
     public sealed class SettingsLayer
     {
         const string Developer = "developerMode";

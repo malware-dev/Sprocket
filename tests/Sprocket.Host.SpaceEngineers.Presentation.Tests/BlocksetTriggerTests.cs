@@ -98,7 +98,7 @@ public class BlocksetTriggerTests
         sim.Editor.PressBlock("Airlock Outer Door");
         sim.Editor.PressChoice("open");
         sim.Editor.PressPrimary();
-        sim.Editor.BackKeeping();
+        sim.Editor.BackSaving();
         for (var i = 0; i < 70; i++)
             sim.Tick();
 

@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
 
         PlayerSettings _held = new PlayerSettings(true);
         Func<PlayerSettings> _read;
-        Action<PlayerSettings> _keep;
+        Action<PlayerSettings> _save;
         CoachMark _mark;
         Callout _hung;
 
@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         {
             _all = all;
             _read = () => _held;
-            _keep = choices => _held = choices;
+            _save = choices => _held = choices;
         }
 
         /// <summary>The callouts due and not yet dismissed in this editor's session, in the order they are offered.</summary>
@@ -56,11 +56,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>The player's choices as they stand.</summary>
         public PlayerSettings Choices => _read();
 
-        /// <summary>Has the callouts read and keep the player's choices through <paramref name="read" /> and <paramref name="keep" />.</summary>
-        public void Keeping(Func<PlayerSettings> read, Action<PlayerSettings> keep)
+        /// <summary>Has the callouts read and save the player's choices through <paramref name="read" /> and <paramref name="save" />.</summary>
+        public void Saving(Func<PlayerSettings> read, Action<PlayerSettings> save)
         {
             _read = read;
-            _keep = keep;
+            _save = save;
         }
 
         /// <summary>Works out which callouts are due as the editor opens.</summary>
@@ -161,14 +161,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         {
             var choices = _read();
             if (!choices.Seen.HasValue || choices.Seen.Value < Release.Number)
-                _keep(choices.WithSeen(Release.Number));
+                _save(choices.WithSeen(Release.Number));
         }
 
         /// <summary>Records <paramref name="callout" /> as dismissed, so no place offers it again.</summary>
         void Dismiss(Callout callout)
         {
             _due.Remove(callout);
-            _keep(_read().WithDismissed(callout.Id));
+            _save(_read().WithDismissed(callout.Id));
             if (_due.Count == 0)
                 RecordSeen();
 

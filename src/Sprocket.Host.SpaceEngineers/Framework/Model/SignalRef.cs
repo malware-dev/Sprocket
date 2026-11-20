@@ -29,8 +29,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>What somebody wrote above it, or empty.</summary>
         public string Annotation { get; set; } = "";
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
         /// <summary>Whether it holds slot <paramref name="at" /> on the block <paramref name="block" /> names.</summary>
         public bool Holds(string block, ToolbarSlot at)

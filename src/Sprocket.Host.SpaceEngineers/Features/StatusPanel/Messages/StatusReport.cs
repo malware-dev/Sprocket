@@ -131,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel.Messages
             ByteData.TryReadString(data, ref offset, out about);
 
             var said = (SequenceProblem)problem;
-            var because = (Cause)cause == Cause.None ? BlockTrouble.None : BlockTrouble.Kept((Cause)cause, string.IsNullOrEmpty(about) ? null : about);
+            var because = (Cause)cause == Cause.None ? BlockTrouble.None : BlockTrouble.Stored((Cause)cause, string.IsNullOrEmpty(about) ? null : about);
             var fault = said == SequenceProblem.NeverTriggered
                 ? SequenceFault.Unstarted((Unwired)unwired, which)
                 : new SequenceFault(said, step, because, which);

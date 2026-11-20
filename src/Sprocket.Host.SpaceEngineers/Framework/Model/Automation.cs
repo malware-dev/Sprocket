@@ -52,10 +52,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>What somebody wrote above the program's first line, or empty.</summary>
         public string Annotation { get; set; } = "";
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
-        /// <summary>What the construct's automation is doing, which the world keeps apart from the program; one of its own until a Sprocket hands over the construct's.</summary>
+        /// <summary>What the construct's automation is doing, which the world stores apart from the program; one of its own until a Sprocket hands over the construct's.</summary>
         public ConstructMemory Memory { get; set; } = new ConstructMemory();
 
         /// <summary>The construct's big owners the automation was last confirmed for, as the game's player identities; empty until the construct had any.</summary>
@@ -96,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>
         /// Says the unreadable original is safe somewhere else, so this may be saved after all.
         /// </summary>
-        public void Kept()
+        public void OriginalIsSafe()
         {
             Intact = true;
             Incompatible = false;

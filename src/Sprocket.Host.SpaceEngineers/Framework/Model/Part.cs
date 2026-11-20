@@ -77,8 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// </summary>
         public string Annotation { get; set; }
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
         /// <summary>Whether a block whose kind stands in <paramref name="lineage" />, nearest first as a kind's lineage has it, may fill this part.</summary>
         public bool Fits(IList<string> lineage) => Takes(Expects, lineage);

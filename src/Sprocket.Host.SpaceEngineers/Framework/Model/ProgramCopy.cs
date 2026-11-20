@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public static void Into(Automation from, Values fromValues, Automation into, Values intoValues)
         {
             into.Annotation = from.Annotation;
-            into.Attributes = Kept(from.Attributes);
+            into.Attributes = Unused(from.Attributes);
 
             foreach (var declared in from.Refs)
                 into.Restore(Ref(declared, fromValues, intoValues));
@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = new EntityRef(declared.Name, declared.KindId);
             copy.Annotation = declared.Annotation;
-            copy.Attributes = Kept(declared.Attributes);
+            copy.Attributes = Unused(declared.Attributes);
             foreach (var key in declared.Keys)
                 copy.Keys.Add(Key(key, fromValues, intoValues));
 
@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = new SignalRef(declared.Name, new List<string>(declared.Blocks), declared.At);
             copy.Annotation = declared.Annotation;
-            copy.Attributes = Kept(declared.Attributes);
+            copy.Attributes = Unused(declared.Attributes);
             return copy;
         }
 
@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var copy = into.Restore(system.Identity, system.Namespace, system.Name);
             copy.Annotation = system.Annotation;
             copy.ListedOn = system.ListedOn;
-            copy.Attributes = Kept(system.Attributes);
+            copy.Attributes = Unused(system.Attributes);
             copy.IsBlueprint = system.IsBlueprint;
             copy.Used(system.LastSequenceNumber);
 
@@ -103,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             {
                 var made = into.Restore(copy, sequence.Number, null);
                 made.Annotation = sequence.Annotation;
-                made.Attributes = Kept(sequence.Attributes);
+                made.Attributes = Unused(sequence.Attributes);
                 made.Name = sequence.Name;
                 made.Category = sequence.Category;
                 made.Exclusive = sequence.Exclusive;
@@ -116,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = into.PartFor(part.Id);
             copy.Annotation = part.Annotation;
-            copy.Attributes = Kept(part.Attributes);
+            copy.Attributes = Unused(part.Attributes);
             copy.Short = part.Short;
             copy.Category = part.Category;
             copy.Optional = part.Optional;
@@ -133,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = new DeclaredType(type.Name);
             copy.Annotation = type.Annotation;
-            copy.Attributes = Kept(type.Attributes);
+            copy.Attributes = Unused(type.Attributes);
             foreach (var choice in type.Choices)
                 copy.Choices.Add(choice);
 
@@ -144,7 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = new State(state.Name, state.Type, state.Start);
             copy.Annotation = state.Annotation;
-            copy.Attributes = Kept(state.Attributes);
+            copy.Attributes = Unused(state.Attributes);
             return copy;
         }
 
@@ -173,7 +173,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             copy.Annotation = trigger.Annotation;
             copy.Category = trigger.Category;
-            copy.Attributes = Kept(trigger.Attributes);
+            copy.Attributes = Unused(trigger.Attributes);
             copy.Does = Step(trigger.Does) as Run;
             return copy;
         }
@@ -182,7 +182,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = Made(step);
             copy.Annotation = step.Annotation;
-            copy.Attributes = Kept(step.Attributes);
+            copy.Attributes = Unused(step.Attributes);
             copy.IsOff = step.IsOff;
             return copy;
         }
@@ -258,11 +258,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = into.Restore(instance.Number, instance.Name);
             copy.Annotation = instance.Annotation;
-            copy.Attributes = Kept(instance.Attributes);
+            copy.Attributes = Unused(instance.Attributes);
             foreach (var slot in instance.Filled)
             {
                 copy.Note(slot, instance.NoteOn(slot));
-                copy.Keep(slot, Kept(instance.KeptOn(slot)));
+                copy.SetUnused(slot, Unused(instance.UnusedOn(slot)));
 
                 var blocks = new List<string>(instance.FilledWith(slot));
                 var positions = instance.Positions(slot);
@@ -281,18 +281,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 instance.AnswerTo(setting, out value);
                 copy.Answer(setting, value);
                 copy.Note(setting, instance.NoteOn(setting));
-                copy.Keep(setting, Kept(instance.KeptOn(setting)));
+                copy.SetUnused(setting, Unused(instance.UnusedOn(setting)));
             }
         }
 
-        static KeptAttributes Kept(KeptAttributes kept)
+        static UnusedAttributes Unused(UnusedAttributes unused)
         {
-            if (kept == null)
+            if (unused == null)
                 return null;
 
-            var copy = new KeptAttributes();
-            for (var i = 0; i < kept.Count; i++)
-                copy.Add(kept.Name(i), kept.Written(i));
+            var copy = new UnusedAttributes();
+            for (var i = 0; i < unused.Count; i++)
+                copy.Add(unused.Name(i), unused.Written(i));
 
             return copy;
         }

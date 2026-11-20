@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             shift.Once = false;
             Put(shift, list);
 
-            var kept = shift.Kept;
+            var kept = shift.Stored;
             if (kept == null)
                 return;
 
@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             var soon = !_started || tick <= _last + 1;
             Put(shift, soon ? _each : _hundreds[Place(tick, Hundred)]);
 
-            var kept = shift.Kept;
+            var kept = shift.Stored;
             if (kept == null)
                 return;
 
@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Puts a shift back where what it keeps says it stood when the world was saved: on its turn, or due once on its tick.</summary>
         public void Restore(Shift shift)
         {
-            var kept = shift.Kept;
+            var kept = shift.Stored;
             if (kept == null)
                 return;
 
@@ -136,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (list == null)
                 return;
 
-            var kept = shift.Kept;
+            var kept = shift.Stored;
             if (kept != null)
             {
                 kept.Period = 0;

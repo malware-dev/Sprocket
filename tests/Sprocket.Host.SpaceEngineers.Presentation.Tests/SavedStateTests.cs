@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>The harness reads what a saved world remembers of the runtime, which the save keeps in binary, as text.</summary>
+/// <summary>The harness reads what a saved world remembers of the runtime, which the save stores in binary, as text.</summary>
 public class SavedStateTests : IDisposable
 {
     static readonly Guid Airlock = new Guid("6f1e2d3c-4b5a-4978-8a1b-2c3d4e5f6a7b");
@@ -30,7 +30,7 @@ public class SavedStateTests : IDisposable
     public void EveryRememberedMemberIsWrittenByName()
     {
         var world = new WorldMemory { Clock = 1234 };
-        var construct = new ConstructMemory { Keeper = 42 };
+        var construct = new ConstructMemory { Storage = 42 };
         construct.Runs.Add(new RunMemory { System = Airlock, Sequence = 1, Step = 3 });
         world.Constructs.Add(construct);
         var player = new PlayerMemory { Player = 7, Ticks = true, ColorTab = 2, ShowsHidden = true };
@@ -41,7 +41,7 @@ public class SavedStateTests : IDisposable
         var said = SavedState.Render(_folder);
 
         Assert.Contains("Clock: 1234\n", said);
-        Assert.Contains("Keeper: 42\n", said);
+        Assert.Contains("Storage: 42\n", said);
         Assert.Contains("System: " + Airlock + "\n", said);
         Assert.Contains("Step: 3\n", said);
         Assert.Contains("Ticks: True\n", said);

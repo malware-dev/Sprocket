@@ -4,12 +4,12 @@ using Sandbox.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 {
     /// <summary>A reading that remembers between looks.</summary>
-    public sealed class KeptReading<T> : Reading where T : class
+    public sealed class RememberingReading<T> : Reading where T : class
     {
         readonly Func<T, ReaderMemory, bool> _reads;
 
         /// <summary>A reading that <paramref name="reads" /> a block with what it remembers of it.</summary>
-        public KeptReading(Func<T, ReaderMemory, bool> reads)
+        public RememberingReading(Func<T, ReaderMemory, bool> reads)
         {
             _reads = reads;
         }

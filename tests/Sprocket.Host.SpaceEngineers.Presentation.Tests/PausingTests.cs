@@ -38,7 +38,7 @@ public class PausingTests
         Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
     }
 
-    /// <summary>A hand-over within the faction keeps the automation running while its programmable block has belonged to somebody else all along.</summary>
+    /// <summary>A hand-over within the faction stores the automation running while its programmable block has belonged to somebody else all along.</summary>
     [Fact]
     public void AHandOverWithinTheFactionKeepsItRunningWhoeverOwnsTheProgrammableBlock()
     {

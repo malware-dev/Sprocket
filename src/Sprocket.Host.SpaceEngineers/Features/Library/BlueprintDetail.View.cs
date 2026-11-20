@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         VStack _acting;
         Glyph _share;
         Button _withdraw;
-        Button _keep;
+        Button _saveCopy;
         Button _block;
         Label _reach;
 
@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                         Children =
                         {
                             new Button { Style = Styles.Button }.As(out _withdraw),
-                            new Button { Style = Styles.Button }.As(out _keep),
+                            new Button { Style = Styles.Button }.As(out _saveCopy),
                             new Button { Style = Styles.Button }.As(out _block)
                         }
                     }.As(out _shares)

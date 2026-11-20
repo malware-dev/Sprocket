@@ -43,7 +43,7 @@ public class ColorChoiceTests
     [InlineData("FF88")]
     [InlineData("orange")]
     [InlineData("")]
-    public void WhatIsNoColorIsKeptAsWritten(string written)
+    public void WhatIsNoColorIsStoredAsWritten(string written)
     {
         var field = Field(new ColorOffer(new Hsv[0], null, null));
         field.Text = written;
@@ -89,9 +89,9 @@ public class ColorChoiceTests
         Assert.Empty(player.RecentColors);
     }
 
-    /// <summary>A color taken with Done goes first among the colors kept with the player, once, and a field made afterwards offers them newest first.</summary>
+    /// <summary>A color taken with Done goes first among the colors stored with the player, once, and a field made afterwards offers them newest first.</summary>
     [Fact]
-    public void AColorChosenIsKeptWithThePlayer()
+    public void AColorChosenIsStoredWithThePlayer()
     {
         var player = new PlayerMemory();
         var told = 0;
@@ -107,7 +107,7 @@ public class ColorChoiceTests
         Assert.Equal(new[] { new Color(255, 0, 0), new Color(0, 255, 0) }, other.Recent.Colors.ToArray());
     }
 
-    /// <summary>Colors kept with the player that do not read, or are there twice, are left out of what is offered.</summary>
+    /// <summary>Colors stored with the player that do not read, or are there twice, are left out of what is offered.</summary>
     [Fact]
     public void KeptColorsAreReadOnce()
     {
@@ -119,7 +119,7 @@ public class ColorChoiceTests
         Assert.Equal(new[] { new Color(32, 192, 255), new Color(32, 192, 255, 128) }, field.Recent.Colors.ToArray());
     }
 
-    /// <summary>The panel opens on the tab last used, and a tab chosen is kept with the player's settings in the world, and said.</summary>
+    /// <summary>The panel opens on the tab last used, and a tab chosen is stored with the player's settings in the world, and said.</summary>
     [Fact]
     public void TheTabUsedIsKept()
     {

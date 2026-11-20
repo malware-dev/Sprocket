@@ -260,7 +260,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         /// <summary>What has to happen before the header's button can be pressed, said as its note while it cannot.</summary>
         public virtual string PrimaryWaits => "";
 
-        /// <summary>Does what the header's button says; on a page that edits, that is leaving it, keeping what it was opened on.</summary>
+        /// <summary>Does what the header's button says; on a page that edits, that is leaving it, saving what it was opened on.</summary>
         public virtual void Primary()
         {
             if (Edits)
@@ -346,7 +346,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         /// </summary>
         /// <remarks>
         /// A page that answers false has asked or pushed something of its own. Where a change made here still stands, it asks
-        /// whether to keep it, and goes back once answered.
+        /// whether to save it, and goes back once answered.
         /// </remarks>
         public virtual bool Leaving()
         {
@@ -354,8 +354,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         }
 
         /// <summary>
-        /// Whether nothing changed here is left to answer for; where something is, asks whether to keep it, as a picker does,
-        /// and goes on with <paramref name="then" /> either way: keeping leaves the changes, discarding takes them back first.
+        /// Whether nothing changed here is left to answer for; where something is, asks whether to save it, as a picker does,
+        /// and goes on with <paramref name="then" /> either way: saving leaves the changes, discarding takes them back first.
         /// </summary>
         /// <remarks>The changes made on the pages opened from this one were answered for there, and stay.</remarks>
         protected bool Answered(Action then)
@@ -363,10 +363,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             if (!Editor.Changed(this))
                 return true;
 
-            Editor.Ask(Editor.Texts.PickKeepQuestion);
-            Editor.Answer(Editor.Texts.PickKeepThem, delegate
+            Editor.Ask(Editor.Texts.PickSaveQuestion);
+            Editor.Answer(Editor.Texts.PickSaveThem, delegate
             {
-                Editor.Keep(this);
+                Editor.Save(this);
                 then();
             }, true);
             Editor.Answer(Editor.Texts.PickDiscardThem, delegate

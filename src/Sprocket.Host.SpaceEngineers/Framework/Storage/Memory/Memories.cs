@@ -5,12 +5,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
 {
     /// <summary>What the world remembers of Sprocket while it runs: Sprocket's clock, each player's settings, and each construct's state until it is claimed.</summary>
     /// <remarks>
-    /// Every tick kept is on Sprocket's clock, the game's frame carried on from where the world was saved, since the game's
+    /// Every tick stored is on Sprocket's clock, the game's frame carried on from where the world was saved, since the game's
     /// frame counter starts from nought each session. Read whole as the world loads and written whole as it saves.
     /// </remarks>
     public sealed class Memories
     {
-        /// <summary>The name of the world's file the memory is kept in.</summary>
+        /// <summary>The name of the world's file the memory is stored in.</summary>
         public const string File = "state";
 
         readonly IBinary _binary;
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
         /// <summary>The identities of the players an admin has stopped sharing.</summary>
         public List<long> Barred { get; } = new List<long>();
 
-        /// <summary>Takes up what the world kept, <paramref name="packed" />, on the game's <paramref name="frame" />; nothing kept is a world new to Sprocket.</summary>
+        /// <summary>Takes up what the world stored, <paramref name="packed" />, on the game's <paramref name="frame" />; nothing stored is a world new to Sprocket.</summary>
         public void Read(string packed, int frame)
         {
             _unclaimed.Clear();
@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
 
             _offset = memory.Clock - frame;
             foreach (var construct in memory.Constructs)
-                _unclaimed[construct.Keeper] = construct;
+                _unclaimed[construct.Storage] = construct;
 
             foreach (var player in memory.Players)
                 _players[player.Player] = player;
@@ -92,19 +92,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
             return player;
         }
 
-        /// <summary>The state filed under <paramref name="keeper" />, given up to whoever claims it; a fresh one where nothing is.</summary>
-        public ConstructMemory Claim(long keeper)
+        /// <summary>The state filed under <paramref name="storage" />, given up to whoever claims it; a fresh one where nothing is.</summary>
+        public ConstructMemory Claim(long storage)
         {
             ConstructMemory memory;
-            if (!_unclaimed.TryGetValue(keeper, out memory))
-                return new ConstructMemory { Keeper = keeper };
+            if (!_unclaimed.TryGetValue(storage, out memory))
+                return new ConstructMemory { Storage = storage };
 
-            _unclaimed.Remove(keeper);
+            _unclaimed.Remove(storage);
             return memory;
         }
 
         /// <summary>
-        /// What the world keeps now, on the game's <paramref name="frame" />: every live construct's state, and what nothing has
+        /// What the world stores now, on the game's <paramref name="frame" />: every live construct's state, and what nothing has
         /// claimed yet.
         /// </summary>
         /// <remarks>Called once a save.</remarks>

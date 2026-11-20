@@ -368,10 +368,10 @@
   <data name="Sprocket.Pick.Anything" xml:space="preserve">
     <value>Hva som helst</value>
   </data>
-  <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
+  <data name="Sprocket.Pick.SaveQuestion" xml:space="preserve">
     <value>Lagre endringene?</value>
   </data>
-  <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
+  <data name="Sprocket.Pick.SaveThem" xml:space="preserve">
     <value>Lagre dem</value>
   </data>
   <data name="Sprocket.Pick.DiscardThem" xml:space="preserve">
@@ -1471,25 +1471,25 @@
   <data name="Sprocket.Library.OnAlready" xml:space="preserve">
     <value>Et logikksystem laget fra denne plantegningen er allerede på denne konstruksjonen. Vil du ha ett til av samme slag, legg til en installasjon i det.</value>
   </data>
-  <data name="Sprocket.Library.KeepBackupQuestion" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupQuestion" xml:space="preserve">
     <value>Lagre denne sikkerhetskopien i biblioteket?</value>
   </data>
-  <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupLinked" xml:space="preserve">
     <value>Biblioteket har plantegningen denne ble laget fra. Vil du oppdatere den plantegningen, eller lagre sikkerhetskopien som en ny plantegning?</value>
   </data>
-  <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupUpdate" xml:space="preserve">
     <value>Oppdater plantegningen</value>
   </data>
-  <data name="Sprocket.Library.KeepBackupNew" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupNew" xml:space="preserve">
     <value>Lagre som ny plantegning</value>
   </data>
-  <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupLeave" xml:space="preserve">
     <value>La den være</value>
   </data>
   <data name="Sprocket.Library.MakeQuestion" xml:space="preserve">
     <value>Lagre logikksystemet som plantegning?</value>
   </data>
-  <data name="Sprocket.Library.MakeKept" xml:space="preserve">
+  <data name="Sprocket.Library.MakeSaved" xml:space="preserve">
     <value>En kopi legges i biblioteket, klar til bruk på alle konstruksjoner.</value>
   </data>
   <data name="Sprocket.Library.MakeConfirm" xml:space="preserve">
@@ -2668,10 +2668,10 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   <data name="Sprocket.Library.SharedPlayers" xml:space="preserve">
     <value>Delt med {count} spillere</value>
   </data>
-  <data name="Sprocket.Library.KeepCopy" xml:space="preserve">
+  <data name="Sprocket.Library.SaveCopy" xml:space="preserve">
     <value>Lagre en kopi</value>
   </data>
-  <data name="Sprocket.Library.KeepCopyAbout" xml:space="preserve">
+  <data name="Sprocket.Library.SaveCopyAbout" xml:space="preserve">
     <value>Legger din egen kopi i biblioteket ditt, til bruk i alle verdener.
 
 Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>

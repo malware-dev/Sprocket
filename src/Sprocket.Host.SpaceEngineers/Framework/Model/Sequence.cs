@@ -33,8 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// </summary>
         public string Annotation { get; set; }
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
         /// <summary>What the player calls this, such as "Let me out", or empty.</summary>
         public string Name { get; set; }

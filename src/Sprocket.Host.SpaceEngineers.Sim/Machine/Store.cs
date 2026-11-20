@@ -14,7 +14,7 @@ namespace Sprocket.Sim.Machine;
 /// simulator a playground somebody can come back to.
 /// <para>
 /// Derived from the game's own abstract rather than from its concrete storage: what the mod holds is
-/// the real type either way, and only the keeping of it is the harness's.
+/// the real type either way, and only the storing of it is the harness's.
 /// </para>
 /// <para>
 /// A key names its own file, so the program is a text file a person can read and repair - the same
@@ -35,7 +35,7 @@ public sealed class Store : MyModStorageComponentBase
         _construct = "";
     }
 
-    /// <summary>Storage for the construct called <paramref name="construct" />, kept in a file per key.</summary>
+    /// <summary>Storage for the construct called <paramref name="construct" />, stored in a file per key.</summary>
     public Store(string construct)
     {
         _construct = construct;
@@ -66,7 +66,7 @@ public sealed class Store : MyModStorageComponentBase
         return _writes.TryGetValue(key, out writes) ? writes : 0;
     }
 
-    /// <summary>Where this is being kept, for the line at the bottom of the window.</summary>
+    /// <summary>Where this is stored, for the line at the bottom of the window.</summary>
     public string Where => _folder.Length == 0 ? "nowhere - nothing is being saved" : _folder;
 
     /// <inheritdoc />

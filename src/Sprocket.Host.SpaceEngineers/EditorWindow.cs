@@ -791,9 +791,9 @@ namespace Sprocket.Host.SpaceEngineers
             if (renames != null)
                 renames(name);
 
-            // The name given on arrival is part of making the thing, so leaving the page does not ask whether to keep it.
+            // The name given on arrival is part of making the thing, so leaving the page does not ask whether to save it.
             if (arriving)
-                _editor.Keep(_editor.Current);
+                _editor.Save(_editor.Current);
         }
 
         /// <summary>Puts the box away, giving nothing.</summary>

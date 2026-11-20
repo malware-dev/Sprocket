@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         }
 
         /// <summary>
-        /// A copy of the Sprocket another machine keeps on <paramref name="block" />, made from what that
+        /// A copy of the Sprocket another machine stores on <paramref name="block" />, made from what that
         /// machine wrote out, to be edited here, its blocks of the world's <paramref name="kinds" />: its program, what is
         /// switched off, and what its construct's memory holds, packed by <paramref name="binary" />.
         /// </summary>
@@ -83,11 +83,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 Unpacked(binary, memory, block.EntityId));
         }
 
-        /// <summary>The construct's memory <paramref name="packed" /> holds, or a fresh one kept by <paramref name="keeper" /> where it holds none.</summary>
-        static ConstructMemory Unpacked(IBinary binary, string packed, long keeper)
+        /// <summary>The construct's memory <paramref name="packed" /> holds, or a fresh one filed under <paramref name="storage" /> where it holds none.</summary>
+        static ConstructMemory Unpacked(IBinary binary, string packed, long storage)
         {
             if (string.IsNullOrEmpty(packed))
-                return new ConstructMemory { Keeper = keeper };
+                return new ConstructMemory { Storage = storage };
 
             try
             {
@@ -95,8 +95,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             }
             catch (Exception exception)
             {
-                GameLog.Say($"block {keeper} came with a memory that would not read, so its copy starts from none: {exception.Message}");
-                return new ConstructMemory { Keeper = keeper };
+                GameLog.Say($"block {storage} came with a memory that would not read, so its copy starts from none: {exception.Message}");
+                return new ConstructMemory { Storage = storage };
             }
         }
 
@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         /// <summary>Brings the toolbars, the holders and whether the automation runs up to date with the construct as it stands.</summary>
         void Bring()
         {
-            // A copy leaves the toolbars to the machine that keeps the Sprocket.
+            // A copy leaves the toolbars to the machine that stores the Sprocket.
             if (!_copy)
                 Touch();
 
@@ -248,10 +248,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 _editor.Renamed();
         }
 
-        /// <summary>The programmable block the automation is kept in: the construct's hero.</summary>
+        /// <summary>The programmable block the automation is stored in: the construct's hero.</summary>
         public IMyTerminalBlock Block => _block;
 
-        /// <summary>What the construct's automation is doing, filed under the block that keeps it, which the world's save writes.</summary>
+        /// <summary>What the construct's automation is doing, filed under the block that stores it, which the world's save writes.</summary>
         public ConstructMemory Memory => _memory;
 
         /// <summary>Starts its clock at <paramref name="now" />, Sprocket's tick as it is made, so anything before its first tick is told the time.</summary>
@@ -260,7 +260,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             _runner.Begin(now);
         }
 
-        /// <summary>Whether the construct has no programmable block left to keep the automation in, which ends it.</summary>
+        /// <summary>Whether the construct has no programmable block left to store the automation in, which ends it.</summary>
         public bool Lost { get; private set; }
 
         /// <summary>
@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         /// <summary>The programmable blocks that just left the construct and still stand.</summary>
         public IReadOnlyList<IMyTerminalBlock> Parted => _holders.Parted;
 
-        /// <summary>The player's library, which the editor is given; null on a machine that keeps none.</summary>
+        /// <summary>The player's library, which the editor is given; null on a machine that stores none.</summary>
         public LibraryShelf Shelf
         {
             get { return _shelf; }
@@ -381,7 +381,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 _editor.WorldSettings = _worldSettings;
                 _editor.ChangeSettings = _changeSettings;
 
-                // A copy's buttons are written where the Sprocket is kept, which is asked by whoever lent it.
+                // A copy's buttons are written where the Sprocket is stored, which is asked by whoever lent it.
                 if (!_copy)
                 {
                     _editor.Wire = Wire;
@@ -397,7 +397,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             }
         }
 
-        /// <summary>The program this Sprocket runs and keeps.</summary>
+        /// <summary>The program this Sprocket runs and stores.</summary>
         public Automation Program => _program;
 
         /// <summary>
@@ -597,7 +597,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         /// </remarks>
         public void Persist()
         {
-            // The machine that keeps the Sprocket writes it; a copy is only somebody's view of it.
+            // The machine that stores the Sprocket writes it; a copy is only somebody's view of it.
             if (_copy)
                 return;
 
@@ -624,9 +624,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             storage.SetValue(BlockStorage.StateKey, state);
         }
 
-        /// <summary>Keeps a backup of the logic systems the library has no equal of, as this construct's automation is lost.</summary>
+        /// <summary>Stores a backup of the logic systems the library has no equal of, as this construct's automation is lost.</summary>
         /// <remarks>
-        /// Leaves out a logic system whose linked blueprint in <paramref name="shelf" /> has its change date, and keeps no backup
+        /// Leaves out a logic system whose linked blueprint in <paramref name="shelf" /> has its change date, and stores no backup
         /// where that is every one.
         /// </remarks>
         public void BackUp(Backups backups, DateTime saved, LibraryShelf shelf)
@@ -746,7 +746,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             return _binary.Pack(_memory);
         }
 
-        /// <summary>The codec this Sprocket packs what it keeps with.</summary>
+        /// <summary>The codec this Sprocket packs what it stores with.</summary>
         public IBinary Binary => _binary;
 
         /// <summary>
@@ -776,7 +776,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 _editor.Reword();
         }
 
-        /// <summary>Keeps the automation in another programmable block on the construct, now that the hero is gone, answering whether it moved.</summary>
+        /// <summary>Stores the automation in another programmable block on the construct, now that the hero is gone, answering whether it moved.</summary>
         /// <remarks>
         /// Where no programmable block is left the automation is <see cref="Lost" />, and whoever holds this lets it go.
         /// </remarks>
@@ -796,7 +796,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 HeroRemoved(this);
         }
 
-        /// <summary>Has the roster find the automation a keeper, as the hero is closed.</summary>
+        /// <summary>Has the roster find another block to store the automation, as the hero is closed.</summary>
         void Rehoming()
         {
             if (HeroRemoved != null)
@@ -816,16 +816,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             if (Lost)
                 return false;
 
-            IMyTerminalBlock keeper = _world.FindKeeper(_block.EntityId);
-            if (keeper != null)
+            IMyTerminalBlock storage = _world.FindStorage(_block.EntityId);
+            if (storage != null)
             {
-                if (keeper == _block)
+                if (storage == _block)
                 {
                     Destroyed = false;
                     return false;
                 }
 
-                Move(keeper);
+                Move(storage);
                 return true;
             }
 
@@ -835,7 +835,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             return false;
         }
 
-        /// <summary>Makes <paramref name="block" /> the hero: the automation is kept in it from here on, and its buttons name it.</summary>
+        /// <summary>Makes <paramref name="block" /> the hero: the automation is stored in it from here on, and its buttons name it.</summary>
         void Move(IMyTerminalBlock block)
         {
             GameLog.Say($"{Logged(_block)} is gone; {Logged(block)} keeps the automation now");
@@ -844,7 +844,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 Leave(_block);
 
             _block = block;
-            _memory.Keeper = block.EntityId;
+            _memory.Storage = block.EntityId;
             _world.Anchor(block);
             _holders.Regather(block);
             Destroyed = false;
@@ -854,7 +854,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             Stir();
         }
 
-        /// <summary>Clears the automation out of <paramref name="block" />, the keeper it has left, where the block is still in the world.</summary>
+        /// <summary>Clears the automation out of <paramref name="block" />, the block it was stored in, where the block is still in the world.</summary>
         static void Leave(IMyTerminalBlock block)
         {
             if (!block.MarkedForClose && !block.Closed)

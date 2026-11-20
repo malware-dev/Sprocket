@@ -104,7 +104,7 @@ namespace Sprocket.GameTests
 
             editor.HoldAlt(false);
 
-            // A backup is kept of a construct's logic systems as its last programmable block is destroyed.
+            // A backup is stored of a construct's logic systems as its last programmable block is destroyed.
             var lost = Destroy(block);
             _report.Check("backup made", lost > 0, $"{lost} programmable blocks destroyed on other constructs");
             yield return 2 * PluginUpdates.PerSecond;

@@ -6,7 +6,7 @@ using VRage.Game.Components;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>Where Sprocket keeps its text in a block's mod storage: the program and its switches, each under a key of its own.</summary>
+    /// <summary>Where Sprocket stores its text in a block's mod storage: the program and its switches, each under a key of its own.</summary>
     public static class BlockStorage
     {
         /// <summary>

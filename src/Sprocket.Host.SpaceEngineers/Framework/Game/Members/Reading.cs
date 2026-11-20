@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>A reading of a <typeparamref name="T" /> that remembers between looks.</summary>
         public static Reading Remembering<T>(Func<T, ReaderMemory, bool> reads) where T : class
         {
-            return new KeptReading<T>(reads);
+            return new RememberingReading<T>(reads);
         }
     }
 }

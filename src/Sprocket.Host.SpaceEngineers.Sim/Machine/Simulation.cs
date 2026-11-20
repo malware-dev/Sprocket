@@ -195,7 +195,7 @@ public sealed class Simulation
     {
         get
         {
-            var now = _roster.Kept(_unit.Block);
+            var now = _roster.Stored(_unit.Block);
             if (now != null && now != _unit)
             {
                 _unit = now;
@@ -218,10 +218,10 @@ public sealed class Simulation
     /// <summary>The player's library, kept in memory for as long as the harness runs.</summary>
     public LibraryShelf Shelf => _shelf;
 
-    /// <summary>The storage folder the library is kept in.</summary>
+    /// <summary>The storage folder the library is stored in.</summary>
     public Folder Folder => _folder;
 
-    /// <summary>The world's storage folder, which the backups are kept in.</summary>
+    /// <summary>The world's storage folder, which the backups are stored in.</summary>
     public Folder WorldFolder => _worldFolder;
 
     /// <summary>What the editor says; loading a language into its book says it in that language.</summary>
@@ -256,7 +256,7 @@ public sealed class Simulation
     /// <summary>The construct itself, for a test that has to weld, grind or cut the power.</summary>
     public Rig Machine => _rig;
 
-    /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
+    /// <summary>where the program is being stored, for the line at the bottom of the window.</summary>
     public string Where => _store.Where;
 
     /// <summary>Takes the construct's backup, as losing its automation does, saying it was taken at <paramref name="saved" />.</summary>

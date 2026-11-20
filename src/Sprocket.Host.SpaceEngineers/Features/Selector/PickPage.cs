@@ -361,15 +361,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
         /// <summary>Asks before throwing away what was picked here, where there is something to lose and something to do with it.</summary>
         /// <remarks>
-        /// Both answers go back; the one Enter takes keeps the work, which finishes the pick as Done does.
+        /// Both answers go back; the one Enter takes saves the work, which finishes the pick as Done does.
         /// </remarks>
         public override bool Leaving()
         {
             if (!IsComplete || !Moved)
                 return true;
 
-            Editor.Ask(Editor.Texts.PickKeepQuestion);
-            Editor.AnswerPrimary(Editor.Texts.PickKeepThem, true);
+            Editor.Ask(Editor.Texts.PickSaveQuestion);
+            Editor.AnswerPrimary(Editor.Texts.PickSaveThem, true);
             Editor.Answer(Editor.Texts.PickDiscardThem, () => Editor.Pop());
 
             return false;

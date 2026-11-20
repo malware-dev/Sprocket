@@ -612,12 +612,12 @@ namespace Sprocket.Sim.Driving
         public static void Back(this SprocketEditor editor) => Run(editor.Screen.Back);
 
         /// <summary>Presses back, and keeps the changes made on the screen where it asks whether to.</summary>
-        public static void BackKeeping(this SprocketEditor editor)
+        public static void BackSaving(this SprocketEditor editor)
         {
             Back(editor);
-            var keep = editor.Screen.Answers.FirstOrDefault(answer => answer.Text == editor.Texts.PickKeepThem);
-            if (keep != null)
-                Run(keep.Command);
+            var save = editor.Screen.Answers.FirstOrDefault(answer => answer.Text == editor.Texts.PickSaveThem);
+            if (save != null)
+                Run(save.Command);
         }
 
         /// <summary>

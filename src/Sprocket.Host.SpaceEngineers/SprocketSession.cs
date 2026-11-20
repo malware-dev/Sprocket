@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
     public class SprocketSession : MySessionComponentBase
     {
-        const int Keeping = 30;
+        const int Saving = 30;
 
         const int Reclaiming = 300;
 
@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly PlayerMemory _mine = new PlayerMemory();
 
-        Interval _keeping = new Interval(Keeping);
+        Interval _saving = new Interval(Saving);
 
         // Due every Reclaiming ticks on the rota, only while the server has lent a Sprocket to somebody.
         Shift _reclaim;
@@ -443,7 +443,7 @@ namespace Sprocket.Host.SpaceEngineers
             _restedProgram = null;
             _copy = copy;
             _copyOf = id;
-            _handover.Kept(id, copy);
+            _handover.Remember(id, copy);
 
             if (again)
             {
@@ -457,21 +457,21 @@ namespace Sprocket.Host.SpaceEngineers
             // Runs on the server, where a change still on its way is not found yet.
             copy.Editor.Elsewhere = (sequence, instance, stops) =>
             {
-                _handover.Keep(id, copy);
+                _handover.Save(id, copy);
                 _handover.Run(id, sequence, instance, stops);
             };
 
-            // Kept on the server; the copy shows it at once.
+            // Saved on the server; the copy shows it at once.
             copy.Editor.HeldElsewhere = (system, instance, held, value) =>
             {
-                _handover.Keep(id, copy);
+                _handover.Save(id, copy);
                 _handover.Hold(id, system, instance, held, value);
             };
 
             // The program that wants the button reaches the server first.
             copy.Editor.Wire = panel =>
             {
-                _handover.Keep(id, copy);
+                _handover.Save(id, copy);
                 _handover.Wire(id, panel);
             };
             copy.Editor.Unwire = () => _handover.Unwire(id);
@@ -480,13 +480,13 @@ namespace Sprocket.Host.SpaceEngineers
             Lent(block, id, copy);
         }
 
-        /// <summary>Shows <paramref name="copy" />, lent of <paramref name="block" />, and hands it back when it is closed, keeping it for its way back.</summary>
+        /// <summary>Shows <paramref name="copy" />, lent of <paramref name="block" />, and hands it back when it is closed, saving it for its way back.</summary>
         void Lent(IMyTerminalBlock block, long id, SprocketUnit copy)
         {
             Show(Opened(block), copy, delegate
             {
-                // Kept before handed back: the server ignores a change from somebody who no longer holds it.
-                _handover.Keep(id, copy);
+                // Saved before handed back: the server ignores a change from somebody who no longer holds it.
+                _handover.Save(id, copy);
                 _handover.Hand(id);
                 if (_copy == copy)
                     _copy = null;
@@ -506,7 +506,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>A client's change arriving at the server, which builds the Sprocket again from it and writes it into the block.</summary>
         void Changed(long id, string program, string switches)
         {
-            SprocketUnit was = _roster.Kept(id);
+            SprocketUnit was = _roster.Stored(id);
             if (was == null)
             {
                 GameLog.Say($"a change arrived for block {id}, which carries no Sprocket here");
@@ -539,13 +539,13 @@ namespace Sprocket.Host.SpaceEngineers
             _handover.Rule();
         }
 
-        /// <summary>Runs the world by <paramref name="next" /> from now on, keeps each level that changed in its own file, and has every Sprocket here follow.</summary>
+        /// <summary>Runs the world by <paramref name="next" /> from now on, saves each level that changed in its own file, and has every Sprocket here follow.</summary>
         /// <remarks>Called on the machine that runs the world.</remarks>
         void Rule(Settings next)
         {
             var was = Asked;
             _settings = next;
-            next.Keep(was);
+            next.Save(was);
             Timed(next);
             foreach (var unit in _roster.All)
                 unit.Apply(next);
@@ -765,7 +765,7 @@ namespace Sprocket.Host.SpaceEngineers
             var name = multiplayer == null ? "" : multiplayer.MyName;
             if (!IsServer)
             {
-                // The server answers with the block that keeps the automation; the editor is still opened from this one.
+                // The server answers with the block that stores the automation; the editor is still opened from this one.
                 _current._asked = block.EntityId;
                 _current._handover.Ask(block.EntityId, name);
                 return;
@@ -815,15 +815,15 @@ namespace Sprocket.Host.SpaceEngineers
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);
             unit.Editor.TipsShown = Choices.Tips;
-            unit.Editor.KeepTips = on =>
+            unit.Editor.SaveTips = on =>
             {
                 _choices = Choices.WithTips(on);
-                _choices.Keep();
+                _choices.Save();
             };
-            unit.Editor.Callouts.Keeping(() => Choices, kept =>
+            unit.Editor.Callouts.Saving(() => Choices, saved =>
             {
-                _choices = kept;
-                kept.Keep();
+                _choices = saved;
+                saved.Save();
             });
             unit.Editor.Preferred = IsServer ? null : (Action)(() => _handover.Prefer(_mine));
             unit.Administers = Administers;
@@ -873,8 +873,8 @@ namespace Sprocket.Host.SpaceEngineers
             {
                 _copy.Tick(frame);
                 _copy.Show(frame);
-                if (_keeping.Due(frame) && _copy.Editor.Holder == null)
-                    _handover.Keep(_copyOf, _copy);
+                if (_saving.Due(frame) && _copy.Editor.Holder == null)
+                    _handover.Save(_copyOf, _copy);
             }
 
             // The rota holds a door's coming close as well as the Sprockets' work, so it runs while either is there.

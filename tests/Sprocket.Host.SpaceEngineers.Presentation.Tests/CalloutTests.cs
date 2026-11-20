@@ -132,9 +132,9 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         Assert.True(screen.Shows(texts.CalloutSettings), screen.Dump);
     }
 
-    /// <summary>What was dismissed is kept as the dismissed ids, and reads back from the global file; the release is recorded as seen only once every callout due is dismissed.</summary>
+    /// <summary>What was dismissed is saved as the dismissed ids, and reads back from the global file; the release is recorded as seen only once every callout due is dismissed.</summary>
     [Fact]
-    public void WhatIsDismissedIsKept()
+    public void WhatIsDismissedIsSaved()
     {
         var screen = Meeting(LogicSystem);
         Assert.Null(screen.Player().Seen);
@@ -236,7 +236,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
     {
         var book = new CalloutBook(all);
         var held = new[] { choices };
-        book.Keeping(() => held[0], kept => held[0] = kept);
+        book.Saving(() => held[0], saved => held[0] = saved);
         book.Begin();
         return book;
     }

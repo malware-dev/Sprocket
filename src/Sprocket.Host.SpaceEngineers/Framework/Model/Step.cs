@@ -22,8 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// </summary>
         public string Annotation { get; set; }
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
         /// <summary>Whether it is switched off: kept whole, and read and checked as ever, but never done.</summary>
         public bool IsOff { get; set; }

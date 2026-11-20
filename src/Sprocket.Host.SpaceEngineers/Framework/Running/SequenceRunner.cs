@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         readonly Sequence _sequence;
 
-        // Kept in what the world saves.
+        // Stored in what the world saves.
         readonly RunMemory _memory;
 
         readonly CompiledRun _workings;
@@ -726,7 +726,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>
         /// The sequence whose run skipped the last start of this one, with the same <c>exclusive</c> id, or null where the last
-        /// start went ahead or was skipped for another reason; not kept in what the world saves.
+        /// start went ahead or was skipped for another reason; not stored in what the world saves.
         /// </summary>
         public Sequence HeldBy { get; private set; }
 

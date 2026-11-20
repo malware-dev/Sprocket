@@ -19,7 +19,7 @@ public class RenamedBlockTests
         Assert.Contains("Lobby Door", Said(screen));
         Assert.DoesNotContain("Airlock Inner Door", Said(screen));
 
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         Assert.Contains("Airlock Button", Said(screen));
 

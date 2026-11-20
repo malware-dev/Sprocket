@@ -245,7 +245,7 @@ public class ProgramCopyTests
         port.Attributes = Attributes("instanceNote", "9");
         port.Fill("inner", new List<string> { "inner1" });
         port.Note("inner", "The port side's inner door.");
-        port.Keep("inner", Attributes("answerNote", "10"));
+        port.SetUnused("inner", Attributes("answerNote", "10"));
         port.Fill("press", new List<string> { "panel1" }, new List<ToolbarSlot> { new ToolbarSlot(1, 2, 3) });
         port.Fill("status", new List<string> { "lcd1" }, new List<int> { 2 });
 
@@ -276,10 +276,10 @@ public class ProgramCopyTests
         system.Enabled = false;
     }
 
-    /// <summary>Attributes Sprocket does not use, kept as written: one called <paramref name="name" />, written <paramref name="written" />.</summary>
-    static KeptAttributes Attributes(string name, string written)
+    /// <summary>Attributes Sprocket does not use, held as written: one called <paramref name="name" />, written <paramref name="written" />.</summary>
+    static UnusedAttributes Attributes(string name, string written)
     {
-        var kept = new KeptAttributes();
+        var kept = new UnusedAttributes();
         kept.Add(name, written);
         return kept;
     }

@@ -105,14 +105,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             Attribute(name, value.ToString());
         }
 
-        /// <summary>Every attribute of <paramref name="kept" />, written back as they were, or nothing where it is null.</summary>
-        public void Attributes(KeptAttributes kept)
+        /// <summary>Every attribute of <paramref name="unused" />, written back as they were, or nothing where it is null.</summary>
+        public void Attributes(UnusedAttributes unused)
         {
-            if (kept == null)
+            if (unused == null)
                 return;
 
-            for (var i = 0; i < kept.Count; i++)
-                Attribute(kept.Name(i), kept.Written(i));
+            for (var i = 0; i < unused.Count; i++)
+                Attribute(unused.Name(i), unused.Written(i));
         }
 
         /// <summary>Starts a statement with one of the format's own words.</summary>

@@ -101,14 +101,14 @@ public class SharingTests
 
     /// <summary>A copy kept is the player's own: it keeps its maker's name and outlasts the share.</summary>
     [Fact]
-    public void AKeptCopyOutlastsTheShare()
+    public void ASavedCopyOutlastsTheShare()
     {
         var identity = Guid.NewGuid();
         _world.Share(Ann, Blueprint("Hangar", identity), ShareReach.Everyone, null, 100);
         var rig = Sharing();
         Library(rig);
 
-        rig.Editor.Holdings.KeepCopy(rig.Editor.Sharing!.Reaching[0]);
+        rig.Editor.Holdings.SaveCopy(rig.Editor.Sharing!.Reaching[0]);
         rig.Tick();
         _world.Withdraw(Ann, identity);
 
@@ -323,7 +323,7 @@ public class SharingTests
         screen.Editor.Sharing = board;
         screen.Editor.IsInFaction = () => inFaction;
         screen.Editor.Shelf = new LibraryShelf(new Folder(), delegate { });
-        screen.Editor.Shelf.Keep(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar", Namespace = "Shop", IsBlueprint = true });
+        screen.Editor.Shelf.Save(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar", Namespace = "Shop", IsBlueprint = true });
         var texts = screen.Editor.Texts;
         screen.Editor.OpenLibrary();
         screen.Run(2);
@@ -347,7 +347,7 @@ public class SharingTests
         board.Changed += screen.Editor.Invalidate;
         board.Ask();
         screen.Editor.Shelf = new LibraryShelf(new Folder(), delegate { });
-        screen.Editor.Shelf.Keep(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar", Namespace = "Shop", IsBlueprint = true });
+        screen.Editor.Shelf.Save(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar", Namespace = "Shop", IsBlueprint = true });
         var texts = screen.Editor.Texts;
         screen.Editor.OpenLibrary();
         screen.Run(2);

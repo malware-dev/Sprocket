@@ -5,10 +5,10 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
 {
     /// <summary>What the player at this machine has chosen for themselves, for every world they play: whether the screens show tips, and which callouts they have dismissed.</summary>
-    /// <remarks>Kept in a section of its own in the global file on the player's own machine, read there and never sent to a server.</remarks>
+    /// <remarks>Stored in a section of its own in the global file on the player's own machine, read there and never sent to a server.</remarks>
     public sealed class PlayerSettings
     {
-        // Persisted: the section of the global file the player's own choices are kept in, and the key of each.
+        // Persisted: the section of the global file the player's own choices are stored in, and the key of each.
         const string Section = "Player";
 
         const string TipsKey = "tips";
@@ -111,12 +111,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
                 ini.Delete(Section, DismissedKey);
         }
 
-        /// <summary>Keeps these choices in the global file on this machine, leaving the rest of the file as it was.</summary>
-        public void Keep()
+        /// <summary>Saves these choices in the global file on this machine, leaving the rest of the file as it was.</summary>
+        public void Save()
         {
             var ini = Settings.GlobalFile() ?? new MyIni();
             Write(ini);
-            Settings.KeepGlobal(ini);
+            Settings.SaveGlobal(ini);
         }
     }
 }

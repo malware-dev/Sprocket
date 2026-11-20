@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sharing
 {
-    /// <summary>The blueprints shared in this world and who may share, as the server keeps them.</summary>
+    /// <summary>The blueprints shared in this world and who may share, as the server stores them.</summary>
     /// <remarks>Runs on the server alone. One sharer and one blueprint identity make one share.</remarks>
     public sealed class BlueprintShares
     {

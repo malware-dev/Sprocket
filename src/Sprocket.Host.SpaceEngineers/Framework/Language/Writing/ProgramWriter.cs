@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
     {
         static readonly Literal[] NoArguments = new Literal[0];
 
-        /// <summary>The program <paramref name="program" /> written out, as the block keeps it.</summary>
+        /// <summary>The program <paramref name="program" /> written out, as the block stores it.</summary>
         public static string Save(Automation program, Values values)
         {
             return Save(program, values, null);
@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return with != null && with.Identity == system.Identity ? with : system;
         }
 
-        /// <summary>The blueprint <paramref name="system" /> written out alone, as a player's library keeps it.</summary>
+        /// <summary>The blueprint <paramref name="system" /> written out alone, as a player's library stores it.</summary>
         /// <remarks>The system alone, without its instances.</remarks>
         public static string Blueprint(AutomationSystem system)
         {
@@ -103,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 pen.Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
         }
 
-        /// <summary>The blueprint <paramref name="system" /> written out alone under the identity <paramref name="identity" />, as the library keeps the blueprint it is linked to.</summary>
+        /// <summary>The blueprint <paramref name="system" /> written out alone under the identity <paramref name="identity" />, as the library stores the blueprint it is linked to.</summary>
         /// <remarks>A blueprint as it is stored carries no link of its own.</remarks>
         public static string Blueprint(AutomationSystem system, Guid identity)
         {
@@ -114,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return pen.ToString();
         }
 
-        /// <summary>The logic system <paramref name="system" /> written out alone with its own identity and the blueprint it is linked to, as a backup keeps it.</summary>
+        /// <summary>The logic system <paramref name="system" /> written out alone with its own identity and the blueprint it is linked to, as a backup stores it.</summary>
         public static string Linked(AutomationSystem system)
         {
             var pen = new ScriptWriter();
@@ -124,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return pen.ToString();
         }
 
-        /// <summary>The blueprints <paramref name="systems" /> written out together, as a backup keeps them: no blocks, and no installations.</summary>
+        /// <summary>The blueprints <paramref name="systems" /> written out together, as a backup stores them: no blocks, and no installations.</summary>
         public static string Blueprints(IList<AutomationSystem> systems)
         {
             var pen = new ScriptWriter();
@@ -600,7 +600,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             foreach (var part in parts)
             {
                 pen.Note(instance.NoteOn(part));
-                pen.Attributes(instance.KeptOn(part));
+                pen.Attributes(instance.UnusedOn(part));
                 pen.Head(part).Says(Keyword.Equals);
 
                 Literal answer;

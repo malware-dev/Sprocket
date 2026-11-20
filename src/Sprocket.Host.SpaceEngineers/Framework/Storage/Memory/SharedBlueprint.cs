@@ -4,7 +4,7 @@ using ProtoBuf;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
 {
-    /// <summary>A blueprint one player has shared in this world, kept by the server.</summary>
+    /// <summary>A blueprint one player has shared in this world, stored by the server.</summary>
     [ProtoContract]
     public sealed class SharedBlueprint
     {

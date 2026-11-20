@@ -486,9 +486,9 @@ public class HandoverTests : IDisposable
         Assert.True(Assert.Single(heard.Players.Values).Ticks);
     }
 
-    /// <summary>The unit a client's player chooses is kept by the server, with that player's settings and nobody else's.</summary>
+    /// <summary>The unit a client's player chooses is stored by the server, with that player's settings and nobody else's.</summary>
     [Fact]
-    public void AClientsChoiceOfUnitIsKeptOnTheServer()
+    public void AClientsChoiceOfUnitIsStoredOnTheServer()
     {
         var anna = _wire.Client("Anna");
         var annas = Client(anna, new Heard());
@@ -509,9 +509,9 @@ public class HandoverTests : IDisposable
         Assert.False(_atServer.Player(Bert).Ticks);
     }
 
-    /// <summary>The colors a client's player chooses travel with their other settings: kept by the server, and lent back with a Sprocket.</summary>
+    /// <summary>The colors a client's player chooses travel with their other settings: stored by the server, and lent back with a Sprocket.</summary>
     [Fact]
-    public void AClientsColorsAreKeptOnTheServerAndLentBack()
+    public void AClientsColorsAreStoredOnTheServerAndLentBack()
     {
         var anna = _wire.Client("Anna");
         var heard = new Heard();
@@ -570,7 +570,7 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, new ProtoBinary(), heard.Program, heard.State, heard.Memory);
-            hers.Kept(_block, copy);
+            hers.Remember(_block, copy);
         });
 
         return (anna, hers, copy);
@@ -584,7 +584,7 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             copy.Editor.NewSystem("Hangar");
-            hers.Keep(_block, copy);
+            hers.Save(_block, copy);
         });
         _wire.Settle();
 
@@ -607,7 +607,7 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             copy.Editor.NewSystem("Hangar");
-            hers.Keep(_block, copy);
+            hers.Save(_block, copy);
         });
         _wire.Settle();
 
@@ -630,7 +630,7 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             copy.Editor.NewSystem("Hangar");
-            hers.Keep(_block, copy);
+            hers.Save(_block, copy);
         });
         _wire.Settle();
 
@@ -653,7 +653,7 @@ public class HandoverTests : IDisposable
     {
         var (anna, hers, copy) = Lent();
 
-        _wire.As(anna, () => hers.Keep(_block, copy));
+        _wire.As(anna, () => hers.Save(_block, copy));
         _wire.Settle();
 
         Assert.Empty(_atServer.Changed);
@@ -668,7 +668,7 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             copy.Editor.NewSystem("Hangar");
-            hers.Keep(_block, copy);
+            hers.Save(_block, copy);
         });
         _wire.Settle();
 
@@ -676,7 +676,7 @@ public class HandoverTests : IDisposable
         {
             copy.Editor.PressStart("when");
             copy.Editor.PressBlock("Airlock Button");
-            hers.Keep(_block, copy);
+            hers.Save(_block, copy);
         });
         _wire.Settle();
 
@@ -694,7 +694,7 @@ public class HandoverTests : IDisposable
         {
             var copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, new ProtoBinary(), "", "", "");
             copy.Editor.NewSystem("Mine");
-            his.Keep(_block, copy);
+            his.Save(_block, copy);
         });
         _wire.Settle();
 
@@ -963,7 +963,7 @@ public class HandoverTests : IDisposable
             copy.Editor.PressBlock("Airlock Button");
             copy.Editor.PressChoice("button 1 is pressed");
             copy.Editor.PressPrimary();
-            hers.Keep(_block, copy);
+            hers.Save(_block, copy);
         });
         _wire.Settle();
 
@@ -1011,7 +1011,7 @@ public class HandoverTests : IDisposable
             copy.Editor.Tick(1);
         });
         _wire.Settle();
-        _wire.As(anna, () => hers.Keep(_block, copy));
+        _wire.As(anna, () => hers.Save(_block, copy));
         _wire.Settle();
 
         Assert.Equal("Button 1 of Airlock Button already does something else.", question);

@@ -77,7 +77,7 @@ public class StartingTests
         var screen = WithOne();
 
         // Leaving a sequence for its system asks nothing, since that is not leaving the system.
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(120);
 
         // The row for it says the same thing, one screen out.

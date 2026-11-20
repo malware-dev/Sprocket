@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         readonly Rota _rota;
         readonly Shift _shift;
 
-        // Kept in what the world saves.
+        // Stored in what the world saves.
         readonly WatchMemory _memory;
 
         readonly List<string> _watched = new List<string>();

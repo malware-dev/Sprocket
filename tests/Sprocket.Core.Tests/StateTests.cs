@@ -59,7 +59,7 @@ public class StateTests
 
     /// <summary>What is off is kept and read back, with why where Sprocket switched it off.</summary>
     [Fact]
-    public void WhatIsOffAndWhyIsKeptAndReadBack()
+    public void WhatIsOffAndWhyIsStoredAndReadBack()
     {
         var before = Ship();
         before.Systems[0].Enabled = false;
@@ -113,7 +113,7 @@ public class StateTests
 
     /// <summary>What a block said stopped it is kept as what it is, and worded only when it is read.</summary>
     [Fact]
-    public void ABlocksTroubleIsKeptAndReadBack()
+    public void ABlocksTroubleIsStoredAndReadBack()
     {
         var before = Ship();
         before.Systems[0].Enabled = false;
@@ -154,7 +154,7 @@ public class StateTests
 
     /// <summary>A block written in the earlier form is read as it was written, and kept in the packed form from then on.</summary>
     [Fact]
-    public void TheEarlierFormIsReadAndKeptPacked()
+    public void TheEarlierFormIsReadAndStoredPacked()
     {
         var earlier =
             "off \"" + Airlock + "\" \"block gone\" sequence 2 step 3 block \"Airlock 1 Tank\" \"tank no gas\" \"hydrogen\"\n" +

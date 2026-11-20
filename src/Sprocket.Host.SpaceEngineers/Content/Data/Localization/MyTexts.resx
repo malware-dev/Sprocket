@@ -476,11 +476,11 @@
     <value>Anything</value>
     <comment>Entry at the top of the list of kinds of block in the picker's column of blocks, which narrows to no kind at all; also the word on the line that opens that list while no kind is chosen.</comment>
   </data>
-  <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
+  <data name="Sprocket.Pick.SaveQuestion" xml:space="preserve">
     <value>Save your changes?</value>
     <comment>Question dialog asked on leaving the picker by going back after changing what it opened on, and on leaving the page where a screen's text or a block's Custom Data is written by going back after changing the text.</comment>
   </data>
-  <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
+  <data name="Sprocket.Pick.SaveThem" xml:space="preserve">
     <value>Save them</value>
     <comment>Answer in the question dialog asked on leaving the picker, or the page a screen's text or a block's Custom Data is written on, after changing what it opened on; it keeps the changes and finishes, and is the answer the Enter key gives.</comment>
   </data>
@@ -1944,23 +1944,23 @@
     <value>A logic system made from this blueprint is on this construct already. For another of the same, add an installation to it.</value>
     <comment>In the library, shown in the chosen blueprint's details after the button that puts it on the construct is pressed, where a logic system made from that blueprint is on the construct already.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupQuestion" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupQuestion" xml:space="preserve">
     <value>Save this backup to the library?</value>
     <comment>The question in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is in the library already. The backup's name follows it in bold.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupLinked" xml:space="preserve">
     <value>The library has the blueprint it was made from. Update that blueprint from it, or save it as a new blueprint?</value>
     <comment>The line at the bottom of the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is in the library already.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupUpdate" xml:space="preserve">
     <value>Update the blueprint</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: replaces that blueprint with the backup.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupNew" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupNew" xml:space="preserve">
     <value>Save as a new blueprint</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: keeps the backup as a separate new blueprint beside it.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupLeave" xml:space="preserve">
     <value>Leave it</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: closes the dialog and keeps nothing. It is the answer Enter takes.</comment>
   </data>
@@ -1968,7 +1968,7 @@
     <value>Make a blueprint of this logic system?</value>
     <comment>In the library, the question asked when the right-pointing arrow in the strip between its panes is pressed while a logic system with no blueprint is chosen. The logic system's name follows in bold.</comment>
   </data>
-  <data name="Sprocket.Library.MakeKept" xml:space="preserve">
+  <data name="Sprocket.Library.MakeSaved" xml:space="preserve">
     <value>A copy of it is saved in the library, where any construct can use it.</value>
     <comment>In the library, the line under the question whether to make a blueprint of a logic system, saying what making it does.</comment>
   </data>
@@ -3497,11 +3497,11 @@ A backslash before a mark shows the mark as it is typed.
     <value>Shared with {count} players</value>
     <comment>Line in the library blueprint detail saying the player has shared this blueprint with chosen players. {count} is how many.</comment>
   </data>
-  <data name="Sprocket.Library.KeepCopy" xml:space="preserve">
+  <data name="Sprocket.Library.SaveCopy" xml:space="preserve">
     <value>Save a copy</value>
     <comment>Button in the detail of a blueprint shared with the player; puts a copy of it in the player's own library.</comment>
   </data>
-  <data name="Sprocket.Library.KeepCopyAbout" xml:space="preserve">
+  <data name="Sprocket.Library.SaveCopyAbout" xml:space="preserve">
     <value>Adds your own copy to your library, for use in any world.
 
 Warning: Your own copy will not update with {sharer}'s changes.</value>

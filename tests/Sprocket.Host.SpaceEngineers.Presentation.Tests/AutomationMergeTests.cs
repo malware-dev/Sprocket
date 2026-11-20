@@ -195,7 +195,7 @@ public class AutomationMergeTests
     }
 
     /// <summary>
-    /// A slot naming the block the automation is kept in, as an older build wrote it, still runs,
+    /// A slot naming the block the automation is stored in, as an older build wrote it, still runs,
     /// and is Sprocket's own as it is, so the pass that mends leaves it.
     /// </summary>
     [Fact]

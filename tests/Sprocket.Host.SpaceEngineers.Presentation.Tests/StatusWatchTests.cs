@@ -255,7 +255,7 @@ public class StatusWatchTests : IDisposable
                 {
                     Level = StatusLevel.Problem, Logic = "Airlock", Number = 3, Blueprint = true, Installation = "Port", Position = 2,
                     Sequence = "Cycle", Row = 4, Halted = true,
-                    Fault = new SequenceFault(SequenceProblem.MissingTarget, 3, BlockTrouble.Kept(Cause.VentNoOxygen, "Oxygen"), "Outer Door")
+                    Fault = new SequenceFault(SequenceProblem.MissingTarget, 3, BlockTrouble.Stored(Cause.VentNoOxygen, "Oxygen"), "Outer Door")
                 },
                 new StatusItem
                 {

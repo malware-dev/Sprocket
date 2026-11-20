@@ -7,7 +7,7 @@ using VRage.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>Where the world's save keeps Sprocket's files: an entity of the mod's own, saved with the world and tied to no block.</summary>
+    /// <summary>Where the world's save stores Sprocket's files: an entity of the mod's own, saved with the world and tied to no block.</summary>
     /// <remarks>Only the server has one, and the game sends it to no client.</remarks>
     public sealed class Carrier
     {
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             }
         }
 
-        /// <summary>Keeps <paramref name="text" /> in the carrier.</summary>
+        /// <summary>Stores <paramref name="text" /> in the carrier.</summary>
         public void Write(string text)
         {
             _entity.Storage[Key] = text;

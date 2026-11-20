@@ -5,7 +5,7 @@ using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
 {
-    /// <summary>The blocks a construct's automation is kept in, listened to for whether any of them is working.</summary>
+    /// <summary>The blocks a construct's automation is stored in, listened to for whether any of them is working.</summary>
     public sealed class HostBlocks
     {
         readonly GridWorld _world;
@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
 
         int _heldAt = int.MinValue;
 
-        /// <summary>The blocks the automation is kept in, of <paramref name="world" />.</summary>
+        /// <summary>The blocks the automation is stored in, of <paramref name="world" />.</summary>
         public HostBlocks(GridWorld world)
         {
             _world = world;

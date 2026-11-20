@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             _asserted.AddRange(from._asserted);
         }
 
-        /// <summary>Writes from here on in the name of <paramref name="hero" />, the block the automation is kept in now, mending on the next pass the buttons that name the one before.</summary>
+        /// <summary>Writes from here on in the name of <paramref name="hero" />, the block the automation is stored in now, mending on the next pass the buttons that name the one before.</summary>
         public void Rehomed(IMyTerminalBlock hero)
         {
             _hero = hero;
@@ -271,7 +271,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
         /// Notes what a player had in the slot <paramref name="want" /> is about to write over, where it is their own item, so
         /// letting go of the slot gives it back.
         /// </summary>
-        void Keep(IMyToolbar toolbar, WantedWiring want, MyToolbarItemInfo present)
+        void NoteTaken(IMyToolbar toolbar, WantedWiring want, MyToolbarItemInfo present)
         {
             var kept = Overwritten(want);
             if (kept == null)
@@ -360,7 +360,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
                 var given = Overwritten(want);
                 if (filled && given != null && given.Back && string.Equals(given.Key, want.Key, StringComparison.Ordinal))
                 {
-                    Keep(toolbar, want, present);
+                    NoteTaken(toolbar, want, present);
                 }
                 else if (filled && !Mine(present, want.PanelId) && !Orphaned(present))
                 {
@@ -424,7 +424,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
 
         /// <summary>
         /// Whether a slot of <paramref name="panel" />'s toolbar holds Sprocket's action for <em>this</em> Sprocket: on the
-        /// panel itself, as it is written, or naming the block the automation is kept in, as a slot an older build wrote does.
+        /// panel itself, as it is written, or naming the block the automation is stored in, as a slot an older build wrote does.
         /// </summary>
         public bool Mine(MyToolbarItemInfo present, long panel)
         {
@@ -539,7 +539,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
                     continue;
 
                 if (filled && !Mine(present, want.PanelId) && !Orphaned(present))
-                    Keep(toolbar, want, present);
+                    NoteTaken(toolbar, want, present);
 
                 if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(want.PanelId, want.Name), SignalAction.Argument(want.Key)))
                 {

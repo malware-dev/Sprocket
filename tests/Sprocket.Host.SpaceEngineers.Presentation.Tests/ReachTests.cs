@@ -222,7 +222,7 @@ public class ReachTests
         AssertEverythingLights("a system with a sequence in it", screen =>
         {
             screen.Editor.NewButtonSystem("Airlock");
-            screen.Editor.BackKeeping();
+            screen.Editor.BackSaving();
         });
 
         AssertEverythingLights("a sequence", screen =>

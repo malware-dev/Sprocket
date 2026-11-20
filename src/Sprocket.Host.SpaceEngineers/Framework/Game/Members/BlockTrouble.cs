@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         }
 
         /// <summary>Trouble read back from a save: <paramref name="cause" />, about <paramref name="about" />, whose run has already ended.</summary>
-        public static BlockTrouble Kept(Cause cause, string about)
+        public static BlockTrouble Stored(Cause cause, string about)
         {
             return new BlockTrouble(cause, about, true);
         }

@@ -138,8 +138,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <remarks>Decides only what the editor lists; the system runs as usual wherever it is listed.</remarks>
         public string ListedOn { get; set; } = "";
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
         /// <summary>Its sequences, in the order the Sequences tab lists them.</summary>
         public IReadOnlyList<Sequence> Sequences => _sequences;
@@ -247,10 +247,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// </summary>
         public IReadOnlyList<Part> Parts => _parts;
 
-        /// <summary>The categories on its installation panel with no slot under them, which the program does not keep.</summary>
+        /// <summary>The categories on its installation panel with no slot under them, which the program does not store.</summary>
         public IList<EmptyCategory> EmptyCategories => _emptyCategories;
 
-        /// <summary>The categories on its Sequences tab with no sequence under them, which the program does not keep.</summary>
+        /// <summary>The categories on its Sequences tab with no sequence under them, which the program does not store.</summary>
         public IList<EmptyCategory> EmptySequenceCategories => _emptySequenceCategories;
 
         /// <summary>Its slots as the installation panel lists them, to be arranged there.</summary>
@@ -259,7 +259,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>Its sequences as the Sequences tab lists them, to be arranged there.</summary>
         public ICategorizedList SequenceList => new Listed<Sequence>(_sequences, _emptySequenceCategories);
 
-        /// <summary>The categories on its Triggers tab with no trigger under them, which the program does not keep.</summary>
+        /// <summary>The categories on its Triggers tab with no trigger under them, which the program does not store.</summary>
         public IList<EmptyCategory> EmptyTriggerCategories => _emptyTriggerCategories;
 
         /// <summary>Its triggers as the Triggers tab lists them, to be arranged there.</summary>

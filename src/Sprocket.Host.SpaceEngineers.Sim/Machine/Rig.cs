@@ -466,7 +466,7 @@ public sealed class Rig
         return Weld(new Panel(id, name, Type<MyObjectBuilder_ButtonPanel>(), subtype, "Button Panel", buttons));
     }
 
-    /// <summary>A programmable block, named, which is a block the automation can be kept in.</summary>
+    /// <summary>A programmable block, named, which is a block the automation can be stored in.</summary>
     public Programmable Programmable(long id, string name)
     {
         return Weld(new Programmable(id, name, Type<MyObjectBuilder_MyProgrammableBlock>(), "LargeProgrammableBlock",

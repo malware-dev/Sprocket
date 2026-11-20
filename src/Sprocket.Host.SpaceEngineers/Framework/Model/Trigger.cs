@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>The category the trigger is listed under on the Triggers tab, with the triggers beside it under the same one, or empty for none.</summary>
         public string Category { get; set; } = "";
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
     }
 }

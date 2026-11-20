@@ -4,7 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
     /// <summary>
     /// Why a sequence cannot work.
     /// </summary>
-    /// <remarks>Persisted: each value's number is kept in saves, so a number is never changed or given to another value.</remarks>
+    /// <remarks>Persisted: each value's number is stored in saves, so a number is never changed or given to another value.</remarks>
     public enum SequenceProblem
     {
         /// <summary>Nothing is wrong.</summary>

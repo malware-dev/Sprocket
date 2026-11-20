@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
 {
-    /// <summary>The value each installation holds in each of its system's states, where a step has set one, kept in what the world saves.</summary>
+    /// <summary>The value each installation holds in each of its system's states, where a step has set one, stored in what the world saves.</summary>
     /// <remarks>
-    /// Each value is found in the construct's saved record by its state's name the first time it is read, and kept by the
+    /// Each value is found in the construct's saved record by its state's name the first time it is read, and stored by the
     /// state itself from then on, so a renamed state keeps its value. A value its state can no longer hold, its type having
     /// changed, is dropped and reads as the starting value. Nothing here is looked at on a tick.
     /// </remarks>
@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         readonly Dictionary<SystemInstance, Dictionary<State, StateMemory>> _held =
             new Dictionary<SystemInstance, Dictionary<State, StateMemory>>();
 
-        /// <summary>The values of <paramref name="automation" />'s states, kept in its saved record.</summary>
+        /// <summary>The values of <paramref name="automation" />'s states, stored in its saved record.</summary>
         public StateValues(Automation automation)
         {
             _automation = automation;
@@ -27,16 +27,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>What <paramref name="instance" /> of <paramref name="system" /> holds in <paramref name="state" />: what a step last set it to, or its starting value.</summary>
         public Literal Read(AutomationSystem system, SystemInstance instance, State state)
         {
-            var kept = Kept(system, instance, state, false);
-            if (kept == null)
+            var stored = Stored(system, instance, state, false);
+            if (stored == null)
                 return Starting(instance, state);
 
-            var value = kept.Choice.Length > 0 ? Literal.Name(kept.Choice) : Literal.Of(kept.Flag);
+            var value = stored.Choice.Length > 0 ? Literal.Name(stored.Choice) : Literal.Of(stored.Flag);
             if (Fits(system, state, value))
                 return value;
 
             GameLog.Say($"State {state.Name} of {system.Name} held a value it can no longer hold, and starts over at its starting value.");
-            Drop(instance, state, kept);
+            Drop(instance, state, stored);
             return Starting(instance, state);
         }
 
@@ -54,10 +54,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (instance == null || StateMentions.Same(Read(system, instance, state), value))
                 return false;
 
-            var kept = Kept(system, instance, state, true);
-            kept.State = state.Name;
-            kept.Choice = value.Kind == ValueKind.Name ? value.Text : "";
-            kept.Flag = value.Kind == ValueKind.Flag && value.Flag;
+            var stored = Stored(system, instance, state, true);
+            stored.State = state.Name;
+            stored.Choice = value.Kind == ValueKind.Name ? value.Text : "";
+            stored.Flag = value.Kind == ValueKind.Flag && value.Flag;
             return true;
         }
 
@@ -128,13 +128,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             foreach (var state in system.States)
             {
-                var kept = Kept(system, from, state, false);
-                if (kept == null)
+                var stored = Stored(system, from, state, false);
+                if (stored == null)
                     continue;
 
-                Drop(from, state, kept);
-                kept.Instance = to.Number;
-                _automation.Memory.States.Add(kept);
+                Drop(from, state, stored);
+                stored.Instance = to.Number;
+                _automation.Memory.States.Add(stored);
                 Dictionary<State, StateMemory> values;
                 if (!_held.TryGetValue(to, out values))
                 {
@@ -142,15 +142,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     _held.Add(to, values);
                 }
 
-                values[state] = kept;
+                values[state] = stored;
             }
         }
 
         /// <summary>
         /// What the saved record holds for <paramref name="state" /> of <paramref name="instance" />, found by name the first
-        /// time and kept by the state after; made where it holds nothing and <paramref name="make" /> says so, or null.
+        /// time and stored by the state after; made where it holds nothing and <paramref name="make" /> says so, or null.
         /// </summary>
-        StateMemory Kept(AutomationSystem system, SystemInstance instance, State state, bool make)
+        StateMemory Stored(AutomationSystem system, SystemInstance instance, State state, bool make)
         {
             if (instance == null)
                 return null;
@@ -162,9 +162,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 _held.Add(instance, values);
             }
 
-            StateMemory kept;
-            if (values.TryGetValue(state, out kept))
-                return kept;
+            StateMemory stored;
+            if (values.TryGetValue(state, out stored))
+                return stored;
 
             var saved = _automation.Memory.States;
             foreach (var one in saved)
@@ -179,10 +179,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (!make)
                 return null;
 
-            kept = new StateMemory { System = system.Identity, Instance = instance.Number, State = state.Name };
-            saved.Add(kept);
-            values.Add(state, kept);
-            return kept;
+            stored = new StateMemory { System = system.Identity, Instance = instance.Number, State = state.Name };
+            saved.Add(stored);
+            values.Add(state, stored);
+            return stored;
         }
 
         /// <summary>Lets go of every record it found, so each is found again in the construct's memory as it stands.</summary>
@@ -193,9 +193,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>Forgets what <paramref name="instance" /> held in <paramref name="state" />, in the saved record as well.</summary>
-        void Drop(SystemInstance instance, State state, StateMemory kept)
+        void Drop(SystemInstance instance, State state, StateMemory stored)
         {
-            _automation.Memory.States.Remove(kept);
+            _automation.Memory.States.Remove(stored);
             Dictionary<State, StateMemory> values;
             if (_held.TryGetValue(instance, out values))
                 values.Remove(state);

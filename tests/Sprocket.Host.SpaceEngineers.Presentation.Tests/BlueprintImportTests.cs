@@ -17,7 +17,7 @@ public class BlueprintImportTests
     {
         var screen = Screen.On(Rig.Demo());
         screen.Editor.Shelf = new LibraryShelf(new Folder(), delegate { });
-        screen.Editor.Shelf.Keep(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar Doors", Namespace = "Shop", IsBlueprint = true });
+        screen.Editor.Shelf.Save(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar Doors", Namespace = "Shop", IsBlueprint = true });
         screen.Editor.OpenedFromData = customData;
         screen.Editor.OpenLibrary();
         screen.Run(2);
@@ -58,9 +58,9 @@ public class BlueprintImportTests
         Assert.Equal(identity, imported.Identity);
     }
 
-    /// <summary>A newer copy of a blueprint the library has, by its identity, updates the one kept rather than adding another.</summary>
+    /// <summary>A newer copy of a blueprint the library has, by its identity, update the one saved rather than adding another.</summary>
     [Fact]
-    public void ANewerCopyUpdatesTheOneKept()
+    public void ANewerCopyUpdatesTheOneSaved()
     {
         Screen? screen = null;
         // ReSharper disable once AccessToModifiedClosure - the library reads its Custom Data only when Import is pressed, after the screen is set.

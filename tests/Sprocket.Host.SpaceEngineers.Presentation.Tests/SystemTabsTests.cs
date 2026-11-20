@@ -24,7 +24,7 @@ public class SystemTabsTests
         screen.Run(2);
         screen.Editor.Program.Sequences[screen.Editor.Program.Sequences.Count - 1].Steps.Insert(0, new Framework.Model.Await());
         screen.Editor.Program.Edited();
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         return screen.Run(120);
     }
 

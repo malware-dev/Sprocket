@@ -4,7 +4,7 @@ using System;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>What is switched off, and why, as a construct's block keeps it beside its program, and read back.</summary>
+    /// <summary>What is switched off, and why, as a construct's block stores it beside its program, and read back.</summary>
     /// <remarks>Persisted as a <see cref="BlockState" /> packed by the game's binary serialization.</remarks>
     public static class BlockSwitches
     {
@@ -22,12 +22,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             foreach (var system in program.Systems)
             {
                 if (!system.Enabled)
-                    state.Switches.Add(new SwitchMemory { System = system.Identity, Halt = KeptReasons.Kept(system.Halt) });
+                    state.Switches.Add(new SwitchMemory { System = system.Identity, Halt = StoredReasons.Stored(system.Halt) });
 
                 foreach (var instance in system.Instances)
                 {
                     if (!instance.Enabled)
-                        state.Switches.Add(new SwitchMemory { System = system.Identity, Instance = instance.Number, Halt = KeptReasons.Kept(instance.Halt) });
+                        state.Switches.Add(new SwitchMemory { System = system.Identity, Instance = instance.Number, Halt = StoredReasons.Stored(instance.Halt) });
                 }
             }
 
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             if (off.Instance == 0)
             {
                 system.Enabled = false;
-                system.Halt = KeptReasons.Halt(off.Halt);
+                system.Halt = StoredReasons.Halt(off.Halt);
                 return;
             }
 
@@ -111,7 +111,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
                 return;
 
             instance.Enabled = false;
-            instance.Halt = KeptReasons.Halt(off.Halt);
+            instance.Halt = StoredReasons.Halt(off.Halt);
         }
     }
 }

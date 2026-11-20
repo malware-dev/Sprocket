@@ -8,11 +8,11 @@ using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 namespace Sprocket.Sim.Machine;
 
 /// <summary>
-/// What the rig's toolbars hold, kept between runs.
+/// What the rig's toolbars hold, stored between runs.
 /// </summary>
 /// <remarks>
 /// In the game a construct's toolbars are in the save, right beside the program, so the two come
-/// back together. The playground kept only the program - so a button wired in one run was unwired in
+/// back together. The playground stored only the program - so a button wired in one run was unwired in
 /// the next, and Sprocket did the honest thing with that: dropped the source, leaving a sentence
 /// reading "When … …" and a tester wondering what they had broken.
 /// <para>
@@ -25,7 +25,7 @@ public static class Wiring
     /// <summary>This store's own key, which is the harness's business and never Sprocket's.</summary>
     public static readonly Guid Key = new Guid("A7E3C1D0-9B42-4F58-8E16-3C7D5A2B9F04");
 
-    /// <summary><paramref name="rig" /> written out as this store keeps it.</summary>
+    /// <summary><paramref name="rig" /> written out as this store stores it.</summary>
     public static string Save(Rig rig)
     {
         var text = new StringBuilder();

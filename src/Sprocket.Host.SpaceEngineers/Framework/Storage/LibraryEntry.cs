@@ -2,10 +2,10 @@ using System;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>One blueprint in a player's library, kept in a file of its own.</summary>
+    /// <summary>One blueprint in a player's library, stored in a file of its own.</summary>
     public sealed class LibraryEntry
     {
-        /// <summary>The blueprint <paramref name="identity" />, by <paramref name="space" /> and called <paramref name="name" />, kept in <paramref name="file" /> as <paramref name="text" />.</summary>
+        /// <summary>The blueprint <paramref name="identity" />, by <paramref name="space" /> and called <paramref name="name" />, stored in <paramref name="file" /> as <paramref name="text" />.</summary>
         public LibraryEntry(string file, Guid identity, string space, string name, DateTime? changed, string text)
         {
             File = file;
@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             Trouble = trouble;
         }
 
-        /// <summary>The name of the file it is kept in, as the index gives it.</summary>
+        /// <summary>The name of the file it is stored in, as the index gives it.</summary>
         public string File { get; private set; }
 
         /// <summary>The blueprint's identity, which a copy of it on a construct shares; empty where it did not read.</summary>
