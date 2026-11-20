@@ -124,7 +124,10 @@ namespace Sprocket.GameTests
             return null;
         }
 
-        /// <summary>Goes back to the screen the editor opens on, as its back button does, answering any question back asks with its first answer.</summary>
+        /// <summary>
+        /// Goes back to the screen the editor opens on, as its back button does, answering any question back asks with its last
+        /// answer, which discards what the page holds and always goes back; keeping it stays on a page whose values are not all given.
+        /// </summary>
         public void Home()
         {
             for (var guard = 0; _editor.Screen.CanGoBack && guard < 20; guard++)
@@ -132,11 +135,11 @@ namespace Sprocket.GameTests
                 Run(_editor.Screen.Back);
                 if (_editor.Screen.HasQuestion)
                 {
+                    dynamic last = null;
                     foreach (dynamic answer in _editor.Screen.Answers)
-                    {
-                        Run(answer.Command);
-                        break;
-                    }
+                        last = answer;
+                    if (last != null)
+                        Run(last.Command);
                 }
             }
         }
