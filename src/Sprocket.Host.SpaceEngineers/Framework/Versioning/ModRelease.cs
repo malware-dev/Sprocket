@@ -4,7 +4,7 @@ using System.Globalization;
 namespace Sprocket.Host.SpaceEngineers.Framework.Versioning
 {
     /// <summary>A release of the mod by its major and minor version, such as 1.1, which what's new is tagged with.</summary>
-    public struct ModRelease : IComparable<ModRelease>
+    public struct ModRelease : IComparable<ModRelease>, IEquatable<ModRelease>
     {
         /// <summary>The release <paramref name="major" />.<paramref name="minor" />.</summary>
         public ModRelease(int major, int minor)
@@ -71,7 +71,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Versioning
         public static bool operator !=(ModRelease a, ModRelease b) => a.CompareTo(b) != 0;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj is ModRelease && this == (ModRelease)obj;
+        public bool Equals(ModRelease other) => CompareTo(other) == 0;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => obj is ModRelease && Equals((ModRelease)obj);
 
         /// <inheritdoc />
         public override int GetHashCode() => Major * 1000 + Minor;
