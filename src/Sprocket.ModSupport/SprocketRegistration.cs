@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using VRage.Utils;
 
 namespace Sprocket.ModSupport
 {
@@ -137,9 +138,23 @@ namespace Sprocket.ModSupport
             _members.Clear();
             _types.Clear();
             _ids.Clear();
-            _build(new SprocketModBuilder(this));
 
-            var reply = register(Said());
+            // This runs inside the game's mod message to every mod listening, which stops at a handler that throws: a
+            // registration that fails is refused here, so the mods after it still hear Sprocket.
+            Dictionary<string, object> said;
+            try
+            {
+                _build(new SprocketModBuilder(this));
+                said = Said();
+            }
+            catch (Exception e)
+            {
+                Refusal = e.Message;
+                MyLog.Default?.WriteLineAndConsole($"[Sprocket] {_mod.Name}'s registration with Sprocket failed: {e.Message}");
+                return;
+            }
+
+            var reply = register(said);
             object refused = null;
             if (reply == null || reply.TryGetValue(SprocketWire.Refused, out refused))
             {
