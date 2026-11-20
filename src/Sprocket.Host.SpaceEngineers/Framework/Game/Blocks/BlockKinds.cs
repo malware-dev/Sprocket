@@ -43,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         public BlockKinds()
         {
             _mods = new ModCapability(Mods);
-            Mods.Registered += Forget;
+            Mods.Registered += ForgetAll;
         }
 
         /// <summary>The members other mods register for their blocks through Sprocket's mod API.</summary>
@@ -55,7 +55,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             // Sprocket's own descriptions go in first, so a mod may override them.
             var catalogue = new ParameterCatalog();
             catalogue.Add(KnownActions.Descriptions(), "");
-            ModActions.Read(catalogue);
             return catalogue;
         }
 
@@ -116,11 +115,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             return _kinds.TryGetValue(kind.Id, out kept) && kept == kind;
         }
 
-        /// <summary>Forgets the kinds of every block type a mod has registered members for, so they are described again in the language now chosen.</summary>
+        /// <summary>Forgets the kinds of every block type where any mod supports Sprocket, so they are described again in the language now chosen.</summary>
         /// <remarks>Asked when the player changes language; a mod says its names, groups and descriptions as they are asked for.</remarks>
         public void Reword()
         {
-            foreach (var type in Mods.Types)
+            if (Mods.Registrations.Count > 0)
+                ForgetAll();
+        }
+
+        /// <summary>Forgets every kind of block described so far, so each is described again with what mods have registered since.</summary>
+        /// <remarks>Asked only as a mod registers or withdraws: a mod's scope may take blocks of any type.</remarks>
+        void ForgetAll()
+        {
+            var types = new HashSet<string>();
+            foreach (var id in _kinds.Keys)
+                types.Add(id.Substring(0, id.IndexOf('/')));
+
+            foreach (var type in types)
                 Forget(type);
         }
 

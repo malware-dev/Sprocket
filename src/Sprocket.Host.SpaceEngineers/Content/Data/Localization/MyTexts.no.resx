@@ -799,6 +799,9 @@
   <data name="Sprocket.Problem.Stuck" xml:space="preserve">
     <value>Dette steget venter på noe som ikke kan bli ferdig.</value>
   </data>
+  <data name="Sprocket.Problem.Failed" xml:space="preserve">
+    <value>Denne sekvensen stoppet fordi et trinn feilet.</value>
+  </data>
   <data name="Sprocket.Problem.Conflicted" xml:space="preserve">
     <value>Denne sekvensen stoppet fordi noe annet tok over en av blokkene.</value>
   </data>
@@ -987,6 +990,9 @@
   </data>
   <data name="Sprocket.Trouble.ScriptNotRun" xml:space="preserve">
     <value>kjørte ikke - ikke noe skript, et skript som ikke lot seg kompilere, eller et som allerede kjører</value>
+  </data>
+  <data name="Sprocket.Trouble.ModFailed" xml:space="preserve">
+    <value>feilet: {reason}</value>
   </data>
   <data name="Sprocket.Trouble.DoorToldToOpen" xml:space="preserve">
     <value>sluttet å lukke seg fordi noe annet åpnet den</value>

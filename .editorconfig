@@ -83,14 +83,14 @@ resharper_csharp_naming_rule.constant_field = AaBb + _aaBb
 resharper_check_namespace_highlighting = none
 resharper_inconsistent_naming_highlighting = none
 
+
 # ---------------------------------------------------------------------------------------------------
-# Sprocket's mod API is a shared project compiled into Sprocket and into every mod that registers
-# members through it, so its namespace is its own, Sprocket.ModApi, wherever it is built. Its public
-# surface is what the other mods call, so the inspections that judge it by this solution's callers are
-# off for it too.
+# Sprocket's mod support is a shared project compiled into Sprocket and into every mod supporting
+# it, so its namespace is its own, Sprocket.ModSupport, wherever it is built. Its public surface is
+# what the other mods call, so the inspections that judge it by this solution's callers are off.
 # ---------------------------------------------------------------------------------------------------
 
-[src/Sprocket.ModApi/**.cs]
+[src/Sprocket.ModSupport/**.cs]
 resharper_check_namespace_highlighting = none
 resharper_unused_member_global_highlighting = none
 resharper_unused_method_return_value_global_highlighting = none

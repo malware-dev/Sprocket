@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
@@ -439,6 +440,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         /// <summary>What runs its program.</summary>
         public AutomationRunner Runner => _runner;
 
+
+        /// <summary>A mod raised the moment <paramref name="key" /> on <paramref name="block" />, one of this construct's.</summary>
+        public void Raised(IMyTerminalBlock block, MemberKey key)
+        {
+            _runner.Raised(block.EntityId, key);
+        }
 
         /// <summary>A block fired one of the actions Sprocket put in it, carrying <paramref name="key" />.</summary>
         public void Fire(string key)

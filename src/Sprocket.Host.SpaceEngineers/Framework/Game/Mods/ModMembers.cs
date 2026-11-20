@@ -1,77 +1,100 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using Sprocket.ModApi;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
 {
-    /// <summary>The members other mods have registered for their blocks through Sprocket's mod API, by block type.</summary>
-    /// <remarks>One for the world, kept by its block kinds; a registration is checked as it arrives, and one that says too little is passed over.</remarks>
+    /// <summary>The registrations of every mod supporting Sprocket in the world, the members they give blocks, and who listens to those blocks.</summary>
+    /// <remarks>One for the world, held by its block kinds; registrations arrive and are withdrawn on the game's main thread.</remarks>
     public sealed class ModMembers
     {
-        readonly Dictionary<string, List<Dictionary<string, object>>> _byType = new Dictionary<string, List<Dictionary<string, object>>>();
+        readonly List<ModRegistration> _registrations = new List<ModRegistration>();
         readonly Dictionary<long, List<Action>> _listening = new Dictionary<long, List<Action>>();
+        readonly List<Dictionary<string, object>> _found = new List<Dictionary<string, object>>();
 
-        /// <summary>Raised with a block type whose members a registration has changed, so a description of that type made earlier is made again.</summary>
-        public event Action<string> Registered;
+        /// <summary>Raised when a registration arrives or is withdrawn, so every block is described again.</summary>
+        public event Action Registered;
 
-        /// <summary>Takes <paramref name="said" />, a member as <see cref="ModMember.Said" /> words it, replacing one with the same id on the same type.</summary>
-        /// <remarks>Called by another mod through the API, on the game's main thread.</remarks>
-        public void Register(Dictionary<string, object> said)
+        /// <summary>Where a mod's task Sprocket stopped is looked at again a second later, or null where nothing looks.</summary>
+        public ModStopChecks Stops { get; set; }
+
+        /// <summary>The registrations standing now.</summary>
+        public IList<ModRegistration> Registrations => _registrations;
+
+        /// <summary>Takes <paramref name="registration" />, replacing one by the same owner.</summary>
+        public void Add(ModRegistration registration)
         {
-            if (said == null)
-                return;
-
-            var id = said.ContainsKey(ModMemberKeys.Id) ? said[ModMemberKeys.Id] as string : null;
-            var type = said.ContainsKey(ModMemberKeys.BlockType) ? said[ModMemberKeys.BlockType] as string : null;
-            var kind = said.ContainsKey(ModMemberKeys.Kind) ? said[ModMemberKeys.Kind] as string : null;
-            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(type) || string.IsNullOrEmpty(kind))
-                return;
-
-            List<Dictionary<string, object>> members;
-            if (!_byType.TryGetValue(type, out members))
-                _byType[type] = members = new List<Dictionary<string, object>>();
-
-            members.RemoveAll(member => member[ModMemberKeys.Id] as string == id);
-            members.Add(said);
-            Registered?.Invoke(type);
+            _registrations.RemoveAll(had => had.Owner == registration.Owner);
+            _registrations.Add(registration);
+            Registered?.Invoke();
         }
 
-        /// <summary>The block types any member is registered for.</summary>
-        public ICollection<string> Types => _byType.Keys;
+        /// <summary>Withdraws the registration made by <paramref name="owner" />.</summary>
+        public void Remove(string owner)
+        {
+            if (_registrations.RemoveAll(had => had.Owner == owner) > 0)
+                Registered?.Invoke();
+        }
 
-        /// <summary>Whether any member is registered for <paramref name="block" />'s type and subtype.</summary>
+        /// <summary>Whether any mod gives <paramref name="block" /> members.</summary>
         public bool Claims(IMyTerminalBlock block)
         {
-            List<Dictionary<string, object>> members;
-            if (!_byType.TryGetValue(block.BlockDefinition.TypeIdString, out members))
-                return false;
-
-            foreach (var member in members)
+            foreach (var registration in _registrations)
             {
-                if (Covers(member, block))
+                if (registration.Claims(block))
                     return true;
             }
 
             return false;
         }
 
-        /// <summary>Fills <paramref name="into" /> with the members registered for <paramref name="block" />'s type and subtype, in the order they were registered.</summary>
-        public void For(IMyTerminalBlock block, List<Dictionary<string, object>> into)
+        /// <summary>Fills <paramref name="into" /> with each mod's members of <paramref name="block" />, paired with the registration giving them.</summary>
+        public void For(IMyTerminalBlock block, List<KeyValuePair<ModRegistration, Dictionary<string, object>>> into)
         {
             into.Clear();
-            List<Dictionary<string, object>> members;
-            if (!_byType.TryGetValue(block.BlockDefinition.TypeIdString, out members))
-                return;
-
-            foreach (var member in members)
+            foreach (var registration in _registrations)
             {
-                if (Covers(member, block))
-                    into.Add(member);
+                _found.Clear();
+                registration.For(block, _found);
+                foreach (var member in _found)
+                    into.Add(new KeyValuePair<ModRegistration, Dictionary<string, object>>(registration, member));
             }
         }
 
-        /// <summary>Has <paramref name="told" /> called whenever the mod says a member of <paramref name="block" /> may have changed, until the answer is disposed.</summary>
+        /// <summary>The host type of the full name <paramref name="fullName" />: Sprocket's own or a registered mod's; null where none is.</summary>
+        public ChoiceType FindType(string fullName, out ModRegistration from)
+        {
+            from = null;
+            if (string.IsNullOrEmpty(fullName))
+                return null;
+
+            var dot = fullName.LastIndexOf('.');
+            if (dot <= 0)
+                return null;
+
+            var space = fullName.Substring(0, dot);
+            var id = fullName.Substring(dot + 1);
+            foreach (var registration in _registrations)
+            {
+                if (registration.Namespace != space)
+                    continue;
+
+                foreach (var type in registration.Types)
+                {
+                    if (type.Id == id)
+                    {
+                        from = registration;
+                        return type;
+                    }
+                }
+            }
+
+            return space == BlockKinds.Own ? ChoiceTypes.Named(space, id) : null;
+        }
+
+        /// <summary>Has <paramref name="told" /> called whenever a mod says a member of <paramref name="block" /> may have changed, until the answer is disposed.</summary>
         public IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             List<Action> listeners;
@@ -82,23 +105,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             return new Listening(_listening, block.EntityId, told);
         }
 
-        /// <summary>Tells everything listening to <paramref name="block" /> that its member <paramref name="id" /> may have changed.</summary>
-        /// <remarks>Called by another mod through the API, on the game's main thread; a block nothing listens to costs one look-up.</remarks>
-        public void Changed(IMyTerminalBlock block, string id)
+        /// <summary>Tells everything listening to <paramref name="block" /> that one of its mod members may have changed.</summary>
+        /// <remarks>Called by a mod, on the game's main thread; a block nothing listens to costs one look-up.</remarks>
+        public void Changed(IMyTerminalBlock block)
         {
             List<Action> listeners;
             if (block == null || !_listening.TryGetValue(block.EntityId, out listeners))
                 return;
 
-            for (var i = 0; i < listeners.Count; i++)
+            // Last first: a listener told may stop listening, which takes it out of the list.
+            for (var i = listeners.Count - 1; i >= 0; i--)
                 listeners[i]();
-        }
-
-        /// <summary>Whether <paramref name="member" /> is on <paramref name="block" />'s subtype: on every subtype where it names none.</summary>
-        static bool Covers(Dictionary<string, object> member, IMyTerminalBlock block)
-        {
-            var subtypes = member.ContainsKey(ModMemberKeys.Subtypes) ? member[ModMemberKeys.Subtypes] as string[] : null;
-            return subtypes == null || subtypes.Length == 0 || Array.IndexOf(subtypes, block.BlockDefinition.SubtypeName) >= 0;
         }
     }
 }

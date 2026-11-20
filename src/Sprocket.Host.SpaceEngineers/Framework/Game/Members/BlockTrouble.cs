@@ -21,6 +21,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return new BlockTrouble(cause, null, true);
         }
 
+        /// <summary>Something to give up on: <paramref name="cause" />, about <paramref name="about" />, and the run ends here.</summary>
+        public static BlockTrouble Fatal(Cause cause, string about)
+        {
+            return new BlockTrouble(cause, about, true);
+        }
+
+        /// <summary>A failure: <paramref name="cause" />, about <paramref name="about" />, which ends the run as a failed step, a problem, rather than as taken out of its hands, a warning.</summary>
+        public static BlockTrouble Failure(Cause cause, string about)
+        {
+            var failure = new BlockTrouble(cause, about, true);
+            failure.Fails = true;
+            return failure;
+        }
+
+        /// <summary>Whether the run ends as failed, rather than as taken out of its hands.</summary>
+        public bool Fails { get; private set; }
+
         /// <summary>Trouble read back from a save: <paramref name="cause" />, about <paramref name="about" />, whose run has already ended.</summary>
         public static BlockTrouble Kept(Cause cause, string about)
         {

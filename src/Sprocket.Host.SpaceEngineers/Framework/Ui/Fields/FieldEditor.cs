@@ -21,6 +21,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         Angle,
 
         /// <summary>Text over several lines, in a box where Enter starts a new one.</summary>
-        Lines
+        Lines,
+
+        /// <summary>A length of time: a number, in seconds or in ticks.</summary>
+        Duration
     }
 }

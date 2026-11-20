@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers
         StatusWatch _watch;
 
         Constructs _constructs;
-        ModApiHost _modApi;
+        ModSupportHost _modApi;
 
         ScreenMotion _motion;
 
@@ -322,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers
             _kinds = new BlockKinds();
 
             // Other mods register their blocks' members into the kinds through Sprocket's mod API.
-            _modApi = new ModApiHost(_kinds.Mods);
+            _modApi = new ModSupportHost(_kinds.Mods, On, _rota);
             _modApi.Start();
 
             // Made before Speak, which rewords every Sprocket.

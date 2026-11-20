@@ -1,6 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.ModSupport;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 {
@@ -38,6 +39,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         /// <summary>What stops the action on a block part way, or null where stopping does nothing.</summary>
         public Action<T> Stops { get; private set; }
+
+        /// <summary>What stops the action on a block, told why, or null where <see cref="Stops" /> does.</summary>
+        public Action<T, SprocketCancelCause> StopsFor { get; set; }
 
         /// <summary>Whether the action is forced by its options, or null where it never is.</summary>
         public Func<TOptions, bool> Forced { get; private set; }

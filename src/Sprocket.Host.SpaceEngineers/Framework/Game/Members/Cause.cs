@@ -110,6 +110,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         WheelNoWheel = 34,
 
         /// <summary>The piston cannot move: something is holding it.</summary>
-        PistonHeld = 35
+        PistonHeld = 35,
+
+        /// <summary>A mod's awaitable action is not getting there now, in the mod's own words.</summary>
+        ModStuck = 36,
+
+        /// <summary>Something took a mod's awaitable action out of its hands, in the mod's own words.</summary>
+        ModConflicted = 37,
+
+        /// <summary>A mod's awaitable action went wrong, in the mod's own words.</summary>
+        ModFailed = 38
     }
 }

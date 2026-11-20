@@ -268,6 +268,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 (block, options, seen) => Literal.Of(whole(block)));
         }
 
+        /// <summary>A length of time read off a <typeparamref name="T" />.</summary>
+        public static OwnValue Length<T>(Func<T, Duration> length) where T : class
+        {
+            return new TypedOwnValue<T, object>(ValueKind.Duration, None, false, Nothing,
+                (block, options, seen) => Literal.Of(length(block)));
+        }
+
         /// <summary>Text read off a <typeparamref name="T" />.</summary>
         public static OwnValue Text<T>(Func<T, string> text) where T : class
         {
