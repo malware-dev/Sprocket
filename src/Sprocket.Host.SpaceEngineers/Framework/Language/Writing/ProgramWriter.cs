@@ -364,6 +364,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (part.Category.Length > 0)
                 pen.AttributeText(ScriptAttributes.Category, part.Category);
 
+            if (part.Editor.Length > 0)
+                pen.AttributeText(ScriptAttributes.Editor, part.Editor);
+
             pen.Attributes(part.Attributes);
             pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Slot).Word(part.Id);
 

@@ -124,6 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             copy.Holds = part.Holds;
             copy.Expects = part.Expects;
             copy.Setting = part.Setting;
+            copy.Editor = part.Editor;
             copy.HasDefault = part.HasDefault;
             copy.Default = part.Default;
         }

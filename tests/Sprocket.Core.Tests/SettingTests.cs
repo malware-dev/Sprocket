@@ -109,6 +109,28 @@ public class SettingTests
         Assert.Equal(Everything, ProgramWriter.Save(copy, into));
     }
 
+    /// <summary>
+    /// A setting's editor is read from its slot's <c>#@ editor</c> attribute, kept by a copy and written back; a name this build
+    /// has no editor for is kept as written.
+    /// </summary>
+    [Theory]
+    [InlineData("percent")]
+    [InlineData("dial")]
+    public void ASettingsEditorIsReadKeptAndWrittenBack(string editor)
+    {
+        var text = Blueprint("    #@ editor: \"" + editor + "\"\n    optional slot opening expects real = 50\n").Replace(" {\n}\n", "\n");
+
+        var program = new Automation();
+        Assert.Equal("", Load(text, program));
+        Assert.Equal(editor, program.Systems[0].FindPart("opening")!.Editor);
+        Assert.Equal(text, ProgramWriter.Save(program, _store));
+
+        var into = new Values();
+        var copy = new Automation();
+        ProgramCopy.Into(program, _store, copy, into);
+        Assert.Equal(text, ProgramWriter.Save(copy, into));
+    }
+
     /// <summary>A blueprint with settings shared as text comes back as it went.</summary>
     [Fact]
     public void ABlueprintWithSettingsIsSharedWhole()

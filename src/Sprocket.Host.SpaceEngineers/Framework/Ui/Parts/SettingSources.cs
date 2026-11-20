@@ -52,9 +52,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         {
             var field = form.Field(at);
             var type = SettingTypes.Of(field);
+            var shaped = SettingEditor.Of(field);
             Offer(editor, system, kind => SettingTypes.Fits(field, kind), form.SettingAt(at),
                 (setting, said) => form.Choose(at, setting, said),
-                () => making(New(editor, system, type, Read(type, form.ValueAt(at)), () => mark,
+                () => making(New(editor, system, shaped != null ? shaped.Name : type, Read(type, form.ValueAt(at)), () => mark,
                     made => form.Choose(at, made, Default(system, made)), () => making(null))));
         }
 
@@ -73,15 +74,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
         /// <summary>
         /// A panel, hung from what <paramref name="mark" /> finds, asking for a new setting of <paramref name="system" /> holding
-        /// <paramref name="type" />: its name and its default, starting at <paramref name="start" />, where a default
-        /// left empty makes every installation choose it. Made as one change, its name is given to <paramref name="made" />; <paramref name="closed" />
-        /// is called as the panel closes either way.
+        /// <paramref name="kind" />, a type or an editor's name: its name and its default, starting at <paramref name="start" />, where
+        /// a default left empty makes every installation choose it. Made as one change, its name is given to <paramref name="made" />;
+        /// <paramref name="closed" /> is called as the panel closes either way.
         /// </summary>
         /// <remarks>Its holder hangs it every tick, as any panel.</remarks>
-        public static ValuesQuestion New(SprocketEditor editor, AutomationSystem system, string type, Literal start, Func<Element> mark,
+        public static ValuesQuestion New(SprocketEditor editor, AutomationSystem system, string kind, Literal start, Func<Element> mark,
             Action<string> made, Action closed)
         {
-            return SettingPanel.New(editor, system, type, start, mark, (part, none) =>
+            return SettingPanel.New(editor, system, kind, start, mark, (part, none) =>
             {
                 editor.MakeSetting(system, part);
                 made(part.Id);
@@ -92,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         public static string Default(AutomationSystem system, string setting)
         {
             var part = system?.FindPart(setting);
-            return part != null && part.HasDefault ? part.Default.Said : "";
+            return part != null && part.HasDefault ? SettingEditor.Said(part, part.Default) : "";
         }
 
         /// <summary>What a value a person typed reads as, as one of <paramref name="type" />, or a value of its own where it reads as none.</summary>

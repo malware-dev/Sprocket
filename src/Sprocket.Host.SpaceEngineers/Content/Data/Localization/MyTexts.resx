@@ -1632,6 +1632,10 @@
     <value>number</value>
     <comment>In the list of what a new setting holds, the setting holds a number that may have decimals.</comment>
   </data>
+  <data name="Sprocket.Setting.KindPercent" xml:space="preserve">
+    <value>percentage</value>
+    <comment>In the list of what a new setting holds, the setting holds a percentage, 0 to 100, set with a slider.</comment>
+  </data>
   <data name="Sprocket.Setting.KindText" xml:space="preserve">
     <value>text</value>
     <comment>In the list of what a new setting holds, the setting holds text.</comment>

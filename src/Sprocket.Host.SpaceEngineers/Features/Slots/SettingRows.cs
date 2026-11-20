@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Slots
@@ -18,9 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
             Literal own;
             if (instance != null && instance.AnswerTo(part.Id, out own))
-                row.Say(own.Said, false);
+                row.Say(SettingEditor.Said(part, own), false);
             else if (part.HasDefault)
-                row.Say(part.Default.Said, false);
+                row.Say(SettingEditor.Said(part, part.Default), false);
             else
                 row.Say(SentenceText.Empty, !unused);
         }

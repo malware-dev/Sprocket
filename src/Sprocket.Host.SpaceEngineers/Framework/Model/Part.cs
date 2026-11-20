@@ -56,6 +56,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// </summary>
         public string Setting { get; set; } = "";
 
+        /// <summary>
+        /// For a setting, the name of how its value is edited and shown beyond its type, such as <c>percent</c>; or empty for
+        /// its type alone. A name no editor of this build has is kept as written.
+        /// </summary>
+        public string Editor { get; set; } = "";
+
         /// <summary>Whether this part is a setting, answered by one value rather than by blocks.</summary>
         public bool IsSetting => Setting.Length > 0;
 

@@ -1237,6 +1237,9 @@
   <data name="Sprocket.Setting.KindReal" xml:space="preserve">
     <value>tall</value>
   </data>
+  <data name="Sprocket.Setting.KindPercent" xml:space="preserve">
+    <value>prosent</value>
+  </data>
   <data name="Sprocket.Setting.KindText" xml:space="preserve">
     <value>tekst</value>
   </data>
