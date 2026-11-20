@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>An if, or an otherwise if, that checks whether a mod is installed is made and changed from the selector's Mods source.</summary>
 public class ModsTests : IDisposable
 {
-    static readonly string Head = $"{ScriptFormat.Line}\n\n"
+    static readonly string Head = $"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}\n\n"
         + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n";
 
     const string Empty = "    sequence 1 {\n    }\n}\n";
@@ -50,6 +50,19 @@ public class ModsTests : IDisposable
         Assert.Equal(new[] { "Gearbox Lifts", "Pump Station" }, rows.Select(row => row.Text));
         Assert.Equal(new[] { "Ada Gear", "Bo North" }, rows.Select(row => row.Secondary));
         Assert.Equal(editor.Texts.PickSourceMods, editor.Source());
+    }
+
+    /// <summary>Checking for a mod is unfinished, so outside developer mode an if is not offered Mods.</summary>
+    [Fact]
+    public void OutsideDeveloperModeAnIfIsNotOfferedMods()
+    {
+        var screen = OnSequence(Head + Empty, out _, false);
+        var editor = screen.Editor;
+
+        editor.PressAdd(SentenceText.IfWord);
+        screen.Run(2);
+
+        Assert.DoesNotContain(editor.Texts.PickSourceMods, Offered(editor));
     }
 
     /// <summary>A step that does something is not offered Mods.</summary>
@@ -272,10 +285,12 @@ public class ModsTests : IDisposable
         Assert.Equal(word, field.Text);
     }
 
-    static Screen OnSequence(string program, out Sequence sequence)
+    /// <summary>The editor on <paramref name="program" />'s first sequence, in developer mode where <paramref name="developer" />, as checking for a mod is offered only there.</summary>
+    static Screen OnSequence(string program, out Sequence sequence, bool developer = true)
     {
         var screen = Screen.Holding(program);
         var editor = screen.Editor;
+        editor.DeveloperMode = developer;
         var system = editor.Program.Systems[0];
         sequence = system.Sequences[0];
         system.Enabled = false;
