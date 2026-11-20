@@ -171,7 +171,7 @@ public class WaitTests
     static Simulation Pausing(string step, out AutomationSystem system, out Sequence sequence)
     {
         var sim = Simulation.Fresh();
-        var program = "sprocket 2 alpha 2\n\n"
+        var program = "sprocket 2\n\n"
             + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Pause\n{\n"
             + "    optional slot Pause expects duration = 2s\n"
             + "    optional slot Glow expects real = 1.5\n\n"

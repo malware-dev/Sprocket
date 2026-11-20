@@ -17,7 +17,7 @@ public class SettingTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 2 alpha 2\n\n";
+    const string Version = "sprocket 2\n\n";
 
     const string Head = "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n";
 
@@ -302,7 +302,7 @@ public class SettingTests
     [Theory]
     [InlineData("sprocket 1 alpha 28")]
     [InlineData("sprocket 1")]
-    [InlineData("sprocket 2 alpha 2")]
+    [InlineData("sprocket 2")]
     public void AGameTypeSharingATypesNameIsWrittenWithItsKind(string version)
     {
         // A rig stands behind the game's gateway and its kinds of object, which telling a block type by its name asks.
@@ -336,7 +336,7 @@ public class SettingTests
     /// </summary>
     [Theory]
     [InlineData("sprocket 1", "", "side")]
-    [InlineData("sprocket 2 alpha 2", "    optional slot mode expects type(side) = inside\n", "slot(side)")]
+    [InlineData("sprocket 2", "    optional slot mode expects type(side) = inside\n", "slot(side)")]
     public void ATypeAndASlotShareAName(string version, string setting, string slot)
     {
         var text = version + "\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"

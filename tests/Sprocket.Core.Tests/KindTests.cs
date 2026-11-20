@@ -13,7 +13,7 @@ public class KindTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Head = "sprocket 2 alpha 2\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n";
+    const string Head = "sprocket 2\n\nsystem blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n";
 
     readonly Values _store = new();
 

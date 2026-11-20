@@ -147,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (header == null && parser.Trouble.Length == 0)
                 refused = $"{(constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0]))}expected sprocket <format>.";
             else if (header != null && !IsCurrent(header) && !FormatUpgrades.From(header.Whole(0), DraftOf(header)))
-                refused = $"{trouble.Line(header)}written for {Format(header.Whole(0), DraftOf(header))}; this reads {Format(ScriptFormat.Version, ScriptFormat.Draft)}.";
+                refused = $"{trouble.Line(header)}written for {ScriptFormat.Spelled(header.Whole(0), DraftOf(header))}; this reads {ScriptFormat.Line}.";
 
             if (refused != null)
             {
@@ -227,16 +227,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         static int DraftOf(Statement statement)
         {
             var at = statement.Find(Keyword.Alpha);
-            return at < 0 ? FormatUpgrades.Finished : statement.Whole(at + 1);
+            return at < 0 ? ScriptFormat.Finished : statement.Whole(at + 1);
         }
 
         /// <summary>Whether the version line <paramref name="header" /> names the version and draft this build writes.</summary>
         static bool IsCurrent(Statement header) => header.Whole(0) == ScriptFormat.Version && DraftOf(header) == ScriptFormat.Draft;
-
-        /// <summary>Version <paramref name="version" /> as its line spells it, with <paramref name="draft" /> where it is unfinished.</summary>
-        static string Format(int version, int draft) =>
-            draft == FormatUpgrades.Finished ? $"sprocket {version}" : $"sprocket {version} alpha {draft}";
-
         /// <summary>A list of vectors of whole numbers as cells, or null where it is anything else.</summary>
         static Vector3I[] Cells(ValueRange items, Statement statement)
         {
