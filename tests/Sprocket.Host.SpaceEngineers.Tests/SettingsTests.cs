@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using VRage.Game.ModAPI.Ingame.Utilities;
 using Xunit;
 
@@ -56,19 +57,35 @@ public class SettingsTests
         Assert.Empty(none.Dismissed);
 
         var file = Ini("[Sprocket]\ndeveloperMode=true\n");
-        new PlayerSettings(true).WithSeen(3).WithDismissed("share").WithDismissed("import").WithDismissed("share").Write(file);
+        new PlayerSettings(true).WithSeen(new ModRelease(1, 3)).WithDismissed("share").WithDismissed("import").WithDismissed("share").Write(file);
 
         Assert.Contains("[Player]", file.ToString());
-        Assert.Contains("seen=3", file.ToString());
+        Assert.Contains("seen=1.3", file.ToString());
         Assert.Contains("dismissed=share,import", file.ToString());
 
         var read = PlayerSettings.From(Ini(file.ToString()));
-        Assert.Equal(3, read.Seen);
+        Assert.Equal(new ModRelease(1, 3), read.Seen);
         Assert.Equal(new[] { "share", "import" }, read.Dismissed);
         Assert.True(read.HasDismissed("import"));
         Assert.False(read.WithTips(false).HasDismissed("settings"));
-        Assert.Equal(3, read.WithTips(false).Seen);
+        Assert.Equal(new ModRelease(1, 3), read.WithTips(false).Seen);
         Assert.True(Settings.From(file.ToString(), null).DeveloperMode);
+    }
+
+    /// <summary>
+    /// A file of release 1 says its release as a whole number, which reads as that release of major version 1 and is
+    /// written back as a version; a release newer than it is still offered.
+    /// </summary>
+    [Fact]
+    public void AReleaseOneFilesWholeNumberReadsAsAVersion()
+    {
+        var read = PlayerSettings.From(Ini("[Player]\nseen=1\n"));
+        Assert.Equal(new ModRelease(1, 1), read.Seen);
+        Assert.True(new ModRelease(1, 2) > read.Seen!.Value);
+
+        var file = Ini("");
+        read.Write(file);
+        Assert.Contains("seen=1.1", file.ToString());
     }
 
     static MyIni Ini(string text)

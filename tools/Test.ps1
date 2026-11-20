@@ -5,7 +5,8 @@
 .DESCRIPTION
     The tests of one process run one at a time: the game reaches drawing and the world through statics, so two tests in
     one process would share a screen and a world (see Serially.cs in the test projects). Separate processes each have
-    their own, so a suite split by class into shards runs as fast as its largest shard.
+    their own, so a suite split by class into shards runs as fast as its largest shard. A class that alone takes longer
+    than one shard is split by its test methods.
 
     Builds first, with MdkBuildConfiguration=none so nothing is deployed, unless -NoBuild is given.
 
@@ -92,31 +93,68 @@ foreach ($folder in Get-ChildItem (Join-Path $root "tests") -Directory) {
         }
     }
 
-    $seconds = ($weight.Values | Measure-Object -Sum).Sum
-    $count = if ($times.Count -gt 0) { [Math]::Ceiling($seconds / $SecondsPerShard) } else { [Math]::Ceiling($tests.Count / $TestsPerShard) }
-    $count = [Math]::Min($MaxShards, [Math]::Max(1, $count))
-    $shards = @()
-    for ($i = 0; $i -lt $count; $i++) {
-        $shards += , @{ Classes = New-Object System.Collections.Generic.List[string]; Weight = 0 }
+    # A class is dealt whole, unless it alone takes longer than one shard: then each of its test methods is dealt on its
+    # own, weighed by what it took last time, or by an even part of its class.
+    $methods = @{}
+    foreach ($test in ($tests | Select-Object -Unique)) {
+        $class = $test.Substring(0, $test.LastIndexOf("."))
+        if (-not $methods.ContainsKey($class)) {
+            $methods[$class] = New-Object System.Collections.Generic.List[string]
+        }
+
+        $methods[$class].Add($test)
     }
 
-    foreach ($class in ($weight.Keys | Sort-Object { $weight[$_] } -Descending)) {
-        $lightest = $shards | Sort-Object { $_.Weight } | Select-Object -First 1
-        $lightest.Classes.Add($class)
-        $lightest.Weight += [Math]::Max(0.1, $weight[$class])
+    $units = @()
+    foreach ($class in $weight.Keys) {
+        $own = $methods[$class]
+        if ($weight[$class] -gt $SecondsPerShard -and $own -and $own.Count -gt 1) {
+            foreach ($method in $own) {
+                $taken = if ($times.ContainsKey($method)) { $times[$method] } else { $weight[$class] / $own.Count }
+                $units += , @{ Switch = "-method"; Name = $method; Weight = $taken }
+            }
+        } else {
+            $units += , @{ Switch = "-class"; Name = $class; Weight = $weight[$class] }
+        }
+    }
+
+    # The runner joins a -class filter and a -method filter as both having to hold, so classes and methods are dealt to
+    # shards of their own.
+    $byMethod = @($units | Where-Object { $_.Switch -eq "-method" })
+    $byClass = @($units | Where-Object { $_.Switch -eq "-class" })
+    $methodSeconds = ($byMethod | ForEach-Object { $_.Weight } | Measure-Object -Sum).Sum
+    $methodCount = if ($byMethod.Count -gt 0) { [Math]::Max(1, [Math]::Ceiling($methodSeconds / $SecondsPerShard)) } else { 0 }
+    $seconds = ($weight.Values | Measure-Object -Sum).Sum - $methodSeconds
+    $count = if ($times.Count -gt 0) { [Math]::Ceiling($seconds / $SecondsPerShard) } else { [Math]::Ceiling($tests.Count / $TestsPerShard) }
+    $count = [Math]::Min([Math]::Max(1, $MaxShards - $methodCount), [Math]::Max(1, $count))
+
+    $shards = @()
+    foreach ($group in @(@{ Units = $byClass; Count = $count }, @{ Units = $byMethod; Count = $methodCount })) {
+        $dealt = @()
+        for ($i = 0; $i -lt $group.Count; $i++) {
+            $dealt += , @{ Units = New-Object System.Collections.Generic.List[object]; Weight = 0 }
+        }
+
+        foreach ($unit in ($group.Units | Sort-Object { $_.Weight } -Descending)) {
+            $lightest = $dealt | Sort-Object { $_.Weight } | Select-Object -First 1
+            $lightest.Units.Add($unit)
+            $lightest.Weight += [Math]::Max(0.1, $unit.Weight)
+        }
+
+        $shards += $dealt
     }
 
     $n = 0
     foreach ($shard in $shards) {
-        if ($shard.Classes.Count -eq 0) {
+        if ($shard.Units.Count -eq 0) {
             continue
         }
 
         $n++
         $arguments = @("-noLogo", "-noColor")
-        foreach ($class in $shard.Classes) {
-            $arguments += "-class"
-            $arguments += "`"$class`""
+        foreach ($unit in $shard.Units) {
+            $arguments += $unit.Switch
+            $arguments += "`"$($unit.Name)`""
         }
 
         $out = Join-Path $work ("{0}.{1}.txt" -f $folder.Name, $n)
@@ -156,7 +194,7 @@ foreach ($run in $runs) {
     $failures += $text | Where-Object { $_ -match "\[FAIL\]" } | ForEach-Object { $_.Trim() }
 }
 
-# What each class took, kept beside the project's build for the next run to balance its shards by.
+# What each class and each test method took, kept beside the project's build for the next run to balance its shards by.
 $measured = @{}
 foreach ($run in $runs) {
     if (-not (Test-Path ($run.Output + ".xml"))) {
@@ -170,7 +208,10 @@ foreach ($run in $runs) {
     $taken = $measured[$run.Times]
     foreach ($test in ([xml](Get-Content ($run.Output + ".xml") -Raw)).SelectNodes("//test")) {
         $class = $test.GetAttribute("type")
-        $taken[$class] = $(if ($taken.ContainsKey($class)) { $taken[$class] } else { 0.0 }) + [double]$test.GetAttribute("time")
+        $method = $class + "." + $test.GetAttribute("method")
+        $time = [double]$test.GetAttribute("time")
+        $taken[$class] = $(if ($taken.ContainsKey($class)) { $taken[$class] } else { 0.0 }) + $time
+        $taken[$method] = $(if ($taken.ContainsKey($method)) { $taken[$method] } else { 0.0 }) + $time
     }
 }
 

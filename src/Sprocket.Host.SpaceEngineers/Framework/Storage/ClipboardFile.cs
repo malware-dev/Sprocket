@@ -3,7 +3,7 @@ using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>Copied text kept in a file, so a player can paste text in from outside the game and copy it back out.</summary>
+    /// <summary>Copied text stored in a file, so a player can paste text in from outside the game and copy it back out.</summary>
     /// <remarks>
     /// Read on every paste and written on every copy. A copy also reaches the computer's own clipboard where one is given;
     /// a paste comes only from the file, since a mod cannot read that clipboard.

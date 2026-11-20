@@ -377,7 +377,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
 
             if (part.IsSetting)
             {
-                SettingRows.Show(Editor.Texts, row, part, chosen, false);
+                SettingRows.Show(row, part, chosen, false);
                 Literal own;
                 return part.HasDefault || chosen != null && chosen.AnswerTo(part.Id, out own);
             }

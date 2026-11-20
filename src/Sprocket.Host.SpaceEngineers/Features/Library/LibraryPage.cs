@@ -19,7 +19,7 @@ using Lumel.Styling;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
-    /// <summary>The library: the blueprints on this construct, the backups of constructs that lost their automation, and the blueprints the player keeps for every world.</summary>
+    /// <summary>The library: the blueprints on this construct, the backups of constructs that lost their automation, and the blueprints the player saves for every world.</summary>
     /// <remarks>The list is made again only when the screen is rebuilt, by something done on this page or a change to the program.</remarks>
     public sealed partial class LibraryPage : EditorPage
     {
@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         LibraryListing _chosen;
         Guid _opening;
-        bool _openingKept;
+        bool _openingSaved;
 
         /// <summary>The library, in the editor <paramref name="editor" />, with the blueprint <paramref name="opening" /> chosen first, or the first one where that is empty.</summary>
         public LibraryPage(SprocketEditor editor, Guid opening) : base(editor)
@@ -81,10 +81,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public LibraryMoves Moves => _moves;
 
         /// <summary>Has the list, when it is next made, choose the blueprint in storage <paramref name="blueprint" /> and bring it into view.</summary>
-        public void ShowKept(Guid blueprint)
+        public void ShowSaved(Guid blueprint)
         {
             _opening = blueprint;
-            _openingKept = true;
+            _openingSaved = true;
         }
 
         /// <summary>Makes the list again, once the view is made; until then <see cref="ViewCreated" /> does.</summary>
@@ -144,7 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (here == 0)
                 Line(texts.LibraryNoneHere, Styles.InnerEmpty, held);
 
-            ListKept(texts);
+            ListSaved(texts);
             ListShared(texts);
             ListBackups(texts);
 
@@ -152,13 +152,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             for (var i = 0; i < _entries.Count && again == null; i++)
             {
                 var entry = _entries[i];
-                if (_opening != Guid.Empty ? entry.Identity == _opening && (!_openingKept || entry.Section == LibrarySection.Kept) : entry.Same(was))
+                if (_opening != Guid.Empty ? entry.Identity == _opening && (!_openingSaved || entry.Section == LibrarySection.Saved) : entry.Same(was))
                     again = entry;
             }
 
-            var reveals = _openingKept && again != null;
+            var reveals = _openingSaved && again != null;
             _opening = Guid.Empty;
-            _openingKept = false;
+            _openingSaved = false;
 
             Choose(again ?? (_entries.Count > 0 ? _entries[0] : null));
             Narrow();
@@ -166,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (!reveals)
                 return;
 
-            // A search that would hide what was just kept is cleared, so it shows.
+            // A search that would hide what was just saved is cleared, so it shows.
             var onConstruct = again.Section == LibrarySection.OnConstruct;
             if (!again.Row.IsVisible)
             {
@@ -178,7 +178,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>
-        /// Lists the backups, where this machine keeps them: the logic systems kept of each construct as it lost its automation,
+        /// Lists the backups, where this machine stores them: the logic systems stored of each construct as it lost its automation,
         /// under the construct's name, the latest loss first.
         /// </summary>
         /// <remarks>Drawn from what the index says of each, without reading a blueprint.</remarks>
@@ -240,7 +240,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Lists the blueprints in the library, by name, reading each to know it will read.</summary>
-        void ListKept(Texts texts)
+        void ListSaved(Texts texts)
         {
             var shelf = Editor.Shelf;
             if (shelf == null)
@@ -254,7 +254,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             foreach (var volume in _volumes)
             {
-                var entry = new LibraryListing { Section = LibrarySection.Kept, Identity = volume.Identity };
+                var entry = new LibraryListing { Section = LibrarySection.Saved, Identity = volume.Identity };
                 if (volume.State == LibraryEntryState.Read)
                 {
                     var trial = new Automation();
@@ -279,7 +279,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
                 if (entry.Read == null)
                 {
-                    row.Problem = Unkept(volume, texts);
+                    row.Problem = NoBlueprint(volume, texts);
                     row.Problems = 1;
                 }
                 else
@@ -496,7 +496,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Why <paramref name="volume" /> gave no blueprint.</summary>
-        static string Unkept(LibraryEntry volume, Texts texts)
+        static string NoBlueprint(LibraryEntry volume, Texts texts)
         {
             switch (volume.State)
             {

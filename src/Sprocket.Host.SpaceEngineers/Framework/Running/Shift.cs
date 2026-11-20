@@ -18,19 +18,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             Ran = int.MinValue;
         }
 
-        /// <summary>A shift whose place and standing on the rota are kept in <paramref name="kept" />, doing <paramref name="due" /> when it comes round.</summary>
-        public Shift(ShiftMemory kept, Action<int> due) : this(kept.Place, due)
+        /// <summary>A shift whose place and standing on the rota are stored in <paramref name="stored" />, doing <paramref name="due" /> when it comes round.</summary>
+        public Shift(ShiftMemory stored, Action<int> due) : this(stored.Place, due)
         {
-            Kept = kept;
+            Stored = stored;
         }
 
-        /// <summary>Where this stands on the rota, kept for the world's save as the rota moves it; null for a shift nothing remembers.</summary>
-        public ShiftMemory Kept { get; private set; }
+        /// <summary>Where this stands on the rota, stored for the world's save as the rota moves it; null for a shift nothing remembers.</summary>
+        public ShiftMemory Stored { get; private set; }
 
-        /// <summary>Stops keeping where this stands, so what it kept stays as it was whatever the rota does to it after.</summary>
+        /// <summary>Stops storing where this stands, so what it stored stays as it was whatever the rota does to it after.</summary>
         public void Forget()
         {
-            Kept = null;
+            Stored = null;
         }
 
         /// <summary>Where this sits in the turn, as <see cref="Rota.Join" /> takes it.</summary>

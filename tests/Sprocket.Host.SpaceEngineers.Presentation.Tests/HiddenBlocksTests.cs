@@ -100,7 +100,7 @@ public class HiddenBlocksTests
         Assert.True(Lists(screen, "Airlock Vent"), "the next picker does not list the hidden block");
     }
 
-    /// <summary>The eye's state is the player's own setting in this world, kept with the world.</summary>
+    /// <summary>The eye's state is the player's own setting in this world, stored with the world.</summary>
     [Fact]
     public void TheEyeIsThePlayersSettingInTheWorld()
     {

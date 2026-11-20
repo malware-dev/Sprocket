@@ -182,7 +182,7 @@ public class StateRuntimeTests
     /// <summary>What <paramref name="program" /> holds is written as the world saves and read back into <paramref name="text" />, as a world loads it.</summary>
     static (Automation Program, AutomationRunner Runner) Reloaded(Automation program, AutomationRunner runner, string text)
     {
-        program.Memory.Keeper = 42;
+        program.Memory.Storage = 42;
         runner.States.Settle();
         var packed = new Memories(new ProtoBinary()).Write(100, new List<ConstructMemory> { program.Memory });
 
@@ -197,7 +197,7 @@ public class StateRuntimeTests
 
     /// <summary>A value set is kept as the world saves and holds again as it loads, starting nothing as it does.</summary>
     [Fact]
-    public void AValueIsKeptWithTheWorld()
+    public void AValueIsStoredWithTheWorld()
     {
         var (program, runner) = Running(Saved);
         var system = program.Systems[0];

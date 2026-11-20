@@ -30,7 +30,7 @@ public class PlacementTests
         Assert.Equal(Category.Movement, kind.FindAction("Braking", ReachKind.Value)!.Category);
         Assert.Equal(Category.Movement, kind.FindAction("Power", ReachKind.Value)!.Category);
         Assert.Equal(Category.Movement, kind.FindAction("Speed Limit", ReachKind.Value)!.Category);
-        Assert.Equal(Category.Behaviour, kind.FindAction("ShareInertiaTensor", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Behavior, kind.FindAction("ShareInertiaTensor", ReachKind.Value)!.Category);
     }
 
     /// <summary>A timer's delay is set by the sequence that starts it, and its countdown is read beside start and stop.</summary>

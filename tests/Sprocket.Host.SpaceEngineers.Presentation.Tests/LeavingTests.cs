@@ -59,15 +59,15 @@ public class LeavingTests
     }
 
     /// <summary>
-    /// And keeping is pressing Done, including the values Done would have asked for.
+    /// And saving is pressing Done, including the values Done would have asked for.
     /// </summary>
     /// <remarks>
     /// The two are the same act arrived at from two directions, so an answer that did half of it -
-    /// applying the blocks and dropping the values - would be a third behaviour wearing the words
+    /// applying the blocks and dropping the values - would be a third behavior wearing the words
     /// of the second.
     /// </remarks>
     [Fact]
-    public void AndKeepingAsksForValuesTheSameWayDoneDoes()
+    public void AndSavingAsksForValuesTheSameWayDoneDoes()
     {
         var picker = Screen.Fresh((WantsValues + " 1348 276 clear " + Back).Split(' '));
 
@@ -76,8 +76,8 @@ public class LeavingTests
         picker.Scene.TakeDefault();
         picker.Run(2);
 
-        // Keeping is Done, and Done with nothing given says so and puts the caret in the field.
-        Assert.True(picker.Shows("Radius is missing."), "keeping did not ask for the value");
+        // Saving is Done, and Done with nothing given says so and puts the caret in the field.
+        Assert.True(picker.Shows("Radius is missing."), "saving did not ask for the value");
         Assert.True(picker.Scene.IsFilling, "the caret did not go to the field");
 
         picker.Do("type", "5");

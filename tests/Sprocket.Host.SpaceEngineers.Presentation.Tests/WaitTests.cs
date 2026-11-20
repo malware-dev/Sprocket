@@ -311,7 +311,7 @@ public class WaitTests
         Assert.Equal("1", Panel(screen).Box.Text);
     }
 
-    /// <summary>The unit chosen last is kept with the world, so a wait added after a reload starts in it.</summary>
+    /// <summary>The unit chosen last is stored with the world, so a wait added after a reload starts in it.</summary>
     [Fact]
     public void TheUnitChosenOutlivesAReload()
     {
@@ -335,7 +335,7 @@ public class WaitTests
 
     /// <summary>Done keeps the length and puts the panel away, and it is drawn as the button Enter presses.</summary>
     [Fact]
-    public void DoneKeepsTheLength()
+    public void DoneSavesTheLength()
     {
         var screen = Added();
         Panel(screen).Box.SelectAll();

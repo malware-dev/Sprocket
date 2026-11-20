@@ -24,7 +24,7 @@ public class RunFaultsTests
 
         var empty = new SequenceFault(SequenceProblem.EmptySlot, 0, BlockTrouble.None, "Interior Light");
         var stopped = new SequenceFault(SequenceProblem.MissingTarget, 1, BlockTrouble.None, "Inner Door");
-        var memory = new RunMemory { Found = KeptReasons.Kept(empty), Met = KeptReasons.Kept(stopped) };
+        var memory = new RunMemory { Found = StoredReasons.Stored(empty), Met = StoredReasons.Stored(stopped) };
         var faults = new RunFaults(sequence, system.First!, sim.Runner, memory, true);
         Assert.True(faults.Found.Waits);
 
@@ -44,7 +44,7 @@ public class RunFaultsTests
         var system = sim.Editor.Program.Systems[0];
 
         var stopped = new SequenceFault(SequenceProblem.MissingTarget, 1, BlockTrouble.None, "Inner Door");
-        var memory = new RunMemory { Met = KeptReasons.Kept(stopped) };
+        var memory = new RunMemory { Met = StoredReasons.Stored(stopped) };
         var faults = new RunFaults(system.Sequences[0], system.First!, sim.Runner, memory, true);
 
         faults.Checked(SequenceFault.None);

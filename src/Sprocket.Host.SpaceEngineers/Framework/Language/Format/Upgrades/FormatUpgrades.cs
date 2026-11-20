@@ -15,11 +15,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
         /// <summary>The oldest draft of version 1 a program can be written for and still be upgraded.</summary>
         public const int Oldest = 14;
 
-        /// <summary>The draft a finished version is read as: later than every draft of it.</summary>
-        public const int Finished = int.MaxValue;
-
-        /// <summary>The last draft of version 1 any build wrote.</summary>
-        public const int LastOfVersion1 = 28;
+        // The first and last draft of each version that a build wrote and this one reads, by version from 1.
+        static readonly int[] FirstDrafts = { Oldest, 1 };
+        static readonly int[] LastDrafts = { 28, 2 };
 
         // Each version's changes, in the order they arrived; immutable tables, read by every load. Version 1's are the
         // permanent upgrade into version 2.
@@ -50,10 +48,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
         /// <summary>Whether a program written for <paramref name="draft" /> of version <paramref name="version" /> is upgraded rather than refused.</summary>
         public static bool From(int version, int draft)
         {
-            if (version == 1)
-                return draft >= Oldest && (draft <= LastOfVersion1 || draft == Finished);
+            if (version < 1 || version > ScriptFormat.Version || version > LastDrafts.Length)
+                return false;
 
-            return version == ScriptFormat.Version && draft < ScriptFormat.Draft;
+            if (draft == ScriptFormat.Finished)
+                return version < ScriptFormat.Version;
+
+            return draft >= FirstDrafts[version - 1] && draft <= LastDrafts[version - 1]
+                && (version < ScriptFormat.Version || draft < ScriptFormat.Draft);
         }
 
         /// <summary>

@@ -33,17 +33,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Whether the block is listened to for getting where the action leads, which it announces.</summary>
         public bool Heard;
 
-        /// <summary>What is remembered of the block, kept in what the world saves while its act is waited on.</summary>
-        public ActMemory Kept;
+        /// <summary>What is remembered of the block, stored in what the world saves while its act is waited on.</summary>
+        public ActMemory Stored;
 
         /// <summary>What the action remembers of the block between looks, or null.</summary>
-        public ReaderMemory Seen => Kept.Seen;
+        public ReaderMemory Seen => Stored.Seen;
 
         /// <summary>Whether the block has said it is done with what it was told, short of what the action waits for.</summary>
         public bool Done
         {
-            get { return Kept.Done; }
-            set { Kept.Done = value; }
+            get { return Stored.Done; }
+            set { Stored.Done = value; }
         }
     }
 }

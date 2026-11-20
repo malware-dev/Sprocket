@@ -112,7 +112,7 @@ public class UnusedSlotTests
         screen.Editor.StepRows()[1].Deletes!.Execute();
         screen.Run(2);
 
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         screen.Editor.Push(new LogicSystemPage(screen.Editor, system));
         screen.Run(2);

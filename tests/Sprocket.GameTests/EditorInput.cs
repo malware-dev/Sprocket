@@ -159,6 +159,70 @@ namespace Sprocket.GameTests
             return false;
         }
 
+        /// <summary>Whether something showing in any open window of the editor's screen says <paramref name="said" />.</summary>
+        public bool Shows(string said)
+        {
+            return Find(said).HasValue;
+        }
+
+        /// <summary>
+        /// Presses with the pointer what says <paramref name="said" /> in any open window of the editor's screen, a bubble or a menu
+        /// among them, topmost first, and says whether there was one: its automation id, its words, its symbol or its header.
+        /// </summary>
+        public bool PressNamed(string said)
+        {
+            var at = Find(said);
+            if (!at.HasValue)
+                return false;
+
+            Rest(at.Value);
+            return Click();
+        }
+
+        /// <summary>Where, in the editor's units, the first showing element saying <paramref name="said" /> stands, topmost window first.</summary>
+        Vector2? Find(string said)
+        {
+            dynamic workspace = Workspace();
+            if (workspace == null)
+                return null;
+
+            int count = workspace.Windows.Count;
+            for (var i = count - 1; i >= 0; i--)
+            {
+                var at = Find((object)workspace.Windows[i], said);
+                if (at.HasValue)
+                    return at;
+            }
+
+            return null;
+        }
+
+        static Vector2? Find(object element, string said)
+        {
+            if (InGameEditor.Get(element, "IsVisible") is bool shown && !shown)
+                return null;
+
+            var words = InGameEditor.Get(element, "AutomationId") as string ?? InGameEditor.Get(element, "Text") as string
+                ?? InGameEditor.Get(element, "Symbol") as string ?? InGameEditor.Get(element, "Header") as string;
+            dynamic found = element;
+            if (words == said || words == "+ " + said)
+            {
+                RectangleF bounds = found.Bounds;
+                Vector2 middle = found.ToScreen(new Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
+                return middle;
+            }
+
+            int count = found.VisualChildCount;
+            for (var i = 0; i < count; i++)
+            {
+                var at = Find((object)found.GetVisualChild(i), said);
+                if (at.HasValue)
+                    return at;
+            }
+
+            return null;
+        }
+
         /// <summary><paramref name="element" /> and every element under it, in drawing order.</summary>
         static IEnumerable<object> Within(object element)
         {

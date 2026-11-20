@@ -31,14 +31,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 if (Ends(plain, "color") || Ends(plain, "texturecombo"))
                     return Category.Appearance;
 
-                return Category.Behaviour;
+                return Category.Behavior;
             }
             if (Starts(plain, "detect"))
-                return Category.Behaviour;
+                return Category.Behavior;
             if (Starts(plain, "transmitmessage") || Starts(plain, "message"))
                 return Category.Signals;
             if (Starts(plain, "flightmode"))
-                return Category.Behaviour;
+                return Category.Behavior;
             if (Starts(plain, "offensivecombat") || Starts(plain, "attackmode")
                 || Starts(plain, "targetpriority"))
                 return Category.Weapons;
@@ -287,7 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 case "evasivemaneuvers":
                 case "evasivemaneuverangle":
                 case "evasivemaneuverintervalrange":
-                    return Category.Behaviour;
+                    return Category.Behavior;
 
                 // Flying the construct.
                 case "override":

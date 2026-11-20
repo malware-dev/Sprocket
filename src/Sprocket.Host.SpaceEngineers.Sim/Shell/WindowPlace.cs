@@ -9,7 +9,7 @@ namespace Sprocket.Sim.Shell
     /// Remembers where the window was and puts it back there next time.
     /// </summary>
     /// <remarks>
-    /// Kept beside the extracted content in <c>%LOCALAPPDATA%\Sprocket</c> rather than in the repository,
+    /// Stored beside the extracted content in <c>%LOCALAPPDATA%\Sprocket</c> rather than in the repository,
     /// for the same reason that is: where somebody likes their window is a property of their desk, not of
     /// the project, and two people working on this would only fight over the file.
     /// <para>
@@ -46,7 +46,7 @@ namespace Sprocket.Sim.Shell
 
             if (OnAScreen(saved[0], saved[1], saved[2], saved[3]))
             {
-                // Manual placement, or the window manager centres it and the position is overwritten by
+                // Manual placement, or the window manager centers it and the position is overwritten by
                 // the thing that was supposed to be the fallback.
                 window.WindowStartupLocation = WindowStartupLocation.Manual;
                 window.Left = saved[0];

@@ -433,7 +433,7 @@ public class EditorTests
 
     /// <summary>Done keeps what was just made, left untouched or not; only Back takes it back.</summary>
     [Fact]
-    public void DoneKeepsWhatWasJustMade()
+    public void DoneSavesWhatWasJustMade()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -1008,7 +1008,7 @@ public class EditorTests
         var system = ship.Automation.Systems[0];
         var sequence = ship.Automation.Sequences[0];
 
-        editor.BackKeeping();
+        editor.BackSaving();
         ship.Tick();
 
         // On its own screen: renameable, the same way a sequence is.
@@ -1022,7 +1022,7 @@ public class EditorTests
         ship.Tick();
         Assert.True(sequence.CanRun(sequence.System.First));
 
-        editor.BackKeeping();
+        editor.BackSaving();
         ship.Tick();
 
         // On the ship's list: the system's own heading carries its switch.
@@ -1243,12 +1243,12 @@ public class EditorTests
         var ship = Build();
         StartOnTheButton(ship.Editor);
 
-        ship.Editor.BackKeeping();
+        ship.Editor.BackSaving();
 
         Assert.Equal("Airlock", ship.Editor.Screen.Title());
         Assert.True(ship.Editor.Screen.CanGoBack);
 
-        ship.Editor.BackKeeping();
+        ship.Editor.BackSaving();
         Assert.Equal("Automation for Test Rig", ship.Editor.Screen.Title());
     }
 
@@ -1572,12 +1572,12 @@ public class EditorTests
         editor.NewSystem("Airlock");
         editor.PressStart("when");
         editor.PressBlock("Airlock Button");
-        editor.BackKeeping();
+        editor.BackSaving();
 
         Assert.Empty(ship.Automation.Sequences);
 
         // And one more back off the system itself.
-        editor.BackKeeping();
+        editor.BackSaving();
         Assert.Equal("Automation for Test Rig", editor.Screen.Title());
     }
 
@@ -1602,7 +1602,7 @@ public class EditorTests
         editor.PressChoice("Discard them");
         Assert.Equal("Airlock", editor.Screen.Title());
 
-        editor.BackKeeping();
+        editor.BackSaving();
         Assert.Equal("Automation for Test Rig", editor.Screen.Title());
     }
 
@@ -1639,7 +1639,7 @@ public class EditorTests
 
         // What starts it is a row of its own, naming the sequence back, and the name it was just
         // given did not touch it.
-        editor.BackKeeping();
+        editor.BackSaving();
         ship.Tick();
 
         Assert.Equal("Airlock", editor.Screen.Title());

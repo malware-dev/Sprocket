@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Slots;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
@@ -28,7 +29,7 @@ public class SettingRowTests
 
         Assert.Equal(Symbols.Setting, row.Mark);
         Assert.Equal("Speed", row.NameButton.AutomationId);
-        Assert.Equal("1.5 by default", row.ValueChip.Text);
+        Assert.Equal("1.5", row.ValueChip.Text);
         Assert.False(row.ValueChip.IsEmpty);
     }
 
@@ -66,7 +67,7 @@ public class SettingRowTests
         screen.Editor.Undo(System(screen), System(screen));
         screen.Run(2);
         Assert.False(Shown(screen).AnswerTo("Speed", out _));
-        Assert.Equal("1.5 by default", Row(screen, "Speed").ValueChip.Text);
+        Assert.Equal("1.5", Row(screen, "Speed").ValueChip.Text);
     }
 
     /// <summary>"Use the default" takes the installation's own value away, and is offered only where the setting has a default.</summary>
@@ -88,7 +89,7 @@ public class SettingRowTests
         screen.Run(2);
 
         Assert.False(Shown(screen).AnswerTo("Speed", out _));
-        Assert.Equal("1.5 by default", Row(screen, "Speed").ValueChip.Text);
+        Assert.Equal("1.5", Row(screen, "Speed").ValueChip.Text);
 
         Row(screen, "Load").Fills!.Execute();
         screen.Run(2);
@@ -107,7 +108,7 @@ public class SettingRowTests
         screen.Run(2);
 
         var row = Within<PartRow>(screen).Single(part => part.Name == "Speed");
-        Assert.Equal("1.5 by default", row.ValueChip.Text);
+        Assert.Equal("1.5", row.ValueChip.Text);
         Assert.Null(row.NameButton.Command);
         row.Fills!.Execute();
         screen.Run(2);
@@ -254,6 +255,75 @@ public class SettingRowTests
         Assert.Null(System(screen).FindPart("Made"));
     }
 
+    /// <summary>
+    /// A percentage is made from the panel as a number edited as a percentage: its default set with a slider from 0 to 100, and
+    /// its row saying it with its unit.
+    /// </summary>
+    [Fact]
+    public void APercentageIsMadeFromThePanelAndSaidWithItsUnit()
+    {
+        var screen = Panel();
+        var asking = Add(screen);
+        Choose(screen, asking, screen.Editor.Texts.SettingKindPercent);
+        asking = Page(screen).Asking!;
+        Assert.IsType<SliderField>(asking.Form.Fields[2]);
+        asking.Form.Fields[0].Text = "Opening";
+        asking.Form.Fields[2].Text = "50";
+        asking.Done();
+        screen.Run(2);
+
+        var part = System(screen).FindPart("Opening")!;
+        Assert.Equal("real", part.Setting);
+        Assert.Equal(SettingEditor.Percent.Name, part.Editor);
+        Assert.Equal("50 %", Row(screen, "Opening").ValueChip.Text);
+    }
+
+    /// <summary>A percentage's own value for this installation is given with a slider, and its row says it with its unit.</summary>
+    [Fact]
+    public void APercentagesOwnValueIsGivenWithASlider()
+    {
+        var opening = Real("Opening", 50);
+        opening.Editor = SettingEditor.Percent.Name;
+        var screen = Panel(opening);
+        Assert.Equal("50 %", Row(screen, "Opening").ValueChip.Text);
+
+        Row(screen, "Opening").Fills!.Execute();
+        screen.Run(2);
+        var asking = Page(screen).Asking!;
+        Assert.IsType<SliderField>(asking.Form.Fields[0]);
+        asking.Form.Fields[0].Text = "75";
+        asking.Done();
+        screen.Run(2);
+
+        Assert.True(Shown(screen).AnswerTo("Opening", out var own));
+        Assert.Equal(75, own.Number);
+        Assert.Equal("75 %", Row(screen, "Opening").ValueChip.Text);
+    }
+
+    /// <summary>A setting made for a value that is a percentage, such as how far a door is open, is a percentage too.</summary>
+    [Fact]
+    public void ASettingMadeForAPercentageIsAPercentage()
+    {
+        var screen = Panel();
+        var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door").Kind;
+        var open = door.Actions.First(action => action.Id == "how_far_open");
+        var compared = ComparisonQuestion.Fields(open, door.Events)[1];
+        var shaped = SettingEditor.Of(compared);
+        Assert.Same(SettingEditor.Percent, shaped);
+
+        Part? made = null;
+        var asking = SettingPanel.New(screen.Editor, System(screen), shaped!.Name, Literal.Of(25.0), () => Page(screen).View!, (part, _) => made = part, () => { });
+        screen.Run(2);
+        Assert.IsType<SliderField>(asking.Form.Fields[2]);
+        asking.Form.Fields[0].Text = "Opening";
+        asking.Done();
+        screen.Run(2);
+
+        Assert.NotNull(made);
+        Assert.Equal("real", made!.Setting);
+        Assert.Equal(SettingEditor.Percent.Name, made.Editor);
+    }
+
     /// <summary>Leaving the default empty makes a new setting required.</summary>
     [Fact]
     public void AnEmptyDefaultMakesANewSettingRequired()
@@ -292,7 +362,7 @@ public class SettingRowTests
         Assert.Equal("outside", part.Default.Said);
     }
 
-    /// <summary>"New state type..." makes a type for the setting and chooses it; the type and the setting come as one change.</summary>
+    /// <summary>"New state type…" makes a type for the setting and chooses it; the type and the setting come as one change.</summary>
     [Fact]
     public void ANewStateTypeIsMadeFromHolds()
     {
@@ -437,7 +507,7 @@ public class SettingRowTests
 
     static IEnumerable<T> Within<T>(Screen screen) where T : Element => screen.Editor.Current!.View!.Within().OfType<T>();
 
-    /// <summary>Presses "a setting..." in the menu under the slots, and answers the panel it opens.</summary>
+    /// <summary>Presses "a setting" in the menu under the slots, and answers the panel it opens.</summary>
     static ValuesQuestion Add(Screen screen)
     {
         var add = Page(screen).View!.Within().OfType<PlusMenu>().SelectMany(menu => menu.Choices).First(choice => choice.Text == screen.Editor.Texts.SlotAddSetting);

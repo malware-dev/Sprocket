@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         Arguments = shared.Arguments,
                         Bound = shared.Bound,
                         Order = entity.Prepare(action, shared.Bound, shared.Arguments),
-                        Kept = Kept(step, compiled.Acts.Count, action.OwnAction != null),
+                        Stored = StoredAct(step, compiled.Acts.Count, action.OwnAction != null),
                         Heard = action.ArrivalAnnounced && Listen(entity)
                     });
                 }
@@ -384,17 +384,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             foreach (var acted in compiled.Acts)
             {
-                if (!_memory.Acts.Contains(acted.Kept))
-                    _memory.Acts.Add(acted.Kept);
+                if (!_memory.Acts.Contains(acted.Stored))
+                    _memory.Acts.Add(acted.Stored);
             }
         }
 
         /// <summary>
-        /// What is remembered of the block at <paramref name="index" /> of the act at <paramref name="step" />: what the world kept
+        /// What is remembered of the block at <paramref name="index" /> of the act at <paramref name="step" />: what the world stored
         /// where this is the first working out since a load, and a fresh one otherwise, remembering what the block does where
         /// <paramref name="remembers" /> says.
         /// </summary>
-        ActMemory Kept(int step, int index, bool remembers)
+        ActMemory StoredAct(int step, int index, bool remembers)
         {
             for (var i = 0; _generation == 1 && i < _memory.Acts.Count; i++)
             {

@@ -108,11 +108,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>Raised with a block type whose kinds have been forgotten, so a construct holding blocks of it reads them again.</summary>
         public event Action<string> Redescribed;
 
-        /// <summary>Returns true if <paramref name="kind" /> is the one kept for its block type, false where it has been forgotten since.</summary>
+        /// <summary>Returns true if <paramref name="kind" /> is the one held for its block type, false where it has been forgotten since.</summary>
         public bool IsCurrent(EntityKind kind)
         {
-            EntityKind kept;
-            return _kinds.TryGetValue(kind.Id, out kept) && kept == kind;
+            EntityKind held;
+            return _kinds.TryGetValue(kind.Id, out held) && held == kind;
         }
 
         /// <summary>Forgets the kinds of every block type where any mod supports Sprocket, so they are described again in the language now chosen.</summary>

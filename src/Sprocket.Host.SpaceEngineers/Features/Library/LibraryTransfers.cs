@@ -14,7 +14,7 @@ using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
-    /// <summary>Moving logic systems between the construct and the library: putting blueprints on, taking them off, keeping and renewing them.</summary>
+    /// <summary>Moving logic systems between the construct and the library: putting blueprints on, taking them off, saving and renewing them.</summary>
     public sealed class LibraryTransfers
     {
         readonly SprocketEditor _editor;
@@ -28,23 +28,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>
-        /// Puts the blueprint <paramref name="system" /> in the library as it is now, promoting the backup that keeps it as it is,
+        /// Puts the blueprint <paramref name="system" /> in the library as it is now, promoting the backup that stores it as it is,
         /// where there is one; and has the library, where it is showing, choose it and bring it into view.
         /// </summary>
         public void Shelve(AutomationSystem system)
         {
             _editor.Stamp(true);
-            var twin = _editor.Backups?.Keeping(system, _editor.World.Values);
-            var kept = _editor.Shelf.Keep(system);
-            _editor.Sharing?.Renew(kept.Identity, kept.Text);
+            var twin = _editor.Backups?.Stored(system, _editor.World.Values);
+            var saved = _editor.Shelf.Save(system);
+            _editor.Sharing?.Renew(saved.Identity, saved.Text);
             if (twin != null)
                 _editor.Backups.Forget(twin);
 
-            (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
+            (_editor.Current as LibraryPage)?.ShowSaved(saved.Identity);
             _editor.Invalidate();
         }
 
-        /// <summary>Calls <paramref name="blueprint" />, read from the library's <paramref name="volume" />, <paramref name="name" />, and keeps it there so.</summary>
+        /// <summary>Calls <paramref name="blueprint" />, read from the library's <paramref name="volume" />, <paramref name="name" />, and saves it there so.</summary>
         public void Rename(AutomationSystem blueprint, LibraryEntry volume, string name)
         {
             var wanted = NameRules.Clean(name);
@@ -53,9 +53,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             blueprint.Name = wanted;
             blueprint.Origin = volume.Identity;
-            var kept = _editor.Shelf.Keep(blueprint);
-            _editor.Sharing?.Renew(kept.Identity, kept.Text);
-            (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
+            var saved = _editor.Shelf.Save(blueprint);
+            _editor.Sharing?.Renew(saved.Identity, saved.Text);
+            (_editor.Current as LibraryPage)?.ShowSaved(saved.Identity);
             _editor.Invalidate();
         }
 
@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             });
         }
 
-        /// <summary>Asks before forgetting <paramref name="backup" />, a logic system kept of a construct that lost its automation.</summary>
+        /// <summary>Asks before forgetting <paramref name="backup" />, a logic system stored of a construct that lost its automation.</summary>
         public void ForgetBackup(Backup backup)
         {
             _editor.Deleting(_editor.Texts.LibraryForgetBackupQuestion, backup.Name, _editor.Texts.DeleteFinal, null, delegate
@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>
-        /// Puts the logic system <paramref name="backed" />, as a backup keeps it, back on the construct with its own identity
+        /// Puts the logic system <paramref name="backed" />, as a backup stores it, back on the construct with its own identity
         /// and its link, with its first installation, answering what was wrong with it, or empty.
         /// </summary>
         /// <remarks>Refused where a logic system of its identity is here already.</remarks>
@@ -174,15 +174,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Adds a copy of the blueprint of <paramref name="shared" /> to the player's library, with an identity of its own and its maker's name.</summary>
-        public void KeepCopy(ShareLine shared)
+        public void SaveCopy(ShareLine shared)
         {
             AutomationSystem system;
             if (_editor.Shelf == null || ProgramReader.Lone(shared.Blueprint, _editor.World.Values, out system).Length > 0)
                 return;
 
             system.Identity = Guid.NewGuid();
-            var kept = _editor.Shelf.Keep(system);
-            (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
+            var saved = _editor.Shelf.Save(system);
+            (_editor.Current as LibraryPage)?.ShowSaved(saved.Identity);
             _editor.Invalidate();
         }
 
@@ -217,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 return;
             }
 
-            // A blueprint the library has as new or newer is left as it is; the rest are added or update the one kept.
+            // A blueprint the library has as new or newer is left as it is; the rest are added or update the one saved.
             // The names go in as arguments, so a name is never read as markup.
             var arguments = new Arguments();
             var wanted = new List<AutomationSystem>();
@@ -247,18 +247,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             }
 
             _editor.Ask(texts.LibraryImportQuestion + "\n" + lines, arguments);
-            _editor.Answer(texts.LibraryImportConfirm, () => Keep(wanted), true);
+            _editor.Answer(texts.LibraryImportConfirm, () => SaveImported(wanted), true);
             _editor.Answer(texts.LibraryImportKeep, () => { });
         }
 
-        void Keep(List<AutomationSystem> systems)
+        void SaveImported(List<AutomationSystem> systems)
         {
-            LibraryEntry kept = null;
+            LibraryEntry saved = null;
             foreach (var system in systems)
-                kept = _editor.Shelf.Import(system);
+                saved = _editor.Shelf.Import(system);
 
-            if (kept != null)
-                (_editor.Current as LibraryPage)?.ShowKept(kept.Identity);
+            if (saved != null)
+                (_editor.Current as LibraryPage)?.ShowSaved(saved.Identity);
             _editor.Invalidate();
         }
 
@@ -283,7 +283,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             }
         }
 
-        /// <summary>Whether the library keeps the blueprint the logic system <paramref name="system" /> is linked to.</summary>
+        /// <summary>Whether the library stores the blueprint the logic system <paramref name="system" /> is linked to.</summary>
         public bool Stored(AutomationSystem system)
         {
             return _editor.Shelf != null && system.HasOrigin && _editor.Shelf.Find(system.Origin) != null;
@@ -399,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public void AskShelve(AutomationSystem system)
         {
             var texts = _editor.Texts;
-            Confirm(texts.LibraryMakeQuestion, texts.LibraryMakeKept, system.Name, texts.LibraryMakeConfirm, texts.LibraryMakeLeave, () => Shelve(system));
+            Confirm(texts.LibraryMakeQuestion, texts.LibraryMakeSaved, system.Name, texts.LibraryMakeConfirm, texts.LibraryMakeLeave, () => Shelve(system));
         }
 
         /// <summary>Asks before <paramref name="copy" /> makes a copy of the logic system called <paramref name="named" />; leaving it is the answer Enter takes.</summary>
@@ -425,7 +425,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>
         /// Promotes the backup whose logic system reads as <paramref name="backed" /> to a blueprint in the library, and it is a
         /// backup no longer: where the blueprint it is linked to is there, after asking whether it updates that blueprint or is
-        /// kept as a new one; leaving both is the answer Enter takes.
+        /// saved as a new one; leaving both is the answer Enter takes.
         /// </summary>
         public void PromoteBackup(AutomationSystem backed)
         {
@@ -440,10 +440,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var arguments = new Arguments();
             arguments.Set("named", backed.Name);
 
-            _editor.Ask($"{_editor.Texts.LibraryKeepBackupQuestion}\n\n**{{named}}**\n\n{_editor.Texts.LibraryKeepBackupLinked}", arguments);
-            _editor.Answer(_editor.Texts.LibraryKeepBackupLeave, () => { }, true);
-            _editor.Answer(_editor.Texts.LibraryKeepBackupUpdate, () => Shelve(backed));
-            _editor.Answer(_editor.Texts.LibraryKeepBackupNew, delegate
+            _editor.Ask($"{_editor.Texts.LibrarySaveBackupQuestion}\n\n**{{named}}**\n\n{_editor.Texts.LibrarySaveBackupLinked}", arguments);
+            _editor.Answer(_editor.Texts.LibrarySaveBackupLeave, () => { }, true);
+            _editor.Answer(_editor.Texts.LibrarySaveBackupUpdate, () => Shelve(backed));
+            _editor.Answer(_editor.Texts.LibrarySaveBackupNew, delegate
             {
                 backed.Origin = Guid.Empty;
                 backed.OriginChanged = null;
@@ -555,7 +555,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             _editor.Stamp(true);
             if (update && !_editor.Shelf.Holds(system))
-                _editor.Shelf.Keep(system);
+                _editor.Shelf.Save(system);
 
             _editor.Do(new TakeSystemOut(system, ChangeKind.TakeOffSystem));
             _editor.Gone(system);

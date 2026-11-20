@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             var texts = _editor.Texts;
             var board = _editor.Sharing;
-            var volume = chosen.Section == LibrarySection.Kept ? _editor.Shelf?.Find(chosen.Identity) : null;
+            var volume = chosen.Section == LibrarySection.Saved ? _editor.Shelf?.Find(chosen.Identity) : null;
             var mine = volume == null || board == null ? null : board.MineOf(volume.Identity);
             var line = chosen.Share;
 
@@ -125,19 +125,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (mine != null)
                 _reach.Text = Reach(texts, mine);
 
-            _keep.IsVisible = line != null && _editor.Shelf != null && chosen.Read != null;
+            _saveCopy.IsVisible = line != null && _editor.Shelf != null && chosen.Read != null;
             _block.IsVisible = line != null;
             if (line != null)
             {
-                _keep.Text = texts.LibraryKeepCopy;
-                _keep.Tip = CodexTip.For(null, Template.Fill(texts.LibraryKeepCopyAbout, "sharer", line.SharerName));
-                _keep.Command = _editor.Act(CommandKind.Shelve, () => _editor.Holdings.KeepCopy(line));
+                _saveCopy.Text = texts.LibrarySaveCopy;
+                _saveCopy.Tip = CodexTip.For(null, Template.Fill(texts.LibrarySaveCopyAbout, "sharer", line.SharerName));
+                _saveCopy.Command = _editor.Act(CommandKind.Shelve, () => _editor.Holdings.SaveCopy(line));
                 _block.Text = Template.Fill(texts.LibraryBlock, "name", line.SharerName);
                 _block.Tip = CodexTip.For(null, Template.Fill(texts.LibraryBlockAbout, "name", line.SharerName));
                 _block.Command = _editor.Act(CommandKind.Expand, () => board?.Block(line.Sharer));
             }
 
-            _shares.IsVisible = _withdraw.IsVisible || _keep.IsVisible || _block.IsVisible;
+            _shares.IsVisible = _withdraw.IsVisible || _saveCopy.IsVisible || _block.IsVisible;
             _acting.IsVisible = _shares.IsVisible || _reach.IsVisible;
         }
 

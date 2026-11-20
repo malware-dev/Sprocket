@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 {
     /// <summary>What a block says is stopping it.</summary>
-    /// <remarks>Persisted: each value's number is kept in saves, so a number is never changed or given to another value.</remarks>
+    /// <remarks>Persisted: each value's number is stored in saves, so a number is never changed or given to another value.</remarks>
     public enum Cause
     {
         /// <summary>Nothing.</summary>

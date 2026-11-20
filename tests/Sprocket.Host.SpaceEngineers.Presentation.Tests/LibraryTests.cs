@@ -86,7 +86,7 @@ public class LibraryTests
         Assert.True(folder.Has("backup-1.cog"));
     }
 
-    /// <summary>Backups taken before the index was read are kept for the session alone, which is how a machine that never reads them keeps them.</summary>
+    /// <summary>Backups taken before the index was read are stored for the session alone, which is how a machine that never reads them keeps them.</summary>
     [Fact]
     public void BackupsAreWrittenOnlyOnceTheIndexIsRead()
     {
@@ -99,7 +99,7 @@ public class LibraryTests
         Assert.Empty(folder.Files);
     }
 
-    /// <summary>Each loss of a changed logic system is kept on its own: lost again after a change, it is kept again, in a file of its own, beside the earlier backup.</summary>
+    /// <summary>Each loss of a changed logic system is stored on its own: lost again after a change, it is stored again, in a file of its own, beside the earlier backup.</summary>
     [Fact]
     public void EachLossIsKeptOnItsOwn()
     {
@@ -205,13 +205,13 @@ public class LibraryTests
         Assert.False(kept.Shows("INSTALLATIONS"), "storage listed the construct's installations");
     }
 
-    /// <summary>A blueprint renamed in the library is kept under its new name, by the same identity.</summary>
+    /// <summary>A blueprint renamed in the library is saved under its new name, by the same identity.</summary>
     [Fact]
     public void ABlueprintIsRenamedInTheLibrary()
     {
         var rig = Blueprinted();
         rig.Editor.Stamp(true);
-        var volume = rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        var volume = rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         var identity = volume.Identity;
         var read = new Automation();
         Assert.Equal("", ProgramReader.Load(volume.Text, read, new Values()));
@@ -229,7 +229,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         rig.Editor.Stamp(true);
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
 
         rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
 
@@ -241,12 +241,12 @@ public class LibraryTests
     public void ALostConstructsBackupHoldsOnlyWhatTheLibraryLacks()
     {
         var rig = Blueprinted();
-        var kept = rig.Editor.Program.Systems[0];
+        var saved = rig.Editor.Program.Systems[0];
         rig.Editor.NewSystem("Hangar");
         rig.Editor.GoToRoot();
         rig.Tick();
         rig.Editor.Stamp(true);
-        rig.Shelf.Keep(kept);
+        rig.Shelf.Save(saved);
 
         rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
 
@@ -323,7 +323,7 @@ public class LibraryTests
     }
 
     /// <summary>
-    /// A lost construct's logic system put on this construct arrives as it was kept, with one installation whose slots are
+    /// A lost construct's logic system put on this construct arrives as it was saved, with one installation whose slots are
     /// empty, switched off until they are filled.
     /// </summary>
     [Fact]
@@ -413,10 +413,10 @@ public class LibraryTests
 
         ToLibrary(page).Command!.Execute();
         rig.Tick();
-        Assert.Contains(rig.Texts.LibraryKeepBackupLinked, rig.Editor.Question());
+        Assert.Contains(rig.Texts.LibrarySaveBackupLinked, rig.Editor.Question());
         Assert.Equal("Airlock Mk 0", Assert.Single(rig.Shelf.All).Name);
 
-        rig.Editor.PressChoice(rig.Texts.LibraryKeepBackupUpdate);
+        rig.Editor.PressChoice(rig.Texts.LibrarySaveBackupUpdate);
         rig.Tick();
 
         var volume = Assert.Single(rig.Shelf.All);
@@ -425,16 +425,16 @@ public class LibraryTests
         Assert.Empty(rig.Backups.All);
     }
 
-    /// <summary>A backup linked to a blueprint in the library is kept beside it as a new blueprint, when asked to.</summary>
+    /// <summary>A backup linked to a blueprint in the library is stored beside it as a new blueprint, when asked to.</summary>
     [Fact]
-    public void ALostConstructsLogicSystemIsKeptAsANewBlueprint()
+    public void ALostConstructsLogicSystemIsSavedAsANewBlueprint()
     {
         var rig = WithLost(out var lost, out var page, Linked);
         ChooseLost(rig, page);
 
         ToLibrary(page).Command!.Execute();
         rig.Tick();
-        rig.Editor.PressChoice(rig.Texts.LibraryKeepBackupNew);
+        rig.Editor.PressChoice(rig.Texts.LibrarySaveBackupNew);
         rig.Tick();
 
         Assert.Equal(2, rig.Shelf.All.Count);
@@ -482,7 +482,7 @@ public class LibraryTests
 
     /// <summary>
     /// A backup put back on and unchanged since is promoted with it: the arrow into the library from this construct makes the
-    /// blueprint, and the backup, which kept the same logic system as it is, is gone.
+    /// blueprint, and the backup, which stored the same logic system as it is, is gone.
     /// </summary>
     [Fact]
     public void ARestoredUnchangedLogicSystemPromotesItsBackup()
@@ -535,7 +535,7 @@ public class LibraryTests
         var rig = Blueprinted();
         var elsewhere = Simulation.Fresh();
         elsewhere.Editor.NewButtonSystem("Hangar");
-        rig.Shelf.Keep(elsewhere.Editor.Program.Systems[0]);
+        rig.Shelf.Save(elsewhere.Editor.Program.Systems[0]);
         var page = Reopened(rig);
 
         Choose(rig, page, "Hangar");
@@ -549,7 +549,7 @@ public class LibraryTests
     public void TheArrowOntoThisConstructSaysALogicSystemIsAlreadyHere()
     {
         var rig = Blueprinted();
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         var page = Reopened(rig);
 
         Choose(rig, page, "Airlock");
@@ -564,7 +564,7 @@ public class LibraryTests
     public void CopyIsOfferedOnlyForThisConstruct()
     {
         var rig = Blueprinted();
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         var page = Reopened(rig);
 
         Choose(rig, page, "Airlock");
@@ -655,7 +655,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         rig.Editor.Program.Systems[0].Changed = Saved;
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         rig.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
 
         rig.Editor.GoToRoot();
@@ -687,7 +687,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         rig.Editor.Program.Systems[0].Changed = Saved;
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         rig.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
         rig.Editor.GoToRoot();
         rig.Editor.OpenLibrary();
@@ -708,7 +708,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         rig.Editor.Program.Systems[0].Changed = Saved;
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         rig.Backups.Take("Lost Ship", Saved, new[] { Other() }, new Values());
         var page = Reopened(rig);
 
@@ -858,7 +858,7 @@ public class LibraryTests
         var rig = Blueprinted();
         var system = rig.Editor.Program.Systems[0];
         system.Changed = Saved;
-        rig.Shelf.Keep(system);
+        rig.Shelf.Save(system);
 
         system.Name = "Airlock Mk II";
         system.Changed = Saved.AddDays(1);
@@ -891,7 +891,7 @@ public class LibraryTests
         Assert.StartsWith("# Blueprints for the automation library:", made);
         Assert.Empty(rig.Shelf.All);
 
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         Assert.Equal(made + "sprocket-bp-Airlock.cog\n", rig.Folder.Files["sprocket-bp.index"]);
         Assert.Single(rig.Shelf.All);
     }
@@ -903,7 +903,7 @@ public class LibraryTests
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
         blueprint.Changed = Saved;
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
         Assert.NotEqual(blueprint.Identity, blueprint.Origin);
         Assert.Equal(Saved, blueprint.OriginChanged);
 
@@ -932,7 +932,7 @@ public class LibraryTests
     public void ALineThatGivesNoBlueprintSaysWhy(string line, LibraryEntryState state)
     {
         var rig = Blueprinted();
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         rig.Folder.Write("junk.doot", "not a blueprint");
         rig.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n" + line + "\n");
 
@@ -977,7 +977,7 @@ public class LibraryTests
         rig.Editor.Shelf = rig.Shelf;
 
         blueprint.Name = "Airlock Mk II";
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
 
         Assert.Equal("# from a friend\r\n\r\n  stoopid.doot  \r\n", rig.Folder.Files["sprocket-bp.index"]);
         Assert.Contains("Airlock Mk II", rig.Folder.Files["stoopid.doot"]);
@@ -990,10 +990,10 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
 
         blueprint.Name = "Airlock Mk II";
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
 
         Assert.False(rig.Folder.Has("sprocket-bp-Airlock.cog"));
         Assert.True(rig.Folder.Has("sprocket-bp-Airlock Mk II.cog"));
@@ -1009,7 +1009,7 @@ public class LibraryTests
         blueprint.Name = "Air: lock?";
         rig.Folder.Write("sprocket-bp-Air_ lock_.cog", "somebody else's");
 
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
 
         Assert.Equal("sprocket-bp-Air_ lock_ 2.cog", Assert.Single(rig.Shelf.All).File);
         Assert.Equal("somebody else's", rig.Folder.Files["sprocket-bp-Air_ lock_.cog"]);
@@ -1020,7 +1020,7 @@ public class LibraryTests
     public void ForgettingDeletesTheFileOnlyWhereItHeldABlueprint()
     {
         var rig = Blueprinted();
-        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Shelf.Save(rig.Editor.Program.Systems[0]);
         rig.Folder.Write("DefenseShields.cfg", "[shields]");
         rig.Folder.Write("sprocket-bp.index", "# mine\nsprocket-bp-Airlock.cog\nDefenseShields.cfg\n");
         rig.Shelf.Read();
@@ -1034,7 +1034,7 @@ public class LibraryTests
     }
 
     /// <summary>
-    /// A blueprint put on a construct from the library arrives as it was kept, as a logic system with its first installation,
+    /// A blueprint put on a construct from the library arrives as it was saved, as a logic system with its first installation,
     /// switched off until its slots are filled, and only once.
     /// </summary>
     [Fact]
@@ -1042,7 +1042,7 @@ public class LibraryTests
     {
         var made = Blueprinted();
         var blueprint = made.Editor.Program.Systems[0];
-        made.Shelf.Keep(blueprint);
+        made.Shelf.Save(blueprint);
 
         var rig = Simulation.Fresh();
         foreach (var file in made.Folder.Files)
@@ -1092,7 +1092,7 @@ public class LibraryTests
     public void PuttingABlueprintOnIsTakenBack()
     {
         var made = Blueprinted();
-        made.Shelf.Keep(made.Editor.Program.Systems[0]);
+        made.Shelf.Save(made.Editor.Program.Systems[0]);
 
         var rig = Simulation.Fresh();
         foreach (var file in made.Folder.Files)
@@ -1137,7 +1137,7 @@ public class LibraryTests
         Assert.Single(rig.Editor.Program.Systems);
         Assert.Empty(rig.Shelf.All);
 
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
         blueprint.Name = "Airlock Mk II";
         rig.Editor.Holdings.TakeOff(blueprint, false);
         Assert.Empty(rig.Editor.Program.Systems);
@@ -1188,13 +1188,13 @@ public class LibraryTests
         Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
     }
 
-    /// <summary>A blueprinted logic system renamed after its blueprint was kept, with the question to take it off standing.</summary>
+    /// <summary>A blueprinted logic system renamed after its blueprint was saved, with the question to take it off standing.</summary>
     static Simulation Changed(out AutomationSystem blueprint)
     {
         var rig = Blueprinted();
         blueprint = rig.Editor.Program.Systems[0];
         blueprint.Changed = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
 
         blueprint.Name = "Airlock Mk II";
         rig.Editor.Holdings.AskTakeOff(blueprint);
@@ -1208,7 +1208,7 @@ public class LibraryTests
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
         rig.Editor.Stamp(true);
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
 
         rig.Editor.Holdings.AskTakeOff(blueprint);
 
@@ -1241,7 +1241,7 @@ public class LibraryTests
         rig.Tick();
         Assert.Same(blueprint, Assert.Single(rig.Editor.Program.Systems));
 
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
         rig.Editor.Invalidate();
         rig.Tick();
 
@@ -1275,7 +1275,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        rig.Shelf.Keep(blueprint);
+        rig.Shelf.Save(blueprint);
 
         var copy = rig.Editor.Holdings.Copy(ProgramWriter.Blueprint(blueprint), out var trouble);
 
@@ -1501,7 +1501,7 @@ public class LibraryTests
         var system = rig.Editor.Program.Systems[0];
         system.Name = "Airlock Mk II";
         system.Changed = Saved.AddDays(1);
-        rig.Shelf.Keep(system);
+        rig.Shelf.Save(system);
 
         // Made from the blueprint's version of a day before, and unchanged since: the library's copy is the newer by its date.
         system.Name = "Airlock";
@@ -1540,7 +1540,7 @@ public class LibraryTests
     static void Linked(Simulation sim, AutomationSystem system)
     {
         system.Name = "Airlock Mk 0";
-        sim.Shelf.Keep(system);
+        sim.Shelf.Save(system);
 
         // Renamed, and dated after the blueprint it is linked to, as an edit on the screen stamps it.
         system.Name = "Airlock";

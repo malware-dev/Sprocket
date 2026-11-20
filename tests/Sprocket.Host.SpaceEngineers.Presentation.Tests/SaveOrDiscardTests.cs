@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// Every screen with a history asks, on the way back, whether to keep what was changed on it: keeping goes back with the
 /// changes, discarding takes them back first. What was changed on a screen opened from it was answered for there.
 /// </summary>
-public class KeepOrDiscardTests
+public class SaveOrDiscardTests
 {
     /// <summary>Slots moved on the logic system's screen are asked about on the way back, and discarding puts them back.</summary>
     [Fact]
@@ -22,7 +22,7 @@ public class KeepOrDiscardTests
 
         editor.Back();
         screen.Run(2);
-        Assert.Equal(editor.Texts.PickKeepQuestion, editor.Question());
+        Assert.Equal(editor.Texts.PickSaveQuestion, editor.Question());
 
         editor.PressChoice(editor.Texts.PickDiscardThem);
         screen.Run(5);
@@ -31,7 +31,7 @@ public class KeepOrDiscardTests
 
     /// <summary>Keeping on the logic system's screen keeps its changes and goes back, asking nothing more.</summary>
     [Fact]
-    public void KeepingOnTheLogicSystemGoesBack()
+    public void SavingOnTheLogicSystemGoesBack()
     {
         var screen = Panel();
         var editor = screen.Editor;
@@ -39,7 +39,7 @@ public class KeepOrDiscardTests
 
         editor.Back();
         screen.Run(2);
-        editor.PressChoice(editor.Texts.PickKeepThem);
+        editor.PressChoice(editor.Texts.PickSaveThem);
         screen.Run(2);
 
         Assert.Single(editor.Program.Systems[0].EmptyCategories);
@@ -49,7 +49,7 @@ public class KeepOrDiscardTests
 
     /// <summary>Done keeps what was changed without asking.</summary>
     [Fact]
-    public void DoneKeepsWithoutAsking()
+    public void DoneSavesWithoutAsking()
     {
         var screen = Panel();
         var editor = screen.Editor;
@@ -58,7 +58,7 @@ public class KeepOrDiscardTests
         editor.PressPrimary();
         screen.Run(2);
 
-        Assert.NotEqual(editor.Texts.PickKeepQuestion, editor.Question());
+        Assert.NotEqual(editor.Texts.PickSaveQuestion, editor.Question());
         Assert.Single(editor.Program.Systems[0].EmptyCategories);
     }
 
@@ -88,7 +88,7 @@ public class KeepOrDiscardTests
 
     /// <summary>What was kept on a slot's page is not asked about again on the logic system's screen it was opened from.</summary>
     [Fact]
-    public void WhatASlotsPageKeptIsNotAskedAgain()
+    public void WhatASlotsPageSavedIsNotAskedAgain()
     {
         var screen = Panel();
         var editor = screen.Editor;
@@ -96,14 +96,14 @@ public class KeepOrDiscardTests
         screen.Run(5);
         editor.Screen.Heading[0].Renames!("Aft Door");
         screen.Run(5);
-        editor.BackKeeping();
+        editor.BackSaving();
         screen.Run(5);
         Assert.IsType<LogicSystemPage>(editor.Current);
 
         editor.Back();
         screen.Run(2);
 
-        Assert.NotEqual(editor.Texts.PickKeepQuestion, editor.Question());
+        Assert.NotEqual(editor.Texts.PickSaveQuestion, editor.Question());
         Assert.NotNull(editor.Program.Systems[0].FindPart("Aft Door"));
     }
 

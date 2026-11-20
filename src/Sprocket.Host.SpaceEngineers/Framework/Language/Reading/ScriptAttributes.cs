@@ -2,7 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 {
-    /// <summary>How a reader takes the attributes of a statement: the ones Sprocket uses by name, and the rest kept as written.</summary>
+    /// <summary>How a reader takes the attributes of a statement: the ones Sprocket uses by name, and the rest held as written.</summary>
     public static class ScriptAttributes
     {
         /// <summary>A system's highest sequence number handed out, a whole number: <c>#@ lastSequence: 7</c>.</summary>
@@ -20,22 +20,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>The category a slot is shown under with the slots beside it under the same one, text: <c>#@ category: "Doors"</c>.</summary>
         public const string Category = "category";
 
-        /// <summary>The attributes of <paramref name="statement" /> other than those named in <paramref name="used" />, kept as written, or null where there are none.</summary>
-        public static KeptAttributes Unused(Statement statement, params string[] used)
+        /// <summary>How a setting's value is edited and shown beyond its type, text naming the editor: <c>#@ editor: "percent"</c>.</summary>
+        public const string Editor = "editor";
+
+        /// <summary>The attributes of <paramref name="statement" /> other than those named in <paramref name="used" />, held as written, or null where there are none.</summary>
+        public static UnusedAttributes Unused(Statement statement, params string[] used)
         {
-            KeptAttributes kept = null;
+            UnusedAttributes found = null;
             foreach (var attribute in statement.Attributes)
             {
                 if (System.Array.IndexOf(used, attribute.Name) >= 0)
                     continue;
 
-                if (kept == null)
-                    kept = new KeptAttributes();
+                if (found == null)
+                    found = new UnusedAttributes();
 
-                kept.Add(attribute.Name, attribute.Written);
+                found.Add(attribute.Name, attribute.Written);
             }
 
-            return kept;
+            return found;
         }
 
         /// <summary>Whether <paramref name="statement" /> has the attribute <paramref name="name" />, and which.</summary>

@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>The room above and below a switch, which a box or a list has by being taller, so every kind of default stands in the same room.</summary>
         const float Pad = 2f;
 
-        static readonly string[] Kinds = { "flag", "integer", "real", "text", "duration" };
+        static readonly string[] Types = { "flag", "integer", "real", "text", "duration" };
 
         readonly SprocketEditor _editor;
         readonly AutomationSystem _system;
@@ -40,41 +40,75 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         ValuesQuestion _question;
         List<Field> _fields;
         string _type;
+        string _editorName;
         DeclaredType _typeMade;
 
-        SettingPanel(SprocketEditor editor, AutomationSystem system, Part part, bool free, string type, Action<Part, DeclaredType> made)
+        SettingPanel(SprocketEditor editor, AutomationSystem system, Part part, bool free, string kind, Action<Part, DeclaredType> made)
         {
             _editor = editor;
             _system = system;
             _part = part;
             _free = free;
-            _type = type;
+            Choose(kind);
             _made = made;
         }
 
-        /// <summary>The kind words the list of what a setting holds starts with, in the order of the language's built-in types.</summary>
+        /// <summary>
+        /// The kind words the list of what a setting holds starts with: the language's built-in types in their order, then each
+        /// editor a setting may name.
+        /// </summary>
         public static List<string> KindWords(Texts texts)
         {
-            return new List<string> { texts.StateFlag, texts.SettingKindInteger, texts.SettingKindReal, texts.SettingKindText, texts.SettingKindDuration };
+            var words = new List<string> { texts.StateFlag, texts.SettingKindInteger, texts.SettingKindReal, texts.SettingKindText, texts.SettingKindDuration };
+            for (var i = 0; i < SettingEditor.Count; i++)
+                words.Add(SettingEditor.At(i).Word(texts));
+            return words;
         }
 
+        /// <summary>The kinds the list of what a setting holds starts with, as <see cref="KindWords" /> words them: each built-in type, then each editor's name.</summary>
+        static List<string> Kinds()
+        {
+            var kinds = new List<string>(Types);
+            for (var i = 0; i < SettingEditor.Count; i++)
+                kinds.Add(SettingEditor.At(i).Name);
+            return kinds;
+        }
+
+        /// <summary>Takes <paramref name="kind" />, a type a setting holds or an editor's name, as what the setting holds and how it is edited.</summary>
+        void Choose(string kind)
+        {
+            var editor = SettingEditor.Find(kind);
+            _type = editor != null ? editor.Type : kind;
+            _editorName = editor != null ? editor.Name : "";
+        }
+
+        /// <summary>What the setting holds as the list of what it holds names it: its editor's name where it has one, its type otherwise.</summary>
+        string Kind => _editorName.Length > 0 ? _editorName : _type;
+
         /// <summary>
-        /// A panel asking for a new setting of <paramref name="system" />: what it holds is chosen in it where <paramref name="type" />
-        /// is null, and is <paramref name="type" /> otherwise, shown but not changed. <paramref name="made" /> is given the setting, and the
-        /// state type made for it where one was, once it is done, and <paramref name="closed" /> is called as the panel closes either way.
+        /// A panel asking for a new setting of <paramref name="system" />: what it holds is chosen in it where <paramref name="kind" />
+        /// is null, and is <paramref name="kind" /> otherwise, a type or an editor's name, shown but not changed. <paramref name="made" />
+        /// is given the setting, and the state type made for it where one was, once it is done, and <paramref name="closed" /> is called as
+        /// the panel closes either way.
         /// </summary>
-        public static ValuesQuestion New(SprocketEditor editor, AutomationSystem system, string type, Literal start, Func<Element> mark,
+        public static ValuesQuestion New(SprocketEditor editor, AutomationSystem system, string kind, Literal start, Func<Element> mark,
             Action<Part, DeclaredType> made, Action closed)
         {
-            var panel = new SettingPanel(editor, system, null, type == null, type ?? "text", made);
+            var panel = new SettingPanel(editor, system, null, kind == null, kind ?? "text", made);
             return panel.Open(mark, start, closed);
         }
 
         /// <summary>A panel opened on <paramref name="part" />, a setting of <paramref name="system" />, asking its name and its default.</summary>
         public static ValuesQuestion Edit(SprocketEditor editor, AutomationSystem system, Part part, Func<Element> mark, Action closed)
         {
-            var panel = new SettingPanel(editor, system, part, false, part.Setting, null);
+            var panel = new SettingPanel(editor, system, part, false, KindOf(part), null);
             return panel.Open(mark, part.HasDefault ? Shown(part.Setting, part.Default) : default(Literal), closed);
+        }
+
+        /// <summary>What <paramref name="part" />, a setting, holds as the list of what a setting holds names it: its editor where this build has it, its type otherwise.</summary>
+        static string KindOf(Part part)
+        {
+            return SettingEditor.Find(part.Editor) != null ? part.Editor : part.Setting;
         }
 
         /// <summary>
@@ -89,7 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (!instance.Gives(part.Id, out now))
                 now = Initial(system, null, type);
 
-            var field = DefaultField(texts, system, null, type, texts.SettingValue, false);
+            var field = DefaultField(texts, system, null, type, SettingEditor.Find(part.Editor), texts.SettingValue, false);
             var fields = new[] { field };
             var question = new ValuesQuestion(editor, null, fields, new[] { Shown(type, now) }, mark, (said, cancelled) =>
             {
@@ -118,7 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var given = new[]
             {
                 Literal.Of(_part != null ? _part.Id : _system.Free(texts.SettingNumbered)),
-                Literal.Name(Word(_type)),
+                Literal.Name(Word(Kind)),
                 _part != null || !_free ? start : Initial(_system, _typeMade, _type)
             };
 
@@ -146,7 +180,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             holds.Searched = true;
             holds.Stacked = true;
             holds.About = texts.Codex.SettingHoldsAbout;
-            var value = DefaultField(texts, _system, _typeMade, _type, texts.SettingDefault, true);
+            var value = DefaultField(texts, _system, _typeMade, _type, SettingEditor.Find(_editorName), texts.SettingDefault, true);
             value.Stacked = true;
             name.Stacked = true;
             return new List<Field> { name, holds, value };
@@ -156,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         List<string> Words()
         {
             if (!_free)
-                return new List<string> { Word(_type) };
+                return new List<string> { Word(Kind) };
 
             var texts = _editor.Texts;
             var words = KindWords(texts);
@@ -170,19 +204,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return words;
         }
 
-        /// <summary>What <paramref name="type" />, a type a setting holds, is called in the list of what it holds.</summary>
-        string Word(string type)
+        /// <summary>What <paramref name="kind" />, a type a setting holds or an editor's name, is called in the list of what it holds.</summary>
+        string Word(string kind)
         {
-            var at = Array.IndexOf(Kinds, type);
-            return at < 0 ? type : KindWords(_editor.Texts)[at];
+            var at = Kinds().IndexOf(kind);
+            return at < 0 ? kind : KindWords(_editor.Texts)[at];
         }
 
-        /// <summary>The type of the setting that <paramref name="word" /> stands for in the list of what it holds, or null for the way to make a new one.</summary>
-        string TypeOf(string word)
+        /// <summary>The type or editor's name that <paramref name="word" /> stands for in the list of what a setting holds, or null for the way to make a new one.</summary>
+        string KindNamed(string word)
         {
-            var kinds = KindWords(_editor.Texts);
-            var at = kinds.IndexOf(word);
-            return word == _editor.Texts.SettingNewType ? null : at < 0 ? word : Kinds[at];
+            var at = KindWords(_editor.Texts).IndexOf(word);
+            return word == _editor.Texts.SettingNewType ? null : at < 0 ? word : Kinds()[at];
         }
 
         /// <summary>Draws the lines in the list of what the setting holds, shows that where it is decided as not to be changed, and says the default may be left empty where it may.</summary>
@@ -191,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var holds = _question.Form.Fields[1] as ListField;
             if (holds != null)
             {
-                var kinds = Kinds.Length;
+                var kinds = Kinds().Count;
                 var words = Words();
                 if (_free)
                 {
@@ -222,20 +255,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var texts = _editor.Texts;
             var form = _question.Form;
             var word = form.Fields[1].Text;
-            if (word == Word(_type))
+            if (word == Word(Kind))
                 return;
 
-            var type = TypeOf(word);
-            if (type == null)
+            var kind = KindNamed(word);
+            if (kind == null)
             {
                 _typeMade = TypeEditing.New(texts, _system.Types.Count, Taken);
-                type = _typeMade.Name;
+                kind = _typeMade.Name;
             }
 
-            _type = type;
+            Choose(kind);
             var name = form.Fields[0].Text;
             _fields = Fields(_fields[0]);
-            var filled = new List<string> { name, Word(_type), Shown(_type, Initial(_system, _typeMade, _type)).Said };
+            var filled = new List<string> { name, Word(Kind), Shown(_type, Initial(_system, _typeMade, _type)).Said };
             form.Show(_fields, filled, null, texts);
             Decorate();
         }
@@ -263,6 +296,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var part = new Part(_system.Free(name.Length > 0 ? name : _editor.Texts.SettingNumbered))
             {
                 Setting = _type,
+                Editor = _editorName,
                 Optional = hasDefault,
                 HasDefault = hasDefault,
                 Default = value
@@ -285,8 +319,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 _editor.Do(_system, edit);
         }
 
-        /// <summary>The field asking a setting holding <paramref name="type" /> for a value, called <paramref name="called" />: one of a declared type's choices, on or off, a length in seconds, a number or text; where <paramref name="mayBeEmpty" />, one that may be left empty.</summary>
-        static Field DefaultField(Texts texts, AutomationSystem system, DeclaredType made, string type, string called, bool mayBeEmpty)
+        /// <summary>
+        /// The field asking a setting holding <paramref name="type" /> for a value, called <paramref name="called" />: one of a declared
+        /// type's choices, on or off, a length in seconds, a number or text, shaped by <paramref name="shaped" /> where it is not null;
+        /// where <paramref name="mayBeEmpty" />, one that may be left empty.
+        /// </summary>
+        static Field DefaultField(Texts texts, AutomationSystem system, DeclaredType made, string type, SettingEditor shaped, string called,
+            bool mayBeEmpty)
         {
             var declared = system.FindType(type) ?? (made != null && made.Name == type ? made : null);
             if (declared != null)
@@ -312,6 +351,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             box.Entry = type == "integer" ? FieldInput.Whole : type == "real" || type == "duration" ? FieldInput.Decimal : FieldInput.Text;
             if (type == "duration")
                 box.Unit = Template.Fill(texts.WaitPickSeconds, "count", "");
+
+            if (shaped != null)
+                box = shaped.Shaped(box);
 
             return box;
         }

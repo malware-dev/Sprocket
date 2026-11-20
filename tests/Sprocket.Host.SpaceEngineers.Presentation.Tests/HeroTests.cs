@@ -12,7 +12,7 @@ public class HeroTests
     const long Anna = 144115188075855873;
     const long Pirates = 144115188075855896;
 
-    /// <summary>The hero ground off, another programmable block keeps the automation, and the button goes on working.</summary>
+    /// <summary>The hero ground off, another programmable block stores the automation, and the button goes on working.</summary>
     [Fact]
     public void GrindingTheHeroMovesTheAutomation()
     {
@@ -27,7 +27,7 @@ public class HeroTests
         Assert.False(rig.Unit.Lost);
         Assert.True(BlockStorage.HasProgram(spare.Block), "the automation was not written into the block that keeps it now");
 
-        // The button named the block that was ground off; it is mended to name the one that keeps the automation now.
+        // The button named the block that was ground off; it is mended to name the one that stores the automation now.
         Sequence sequence = rig.Editor.Program.Sequences[0];
         rig.Press("Airlock Button");
         rig.Tick();
@@ -35,7 +35,7 @@ public class HeroTests
         Assert.True(Running(rig, sequence), "the press did not reach the sequence");
     }
 
-    /// <summary>The hero given to somebody the big owners share nothing with keeps the automation, which runs on.</summary>
+    /// <summary>The hero given to somebody the big owners share nothing with stores the automation, which runs on.</summary>
     [Fact]
     public void TheHeroGivenAwayKeepsTheAutomation()
     {
@@ -69,7 +69,7 @@ public class HeroTests
         Assert.True(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the automation was not kept");
     }
 
-    /// <summary>The hero given away still keeps the automation after a reload.</summary>
+    /// <summary>The hero given away still stores the automation after a reload.</summary>
     [Fact]
     public void TheHeroGivenAwayKeepsTheAutomationThroughAReload()
     {
@@ -89,7 +89,7 @@ public class HeroTests
         Assert.True(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the hero given away lost the automation");
     }
 
-    /// <summary>The hero's grid deleted whole, a programmable block on a grid of the construct that is left keeps the automation.</summary>
+    /// <summary>The hero's grid deleted whole, a programmable block on a grid of the construct that is left stores the automation.</summary>
     [Fact]
     public void DeletingTheHerosGridMovesTheAutomationToAGridThatIsLeft()
     {
@@ -121,7 +121,7 @@ public class HeroTests
         Assert.Same(was, rig.Unit.Block);
     }
 
-    /// <summary>The block that keeps the automation switched off, another programmable block on the construct keeps it running.</summary>
+    /// <summary>The block that stores the automation switched off, another programmable block on the construct keeps it running.</summary>
     [Fact]
     public void AnyWorkingProgrammableBlockKeepsTheAutomationRunning()
     {

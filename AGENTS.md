@@ -59,6 +59,15 @@ profile restyles every file.
   maps branches to folders.
 - `main` holds what is published on the stable Workshop item, and `bleeding-edge` what is published on Bleeding Edge,
   nothing more. New code is made on `update`, and a published branch takes it only as it is published.
+- No work is done on `update` itself. Each piece of work has its own branch from `update`, and is merged into it only
+  when it is done and reviewed, so `update` holds only finished work.
+- Nothing is released by accident. Before any upload, the maintainer is shown everything it carries that the item
+  does not have yet: every commit (`git log --oneline origin/<published branch>..<source>`) and the format version it
+  writes beside the one published. He approves that content, not only the act of uploading. An upload that would carry
+  more than he asked for is not made: it waits, or is built from the published branch with only what was asked for.
+- Only `main` builds into the stable folder; every other local build that deploys goes into the Bleeding Edge folder,
+  which is experimental by nature. So a local folder is never uploaded as it stands: an upload is built from its
+  published branch at the approved commit, and the packed folder is checked against that commit before it goes out.
 - A pack clears the deployed folder before it writes, so a pack that fails on a file the running game holds leaves the
   mod half deployed. Check the folder after a failed pack.
 - Never close, kill or restart a game the developer is running. After a deploy, say what takes it in: code and the
@@ -94,8 +103,9 @@ profile restyles every file.
   renamed id included, comes with its upgrade in the same commit.
 - Anything else Sprocket writes to disk or a save, and anything added to what a construct's block stores, is agreed
   before it is built, with the maintainer's go-ahead.
-- The stable release writes a finished format version, without `alpha`. When it does, Bleeding Edge moves on to the
-  next version's first draft: a stable `sprocket 1` goes with a Bleeding Edge `sprocket 2 alpha 1`.
+- The stable release writes a finished format version, without `alpha`, and Bleeding Edge writes the same until the
+  next change to the language. That change opens the next version's first draft: after a stable `sprocket 2`, the
+  first language change makes Bleeding Edge write `sprocket 3 alpha 1`.
 - `docs/Language.md` is the language's spec. A language change lands there first, its exact wording approved, before
   any reader or writer code for it. Where code and spec disagree, the code is suspect: raise it, and never edit the
   spec to match.

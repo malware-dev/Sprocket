@@ -2,7 +2,7 @@ using Mal.MdkModMixin.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Network
 {
-    /// <summary>A client's player changing their own settings in this world, for the server to keep with them.</summary>
+    /// <summary>A client's player changing their own settings in this world, for the server to store with them.</summary>
     public struct PlayerPreference
     {
         /// <summary>Whether they give lengths in ticks rather than seconds.</summary>

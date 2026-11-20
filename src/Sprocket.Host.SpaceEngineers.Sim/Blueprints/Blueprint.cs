@@ -19,7 +19,7 @@ namespace Sprocket.Sim.Blueprints;
 /// <remarks>Its shapes are copied from a save the game wrote.</remarks>
 public static class Blueprint
 {
-    /// <summary>The file a blueprint is kept in.</summary>
+    /// <summary>The file a blueprint is stored in.</summary>
     public const string File = "bp.sbc";
 
     /// <summary>The binary the game writes beside a blueprint, which wins over the text.</summary>

@@ -8,7 +8,7 @@ using VRage.Utils;
 namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 {
     /// <summary>
-    /// The button on a programmable block that opens Sprocket, set apart by a separator on each side, and in developer mode the label on the block keeping the automation.
+    /// The button on a programmable block that opens Sprocket, set apart by a separator on each side, and in developer mode the label on the block storing the automation.
     /// </summary>
     public static class SprocketControls
     {
@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 
         /// <summary>
         /// Makes the button once, in <paramref name="texts" />, which the game keeps for the session; and where
-        /// <paramref name="developer" /> is set, the label that marks the block keeping the automation.
+        /// <paramref name="developer" /> is set, the label that marks the block storing the automation.
         /// </summary>
         public static void DoOnce(Texts texts, bool developer)
         {

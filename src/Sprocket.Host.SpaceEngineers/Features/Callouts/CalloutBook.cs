@@ -1,10 +1,11 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using Lumel;
-using Lumel.Layout;
+using Lumel.Text;
 using Lumel.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Callouts
@@ -17,9 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <remarks>A static: the one list, the same for every editor.</remarks>
         public static readonly IList<Callout> All = new[]
         {
-            new Callout("share", Release.Number, texts => texts.CalloutShare, CalloutPlace.HeaderShare, CalloutPlace.HomeShare, CalloutPlace.LibraryShare),
-            new Callout("import", Release.Number, texts => texts.CalloutImport, CalloutPlace.LibraryImport),
-            new Callout("settings", Release.Number, texts => texts.CalloutSettings, CalloutPlace.SlotAdd)
+            new Callout("share", new ModRelease(1, 1), texts => texts.CalloutShare, CalloutPlace.HeaderShare, CalloutPlace.HomeShare, CalloutPlace.LibraryShare),
+            new Callout("import", new ModRelease(1, 1), texts => texts.CalloutImport, CalloutPlace.LibraryImport),
+            new Callout("settings", new ModRelease(1, 1), texts => texts.CalloutSettings, CalloutPlace.SlotAdd)
         };
 
         readonly IList<Callout> _all;
@@ -27,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
 
         PlayerSettings _held = new PlayerSettings(true);
         Func<PlayerSettings> _read;
-        Action<PlayerSettings> _keep;
+        Action<PlayerSettings> _save;
         CoachMark _mark;
         Callout _hung;
 
@@ -41,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         {
             _all = all;
             _read = () => _held;
-            _keep = choices => _held = choices;
+            _save = choices => _held = choices;
         }
 
         /// <summary>The callouts due and not yet dismissed in this editor's session, in the order they are offered.</summary>
@@ -56,11 +57,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>The player's choices as they stand.</summary>
         public PlayerSettings Choices => _read();
 
-        /// <summary>Has the callouts read and keep the player's choices through <paramref name="read" /> and <paramref name="keep" />.</summary>
-        public void Keeping(Func<PlayerSettings> read, Action<PlayerSettings> keep)
+        /// <summary>Has the callouts read and save the player's choices through <paramref name="read" /> and <paramref name="save" />.</summary>
+        public void Saving(Func<PlayerSettings> read, Action<PlayerSettings> save)
         {
             _read = read;
-            _keep = keep;
+            _save = save;
         }
 
         /// <summary>Works out which callouts are due as the editor opens.</summary>
@@ -74,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
             for (var i = 0; i < _all.Count; i++)
             {
                 var callout = _all[i];
-                var newer = choices.Seen.HasValue ? callout.Release > choices.Seen.Value : callout.Release == Release.Number;
+                var newer = choices.Seen.HasValue ? callout.Release > choices.Seen.Value : callout.Release == ModVersion.Release;
                 if (newer && !choices.HasDismissed(callout.Id))
                     _due.Add(callout);
             }
@@ -86,10 +87,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>Hangs the first due callout whose place has an anchor on the screen, if none is hanging, with <paramref name="anchorOf" /> finding the element at a place.</summary>
         public void Offer(Texts texts, Func<CalloutPlace, Element> anchorOf)
         {
-            // A callout stays open while the player turns to another tab of the page it hangs from, so it is put away here.
-            if (_mark != null && _mark.IsOpen && !IsShown(_mark.Anchor))
-                _mark.Close();
-
             if (_due.Count == 0 || _mark != null && _mark.IsOpen)
                 return;
 
@@ -117,26 +114,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>Puts away the callout hanging, without dismissing it.</summary>
         public void Close()
         {
-            if (_mark != null)
-                _mark.Close();
-
+            var mark = _mark;
             _mark = null;
             _hung = null;
+            mark?.Close();
         }
 
-        /// <summary>Whether <paramref name="element" /> is in a window, with nothing holding it hidden and no deck holding it turned to another card, so a callout can hang from it.</summary>
+        /// <summary>Whether <paramref name="element" /> is in a window, with nothing holding it hidden and nothing covering it, so a callout can hang from it.</summary>
         public static bool IsShown(Element element)
         {
-            if (element == null || element.Windows == null)
+            if (element == null || element.Windows == null || element.IsCovered)
                 return false;
 
             for (var at = element; at != null; at = at.Parent)
             {
                 if (!at.IsVisible)
-                    return false;
-
-                var deck = at.Parent as Deck;
-                if (deck != null && deck.Top != at)
                     return false;
             }
 
@@ -146,25 +138,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         /// <summary>Opens <paramref name="callout" /> from <paramref name="anchor" />, which dismisses it for good once pressed.</summary>
         void Hang(Callout callout, Texts texts, Element anchor)
         {
-            _mark = new CoachMark(callout.Said(texts)) { Style = Styles.Callout, Anchor = anchor, DismissesOnPressOutside = true };
-            _mark.Dismissed += () => Dismiss(callout);
+            var mark = new CoachMark(Template.Fill(texts.CalloutNew, "said", callout.Said(texts))) { Style = Styles.Callout, Anchor = anchor, AutomationId = callout.Said(texts) };
+            mark.Dismissed += () => Dismiss(callout);
+            mark.Closed += reason => Lapsed(mark);
+            _mark = mark;
             _hung = callout;
-            _mark.Open();
+            mark.Open();
+        }
+
+        /// <summary>Lets the next place offer what <paramref name="mark" /> held, where it closed by itself, as it does when its anchor goes out of view.</summary>
+        void Lapsed(CoachMark mark)
+        {
+            if (_mark != mark)
+                return;
+
+            _mark = null;
+            _hung = null;
+            Changed?.Invoke();
         }
 
         /// <summary>Records the current release as seen, once nothing of it is left to offer.</summary>
         void RecordSeen()
         {
             var choices = _read();
-            if (!choices.Seen.HasValue || choices.Seen.Value < Release.Number)
-                _keep(choices.WithSeen(Release.Number));
+            if (!choices.Seen.HasValue || choices.Seen.Value < ModVersion.Release)
+                _save(choices.WithSeen(ModVersion.Release));
         }
 
         /// <summary>Records <paramref name="callout" /> as dismissed, so no place offers it again.</summary>
         void Dismiss(Callout callout)
         {
             _due.Remove(callout);
-            _keep(_read().WithDismissed(callout.Id));
+            _save(_read().WithDismissed(callout.Id));
             if (_due.Count == 0)
                 RecordSeen();
 

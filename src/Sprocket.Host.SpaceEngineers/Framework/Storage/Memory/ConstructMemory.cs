@@ -7,9 +7,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
     [ProtoContract]
     public sealed class ConstructMemory
     {
-        /// <summary>The id of the programmable block keeping the automation, which this is filed under.</summary>
+        /// <summary>The id of the programmable block storing the automation, which this is filed under.</summary>
         [ProtoMember(1)]
-        public long Keeper { get; set; }
+        public long Storage { get; set; }
 
         /// <summary>The big owners the automation was last confirmed for.</summary>
         [ProtoMember(2)]

@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The rows of the Triggers tab, in order: each trigger's line, and each category's heading and end.</summary>
         public Element.Collection TriggerRows => _triggerList.Children;
 
-        /// <summary>Writes the description being typed, and asks whether to keep what was changed here, on the way out.</summary>
+        /// <summary>Writes the description being typed, and asks whether to save what was changed here, on the way out.</summary>
         public override bool Leaving()
         {
             _panelWork?.Leave();

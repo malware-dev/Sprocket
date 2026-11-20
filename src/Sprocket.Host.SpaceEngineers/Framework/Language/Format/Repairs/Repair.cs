@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs
     /// </remarks>
     public abstract class Repair
     {
-        /// <summary>The problem a step needing it is marked with, whose number saves keep.</summary>
+        /// <summary>The problem a step needing it is marked with, whose number is stored in saves.</summary>
         public abstract SequenceProblem Problem { get; }
 
         /// <summary>Whether the form is in the logic system itself, the same in every installation, rather than in what one installation holds.</summary>

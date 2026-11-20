@@ -8,7 +8,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>The logic systems kept of each construct as it lost its automation, each blueprint in a file of its own, and the index listing them.</summary>
+    /// <summary>The logic systems stored of each construct as it lost its automation, each blueprint in a file of its own, and the index listing them.</summary>
     /// <remarks>
     /// Persisted: the index is an ini file with a section for each blueprint file:
     /// <code>
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 
         bool _open;
 
-        /// <summary>Backups kept in <paramref name="files" />, once they have been read from it.</summary>
+        /// <summary>Backups stored in <paramref name="files" />, once they have been read from it.</summary>
         public Backups(IFiles files)
         {
             _files = files;
@@ -110,16 +110,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
         }
 
         /// <summary>
-        /// Keeps <paramref name="systems" />, the logic systems of the construct called <paramref name="construct" />, as it
+        /// Stores <paramref name="systems" />, the logic systems of the construct called <paramref name="construct" />, as it
         /// loses its automation at <paramref name="lost" />; one already backed up as it is, by its identity and the date it last
-        /// changed, is not kept twice. <paramref name="values" /> reads the backups already kept.
+        /// changed, is not stored twice. <paramref name="values" /> reads the backups already stored.
         /// </summary>
         public void Take(string construct, DateTime lost, IList<AutomationSystem> systems, Values values)
         {
             for (var i = 0; i < systems.Count; i++)
             {
                 var system = systems[i];
-                if (Keeping(system, values) != null)
+                if (Stored(system, values) != null)
                     continue;
 
                 var backup = new Backup(Free(), system.Identity, system.Name, construct, lost);
@@ -132,9 +132,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
                 WriteIndex();
         }
 
-        /// <summary>The backup that keeps <paramref name="system" /> as it is, the same logic system last changed at the same time, or null; <paramref name="values" /> reads the backups.</summary>
-        /// <remarks>Reads the file of each backup of the same logic system, so it is for a construct losing its automation or a blueprint being kept, never for a repeating path.</remarks>
-        public Backup Keeping(AutomationSystem system, Values values)
+        /// <summary>The backup that stores <paramref name="system" /> as it is, the same logic system last changed at the same time, or null; <paramref name="values" /> reads the backups.</summary>
+        /// <remarks>Reads the file of each backup of the same logic system, so it is for a construct losing its automation or a blueprint being saved, never for a repeating path.</remarks>
+        public Backup Stored(AutomationSystem system, Values values)
         {
             foreach (var backup in _all)
             {
@@ -149,7 +149,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
             return null;
         }
 
-        /// <summary>The logic system <paramref name="backup" /> keeps, read from its file, answering what was wrong with it, or empty.</summary>
+        /// <summary>The logic system <paramref name="backup" /> stores, read from its file, answering what was wrong with it, or empty.</summary>
         public string Open(Backup backup, Values values, out AutomationSystem read)
         {
             read = null;

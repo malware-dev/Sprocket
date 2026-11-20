@@ -44,7 +44,7 @@ namespace Sprocket.Sim
                 return;
             }
 
-            // What a saved world remembers of the runtime, which the save keeps in binary.
+            // What a saved world remembers of the runtime, which the save stores in binary.
             if (args.Length > 1 && args[0] == "--state")
             {
                 Console.Write(SavedState.Render(args[1]));

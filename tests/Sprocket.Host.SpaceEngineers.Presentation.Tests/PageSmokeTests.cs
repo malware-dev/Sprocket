@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// Walks the screens through every kind of page, with nobody looking.
 /// </summary>
 /// <remarks>
-/// The editor's own behaviour is covered in Sprocket.Core.Tests. What is left to check here is that
+/// The editor's own behavior is covered in Sprocket.Core.Tests. What is left to check here is that
 /// nothing throws while each page is measured, arranged and drawn.
 /// </remarks>
 public class PageSmokeTests

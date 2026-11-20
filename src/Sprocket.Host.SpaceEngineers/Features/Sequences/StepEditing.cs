@@ -413,7 +413,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     page.Source = choice;
                     return page;
                 },
-                choice => new ModsPage(_editor, lead, was as HostTest, choice, test => chosen(test, null)));
+                // Checking for a mod is unfinished, so it is offered in developer mode, and to a test already checking one.
+                _editor.DeveloperMode || was is HostTest
+                    ? choice => new ModsPage(_editor, lead, was as HostTest, choice, test => chosen(test, null))
+                    : (Func<SourceSwitch, Framework.Ui.Shell.EditorPage>)null);
 
             _editor.Push(source.Open(was is StateTest ? PickSource.States : was is HostTest ? PickSource.Mods : was != null ? PickSource.Blocks : source.Usual));
         }

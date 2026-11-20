@@ -4,7 +4,7 @@ using System;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
 {
-    /// <summary>The words earlier builds kept problems and block troubles by, read so that what they kept carries over; nothing writes them.</summary>
+    /// <summary>The words earlier build stored problems and block troubles by, read so that what they stored carries over; nothing writes them.</summary>
     /// <remarks>Persisted: these are the words in saves and blocks those builds wrote.</remarks>
     public static class EarlierSpellings
     {
@@ -48,14 +48,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
             Cause.DoorToldToOpen, Cause.DoorToldToClose
         };
 
-        /// <summary>The problem an earlier build kept as <paramref name="spelled" />, or none.</summary>
+        /// <summary>The problem an earlier build stored as <paramref name="spelled" />, or none.</summary>
         public static SequenceProblem ProblemOf(string spelled)
         {
             var at = Array.IndexOf(Reasons, spelled);
             return at < 0 ? SequenceProblem.None : Problems[at];
         }
 
-        /// <summary>The cause an earlier build kept as <paramref name="spelled" />, or none.</summary>
+        /// <summary>The cause an earlier build stored as <paramref name="spelled" />, or none.</summary>
         public static Cause CauseOf(string spelled)
         {
             var at = Array.IndexOf(Causes, spelled);

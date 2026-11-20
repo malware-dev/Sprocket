@@ -5,8 +5,8 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>The programmable block keeping the automation given away, the status panel shows the automation running as before.</summary>
-public class GivenAwayKeeperStatusTests
+/// <summary>The programmable block storing the automation given away, the status panel shows the automation running as before.</summary>
+public class GivenAwayStorageStatusTests
 {
     const long Anna = 144115188075855873;
     const long Pirates = 144115188075855896;

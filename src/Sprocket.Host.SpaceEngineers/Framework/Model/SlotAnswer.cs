@@ -2,14 +2,14 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
-    /// <summary>How one installation answers one slot, kept so the answer can be put back once the slot is taken out.</summary>
+    /// <summary>How one installation answers one slot, held so the answer can be put back once the slot is taken out.</summary>
     public sealed class SlotAnswer
     {
         readonly List<string> _blocks;
         readonly List<int> _facets;
         readonly List<ToolbarSlot> _positions;
         readonly string _note;
-        readonly KeptAttributes _kept;
+        readonly UnusedAttributes _unused;
         readonly bool _answered;
         readonly Literal _setting;
 
@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             _facets = facets == null ? null : new List<int>(facets);
             _positions = positions == null ? null : new List<ToolbarSlot>(positions);
             _note = instance.NoteOn(slot);
-            _kept = instance.KeptOn(slot);
+            _unused = instance.UnusedOn(slot);
             _answered = instance.AnswerTo(slot, out _setting);
         }
 
@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public static SlotAnswer Of(SystemInstance instance, string slot)
         {
             var answer = new SlotAnswer(instance, slot);
-            return answer._blocks == null && !answer._answered && answer._note.Length == 0 && answer._kept == null ? null : answer;
+            return answer._blocks == null && !answer._answered && answer._note.Length == 0 && answer._unused == null ? null : answer;
         }
 
         /// <summary>Has the installation answer <paramref name="slot" /> as it did when this was taken.</summary>
@@ -51,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 Instance.Fill(slot, _blocks);
 
             Instance.Note(slot, _note);
-            Instance.Keep(slot, _kept);
+            Instance.SetUnused(slot, _unused);
         }
     }
 }

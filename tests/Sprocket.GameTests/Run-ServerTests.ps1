@@ -31,7 +31,7 @@ $installed = (Select-String $manifest -Pattern '"BetaKey"\s+"([^"]*)"' | Select-
 if ($installed -ne $Branch) { throw "The dedicated server is on branch '$installed', not '$Branch'." }
 
 # 2. The plugin, and the mod packed as the game would load it.
-dotnet build "$repo\tests\Sprocket.GameTests" -v q | Out-Null
+dotnet build "$repo\tests\Sprocket.GameTests" -v q -p:MdkBuildConfiguration=none | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'The test plugin did not build.' }
 $pack = Join-Path $work 'pack'
 if (Test-Path $pack) { Remove-Item $pack -Recurse -Force }

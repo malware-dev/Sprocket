@@ -11,18 +11,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Writing
         readonly string _title;
         readonly string _given;
         readonly int _longest;
-        readonly Action<string> _keep;
+        readonly Action<string> _save;
 
         /// <summary>
         /// A page titled <paramref name="title" /> holding <paramref name="given" />, up to <paramref name="longest" /> characters
-        /// or any number for zero, that hands what it holds to <paramref name="keep" /> when it is kept.
+        /// or any number for zero, that hands what it holds to <paramref name="save" /> when it is saved.
         /// </summary>
-        public TextPage(SprocketEditor editor, string title, string given, int longest, Action<string> keep) : base(editor)
+        public TextPage(SprocketEditor editor, string title, string given, int longest, Action<string> save) : base(editor)
         {
             _title = title;
             _given = given ?? "";
             _longest = longest;
-            _keep = keep;
+            _save = save;
         }
 
         /// <inheritdoc />
@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Writing
         /// <summary>The box is the whole of the page and scrolls both ways by itself.</summary>
         public override bool ScrollsItself => true;
 
-        /// <summary>Finished with Done, which keeps the text, as well as left by going back.</summary>
+        /// <summary>Finished with Done, which saves the text, as well as left by going back.</summary>
         public override bool Edits => true;
 
         /// <summary>The box the text is written in, where the view has been made.</summary>
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Writing
         {
         }
 
-        /// <summary>Goes back to the form and keeps the text there.</summary>
+        /// <summary>Goes back to the form and saves the text there.</summary>
         /// <remarks>Back first, so the form hears the text while its own page is the one showing, as it does any other change.</remarks>
         public override void Primary()
         {
@@ -53,17 +53,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Writing
             Editor.Pop();
 
             if (text != null)
-                _keep(text);
+                _save(text);
         }
 
-        /// <summary>Asks whether to keep the text, where it has changed; both answers go back.</summary>
+        /// <summary>Asks whether to save the text, where it has changed; both answers go back.</summary>
         public override bool Leaving()
         {
             if (_box == null || _box.Text == _given)
                 return true;
 
-            Editor.Ask(Editor.Texts.PickKeepQuestion);
-            Editor.AnswerPrimary(Editor.Texts.PickKeepThem, true);
+            Editor.Ask(Editor.Texts.PickSaveQuestion);
+            Editor.AnswerPrimary(Editor.Texts.PickSaveThem, true);
             Editor.Answer(Editor.Texts.PickDiscardThem, () => Editor.Pop());
             return false;
         }

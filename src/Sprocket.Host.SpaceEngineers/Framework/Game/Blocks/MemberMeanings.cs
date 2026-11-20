@@ -45,13 +45,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
             // How far it flees, beside where it flees to.
             if (block is IMyDefensiveCombatBlock)
-                In(kind, "WaypointZoneSize", Category.Behaviour);
+                In(kind, "WaypointZoneSize", Category.Behavior);
 
             // A dummy is shot at and shoots nothing: how it recovers is how it is set up.
             if (block is IMyTargetDummyBlock)
             {
-                In(kind, "Enable Restoration", Category.Behaviour);
-                In(kind, "Delay", Category.Behaviour);
+                In(kind, "Enable Restoration", Category.Behavior);
+                In(kind, "Delay", Category.Behavior);
             }
 
             // Who hears its messages, and how they go out.
@@ -116,8 +116,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
             if (block is IMyLaserAntenna)
             {
-                In(kind, "Range", Category.Behaviour);
-                In(kind, "isPerm", Category.Behaviour);
+                In(kind, "Range", Category.Behavior);
+                In(kind, "isPerm", Category.Behavior);
             }
 
             if (block is IMyMechanicalConnectionBlock)
@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 Building(kind);
 
                 // Set once when the machine is built, however it moves after.
-                In(kind, "ShareInertiaTensor", Category.Behaviour);
+                In(kind, "ShareInertiaTensor", Category.Behavior);
             }
 
             // Lock, unlock and toggle lock set it, and the rotor's own locked reads it.
@@ -163,13 +163,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             // A searchlight is no gun: what it aims at and how it looks are how it is set up.
             if (block is IMySearchlight)
             {
-                In(kind, "TargetingGroup_Selector", Category.Behaviour);
-                In(kind, "ViewRotation", Category.Behaviour);
+                In(kind, "TargetingGroup_Selector", Category.Behavior);
+                In(kind, "ViewRotation", Category.Behavior);
             }
 
             if (block is IMyCameraBlock)
             {
-                In(kind, "ViewRotation", Category.Behaviour);
+                In(kind, "ViewRotation", Category.Behavior);
 
                 // Looking through a camera is something a person does.
                 Hide(kind, "View");
@@ -215,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             }
 
             if (block is IMyStoreBlock)
-                In(kind, "Searchable", Category.Behaviour);
+                In(kind, "Searchable", Category.Behavior);
 
             if (block is IMyGasTank)
                 HideToggle(kind, "Stockpile");
@@ -282,10 +282,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>What every block means by a word, where the table's answer is the wrong one.</summary>
         static void Everywhere(EntityKind kind, IMyTerminalBlock block)
         {
-            In(kind, "Threshold", Category.Behaviour);
-            In(kind, "Condition", Category.Behaviour);
-            In(kind, "AvailableEvents", Category.Behaviour);
-            In(kind, "ANDCheckbox", Category.Behaviour);
+            In(kind, "Threshold", Category.Behavior);
+            In(kind, "Condition", Category.Behavior);
+            In(kind, "AvailableEvents", Category.Behavior);
+            In(kind, "ANDCheckbox", Category.Behavior);
             In(kind, "ReceiveFrom", Category.Signals);
             Hide(kind, "SearchBox");
 
@@ -328,17 +328,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             if (!(block is IMyRemoteControl))
                 return;
 
-            In(kind, "CameraList", Category.Behaviour);
+            In(kind, "CameraList", Category.Behavior);
             Withhold(kind, "CameraList", Readiness.Pending, UnreadyReason.Camera);
-            In(kind, "SpeedLimit", Category.Behaviour);
+            In(kind, "SpeedLimit", Category.Behavior);
 
             // How the autopilot flies its route, and the start of the route again.
             In(kind, "FlightMode", Category.Flight);
             In(kind, "Reset", Category.Flight);
 
             // Which way a remote calls forward, spelled once as a value and six times as actions.
-            In(kind, "Left", Category.Behaviour);
-            In(kind, "Right", Category.Behaviour);
+            In(kind, "Left", Category.Behavior);
+            In(kind, "Right", Category.Behavior);
         }
 
         /// <summary>
@@ -346,21 +346,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// </summary>
         static void Turrets(EntityKind kind, IMyTerminalBlock block)
         {
-            In(kind, "Range", Category.Behaviour);
-            In(kind, "TargetingGroup_Selector", Category.Behaviour);
-            In(kind, "ViewRotation", Category.Behaviour);
+            In(kind, "Range", Category.Behavior);
+            In(kind, "TargetingGroup_Selector", Category.Behavior);
+            In(kind, "ViewRotation", Category.Behavior);
             Hide(kind, "Control");
 
             if (!(block is IMyTurretControlBlock))
                 return;
 
-            In(kind, "AI", Category.Behaviour);
-            In(kind, "AngleDeviation", Category.Behaviour);
-            In(kind, "MultiplierAz", Category.Behaviour);
-            In(kind, "MultiplierEl", Category.Behaviour);
-            In(kind, "RotorAzimuth", Category.Behaviour);
-            In(kind, "RotorElevation", Category.Behaviour);
-            In(kind, "CameraList", Category.Behaviour);
+            In(kind, "AI", Category.Behavior);
+            In(kind, "AngleDeviation", Category.Behavior);
+            In(kind, "MultiplierAz", Category.Behavior);
+            In(kind, "MultiplierEl", Category.Behavior);
+            In(kind, "RotorAzimuth", Category.Behavior);
+            In(kind, "RotorElevation", Category.Behavior);
+            In(kind, "CameraList", Category.Behavior);
 
             Withhold(kind, "RotorAzimuth", Readiness.Pending, UnreadyReason.Rotor);
             Withhold(kind, "RotorElevation", Readiness.Pending, UnreadyReason.Rotor);
@@ -377,7 +377,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                          "ChangeIntervalSlider", "PreserveAspectRatio", "Rotate"
                      })
             {
-                In(kind, one, Category.Behaviour);
+                In(kind, one, Category.Behavior);
             }
 
             In(kind, "Title", Category.Identity);
@@ -392,7 +392,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                          "MarkMissingBlocks", "MarkUnfinishedBlocks"
                      })
             {
-                In(kind, one, Category.Behaviour);
+                In(kind, one, Category.Behavior);
             }
         }
 

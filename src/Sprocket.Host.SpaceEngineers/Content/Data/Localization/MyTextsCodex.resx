@@ -69,7 +69,7 @@
     <comment>Codex page on "Option", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Setting" xml:space="preserve">
-    <value>A ![](mark:setting)&amp;nbsp;**setting** is a value you choose separately for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) on the [installation panel](Term.InstallationPanel class=term), where it stands among the slots. If you don't choose one, the setting's default is used. A setting with no default must be filled in.</value>
+    <value>A ![](mark:setting)&amp;nbsp;**setting** allows you to adjust a logic system for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) without changing its steps, such as how long one airlock waits before it closes. It shows up on the [installation panel](Term.InstallationPanel class=term) alongside the other slots.</value>
     <comment>Codex page on "Setting", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
@@ -109,7 +109,7 @@
     <comment>Codex page on "finally", shown in a tip: the part of a sequence that runs however the sequence ends. It says what the term is, naming it in bold.</comment>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
-    <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), or whether a mod is installed, and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
+    <value>An **if**, also known as a *conditional*, is a [step](Term.Step class=term) that checks blocks, or one of the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), and runs the steps under it only when its [condition](Term.Condition class=term) passes.</value>
     <comment>Codex page on "If", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Condition" xml:space="preserve">
@@ -830,7 +830,7 @@
   </data>
   <data name="Sprocket.Slot.AddSettingAbout" xml:space="preserve">
     <value>Make a new ![](mark:setting)&amp;nbsp;[setting](Term.Setting class=term), a value each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) gives for itself.</value>
-    <comment>Tooltip on &quot;a setting...&quot; in the menu of the &quot;+ slot&quot; button on a logic system's installation panel tab.</comment>
+    <comment>Tooltip on &quot;a setting&quot; in the menu of the &quot;+ slot&quot; button on a logic system's installation panel tab.</comment>
   </data>
   <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
     <value>Rename this [setting](Term.Setting class=term) or change its default.</value>

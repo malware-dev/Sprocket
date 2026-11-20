@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         Color,
 
         /// <summary>One of a list of names a member gives, written as the name: <c>closed</c>.</summary>
-        /// <remarks>Kept as the name rather than as a position in the list, so a list that gains a name keeps its meaning.</remarks>
+        /// <remarks>Stored as the name rather than as a position in the list, so a list that gains a name keeps its meaning.</remarks>
         Name,
 
         /// <summary>Slots, by name, for a parameter that takes slots.</summary>

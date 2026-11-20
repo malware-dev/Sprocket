@@ -56,6 +56,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// </summary>
         public string Setting { get; set; } = "";
 
+        /// <summary>
+        /// For a setting, the name of how its value is edited and shown beyond its type, such as <c>percent</c>; or empty for
+        /// its type alone. A name no editor of this build has is written back as it was read.
+        /// </summary>
+        public string Editor { get; set; } = "";
+
         /// <summary>Whether this part is a setting, answered by one value rather than by blocks.</summary>
         public bool IsSetting => Setting.Length > 0;
 
@@ -71,8 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// </summary>
         public string Annotation { get; set; }
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
 
         /// <summary>Whether a block whose kind stands in <paramref name="lineage" />, nearest first as a kind's lineage has it, may fill this part.</summary>
         public bool Fits(IList<string> lineage) => Takes(Expects, lineage);

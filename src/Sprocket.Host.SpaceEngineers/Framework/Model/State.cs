@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>What somebody wrote about the state, in their own words, or empty.</summary>
         public string Annotation { get; set; } = "";
 
-        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
-        public KeptAttributes Attributes { get; set; }
+        /// <summary>The attributes written above it that Sprocket does not use, held as written, or null where there are none.</summary>
+        public UnusedAttributes Attributes { get; set; }
     }
 }

@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
             return _systems.MadeBy(maker) || _construct.MadeBy(maker);
         }
 
-        /// <summary>Keeps every change made on the page numbered <paramref name="maker" /> as any other change.</summary>
+        /// <summary>Saves every change made on the page numbered <paramref name="maker" /> as any other change.</summary>
         public void Disown(int maker)
         {
             _systems.Disown(maker);

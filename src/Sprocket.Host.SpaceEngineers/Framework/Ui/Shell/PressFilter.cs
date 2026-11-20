@@ -120,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         void Replace()
         {
             Told = true;
-            _editor.Program.Kept();
+            _editor.Program.OriginalIsSafe();
             _editor.Invalidate();
         }
     }

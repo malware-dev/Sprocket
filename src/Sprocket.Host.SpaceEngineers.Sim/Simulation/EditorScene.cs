@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using Ship = Sprocket.Sim.Machine.Simulation;
@@ -34,7 +35,7 @@ namespace Sprocket.Sim.Simulation
         EditorWindow _view;
 
         // The player's choices, as a player already offered this release's callouts has them, so a screen shows none.
-        PlayerSettings _player = new PlayerSettings(true, Release.Number);
+        PlayerSettings _player = new PlayerSettings(true, ModVersion.Release);
 
         Vector2 _at;
 
@@ -74,7 +75,7 @@ namespace Sprocket.Sim.Simulation
         EditorScene(Ship ship)
         {
             _ship = ship;
-            Kept();
+            SaveChoices();
             _view = new EditorWindow(_ship.Editor, _workspace);
             _workspace.Open(_view);
         }
@@ -137,7 +138,7 @@ namespace Sprocket.Sim.Simulation
             _ship.Editor.Invalidate();
         }
 
-        /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
+        /// <summary>where the program is being stored, for the line at the bottom of the window.</summary>
         public string Where => _ship.Where;
 
         /// <summary>
@@ -173,7 +174,7 @@ namespace Sprocket.Sim.Simulation
         public void Reopen()
         {
             _view.Close();
-            Kept();
+            SaveChoices();
             _view = new EditorWindow(_ship.Editor, _workspace);
             _workspace.Open(_view);
             _ship.Editor.Opened();
@@ -190,9 +191,9 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <summary>Has the editor keep the player's choices here.</summary>
-        void Kept()
+        void SaveChoices()
         {
-            _ship.Editor.Callouts.Keeping(() => _player, kept => _player = kept);
+            _ship.Editor.Callouts.Saving(() => _player, saved => _player = saved);
         }
 
         /// <summary>The frame the ship is on, which the screen is timed by.</summary>

@@ -299,11 +299,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         }
 
         /// <summary>
-        /// The programmable block to keep the automation, whoever owns it: the block <paramref name="entityId" /> where it is
+        /// The programmable block to store the automation, whoever owns it: the block <paramref name="entityId" /> where it is
         /// still on the construct, otherwise any other; null where there is none.
         /// </summary>
-        /// <remarks>Reads every block on the construct; asked as the keeper is lost, never on a tick.</remarks>
-        public IMyTerminalBlock FindKeeper(long entityId)
+        /// <remarks>Reads every block on the construct; asked as the block storing the automation is lost, never on a tick.</remarks>
+        public IMyTerminalBlock FindStorage(long entityId)
         {
             Current();
 

@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
         /// <param name="player">A player's settings in this world, by identity: anybody's on the server, a client's own on a client.</param>
         /// <param name="settings">On the server, the settings the world runs by, written as one text.</param>
         /// <param name="settled">On a client, the server's settings arriving, which it takes as its own.</param>
-        /// <param name="ruled">On the server, settings an admin's client proposed, which it takes and keeps before telling every client.</param>
+        /// <param name="ruled">On the server, settings an admin's client proposed, which it takes and stores before telling every client.</param>
         public Handover(Func<long, SprocketUnit> find, Action<long, string, string, string> given,
             Action<long, string, string, string, string> refused, Action<long> foreign, Action<long, string, string> changed,
             Action<long, string, string> stored, Func<long, PlayerMemory> player, Func<string> settings, Action<string> settled,
@@ -167,7 +167,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
         /// Compared as written, so only committed changes are sent; the first send after a copy arrives is measured against
         /// what arrived.
         /// </remarks>
-        public void Keep(long block, SprocketUnit copy)
+        public void Save(long block, SprocketUnit copy)
         {
             string program;
             string state;
@@ -233,7 +233,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
         }
 
         /// <summary>Remembers what the server lent, so sending starts from it rather than from nothing.</summary>
-        public void Kept(long block, SprocketUnit copy)
+        public void Remember(long block, SprocketUnit copy)
         {
             string program;
             string state;
@@ -320,7 +320,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            // Lent by the block that keeps the automation, whichever programmable block on the construct was opened, so
+            // Lent by the block that stores the automation, whichever programmable block on the construct was opened, so
             // one construct has one lease, and the client works with that block from here on.
             SprocketUnit unit = _find(claim.Block);
             long lent = unit == null ? claim.Block : unit.Block.EntityId;
@@ -373,7 +373,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
                 return;
 
             var me = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
-            Kept(_player(me), grant.Ticks, grant.ColorTab, grant.ShowsHidden, grant.RecentColors);
+            Store(_player(me), grant.Ticks, grant.ColorTab, grant.ShowsHidden, grant.RecentColors);
             _settled(grant.Settings);
 
             if (grant.Foreign)
@@ -400,11 +400,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Network
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            Kept(_player(Identity(sender)), preference.Ticks, preference.ColorTab, preference.ShowsHidden, preference.RecentColors);
+            Store(_player(Identity(sender)), preference.Ticks, preference.ColorTab, preference.ShowsHidden, preference.RecentColors);
         }
 
         /// <summary>Gives <paramref name="player" /> the settings said, the colors as their codes separated by spaces.</summary>
-        static void Kept(PlayerMemory player, bool ticks, int colorTab, bool hidden, string recent)
+        static void Store(PlayerMemory player, bool ticks, int colorTab, bool hidden, string recent)
         {
             player.Ticks = ticks;
             player.ColorTab = colorTab;

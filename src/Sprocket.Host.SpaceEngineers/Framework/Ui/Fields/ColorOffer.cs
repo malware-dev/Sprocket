@@ -8,7 +8,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 {
     /// <summary>What a color field offers the player: their paint colors, the colors they last chose in a picker, and how they like to give one.</summary>
-    /// <remarks>The colors last chosen and the way of giving one are the player's settings in this world, kept with the world.</remarks>
+    /// <remarks>The colors last chosen and the way of giving one are the player's settings in this world, stored with the world.</remarks>
     public sealed class ColorOffer
     {
         /// <summary>How many colors chosen last it offers: one row of the panel's swatches.</summary>

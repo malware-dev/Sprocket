@@ -476,11 +476,11 @@
     <value>Anything</value>
     <comment>Entry at the top of the list of kinds of block in the picker's column of blocks, which narrows to no kind at all; also the word on the line that opens that list while no kind is chosen.</comment>
   </data>
-  <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
+  <data name="Sprocket.Pick.SaveQuestion" xml:space="preserve">
     <value>Save your changes?</value>
     <comment>Question dialog asked on leaving the picker by going back after changing what it opened on, and on leaving the page where a screen's text or a block's Custom Data is written by going back after changing the text.</comment>
   </data>
-  <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
+  <data name="Sprocket.Pick.SaveThem" xml:space="preserve">
     <value>Save them</value>
     <comment>Answer in the question dialog asked on leaving the picker, or the page a screen's text or a block's Custom Data is written on, after changing what it opened on; it keeps the changes and finishes, and is the answer the Enter key gives.</comment>
   </data>
@@ -1640,6 +1640,10 @@
     <value>number</value>
     <comment>In the list of what a new setting holds, the setting holds a number that may have decimals.</comment>
   </data>
+  <data name="Sprocket.Setting.KindPercent" xml:space="preserve">
+    <value>percentage</value>
+    <comment>In the list of what a new setting holds, the setting holds a percentage, 0 to 100, set with a slider.</comment>
+  </data>
   <data name="Sprocket.Setting.KindText" xml:space="preserve">
     <value>text</value>
     <comment>In the list of what a new setting holds, the setting holds text.</comment>
@@ -1649,11 +1653,11 @@
     <comment>In the list of what a new setting holds, the setting holds a length of time.</comment>
   </data>
   <data name="Sprocket.Setting.NewType" xml:space="preserve">
-    <value>New state type...</value>
+    <value>New state type…</value>
     <comment>Last choice in the list of what a new setting holds, after the logic system's own state types: it makes a new state type for the setting to hold.</comment>
   </data>
   <data name="Sprocket.Slot.AddSetting" xml:space="preserve">
-    <value>a setting...</value>
+    <value>a setting</value>
     <comment>On the installation panel tab of a logic system, in the menu of the &quot;+ slot&quot; button under the slots and at the end of each category of slots. It opens the panel that makes a setting.</comment>
   </data>
   <data name="Sprocket.Value.Fixed" xml:space="preserve">
@@ -1661,7 +1665,7 @@
     <comment>First choice in the menu under a value's link mark in a values panel: the value is the one typed or chosen in its field, the same for every installation.</comment>
   </data>
   <data name="Sprocket.Value.NewSetting" xml:space="preserve">
-    <value>New setting...</value>
+    <value>New setting…</value>
     <comment>Last choice in the menu under a value's link mark in a values panel: opens a form making a new setting for the value.</comment>
   </data>
   <data name="Sprocket.Value.ByDefault" xml:space="preserve">
@@ -1948,23 +1952,23 @@
     <value>A logic system made from this blueprint is on this construct already. For another of the same, add an installation to it.</value>
     <comment>In the library, shown in the chosen blueprint's details after the button that puts it on the construct is pressed, where a logic system made from that blueprint is on the construct already.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupQuestion" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupQuestion" xml:space="preserve">
     <value>Save this backup to the library?</value>
     <comment>The question in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is in the library already. The backup's name follows it in bold.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupLinked" xml:space="preserve">
     <value>The library has the blueprint it was made from. Update that blueprint from it, or save it as a new blueprint?</value>
     <comment>The line at the bottom of the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is in the library already.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupUpdate" xml:space="preserve">
     <value>Update the blueprint</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: replaces that blueprint with the backup.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupNew" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupNew" xml:space="preserve">
     <value>Save as a new blueprint</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: keeps the backup as a separate new blueprint beside it.</comment>
   </data>
-  <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
+  <data name="Sprocket.Library.SaveBackupLeave" xml:space="preserve">
     <value>Leave it</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: closes the dialog and keeps nothing. It is the answer Enter takes.</comment>
   </data>
@@ -1972,7 +1976,7 @@
     <value>Make a blueprint of this logic system?</value>
     <comment>In the library, the question asked when the right-pointing arrow in the strip between its panes is pressed while a logic system with no blueprint is chosen. The logic system's name follows in bold.</comment>
   </data>
-  <data name="Sprocket.Library.MakeKept" xml:space="preserve">
+  <data name="Sprocket.Library.MakeSaved" xml:space="preserve">
     <value>A copy of it is saved in the library, where any construct can use it.</value>
     <comment>In the library, the line under the question whether to make a blueprint of a logic system, saying what making it does.</comment>
   </data>
@@ -3501,11 +3505,11 @@ A backslash before a mark shows the mark as it is typed.
     <value>Shared with {count} players</value>
     <comment>Line in the library blueprint detail saying the player has shared this blueprint with chosen players. {count} is how many.</comment>
   </data>
-  <data name="Sprocket.Library.KeepCopy" xml:space="preserve">
+  <data name="Sprocket.Library.SaveCopy" xml:space="preserve">
     <value>Save a copy</value>
     <comment>Button in the detail of a blueprint shared with the player; puts a copy of it in the player's own library.</comment>
   </data>
-  <data name="Sprocket.Library.KeepCopyAbout" xml:space="preserve">
+  <data name="Sprocket.Library.SaveCopyAbout" xml:space="preserve">
     <value>Adds your own copy to your library, for use in any world.
 
 Warning: Your own copy will not update with {sharer}'s changes.</value>
@@ -3704,15 +3708,19 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <comment>Tip on Copy compact in the Share menu.</comment>
   </data>
   <data name="Sprocket.Callout.Share" xml:space="preserve">
-    <value>Share a logic system, or copy it as text, from here.</value>
+    <value>Share a logic system from here.</value>
     <comment>Callout over the Share mark in the editor's header, on a logic system's row on the home screen, and on a blueprint's details in the library; shown once to a player after an update, until it is pressed.</comment>
   </data>
   <data name="Sprocket.Callout.Import" xml:space="preserve">
-    <value>Import a logic system pasted as text into a programmable block's Custom Data.</value>
+    <value>Import a logic system from text.</value>
     <comment>Callout over the Import mark beside the search in the blueprint library; shown once to a player after an update, until it is pressed.</comment>
   </data>
   <data name="Sprocket.Callout.Settings" xml:space="preserve">
-    <value>Settings can be made here too, as slots.</value>
+    <value>Add a setting here.</value>
     <comment>Callout over the plus that adds a slot in the installation panel of a logic system; shown once to a player after an update, until it is pressed.</comment>
+  </data>
+  <data name="Sprocket.Callout.New" xml:space="preserve">
+    <value>**New:** {said}</value>
+    <comment>Every callout's words, which point out a function an update brought. {said} is the callout's own sentence. The stars make "New:" bold.</comment>
   </data>
 </root>

@@ -10,8 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>A backup of a construct that lost its automation.</summary>
         BackedUp,
 
-        /// <summary>A blueprint the player keeps for every world.</summary>
-        Kept,
+        /// <summary>A blueprint the player saves for every world.</summary>
+        Saved,
 
         /// <summary>A blueprint another player has shared with this one.</summary>
         Shared

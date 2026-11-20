@@ -194,7 +194,7 @@ public class OptimizeSlotsTests
     /// <summary>Leaves the sequence, keeping what was made, and opens the installation panel tab of <paramref name="system" />.</summary>
     static void Panel(Screen screen, AutomationSystem system)
     {
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         screen.Editor.Push(new LogicSystemPage(screen.Editor, system));
         screen.Run(2);

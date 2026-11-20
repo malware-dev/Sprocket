@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
     {
         static readonly Literal[] NoArguments = new Literal[0];
 
-        /// <summary>The program <paramref name="program" /> written out, as the block keeps it.</summary>
+        /// <summary>The program <paramref name="program" /> written out, as the block stores it.</summary>
         public static string Save(Automation program, Values values)
         {
             return Save(program, values, null);
@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var pen = new ScriptWriter();
             pen.Note(program.Annotation);
             pen.Attributes(program.Attributes);
-            pen.Start(ScriptFormat.Header, false).Whole(ScriptFormat.Version).Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
+            Head(pen);
             pen.End();
 
             // Before anything that names one, so a reader has them in hand by the time it meets a step. A variable
@@ -88,39 +88,47 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return with != null && with.Identity == system.Identity ? with : system;
         }
 
-        /// <summary>The blueprint <paramref name="system" /> written out alone, as a player's library keeps it.</summary>
+        /// <summary>The blueprint <paramref name="system" /> written out alone, as a player's library stores it.</summary>
         /// <remarks>The system alone, without its instances.</remarks>
         public static string Blueprint(AutomationSystem system)
         {
             return Blueprint(system, system.Identity);
         }
 
-        /// <summary>The blueprint <paramref name="system" /> written out alone under the identity <paramref name="identity" />, as the library keeps the blueprint it is linked to.</summary>
+        /// <summary>Writes the version line this build writes, with its draft where the version is unfinished.</summary>
+        static void Head(ScriptWriter pen)
+        {
+            pen.Start(ScriptFormat.Header, false).Whole(ScriptFormat.Version);
+            if (ScriptFormat.IsDraft)
+                pen.Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
+        }
+
+        /// <summary>The blueprint <paramref name="system" /> written out alone under the identity <paramref name="identity" />, as the library stores the blueprint it is linked to.</summary>
         /// <remarks>A blueprint as it is stored carries no link of its own.</remarks>
         public static string Blueprint(AutomationSystem system, Guid identity)
         {
             var pen = new ScriptWriter();
-            pen.Start(ScriptFormat.Header, false).Whole(ScriptFormat.Version).Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
+            Head(pen);
             pen.End();
             WriteSystem(pen, system, identity, true, false, false);
             return pen.ToString();
         }
 
-        /// <summary>The logic system <paramref name="system" /> written out alone with its own identity and the blueprint it is linked to, as a backup keeps it.</summary>
+        /// <summary>The logic system <paramref name="system" /> written out alone with its own identity and the blueprint it is linked to, as a backup stores it.</summary>
         public static string Linked(AutomationSystem system)
         {
             var pen = new ScriptWriter();
-            pen.Start(ScriptFormat.Header, false).Whole(ScriptFormat.Version).Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
+            Head(pen);
             pen.End();
             WriteSystem(pen, system, system.Identity, true, false, true);
             return pen.ToString();
         }
 
-        /// <summary>The blueprints <paramref name="systems" /> written out together, as a backup keeps them: no blocks, and no installations.</summary>
+        /// <summary>The blueprints <paramref name="systems" /> written out together, as a backup stores them: no blocks, and no installations.</summary>
         public static string Blueprints(IList<AutomationSystem> systems)
         {
             var pen = new ScriptWriter();
-            pen.Start(ScriptFormat.Header, false).Whole(ScriptFormat.Version).Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
+            Head(pen);
             pen.End();
             for (var i = 0; i < systems.Count; i++)
                 WriteSystem(pen, systems[i], systems[i].Identity, true, false, false);
@@ -356,6 +364,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (part.Category.Length > 0)
                 pen.AttributeText(ScriptAttributes.Category, part.Category);
 
+            if (part.Editor.Length > 0)
+                pen.AttributeText(ScriptAttributes.Editor, part.Editor);
+
             pen.Attributes(part.Attributes);
             pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Slot).Word(part.Id);
 
@@ -589,7 +600,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             foreach (var part in parts)
             {
                 pen.Note(instance.NoteOn(part));
-                pen.Attributes(instance.KeptOn(part));
+                pen.Attributes(instance.UnusedOn(part));
                 pen.Head(part).Says(Keyword.Equals);
 
                 Literal answer;

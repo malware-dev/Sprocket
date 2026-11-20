@@ -91,7 +91,7 @@ public class MarkTests
         screen.Run(5);
         editor.Back();
         screen.Run(5);
-        editor.PressChoice(editor.Texts.PickKeepThem);
+        editor.PressChoice(editor.Texts.PickSaveThem);
         screen.Run(5);
 
         Assert.Equal(new[] { "signal slot 1", "Aft Door", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
@@ -123,7 +123,7 @@ public class MarkTests
 
     /// <summary>Done on a slot's page keeps its changes without asking.</summary>
     [Fact]
-    public void DoneKeepsASlotsChanges()
+    public void DoneSavesASlotsChanges()
     {
         var screen = Slots();
         var editor = screen.Editor;

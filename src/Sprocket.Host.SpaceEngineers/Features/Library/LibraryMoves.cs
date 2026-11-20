@@ -84,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             // A shared blueprint is saved by the Save a copy button in its detail, so the arrow has nothing to say of it.
             _out.Tip = KeptTip.For(_out.Tip, same ? codex.LibrarySame
                 : backed ? codex.LibraryPromoteAbout
-                : entry != null && entry.Section == LibrarySection.Kept && live == null ? codex.LibraryInLibrary
+                : entry != null && entry.Section == LibrarySection.Saved && live == null ? codex.LibraryInLibrary
                 : entry != null && entry.Section == LibrarySection.Shared && live == null ? ""
                 : updates ? codex.SystemsUpdateBlueprintAbout : codex.SystemsMakeBlueprintAbout);
 
@@ -205,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (shelf == null)
                 return null;
 
-            if (entry.Section == LibrarySection.Kept)
+            if (entry.Section == LibrarySection.Saved)
                 return shelf.Find(entry.Identity);
 
             var linked = entry.Section == LibrarySection.BackedUp ? entry.Read : live;

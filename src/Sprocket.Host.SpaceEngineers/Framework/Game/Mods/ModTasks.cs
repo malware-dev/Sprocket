@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
 {
     /// <summary>The tasks one awaitable action of a mod is running, one for each block a step waits on, and how each has ended.</summary>
     /// <remarks>
-    /// A block keeps its record until a step starts the action on it again or its run stops waiting, so it is held at most
+    /// A block holds its record until a step starts the action on it again or its run stops waiting, so it is held at most
     /// once per block. What the mod reports is heard on the game's main thread and tells whatever waits on the block to look.
     /// </remarks>
     public sealed class ModTasks

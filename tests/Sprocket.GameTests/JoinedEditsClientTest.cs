@@ -81,7 +81,10 @@ namespace Sprocket.GameTests
             _report.Check("blueprint carries an edit at once", seen >= 0,
                 seen >= 0 ? $"the added await is in this client's copy of {Block} {seen} updates after the editor closed" : $"the added await was not in this client's copy of {Block} three seconds after the editor closed");
 
-            // #19 again, for a switch: the logic system switched on, the editor closed.
+            // #19 again, for a switch: the logic system switched on, the editor closed. Opened a second after it closed, as a
+            // player can: the game removes the closed editor's screen at its next frame, and a lease given before that is
+            // handed back with it.
+            yield return PluginUpdates.PerSecond;
             var switches = Switches(block);
             open = Open(block);
             while (open.MoveNext())

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>Files kept in the world's save, packed together as one text for the world's carrier to hold.</summary>
+    /// <summary>Files stored in the world's save, packed together as one text for the world's carrier to hold.</summary>
     /// <remarks>
     /// Persisted: a head line, then each file as a line <c>= name</c> followed by its lines, a line starting with <c>=</c>
     /// written with one more <c>=</c> in front:

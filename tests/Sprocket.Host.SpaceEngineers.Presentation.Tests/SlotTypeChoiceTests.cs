@@ -90,7 +90,7 @@ public class SlotTypeChoiceTests
     public void ASignalSlotHasNoTypeToChoose()
     {
         var screen = OnTheDoorsSlot(out var system, out _);
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         screen.Editor.OpenSlot(((SignalTrigger)system.Triggers[0]).Part);
         screen.Run(2);

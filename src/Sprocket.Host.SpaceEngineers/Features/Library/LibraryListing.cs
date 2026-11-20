@@ -31,12 +31,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public StatusRow Row;
 
         /// <summary>
-        /// The logic system on <paramref name="program" /> it is of, or null: itself, the one its backup keeps, or the one made from
+        /// The logic system on <paramref name="program" /> it is of, or null: itself, the one its backup stores, or the one made from
         /// its blueprint in the library.
         /// </summary>
         public AutomationSystem LiveIn(Automation program)
         {
-            var system = Section == LibrarySection.Kept ? program.MadeFrom(Identity) : program.FindSystem(Identity);
+            var system = Section == LibrarySection.Saved ? program.MadeFrom(Identity) : program.FindSystem(Identity);
             return system != null && system.IsBlueprint ? system : null;
         }
 

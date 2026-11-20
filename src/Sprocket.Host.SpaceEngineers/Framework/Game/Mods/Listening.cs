@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
         readonly long _block;
         Action _told;
 
-        /// <summary>The listener <paramref name="told" /> to the block <paramref name="block" />, kept in <paramref name="listening" />.</summary>
+        /// <summary>The listener <paramref name="told" /> to the block <paramref name="block" />, held in <paramref name="listening" />.</summary>
         public Listening(Dictionary<long, List<Action>> listening, long block, Action told)
         {
             _listening = listening;

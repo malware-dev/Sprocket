@@ -21,7 +21,7 @@ namespace Sprocket.Sim.Saves;
 /// </remarks>
 public static class SavedState
 {
-    /// <summary>The sector file a save keeps its entities in, as XML.</summary>
+    /// <summary>The sector file a save stores its entities in, as XML.</summary>
     const string Sector = "SANDBOX_0_0_0_.sbs";
 
     /// <summary>The state of the save at <paramref name="path" />, a save's folder or its sector file, as text.</summary>
@@ -54,7 +54,7 @@ public static class SavedState
         return said.ToString();
     }
 
-    /// <summary>The text the carrier keeps under its key in <paramref name="sector" />, or null where the world has none.</summary>
+    /// <summary>The text the carrier stores under its key in <paramref name="sector" />, or null where the world has none.</summary>
     static string? Carried(string sector)
     {
         var key = Carrier.Key.ToString("D");

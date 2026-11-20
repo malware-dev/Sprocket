@@ -110,7 +110,7 @@ public class AdminTests
 
     /// <summary>Close and Escape both put it away, keeping what was changed.</summary>
     [Fact]
-    public void CloseKeepsWhatChanged()
+    public void CloseSavesWhatChanged()
     {
         var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
         Choose(screen, "Default (every tick)", "Every 10 ticks");

@@ -309,6 +309,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             part.Short = attribute.Value.Word;
         }
 
+        /// <summary><c>#@ editor: "percent"</c> on a setting's slot: how its value is edited and shown beyond its type, text; a name this build has no editor for is read and written back as it was.</summary>
+        static void Editor(Statement statement, Part part, ScriptTrouble trouble)
+        {
+            ScriptAttribute attribute;
+            if (!ScriptAttributes.Find(statement, ScriptAttributes.Editor, out attribute))
+                return;
+
+            if (attribute.Value.Form != ValueForm.Text)
+            {
+                trouble.Say(statement, $"expected text for the attribute {ScriptAttributes.Editor}.");
+                return;
+            }
+
+            part.Editor = attribute.Value.Word;
+        }
+
         /// <summary><c>#@ category: "Doors"</c> on a slot or a sequence: the category it is listed under with those beside it under the same one, text.</summary>
         public static void Category(Statement statement, ICategorized item, ScriptTrouble trouble)
         {
@@ -361,9 +377,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             var part = system.PartFor(name.Word);
             part.Annotation = statement.Annotation;
-            part.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Short, ScriptAttributes.Category);
+            part.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Short, ScriptAttributes.Category, ScriptAttributes.Editor);
             Short(statement, part, trouble);
             Category(statement, part, trouble);
+            Editor(statement, part, trouble);
             part.Optional = optional;
 
             if (!statement.Says(2, Keyword.Expects))

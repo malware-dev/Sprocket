@@ -29,7 +29,7 @@ public class SettingsFilesTests
         Storing(() =>
         {
             var was = Settings.Read();
-            was.WithWorld(was.World.WithFastestUpdate(100)).Keep(was);
+            was.WithWorld(was.World.WithFastestUpdate(100)).Save(was);
         });
 
         Assert.Equal(new[] { World }, _written);
@@ -48,7 +48,7 @@ public class SettingsFilesTests
         Storing(() =>
         {
             var was = Settings.Read();
-            was.WithGlobal(was.Global.WithDeveloperMode(true)).Keep(was);
+            was.WithGlobal(was.Global.WithDeveloperMode(true)).Save(was);
         });
 
         Assert.Equal(new[] { Global }, _written);
@@ -67,7 +67,7 @@ public class SettingsFilesTests
         Storing(() =>
         {
             var was = Settings.Read();
-            was.WithWorld(was.World.WithFastestUpdate(null)).Keep(was);
+            was.WithWorld(was.World.WithFastestUpdate(null)).Save(was);
         });
 
         Assert.DoesNotContain("fastestUpdate", _files[World]);

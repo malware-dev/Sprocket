@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
         [ProtoMember(12)]
         public bool ByHand { get; set; }
 
-        /// <summary>What stopped the last run from outside, by its kept number: nought nothing, one a sequence, two a trigger, three a hand, four a switch.</summary>
+        /// <summary>What stopped the last run from outside, by its stored number: nought nothing, one a sequence, two a trigger, three a hand, four a switch.</summary>
         [ProtoMember(13)]
         public int StoppedBy { get; set; }
 

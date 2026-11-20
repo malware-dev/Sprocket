@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 {
-    /// <summary>The blueprints a player keeps for every world, each in a file of its own, and the index naming them.</summary>
+    /// <summary>The blueprints a player saves for every world, each in a file of its own, and the index naming them.</summary>
     /// <remarks>
     /// Persisted: the index is a list of file names, one to a line; a line starting <c>#</c> is a comment, and a blank line
     /// is nothing. Each file holds one blueprint as <see cref="ProgramWriter.Blueprint(AutomationSystem, Guid)" /> writes it.
@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
 
         readonly List<LibraryEntry> _all = new List<LibraryEntry>();
 
-        /// <summary>A library kept in <paramref name="files" />, saying through <paramref name="say" /> what would not write.</summary>
+        /// <summary>A library stored in <paramref name="files" />, saying through <paramref name="say" /> what would not write.</summary>
         public LibraryShelf(IFiles files, Action<string> say)
         {
             _files = files;
@@ -71,24 +71,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
         /// linked to, or as a new blueprint where it links to none here, and links it to the blueprint as it now is.
         /// </summary>
         /// <remarks>A file the library named after the blueprint is renamed with it; a file a player named keeps its name.</remarks>
-        public LibraryEntry Keep(AutomationSystem blueprint)
+        public LibraryEntry Save(AutomationSystem blueprint)
         {
-            return Keep(blueprint, Guid.NewGuid());
+            return Save(blueprint, Guid.NewGuid());
         }
 
         /// <summary>
         /// Puts the blueprint <paramref name="blueprint" />, brought in from elsewhere, in the library under its own identity, in
-        /// place of the blueprint here that has it, so a newer copy of a blueprint updates the one kept.
+        /// place of the blueprint here that has it, so a newer copy of a blueprint update the one saved.
         /// </summary>
         public LibraryEntry Import(AutomationSystem blueprint)
         {
             if (Find(blueprint.Identity) != null)
                 blueprint.Origin = blueprint.Identity;
 
-            return Keep(blueprint, blueprint.Identity);
+            return Save(blueprint, blueprint.Identity);
         }
 
-        LibraryEntry Keep(AutomationSystem blueprint, Guid fresh)
+        LibraryEntry Save(AutomationSystem blueprint, Guid fresh)
         {
             var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
             var identity = had?.Identity ?? fresh;

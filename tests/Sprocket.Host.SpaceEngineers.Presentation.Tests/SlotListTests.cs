@@ -28,7 +28,7 @@ public class SlotListTests
         screen.Editor.PressChoice("power");
         screen.Editor.PressPrimary();
         screen.Run(2);
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
         return screen.Run(2);
@@ -101,7 +101,7 @@ public class SlotListTests
         screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressPrimary();
         screen.Run(2);
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
         screen.Run(2);
@@ -139,7 +139,7 @@ public class SlotListTests
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
         screen.Run(2);
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
         screen.Run(2);
@@ -172,7 +172,7 @@ public class SlotListTests
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
         screen.Run(2);
-        screen.Editor.BackKeeping();
+        screen.Editor.BackSaving();
         screen.Run(2);
         screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
         screen.Run(2);

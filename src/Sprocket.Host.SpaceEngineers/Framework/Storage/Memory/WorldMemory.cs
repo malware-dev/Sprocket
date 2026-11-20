@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
         [ProtoMember(1)]
         public int Clock { get; set; }
 
-        /// <summary>Each construct's runtime state, filed under the block keeping its automation.</summary>
+        /// <summary>Each construct's runtime state, filed under the block storing its automation.</summary>
         [ProtoMember(2)]
         public List<ConstructMemory> Constructs { get; set; } = new List<ConstructMemory>();
 

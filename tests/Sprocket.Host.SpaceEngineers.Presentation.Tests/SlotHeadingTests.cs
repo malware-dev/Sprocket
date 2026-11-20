@@ -283,7 +283,7 @@ public class SlotHeadingTests
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         var slot = ((SignalTrigger)system.Triggers[0]).Part;
-        editor.BackKeeping();
+        editor.BackSaving();
         screen.Run(2);
 
         editor.PressStart(SentenceText.WhenWord);

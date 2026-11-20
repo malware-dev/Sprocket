@@ -18,10 +18,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
     {
         const string File = "sprocket.ini";
 
-        // Persisted: the section each file keeps its settings in.
+        // Persisted: the section each file stores its settings in.
         const string Section = "Sprocket";
 
-        // The sections the text a client is sent keeps each level in.
+        // The sections the text a client is sent stores each level in.
         const string Everywhere = "Every world";
 
         const string Here = "This world";
@@ -125,19 +125,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
             return write.ToString();
         }
 
-        /// <summary>Keeps each level that differs from <paramref name="was" /> in its own file, leaving the rest of the file as it was.</summary>
+        /// <summary>Saves each level that differs from <paramref name="was" /> in its own file, leaving the rest of the file as it was.</summary>
         /// <remarks>On the machine that runs the world, as an admin changes them.</remarks>
-        public void Keep(Settings was)
+        public void Save(Settings was)
         {
             if (was == null || !Global.Same(was.Global))
-                Keep(Global, true);
+                Save(Global, true);
 
             if (was == null || !World.Same(was.World))
-                Keep(World, false);
+                Save(World, false);
         }
 
         /// <summary>Writes <paramref name="layer" /> into the global file where <paramref name="everywhere" /> says, and the world's otherwise.</summary>
-        static void Keep(SettingsLayer layer, bool everywhere)
+        static void Save(SettingsLayer layer, bool everywhere)
         {
             IMyUtilities files = MyAPIGateway.Utilities;
             if (files == null)
@@ -156,7 +156,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
         }
 
         /// <summary>Writes <paramref name="ini" /> as the global file, on the machine it is asked on.</summary>
-        public static void KeepGlobal(MyIni ini)
+        public static void SaveGlobal(MyIni ini)
         {
             Write(ini, true);
         }

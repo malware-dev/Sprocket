@@ -1199,7 +1199,7 @@ public class ScriptTests
         Assert.Null(after.Systems[0].OriginChanged);
     }
 
-    /// <summary>A blueprint as the library keeps it carries no <c>from</c>; a logic system written alone with its link does.</summary>
+    /// <summary>A blueprint as the library stores it carries no <c>from</c>; a logic system written alone with its link does.</summary>
     [Fact]
     public void ABlueprintAsStoredCarriesNoFrom()
     {

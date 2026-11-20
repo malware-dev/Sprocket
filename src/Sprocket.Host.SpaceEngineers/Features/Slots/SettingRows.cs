@@ -1,8 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Model;
-using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
-using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Slots
 {
@@ -11,18 +10,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
     {
         /// <summary>
         /// Shows <paramref name="part" />, a setting, in <paramref name="row" /> as <paramref name="instance" /> has it: the value it
-        /// gives, the default said so where it gives none, and an empty part, marked as still to be given where the setting has
+        /// gives, its default where it gives none, and an empty part, marked as still to be given where the setting has
         /// no default and the row is not <paramref name="unused" />.
         /// </summary>
-        public static void Show(Texts texts, PartRow row, Part part, SystemInstance instance, bool unused)
+        public static void Show(PartRow row, Part part, SystemInstance instance, bool unused)
         {
             row.Mark = Symbols.Setting;
 
             Literal own;
             if (instance != null && instance.AnswerTo(part.Id, out own))
-                row.Say(own.Said, false);
+                row.Say(SettingEditor.Said(part, own), false);
             else if (part.HasDefault)
-                row.Say(Template.Fill(texts.ValueByDefault, "value", part.Default.Said), false);
+                row.Say(SettingEditor.Said(part, part.Default), false);
             else
                 row.Say(SentenceText.Empty, !unused);
         }

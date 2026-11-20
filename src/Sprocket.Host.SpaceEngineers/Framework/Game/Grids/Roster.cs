@@ -13,7 +13,7 @@ using Sandbox.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
 {
-    /// <summary>Every Sprocket in the world, each filed under the programmable block that keeps it.</summary>
+    /// <summary>Every Sprocket in the world, each filed under the programmable block that stores it.</summary>
     public sealed class Roster : IDisposable
     {
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
@@ -66,21 +66,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         /// <summary>Each of them.</summary>
         public IEnumerable<SprocketUnit> All => _units.Values;
 
-        /// <summary>The Sprocket <paramref name="block" /> keeps, or null.</summary>
-        public SprocketUnit Kept(IMyTerminalBlock block)
+        /// <summary>The Sprocket <paramref name="block" /> stores, or null.</summary>
+        public SprocketUnit Stored(IMyTerminalBlock block)
         {
             SprocketUnit unit;
             return block != null && _units.TryGetValue(block.EntityId, out unit) ? unit : null;
         }
 
-        /// <summary>The Sprocket kept under <paramref name="id" />, or where it moved to, or null.</summary>
-        public SprocketUnit Kept(long id)
+        /// <summary>The Sprocket stored under <paramref name="id" />, or where it moved to, or null.</summary>
+        public SprocketUnit Stored(long id)
         {
             SprocketUnit unit;
             return _units.TryGetValue(Key(id), out unit) ? unit : null;
         }
 
-        /// <summary>The id the automation once kept under <paramref name="id" /> is kept under now.</summary>
+        /// <summary>The id the automation once stored under <paramref name="id" /> is stored under now.</summary>
         public long Key(long id)
         {
             long next;
@@ -357,7 +357,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             return kept;
         }
 
-        /// <summary>Files a Sprocket kept under <paramref name="was" /> under the block that holds it now, or lets it go where it is lost.</summary>
+        /// <summary>Files a Sprocket stored under <paramref name="was" /> under the block that holds it now, or lets it go where it is lost.</summary>
         void File(long was, SprocketUnit unit)
         {
             if (unit.Lost)

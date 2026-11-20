@@ -77,15 +77,15 @@ public class CodexTests
     {
         var screen = Screen.Fresh("tick", "3");
         var editor = screen.Editor;
-        var kept = new List<bool>();
-        editor.KeepTips = kept.Add;
+        var saved = new List<bool>();
+        editor.SaveTips = saved.Add;
         var at = screen.Scene.Find(editor.Texts.SystemsNew);
         var heading = FirstLink(screen, out var term, CodexPages.LogicSystem);
 
         var mark = screen.Scene.Find("?");
         screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
         Assert.False(editor.TipsShown);
-        Assert.Equal(new[] { false }, kept);
+        Assert.Equal(new[] { false }, saved);
         Assert.Null(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
         Assert.Equal(Palette.Faint, term.LinkColor);
 
@@ -94,7 +94,7 @@ public class CodexTests
 
         screen.Do(((int)mark.X).ToString(), ((int)mark.Y).ToString(), "tick", "3");
         Assert.True(editor.TipsShown);
-        Assert.Equal(new[] { false, true }, kept);
+        Assert.Equal(new[] { false, true }, saved);
         Assert.NotNull(term.TipAt(term.FromScreen(heading + new Vector2(4f, 6f))));
         Assert.Equal(Palette.Link, term.LinkColor);
     }

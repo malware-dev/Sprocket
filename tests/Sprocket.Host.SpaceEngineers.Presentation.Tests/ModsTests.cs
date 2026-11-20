@@ -52,6 +52,19 @@ public class ModsTests : IDisposable
         Assert.Equal(editor.Texts.PickSourceMods, editor.Source());
     }
 
+    /// <summary>Checking for a mod is unfinished, so outside developer mode an if is not offered Mods.</summary>
+    [Fact]
+    public void OutsideDeveloperModeAnIfIsNotOfferedMods()
+    {
+        var screen = OnSequence(Head + Empty, out _, false);
+        var editor = screen.Editor;
+
+        editor.PressAdd(SentenceText.IfWord);
+        screen.Run(2);
+
+        Assert.DoesNotContain(editor.Texts.PickSourceMods, Offered(editor));
+    }
+
     /// <summary>A step that does something is not offered Mods.</summary>
     [Fact]
     public void ATaskIsNotOfferedMods()
@@ -272,10 +285,12 @@ public class ModsTests : IDisposable
         Assert.Equal(word, field.Text);
     }
 
-    static Screen OnSequence(string program, out Sequence sequence)
+    /// <summary>The editor on <paramref name="program" />'s first sequence, in developer mode where <paramref name="developer" />, as checking for a mod is offered only there.</summary>
+    static Screen OnSequence(string program, out Sequence sequence, bool developer = true)
     {
         var screen = Screen.Holding(program);
         var editor = screen.Editor;
+        editor.DeveloperMode = developer;
         var system = editor.Program.Systems[0];
         sequence = system.Sequences[0];
         system.Enabled = false;
