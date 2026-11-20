@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 return turn;
 
             if (!hinge)
-                turn.Way = (MyRotationDirection)arguments[0].Whole;
+                turn.Way = (MyRotationDirection)arguments[0].Integer;
 
             turn.Angle = (float)arguments[at].Real;
             turn.Speed = (float)Math.Abs(arguments[at + 1].Real);

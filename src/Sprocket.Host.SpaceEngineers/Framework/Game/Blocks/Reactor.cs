@@ -11,9 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <summary>A reactor: read for its uranium and its output, and heard as it runs out of uranium.</summary>
     public sealed partial class Reactor : Capability
     {
-        static readonly OwnValue Output = OwnValue.Number<IMyReactor>(reactor => reactor.CurrentOutput);
+        static readonly OwnValue Output = OwnValue.Real<IMyReactor>(reactor => reactor.CurrentOutput);
 
-        static readonly OwnValue MostOut = OwnValue.Number<IMyReactor>(reactor => reactor.MaxOutput);
+        static readonly OwnValue MostOut = OwnValue.Real<IMyReactor>(reactor => reactor.MaxOutput);
 
         // Made as the first reactor is described: the uranium ingot's type can be named only once the game has registered
         // its types.
@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             if (_fuel == null)
             {
                 var uranium = new MyItemType("MyObjectBuilder_Ingot", "Uranium");
-                _fuel = OwnValue.Number<IMyReactor>(reactor => Held(reactor, uranium));
+                _fuel = OwnValue.Real<IMyReactor>(reactor => Held(reactor, uranium));
             }
 
             kind.WithValue("uranium", "uranium", _fuel).Measured(" kg").Announced().In(Category.Fuel)

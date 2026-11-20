@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>A sensor's capability, with nothing read yet.</summary>
         public Sensor()
         {
-            _count = OwnValue.Whole<IMySensorBlock>(Count);
+            _count = OwnValue.Integer<IMySensorBlock>(Count);
         }
 
         /// <inheritdoc />

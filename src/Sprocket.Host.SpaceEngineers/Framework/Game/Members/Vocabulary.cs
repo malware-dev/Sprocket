@@ -442,7 +442,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>The name <paramref name="read" /> stands for among <paramref name="own" />'s, which it holds as a position, or null where it stands for none.</summary>
         static Literal? Named(OwnValue own, Literal read)
         {
-            var at = read.Kind == ValueKind.Integer ? read.Whole : -1;
+            var at = read.Kind == ValueKind.Integer ? read.Integer : -1;
             return at >= 0 && at < own.Names.Count ? Literal.Name(own.Names[(int)at]) : (Literal?)null;
         }
 

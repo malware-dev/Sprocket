@@ -13,15 +13,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         const string Unaired = "Nothing announces a change in the air a thruster is in.";
 
-        static readonly OwnValue Override = OwnValue.Number<IMyThrust>(thruster => thruster.ThrustOverridePercentage * 100.0)
+        static readonly OwnValue Override = OwnValue.Real<IMyThrust>(thruster => thruster.ThrustOverridePercentage * 100.0)
             .Writing<IMyThrust>((thruster, value) => thruster.ThrustOverridePercentage = (float)(value.Number / 100.0));
 
-        static readonly OwnValue Thrust = OwnValue.Number<IMyThrust>(thruster => thruster.CurrentThrustPercentage);
+        static readonly OwnValue Thrust = OwnValue.Real<IMyThrust>(thruster => thruster.CurrentThrustPercentage);
 
-        static readonly OwnValue Effectiveness = OwnValue.Number<IMyThrust>(thruster =>
+        static readonly OwnValue Effectiveness = OwnValue.Real<IMyThrust>(thruster =>
             thruster.MaxThrust > 0f ? thruster.MaxEffectiveThrust / thruster.MaxThrust * 100.0 : 0.0);
 
-        static readonly OwnValue MostThrust = OwnValue.Number<IMyThrust>(thruster => thruster.MaxThrust);
+        static readonly OwnValue MostThrust = OwnValue.Real<IMyThrust>(thruster => thruster.MaxThrust);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

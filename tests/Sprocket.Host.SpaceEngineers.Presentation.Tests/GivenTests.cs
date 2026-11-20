@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class GivenTests
 {
-    /// <summary>A whole number goes as a 32-bit one, a real as a float, a flag as a bool, text as text and a color as the way it is written, the game having no value of its own for one; only a number too big for 32 bits goes wide.</summary>
+    /// <summary>An integer goes as a 32-bit one, a real as a float, a flag as a bool, text as text and a color as the way it is written, the game having no value of its own for one; only a number too big for 32 bits goes wide.</summary>
     [Fact]
     public void AValueGoesAsTheKindItWasWrittenAs()
     {

@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                 case SprocketWire.TypeReal:
                     return ModWire.Part<bool>(option, SprocketWire.Percent) ? given.Number / 100 : given.Number;
                 case SprocketWire.TypeInteger:
-                    return given.Whole;
+                    return given.Integer;
                 case SprocketWire.TypeColor:
                     return new Color(given.Red, given.Green, given.Blue, given.Alpha);
                 case SprocketWire.TypeDuration:
@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                     field = percent
                         ? Field.Between(name, least.Length > 0 ? least : "0", most.Length > 0 ? most : "100")
                         : Field.Between(name, least, most);
-                    field.Entry = ModWire.Part<string>(option, SprocketWire.Type) == SprocketWire.TypeInteger ? FieldInput.Whole : FieldInput.Decimal;
+                    field.Entry = ModWire.Part<string>(option, SprocketWire.Type) == SprocketWire.TypeInteger ? FieldInput.Integer : FieldInput.Real;
                     break;
                 case SprocketWire.TypeColor:
                     field = Field.Holding(name, FieldEditor.Color, 1);

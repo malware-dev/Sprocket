@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
         public TroubleMemory Because { get; set; }
 
         /// <summary>The problem, by the number set on its <c>SequenceProblem</c> value.</summary>
-        /// <remarks>Stored as a whole number, so a build that does not know a newer problem reads it as none rather than failing.</remarks>
+        /// <remarks>Stored as an integer, so a build that does not know a newer problem reads it as none rather than failing.</remarks>
         [ProtoMember(5)]
         public int Problem { get; set; }
     }

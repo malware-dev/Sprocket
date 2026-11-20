@@ -507,10 +507,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         public static bool Lasting(Value value, long least, out Duration length)
         {
             length = default(Duration);
-            if (value.Form != ValueForm.Duration || value.Whole < least || value.Whole > int.MaxValue)
+            if (value.Form != ValueForm.Duration || value.Integer < least || value.Integer > int.MaxValue)
                 return false;
 
-            length = value.Word == Parser.Seconds ? Duration.OfSeconds(value.Real) : Duration.OfTicks((int)value.Whole);
+            length = value.Word == Parser.Seconds ? Duration.OfSeconds(value.Real) : Duration.OfTicks((int)value.Integer);
             return true;
         }
 
@@ -699,15 +699,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return Literal.Of(value.Word);
 
             if (value.Form == ValueForm.Integer || value.Form == ValueForm.Duration)
-                return Literal.Of(value.Whole);
+                return Literal.Of(value.Integer);
 
             if (value.Form == ValueForm.Real)
                 return Literal.Of(value.Real);
 
             if (value.Form == ValueForm.Color)
             {
-                return Literal.Color((byte)(value.Whole >> 24), (byte)(value.Whole >> 16),
-                    (byte)(value.Whole >> 8), (byte)value.Whole);
+                return Literal.Color((byte)(value.Integer >> 24), (byte)(value.Integer >> 16),
+                    (byte)(value.Integer >> 8), (byte)value.Integer);
             }
 
             if (value.Says(Keyword.On))
@@ -749,9 +749,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 }
             }
 
-            if (named.Form == ValueForm.Integer && named.Whole >= 1 && named.Whole <= int.MaxValue)
+            if (named.Form == ValueForm.Integer && named.Integer >= 1 && named.Integer <= int.MaxValue)
             {
-                var numbered = new Run((int)named.Whole);
+                var numbered = new Run((int)named.Integer);
                 numbered.Stops = stops;
                 trouble.Wrote(statement, numbered);
                 return Noted(numbered, statement);

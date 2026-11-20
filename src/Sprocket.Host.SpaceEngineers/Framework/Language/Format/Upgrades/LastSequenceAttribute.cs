@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
                 }
 
                 var attributes = new List<ScriptAttribute>(system.Attributes);
-                var written = number.Whole.ToString(CultureInfo.InvariantCulture);
+                var written = number.Integer.ToString(CultureInfo.InvariantCulture);
                 attributes.Add(new ScriptAttribute(ScriptAttributes.LastSequence, number, written));
                 constructs[i] = system.With(values, system.Lines, attributes);
             }

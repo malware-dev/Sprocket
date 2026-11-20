@@ -111,7 +111,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             Told();
         }
 
-        /// <summary>Shows <paramref name="seconds" /> as the unit, a whole number of ticks or seconds to two places.</summary>
+        /// <summary>Shows <paramref name="seconds" /> as the unit, an integer count of ticks or seconds to two places.</summary>
         void Unit(bool seconds)
         {
             _inSeconds = seconds;

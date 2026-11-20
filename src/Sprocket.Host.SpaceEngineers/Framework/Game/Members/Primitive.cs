@@ -15,21 +15,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         /// <summary>A truth value.</summary>
         Boolean,
-        /// <summary>A whole number from 0 to 255.</summary>
+        /// <summary>An integer from 0 to 255.</summary>
         Byte,
-        /// <summary>A whole number from -128 to 127.</summary>
+        /// <summary>An integer from -128 to 127.</summary>
         SByte,
-        /// <summary>A whole number in 16 bits, signed.</summary>
+        /// <summary>An integer in 16 bits, signed.</summary>
         Int16,
-        /// <summary>A whole number in 16 bits, unsigned.</summary>
+        /// <summary>An integer in 16 bits, unsigned.</summary>
         UInt16,
-        /// <summary>A whole number in 32 bits, signed.</summary>
+        /// <summary>An integer in 32 bits, signed.</summary>
         Int32,
-        /// <summary>A whole number in 32 bits, unsigned.</summary>
+        /// <summary>An integer in 32 bits, unsigned.</summary>
         UInt32,
-        /// <summary>A whole number in 64 bits, signed.</summary>
+        /// <summary>An integer in 64 bits, signed.</summary>
         Int64,
-        /// <summary>A whole number in 64 bits, unsigned.</summary>
+        /// <summary>An integer in 64 bits, unsigned.</summary>
         UInt64,
         /// <summary>A real number in 32 bits.</summary>
         Single,

@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <summary>An artificial mass, which artificial gravity pulls on while it is switched on: read for how heavy it is.</summary>
     public sealed class ArtificialMass : Capability
     {
-        static readonly OwnValue Mass = OwnValue.Number<IMyArtificialMassBlock>(block => block.VirtualMass);
+        static readonly OwnValue Mass = OwnValue.Real<IMyArtificialMassBlock>(block => block.VirtualMass);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

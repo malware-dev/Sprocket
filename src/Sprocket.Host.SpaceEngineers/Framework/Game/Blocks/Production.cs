@@ -32,11 +32,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly OwnValue Stuck = OwnValue.Flag(Reading.Of<IMyProductionBlock>(block =>
             !block.IsQueueEmpty && !block.IsProducing && block.Enabled && block.IsWorking));
 
-        static readonly OwnValue Progress = OwnValue.Number<IMyAssembler>(assembler => assembler.CurrentProgress * 100.0);
+        static readonly OwnValue Progress = OwnValue.Real<IMyAssembler>(assembler => assembler.CurrentProgress * 100.0);
 
         static readonly OwnValue Mode = OwnValue.OneOf<IMyAssembler>(ChoiceTypes.AssemblerMode, Position)
             .Writing<IMyAssembler>((assembler, mode) =>
-                assembler.Mode = mode.Whole == 1 ? MyAssemblerMode.Disassembly : MyAssemblerMode.Assembly);
+                assembler.Mode = mode.Integer == 1 ? MyAssemblerMode.Disassembly : MyAssemblerMode.Assembly);
 
         // The mode of an assembler whose definition keeps it from disassembling, which its production screen offers no
         // choice of.
@@ -45,9 +45,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly OwnValue Repeating = OwnValue.Flag(Reading.Of<IMyAssembler>(assembler => assembler.Repeating))
             .Writing<IMyAssembler>((assembler, repeating) => assembler.Repeating = repeating.Flag);
 
-        static readonly OwnValue InputFill = OwnValue.Number<IMyProductionBlock>(block => block.InputInventory.VolumeFillFactor * 100.0);
+        static readonly OwnValue InputFill = OwnValue.Real<IMyProductionBlock>(block => block.InputInventory.VolumeFillFactor * 100.0);
 
-        static readonly OwnValue OutputFill = OwnValue.Number<IMyProductionBlock>(block => block.OutputInventory.VolumeFillFactor * 100.0);
+        static readonly OwnValue OutputFill = OwnValue.Real<IMyProductionBlock>(block => block.OutputInventory.VolumeFillFactor * 100.0);
 
         static readonly OwnAction Clears = OwnAction.Of<IMyProductionBlock>(block => block.ClearQueue());
 
@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>Production, with the list the queue is read into.</summary>
         public Production()
         {
-            _queued = OwnValue.Whole<IMyAssembler>(Queued);
+            _queued = OwnValue.Integer<IMyAssembler>(Queued);
         }
 
         /// <inheritdoc />
@@ -120,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             Blueprints(assembler, words, means, blueprints);
 
             var amount = Field.Between("amount", "1", "");
-            amount.Entry = FieldInput.Whole;
+            amount.Entry = FieldInput.Integer;
             amount.Needed = true;
             amount.Default = "1";
 

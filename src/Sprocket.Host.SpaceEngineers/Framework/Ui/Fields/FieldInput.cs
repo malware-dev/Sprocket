@@ -7,11 +7,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>Whatever is typed, read as whatever it spells.</summary>
         Any,
 
-        /// <summary>A whole number.</summary>
-        Whole,
+        /// <summary>An integer.</summary>
+        Integer,
 
-        /// <summary>A number that may have a fraction, shown with at least one place after the point.</summary>
-        Decimal,
+        /// <summary>A real number, shown with at least one place after the point.</summary>
+        Real,
 
         /// <summary>Text, kept as text whatever it spells.</summary>
         Text,

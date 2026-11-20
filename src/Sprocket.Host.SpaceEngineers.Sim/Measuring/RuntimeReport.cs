@@ -56,7 +56,7 @@ public static class RuntimeReport
         report.AppendLine();
 
         var call = Calibrate();
-        report.AppendLine("one stand-in call: " + Span(call.Micros * 1000) + " ns, " + Whole((long)call.Bytes) + " bytes");
+        report.AppendLine("one stand-in call: " + Span(call.Micros * 1000) + " ns, " + Integer((long)call.Bytes) + " bytes");
         report.AppendLine();
 
         report.AppendLine("state       ships  airlocks  extra   us/tick   own us   calls   bytes   own bytes   shifts");
@@ -149,9 +149,9 @@ public static class RuntimeReport
                 Step(sim, rig, ref frame, false, false);
         }
 
-        report.AppendLine(Pad(Whole(airlocks), 11) + Pad(Span(Elapsed(rebuilt) / times), 13) + Pad(Span(Elapsed(checkedClock) / times), 13)
-            + Pad(Span(Elapsed(saved) / times), 11) + Pad(Whole(rebuiltBytes / times), 16) + Pad(Whole(checkedBytes / times), 16)
-            + Whole(savedBytes / times));
+        report.AppendLine(Pad(Integer(airlocks), 11) + Pad(Span(Elapsed(rebuilt) / times), 13) + Pad(Span(Elapsed(checkedClock) / times), 13)
+            + Pad(Span(Elapsed(saved) / times), 11) + Pad(Integer(rebuiltBytes / times), 16) + Pad(Integer(checkedBytes / times), 16)
+            + Integer(savedBytes / times));
     }
 
     /// <summary>The construct with airlocks of the harness's world: every one but the empty first one.</summary>
@@ -283,8 +283,8 @@ public static class RuntimeReport
         var perBytes = (double)bytes / ticks;
         GC.KeepAlive(doors);
 
-        report.AppendLine(Pad(state.ToString().ToLowerInvariant(), 12) + Pad(Whole(ships), 7) + Pad(Whole(airlocks), 10)
-            + Pad(Whole(extra), 8) + Pad(Span(tick), 10) + Pad(Span(Math.Max(0, tick - perCall * call.Micros)), 9)
+        report.AppendLine(Pad(state.ToString().ToLowerInvariant(), 12) + Pad(Integer(ships), 7) + Pad(Integer(airlocks), 10)
+            + Pad(Integer(extra), 8) + Pad(Span(tick), 10) + Pad(Span(Math.Max(0, tick - perCall * call.Micros)), 9)
             + Pad(Span(perCall), 8) + Pad(Span(perBytes), 8) + Pad(Span(Math.Max(0, perBytes - perCall * call.Bytes)), 12)
             + Span((double)shifts / ticks));
     }
@@ -306,7 +306,7 @@ public static class RuntimeReport
         var weld = Changed(sim, rig, ref frame, () => rig.Light(900000 + welded++, "Welded " + welded));
         var handed = Changed(sim, rig, ref frame, () => Unit(sim).World.Reshare());
 
-        report.AppendLine(Pad(Whole(extra), 8) + Pad(Span(weld.Micros), 10) + Pad(Span(weld.Calls), 8) + Pad(Span(weld.Bytes), 12)
+        report.AppendLine(Pad(Integer(extra), 8) + Pad(Span(weld.Micros), 10) + Pad(Span(weld.Calls), 8) + Pad(Span(weld.Bytes), 12)
             + Pad(Span(handed.Micros), 11) + Pad(Span(handed.Calls), 9) + Span(handed.Bytes));
     }
 
@@ -576,7 +576,7 @@ public static class RuntimeReport
         return value.ToString(value < 10 ? "0.000" : "0.0", CultureInfo.InvariantCulture);
     }
 
-    static string Whole(long value)
+    static string Integer(long value)
     {
         return value.ToString(CultureInfo.InvariantCulture);
     }

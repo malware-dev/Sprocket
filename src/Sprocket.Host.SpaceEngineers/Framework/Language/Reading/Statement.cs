@@ -97,8 +97,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return value.Form == ValueForm.Text ? value.Word : "";
         }
 
-        /// <summary>The number at a position as a whole number, 0 where there is none.</summary>
-        public int Whole(int index)
+        /// <summary>The number at a position as an integer, 0 where there is none.</summary>
+        public int Integer(int index)
         {
             return (int)ValueAt(index).Number();
         }
@@ -171,7 +171,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>A written number as a count, 0 where it is none a count can be.</summary>
         public static int Counted(Value value)
         {
-            return value.Form == ValueForm.Integer ? Number(value.Whole) : 0;
+            return value.Form == ValueForm.Integer ? Number(value.Integer) : 0;
         }
 
         /// <summary>The statement that starts at the value <paramref name="at" />: its word, and the values after it.</summary>

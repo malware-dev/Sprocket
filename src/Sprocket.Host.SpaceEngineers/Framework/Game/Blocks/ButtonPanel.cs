@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static Field Asked(int buttons)
         {
             var button = Field.Between("button", "1", buttons.ToString(CultureInfo.InvariantCulture));
-            button.Entry = FieldInput.Whole;
+            button.Entry = FieldInput.Integer;
             button.Needed = true;
             return button;
         }

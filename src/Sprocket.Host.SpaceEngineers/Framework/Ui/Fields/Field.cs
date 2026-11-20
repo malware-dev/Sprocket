@@ -428,7 +428,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             double low, high;
             bool hasLow = Reads(Least, out low);
             bool hasHigh = Reads(Most, out high);
-            bool numeric = Entry == FieldInput.Whole || Entry == FieldInput.Decimal;
+            bool numeric = Entry == FieldInput.Integer || Entry == FieldInput.Real;
 
             if (!hasLow && !hasHigh && !numeric)
                 return "";
@@ -437,9 +437,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             if (!Reads(said, out value))
                 return Template.Fill(texts.ValueNumber, "name", called);
 
-            long whole;
-            if (Entry == FieldInput.Whole
-                && !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
+            long integer;
+            if (Entry == FieldInput.Integer
+                && !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out integer))
             {
                 return Template.Fill(texts.ValueWhole, "name", called);
             }
@@ -482,9 +482,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// </summary>
         public string Shown(string said)
         {
-            long whole;
-            if (Entry != FieldInput.Decimal || string.IsNullOrEmpty(said)
-                || !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
+            long integer;
+            if (Entry != FieldInput.Real || string.IsNullOrEmpty(said)
+                || !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out integer))
             {
                 return said;
             }

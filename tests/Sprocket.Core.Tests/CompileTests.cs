@@ -21,9 +21,9 @@ public class CompileTests
 {
     const long Directly = 0;
 
-    /// <summary>A whole number is a real where a real is wanted, and nothing else becomes anything.</summary>
+    /// <summary>An integer is a real where a real is wanted, and nothing else becomes anything.</summary>
     [Fact]
-    public void AWholeNumberIsARealWhereARealIsWantedAndNothingElseBecomesAnything()
+    public void AnIntegerIsARealWhereARealIsWantedAndNothingElseBecomesAnything()
     {
         Literal became;
         Assert.True(Literal.Of(90L).Becomes(ValueKind.Real, out became));
@@ -130,7 +130,7 @@ public class CompileTests
     }
 
     /// <summary>
-    /// A game action declaring text where it takes numbers is taken at what it takes, so a whole number
+    /// A game action declaring text where it takes numbers is taken at what it takes, so an integer
     /// written for a piston's position arrives as a real one.
     /// </summary>
     [Fact]
@@ -147,7 +147,7 @@ public class CompileTests
 
         var fields = new List<Field>();
         action.Fields(fields);
-        Assert.All(fields, field => Assert.Equal(FieldInput.Decimal, field.Entry));
+        Assert.All(fields, field => Assert.Equal(FieldInput.Real, field.Entry));
     }
 
     /// <summary>What an action declares stands where nothing corrects it.</summary>
@@ -176,7 +176,7 @@ public class CompileTests
     }
 
     [Fact]
-    public void AWholeNumberFitsOnlyATypeLargeEnoughForIt()
+    public void AnIntegerFitsOnlyATypeLargeEnoughForIt()
     {
         Assert.True(Literal.Of(255L).Fits(Primitive.Byte, out _));
         Assert.False(Literal.Of(256L).Fits(Primitive.Byte, out _));
@@ -257,16 +257,16 @@ public class CompileTests
         ship.Entity(remote.Id).Kind.FindAction("Steer", ReachKind.Action)!.Fields(fields);
 
         var field = Assert.Single(fields);
-        Assert.Equal(FieldInput.Whole, field.Entry);
+        Assert.Equal(FieldInput.Integer, field.Entry);
         Assert.Equal("0", field.Least);
         Assert.Equal("255", field.Most);
     }
 
     [Fact]
-    public void AWholeNumberBoxRefusesAFraction()
+    public void AnIntegerBoxRefusesAFraction()
     {
         var field = Field.Between("count", "0", "10");
-        field.Entry = FieldInput.Whole;
+        field.Entry = FieldInput.Integer;
 
         Assert.Equal("count must be a whole number.", field.Refuses(new Texts(), "count", "2.5"));
         Assert.Equal("", field.Refuses(new Texts(), "count", "2"));
@@ -276,7 +276,7 @@ public class CompileTests
     public void ADecimalBoxShowsAPlaceAfterThePoint()
     {
         var field = Field.Between("speed", "0", "5");
-        field.Entry = FieldInput.Decimal;
+        field.Entry = FieldInput.Real;
 
         Assert.Equal("1.0", field.Shown("1"));
         Assert.Equal("0.25", field.Shown("0.25"));

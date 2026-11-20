@@ -22,7 +22,7 @@ public class ChoosingKeysTests
 
     static Field Angle()
     {
-        return new Field { Name = "Angle", Edits = FieldEditor.Angle, Least = "-90", Most = "90", Entry = FieldInput.Decimal };
+        return new Field { Name = "Angle", Edits = FieldEditor.Angle, Least = "-90", Most = "90", Entry = FieldInput.Real };
     }
 
     /// <summary>A form holding the fields, with the keyboard in the first.</summary>

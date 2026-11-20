@@ -66,13 +66,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return $"\"{value.Word}\"";
 
             if (value.Form == ValueForm.Integer)
-                return value.Whole.ToString(CultureInfo.InvariantCulture);
+                return value.Integer.ToString(CultureInfo.InvariantCulture);
 
             if (value.Form == ValueForm.Duration && value.Word == Parser.Seconds)
                 return $"{value.Real.ToString("R", CultureInfo.InvariantCulture)}s";
 
             if (value.Form == ValueForm.Duration)
-                return $"{value.Whole.ToString(CultureInfo.InvariantCulture)}t";
+                return $"{value.Integer.ToString(CultureInfo.InvariantCulture)}t";
 
             return "what follows";
         }

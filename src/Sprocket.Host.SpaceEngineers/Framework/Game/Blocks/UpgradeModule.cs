@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     {
         const string Unheard = "A module raises nothing as blocks are built or taken away beside it.";
 
-        static readonly OwnValue Connections = OwnValue.Whole<IMyUpgradeModule>(module => module.Connections);
+        static readonly OwnValue Connections = OwnValue.Integer<IMyUpgradeModule>(module => module.Connections);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

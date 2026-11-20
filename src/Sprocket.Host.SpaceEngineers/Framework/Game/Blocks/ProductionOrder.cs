@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 return order;
 
             order.Known = blueprints.TryGetValue(arguments[0].Text ?? "", out order.Blueprint);
-            order.Amount = arguments[1].Whole;
+            order.Amount = arguments[1].Integer;
             return order;
         }
     }

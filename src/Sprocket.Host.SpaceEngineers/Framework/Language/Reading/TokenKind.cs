@@ -26,13 +26,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// </summary>
         Text,
 
-        /// <summary>A whole number.</summary>
+        /// <summary>An integer.</summary>
         Integer,
 
         /// <summary>A number with a point or an exponent.</summary>
         Real,
 
-        /// <summary>A whole number of ticks and its unit, written as one word: <c>600t</c>.</summary>
+        /// <summary>An integer count of ticks and its unit, written as one word: <c>600t</c>.</summary>
         Duration,
 
         /// <summary>Red, green, blue and alpha, packed in that order.</summary>

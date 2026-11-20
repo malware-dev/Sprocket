@@ -51,7 +51,7 @@ public class HostMemberTests
             kind.Actions[kind.Actions.Count - 1].InNamespace(space);
             kind.WithAction("drop", "drop", OwnAction.Of<IMyTerminalBlock>(_ => Log.Add($"{space}:drop")));
             kind.Actions[kind.Actions.Count - 1].InNamespace(space);
-            kind.WithValue(value, "ride height", OwnValue.Number<IMyTerminalBlock>(_ => Height)
+            kind.WithValue(value, "ride height", OwnValue.Real<IMyTerminalBlock>(_ => Height)
                 .Writing<IMyTerminalBlock>((_, to) => Log.Add($"{space}:{value}={to.Real}")));
             kind.Actions[kind.Actions.Count - 1].InNamespace(space);
             kind.WithEvent("landed", Reading.Of<IMyTerminalBlock>(_ => Landed), SignalEdge.Rising, "lands").Looked("a test's signal");

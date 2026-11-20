@@ -118,7 +118,7 @@ public class NumberBoxTests
         form.Show(new[]
         {
             Field.Between("speed", "0", "5"),
-            new Field { Name = "count", Entry = FieldInput.Whole },
+            new Field { Name = "count", Entry = FieldInput.Integer },
             Field.Called("label")
         }, new[] { "", "", "" }, new ColorOffer(new Hsv[0], null, null), new Texts());
 

@@ -13,13 +13,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly OwnValue Projecting = OwnValue.Flag(Reading.Of<IMyProjector>(projector => projector.IsProjecting));
 
-        static readonly OwnValue Left = OwnValue.Whole<IMyProjector>(projector => projector.RemainingBlocks);
+        static readonly OwnValue Left = OwnValue.Integer<IMyProjector>(projector => projector.RemainingBlocks);
 
-        static readonly OwnValue ArmorLeft = OwnValue.Whole<IMyProjector>(projector => projector.RemainingArmorBlocks);
+        static readonly OwnValue ArmorLeft = OwnValue.Integer<IMyProjector>(projector => projector.RemainingArmorBlocks);
 
-        static readonly OwnValue Total = OwnValue.Whole<IMyProjector>(projector => projector.TotalBlocks);
+        static readonly OwnValue Total = OwnValue.Integer<IMyProjector>(projector => projector.TotalBlocks);
 
-        static readonly OwnValue Ready = OwnValue.Whole<IMyProjector>(projector => projector.BuildableBlocksCount);
+        static readonly OwnValue Ready = OwnValue.Integer<IMyProjector>(projector => projector.BuildableBlocksCount);
 
         // The terminal's own Remove, which every player sees go.
         static readonly OwnAction Removes = OwnAction.Of<IMyProjector>(projector => projector.SetProjectedGrid(null));

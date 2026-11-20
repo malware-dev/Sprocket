@@ -82,10 +82,10 @@ public sealed class BlockDefinitions
 
     static Vector3I Cell(XElement element)
     {
-        return new Vector3I(Whole(element, "x"), Whole(element, "y"), Whole(element, "z"));
+        return new Vector3I(Integer(element, "x"), Integer(element, "y"), Integer(element, "z"));
     }
 
-    static int Whole(XElement element, string axis)
+    static int Integer(XElement element, string axis)
     {
         var said = (string)element.Attribute(axis);
         return said == null ? 0 : int.Parse(said, CultureInfo.InvariantCulture);

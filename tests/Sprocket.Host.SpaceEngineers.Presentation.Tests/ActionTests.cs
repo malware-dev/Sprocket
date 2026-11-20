@@ -353,9 +353,9 @@ public class ActionTests
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("SetColor", act.ActionId);
         Assert.Equal(3, act.Arguments.Count);
-        Assert.Equal(255, act.Arguments[0].Whole);
-        Assert.Equal(136, act.Arguments[1].Whole);
-        Assert.Equal(0, act.Arguments[2].Whole);
+        Assert.Equal(255, act.Arguments[0].Integer);
+        Assert.Equal(136, act.Arguments[1].Integer);
+        Assert.Equal(0, act.Arguments[2].Integer);
     }
 
     /// <summary>
@@ -544,7 +544,7 @@ public class ActionTests
         // What the block is told, which is the number the game keeps its charge modes as.
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Literal held = Assert.Single(act.Arguments);
-        Assert.Equal(1, held.Whole);
+        Assert.Equal(1, held.Integer);
 
         // And what a person reads, which is neither the number nor anywhere in the program.
         Assert.True(screen.Shows("Recharge"), "the step does not say what was chosen");
@@ -598,7 +598,7 @@ public class ActionTests
         screen.Do("enter");
 
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(2, Assert.Single(act.Arguments).Whole);
+        Assert.Equal(2, Assert.Single(act.Arguments).Integer);
         Assert.True(screen.Shows("Left"), "the step does not say what was chosen");
     }
 
@@ -618,7 +618,7 @@ public class ActionTests
 
         var act = screen.Editor.Program.Sequences.SelectMany(sequence => sequence.Steps).OfType<Act>()
             .Single(step => step.ActionId == Framework.Game.Blocks.Vent.Depressurize);
-        Assert.Equal(Framework.Game.Blocks.Vent.Hold, Assert.Single(act.Arguments).Whole);
+        Assert.Equal(Framework.Game.Blocks.Vent.Hold, Assert.Single(act.Arguments).Integer);
     }
 
     /// <summary>The fields of a form end together against the right, whatever their widths: a dial with its box, a number, a list.</summary>

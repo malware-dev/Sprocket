@@ -114,9 +114,9 @@ public class WatchedNumberTests
     {
         var rig = Simulation.Fresh();
         var by = Field.Called("by");
-        by.Entry = FieldInput.Decimal;
+        by.Entry = FieldInput.Real;
         rig.Editor.World.Entities.First(entity => entity.Name == "Airlock Light").Kind.WithValue("brighter", "brighter",
-            OwnValue.Number<Sandbox.ModAPI.IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by))
+            OwnValue.Real<Sandbox.ModAPI.IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by))
             .Looked("A test value.");
         rig.Editor.NewSystem("Airlock");
         rig.Editor.PressStart(SentenceText.WhenWord);
@@ -188,9 +188,9 @@ public class WatchedNumberTests
     {
         var rig = Simulation.Fresh();
         var by = Field.Called("by");
-        by.Entry = FieldInput.Whole;
+        by.Entry = FieldInput.Integer;
         rig.Editor.World.Entities.First(entity => entity.Name == "Airlock Light").Kind.WithValue("brighter", "brighter",
-                OwnValue.Number<Sandbox.ModAPI.IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by))
+                OwnValue.Real<Sandbox.ModAPI.IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by))
             .Looked("A test value.");
         rig.Editor.NewSystem("Airlock");
         rig.Editor.PressStart(SentenceText.WhenWord);

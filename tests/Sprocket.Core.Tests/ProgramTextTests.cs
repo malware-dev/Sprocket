@@ -333,7 +333,7 @@ public class ProgramTextTests
         Assert.Equal(ReachKind.Native, own.Form);
         Assert.Equal(Blocks.Rotor.RotateTo, own.ActionId);
         Assert.Equal(2, own.Arguments.Count);
-        Assert.Equal(90, own.Arguments[0].Whole);
+        Assert.Equal(90, own.Arguments[0].Integer);
         Assert.Equal(2.5, own.Arguments[1].Real);
 
         var value = Assert.IsType<Act>(steps[2]);
@@ -385,9 +385,9 @@ public class ProgramTextTests
         Assert.Equal(new[] { "light" }, back.Targets);
         Assert.Equal(3, back.Arguments.Count);
         Assert.Equal(ValueKind.Integer, back.Arguments[0].Kind);
-        Assert.Equal(255, back.Arguments[0].Whole);
-        Assert.Equal(136, back.Arguments[1].Whole);
-        Assert.Equal(0, back.Arguments[2].Whole);
+        Assert.Equal(255, back.Arguments[0].Integer);
+        Assert.Equal(136, back.Arguments[1].Integer);
+        Assert.Equal(0, back.Arguments[2].Integer);
 
         var kinds = Assert.IsType<Act>(after.Sequences[0].Steps[1]);
         Assert.Equal(4, kinds.Arguments.Count);

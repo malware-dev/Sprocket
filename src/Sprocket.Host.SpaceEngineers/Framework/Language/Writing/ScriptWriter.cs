@@ -310,8 +310,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return spelt.ToString();
         }
 
-        /// <summary>A whole number.</summary>
-        public ScriptWriter Whole(long value)
+        /// <summary>An integer.</summary>
+        public ScriptWriter Integer(long value)
         {
             Space();
             _text.Append(value.ToString(CultureInfo.InvariantCulture));
@@ -382,7 +382,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>Three whole numbers in brackets: <c>(3 0 -2)</c>.</summary>
+        /// <summary>Three integers in brackets: <c>(3 0 -2)</c>.</summary>
         public ScriptWriter Vector(int x, int y, int z)
         {
             Space();

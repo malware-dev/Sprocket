@@ -429,7 +429,7 @@ public abstract class Fitting
     /// Gives it one that may only be a listed few, each word standing for what the block is told.
     /// </summary>
     /// <remarks>
-    /// What a combo box on the terminal amounts to. The game reports one as a whole number and keeps
+    /// What a combo box on the terminal amounts to. The game reports one as an integer and keeps
     /// the words on the control, so the two lists are written out here the same way they arrive.
     /// </remarks>
     public Fitting Carrying(string id, string text, params string[] wordsAndMeanings)

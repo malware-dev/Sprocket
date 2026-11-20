@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly OwnValue Drilling = OwnValue.Flag(Reading.Of<IMyShipDrill>(drill => drill.IsActivated));
 
         static readonly OwnValue Mode = OwnValue.OneOf<IMyShipDrill>(ChoiceTypes.DrillMode, drill => drill.TerrainClearingMode ? 1 : 0)
-            .Writing<IMyShipDrill>((drill, mode) => drill.TerrainClearingMode = mode.Whole == 1);
+            .Writing<IMyShipDrill>((drill, mode) => drill.TerrainClearingMode = mode.Integer == 1);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

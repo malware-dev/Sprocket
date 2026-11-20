@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return Text(text);
         }
 
-        /// <summary>The whole number, if that is what this is.</summary>
+        /// <summary>The integer, if that is what this is.</summary>
         public bool TryInteger(ValueKind kind, EntityValue value, out long integer)
         {
             integer = value.Bits;
@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>
         /// This measured as a number, whatever it is.
         /// </summary>
-        /// <remarks>A flag reads one or zero. Never a way to get a whole number back: past 2^53 a double cannot carry one.</remarks>
+        /// <remarks>A flag reads one or zero. Never a way to get an integer back: past 2^53 a double cannot carry one.</remarks>
         public double AsNumber(ValueKind kind, EntityValue value)
         {
             return kind == ValueKind.Real ? BitConverter.Int64BitsToDouble(value.Bits) : value.Bits;

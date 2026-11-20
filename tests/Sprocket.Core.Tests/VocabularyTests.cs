@@ -341,9 +341,9 @@ public class VocabularyTests
         var ship = new Ship();
         var ways = new[] { "up", "down" };
         var amount = Field.Between("by", "0", "10");
-        amount.Entry = FieldInput.Decimal;
+        amount.Entry = FieldInput.Real;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
-            OwnValue.Number<IMyTerminalBlock, double>(arguments => arguments[1].Real, (_, more) => more)
+            OwnValue.Real<IMyTerminalBlock, double>(arguments => arguments[1].Real, (_, more) => more)
                 .Taking(Field.Among("way", ways, ways), amount));
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
@@ -370,7 +370,7 @@ public class VocabularyTests
         var ship = new Ship();
         var level = 0.0;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("level", "level",
-                OwnValue.Number<IMyTerminalBlock>(_ => level).Writing<IMyTerminalBlock>((_, value) => level = value.Number))
+                OwnValue.Real<IMyTerminalBlock>(_ => level).Writing<IMyTerminalBlock>((_, value) => level = value.Number))
             .Looked("A test value.");
 
         var cycle = ship.Program.AddSequence((Trigger)null!);
@@ -400,7 +400,7 @@ public class VocabularyTests
         var ship = new Ship();
         var at = 0;
         ship.Rig.Entity(ship.Door.Id).Kind.WithValue("speed", "speed",
-                OwnValue.OneOf<IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "level", "low", "high"), _ => at).Writing<IMyTerminalBlock>((_, given) => at = (int)given.Whole))
+                OwnValue.OneOf<IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "level", "low", "high"), _ => at).Writing<IMyTerminalBlock>((_, given) => at = (int)given.Integer))
             .Looked("A test value.");
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
@@ -424,7 +424,7 @@ public class VocabularyTests
         var ship = new Ship();
         var level = 0.0;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("level", "level",
-                OwnValue.Number<IMyTerminalBlock>(_ => level).Writing<IMyTerminalBlock>((_, value) => level = value.Number))
+                OwnValue.Real<IMyTerminalBlock>(_ => level).Writing<IMyTerminalBlock>((_, value) => level = value.Number))
             .Looked("A test value.").Between("0", "10");
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
@@ -444,7 +444,7 @@ public class VocabularyTests
         var kind = new EntityKind("Test/Block", "Block");
         Assert.Throws<InvalidOperationException>(() => kind.Between("0", "10"));
 
-        kind.WithValue("level", "level", OwnValue.Number<IMyTerminalBlock>(_ => 0.0))
+        kind.WithValue("level", "level", OwnValue.Real<IMyTerminalBlock>(_ => 0.0))
             .WithEvent("bumped", Reading.Of<IMyTerminalBlock>(_ => false), SignalEdge.Rising, "bumped");
         Assert.Throws<InvalidOperationException>(() => kind.Between("0", "10"));
     }
@@ -594,9 +594,9 @@ public class VocabularyTests
     {
         var ship = new Ship();
         var by = Field.Called("by");
-        by.Entry = FieldInput.Decimal;
+        by.Entry = FieldInput.Real;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
-            OwnValue.Number<IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by));
+            OwnValue.Real<IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by));
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
         var test = new Comparison

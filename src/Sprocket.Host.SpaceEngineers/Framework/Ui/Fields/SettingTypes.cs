@@ -18,9 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
             switch (field.Entry)
             {
-                case FieldInput.Whole:
+                case FieldInput.Integer:
                     return "integer";
-                case FieldInput.Decimal:
+                case FieldInput.Real:
                     return "real";
                 case FieldInput.Text:
                     return "text";
@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             return null;
         }
 
-        /// <summary>Whether a setting holding <paramref name="type" /> may stand in for what <paramref name="field" /> asks for: one of its type, or a whole number for a real.</summary>
+        /// <summary>Whether a setting holding <paramref name="type" /> may stand in for what <paramref name="field" /> asks for: one of its type, or an integer for a real.</summary>
         public static bool Fits(Field field, string type)
         {
             var wanted = Of(field);

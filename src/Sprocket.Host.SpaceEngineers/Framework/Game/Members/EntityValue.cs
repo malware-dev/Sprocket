@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         }
 
         /// <summary>
-        /// A whole number, held exactly.
+        /// An integer, held exactly.
         /// </summary>
         /// <remarks>An entity id runs to seventeen digits, past the 2^53 a double holds exactly.</remarks>
         public static EntityValue Of(long integer)

@@ -24,13 +24,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly OwnValue Controlled = OwnValue.Flag(Reading.Of<IMyCockpit>(cockpit => cockpit.IsUnderControl));
 
-        static readonly OwnValue Air = OwnValue.Number<IMyCockpit>(cockpit => cockpit.OxygenFilledRatio * 100.0);
+        static readonly OwnValue Air = OwnValue.Real<IMyCockpit>(cockpit => cockpit.OxygenFilledRatio * 100.0);
 
-        static readonly OwnValue Natural = OwnValue.Number<IMyCockpit>(cockpit => cockpit.GetNaturalGravity().Length() / G);
+        static readonly OwnValue Natural = OwnValue.Real<IMyCockpit>(cockpit => cockpit.GetNaturalGravity().Length() / G);
 
-        static readonly OwnValue Artificial = OwnValue.Number<IMyCockpit>(cockpit => cockpit.GetArtificialGravity().Length() / G);
+        static readonly OwnValue Artificial = OwnValue.Real<IMyCockpit>(cockpit => cockpit.GetArtificialGravity().Length() / G);
 
-        static readonly OwnValue Mass = OwnValue.Number<IMyCockpit>(cockpit => cockpit.CalculateShipMass().TotalMass);
+        static readonly OwnValue Mass = OwnValue.Real<IMyCockpit>(cockpit => cockpit.CalculateShipMass().TotalMass);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

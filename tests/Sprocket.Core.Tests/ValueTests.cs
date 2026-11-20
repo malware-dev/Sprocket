@@ -30,7 +30,7 @@ public class ValueTests
     }
 
     [Fact]
-    public void TwoWholeNumbersAreComparedAsWholeNumbers()
+    public void TwoIntegersAreComparedAsIntegers()
     {
         var one = EntityValue.Of(OneId);
         var other = EntityValue.Of(TheNextIdAlong);
@@ -41,14 +41,14 @@ public class ValueTests
     }
 
     [Fact]
-    public void AWholeNumberKeepsEveryDigit()
+    public void AnIntegerKeepsEveryDigit()
     {
         long back;
         Assert.True(_values.TryInteger(ValueKind.Integer, EntityValue.Of(OneId), out back));
         Assert.Equal(OneId, back);
     }
 
-    /// <summary>A real survives sharing one field with whole numbers and colors.</summary>
+    /// <summary>A real survives sharing one field with integers and colors.</summary>
     [Fact]
     public void ARealKeepsItsValue()
     {

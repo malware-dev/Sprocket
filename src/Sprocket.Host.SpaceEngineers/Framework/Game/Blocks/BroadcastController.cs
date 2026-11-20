@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static Field AskedMessage()
         {
             var message = Field.Between("message", "1", Saved.ToString());
-            message.Entry = FieldInput.Whole;
+            message.Entry = FieldInput.Integer;
             message.Needed = true;
             return message;
         }
@@ -100,7 +100,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             /// <summary>The message a step sending a saved one was given.</summary>
             public static Numbered Read(IList<Literal> arguments)
             {
-                return new Numbered { Index = arguments != null && arguments.Count > 0 ? (int)arguments[0].Whole - 1 : -1 };
+                return new Numbered { Index = arguments != null && arguments.Count > 0 ? (int)arguments[0].Integer - 1 : -1 };
             }
         }
     }

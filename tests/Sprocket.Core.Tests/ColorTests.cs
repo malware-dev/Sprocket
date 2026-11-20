@@ -102,11 +102,11 @@ public class ColorTests
         Assert.Equal(new[] { said }, into);
     }
 
-    static List<Literal> Values(params long[] wholes)
+    static List<Literal> Values(params long[] integers)
     {
         var said = new List<Literal>();
-        foreach (long whole in wholes)
-            said.Add(Literal.Of(whole));
+        foreach (long integer in integers)
+            said.Add(Literal.Of(integer));
 
         return said;
     }

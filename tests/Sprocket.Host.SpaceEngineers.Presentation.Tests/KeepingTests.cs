@@ -40,7 +40,7 @@ public class KeepingTests
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(5L, Assert.Single(act.Arguments).Whole);
+        Assert.Equal(5L, Assert.Single(act.Arguments).Integer);
     }
 
     /// <summary>

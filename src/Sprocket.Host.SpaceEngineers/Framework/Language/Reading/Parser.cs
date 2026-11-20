@@ -227,8 +227,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (first.Key != Keyword.None || first.Head != ScriptFormat.Header || first.ValueAt(0).Form != ValueForm.Integer)
                 return;
 
-            var version = first.Whole(0);
-            var draft = first.Says(1, Keyword.Alpha) ? first.Whole(2) : int.MaxValue;
+            var version = first.Integer(0);
+            var draft = first.Says(1, Keyword.Alpha) ? first.Integer(2) : int.MaxValue;
             _lexer.Earlier = version < Keywords.ContextualVersion || (version == Keywords.ContextualVersion && draft < Keywords.ContextualDraft);
             _reading.Earlier = _lexer.Earlier;
         }
@@ -483,7 +483,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
                 case TokenKind.Integer:
                     Step();
-                    return new Value(ValueForm.Integer, null, token.Whole);
+                    return new Value(ValueForm.Integer, null, token.Integer);
 
                 case TokenKind.Real:
                     Step();
@@ -491,11 +491,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
                 case TokenKind.Duration:
                     Step();
-                    return new Value(ValueForm.Duration, token.Text[0] == 's' ? Seconds : null, token.Whole, token.Real);
+                    return new Value(ValueForm.Duration, token.Text[0] == 's' ? Seconds : null, token.Integer, token.Real);
 
                 case TokenKind.Color:
                     Step();
-                    return new Value(ValueForm.Color, null, token.Whole);
+                    return new Value(ValueForm.Color, null, token.Integer);
 
                 case TokenKind.ListOpen:
                     return List();
@@ -717,7 +717,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             for (var i = 0; i < 3; i++)
             {
                 if (_token.Kind == TokenKind.Integer)
-                    items.Add(new Value(ValueForm.Integer, null, _token.Whole));
+                    items.Add(new Value(ValueForm.Integer, null, _token.Integer));
                 else if (_token.Kind == TokenKind.Real)
                     items.Add(new Value(ValueForm.Real, null, 0, _token.Real));
                 else

@@ -27,10 +27,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return new Literal(ValueKind.Flag, EntityValue.Of(flag), null);
         }
 
-        /// <summary>A whole number.</summary>
-        public static Literal Of(long whole)
+        /// <summary>An integer.</summary>
+        public static Literal Of(long integer)
         {
-            return new Literal(ValueKind.Integer, EntityValue.Of(whole), null);
+            return new Literal(ValueKind.Integer, EntityValue.Of(integer), null);
         }
 
         /// <summary>A real number.</summary>
@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public bool IsKinded => Kind == ValueKind.Setting && Value.Bits != 0;
 
         /// <summary>It as a length of time, for <see cref="ValueKind.Duration" />.</summary>
-        public Duration Length => Text == InSeconds ? Duration.OfSeconds(Real) : Duration.OfTicks((int)Whole);
+        public Duration Length => Text == InSeconds ? Duration.OfSeconds(Real) : Duration.OfTicks((int)Integer);
 
         /// <summary>The names, for <see cref="ValueKind.Slots" />, and null for the rest.</summary>
         public IList<string> Names { get; private set; }
@@ -136,20 +136,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>It as a flag, for <see cref="ValueKind.Flag" />.</summary>
         public bool Flag => Value.Bits != 0;
 
-        /// <summary>It as a whole number, for <see cref="ValueKind.Integer" />.</summary>
-        public long Whole => Value.Bits;
+        /// <summary>It as an integer, for <see cref="ValueKind.Integer" />.</summary>
+        public long Integer => Value.Bits;
 
         /// <summary>It as a real number, for <see cref="ValueKind.Real" />.</summary>
         public double Real => BitConverter.Int64BitsToDouble(Value.Bits);
 
         /// <summary>What it is as a number, whether it was written whole or with a point, and nought for anything else.</summary>
-        /// <remarks><see cref="Real" /> read over a whole number is not the number at all.</remarks>
+        /// <remarks><see cref="Real" /> read over an integer is not the number at all.</remarks>
         public double Number
         {
             get
             {
                 if (Kind == ValueKind.Integer)
-                    return Whole;
+                    return Integer;
 
                 return Kind == ValueKind.Real ? Real : 0;
             }
@@ -193,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     return Flag ? "on" : "off";
 
                 if (Kind == ValueKind.Integer)
-                    return Whole.ToString(CultureInfo.InvariantCulture);
+                    return Integer.ToString(CultureInfo.InvariantCulture);
 
                 if (Kind == ValueKind.Real)
                     return Real.ToString("R", CultureInfo.InvariantCulture);
@@ -205,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>
         /// This as the game will take it as <paramref name="type" />, or false where it cannot be one.
         /// </summary>
-        /// <remarks>A whole number also fits a real type, and a value must be within what the type holds: 300 is no byte.</remarks>
+        /// <remarks>An integer also fits a real type, and a value must be within what the type holds: 300 is no byte.</remarks>
         public bool Fits(Primitive type, out Literal became)
         {
             became = this;
@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         bool Within(long least, long most)
         {
-            return Kind == ValueKind.Integer && Whole >= least && Whole <= most;
+            return Kind == ValueKind.Integer && Integer >= least && Integer <= most;
         }
 
         /// <summary>
@@ -260,21 +260,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 case Primitive.Boolean:
                     return Flag;
                 case Primitive.Byte:
-                    return (byte)Whole;
+                    return (byte)Integer;
                 case Primitive.SByte:
-                    return (sbyte)Whole;
+                    return (sbyte)Integer;
                 case Primitive.Int16:
-                    return (short)Whole;
+                    return (short)Integer;
                 case Primitive.UInt16:
-                    return (ushort)Whole;
+                    return (ushort)Integer;
                 case Primitive.Int32:
-                    return (int)Whole;
+                    return (int)Integer;
                 case Primitive.UInt32:
-                    return (uint)Whole;
+                    return (uint)Integer;
                 case Primitive.Int64:
-                    return Whole;
+                    return Integer;
                 case Primitive.UInt64:
-                    return (ulong)Whole;
+                    return (ulong)Integer;
                 case Primitive.Single:
                     return (float)Number;
                 case Primitive.Double:
@@ -289,7 +289,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         }
 
         /// <summary>This as <paramref name="kind" />, or false where it cannot be one.</summary>
-        /// <remarks>A whole number also becomes a real one, and a name also becomes text; every other kind only becomes itself.</remarks>
+        /// <remarks>An integer also becomes a real one, and a name also becomes text; every other kind only becomes itself.</remarks>
         public bool Becomes(ValueKind kind, out Literal became)
         {
             became = this;
@@ -305,7 +305,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             if (Kind != ValueKind.Integer || kind != ValueKind.Real)
                 return false;
 
-            became = Of((double)Whole);
+            became = Of((double)Integer);
             return true;
         }
 

@@ -27,9 +27,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly OwnAction Moves = OwnAction.Of<IMyTerminalBlock, Move>(Move.Read, Started, Arrives, Finished, Stuck);
 
-        static readonly OwnValue Fill = OwnValue.Number<IMyTerminalBlock, Held>(Held.Read, (block, held) => block.GetInventory(held.At).VolumeFillFactor * 100d);
+        static readonly OwnValue Fill = OwnValue.Real<IMyTerminalBlock, Held>(Held.Read, (block, held) => block.GetInventory(held.At).VolumeFillFactor * 100d);
 
-        static readonly OwnValue Mass = OwnValue.Number<IMyTerminalBlock, Held>(Held.Read, (block, held) => (double)block.GetInventory(held.At).CurrentMass);
+        static readonly OwnValue Mass = OwnValue.Real<IMyTerminalBlock, Held>(Held.Read, (block, held) => (double)block.GetInventory(held.At).CurrentMass);
 
         /// <inheritdoc />
         public override string Id => TypeId;
@@ -121,7 +121,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             field.SaidEmpty = "all";
             field.UnitFollows = "items";
             field.UnitOf = Inventory.UnitOf;
-            field.Entry = FieldInput.Decimal;
+            field.Entry = FieldInput.Real;
             field.MayBeLeftOut = true;
             field.Default = "";
             return field;
@@ -131,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static Field WhenStuck()
         {
             var field = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { Literal.Of(MoveOn).Said, Literal.Of(Hold).Said });
-            field.Entry = FieldInput.Whole;
+            field.Entry = FieldInput.Integer;
             field.Default = "hold";
             field.Quiet = "hold";
             field.Lead = "or";

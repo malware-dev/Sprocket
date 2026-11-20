@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
     /// <summary>How a reader takes the attributes of a statement: the ones Sprocket uses by name, and the rest held as written.</summary>
     public static class ScriptAttributes
     {
-        /// <summary>A system's highest sequence number handed out, a whole number: <c>#@ lastSequence: 7</c>.</summary>
+        /// <summary>A system's highest sequence number handed out, an integer: <c>#@ lastSequence: 7</c>.</summary>
         public const string LastSequence = "lastSequence";
 
         /// <summary>The block a system lists on alone, text naming a declared block: <c>#@ listedOn: "Back Office PB"</c>.</summary>

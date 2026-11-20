@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         static readonly MyItemType Ice = MyItemType.MakeOre("Ice");
 
         // Ice is read off the generator's inventory, in kilograms.
-        static readonly OwnValue Held = OwnValue.Number<IMyGasGenerator>(generator =>
+        static readonly OwnValue Held = OwnValue.Real<IMyGasGenerator>(generator =>
         {
             var inventory = generator.GetInventory(0);
             return inventory == null ? 0.0 : (double)inventory.GetItemAmount(Ice);

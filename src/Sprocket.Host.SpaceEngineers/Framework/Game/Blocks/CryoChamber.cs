@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             chamber.Pilot == null ? "" : chamber.Pilot.DisplayName);
 
         // The game reads the chamber's air as a fraction; every fill Sprocket says is in percent.
-        static readonly OwnValue Air = OwnValue.Number<IMyCryoChamber>(chamber => chamber.OxygenFilledRatio * 100.0);
+        static readonly OwnValue Air = OwnValue.Real<IMyCryoChamber>(chamber => chamber.OxygenFilledRatio * 100.0);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

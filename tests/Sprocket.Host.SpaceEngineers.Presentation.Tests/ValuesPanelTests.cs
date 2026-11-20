@@ -40,7 +40,7 @@ public class ValuesPanelTests
         Assert.Single(screen.Editor.Program.Sequences[0].Steps);
 
         screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);
-        Assert.Equal(2, Assert.Single(Step(screen).Arguments).Whole);
+        Assert.Equal(2, Assert.Single(Step(screen).Arguments).Integer);
     }
 
     /// <summary>A value the block refuses keeps the panel open, saying why, and the step keeps what it gave.</summary>
@@ -57,7 +57,7 @@ public class ValuesPanelTests
         var giving = Page(screen).Giving;
         Assert.NotNull(giving);
         Assert.Equal("Falloff must be between 0 and 2.", giving.Why);
-        Assert.Equal(2, Assert.Single(Step(screen).Arguments).Whole);
+        Assert.Equal(2, Assert.Single(Step(screen).Arguments).Integer);
     }
 
     /// <summary>Escape puts the panel away and leaves the step as it was.</summary>
@@ -72,7 +72,7 @@ public class ValuesPanelTests
         screen.Run(2);
 
         Assert.Null(Page(screen).Giving);
-        Assert.Equal(2, Assert.Single(Step(screen).Arguments).Whole);
+        Assert.Equal(2, Assert.Single(Step(screen).Arguments).Integer);
     }
 
     /// <summary>What an if compares a number with is changed in a panel under it, as one change.</summary>
@@ -90,7 +90,7 @@ public class ValuesPanelTests
 
         var sequence = screen.Editor.Program.Sequences[0];
         var opens = sequence.Steps.OfType<If>().Single();
-        Assert.Equal(1, opens.Compared.Value.Whole);
+        Assert.Equal(1, opens.Compared.Value.Integer);
         screen.Editor.StepRows()[sequence.Steps.IndexOf(opens)].Slots.OfType<ArgumentsSlot>()
             .Single(part => part.Holds == ArgumentRole.Checked).Opens!.Execute();
         screen.Run(2);

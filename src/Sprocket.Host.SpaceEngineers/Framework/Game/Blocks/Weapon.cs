@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         // Every vanilla weapon block is also the game's gun object, which counts the rounds loaded and the magazines of the
         // chosen kind in its inventory, in rounds.
-        static readonly OwnValue Rounds = OwnValue.Whole<IMyGunObject<MyGunBase>>(gun => gun.GetTotalAmmunitionAmount());
+        static readonly OwnValue Rounds = OwnValue.Integer<IMyGunObject<MyGunBase>>(gun => gun.GetTotalAmmunitionAmount());
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

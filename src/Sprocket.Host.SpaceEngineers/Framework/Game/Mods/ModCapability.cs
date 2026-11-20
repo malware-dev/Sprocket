@@ -184,9 +184,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                 case SprocketWire.TypeFlag:
                     return OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block => As(Read(read, block), false)));
                 case SprocketWire.TypeReal:
-                    return OwnValue.Number<IMyTerminalBlock>(block => Number(Read(read, block)));
+                    return OwnValue.Real<IMyTerminalBlock>(block => Number(Read(read, block)));
                 case SprocketWire.TypeInteger:
-                    return OwnValue.Whole<IMyTerminalBlock>(block => As(Read(read, block), 0L));
+                    return OwnValue.Integer<IMyTerminalBlock>(block => As(Read(read, block), 0L));
                 case SprocketWire.TypeText:
                     return OwnValue.Text<IMyTerminalBlock>(block => Read(read, block) as string ?? "");
                 case SprocketWire.TypeColor:
@@ -215,9 +215,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                 case SprocketWire.TypeFlag:
                     return OwnValue.Flag<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), false));
                 case SprocketWire.TypeReal:
-                    return OwnValue.Number<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => Number(ask(block, arguments)));
+                    return OwnValue.Real<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => Number(ask(block, arguments)));
                 case SprocketWire.TypeInteger:
-                    return OwnValue.Whole<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), 0L));
+                    return OwnValue.Integer<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), 0L));
                 case SprocketWire.TypeText:
                     return OwnValue.Text<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => ask(block, arguments) as string ?? "");
                 case SprocketWire.TypeColor:
@@ -275,7 +275,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             {
                 ModRegistration owner;
                 var choices = _members.FindType(ModWire.Part<string>(member, SprocketWire.Of), out owner);
-                var at = (int)given.Whole;
+                var at = (int)given.Integer;
                 if (choices == null || at < 0 || at >= choices.Choices.Length)
                     return;
 

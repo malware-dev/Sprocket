@@ -30,8 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 if (value.Kind != ValueKind.Integer)
                     return "";
 
-                long whole = value.Whole;
-                parts[i] = (byte)(whole < 0 ? 0 : whole > 255 ? 255 : whole);
+                long integer = value.Integer;
+                parts[i] = (byte)(integer < 0 ? 0 : integer > 255 ? 255 : integer);
             }
 
             return $"#{Hex(parts[0])}{Hex(parts[1])}{Hex(parts[2])}";
@@ -76,9 +76,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 return;
             }
 
-            into.Add(Whole(shade.R));
-            into.Add(Whole(shade.G));
-            into.Add(Whole(shade.B));
+            into.Add(Integer(shade.R));
+            into.Add(Integer(shade.G));
+            into.Add(Integer(shade.B));
 
             for (var i = 3; i < count; i++)
                 into.Add("");
@@ -133,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return part.ToString("X2", CultureInfo.InvariantCulture);
         }
 
-        static string Whole(byte part)
+        static string Integer(byte part)
         {
             return part.ToString(CultureInfo.InvariantCulture);
         }

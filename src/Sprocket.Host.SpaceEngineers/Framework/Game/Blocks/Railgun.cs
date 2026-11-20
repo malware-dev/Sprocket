@@ -25,13 +25,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// <summary>A railgun's values, each reading the block's capacitor.</summary>
         public Railgun()
         {
-            _charge = OwnValue.Number<IMyTerminalBlock>(block =>
+            _charge = OwnValue.Real<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
                 return capacitor == null || capacitor.Capacity <= 0f ? 0d : 100d * capacitor.StoredPower / capacitor.Capacity;
             });
 
-            _remaining = OwnValue.Number<IMyTerminalBlock>(block =>
+            _remaining = OwnValue.Real<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
                 return capacitor?.TimeRemaining ?? 0d;

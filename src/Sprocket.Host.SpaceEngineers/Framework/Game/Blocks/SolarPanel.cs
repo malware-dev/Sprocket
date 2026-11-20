@@ -9,11 +9,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <summary>A solar panel, which takes no orders: read for the sunlight it catches and the power it gives.</summary>
     public sealed class SolarPanel : Capability
     {
-        static readonly OwnValue Sunlight = OwnValue.Number<IMySolarPanel>((panel, seen) => Lit(panel, seen));
+        static readonly OwnValue Sunlight = OwnValue.Real<IMySolarPanel>((panel, seen) => Lit(panel, seen));
 
-        static readonly OwnValue Output = OwnValue.Number<IMySolarPanel>(panel => panel.CurrentOutput);
+        static readonly OwnValue Output = OwnValue.Real<IMySolarPanel>(panel => panel.CurrentOutput);
 
-        static readonly OwnValue MostOut = OwnValue.Number<IMySolarPanel>(panel => panel.MaxOutput);
+        static readonly OwnValue MostOut = OwnValue.Real<IMySolarPanel>(panel => panel.MaxOutput);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
