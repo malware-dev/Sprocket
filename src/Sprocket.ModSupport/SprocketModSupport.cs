@@ -29,7 +29,8 @@ namespace Sprocket.ModSupport
         /// </summary>
         /// <remarks>
         /// Called from the mod's session component's <c>LoadData</c> or later, never a constructor or static field; the result
-        /// is disposed in <c>UnloadData</c>. A mistake in what the mod gives throws, so it shows on the first load.
+        /// is disposed in <c>UnloadData</c>. A bad namespace or a missing name throws here; a mistake in what
+        /// <paramref name="build" /> describes refuses the registration, logged under the mod's name.
         /// </remarks>
         public static IDisposable Register(SprocketMod mod, Action<SprocketModBuilder> build)
         {
