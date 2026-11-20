@@ -14,7 +14,7 @@ namespace Sprocket.Tests;
 /// </summary>
 public class KeywordTests
 {
-    static readonly string Version = $"{ScriptFormat.Line}\n\n";
+    static readonly string Version = $"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}\n\n";
 
     const string Blueprint = "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Words\n{\n";
 

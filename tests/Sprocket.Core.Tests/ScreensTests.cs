@@ -263,7 +263,7 @@ public class ScreensTests
         var (ship, board) = Built();
         var (program, _, _, _) = Slotted(ship, board, 2, ScreenType.ShowText, Literal.Of("Docked"));
         var values = new Values();
-        var text = ProgramWriter.Save(program, values).Replace("sprocket 2", "sprocket 1").Replace("sprocket.get_screen(", "sprocket.screen(");
+        var text = ProgramWriter.Save(program, values).Replace("sprocket 2 alpha 2", "sprocket 1").Replace("sprocket.get_screen(", "sprocket.screen(");
 
         var read = new Automation();
         Assert.Equal("", ProgramReader.Load(text, read, values));

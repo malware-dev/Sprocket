@@ -58,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>
         /// For a setting, the name of how its value is edited and shown beyond its type, such as <c>percent</c>; or empty for
-        /// its type alone. A name no editor of this build has is kept as written.
+        /// its type alone. A name no editor of this build has is written back as it was read.
         /// </summary>
         public string Editor { get; set; } = "";
 

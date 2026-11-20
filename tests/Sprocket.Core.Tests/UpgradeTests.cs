@@ -103,7 +103,7 @@ public class UpgradeTests
         Assert.Equal(ReachKind.Action, arm.Form);
 
         var written = ProgramWriter.Save(program, values);
-        Assert.StartsWith($"{ScriptFormat.Line}", written);
+        Assert.StartsWith($"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}", written);
         Assert.Contains("call sprocket.detach on [ stage ]", written);
         Assert.Contains("call Detach on [ arm ]", written);
         Assert.Contains("call sprocket.detach on [ charge ]", written);
@@ -380,7 +380,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith($"{ScriptFormat.Line}", written);
+        Assert.StartsWith($"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}", written);
         Assert.DoesNotContain("sprocket.'on'", written);
         Assert.DoesNotContain("sprocket.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -435,7 +435,7 @@ public class UpgradeTests
         var text = Switching.Replace("sprocket 1 alpha 14", header);
 
         Assert.Equal("", ProgramReader.Lone(text, new Values(), out var read));
-        Assert.StartsWith("sprocket 2", ProgramWriter.Blueprint(read!));
+        Assert.StartsWith("sprocket 2 alpha 2", ProgramWriter.Blueprint(read!));
     }
 
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>

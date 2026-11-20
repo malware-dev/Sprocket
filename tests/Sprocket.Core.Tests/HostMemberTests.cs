@@ -77,7 +77,7 @@ public class HostMemberTests
             var declared = ProgramWriter.Save(declaring, Rig.Values).Split('\n').Single(line => line.StartsWith("let "));
             body = body.Replace("[ pad ]", $"[ {pad} ]");
 
-            var text = "sprocket 2\n\n"
+            var text = "sprocket 2 alpha 2\n\n"
                        + declared + "\n\n"
                        + "system \"4b6e1f20-8c3a-4d5e-9f71-2a3b4c5d6e7f\" as Malforge.Hover\n{\n"
                        + body

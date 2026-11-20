@@ -309,7 +309,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             part.Short = attribute.Value.Word;
         }
 
-        /// <summary><c>#@ editor: "percent"</c> on a setting's slot: how its value is edited and shown beyond its type, text; a name this build has no editor for is kept as written.</summary>
+        /// <summary><c>#@ editor: "percent"</c> on a setting's slot: how its value is edited and shown beyond its type, text; a name this build has no editor for is read and written back as it was.</summary>
         static void Editor(Statement statement, Part part, ScriptTrouble trouble)
         {
             ScriptAttribute attribute;
