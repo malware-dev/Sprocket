@@ -371,7 +371,7 @@ namespace Sprocket.GameTests
         }
 
         /// <summary>The text on the system clipboard, or null where it holds none or another program keeps it open past a few tries.</summary>
-        static string ReadClipboard()
+        public static string ReadClipboard()
         {
             string text = null;
             var thread = new Thread(() =>
@@ -395,7 +395,8 @@ namespace Sprocket.GameTests
             return text;
         }
 
-        static void WriteClipboard(string text)
+        /// <summary>Puts <paramref name="text" /> on the system clipboard.</summary>
+        public static void WriteClipboard(string text)
         {
             MyVRage.Platform.System.Clipboard = text;
         }

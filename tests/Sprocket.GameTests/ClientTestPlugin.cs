@@ -239,7 +239,7 @@ namespace Sprocket.GameTests
                     yield return shot.Current;
             }
 
-            if (Wants("kept") || Wants("editor") || Wants("menus"))
+            if (Wants("kept") || Wants("editor") || Wants("menus") || Wants("callouts") || Wants("settings") || Wants("share"))
             {
                 var kept = new KeptCountClientTest(_blueprints, _shots, _report).Run();
                 while (kept.MoveNext())
@@ -254,6 +254,15 @@ namespace Sprocket.GameTests
             }
 
             var tour = new EditorTour(_shots, _report, _input);
+
+            // Before any other editor test, which would meet the what's-new bubbles first.
+            if (Wants("callouts"))
+            {
+                var callouts = new CalloutsClientTest(tour, _report, _input).Run();
+                while (callouts.MoveNext())
+                    yield return callouts.Current;
+            }
+
             if (Wants("editor"))
             {
                 var editor = new EditorShotClientTest(tour, _report).Run("Kept Automation");
@@ -274,6 +283,20 @@ namespace Sprocket.GameTests
                 var shared = new SharedTextClientTest(_report).Run();
                 while (shared.MoveNext())
                     yield return shared.Current;
+            }
+
+            if (Wants("settings"))
+            {
+                var settings = new SettingsClientTest(tour, _report, _input).Run();
+                while (settings.MoveNext())
+                    yield return settings.Current;
+            }
+
+            if (Wants("share"))
+            {
+                var share = new ShareImportClientTest(tour, _report, _input).Run();
+                while (share.MoveNext())
+                    yield return share.Current;
             }
 
             if (Wants("menus"))
