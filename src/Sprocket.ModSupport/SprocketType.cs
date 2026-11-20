@@ -9,12 +9,14 @@ namespace Sprocket.ModSupport
     /// elsewhere and named by its full name.
     /// </summary>
     /// <remarks>Its words are stored in players' programs: a word may be added once the mod is released, never removed or renamed.</remarks>
-    public class SprocketType
+    public class SprocketType : ISprocketWired
     {
         readonly Dictionary<string, Func<string>> _names = new Dictionary<string, Func<string>>();
 
-        /// <summary>The type <paramref name="id" /> in the namespace <paramref name="space" />, holding <paramref name="words" />; none where it is defined elsewhere.</summary>
-        public SprocketType(string space, string id, string[] words)
+        /// <summary>The type <paramref name="id" /> of a mod registered through <paramref name="registry" />, which only the wrapper holds, in the namespace <paramref name="space" />, holding <paramref name="words" />; none where it is defined elsewhere.</summary>
+        // The key parameter is the gate itself: a caller has to hold one to make this, and nothing is read from it.
+        // ReSharper disable once UnusedParameter.Local
+        public SprocketType(ISprocketRegistry registry, string space, string id, string[] words)
         {
             Namespace = space;
             Id = id;
@@ -58,9 +60,9 @@ namespace Sprocket.ModSupport
             return this;
         }
 
-        /// <summary>The type as Sprocket reads it, by the keys of <see cref="SprocketWire" />.</summary>
+        /// <inheritdoc />
         /// <remarks>Throws where a word has no name.</remarks>
-        public Dictionary<string, object> Wire()
+        Dictionary<string, object> ISprocketWired.Wire()
         {
             var names = new Func<string>[Words.Length];
             for (var i = 0; i < Words.Length; i++)

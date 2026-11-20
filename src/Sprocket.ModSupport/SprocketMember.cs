@@ -10,18 +10,18 @@ namespace Sprocket.ModSupport
     /// time: a value, a function, an action, an awaitable action, a whitelisted terminal member, or an override.
     /// </summary>
     /// <remarks>A detail that does not fit the member's kind throws as it is given, so a mistake shows on the first load.</remarks>
-    public sealed class SprocketMember
+    public sealed class SprocketMember : ISprocketMemberWiring, ISprocketWired
     {
         readonly Dictionary<string, object> _said = new Dictionary<string, object>();
-        readonly SprocketRegistration _registration;
+        readonly ISprocketRegistry _registration;
         readonly string _kind;
         readonly List<KeyValuePair<Func<IMyTerminalBlock, bool>, SprocketFailure>> _polledFailures = new List<KeyValuePair<Func<IMyTerminalBlock, bool>, SprocketFailure>>();
         Action<IMyTerminalBlock, object[]> _kick;
         Func<IMyTerminalBlock, bool> _polledDone;
         Action<IMyTerminalBlock, SprocketCancel> _cancelling;
 
-        /// <summary>The member <paramref name="id" /> of the kind word <paramref name="kind" /> on the scope numbered <paramref name="scope" />, registered through <paramref name="registration" />.</summary>
-        public SprocketMember(SprocketRegistration registration, int scope, string kind, string id)
+        /// <summary>The member <paramref name="id" /> of the kind word <paramref name="kind" /> on the scope numbered <paramref name="scope" />, registered through <paramref name="registration" />, which only the wrapper holds.</summary>
+        public SprocketMember(ISprocketRegistry registration, int scope, string kind, string id)
         {
             _registration = registration;
             _kind = kind;
@@ -192,8 +192,8 @@ namespace Sprocket.ModSupport
             _registration.Changed(block, Id);
         }
 
-        /// <summary>Gives the member its own reading <paramref name="read" />, writing <paramref name="write" />, and the type word <paramref name="type" />.</summary>
-        public SprocketMember Valuing(string type, Func<IMyTerminalBlock, object> read, Action<IMyTerminalBlock, object> write)
+        /// <inheritdoc />
+        SprocketMember ISprocketMemberWiring.Valuing(string type, Func<IMyTerminalBlock, object> read, Action<IMyTerminalBlock, object> write)
         {
             _said[SprocketWire.Type] = type;
             _said[SprocketWire.Read] = read;
@@ -202,8 +202,8 @@ namespace Sprocket.ModSupport
             return this;
         }
 
-        /// <summary>Gives the function its options and its reading <paramref name="ask" />, of the type word <paramref name="type" />.</summary>
-        public SprocketMember Asking(string type, ISprocketOption[] options, Func<IMyTerminalBlock, object[], object> ask)
+        /// <inheritdoc />
+        SprocketMember ISprocketMemberWiring.Asking(string type, ISprocketOption[] options, Func<IMyTerminalBlock, object[], object> ask)
         {
             _said[SprocketWire.Type] = type;
             _said[SprocketWire.Options] = Wired(options);
@@ -211,27 +211,27 @@ namespace Sprocket.ModSupport
             return this;
         }
 
-        /// <summary>Gives the action its options and what it does, <paramref name="run" />.</summary>
-        public SprocketMember Running(ISprocketOption[] options, Action<IMyTerminalBlock, object[]> run)
+        /// <inheritdoc />
+        SprocketMember ISprocketMemberWiring.Running(ISprocketOption[] options, Action<IMyTerminalBlock, object[]> run)
         {
             _said[SprocketWire.Options] = Wired(options);
             _said[SprocketWire.Run] = run;
             return this;
         }
 
-        /// <summary>Gives the awaitable action its options and the task <paramref name="start" /> starts.</summary>
-        public SprocketMember Starting(ISprocketOption[] options, Func<IMyTerminalBlock, object[], SprocketTask> start)
+        /// <inheritdoc />
+        SprocketMember ISprocketMemberWiring.Starting(ISprocketOption[] options, Func<IMyTerminalBlock, object[], SprocketTask> start)
         {
             _said[SprocketWire.Options] = Wired(options);
-            _said[SprocketWire.Start] = (Func<IMyTerminalBlock, object[], Dictionary<string, object>>)((block, given) => (start(block, given) ?? SprocketTask.Completed).Wire());
+            _said[SprocketWire.Start] = (Func<IMyTerminalBlock, object[], Dictionary<string, object>>)((block, given) => ((ISprocketWired)(start(block, given) ?? SprocketTask.Completed)).Wire());
             return this;
         }
 
-        /// <summary>Gives the awaitable action its options and <paramref name="kick" />, which starts it; <see cref="PolledDone" /> says when it is done.</summary>
-        public SprocketMember Kicking(ISprocketOption[] options, Action<IMyTerminalBlock, object[]> kick)
+        /// <inheritdoc />
+        SprocketMember ISprocketMemberWiring.Kicking(ISprocketOption[] options, Action<IMyTerminalBlock, object[]> kick)
         {
             _kick = kick;
-            return Starting(options, Kicked);
+            return ((ISprocketMemberWiring)this).Starting(options, Kicked);
         }
 
         /// <summary>Says the value is a word of <paramref name="type" />.</summary>
@@ -241,9 +241,9 @@ namespace Sprocket.ModSupport
             return this;
         }
 
-        /// <summary>The member as Sprocket reads it, by the keys of <see cref="SprocketWire" />.</summary>
+        /// <inheritdoc />
         /// <remarks>Throws where the member lacks what it needs: a name and description, a flag's readings, an awaitable's end.</remarks>
-        public Dictionary<string, object> Wire()
+        Dictionary<string, object> ISprocketWired.Wire()
         {
             var made = _kind != SprocketWire.KindWhitelisted && _kind != SprocketWire.KindOverride;
             if (made && !_said.ContainsKey(SprocketWire.Named))

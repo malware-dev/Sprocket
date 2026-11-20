@@ -11,8 +11,9 @@ namespace Sprocket.ModSupport
     /// <remarks>
     /// Made and ended on the game's main thread. A task ends once; whatever it is told after that is passed over.
     /// </remarks>
-    public sealed class SprocketTask
+    public sealed partial class SprocketTask : ISprocketWired
     {
+        static readonly ISprocketWiring Wiring = new Key();
         readonly List<Action<SprocketTask>> _ending = new List<Action<SprocketTask>>();
         Action<string, string, string> _heard;
         Action _poll;
@@ -139,7 +140,7 @@ namespace Sprocket.ModSupport
                     foreach (var other in waiting)
                     {
                         if (!other.IsEnded)
-                            other.Request(new SprocketCancel(SprocketCancelCause.Aborted));
+                            other.Request(new SprocketCancel(Wiring, SprocketCancelCause.Aborted));
                     }
                 });
             }
@@ -205,13 +206,13 @@ namespace Sprocket.ModSupport
             return task;
         }
 
-        /// <summary>The task as Sprocket hears it across the mod boundary, by the keys of <see cref="SprocketWire" />.</summary>
-        public Dictionary<string, object> Wire()
+        /// <inheritdoc />
+        Dictionary<string, object> ISprocketWired.Wire()
         {
             return new Dictionary<string, object>
             {
                 { SprocketWire.Hear, (Action<Action<string, string, string>>)Heard },
-                { SprocketWire.Cancel, (Action<bool, string>)((final, cause) => Request(new SprocketCancel(Cause(cause)))) },
+                { SprocketWire.Cancel, (Action<bool, string>)((final, cause) => Request(new SprocketCancel(Wiring, Cause(cause)))) },
                 { SprocketWire.Poll, (Action)(() => _poll?.Invoke()) }
             };
         }

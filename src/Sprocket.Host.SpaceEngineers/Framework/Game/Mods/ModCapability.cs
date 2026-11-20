@@ -4,6 +4,7 @@ using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.ModSupport;
 using VRageMath;
@@ -152,8 +153,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
         {
             var gameId = Id(member);
             var name = ModWire.Said(ModWire.Part<Func<string>>(member, SprocketWire.Named));
-            var sets = block.GetProperty(gameId) != null;
-            var acts = block.GetActionWithName(gameId) != null;
+            var sets = Toolbars.Gauge(block, gameId) != null;
+            var acts = Toolbars.Offers(block, gameId);
             if (!sets && !acts)
             {
                 GameLog.Say($"A mod whitelists \"{gameId}\" on {block.BlockDefinition}, which has no terminal action or property by that id.");

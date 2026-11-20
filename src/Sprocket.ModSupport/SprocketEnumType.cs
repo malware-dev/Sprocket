@@ -9,9 +9,9 @@ namespace Sprocket.ModSupport
     {
         readonly T[] _values;
 
-        /// <summary>The type <paramref name="id" /> in <paramref name="space" />, its words <paramref name="words" /> standing for <paramref name="values" /> in order.</summary>
-        public SprocketEnumType(string space, string id, string[] words, T[] values)
-            : base(space, id, words)
+        /// <summary>The type <paramref name="id" /> of a mod registered through <paramref name="registry" />, which only the wrapper holds, in <paramref name="space" />, its words <paramref name="words" /> standing for <paramref name="values" /> in order.</summary>
+        public SprocketEnumType(ISprocketRegistry registry, string space, string id, string[] words, T[] values)
+            : base(registry, space, id, words)
         {
             _values = values;
         }

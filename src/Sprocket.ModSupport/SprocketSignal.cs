@@ -5,13 +5,13 @@ using VRage.Utils;
 namespace Sprocket.ModSupport
 {
     /// <summary>A signal a mod raises on its blocks, which players start their automation on, such as "gains grip".</summary>
-    public sealed class SprocketSignal
+    public sealed class SprocketSignal : ISprocketWired
     {
-        readonly SprocketRegistration _registration;
+        readonly ISprocketRegistry _registration;
         readonly SprocketMember _member;
 
-        /// <summary>The signal <paramref name="member" /> describes, raised through <paramref name="registration" />.</summary>
-        public SprocketSignal(SprocketRegistration registration, SprocketMember member)
+        /// <summary>The signal <paramref name="member" /> describes, raised through <paramref name="registration" />, which only the wrapper holds.</summary>
+        public SprocketSignal(ISprocketRegistry registration, SprocketMember member)
         {
             _registration = registration;
             _member = member;
@@ -55,7 +55,7 @@ namespace Sprocket.ModSupport
             _registration.Raise(block, Id);
         }
 
-        /// <summary>The signal as Sprocket reads it, by the keys of <see cref="SprocketWire" />.</summary>
-        public Dictionary<string, object> Wire() => _member.Wire();
+        /// <inheritdoc />
+        Dictionary<string, object> ISprocketWired.Wire() => ((ISprocketWired)_member).Wire();
     }
 }

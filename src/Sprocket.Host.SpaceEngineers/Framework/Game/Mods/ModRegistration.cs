@@ -37,8 +37,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                 if (at < 0 || at >= _scopes.Count || string.IsNullOrEmpty(id))
                     continue;
 
-                // Left out alone, so one bad id does not take the rest of the mod with it.
-                if (!SprocketIds.Follows(id))
+                // Left out alone, so one bad id does not take the rest of the mod with it. A whitelist or an override names a member that
+                // already exists, by its own id, so only the members a mod makes are held to the convention.
+                if (Makes(member) && !SprocketIds.Follows(id))
                 {
                     GameLog.Say($"{Title}: the member \"{id}\" breaks Sprocket's naming convention, so it is left out. Ids are lowercase words joined by single underscores, such as speed_unit.");
                     continue;
@@ -57,6 +58,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                 Types.Add(new ChoiceType(Namespace, id, words));
                 _wordNames[id] = ModWire.Part<Func<string>[]>(type, SprocketWire.WordNames) ?? new Func<string>[0];
             }
+        }
+
+        /// <summary>Whether <paramref name="member" /> is one the mod makes, rather than a whitelist or an override naming one that exists.</summary>
+        static bool Makes(Dictionary<string, object> member)
+        {
+            var kind = ModWire.Part<string>(member, SprocketWire.Kind);
+            return kind != SprocketWire.KindWhitelisted && kind != SprocketWire.KindOverride;
         }
 
         /// <summary>The mod's namespace.</summary>

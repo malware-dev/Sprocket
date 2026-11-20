@@ -3,6 +3,7 @@ using Sandbox.ModAPI;
 using VRage;
 using VRage.Utils;
 using VRage.Game.ModAPI;
+using VRageMath;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Mods;
@@ -1069,14 +1070,14 @@ public class ModSupportTests
     {
         var task = new SprocketTask();
         string? heard = null;
-        ((Action<Action<string, string, string>>)task.Wire()[SprocketWire.Hear])((outcome, _, _) => heard = outcome);
+        ((Action<Action<string, string, string>>)((ISprocketWired)task).Wire()[SprocketWire.Hear])((outcome, _, _) => heard = outcome);
         task.Cancelling += _ =>
         {
             task.Conflicted(new SprocketFailure("switched_back", "was switched back"));
             task.Cancel();
         };
 
-        ((Action<bool, string>)task.Wire()[SprocketWire.Cancel])(true, "Stopped");
+        ((Action<bool, string>)((ISprocketWired)task).Wire()[SprocketWire.Cancel])(true, "Stopped");
 
         Assert.Equal(SprocketWire.Cancelled, task.Outcome);
         Assert.Equal(SprocketWire.Cancelled, heard);
@@ -1091,13 +1092,13 @@ public class ModSupportTests
         var second = new SprocketTask();
         var chain = first.Then(() => second);
         string? heard = null;
-        ((Action<Action<string, string, string>>)chain.Wire()[SprocketWire.Hear])((outcome, id, _) => heard = outcome + ":" + id);
+        ((Action<Action<string, string, string>>)((ISprocketWired)chain).Wire()[SprocketWire.Hear])((outcome, id, _) => heard = outcome + ":" + id);
 
         first.Complete();
         Assert.False(chain.IsEnded);
         SprocketCancel? asked = null;
         second.Cancelling += cancel => asked = cancel;
-        ((Action<bool, string>)chain.Wire()[SprocketWire.Cancel])(true, "Aborted");
+        ((Action<bool, string>)((ISprocketWired)chain).Wire()[SprocketWire.Cancel])(true, "Aborted");
         Assert.Equal(SprocketCancelCause.Aborted, asked!.Cause);
 
         // Stopped, it ends as cancelled, once, whatever the mod tells it after.
@@ -1121,6 +1122,89 @@ public class ModSupportTests
 
         /// <summary>Quickly.</summary>
         Brisk
+    }
+
+    /// <summary>
+    /// A mod whitelists one of the game's own terminal actions under a name of its own, which vouches for it and renames it;
+    /// one the block does not have is left out.
+    /// </summary>
+    [Fact]
+    public void AWhitelistedGameActionIsVouchedForUnderTheModsName()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        light.Offering("SetRadius", "Set Radius", 1);
+        var sim = Simulation.On(rig);
+        Registered(sim.Kinds.Mods, true, api =>
+        {
+            var lights = api.Block(Type(light));
+            lights.Whitelist("SetRadius").Named("glow size", "Sets how far the glow reaches.");
+            lights.Whitelist("NoSuchMember").Named("nothing", "Not on this block.");
+        });
+
+        var kind = sim.Kinds.For(light.Block);
+        Assert.True(kind.Vets("SetRadius", false));
+        Assert.True(kind.Renames("SetRadius", false, out var word));
+        Assert.Equal("glow size", word);
+        Assert.False(kind.Vets("NoSuchMember", false));
+        Assert.False(kind.Vets("NoSuchMember", true));
+    }
+
+    /// <summary>Each read of a mod's value or function asks the mod once, whatever its type.</summary>
+    [Fact]
+    public void AReadOfAModsValueAsksTheModOnce()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        var sim = Simulation.On(rig);
+        var asked = new Dictionary<string, int>();
+        Func<string, Func<object>, Func<IMyTerminalBlock, object>> counted = (id, value) => _ =>
+        {
+            asked[id] = asked.TryGetValue(id, out var count) ? count + 1 : 1;
+            return value();
+        };
+        Registered(sim.Kinds.Mods, true, api =>
+        {
+            var lights = api.Block(Type(light));
+            lights.Flag("lit", block => (bool)counted("lit", () => true)(block)).Named("lit", "Lit.").Reading("is lit", "is dark");
+            lights.Whole("level", block => (long)counted("level", () => 3L)(block)).Named("level", "Level.");
+            lights.Colored("tint", block => (Color)counted("tint", () => Color.Red)(block)).Named("tint", "Tint.");
+            lights.Duration("glow_time", block => (TimeSpan)counted("glow_time", () => TimeSpan.FromSeconds(2))(block)).Named("glow time", "Glow time.");
+            lights.Flag("lit_at", Option.Number("distance"), (block, _) => (bool)counted("lit_at", () => true)(block)).Named("lit at", "Lit at.").Reading("is lit at", "is dark at");
+        });
+
+        var kind = sim.Kinds.For(light.Block);
+        foreach (var id in new[] { "lit", "level", "tint", "glow_time", "lit_at" })
+        {
+            var own = kind.Actions.Single(action => action.Id == id).OwnValue;
+            var given = id == "lit_at" ? new[] { Literal.Of(5.0) } : new Literal[0];
+            own.Gauge(light.Block, given, own.Remembers ? new ReaderMemory() : null).Read();
+        }
+
+        Assert.Equal(new[] { 1, 1, 1, 1, 1 }, new[] { "lit", "level", "tint", "glow_time", "lit_at" }.Select(id => asked.TryGetValue(id, out var count) ? count : 0));
+    }
+
+    /// <summary>A value with options is a function: the block offers it with a field for each option, asked when a step reads it.</summary>
+    [Fact]
+    public void AValueWithOptionsIsAFunctionAskingEachOption()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        var sim = Simulation.On(rig);
+        Registered(sim.Kinds.Mods, true, api => api.Block(Type(light))
+            .Number("brightness_at", Option.Number("distance").Unit("m"), (_, distance) => 100 - distance)
+            .Named("brightness at", "How bright the light is at a distance."));
+
+        sim.Editor.NewButtonSystem("Glow");
+        sim.Tick();
+        sim.Editor.PressAdd(SentenceText.IfWord);
+        sim.Editor.PressBlock("Glow Light");
+        sim.Tick();
+        Assert.Contains("brightness at", sim.Editor.Members());
+
+        sim.Editor.PressChoice("brightness at");
+        sim.Tick();
+        Assert.Contains(sim.Editor.Pick().Arguments!.Form.Fields, field => field.Text != null);
     }
 
     /// <summary>The test mod registered into <paramref name="members" /> through the game's mod messages, Sprocket loading first where <paramref name="sprocketFirst" /> says so.</summary>

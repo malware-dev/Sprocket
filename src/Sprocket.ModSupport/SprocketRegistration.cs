@@ -9,7 +9,7 @@ namespace Sprocket.ModSupport
     /// blocks once Sprocket answers, and hands that over. Disposing it withdraws the registration.
     /// </summary>
     /// <remarks>Made by <see cref="SprocketModSupport.Register" /> in the mod's <c>LoadData</c> and disposed in its <c>UnloadData</c>.</remarks>
-    public sealed class SprocketRegistration : IDisposable
+    public sealed class SprocketRegistration : IDisposable, ISprocketRegistry
     {
         readonly SprocketMod _mod;
         readonly Action<SprocketModBuilder> _build;
@@ -23,8 +23,10 @@ namespace Sprocket.ModSupport
         Action _withdraw;
         bool _listening;
 
-        /// <summary>The registration of <paramref name="mod" />, whose blocks <paramref name="build" /> describes once Sprocket answers.</summary>
-        public SprocketRegistration(SprocketMod mod, Action<SprocketModBuilder> build)
+        /// <summary>The registration of <paramref name="mod" />, made with the wrapper's key <paramref name="wiring" />, whose blocks <paramref name="build" /> describes once Sprocket answers.</summary>
+        // The key parameter is the gate itself: a caller has to hold one to make this, and nothing is read from it.
+        // ReSharper disable once UnusedParameter.Local
+        public SprocketRegistration(ISprocketWiring wiring, SprocketMod mod, Action<SprocketModBuilder> build)
         {
             SprocketIds.CheckNamespace(mod.Namespace);
             if (string.IsNullOrEmpty(mod.Name))
@@ -38,7 +40,7 @@ namespace Sprocket.ModSupport
             _build = build;
         }
 
-        /// <summary>The mod's namespace.</summary>
+        /// <inheritdoc />
         public string Namespace => _mod.Namespace;
 
         /// <summary>Whether Sprocket took the registration.</summary>
@@ -47,8 +49,8 @@ namespace Sprocket.ModSupport
         /// <summary>Why Sprocket refused the registration, or null where it has not.</summary>
         public string Refusal { get; private set; }
 
-        /// <summary>Starts listening for Sprocket and asks for it, in case it loaded first.</summary>
-        public void Listen()
+        /// <inheritdoc />
+        void ISprocketRegistry.Listen()
         {
             if (_listening)
                 return;
@@ -70,16 +72,16 @@ namespace Sprocket.ModSupport
             _raise = null;
         }
 
-        /// <summary>A new scope narrowing the scope numbered <paramref name="narrows" />, or a base where it is -1.</summary>
-        public SprocketBlock Scope(int narrows)
+        /// <inheritdoc />
+        SprocketBlock ISprocketRegistry.Scope(int narrows)
         {
             var scope = new SprocketBlock(this, _scopes.Count, narrows);
             _scopes.Add(scope);
             return scope;
         }
 
-        /// <summary>A new member of the kind word <paramref name="kind" /> on the scope numbered <paramref name="scope" />; an id the mod makes is checked and must be new.</summary>
-        public SprocketMember Member(int scope, string kind, string id, bool made)
+        /// <inheritdoc />
+        SprocketMember ISprocketRegistry.Member(int scope, string kind, string id, bool made)
         {
             if (made)
             {
@@ -95,8 +97,8 @@ namespace Sprocket.ModSupport
             return member;
         }
 
-        /// <summary>Adds <paramref name="type" /> to the mod's types.</summary>
-        public T Define<T>(T type) where T : SprocketType
+        /// <inheritdoc />
+        T ISprocketRegistry.Define<T>(T type)
         {
             foreach (var had in _types)
             {
@@ -108,14 +110,14 @@ namespace Sprocket.ModSupport
             return type;
         }
 
-        /// <summary>Tells Sprocket the member <paramref name="id" /> of <paramref name="block" /> may have changed.</summary>
-        public void Changed(IMyTerminalBlock block, string id)
+        /// <inheritdoc />
+        void ISprocketRegistry.Changed(IMyTerminalBlock block, string id)
         {
             _changed?.Invoke(block, id);
         }
 
-        /// <summary>Raises the signal <paramref name="id" /> on <paramref name="block" />.</summary>
-        public void Raise(IMyTerminalBlock block, string id)
+        /// <inheritdoc />
+        void ISprocketRegistry.Raise(IMyTerminalBlock block, string id)
         {
             _raise?.Invoke(block, id);
         }
@@ -155,17 +157,17 @@ namespace Sprocket.ModSupport
         {
             var scopes = new Dictionary<string, object>[_scopes.Count];
             for (var i = 0; i < scopes.Length; i++)
-                scopes[i] = _scopes[i].Wire();
+                scopes[i] = ((ISprocketWired)_scopes[i]).Wire();
 
             var members = new Dictionary<string, object>[_members.Count];
             for (var i = 0; i < members.Length; i++)
-                members[i] = _members[i].Wire();
+                members[i] = ((ISprocketWired)_members[i]).Wire();
 
             var types = new List<Dictionary<string, object>>();
             foreach (var type in _types)
             {
                 if (type.IsDefined)
-                    types.Add(type.Wire());
+                    types.Add(((ISprocketWired)type).Wire());
             }
 
             return new Dictionary<string, object>

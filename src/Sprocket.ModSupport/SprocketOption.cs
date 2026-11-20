@@ -6,13 +6,15 @@ namespace Sprocket.ModSupport
 {
     /// <summary>One option an action or function takes, such as a height, which a player fills in on the step; made by <see cref="Option" />.</summary>
     /// <typeparam name="T">What the mod's callback is given for it.</typeparam>
-    public sealed class SprocketOption<T> : ISprocketOption
+    public sealed class SprocketOption<T> : ISprocketOption, ISprocketOptionReading<T>
     {
         readonly Dictionary<string, object> _said = new Dictionary<string, object>();
         readonly Func<object, T> _read;
 
-        /// <summary>An option of the type word <paramref name="type" />, called <paramref name="name" />, its value given to the mod as <paramref name="read" /> makes it.</summary>
-        public SprocketOption(string type, Func<string> name, Func<object, T> read)
+        /// <summary>An option made with the wrapper's key <paramref name="wiring" />, of the type word <paramref name="type" />, called <paramref name="name" />, its value given to the mod as <paramref name="read" /> makes it.</summary>
+        // The key parameter is the gate itself: a caller has to hold one to make this, and nothing is read from it.
+        // ReSharper disable once UnusedParameter.Local
+        public SprocketOption(ISprocketWiring wiring, string type, Func<string> name, Func<object, T> read)
         {
             _said[SprocketWire.Type] = type;
             _said[SprocketWire.Named] = name;
@@ -55,13 +57,13 @@ namespace Sprocket.ModSupport
         }
 
         /// <inheritdoc />
-        public Dictionary<string, object> Wire()
+        Dictionary<string, object> ISprocketWired.Wire()
         {
             return _said;
         }
 
         /// <summary>The value Sprocket gives for the option, as the mod's callback takes it.</summary>
-        public T Read(object given)
+        T ISprocketOptionReading<T>.Read(object given)
         {
             return _read(given);
         }

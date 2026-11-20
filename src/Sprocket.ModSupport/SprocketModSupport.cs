@@ -19,8 +19,10 @@ namespace Sprocket.ModSupport
     ///     });
     /// </code>
     /// </example>
-    public static class SprocketModSupport
+    public static partial class SprocketModSupport
     {
+        static readonly ISprocketWiring Wiring = new Key();
+
         /// <summary>
         /// Registers <paramref name="mod" /> with Sprocket: <paramref name="build" /> describes its blocks once Sprocket
         /// answers, whichever of the two loads first, and never runs in a world without Sprocket.
@@ -31,8 +33,8 @@ namespace Sprocket.ModSupport
         /// </remarks>
         public static IDisposable Register(SprocketMod mod, Action<SprocketModBuilder> build)
         {
-            var registration = new SprocketRegistration(mod, build);
-            registration.Listen();
+            var registration = new SprocketRegistration(Wiring, mod, build);
+            ((ISprocketRegistry)registration).Listen();
             return registration;
         }
     }

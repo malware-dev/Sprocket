@@ -5,8 +5,10 @@ using VRageMath;
 namespace Sprocket.ModSupport
 {
     /// <summary>Makes the options a mod's actions and functions take, each named as players read it.</summary>
-    public static class Option
+    public static partial class Option
     {
+        static readonly ISprocketWiring Wiring = new Key();
+
         /// <summary>A real number called <paramref name="name" />.</summary>
         public static SprocketOption<double> Number(string name) => Number(SprocketText.Of(name));
 
@@ -45,28 +47,28 @@ namespace Sprocket.ModSupport
 
         /// <summary>One of the words of <paramref name="type" />, called <paramref name="name" />.</summary>
         public static SprocketOption<string> Choice(string name, SprocketType type) =>
-            new SprocketOption<string>(SprocketWire.TypeChoice, SprocketText.Of(name), given => given as string ?? "").Choosing(type);
+            new SprocketOption<string>(Wiring, SprocketWire.TypeChoice, SprocketText.Of(name), given => given as string ?? "").Choosing(type);
 
         /// <summary>One of the words of the enum type <paramref name="type" />, called <paramref name="name" />, given to the mod as the enum.</summary>
         public static SprocketOption<T> Choice<T>(string name, SprocketEnumType<T> type) where T : struct =>
-            new SprocketOption<T>(SprocketWire.TypeChoice, SprocketText.Of(name), given => type.Value(given as string)).Choosing(type);
+            new SprocketOption<T>(Wiring, SprocketWire.TypeChoice, SprocketText.Of(name), given => type.Value(given as string)).Choosing(type);
 
         static SprocketOption<double> Number(Func<string> name) =>
-            new SprocketOption<double>(SprocketWire.TypeNumber, name, given => given is double ? (double)given : 0.0);
+            new SprocketOption<double>(Wiring, SprocketWire.TypeNumber, name, given => given is double ? (double)given : 0.0);
 
         static SprocketOption<long> Whole(Func<string> name) =>
-            new SprocketOption<long>(SprocketWire.TypeWhole, name, given => given is long ? (long)given : 0L);
+            new SprocketOption<long>(Wiring, SprocketWire.TypeWhole, name, given => given is long ? (long)given : 0L);
 
         static SprocketOption<bool> Flag(Func<string> name) =>
-            new SprocketOption<bool>(SprocketWire.TypeFlag, name, given => given is bool && (bool)given);
+            new SprocketOption<bool>(Wiring, SprocketWire.TypeFlag, name, given => given is bool && (bool)given);
 
         static SprocketOption<string> Text(Func<string> name) =>
-            new SprocketOption<string>(SprocketWire.TypeText, name, given => given as string ?? "");
+            new SprocketOption<string>(Wiring, SprocketWire.TypeText, name, given => given as string ?? "");
 
         static SprocketOption<Color> Color(Func<string> name) =>
-            new SprocketOption<Color>(SprocketWire.TypeColor, name, given => given is Color ? (Color)given : VRageMath.Color.White);
+            new SprocketOption<Color>(Wiring, SprocketWire.TypeColor, name, given => given is Color ? (Color)given : VRageMath.Color.White);
 
         static SprocketOption<TimeSpan> Duration(Func<string> name) =>
-            new SprocketOption<TimeSpan>(SprocketWire.TypeDuration, name, given => given is TimeSpan ? (TimeSpan)given : TimeSpan.Zero);
+            new SprocketOption<TimeSpan>(Wiring, SprocketWire.TypeDuration, name, given => given is TimeSpan ? (TimeSpan)given : TimeSpan.Zero);
     }
 }

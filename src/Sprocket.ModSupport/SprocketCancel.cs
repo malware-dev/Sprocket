@@ -4,8 +4,10 @@ namespace Sprocket.ModSupport
     /// <remarks>A stop is never optional: Sprocket has let go, and nothing the task reports after it reaches the run.</remarks>
     public sealed class SprocketCancel
     {
-        /// <summary>Sprocket stopping a task for <paramref name="cause" />.</summary>
-        public SprocketCancel(SprocketCancelCause cause)
+        /// <summary>Sprocket stopping a task for <paramref name="cause" />, made with the wrapper's key <paramref name="wiring" />.</summary>
+        // The key parameter is the gate itself: a caller has to hold one to make this, and nothing is read from it.
+        // ReSharper disable once UnusedParameter.Local
+        public SprocketCancel(ISprocketWiring wiring, SprocketCancelCause cause)
         {
             Cause = cause;
         }

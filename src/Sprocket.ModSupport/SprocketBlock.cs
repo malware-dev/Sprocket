@@ -10,13 +10,13 @@ namespace Sprocket.ModSupport
     /// A set of blocks a mod tells Sprocket about, and the members they have. A narrower set made from it has every member
     /// it has, and may add its own or override the details of those it inherits.
     /// </summary>
-    public sealed class SprocketBlock
+    public sealed class SprocketBlock : ISprocketBlockWiring, ISprocketWired
     {
-        readonly SprocketRegistration _registration;
+        readonly ISprocketRegistry _registration;
         readonly Dictionary<string, object> _said = new Dictionary<string, object>();
 
-        /// <summary>The scope numbered <paramref name="index" />, narrowing the scope <paramref name="narrows" /> or -1 for a base, registered through <paramref name="registration" />.</summary>
-        public SprocketBlock(SprocketRegistration registration, int index, int narrows)
+        /// <summary>The scope numbered <paramref name="index" />, narrowing the scope <paramref name="narrows" /> or -1 for a base, registered through <paramref name="registration" />, which only the wrapper holds.</summary>
+        public SprocketBlock(ISprocketRegistry registration, int index, int narrows)
         {
             _registration = registration;
             Index = index;
@@ -56,8 +56,8 @@ namespace Sprocket.ModSupport
             return narrower;
         }
 
-        /// <summary>Says which blocks a base scope is: of the object builder type <paramref name="blockType" />, of <paramref name="subtypes" /> where any are given.</summary>
-        public SprocketBlock OfType(string blockType, string[] subtypes)
+        /// <inheritdoc />
+        SprocketBlock ISprocketBlockWiring.OfType(string blockType, string[] subtypes)
         {
             _said[SprocketWire.BlockType] = blockType;
             _said[SprocketWire.Subtypes] = subtypes;
@@ -107,27 +107,27 @@ namespace Sprocket.ModSupport
 
         /// <summary>A real number <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
         public SprocketMember Number<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, double> read) =>
-            Function(id, SprocketWire.TypeNumber, new ISprocketOption[] { o1 }, (b, g) => read(b, o1.Read(g[0])));
+            Function(id, SprocketWire.TypeNumber, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
 
         /// <summary>A real number <paramref name="id" /> that needs <paramref name="o1" /> and <paramref name="o2" /> to go on, read by <paramref name="read" />.</summary>
         public SprocketMember Number<T1, T2>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, Func<IMyTerminalBlock, T1, T2, double> read) =>
-            Function(id, SprocketWire.TypeNumber, new ISprocketOption[] { o1, o2 }, (b, g) => read(b, o1.Read(g[0]), o2.Read(g[1])));
+            Function(id, SprocketWire.TypeNumber, new ISprocketOption[] { o1, o2 }, (b, g) => read(b, Read(o1, g[0]), Read(o2, g[1])));
 
         /// <summary>A whole number <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
         public SprocketMember Whole<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, long> read) =>
-            Function(id, SprocketWire.TypeWhole, new ISprocketOption[] { o1 }, (b, g) => read(b, o1.Read(g[0])));
+            Function(id, SprocketWire.TypeWhole, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
 
         /// <summary>An on or off <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
         public SprocketMember Flag<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, bool> read) =>
-            Function(id, SprocketWire.TypeFlag, new ISprocketOption[] { o1 }, (b, g) => read(b, o1.Read(g[0])));
+            Function(id, SprocketWire.TypeFlag, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
 
         /// <summary>A text <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
         public SprocketMember Text<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, string> read) =>
-            Function(id, SprocketWire.TypeText, new ISprocketOption[] { o1 }, (b, g) => read(b, o1.Read(g[0])));
+            Function(id, SprocketWire.TypeText, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
 
         /// <summary>A word of <paramref name="type" /> <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
         public SprocketMember Choice<T1>(string id, SprocketType type, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, string> read) =>
-            Function(id, SprocketWire.TypeChoice, new ISprocketOption[] { o1 }, (b, g) => read(b, o1.Read(g[0]))).Choosing(type);
+            Function(id, SprocketWire.TypeChoice, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0]))).Choosing(type);
 
         /// <summary>An action <paramref name="id" />, done by <paramref name="run" />.</summary>
         public SprocketMember Action(string id, Action<IMyTerminalBlock> run) =>
@@ -135,15 +135,15 @@ namespace Sprocket.ModSupport
 
         /// <summary>An action <paramref name="id" /> taking <paramref name="o1" />, done by <paramref name="run" />.</summary>
         public SprocketMember Action<T1>(string id, SprocketOption<T1> o1, Action<IMyTerminalBlock, T1> run) =>
-            Act(id, new ISprocketOption[] { o1 }, (b, g) => run(b, o1.Read(g[0])));
+            Act(id, new ISprocketOption[] { o1 }, (b, g) => run(b, Read(o1, g[0])));
 
         /// <summary>An action <paramref name="id" /> taking <paramref name="o1" /> and <paramref name="o2" />, done by <paramref name="run" />.</summary>
         public SprocketMember Action<T1, T2>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, Action<IMyTerminalBlock, T1, T2> run) =>
-            Act(id, new ISprocketOption[] { o1, o2 }, (b, g) => run(b, o1.Read(g[0]), o2.Read(g[1])));
+            Act(id, new ISprocketOption[] { o1, o2 }, (b, g) => run(b, Read(o1, g[0]), Read(o2, g[1])));
 
         /// <summary>An action <paramref name="id" /> taking <paramref name="o1" />, <paramref name="o2" /> and <paramref name="o3" />, done by <paramref name="run" />.</summary>
         public SprocketMember Action<T1, T2, T3>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, SprocketOption<T3> o3, Action<IMyTerminalBlock, T1, T2, T3> run) =>
-            Act(id, new ISprocketOption[] { o1, o2, o3 }, (b, g) => run(b, o1.Read(g[0]), o2.Read(g[1]), o3.Read(g[2])));
+            Act(id, new ISprocketOption[] { o1, o2, o3 }, (b, g) => run(b, Read(o1, g[0]), Read(o2, g[1]), Read(o3, g[2])));
 
         /// <summary>An awaitable action <paramref name="id" />, started by <paramref name="start" />, which returns the task a step waits on.</summary>
         public SprocketMember Awaitable(string id, Func<IMyTerminalBlock, SprocketTask> start) =>
@@ -151,15 +151,15 @@ namespace Sprocket.ModSupport
 
         /// <summary>An awaitable action <paramref name="id" /> taking <paramref name="o1" />, started by <paramref name="start" />, which returns the task a step waits on.</summary>
         public SprocketMember Awaitable<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, SprocketTask> start) =>
-            Await(id, new ISprocketOption[] { o1 }, (b, g) => start(b, o1.Read(g[0])));
+            Await(id, new ISprocketOption[] { o1 }, (b, g) => start(b, Read(o1, g[0])));
 
         /// <summary>An awaitable action <paramref name="id" /> taking <paramref name="o1" /> and <paramref name="o2" />, started by <paramref name="start" />.</summary>
         public SprocketMember Awaitable<T1, T2>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, Func<IMyTerminalBlock, T1, T2, SprocketTask> start) =>
-            Await(id, new ISprocketOption[] { o1, o2 }, (b, g) => start(b, o1.Read(g[0]), o2.Read(g[1])));
+            Await(id, new ISprocketOption[] { o1, o2 }, (b, g) => start(b, Read(o1, g[0]), Read(o2, g[1])));
 
         /// <summary>An awaitable action <paramref name="id" /> taking three options, started by <paramref name="start" />.</summary>
         public SprocketMember Awaitable<T1, T2, T3>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, SprocketOption<T3> o3, Func<IMyTerminalBlock, T1, T2, T3, SprocketTask> start) =>
-            Await(id, new ISprocketOption[] { o1, o2, o3 }, (b, g) => start(b, o1.Read(g[0]), o2.Read(g[1]), o3.Read(g[2])));
+            Await(id, new ISprocketOption[] { o1, o2, o3 }, (b, g) => start(b, Read(o1, g[0]), Read(o2, g[1]), Read(o3, g[2])));
 
         /// <summary>An awaitable action <paramref name="id" /> started by <paramref name="kick" />; say when it is done with <see cref="SprocketMember.PolledDone" />.</summary>
         public SprocketMember Awaitable(string id, Action<IMyTerminalBlock> kick) =>
@@ -167,28 +167,30 @@ namespace Sprocket.ModSupport
 
         /// <summary>An awaitable action <paramref name="id" /> taking <paramref name="o1" />, started by <paramref name="kick" />; say when it is done with <see cref="SprocketMember.PolledDone" />.</summary>
         public SprocketMember Awaitable<T1>(string id, SprocketOption<T1> o1, Action<IMyTerminalBlock, T1> kick) =>
-            Kick(id, new ISprocketOption[] { o1 }, (b, g) => kick(b, o1.Read(g[0])));
+            Kick(id, new ISprocketOption[] { o1 }, (b, g) => kick(b, Read(o1, g[0])));
 
         /// <summary>An awaitable action <paramref name="id" /> taking <paramref name="o1" /> and <paramref name="o2" />, started by <paramref name="kick" />.</summary>
         public SprocketMember Awaitable<T1, T2>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, Action<IMyTerminalBlock, T1, T2> kick) =>
-            Kick(id, new ISprocketOption[] { o1, o2 }, (b, g) => kick(b, o1.Read(g[0]), o2.Read(g[1])));
+            Kick(id, new ISprocketOption[] { o1, o2 }, (b, g) => kick(b, Read(o1, g[0]), Read(o2, g[1])));
 
-        /// <summary>The scope as Sprocket reads it, by the keys of <see cref="SprocketWire" />.</summary>
-        public Dictionary<string, object> Wire() => _said;
+        /// <inheritdoc />
+        Dictionary<string, object> ISprocketWired.Wire() => _said;
+
+        static T Read<T>(SprocketOption<T> option, object given) => ((ISprocketOptionReading<T>)option).Read(given);
 
         SprocketMember Value(string id, string type, Func<IMyTerminalBlock, object> read, Action<IMyTerminalBlock, object> write) =>
-            _registration.Member(Index, SprocketWire.KindValue, id, true).Valuing(type, read, write);
+            ((ISprocketMemberWiring)_registration.Member(Index, SprocketWire.KindValue, id, true)).Valuing(type, read, write);
 
         SprocketMember Function(string id, string type, ISprocketOption[] options, Func<IMyTerminalBlock, object[], object> ask) =>
-            _registration.Member(Index, SprocketWire.KindFunction, id, true).Asking(type, options, ask);
+            ((ISprocketMemberWiring)_registration.Member(Index, SprocketWire.KindFunction, id, true)).Asking(type, options, ask);
 
         SprocketMember Act(string id, ISprocketOption[] options, Action<IMyTerminalBlock, object[]> run) =>
-            _registration.Member(Index, SprocketWire.KindAction, id, true).Running(options, run);
+            ((ISprocketMemberWiring)_registration.Member(Index, SprocketWire.KindAction, id, true)).Running(options, run);
 
         SprocketMember Await(string id, ISprocketOption[] options, Func<IMyTerminalBlock, object[], SprocketTask> start) =>
-            _registration.Member(Index, SprocketWire.KindAwaitable, id, true).Starting(options, start);
+            ((ISprocketMemberWiring)_registration.Member(Index, SprocketWire.KindAwaitable, id, true)).Starting(options, start);
 
         SprocketMember Kick(string id, ISprocketOption[] options, Action<IMyTerminalBlock, object[]> kick) =>
-            _registration.Member(Index, SprocketWire.KindAwaitable, id, true).Kicking(options, kick);
+            ((ISprocketMemberWiring)_registration.Member(Index, SprocketWire.KindAwaitable, id, true)).Kicking(options, kick);
     }
 }
