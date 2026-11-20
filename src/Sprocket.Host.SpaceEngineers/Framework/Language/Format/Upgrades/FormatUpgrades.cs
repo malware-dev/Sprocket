@@ -26,10 +26,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             new ComponentMembers(),
         };
 
+        /// <summary>The last draft of version 1 any build wrote.</summary>
+        public const int LastOfVersion1 = 28;
+
         /// <summary>Whether a program written for <paramref name="draft" /> of version <paramref name="version" /> is upgraded rather than refused.</summary>
         public static bool From(int version, int draft)
         {
-            return version == 1 && draft >= Oldest && draft < ScriptFormat.Draft;
+            return version == 1 && draft >= Oldest && draft <= LastOfVersion1 && draft < ScriptFormat.Draft;
         }
 
         /// <summary>Rewrites <paramref name="constructs" />, read from a program written for <paramref name="draft" />, into the current form, before they are read.</summary>

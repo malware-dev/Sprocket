@@ -103,7 +103,7 @@ public class UpgradeTests
         Assert.Equal(ReachKind.Action, arm.Form);
 
         var written = ProgramWriter.Save(program, values);
-        Assert.StartsWith($"sprocket 1 alpha {ScriptFormat.Draft}", written);
+        Assert.StartsWith(ScriptFormat.Line, written);
         Assert.Contains("call ext.detach on [ stage ]", written);
         Assert.Contains("call Detach on [ arm ]", written);
         Assert.Contains("call ext.detach on [ charge ]", written);
@@ -381,7 +381,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith($"sprocket 1 alpha {ScriptFormat.Draft}", written);
+        Assert.StartsWith(ScriptFormat.Line, written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -429,7 +429,7 @@ public class UpgradeTests
     [InlineData("sprocket 1 alpha 13")]
     [InlineData("sprocket 1 alpha 29")]
     [InlineData("sprocket 2 alpha 14")]
-    [InlineData("sprocket 1")]
+    [InlineData("sprocket 2")]
     public void AnyOtherFormatIsRefused(string header)
     {
         var text = Switching.Replace("sprocket 1 alpha 14", header);
