@@ -1040,6 +1040,30 @@ public class ModSupportTests
     }
 
     /// <summary>
+    /// A block type named alone takes every type built on it, so a functional block is every light; with subtypes it names
+    /// whole definitions, of exactly that type.
+    /// </summary>
+    [Fact]
+    public void ABlockTypeTakesTheTypesBuiltOnItButASubtypeOnlyItsOwn()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        Simulation.On(rig);
+
+        var functional = new ModMembers();
+        Registered(functional, true, api => api.Block("MyObjectBuilder_FunctionalBlock").Real("lift", _ => 1.0).Named("lift", "How far it lifts."));
+        Assert.True(functional.Claims(light.Block));
+
+        var functionalSubtype = new ModMembers();
+        Registered(functionalSubtype, true, api => api.Block("MyObjectBuilder_FunctionalBlock", Subtype(light)).Real("lift", _ => 1.0).Named("lift", "How far it lifts."));
+        Assert.False(functionalSubtype.Claims(light.Block));
+
+        var doors = new ModMembers();
+        Registered(doors, true, api => api.Block("MyObjectBuilder_Door").Real("lift", _ => 1.0).Named("lift", "How far it lifts."));
+        Assert.False(doors.Claims(light.Block));
+    }
+
+    /// <summary>
     /// A mod whose registration throws is refused on its own: the game's mod messages stop at a handler that throws, so a
     /// mod hearing Sprocket after it still registers.
     /// </summary>
