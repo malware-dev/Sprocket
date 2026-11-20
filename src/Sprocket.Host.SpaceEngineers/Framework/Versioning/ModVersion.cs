@@ -21,11 +21,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Versioning
         /// <summary>The Bleeding Edge build of this version, from 1; 0 for a stable release.</summary>
         public const int Beta = 3;
 
+        /// <summary>Whether this build is a Bleeding Edge build rather than a stable release.</summary>
+        /// <remarks>Read only, not const, so the text is built the same way whichever this build is.</remarks>
+        public static readonly bool IsBeta = Beta > 0;
+
         /// <summary>The release this build belongs to, which what's new in it is tagged with.</summary>
         public static readonly ModRelease Release = new ModRelease(Major, Minor);
 
         /// <summary>The version as it is written, such as <c>1.1.0-beta.3</c> or <c>1.1.0</c>.</summary>
         public static readonly string Text = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", Major, Minor, Patch)
-                                             + (Beta > 0 ? "-beta." + Beta.ToString(CultureInfo.InvariantCulture) : "");
+                                             + (IsBeta ? "-beta." + Beta.ToString(CultureInfo.InvariantCulture) : "");
     }
 }
