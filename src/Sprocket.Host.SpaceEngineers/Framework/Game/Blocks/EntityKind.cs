@@ -122,6 +122,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             return this;
         }
 
+        /// <summary>Adds the signal <paramref name="id" /> a mod raises, in its namespace <paramref name="space" />, read as <paramref name="text" />.</summary>
+        public EntityKind WithRaised(string id, string text, string space)
+        {
+            _events.Add(EntityEvent.Raised(id, text).InNamespace(space));
+            _value = null;
+            return this;
+        }
+
         /// <summary>
         /// Adds the signal <paramref name="id" />, read as <paramref name="text" />: Sprocket's own value <paramref name="value" />,
         /// added before it, coming to be <paramref name="becomes" />.
@@ -328,6 +336,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         public EntityKind In(Category category)
         {
             _actions[_actions.Count - 1].Category = category;
+            return this;
+        }
+
+        /// <summary>Stands the member added last in a mod's own group, headed <paramref name="heading" />, after Sprocket's groups and before Other.</summary>
+        public EntityKind InGroup(string heading)
+        {
+            _actions[_actions.Count - 1].Group = heading;
+            return this;
+        }
+
+        /// <summary>Puts the member added last in the host's namespace <paramref name="space" />, a mod's.</summary>
+        public EntityKind InNamespace(string space)
+        {
+            _actions[_actions.Count - 1].InNamespace(space);
+            return this;
+        }
+
+        /// <summary>Gives the member added last <paramref name="about" />, what the mod that adds it says of it, shown in the selector before any codex page of its name.</summary>
+        public EntityKind Telling(string about)
+        {
+            _actions[_actions.Count - 1].About = about;
             return this;
         }
 
@@ -663,6 +692,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                     return either;
                 case ValueKind.Color:
                     return Field.Holding(named, FieldEditor.Color, 1);
+                case ValueKind.Duration:
+                    var length = Field.Called(named);
+                    length.Edits = FieldEditor.Duration;
+                    return length;
             }
 
             var box = Field.Called(named);

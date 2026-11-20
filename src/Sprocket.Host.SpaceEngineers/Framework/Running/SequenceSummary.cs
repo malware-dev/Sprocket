@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         foreach (var source in sending)
                         {
                             GridEntity block = bindings.Entity(source);
-                            if (block != null && Probe.Watching(block, required.Key) == null)
+                            if (block != null && block.Kind.FindEvent(required.Key)?.IsRaised != true && Probe.Watching(block, required.Key) == null)
                                 return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
                         }
                     }

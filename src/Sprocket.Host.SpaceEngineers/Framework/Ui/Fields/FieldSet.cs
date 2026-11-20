@@ -249,6 +249,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 if (!fields[f].TakesSlots && fields[f].Entry == FieldInput.Name && values[at].Kind == ValueKind.Text)
                     values[at] = Literal.Name(values[at].Text);
 
+                Duration length;
+                if (fields[f].Edits == FieldEditor.Duration && values[at].Kind == ValueKind.Text && DurationField.Read(values[at].Text, out length))
+                    values[at] = Literal.Of(length);
+
                 at += fields[f].Covers;
             }
 
@@ -447,7 +451,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 edited();
         }
 
-        /// <summary>The field a value is given in: a switch for on or off, a line of words for a few others, a list for more, a mixer, a dial, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
+        /// <summary>The field a value is given in: a switch for on or off, a line of words for a few others, a list for more, a mixer, a dial, a length, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
         IField Make(Field field, ColorOffer colors, Texts texts)
         {
             if (field.Edits == FieldEditor.Color)
@@ -455,6 +459,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
             if (field.Edits == FieldEditor.Angle)
                 return new AngleField(field.Least, field.Most, _submit);
+
+            if (field.Edits == FieldEditor.Duration)
+                return new DurationField(texts, _submit);
 
             if (field.Edits == FieldEditor.Lines)
             {

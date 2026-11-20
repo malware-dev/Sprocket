@@ -41,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         readonly List<string> _why = new List<string>();
         readonly List<HostType> _types = new List<HostType>();
         readonly List<bool> _slotted = new List<bool>();
+        readonly List<string> _ownGroups = new List<string>();
 
         /// <summary>
         /// The offers of a pick in <paramref name="editor" />: of what starts something where <paramref name="forEvents" />, of
@@ -114,6 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             _why.Clear();
             _types.Clear();
             _slotted.Clear();
+            _ownGroups.Clear();
 
             if (_forTests)
             {
@@ -224,11 +226,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                     States(actions[i], events);
             }
 
-            for (var group = 0; group <= (int)Category.Other; group++)
+            Gather(actions);
+            for (var place = 0; place < GroupCount; place++)
             {
+                var group = GroupAt(place);
                 foreach (var one in actions)
                 {
-                    if (!one.IsStatus && (one.OwnValue != null || (one.Sets && Lists(one))) && (int)one.Category == group
+                    if (!one.IsStatus && (one.OwnValue != null || (one.Sets && Lists(one))) && Grouping(one) == group
                         && (!sums || Number(one)))
                         Read(one, group);
                 }
@@ -286,8 +290,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             }
 
             // Sprocket's groups, in the order the categories are declared, so a member sits in the same place on every block.
-            for (var group = 0; group <= (int)Category.Other; group++)
-                Listed(actions, group);
+            Gather(actions);
+            for (var place = 0; place < GroupCount; place++)
+                Listed(actions, GroupAt(place));
         }
 
         void Listed(List<EntityAction> actions, int group)
@@ -374,7 +379,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             if (_editor.ShowsTerminal)
                 return one.Sets ? Values : Actions;
 
-            return (int)one.Category;
+            return Grouping(one);
+        }
+
+        /// <summary>The organized view's group <paramref name="one" /> stands in: its category, or the mod's own group it names.</summary>
+        int Grouping(EntityAction one)
+        {
+            return one.Group == null ? (int)one.Category : Statuses + 1 + _ownGroups.IndexOf(one.Group);
+        }
+
+        /// <summary>Notes the groups of their own that mods stand any of <paramref name="actions" /> in, in the order they are first met.</summary>
+        void Gather(List<EntityAction> actions)
+        {
+            foreach (var one in actions)
+            {
+                if (one.Group != null && !_ownGroups.Contains(one.Group))
+                    _ownGroups.Add(one.Group);
+            }
+        }
+
+        /// <summary>How many groups the organized view lists: Sprocket's categories and the mods' own.</summary>
+        int GroupCount => (int)Category.Other + 1 + _ownGroups.Count;
+
+        /// <summary>The group the organized view lists at <paramref name="place" />: Sprocket's categories, then the mods' own groups, then Other.</summary>
+        int GroupAt(int place)
+        {
+            if (place < (int)Category.Other)
+                return place;
+
+            var own = place - (int)Category.Other;
+            return own < _ownGroups.Count ? Statuses + 1 + own : (int)Category.Other;
         }
 
         /// <summary>What the group <paramref name="group" /> is headed, in the view now showing.</summary>
@@ -386,6 +420,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
 
             if (_editor.ShowsTerminal)
                 return group == Values ? _editor.Texts.PickValues : _editor.Texts.PickToolbarActions;
+
+            if (group > Statuses)
+                return _ownGroups[group - Statuses - 1];
 
             return group == Statuses ? _editor.Texts.PickStatus : CategoryText.Of(_editor.Texts, (Category)group);
         }

@@ -9,8 +9,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
     public static class StoredReasons
     {
         // The last value of each, so a number a newer build stored reads as none.
-        const int LastProblem = (int)SequenceProblem.Ambiguous;
-        const int LastCause = (int)Cause.PistonHeld;
+        const int LastProblem = (int)SequenceProblem.Failed;
+        const int LastCause = (int)Cause.ModFailed;
 
         /// <summary>The problem <paramref name="number" /> or <paramref name="spelled" /> holds, or none.</summary>
         public static SequenceProblem Problem(int number, string spelled)

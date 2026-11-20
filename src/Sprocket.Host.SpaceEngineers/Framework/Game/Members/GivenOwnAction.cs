@@ -1,6 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.ModSupport;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 {
@@ -78,6 +79,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         {
             if (_doing.Stops != null)
                 _doing.Stops((T)block);
+        }
+
+        /// <inheritdoc />
+        public override void Stop(IMyTerminalBlock block, SprocketCancelCause cause)
+        {
+            if (_doing.StopsFor != null)
+                _doing.StopsFor((T)block, cause);
+            else
+                Stop(block);
         }
 
         /// <inheritdoc />

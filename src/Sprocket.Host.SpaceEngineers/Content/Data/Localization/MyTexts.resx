@@ -1048,6 +1048,10 @@
     <value>This step is waiting for something that cannot finish.</value>
     <comment>Problem while a step waits on a block that says it can never finish, used where the block gives no words of its own for why. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
   </data>
+  <data name="Sprocket.Problem.Failed" xml:space="preserve">
+    <value>This sequence stopped because a step failed.</value>
+    <comment>Problem after a sequence's last run ended because an action a mod adds, which a step waited for, failed; used where the mod gives no words of its own for why. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen.</comment>
+  </data>
   <data name="Sprocket.Problem.Conflicted" xml:space="preserve">
     <value>This sequence stopped because something else took over one of its blocks.</value>
     <comment>Warning after a sequence's last run gave up because something else took over one of its blocks, used where the block gives no words of its own for what happened. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
@@ -1300,6 +1304,10 @@
     <value>did not run - no script, a script that would not compile, or one already running</value>
     <comment>Said when a step told a programmable block to run and its script did not run, which ends the run and switches the logic system off. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and as the reason in the sentence saying why Sprocket switched off the logic system, such as "Stopped at step 3: ...".</comment>
   </data>
+  <data name="Sprocket.Trouble.ModFailed" xml:space="preserve">
+    <value>failed: {reason}</value>
+    <comment>Said as a problem after a run ended because an action a mod adds failed while a step waited for it; {reason} is the mod's own words for what went wrong, such as "lost its grip on the ground". It follows the block's name to make a sentence, as in "Lift 1 failed: lost its grip on the ground", shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen.</comment>
+  </data>
   <data name="Sprocket.Trouble.DoorToldToOpen" xml:space="preserve">
     <value>stopped closing because something else opened it</value>
     <comment>Said as a warning after a run gave up because something else told a door to open while a step waited for it to close. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
@@ -1502,11 +1510,11 @@
   </data>
   <data name="Sprocket.Wait.InSeconds" xml:space="preserve">
     <value>seconds</value>
-    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the option beside the number that gives the length in seconds.</comment>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the option beside the number that gives the length in seconds; also beside the number of a length an action takes, among its options in the picker.</comment>
   </data>
   <data name="Sprocket.Wait.InTicks" xml:space="preserve">
     <value>ticks</value>
-    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the option beside the number that gives the length in ticks.</comment>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the option beside the number that gives the length in ticks; also beside the number of a length an action takes, among its options in the picker.</comment>
   </data>
   <data name="Sprocket.Wait.PickSeconds" xml:space="preserve">
     <value>{count} s</value>

@@ -421,6 +421,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 return texts.ProblemMistyped;
             if (problem == SequenceProblem.Stuck)
                 return texts.ProblemStuck;
+            if (problem == SequenceProblem.Failed)
+                return texts.ProblemFailed;
             if (problem == SequenceProblem.Conflicted)
                 return texts.ProblemConflicted;
             if (problem == SequenceProblem.Circular)

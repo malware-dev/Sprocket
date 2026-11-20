@@ -328,6 +328,82 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
+        /// Runs or stops what waits on the moment <paramref name="key" /> a mod raised on the block <paramref name="entityId" />,
+        /// once for this raise, as a press of a button wired to it would.
+        /// </summary>
+        /// <remarks>Asked only as a mod raises, never on a tick; walks the systems' signal triggers.</remarks>
+        public void Raised(long entityId, MemberKey key)
+        {
+            RaisesWalked++;
+            var systems = _automation.Systems;
+            for (var s = 0; s < systems.Count; s++)
+            {
+                var system = systems[s];
+                if (!system.Enabled)
+                    continue;
+
+                var triggers = system.Triggers;
+                for (var t = 0; t < triggers.Count; t++)
+                {
+                    var signal = triggers[t] as SignalTrigger;
+                    // A bare signal names the one member of its id in any namespace; more than one is the summary's fault, below.
+                    if (signal == null || !signal.IsWatched || !signal.Key.Names(key))
+                        continue;
+
+                    var sequence = system.FindSequence(signal.Runs);
+                    if (sequence == null)
+                        continue;
+
+                    var instances = system.Uses;
+                    for (var n = 0; n < instances.Count; n++)
+                    {
+                        // A faulted or waiting trigger starts nothing, as on the watched path.
+                        if (instances[n].Enabled && !SequenceSummary.Waits(system, signal, instances[n]) && From(signal, instances[n], entityId))
+                        {
+                            if (signal.Stops)
+                                Halt(sequence, instances[n], StopCause.Trigger, 0);
+                            else
+                                Call(sequence, instances[n]);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>How many raises have walked the triggers, which a test counts.</summary>
+        public int RaisesWalked { get; private set; }
+
+        /// <summary>Whether <paramref name="signal" />, on <paramref name="instance" />, waits on a moment a mod raises rather than a change watched for.</summary>
+        bool Raises(SignalTrigger signal, SystemInstance instance)
+        {
+            if (signal == null)
+                return false;
+
+            foreach (var source in SystemInstance.Through(instance, signal.Sources))
+            {
+                var block = _bindings.Entity(source);
+                var raised = block?.Kind.FindEvent(signal.Key);
+                if (raised != null && raised.IsRaised)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether <paramref name="signal" />, on <paramref name="instance" />, listens to the block <paramref name="entityId" />.</summary>
+        bool From(SignalTrigger signal, SystemInstance instance, long entityId)
+        {
+            foreach (var source in SystemInstance.Through(instance, signal.Sources))
+            {
+                var block = _bindings.Entity(source);
+                if (block != null && block.Block.EntityId == entityId)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Abandons a run, as a button that stops a sequence does.
         /// </summary>
         /// <remarks>
@@ -494,7 +570,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     for (var n = 0; n < instances.Count; n++)
                     {
                         // Switched off, or waiting to be filled in, it has nothing watched, so it costs no look until it may run.
-                        if (watched && system.Enabled && instances[n].Enabled && !SequenceSummary.Waits(system, trigger, instances[n]))
+                        // A moment a mod raises starts its sequence as it is raised, so it is never watched.
+                        if (watched && system.Enabled && instances[n].Enabled && !SequenceSummary.Waits(system, trigger, instances[n])
+                            && !Raises(signal, instances[n]))
                             _watches.Keep(system, t, trigger, instances[n]);
                     }
                 }

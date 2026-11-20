@@ -689,6 +689,10 @@ namespace Sprocket.Sim.Driving
         public static List<string> Members(this SprocketEditor editor) =>
             editor.Stages().ElementAt(1).Entries().Where(entry => !entry.IsHeading).Select(entry => entry.Text).ToList();
 
+        /// <summary>The words of the second column of the pick on the screen, headings and members in order, each heading marked with a leading '#'.</summary>
+        public static List<string> MembersHeaded(this SprocketEditor editor) =>
+            editor.Stages().ElementAt(1).Entries().Select(entry => entry.IsHeading ? "#" + entry.Text : entry.Text).ToList();
+
         /// <summary>The row saying <paramref name="name" /> in a pick, or an exception naming the screen.</summary>
         static PickRow Row(SprocketEditor editor, string name)
         {

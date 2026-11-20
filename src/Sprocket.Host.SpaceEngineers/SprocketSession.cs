@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Copies;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Mods;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -90,6 +91,7 @@ namespace Sprocket.Host.SpaceEngineers
         StatusWatch _watch;
 
         Constructs _constructs;
+        ModSupportHost _modApi;
 
         ScreenMotion _motion;
 
@@ -320,6 +322,10 @@ namespace Sprocket.Host.SpaceEngineers
             // Made here rather than with the session, since the mods they are read from are known only once the world loads.
             _kinds = new BlockKinds();
 
+            // Other mods register their blocks' members into the kinds through Sprocket's mod API.
+            _modApi = new ModSupportHost(_kinds.Mods, On, _rota);
+            _modApi.Start();
+
             // Made before Speak, which rewords every Sprocket.
             _roster = new Roster(() => Asked, _rota, _kinds, _texts, _memories, _backups, Frame, Later)
             {
@@ -399,6 +405,7 @@ namespace Sprocket.Host.SpaceEngineers
         {
             _gameTexts.Load(MyAPIGateway.Session.Config.Language);
             _texts.Load(_gameTexts);
+            _kinds.Reword();
 
             foreach (SprocketUnit unit in _roster.All)
                 unit.Reword();
@@ -1005,6 +1012,7 @@ namespace Sprocket.Host.SpaceEngineers
             }
 
             SignalAction.End();
+            _modApi?.Stop();
 
             if (_gameTexts != null && MyAPIGateway.Gui != null)
                 MyAPIGateway.Gui.GuiControlRemoved -= Closed;

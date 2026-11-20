@@ -114,6 +114,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// namespace, the game's included, offers on its blocks.
         /// </summary>
         /// <remarks>Found when the program is bound; the fault's words are the name as written, and the name written with more detail mends it.</remarks>
-        Ambiguous = 24
+        Ambiguous = 24,
+
+        /// <summary>The last run ended because a mod's awaitable action failed.</summary>
+        /// <remarks>A problem a sequence's catch handles; the words come from the mod.</remarks>
+        Failed = 25
     }
 }

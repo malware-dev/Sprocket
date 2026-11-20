@@ -22,6 +22,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             Text = text;
         }
 
+        /// <summary>A signal a mod raises on its block, <paramref name="id" />, read in a sentence as <paramref name="text" />: a moment with no reading behind it.</summary>
+        public static EntityEvent Raised(string id, string text)
+        {
+            var raised = new EntityEvent(id, null, SignalEdge.Rising, text);
+            raised.IsRaised = true;
+            return raised;
+        }
+
+        /// <summary>Whether this is a moment a mod raises, which starts what waits on it as it is raised rather than being watched.</summary>
+        public bool IsRaised { get; private set; }
+
         /// <summary>A signal: one the construct sends from the toolbar slot <paramref name="at" />, which its id names, with no reading behind it at all.</summary>
         public EntityEvent(ToolbarSlot at, string text)
         {

@@ -1,6 +1,7 @@
-using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.ModSupport;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 {
@@ -51,6 +52,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             Action<IList<T>, TOptions> begins = null) where T : class
         {
             return new TypedOwnAction<T, TOptions>(options, does, until, done, trouble, stop, expected, forced, begins);
+        }
+
+        /// <summary>An action on a <typeparamref name="T" /> that is told why it is called off, as a mod's awaitable action is: <paramref name="stops" /> is told the cause.</summary>
+        public static OwnAction Told<T, TOptions>(Func<IList<Literal>, TOptions> options, Action<T, TOptions, ReaderMemory> does, Reading until,
+            Func<T, TOptions, ReaderMemory, bool> done, Func<T, TOptions, ReaderMemory, BlockTrouble> trouble, Action<T, SprocketCancelCause> stops) where T : class
+        {
+            var made = new TypedOwnAction<T, TOptions>(options, does, until, done, trouble, null, null);
+            made.StopsFor = stops;
+            return made;
         }
 
         static object Nothing(IList<Literal> arguments)

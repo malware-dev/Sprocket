@@ -72,4 +72,5 @@
     <None Remove="thumb.png" />
     <None Remove="LICENSE.txt" />
   </ItemGroup>
+  <Import Project="..\Sprocket.ModSupport\Sprocket.ModSupport.projitems" Label="Shared" />
 </Project>

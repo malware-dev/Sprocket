@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using Sprocket.ModSupport;
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
@@ -14,6 +15,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
     /// </summary>
     public sealed class SequenceRunner
     {
+        // Why the run is ending, told to the mods' actions it calls off; what ends it says so just before, and calling off forgets it; null where nothing has said.
+        SprocketCancelCause? _cause;
+
         // Ticks between looks, at an await, for something that has sent its blocks the other way.
         const int Conflicts = 60;
 
@@ -245,7 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     if (said.Ends)
                     {
                         _faults.Hold(stuck);
-                        return new SequenceFault(SequenceProblem.Conflicted, step, said, entity.Name);
+                        return new SequenceFault(said.Fails ? SequenceProblem.Failed : SequenceProblem.Conflicted, step, said, entity.Name);
                     }
 
                     if (said.Exists && !stuck.Exists)
@@ -541,6 +545,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Ends the run where it fails: in its catch where it has one it has not reached, then its finally; or at once.</summary>
         void Fail()
         {
+            // A failure the run meets itself; a stop or an abort has said why already.
+            if (_cause == null)
+                _cause = SprocketCancelCause.Failed;
             if (!Handle(true))
                 End();
         }
@@ -604,6 +611,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             var running = IsRunning;
             var at = _memory.Step;
+            _cause = by == StopCause.Switch ? SprocketCancelCause.SwitchedOff : SprocketCancelCause.Stopped;
             Stop();
             if (!running)
                 return;
@@ -630,9 +638,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _rota.Leave(_busy);
         }
 
-        /// <summary>Tells every block still being waited on to call off what was started on it.</summary>
+        /// <summary>Tells every block still being waited on to call off what was started on it, saying why the run ends, and forgets why.</summary>
         void Called()
         {
+            var cause = _cause ?? SprocketCancelCause.Stopped;
+            _cause = null;
             if (_bindings == null)
                 return;
 
@@ -646,7 +656,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 foreach (var acted in compiled.Acts)
                 {
                     if (acted.Bound != null)
-                        acted.Bound.Stop(acted.Entity.Block);
+                        acted.Bound.Stop(acted.Entity.Block, cause);
                 }
             }
         }
@@ -1126,6 +1136,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </summary>
         void Aborted(Abort abort)
         {
+            _cause = SprocketCancelCause.Aborted;
             var message = abort.MessageIn(_instance);
             if (abort.Level == AbortLevel.Note && message.Length == 0)
             {

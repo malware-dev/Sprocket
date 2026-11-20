@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>57946fbb-bba3-413b-9ff5-69d2ee514988</SharedGUID>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ISprocketBlockWiring.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISprocketMemberWiring.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISprocketOption.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISprocketOptionReading.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISprocketRegistry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISprocketWired.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISprocketWiring.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Option.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Option.Key.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketCancel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketCancelCause.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketEnumType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketFailure.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketMember.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketMod.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketModBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketModSupport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketModSupport.Key.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketOption.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketRegistration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketSignal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketTask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketTask.Key.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SprocketWire.cs" />
+  </ItemGroup>
+</Project>

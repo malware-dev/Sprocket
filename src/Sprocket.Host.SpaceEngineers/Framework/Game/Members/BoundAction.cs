@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.ModSupport;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 {
@@ -40,6 +41,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         /// <summary>Calls off what this started on <paramref name="block" />.</summary>
         public abstract void Stop(IMyTerminalBlock block);
+
+        /// <summary>Calls off what this started on <paramref name="block" />, saying why, <paramref name="cause" />.</summary>
+        public virtual void Stop(IMyTerminalBlock block, SprocketCancelCause cause)
+        {
+            Stop(block);
+        }
 
         /// <summary>How many ticks <paramref name="block" /> should take to finish, or <see cref="Grids.GridEntity.Unestimated" />.</summary>
         public abstract int Expected(IMyTerminalBlock block);

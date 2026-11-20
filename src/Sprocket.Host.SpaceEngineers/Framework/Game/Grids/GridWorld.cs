@@ -66,6 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         public GridWorld(IMyTerminalBlock anchor, BlockKinds kinds)
         {
             _kinds = kinds;
+            _kinds.Redescribed += OnRedescribed;
             Keys = new BlockKeys(this);
             Follow(anchor);
         }
@@ -614,7 +615,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
                 _returned.Add(block.CustomName);
 
             GridEntity entity;
-            if (!_keptById.TryGetValue(id, out entity) || entity.Block != block)
+            if (!_keptById.TryGetValue(id, out entity) || entity.Block != block || !_kinds.IsCurrent(entity.Kind))
                 entity = new GridEntity(block, _kinds.For(block));
 
             _byId.Add(id, entity);
@@ -870,6 +871,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
             Stir();
         }
 
+        void OnRedescribed(string type)
+        {
+            _stale = true;
+            Stir();
+        }
+
         void OnGridsChanged(IMyCubeGrid grid, IMyCubeGrid other)
         {
             _stale = true;
@@ -958,6 +965,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Grids
         /// <summary>Stops listening to the grids this was watching.</summary>
         public void Dispose()
         {
+            _kinds.Redescribed -= OnRedescribed;
             Watch(new List<IMyCubeGrid>());
             Join(null);
             foreach (var heard in _named.Values)

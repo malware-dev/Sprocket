@@ -46,6 +46,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 case Cause.DoorToldToOpen: return texts.TroubleDoorToldToOpen;
                 case Cause.DoorToldToClose: return texts.TroubleDoorToldToClose;
                 case Cause.WheelNoWheel: return texts.TroubleWheelNoWheel;
+                case Cause.ModStuck:
+                case Cause.ModConflicted: return trouble.About ?? "";
+                case Cause.ModFailed: return Template.Fill(texts.TroubleModFailed, "reason", trouble.About ?? "");
                 default: return "";
             }
         }

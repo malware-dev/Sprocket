@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Mods;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
@@ -29,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
         readonly ParameterCatalog _catalogue = Catalogue();
         readonly Capabilities _capabilities = new Capabilities();
+        readonly ModCapability _mods;
 
         /// <summary>
         /// The kinds of block in a world, described from Sprocket's capabilities and what Sprocket and every mod loaded say
@@ -40,7 +42,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// </remarks>
         public BlockKinds()
         {
+            _mods = new ModCapability(Mods);
+            Mods.Registered += ForgetAll;
         }
+
+        /// <summary>The members other mods register for their blocks through Sprocket's mod API.</summary>
+        public ModMembers Mods { get; } = new ModMembers();
 
         /// <summary>What Sprocket and then every mod loaded say of the actions blocks have.</summary>
         static ParameterCatalog Catalogue()
@@ -48,7 +55,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             // Sprocket's own descriptions go in first, so a mod may override them.
             var catalogue = new ParameterCatalog();
             catalogue.Add(KnownActions.Descriptions(), "");
-            ModActions.Read(catalogue);
             return catalogue;
         }
 
@@ -72,6 +78,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             // What this block is, before what every block is, so a door offers "open" above "power".
             Describe(kind, block, _capabilities.Blocks);
 
+            // What the mod that adds the block says of it, after what Sprocket knows of every block like it.
+            if (_mods.Claims(block))
+            {
+                kind.Known(_mods);
+                _mods.Describe(kind, block);
+            }
+
             if (!Signalled(kind))
                 Signals(kind, block);
 
@@ -90,6 +103,53 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
             _kinds.Add(id, kind);
             return kind;
+        }
+
+        /// <summary>Raised with a block type whose kinds have been forgotten, so a construct holding blocks of it reads them again.</summary>
+        public event Action<string> Redescribed;
+
+        /// <summary>Returns true if <paramref name="kind" /> is the one held for its block type, false where it has been forgotten since.</summary>
+        public bool IsCurrent(EntityKind kind)
+        {
+            EntityKind held;
+            return _kinds.TryGetValue(kind.Id, out held) && held == kind;
+        }
+
+        /// <summary>Forgets the kinds of every block type where any mod supports Sprocket, so they are described again in the language now chosen.</summary>
+        /// <remarks>Asked when the player changes language; a mod says its names, groups and descriptions as they are asked for.</remarks>
+        public void Reword()
+        {
+            if (Mods.Registrations.Count > 0)
+                ForgetAll();
+        }
+
+        /// <summary>Forgets every kind of block described so far, so each is described again with what mods have registered since.</summary>
+        /// <remarks>Asked only as a mod registers or withdraws: a mod's scope may take blocks of any type.</remarks>
+        void ForgetAll()
+        {
+            var types = new HashSet<string>();
+            foreach (var id in _kinds.Keys)
+                types.Add(id.Substring(0, id.IndexOf('/')));
+
+            foreach (var type in types)
+                Forget(type);
+        }
+
+        /// <summary>Forgets every kind of block of <paramref name="type" /> described so far, so the next block of it is described with what its mod has registered since.</summary>
+        void Forget(string type)
+        {
+            var prefix = type + "/";
+            var gone = new List<string>();
+            foreach (var id in _kinds.Keys)
+            {
+                if (id.StartsWith(prefix, StringComparison.Ordinal))
+                    gone.Add(id);
+            }
+
+            foreach (var id in gone)
+                _kinds.Remove(id);
+
+            Redescribed?.Invoke(type);
         }
 
         /// <summary>Has every one of <paramref name="capabilities" /> that claims <paramref name="block" /> describe it, in order.</summary>
