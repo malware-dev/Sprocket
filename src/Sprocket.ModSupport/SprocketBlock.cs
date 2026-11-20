@@ -74,12 +74,12 @@ namespace Sprocket.ModSupport
         public SprocketSignal DefineSignal(string id) => new SprocketSignal(_registration, _registration.Member(Index, SprocketWire.KindSignal, id, true));
 
         /// <summary>A real number <paramref name="id" />, read by <paramref name="read" /> and set by <paramref name="write" /> where given.</summary>
-        public SprocketMember Number(string id, Func<IMyTerminalBlock, double> read, Action<IMyTerminalBlock, double> write = null) =>
-            Value(id, SprocketWire.TypeNumber, b => read(b), write == null ? null : (Action<IMyTerminalBlock, object>)((b, v) => write(b, (double)v)));
+        public SprocketMember Real(string id, Func<IMyTerminalBlock, double> read, Action<IMyTerminalBlock, double> write = null) =>
+            Value(id, SprocketWire.TypeReal, b => read(b), write == null ? null : (Action<IMyTerminalBlock, object>)((b, v) => write(b, (double)v)));
 
-        /// <summary>A whole number <paramref name="id" />, read by <paramref name="read" /> and set by <paramref name="write" /> where given.</summary>
-        public SprocketMember Whole(string id, Func<IMyTerminalBlock, long> read, Action<IMyTerminalBlock, long> write = null) =>
-            Value(id, SprocketWire.TypeWhole, b => read(b), write == null ? null : (Action<IMyTerminalBlock, object>)((b, v) => write(b, (long)v)));
+        /// <summary>An integer <paramref name="id" />, read by <paramref name="read" /> and set by <paramref name="write" /> where given.</summary>
+        public SprocketMember Integer(string id, Func<IMyTerminalBlock, long> read, Action<IMyTerminalBlock, long> write = null) =>
+            Value(id, SprocketWire.TypeInteger, b => read(b), write == null ? null : (Action<IMyTerminalBlock, object>)((b, v) => write(b, (long)v)));
 
         /// <summary>An on or off <paramref name="id" />, read by <paramref name="read" /> and set by <paramref name="write" /> where given.</summary>
         public SprocketMember Flag(string id, Func<IMyTerminalBlock, bool> read, Action<IMyTerminalBlock, bool> write = null) =>
@@ -90,7 +90,7 @@ namespace Sprocket.ModSupport
             Value(id, SprocketWire.TypeText, b => read(b), write == null ? null : (Action<IMyTerminalBlock, object>)((b, v) => write(b, (string)v)));
 
         /// <summary>A color <paramref name="id" />, read by <paramref name="read" /> and set by <paramref name="write" /> where given.</summary>
-        public SprocketMember Colored(string id, Func<IMyTerminalBlock, Color> read, Action<IMyTerminalBlock, Color> write = null) =>
+        public SprocketMember Color(string id, Func<IMyTerminalBlock, Color> read, Action<IMyTerminalBlock, Color> write = null) =>
             Value(id, SprocketWire.TypeColor, b => read(b), write == null ? null : (Action<IMyTerminalBlock, object>)((b, v) => write(b, (Color)v)));
 
         /// <summary>A length of time <paramref name="id" />, read by <paramref name="read" /> and set by <paramref name="write" /> where given.</summary>
@@ -106,16 +106,16 @@ namespace Sprocket.ModSupport
             Value(id, SprocketWire.TypeChoice, b => type.Word(read(b)), write == null ? null : (Action<IMyTerminalBlock, object>)((b, v) => write(b, type.Value((string)v)))).Choosing(type);
 
         /// <summary>A real number <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
-        public SprocketMember Number<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, double> read) =>
-            Function(id, SprocketWire.TypeNumber, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
+        public SprocketMember Real<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, double> read) =>
+            Function(id, SprocketWire.TypeReal, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
 
         /// <summary>A real number <paramref name="id" /> that needs <paramref name="o1" /> and <paramref name="o2" /> to go on, read by <paramref name="read" />.</summary>
-        public SprocketMember Number<T1, T2>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, Func<IMyTerminalBlock, T1, T2, double> read) =>
-            Function(id, SprocketWire.TypeNumber, new ISprocketOption[] { o1, o2 }, (b, g) => read(b, Read(o1, g[0]), Read(o2, g[1])));
+        public SprocketMember Real<T1, T2>(string id, SprocketOption<T1> o1, SprocketOption<T2> o2, Func<IMyTerminalBlock, T1, T2, double> read) =>
+            Function(id, SprocketWire.TypeReal, new ISprocketOption[] { o1, o2 }, (b, g) => read(b, Read(o1, g[0]), Read(o2, g[1])));
 
-        /// <summary>A whole number <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
-        public SprocketMember Whole<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, long> read) =>
-            Function(id, SprocketWire.TypeWhole, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
+        /// <summary>An integer <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
+        public SprocketMember Integer<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, long> read) =>
+            Function(id, SprocketWire.TypeInteger, new ISprocketOption[] { o1 }, (b, g) => read(b, Read(o1, g[0])));
 
         /// <summary>An on or off <paramref name="id" /> that needs <paramref name="o1" /> to go on, read by <paramref name="read" />.</summary>
         public SprocketMember Flag<T1>(string id, SprocketOption<T1> o1, Func<IMyTerminalBlock, T1, bool> read) =>

@@ -119,10 +119,10 @@ namespace Sprocket.ModSupport
         public const string TypeFlag = "flag";
 
         /// <summary>A type of value: a real number.</summary>
-        public const string TypeNumber = "number";
+        public const string TypeReal = "real";
 
-        /// <summary>A type of value: a whole number.</summary>
-        public const string TypeWhole = "whole";
+        /// <summary>A type of value: an integer.</summary>
+        public const string TypeInteger = "integer";
 
         /// <summary>A type of value: text.</summary>
         public const string TypeText = "text";

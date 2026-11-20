@@ -183,9 +183,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             {
                 case SprocketWire.TypeFlag:
                     return OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block => As(Read(read, block), false)));
-                case SprocketWire.TypeNumber:
+                case SprocketWire.TypeReal:
                     return OwnValue.Number<IMyTerminalBlock>(block => Number(Read(read, block)));
-                case SprocketWire.TypeWhole:
+                case SprocketWire.TypeInteger:
                     return OwnValue.Whole<IMyTerminalBlock>(block => As(Read(read, block), 0L));
                 case SprocketWire.TypeText:
                     return OwnValue.Text<IMyTerminalBlock>(block => Read(read, block) as string ?? "");
@@ -214,9 +214,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             {
                 case SprocketWire.TypeFlag:
                     return OwnValue.Flag<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), false));
-                case SprocketWire.TypeNumber:
+                case SprocketWire.TypeReal:
                     return OwnValue.Number<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => Number(ask(block, arguments)));
-                case SprocketWire.TypeWhole:
+                case SprocketWire.TypeInteger:
                     return OwnValue.Whole<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), 0L));
                 case SprocketWire.TypeText:
                     return OwnValue.Text<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => ask(block, arguments) as string ?? "");
