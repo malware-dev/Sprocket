@@ -65,6 +65,9 @@ profile restyles every file.
   does not have yet: every commit (`git log --oneline origin/<published branch>..<source>`) and the format version it
   writes beside the one published. He approves that content, not only the act of uploading. An upload that would carry
   more than he asked for is not made: it waits, or is built from the published branch with only what was asked for.
+- Only `main` builds into the stable folder; every other local build that deploys goes into the Bleeding Edge folder,
+  which is experimental by nature. So a local folder is never uploaded as it stands: an upload is built from its
+  published branch at the approved commit, and the packed folder is checked against that commit before it goes out.
 - A pack clears the deployed folder before it writes, so a pack that fails on a file the running game holds leaves the
   mod half deployed. Check the folder after a failed pack.
 - Never close, kill or restart a game the developer is running. After a deploy, say what takes it in: code and the
