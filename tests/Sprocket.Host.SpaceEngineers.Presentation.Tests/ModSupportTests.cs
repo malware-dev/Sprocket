@@ -1039,6 +1039,37 @@ public class ModSupportTests
         Assert.False(members.Claims(light.Block));
     }
 
+    /// <summary>
+    /// A mod whose registration throws is refused on its own: the game's mod messages stop at a handler that throws, so a
+    /// mod hearing Sprocket after it still registers.
+    /// </summary>
+    [Fact]
+    public void AModWhoseRegistrationThrowsLeavesTheOthersRegistered()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        var members = new ModMembers();
+        HostNamespacesOnce();
+        var was = MyAPIGateway.Utilities;
+        MyAPIGateway.Utilities = Relay();
+        try
+        {
+            var broken = (SprocketRegistration)SprocketModSupport.Register(new SprocketMod { Namespace = "test.broken_mod", Name = "Broken", Author = "Tester" },
+                api => api.Block(Type(light)).Flag("lit", _ => true).Named("lit", "Lit."));
+            var sound = (SprocketRegistration)SprocketModSupport.Register(new SprocketMod { Namespace = "test.sound_mod", Name = "Sound", Author = "Tester" },
+                api => api.Block(Type(light)).Real("lift", _ => 1.0).Named("lift", "How far it lifts."));
+            new ModSupportHost(members, _ => null, new Rota()).Start();
+
+            Assert.False(broken.IsRegistered);
+            Assert.Contains("readings", broken.Refusal);
+            Assert.True(sound.IsRegistered, "a mod after the broken one never heard Sprocket");
+        }
+        finally
+        {
+            MyAPIGateway.Utilities = was;
+        }
+    }
+
     /// <summary>What a mod has a task call as it ends is called once, however it ends, and at once where it has already ended.</summary>
     [Theory]
     [InlineData(SprocketWire.Completed)]
