@@ -59,6 +59,10 @@ profile restyles every file.
   maps branches to folders.
 - `main` holds what is published on the stable Workshop item, and `bleeding-edge` what is published on Bleeding Edge,
   nothing more. New code is made on `update`, and a published branch takes it only as it is published.
+- Nothing is released by accident. Before any upload, the maintainer is shown everything it carries that the item
+  does not have yet: every commit (`git log --oneline origin/<published branch>..<source>`) and the format version it
+  writes beside the one published. He approves that content, not only the act of uploading. An upload that would carry
+  more than he asked for is not made: it waits, or is built from the published branch with only what was asked for.
 - A pack clears the deployed folder before it writes, so a pack that fails on a file the running game holds leaves the
   mod half deployed. Check the folder after a failed pack.
 - Never close, kill or restart a game the developer is running. After a deploy, say what takes it in: code and the
