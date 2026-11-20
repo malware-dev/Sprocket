@@ -800,7 +800,7 @@
     <value>Dette steget venter på noe som ikke kan bli ferdig.</value>
   </data>
   <data name="Sprocket.Problem.Failed" xml:space="preserve">
-    <value>Denne sekvensen stoppet fordi et trinn feilet.</value>
+    <value>Denne sekvensen stoppet fordi et steg feilet.</value>
   </data>
   <data name="Sprocket.Problem.Conflicted" xml:space="preserve">
     <value>Denne sekvensen stoppet fordi noe annet tok over en av blokkene.</value>

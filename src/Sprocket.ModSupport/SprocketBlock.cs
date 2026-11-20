@@ -56,27 +56,11 @@ namespace Sprocket.ModSupport
             return narrower;
         }
 
-        /// <summary>The narrower set of these blocks that <paramref name="takes" /> holds of.</summary>
-        /// <remarks>Asked once per block, when Sprocket first reads it: its answer stands for the block's life.</remarks>
-        public SprocketBlock Where(Func<IMyTerminalBlock, bool> takes)
-        {
-            var narrower = _registration.Scope(Index);
-            narrower._said[SprocketWire.Takes] = takes;
-            return narrower;
-        }
-
         /// <summary>Says which blocks a base scope is: of the object builder type <paramref name="blockType" />, of <paramref name="subtypes" /> where any are given.</summary>
         public SprocketBlock OfType(string blockType, string[] subtypes)
         {
             _said[SprocketWire.BlockType] = blockType;
             _said[SprocketWire.Subtypes] = subtypes;
-            return this;
-        }
-
-        /// <summary>Says a base scope is every block <paramref name="takes" /> holds of.</summary>
-        public SprocketBlock Taking(Func<IMyTerminalBlock, bool> takes)
-        {
-            _said[SprocketWire.Takes] = takes;
             return this;
         }
 

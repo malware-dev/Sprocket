@@ -105,9 +105,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                     break;
                 case SprocketWire.TypeNumber:
                 case SprocketWire.TypeWhole:
-                    field = Field.Between(name,
-                        Bound(ModWire.Part<Func<IMyTerminalBlock, double>>(option, SprocketWire.Least), block, percent),
-                        Bound(ModWire.Part<Func<IMyTerminalBlock, double>>(option, SprocketWire.Most), block, percent));
+                    var least = Bound(ModWire.Part<Func<IMyTerminalBlock, double>>(option, SprocketWire.Least), block, percent);
+                    var most = Bound(ModWire.Part<Func<IMyTerminalBlock, double>>(option, SprocketWire.Most), block, percent);
+
+                    // A percentage with no range of its own is 0 to 100, as every percentage of Sprocket's own is.
+                    field = percent
+                        ? Field.Between(name, least.Length > 0 ? least : "0", most.Length > 0 ? most : "100")
+                        : Field.Between(name, least, most);
                     field.Entry = ModWire.Part<string>(option, SprocketWire.Type) == SprocketWire.TypeWhole ? FieldInput.Whole : FieldInput.Decimal;
                     break;
                 case SprocketWire.TypeColor:

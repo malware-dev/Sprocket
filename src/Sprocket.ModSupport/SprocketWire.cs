@@ -70,9 +70,6 @@ namespace Sprocket.ModSupport
         /// <summary>In a scope: the subtypes it takes, a <c>string[]</c>; empty for every subtype.</summary>
         public const string Subtypes = "subtypes";
 
-        /// <summary>In a scope: whether it takes a block, a <c>Func&lt;IMyTerminalBlock, bool&gt;</c>, asked once per block.</summary>
-        public const string Takes = "takes";
-
         /// <summary>In a scope or member: the group it stands in, a <c>Func&lt;string&gt;</c> of a group of the mod's own.</summary>
         public const string Group = "group";
 

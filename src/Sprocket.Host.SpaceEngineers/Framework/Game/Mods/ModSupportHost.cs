@@ -83,6 +83,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
         Dictionary<string, object> Register(Dictionary<string, object> said)
         {
             var registration = new ModRegistration(said);
+
+            // The wrapper checks the convention as a mod registers; a mod sending the registration otherwise is held to it here.
+            try
+            {
+                SprocketIds.CheckNamespace(registration.Namespace);
+            }
+            catch (ArgumentException e)
+            {
+                GameLog.Say(e.Message);
+                return new Dictionary<string, object> { { SprocketWire.Refused, e.Message } };
+            }
+
             if (!HostNamespaces.Register(registration.Namespace, registration.Owner, registration.Title, registration.Author))
             {
                 var holder = HostNamespaces.Find(registration.Namespace);

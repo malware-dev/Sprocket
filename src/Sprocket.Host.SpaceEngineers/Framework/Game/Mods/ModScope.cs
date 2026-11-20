@@ -10,7 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
     {
         readonly string _blockType;
         readonly string[] _subtypes;
-        readonly Func<IMyTerminalBlock, bool> _takes;
 
         /// <summary>The scope <paramref name="said" /> describes, narrowing <paramref name="wider" /> where that is not null.</summary>
         public ModScope(Dictionary<string, object> said, ModScope wider)
@@ -18,7 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             Wider = wider;
             _blockType = ModWire.Part<string>(said, SprocketWire.BlockType);
             _subtypes = ModWire.Part<string[]>(said, SprocketWire.Subtypes) ?? new string[0];
-            _takes = ModWire.Part<Func<IMyTerminalBlock, bool>>(said, SprocketWire.Takes);
             Group = ModWire.Part<Func<string>>(said, SprocketWire.Group);
             SprocketsGroup = ModWire.Part<string>(said, SprocketWire.SprocketsGroup);
         }
@@ -36,26 +34,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
         public int Depth => Wider == null ? 0 : Wider.Depth + 1;
 
         /// <summary>Whether <paramref name="block" /> is in the scope.</summary>
-        /// <remarks>Asked as a block type is described, once per type; a mod's test that throws leaves the block out.</remarks>
+        /// <remarks>Asked as a block type is described, once per type and subtype: a scope names block types and subtypes, never single blocks.</remarks>
         public bool Claims(IMyTerminalBlock block)
         {
             if (Wider != null && !Wider.Claims(block))
                 return false;
 
+            // A base scope names its block type; one that names none, sent without the wrapper, takes no block.
+            if (Wider == null && _blockType == null)
+                return false;
+
             if (_blockType != null && block.BlockDefinition.TypeIdString != _blockType)
                 return false;
 
-            if (_subtypes.Length > 0 && Array.IndexOf(_subtypes, block.BlockDefinition.SubtypeName) < 0)
-                return false;
-
-            try
-            {
-                return _takes == null || _takes(block);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return _subtypes.Length == 0 || Array.IndexOf(_subtypes, block.BlockDefinition.SubtypeName) >= 0;
         }
     }
 }

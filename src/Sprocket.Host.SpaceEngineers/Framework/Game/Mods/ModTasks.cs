@@ -73,8 +73,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
                 return false;
 
             if (run.Outcome == null)
-                ModWire.Part<Action>(run.Wire, SprocketWire.Poll)?.Invoke();
+                Polled(run, block);
             return run.Outcome == SprocketWire.Completed;
+        }
+
+        /// <summary>Has the mod look at <paramref name="run" />, the task on <paramref name="block" />; a look that throws fails the task.</summary>
+        static void Polled(Run run, IMyTerminalBlock block)
+        {
+            try
+            {
+                ModWire.Part<Action>(run.Wire, SprocketWire.Poll)?.Invoke();
+            }
+            catch (Exception e)
+            {
+                GameLog.Say($"A mod's awaitable action on {block.CustomName} failed while Sprocket looked at it: {e.Message}");
+                run.Outcome = SprocketWire.Failed;
+                run.Message = "";
+            }
         }
 
         /// <summary>Whether the mod agreed to stop the task on <paramref name="block" />, which settles the step though it never got there.</summary>

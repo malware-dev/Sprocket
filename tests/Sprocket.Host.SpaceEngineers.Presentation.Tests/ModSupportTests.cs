@@ -62,6 +62,69 @@ public class ModSupportTests
         Assert.Contains(Space, second.Refusal);
     }
 
+    /// <summary>A registration sent without the wrapper is held to the convention too: a namespace breaking it is refused, with why.</summary>
+    [Theory]
+    [InlineData("")]
+    [InlineData("Glow Mod")]
+    [InlineData("test..glow")]
+    public void ARegistrationWithAMalformedNamespaceIsRefused(string space)
+    {
+        var answer = RegisteredRaw(new ModMembers(), new Dictionary<string, object>
+        {
+            { SprocketWire.Namespace, space }, { SprocketWire.Name, "Glow" }, { SprocketWire.Author, "Tester" }
+        });
+
+        Assert.True(answer.ContainsKey(SprocketWire.Refused));
+        Assert.False(string.IsNullOrEmpty((string)answer[SprocketWire.Refused]));
+        Assert.Null(HostNamespaces.Find(space));
+    }
+
+    /// <summary>A member whose id breaks the convention, sent without the wrapper, is left out alone, and the mod's other members stand.</summary>
+    [Fact]
+    public void AMemberWithAMalformedIdIsLeftOutAndTheRestStand()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        var members = new ModMembers();
+        var answer = RegisteredRaw(members, new Dictionary<string, object>
+        {
+            { SprocketWire.Namespace, Space }, { SprocketWire.Name, "Glow" }, { SprocketWire.Author, "Tester" },
+            { SprocketWire.Scopes, new[] { new Dictionary<string, object> { { SprocketWire.BlockType, Type(light) } } } },
+            {
+                SprocketWire.Members, new[]
+                {
+                    new Dictionary<string, object> { { SprocketWire.Scope, 0 }, { SprocketWire.Id, "Ride-Height" } },
+                    new Dictionary<string, object> { { SprocketWire.Scope, 0 }, { SprocketWire.Id, "ride_height" } }
+                }
+            }
+        });
+
+        Assert.False(answer.ContainsKey(SprocketWire.Refused));
+        var found = new List<KeyValuePair<ModRegistration, Dictionary<string, object>>>();
+        members.For(light.Block, found);
+        Assert.Equal(new[] { "ride_height" }, found.Select(member => (string)member.Value[SprocketWire.Id]));
+    }
+
+    /// <summary>A mod's blocks are named by type and subtype only: a scope sent without the wrapper that names no block type takes no block.</summary>
+    [Fact]
+    public void AScopeNamingNoBlockTypeTakesNoBlock()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        var members = new ModMembers();
+        RegisteredRaw(members, new Dictionary<string, object>
+        {
+            { SprocketWire.Namespace, Space }, { SprocketWire.Name, "Glow" }, { SprocketWire.Author, "Tester" },
+            { SprocketWire.Scopes, new[] { new Dictionary<string, object>() } },
+            { SprocketWire.Members, new[] { new Dictionary<string, object> { { SprocketWire.Scope, 0 }, { SprocketWire.Id, "ride_height" } } } }
+        });
+
+        Assert.False(members.Claims(light.Block));
+        var found = new List<KeyValuePair<ModRegistration, Dictionary<string, object>>>();
+        members.For(light.Block, found);
+        Assert.Empty(found);
+    }
+
     /// <summary>An id breaking the naming convention is refused as it is given, so a mod's author meets it on the first load.</summary>
     [Theory]
     [InlineData("RideHeight")]
@@ -574,6 +637,37 @@ public class ModSupportTests
         Assert.Equal(1, after);
     }
 
+    /// <summary>An option that is a percentage with no range of its own is asked from 0 to 100, as Sprocket's own percentages are; one with a range keeps it.</summary>
+    [Fact]
+    public void APercentOptionWithNoRangeIsAskedFrom0To100()
+    {
+        var plain = new Dictionary<string, object> { { SprocketWire.Type, SprocketWire.TypeNumber }, { SprocketWire.Percent, true } };
+        var ranged = new Dictionary<string, object>(plain) { { SprocketWire.Most, (Func<IMyTerminalBlock, double>)(_ => 0.5) } };
+
+        var fields = ModFields.Asked(new[] { plain, ranged }, null!, new ModMembers());
+
+        Assert.Equal(("0", "100", " %"), (fields[0].Least, fields[0].Most, fields[0].Unit));
+        Assert.Equal(("0", "50"), (fields[1].Least, fields[1].Most));
+    }
+
+    /// <summary>A polled condition that throws fails the task, so the run ends as a failure rather than the mod's error reaching Sprocket's update.</summary>
+    [Fact]
+    public void APolledConditionThatThrowsFailsTheTask()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        var after = 0;
+        var sim = Waiting(rig, light, lights => lights.Awaitable("settle", _ => { }).PolledDone(_ => throw new InvalidOperationException("broken")), () => after++);
+
+        for (var i = 0; i < 300; i++)
+            sim.Tick();
+
+        Assert.Equal(0, after);
+        var runner = sim.Runner.Get(sim.Unit.Program.Systems[0].Sequences[0]);
+        Assert.False(runner.IsRunning, "the run went on waiting on a condition that throws");
+        Assert.Equal(SequenceProblem.Failed, SequenceSummary.Fault(runner).Problem);
+    }
+
     /// <summary>A task that fails ends the run as a problem in the mod's own words, and nothing after it runs.</summary>
     [Fact]
     public void AFailedTaskEndsTheRunInTheModsWords()
@@ -1045,6 +1139,26 @@ public class ModSupportTests
             if (!sprocketFirst)
                 host.Start();
             return registration;
+        }
+        finally
+        {
+            MyAPIGateway.Utilities = was;
+        }
+    }
+
+    /// <summary>What Sprocket answers to <paramref name="said" />, a registration sent straight on the channel as a mod without the wrapper would, taken into <paramref name="members" />.</summary>
+    Dictionary<string, object> RegisteredRaw(ModMembers members, Dictionary<string, object> said)
+    {
+        HostNamespacesOnce();
+        var was = MyAPIGateway.Utilities;
+        MyAPIGateway.Utilities = Relay();
+        try
+        {
+            Dictionary<string, object>? heard = null;
+            MyAPIGateway.Utilities.RegisterMessageHandler(SprocketWire.Channel, message => heard ??= message as Dictionary<string, object>);
+            new ModSupportHost(members, _ => null, new Rota()).Start();
+            var register = (Func<Dictionary<string, object>, Dictionary<string, object>>)heard![SprocketWire.Register];
+            return register(said);
         }
         finally
         {

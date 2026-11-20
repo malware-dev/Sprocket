@@ -1,5 +1,4 @@
 using System;
-using Sandbox.ModAPI;
 
 namespace Sprocket.ModSupport
 {
@@ -26,12 +25,6 @@ namespace Sprocket.ModSupport
             const string builder = "MyObjectBuilder_";
             var full = blockType.StartsWith(builder, StringComparison.Ordinal) ? blockType : builder + blockType;
             return _registration.Scope(-1).OfType(full, subtypes ?? new string[0]);
-        }
-
-        /// <summary>Every block that is a <typeparamref name="T" />, such as <c>IMyShipController</c>, the game's and other mods' included.</summary>
-        public SprocketBlock Block<T>() where T : class, IMyTerminalBlock
-        {
-            return _registration.Scope(-1).Taking(block => block is T);
         }
 
         /// <summary>Defines the host type <paramref name="id" />, holding <paramref name="words" /> as programs write them.</summary>

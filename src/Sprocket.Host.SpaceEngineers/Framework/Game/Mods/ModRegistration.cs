@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.ModSupport;
 
@@ -32,8 +33,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             foreach (var member in ModWire.Part<Dictionary<string, object>[]>(said, SprocketWire.Members) ?? new Dictionary<string, object>[0])
             {
                 var at = ModWire.Part<int>(member, SprocketWire.Scope);
-                if (at >= 0 && at < _scopes.Count && !string.IsNullOrEmpty(ModWire.Part<string>(member, SprocketWire.Id)))
-                    _members.Add(new KeyValuePair<ModScope, Dictionary<string, object>>(_scopes[at], member));
+                var id = ModWire.Part<string>(member, SprocketWire.Id);
+                if (at < 0 || at >= _scopes.Count || string.IsNullOrEmpty(id))
+                    continue;
+
+                // Left out alone, so one bad id does not take the rest of the mod with it.
+                if (!SprocketIds.Follows(id))
+                {
+                    GameLog.Say($"{Title}: the member \"{id}\" breaks Sprocket's naming convention, so it is left out. Ids are lowercase words joined by single underscores, such as speed_unit.");
+                    continue;
+                }
+
+                _members.Add(new KeyValuePair<ModScope, Dictionary<string, object>>(_scopes[at], member));
             }
 
             foreach (var type in ModWire.Part<Dictionary<string, object>[]>(said, SprocketWire.Types) ?? new Dictionary<string, object>[0])

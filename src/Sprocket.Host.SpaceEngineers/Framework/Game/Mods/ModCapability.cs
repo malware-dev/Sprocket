@@ -181,17 +181,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             switch (type)
             {
                 case SprocketWire.TypeFlag:
-                    return OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block => Read(read, block) is bool && (bool)Read(read, block)));
+                    return OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block => As(Read(read, block), false)));
                 case SprocketWire.TypeNumber:
                     return OwnValue.Number<IMyTerminalBlock>(block => Number(Read(read, block)));
                 case SprocketWire.TypeWhole:
-                    return OwnValue.Whole<IMyTerminalBlock>(block => Read(read, block) is long ? (long)Read(read, block) : 0L);
+                    return OwnValue.Whole<IMyTerminalBlock>(block => As(Read(read, block), 0L));
                 case SprocketWire.TypeText:
                     return OwnValue.Text<IMyTerminalBlock>(block => Read(read, block) as string ?? "");
                 case SprocketWire.TypeColor:
-                    return OwnValue.Color<IMyTerminalBlock>(block => Read(read, block) is Color ? (Color)Read(read, block) : Color.White);
+                    return OwnValue.Color<IMyTerminalBlock>(block => As(Read(read, block), Color.White));
                 case SprocketWire.TypeDuration:
-                    return OwnValue.Length<IMyTerminalBlock>(block => Read(read, block) is TimeSpan ? Duration.OfSeconds(((TimeSpan)Read(read, block)).TotalSeconds) : Duration.OfSeconds(0));
+                    return OwnValue.Length<IMyTerminalBlock>(block => Duration.OfSeconds(As(Read(read, block), TimeSpan.Zero).TotalSeconds));
                 case SprocketWire.TypeChoice:
                     ModRegistration owner;
                     var choices = _members.FindType(ModWire.Part<string>(member, SprocketWire.Of), out owner);
@@ -212,15 +212,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             switch (type)
             {
                 case SprocketWire.TypeFlag:
-                    return OwnValue.Flag<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => ask(block, arguments) is bool && (bool)ask(block, arguments));
+                    return OwnValue.Flag<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), false));
                 case SprocketWire.TypeNumber:
                     return OwnValue.Number<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => Number(ask(block, arguments)));
                 case SprocketWire.TypeWhole:
-                    return OwnValue.Whole<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => ask(block, arguments) is long ? (long)ask(block, arguments) : 0L);
+                    return OwnValue.Whole<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), 0L));
                 case SprocketWire.TypeText:
                     return OwnValue.Text<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => ask(block, arguments) as string ?? "");
                 case SprocketWire.TypeColor:
-                    return OwnValue.Color<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => ask(block, arguments) is Color ? (Color)ask(block, arguments) : Color.White);
+                    return OwnValue.Color<IMyTerminalBlock, IList<Literal>>(given, (block, arguments) => As(ask(block, arguments), Color.White));
                 default:
                     return null;
             }
@@ -359,6 +359,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Mods
             {
                 GameLog.Say($"A mod failed setting {Id(member)}: {e.Message}");
             }
+        }
+
+        /// <summary>Returns <paramref name="said" /> as a <typeparamref name="T" />, or <paramref name="otherwise" /> where it is another type or nothing.</summary>
+        static T As<T>(object said, T otherwise) where T : struct
+        {
+            return said is T ? (T)said : otherwise;
         }
 
         static double Number(object read)
