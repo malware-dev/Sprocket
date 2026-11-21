@@ -102,4 +102,10 @@ public sealed class Seat : Fitting
         Told("empty");
         _changed?.Invoke((IMyCockpit)Block);
     }
+
+    /// <summary>Uses slot <paramref name="slot" /> of the seat's toolbar, counted from zero, as a seated player pressing its key does.</summary>
+    public void Press(int slot)
+    {
+        Run(slot);
+    }
 }

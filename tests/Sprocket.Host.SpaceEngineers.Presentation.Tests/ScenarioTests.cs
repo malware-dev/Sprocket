@@ -187,6 +187,20 @@ public class ScenarioTests
         Assert.False(scenario.PlateLight.Enabled, "the plate unlocked and its light stayed on");
     }
 
+    /// <summary>The cockpit's first toolbar slot, pressed as a seated player presses it, switches the light off.</summary>
+    [Fact]
+    public void TheCockpitPressSwitchesTheLightOff()
+    {
+        var scenario = new CockpitPress();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+        Assert.True(scenario.Light.Enabled, "the light is off before the press");
+
+        scenario.Cockpit.Press(0);
+        Run(sim);
+
+        Assert.False(scenario.Light.Enabled, "pressing the cockpit's first slot left the light on");
+    }
+
     /// <summary>Store Button moves the ingots out of the refinery's output, its second inventory, into the cargo container.</summary>
     [Fact]
     public void TheRefineryMovesStoreTheOutput()

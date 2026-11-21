@@ -87,6 +87,7 @@ namespace Sprocket.Host.SpaceEngineers
         ShareDesk _desk;
 
         StatusWatch _watch;
+        SlotPresses _presses;
 
         Constructs _constructs;
 
@@ -334,15 +335,18 @@ namespace Sprocket.Host.SpaceEngineers
 
             Speak();
 
-            // On every machine: a server presses slots, and a client draws them.
-            SignalAction.Begin(_texts);
+            // On every machine: a client draws slots and presses a ship's, and a server presses a button panel's and fires them all.
+            _presses = new SlotPresses(id => MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock,
+                (block, sender) => block.HasPlayerAccess(MyAPIGateway.Players.TryGetIdentityId(sender)), (block, key) => On(block)?.Fire(key));
+            SignalAction.Begin(_texts, _presses.Pressed);
 
             _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
                 Settled, written => Rule(Settings.Of(written)));
             _constructs = new Constructs(_roster);
             _motion = new ScreenMotion(_rota);
             _watch = new StatusWatch(_rota, Frame, _constructs.Of, Connected);
-            _channel = ShareCourier.Carry(StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType())))).Build();
+            _channel = SlotPresses.Carry(ShareCourier.Carry(StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType()))))).Build();
+            _presses.Listen(_channel);
             _handover.Listen(_channel);
             _watch.Listen(_channel);
             _shares = new ShareCourier(Desk, Told);

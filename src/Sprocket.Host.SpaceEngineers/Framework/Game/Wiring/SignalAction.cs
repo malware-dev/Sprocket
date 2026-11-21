@@ -1,5 +1,5 @@
-using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Sandbox.ModAPI;
@@ -74,9 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             return arguments;
         }
 
-        /// <summary>Makes the action, in <paramref name="texts" />, and offers it to every block until <see cref="End" />.</summary>
+        /// <summary>Makes the action, in <paramref name="texts" />, handing each press to <paramref name="pressed" />, and offers it to every block until <see cref="End" />.</summary>
         /// <remarks>Called as a world loads. Making it touches no type's list of actions, so it is safe before any block exists.</remarks>
-        public static void Begin(Texts texts)
+        public static void Begin(Texts texts, Action<IMyTerminalBlock, string> pressed)
         {
             if (_action != null || MyAPIGateway.TerminalControls == null)
                 return;
@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             // The value fixes the parameter's type, and is what the action receives when run with none; an empty key resolves to
             // nothing.
             action.ParameterDefinitions.Add(TerminalActionParameter.Get(string.Empty));
-            action.ActionWithParameters = Run;
+            action.ActionWithParameters = (block, parameters) => Run(block, parameters, pressed);
 
             action.InvalidToolbarTypes = EveryList();
 
@@ -120,9 +120,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             actions.Add(_action);
         }
 
-        /// <summary>Fires the key a slot carries on the Sprocket of the construct <paramref name="block" />, the pressed block, is on.</summary>
-        /// <remarks>Runs on the server: the press is a server event and <c>Apply</c> never syncs.</remarks>
-        static void Run(IMyTerminalBlock block, ListReader<TerminalActionParameter> parameters)
+        /// <summary>Hands the key a slot carries, with <paramref name="block" />, the block its action is on, to <paramref name="pressed" />.</summary>
+        /// <remarks>
+        /// Runs where the toolbar ran its slot: on the server for a button panel, whose press the game sends there, and on the
+        /// pressing player's machine for a ship's toolbar, which the game runs there and never syncs.
+        /// </remarks>
+        static void Run(IMyTerminalBlock block, ListReader<TerminalActionParameter> parameters, Action<IMyTerminalBlock, string> pressed)
         {
             if (block == null || parameters.Count == 0)
                 return;
@@ -132,9 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             if (string.IsNullOrEmpty(key))
                 return;
 
-            SprocketUnit unit = SprocketSession.On(block);
-            if (unit != null)
-                unit.Fire(key);
+            pressed(block, key);
         }
     }
 }

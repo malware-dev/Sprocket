@@ -154,6 +154,16 @@ namespace Sprocket.GameTests
                 paged.CubeGrid.ChangeGridOwnership(players[0].IdentityId, MyOwnershipShareModeEnum.None);
             }
 
+            // Sprocket Cockpit Press, the player's own, whose cockpit CockpitPressClientTest presses (#102).
+            var pressing = new PastedBlueprint(Path.Combine(blueprints, "Sprocket Cockpit Press", "bp.sbc"), near + new Vector3D(0, 0, -40));
+            var cockpit = pressing.Find("Press Cockpit");
+            _report.Check("joined cockpit paste", cockpit != null, cockpit != null ? "Sprocket Cockpit Press stands for the client" : "Press Cockpit is missing after the paste");
+            if (cockpit != null)
+            {
+                yield return 3 * PluginUpdates.PerSecond;
+                cockpit.CubeGrid.ChangeGridOwnership(players[0].IdentityId, MyOwnershipShareModeEnum.None);
+            }
+
             // The client tests run until it leaves: fifteen minutes at most. Meanwhile a logic system is switched where the client
             // asks, as a second client would switch it (#36).
             var signals = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_SIGNALS");
@@ -171,6 +181,9 @@ namespace Sprocket.GameTests
                         yield return played.Current;
                 }
 
+                if (cockpit != null && !string.IsNullOrEmpty(signals))
+                    Seat((IMyCockpit)cockpit, players[0], signals);
+
                 if (paged != null && !string.IsNullOrEmpty(signals))
                 {
                     foreach (var on in new[] { false, true })
@@ -186,6 +199,22 @@ namespace Sprocket.GameTests
             }
 
             _report.Check("joined client left", players.Count == 0, players.Count == 0 ? "the client left" : "the client stayed past fifteen minutes");
+        }
+
+        /// <summary>Seats <paramref name="player" /> in <paramref name="cockpit" /> where the client asks in the file seat in <paramref name="signals" />, and lets them out where it asks in unseat, answering each in seated and unseated.</summary>
+        static void Seat(IMyCockpit cockpit, IMyPlayer player, string signals)
+        {
+            if (File.Exists(Path.Combine(signals, "seat")) && !File.Exists(Path.Combine(signals, "seated")) && player.Character != null)
+            {
+                cockpit.AttachPilot(player.Character);
+                File.WriteAllText(Path.Combine(signals, "seated"), cockpit.CustomName);
+            }
+
+            if (File.Exists(Path.Combine(signals, "unseat")) && !File.Exists(Path.Combine(signals, "unseated")))
+            {
+                cockpit.RemovePilot();
+                File.WriteAllText(Path.Combine(signals, "unseated"), cockpit.CustomName);
+            }
         }
 
         /// <summary>

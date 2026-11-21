@@ -200,9 +200,12 @@ namespace Sprocket.GameTests
                 ? "the player stands in a space suit" : "the player has no character a minute after asking to respawn");
             yield return 2 * PluginUpdates.PerSecond;
 
-            var notice = new TerminalNoticeClientTest(_shots, _report, _input).Run();
-            while (notice.MoveNext())
-                yield return notice.Current;
+            if (Wants("notice"))
+            {
+                var notice = new TerminalNoticeClientTest(_shots, _report, _input).Run();
+                while (notice.MoveNext())
+                    yield return notice.Current;
+            }
 
             var signals = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_SIGNALS");
             if (string.IsNullOrEmpty(signals))
@@ -211,13 +214,26 @@ namespace Sprocket.GameTests
                 yield break;
             }
 
-            var edits = new JoinedEditsClientTest(_report, _input, signals).Run();
-            while (edits.MoveNext())
-                yield return edits.Current;
+            if (Wants("edits"))
+            {
+                var edits = new JoinedEditsClientTest(_report, _input, signals).Run();
+                while (edits.MoveNext())
+                    yield return edits.Current;
+            }
 
-            var hands = new ChangingHandsClientTest(_shots, _report, _input, new EditorTour(_shots, _report, _input), signals).Run();
-            while (hands.MoveNext())
-                yield return hands.Current;
+            if (Wants("cockpit"))
+            {
+                var press = new CockpitPressClientTest(_report, signals).Run();
+                while (press.MoveNext())
+                    yield return press.Current;
+            }
+
+            if (Wants("hands"))
+            {
+                var hands = new ChangingHandsClientTest(_shots, _report, _input, new EditorTour(_shots, _report, _input), signals).Run();
+                while (hands.MoveNext())
+                    yield return hands.Current;
+            }
         }
 
         IEnumerator<int> Steps()
