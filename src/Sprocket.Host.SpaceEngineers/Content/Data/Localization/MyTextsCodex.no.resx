@@ -1800,6 +1800,10 @@
     <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når landingsstellet låser seg.</value>
     <comment>Codex entry on the block member "locks" of LandingGear, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.LandingGear.Unlocks" xml:space="preserve">
+    <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når landingsstellet låser seg opp.</value>
+    <comment>Codex entry on the block member "unlocks" of LandingGear, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.LandingGear.Lock" xml:space="preserve">
     <value>Låser landingsstellet til det som er innen rekkevidde.</value>
     <comment>Codex entry on the block member "lock" of LandingGear, shown in the picker when it is chosen.</comment>
@@ -1847,6 +1851,10 @@
   <data name="Sprocket.Member.Connector.Locks" xml:space="preserve">
     <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når kontakten låser seg.</value>
     <comment>Codex entry on the block member "locks" of Connector, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Connector.Unlocks" xml:space="preserve">
+    <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når kontakten låser seg opp.</value>
+    <comment>Codex entry on the block member "unlocks" of Connector, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Connector.DockedShip" xml:space="preserve">
     <value>Navnet på skipet som er låst til kontakten, eller ingenting når det ikke er noe.</value>
