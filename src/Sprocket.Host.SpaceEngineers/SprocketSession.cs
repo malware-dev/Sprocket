@@ -16,6 +16,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -362,6 +363,7 @@ namespace Sprocket.Host.SpaceEngineers
                     _rota.At(_reclaim, _rota.Now + Reclaiming);
             };
 
+            GameLog.Say($"Sprocket Automation {ModVersion.Text}");
             GameLog.Say(IsServer
                 ? "this machine runs the Sprockets"
                 : "this machine is a client; the Sprockets run on the server");

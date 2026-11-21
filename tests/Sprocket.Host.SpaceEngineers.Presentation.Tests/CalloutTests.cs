@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using VRage.Game.ModAPI.Ingame.Utilities;
 using Xunit;
 
@@ -188,7 +189,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         screen.Do("press", "Airlock").Run(3).Do("press", "Installation panel").Run(3);
         Assert.True(screen.Shows(texts.CalloutSettings), screen.Dump);
         PressBubble(screen).Run(2);
-        Assert.Equal(Release.Number, screen.Player().Seen);
+        Assert.Equal(ModVersion.Release, screen.Player().Seen);
 
         screen.Scene.Reopen();
         screen.Run(3);
@@ -202,7 +203,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         var screen = Screen.Fresh(LogicSystem).Run(3);
         var texts = screen.Editor.Texts;
 
-        Assert.Equal(Release.Number, screen.Player().Seen);
+        Assert.Equal(ModVersion.Release, screen.Player().Seen);
         Assert.Empty(screen.Editor.Callouts.Due);
         Assert.False(screen.Shows(texts.CalloutShare), screen.Dump);
 
@@ -217,18 +218,18 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
     {
         var all = new[]
         {
-            new Callout("old", Release.Number - 1, _ => "", CalloutPlace.HeaderShare),
-            new Callout("now", Release.Number, _ => "", CalloutPlace.HeaderShare),
-            new Callout("next", Release.Number + 1, _ => "", CalloutPlace.HeaderShare)
+            new Callout("old", new ModRelease(ModVersion.Major, ModVersion.Minor - 1), _ => "", CalloutPlace.HeaderShare),
+            new Callout("now", ModVersion.Release, _ => "", CalloutPlace.HeaderShare),
+            new Callout("next", new ModRelease(ModVersion.Major, ModVersion.Minor + 1), _ => "", CalloutPlace.HeaderShare)
         };
 
         var fresh = Begun(all, new PlayerSettings(true));
         Assert.Equal(new[] { "now" }, fresh.Due.Select(callout => callout.Id));
         Assert.Null(fresh.Choices.Seen);
 
-        Assert.Equal(new[] { "now", "next" }, Begun(all, new PlayerSettings(true, Release.Number - 1)).Due.Select(callout => callout.Id));
-        Assert.Equal(new[] { "next" }, Begun(all, new PlayerSettings(true, Release.Number)).Due.Select(callout => callout.Id));
-        Assert.Equal(new[] { "next" }, Begun(all, new PlayerSettings(true, Release.Number - 1, new[] { "now" })).Due.Select(callout => callout.Id));
+        Assert.Equal(new[] { "now", "next" }, Begun(all, new PlayerSettings(true, new ModRelease(ModVersion.Major, ModVersion.Minor - 1))).Due.Select(callout => callout.Id));
+        Assert.Equal(new[] { "next" }, Begun(all, new PlayerSettings(true, ModVersion.Release)).Due.Select(callout => callout.Id));
+        Assert.Equal(new[] { "next" }, Begun(all, new PlayerSettings(true, new ModRelease(ModVersion.Major, ModVersion.Minor - 1), new[] { "now" })).Due.Select(callout => callout.Id));
     }
 
     /// <summary>A book of <paramref name="all" /> for a player whose choices are <paramref name="choices" />, begun as an editor opens.</summary>
