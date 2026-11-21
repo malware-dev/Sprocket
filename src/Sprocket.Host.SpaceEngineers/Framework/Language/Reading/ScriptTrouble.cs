@@ -45,6 +45,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 What = Line(at) + what;
         }
 
+        /// <summary>Says the line of <paramref name="at" /> holds an expression where Sprocket takes only a literal: a default, which is a limit of Sprocket as a host and no rule of the language.</summary>
+        public void Constant(Statement at)
+        {
+            Say(at, "Sprocket does not take an expression in a default: a state's starting value, a setting's default, or an installation's answer. This is a limit of Sprocket as a host, not of the language. Write a literal here.");
+        }
+
         /// <summary>
         /// Says that slot <paramref name="at" /> on <paramref name="block" /> starts something, and is trouble where something
         /// read before already starts something from it.

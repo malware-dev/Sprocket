@@ -139,15 +139,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     if (shared != null)
                         return new SequenceFault(SequenceProblem.Ambiguous, SequenceFault.Trigger, BlockTrouble.None, shared);
 
-                    var refused = asked?.Refused(SystemInstance.Settled(through, when.Arguments));
+                    // What an expression comes to is known only as the watcher looks, so its kind is what is checked, with the expressions.
+                    var worked = Literal.HoldsExpression(when.Arguments);
+                    var refused = worked ? null : asked?.Refused(SystemInstance.Settled(through, when.Arguments));
                     if (refused != null)
                         return new SequenceFault(SequenceProblem.Mistyped, SequenceFault.Trigger, BlockTrouble.None, refused);
 
-                    if (block != null && Probe.Of(block, when.Key, SystemInstance.Settled(through, when.Arguments), when.Quantifier,
-                            when.Relation, Settled(through, when.Value)) == null)
+                    Literal? compared = Settled(through, when.Value);
+                    if (when.Value.IsExpression)
+                    {
+                        ValueKind? kind;
+                        when.Value.Tree.TypeOf(new ExpressionTypes(system, through, bindings), out kind);
+                        compared = ExpressionTypes.Sample(kind);
+                    }
+
+                    if (!worked && compared != null && block != null && Probe.Of(block, when.Key, SystemInstance.Settled(through, when.Arguments),
+                            when.Quantifier, when.Relation, compared.Value) == null)
                         return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
 
-                    if (asked != null && !asked.Answers(block.Block, SystemInstance.Settled(through, when.Arguments)) && !passed.Exists)
+                    if (asked != null && !worked && !asked.Answers(block.Block, SystemInstance.Settled(through, when.Arguments)) && !passed.Exists)
                         passed = new SequenceFault(SequenceProblem.PassedOver, SequenceFault.Trigger, BlockTrouble.None, block.Name);
                 }
             }
@@ -245,6 +255,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             SequenceFault mistyped = Mistyped(bindings, sequence, through);
             if (mistyped.Exists)
                 return mistyped;
+
+            SequenceFault worked = ExpressionChecks.Checked(bindings, sequence, through);
+            if (worked.Exists)
+                return worked;
 
             // Last, because it is about the sequence as a whole rather than about something it names; a warning about a step
             // is said ahead of one about the whole, a fault behind none.
@@ -354,13 +368,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             var triggers = system == null ? null : system.Triggers;
             for (var i = 0; triggers != null && i < triggers.Count; i++)
             {
-                var moment = triggers[i] as MomentTrigger;
-                if (moment == null || !moment.IsAbout(sequence))
+                if (!triggers[i].IsAbout(sequence))
                     continue;
 
-                var lost = Lost(bindings, system, through, moment.Sources, SequenceProblem.MissingSource, SequenceFault.Trigger, ref adrift);
-                if (lost.Exists)
-                    return lost;
+                var moment = triggers[i] as MomentTrigger;
+                if (moment != null)
+                {
+                    var lost = Lost(bindings, system, through, moment.Sources, SequenceProblem.MissingSource, SequenceFault.Trigger, ref adrift);
+                    if (lost.Exists)
+                        return lost;
+                }
+
+                // What an expression of the trigger reads is watched too.
+                var read = new List<IList<string>>();
+                triggers[i].ReadLists(read);
+                foreach (var names in read)
+                {
+                    var gone = Lost(bindings, system, through, names, SequenceProblem.MissingSource, SequenceFault.Trigger, ref adrift);
+                    if (gone.Exists)
+                        return gone;
+                }
             }
 
             for (var i = 0; i < sequence.Steps.Count; i++)
@@ -430,13 +457,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                var moment = triggers[i] as MomentTrigger;
-                if (moment == null || !moment.IsAbout(sequence))
+                if (!triggers[i].IsAbout(sequence))
                     continue;
 
-                var slot = EmptyOf(system, through, moment.Sources);
+                var moment = triggers[i] as MomentTrigger;
+                var slot = moment == null ? null : EmptyOf(system, through, moment.Sources);
                 if (slot != null)
                     return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, BlockTrouble.None, slot);
+
+                var read = new List<IList<string>>();
+                triggers[i].ReadLists(read);
+                foreach (var names in read)
+                {
+                    slot = EmptyOf(system, through, names);
+                    if (slot != null)
+                        return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, BlockTrouble.None, slot);
+                }
             }
 
             var settings = new List<string>();
@@ -632,7 +668,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var test = TestOf(sequence.Steps[i]);
-                if (test == null)
+                if (test == null || Literal.HoldsExpression(test.Arguments))
                     continue;
 
                 foreach (var target in SystemInstance.Through(through, test.Targets))
@@ -720,6 +756,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var test = TestOf(sequence.Steps[i]);
+                if (test != null && (test.Value.IsExpression || Literal.HoldsExpression(test.Arguments)))
+                    continue;
+
                 if (test != null)
                 {
                     compared.Clear();
@@ -732,7 +771,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 }
 
                 var act = sequence.Steps[i] as Act;
-                if (act == null || !act.HasAction || act.Arguments.Count == 0)
+                if (act == null || !act.HasAction || act.Arguments.Count == 0 || Literal.HoldsExpression(act.Arguments))
                     continue;
 
                 var targets = SystemInstance.Through(through, act.Targets);

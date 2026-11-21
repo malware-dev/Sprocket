@@ -577,7 +577,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (added && _editor.Withdraw(_sequence))
                 _editor.Do(_sequence, new AddStep(ChangeKind.AddWait, index, new Wait(now) { Setting = setting }));
             else
-                _editor.Do(_sequence, new SetWait(index, wait.Length, wait.Setting, now, setting));
+                _editor.Do(_sequence, new SetWait(index, wait.Length, wait.Setting, now, setting, wait.Expression));
         }
 
         /// <summary>Gives <paramref name="abort" /> the <paramref name="message" />, or the setting <paramref name="setting" /> where it is not empty, and <paramref name="level" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>

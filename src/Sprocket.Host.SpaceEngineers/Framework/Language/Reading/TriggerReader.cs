@@ -221,7 +221,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             {
                 var setting = SettingReader.Referenced(statement, statement.ValueAt(at + 1), system);
                 Duration interval;
-                if (setting != null)
+                Literal worked;
+                if (ExpressionReader.Is(statement.ValueAt(at + 1)))
+                {
+                    if (!ExpressionReader.Read(statement, statement.ValueAt(at + 1), system, trouble, out worked))
+                        return null;
+
+                    when.IntervalExpression = worked.Tree;
+                }
+                else if (setting != null)
                 {
                     if (!SettingReader.Owe(statement, setting, system, SettingReader.Lasting, "a duration", trouble))
                         return null;
@@ -276,6 +284,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         static Trigger Every(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
+            Literal worked;
+            if (ExpressionReader.Is(statement.ValueAt(0)))
+                return ExpressionReader.Read(statement, statement.ValueAt(0), system, trouble, out worked) ? new EveryTrigger(0) { IntervalExpression = worked.Tree } : null;
+
             var setting = SettingReader.Referenced(statement, statement.ValueAt(0), system);
             if (setting != null)
             {

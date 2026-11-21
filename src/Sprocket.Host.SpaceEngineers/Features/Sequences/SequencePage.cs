@@ -638,14 +638,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var wait = step as Wait;
             if (wait != null)
             {
-                row.Slots.Add(new DurationSlot(wait.Length, wait.Setting, Changes(CommandKind.StepSlot, () => Open(wait, false))));
+                row.Slots.Add(new DurationSlot(wait.Length, wait.Setting, wait.Expression?.Written, Changes(CommandKind.StepSlot, () => Open(wait, false))));
                 return;
             }
 
             var abort = step as Abort;
             if (abort != null)
             {
-                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Setting, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
+                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Setting, abort.Expression?.Written, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
                 return;
             }
 
@@ -738,7 +738,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var opens = Changes(CommandKind.StepSlot, () => _stepwork.ChangeSetState(set));
             row.Slots.Add(new SystemStateSlot(set.State, opens));
             row.Slots.Add(StateValueQuestion.Part(_sequence.System, set.State, set.Value, set.From,
-                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set, () => Chip(set, ArgumentRole.NewValue))), ArgumentRole.NewValue));
+                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set, () => Chip(set, ArgumentRole.NewValue))), ArgumentRole.NewValue, set.Expression?.Written));
         }
 
         /// <summary>Gives the row of an if, or of a branch, that tests one of the system's states the parts of its test.</summary>
@@ -869,7 +869,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return;
             }
 
-            Action<string, bool> answered = (said, cancelled) => _stepwork.Closed(act, FieldSet.Read(said, fields), cancelled);
+            Action<string, bool> answered = (said, cancelled) => _stepwork.Closed(act, FieldSet.Read(said, fields, act.Arguments), cancelled);
             _stepwork.Repaired(act, delegate
             {
                 if (ValuesQuestion.Offer(Editor, fields, act.Arguments, said => answered(said, false)))
@@ -905,7 +905,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     return;
 
                 var now = test.Copy();
-                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields), checks, value => now.Value = value);
+                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, given), checks, value => now.Value = value);
                 _stepwork.Retest(step, test, now);
             };
             if (ValuesQuestion.Offer(Editor, fields, given, said => answered(said, false)))

@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sharing.Text
             "on", "off", "all", "any", "wait", "await", "required", "expects", "changed", "as", "last",
             "running", "step", "stop", "call", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
             "signal", "sum", "!=", "<", ">", "<=", ">=", "whenever", "from", "average", "type",
-            "is", "not", "installed"
+            "is", "not", "installed", "min", "max", "+", "-", "*", "/"
         };
 
         /// <summary>The bytes of <paramref name="script" />.</summary>

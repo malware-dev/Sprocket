@@ -28,6 +28,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         int _failures;
 
+        // The head and first value of the statement being read, which say where a value may combine readings.
+        Keyword _key;
+
+        int _from;
+
         /// <summary>A parser at the start of <paramref name="text" />.</summary>
         public Parser(string text)
         {
@@ -319,6 +324,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var failures = _failures;
             var values = _reading.Values;
             var from = values.Count;
+            _key = key;
+            _from = from;
 
             Step();
             Values(values);
@@ -392,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 if (!Valuish())
                     return;
 
-                values.Add(Next());
+                values.Add(Next(Combines(values)));
             }
         }
 
@@ -418,18 +425,232 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 case TokenKind.Color:
                 case TokenKind.ListOpen:
                 case TokenKind.VectorOpen:
+                case TokenKind.Minus:
                     return true;
             }
 
             return false;
         }
 
-        Value Next()
+        /// <summary>
+        /// Whether the value to be read next in the statement, after the ones in <paramref name="values" />, takes a value of a step
+        /// or a test: after <c>to</c> or a comparison, as the length of a <c>wait</c> or after <c>every</c>, or as an abort's message.
+        /// </summary>
+        bool Combines(ValueChunks values)
+        {
+            if (values.Count == _from)
+                return _key == Keyword.Wait || _key == Keyword.Every;
+
+            var previous = values[values.Count - 1];
+            if (previous.Form != ValueForm.Keyword && previous.Form != ValueForm.Identifier)
+                return false;
+
+            if (previous.Form == ValueForm.Identifier && previous.Keyword == Keyword.None && previous.Word == AbortWords.Saying)
+                return true;
+
+            switch (previous.Keyword)
+            {
+                case Keyword.To:
+                case Keyword.EqualTo:
+                case Keyword.NotEqualTo:
+                case Keyword.Above:
+                case Keyword.AtLeast:
+                case Keyword.Below:
+                case Keyword.AtMost:
+                case Keyword.Every:
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>One value, or the expression it starts where an operator follows it.</summary>
+        /// <remarks>
+        /// <paramref name="combine" /> says whether <c>sum</c>, <c>average</c>, <c>min</c> and <c>max</c> before a member combine its readings, which they do only
+        /// where a statement takes a value, and are names anywhere else.
+        /// </remarks>
+        Value Next(bool combine = true)
+        {
+            var failures = _failures;
+            var first = Operand(combine);
+            if (_failures > failures || !Operates(first))
+                return first;
+
+            var terms = new List<Value> { first };
+            Climb(terms, 1);
+            return Expressed(terms);
+        }
+
+        static bool IsOperator(TokenKind kind)
+        {
+            return Precedence(kind) > 0;
+        }
+
+        /// <summary>How tightly the operator <paramref name="kind" /> binds: 2 for <c>*</c> and <c>/</c>, 1 for <c>+</c> and <c>-</c>, and 0 where it is none.</summary>
+        static int Precedence(TokenKind kind)
+        {
+            switch (kind)
+            {
+                case TokenKind.Star:
+                case TokenKind.Slash:
+                    return 2;
+                case TokenKind.Plus:
+                case TokenKind.Minus:
+                    return 1;
+            }
+
+            return 0;
+        }
+
+        static string Spelling(TokenKind kind)
+        {
+            switch (kind)
+            {
+                case TokenKind.Star: return ExpressionWords.Multiply;
+                case TokenKind.Slash: return ExpressionWords.Divide;
+                case TokenKind.Plus: return ExpressionWords.Add;
+            }
+
+            return ExpressionWords.Subtract;
+        }
+
+        /// <summary>
+        /// Whether the operator now standing joins <paramref name="first" /> to another operand: it is a value that can be one,
+        /// and no word that only separates the parts of a statement, such as <c>to</c>; a name spelled like a combining word is one.
+        /// </summary>
+        bool Operates(Value first)
+        {
+            if (!IsOperator(_token.Kind))
+                return false;
+
+            switch (first.Form)
+            {
+                case ValueForm.Identifier:
+                    return first.Keyword == Keyword.None || first.Keyword == Keyword.Sum || first.Keyword == Keyword.Average
+                        || first.Keyword == Keyword.Min || first.Keyword == Keyword.Max;
+                case ValueForm.Qualified:
+                case ValueForm.Reference:
+                case ValueForm.Kinded:
+                case ValueForm.Integer:
+                case ValueForm.Real:
+                case ValueForm.Duration:
+                case ValueForm.Text:
+                case ValueForm.Color:
+                case ValueForm.Expression:
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Reads operators and the operands after them into <paramref name="terms" />, postfix, those binding at least as tightly as <paramref name="least" />.</summary>
+        void Climb(List<Value> terms, int least)
+        {
+            while (true)
+            {
+                var precedence = Precedence(_token.Kind);
+                if (precedence == 0 || precedence < least)
+                    return;
+
+                var op = _token.Kind;
+                Step();
+                var failures = _failures;
+                if (!Valuish())
+                {
+                    Fail("expected a value after the operator.");
+                    return;
+                }
+
+                terms.Add(Operand(true));
+                if (_failures > failures)
+                    return;
+
+                // What binds tighter than this operator belongs to the operand just read.
+                Climb(terms, precedence + 1);
+                if (_failures > failures)
+                    return;
+
+                terms.Add(Value.Operating(Spelling(op), 2));
+            }
+        }
+
+        /// <summary>The terms <paramref name="terms" />, written into the reading's shared run, as one expression.</summary>
+        Value Expressed(List<Value> terms)
+        {
+            var all = _reading.Terms;
+            var from = all.Count;
+            foreach (var term in terms)
+                all.Add(term);
+
+            return Value.Expressed(from, terms.Count);
+        }
+
+        /// <summary>The negative of the operand after a <c>-</c>: a number written apart from its dash is the number negated.</summary>
+        Value Negated()
+        {
+            Step();
+            var failures = _failures;
+            if (!Valuish())
+            {
+                Fail("expected a value after '-'.");
+                return Value.None;
+            }
+
+            var operand = Operand(true);
+            if (_failures > failures)
+                return Value.None;
+
+            if (operand.Form == ValueForm.Integer)
+                return new Value(ValueForm.Integer, null, -operand.Integer);
+
+            if (operand.Form == ValueForm.Real)
+                return new Value(ValueForm.Real, null, 0, -operand.Real);
+
+            return Expressed(new List<Value> { operand, Value.Operating(ExpressionWords.Negate, 1) });
+        }
+
+        /// <summary>Whether the word <paramref name="token" /> combines the readings that follow it: <c>sum</c>, <c>average</c>, <c>min</c> or <c>max</c> before a member.</summary>
+        bool Combining(Token token)
+        {
+            if (token.Keyword != Keyword.Sum && token.Keyword != Keyword.Average && token.Keyword != Keyword.Min && token.Keyword != Keyword.Max)
+                return false;
+
+            var after = Peek();
+            return after.Kind == TokenKind.Identifier && after.Keyword != Keyword.On;
+        }
+
+        /// <summary><c>sum gearbox.fill on [ tanks ]</c>, from its combining word: the reading, then the word.</summary>
+        Value Combined(Token token)
+        {
+            var word = Keywords.Name(token.Keyword);
+            Step();
+            var failures = _failures;
+            var member = Operand(true);
+            if (_failures > failures)
+                return Value.None;
+
+            if (member.Form != ValueForm.Reference)
+            {
+                Fail($"expected a member on a list of names after '{word}', like {word} gearbox.fill on [ tanks ].");
+                return Value.None;
+            }
+
+            return Expressed(new List<Value> { member, Value.Operating(word) });
+        }
+
+        /// <summary>One operand: a value of any form, without the operators that may follow it.</summary>
+        Value Operand(bool combine)
         {
             var token = _token;
             switch (token.Kind)
             {
+                case TokenKind.Minus:
+                    return Negated();
+
                 case TokenKind.Identifier:
+                    if (combine && Combining(token))
+                        return Combined(token);
+
                     Step();
                     var name = Named(token);
                     if (_token.Kind == TokenKind.Dot)
@@ -440,10 +661,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                             return Value.None;
                     }
 
-                    if (_token.Kind == TokenKind.VectorOpen)
+                    // A <c>(</c> after <c>to</c> opens a group: <c>to</c> is no function.
+                    if (_token.Kind == TokenKind.VectorOpen && token.Keyword != Keyword.To)
                         return Called(name);
 
-                    return Referencing() ? Referenced(name, Value.Listed(0, 0)) : name;
+                    return token.Keyword != Keyword.To && Referencing() ? Referenced(name, Value.Listed(0, 0)) : name;
 
                 case TokenKind.Keyword:
                     Step();
@@ -501,7 +723,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return List();
 
                 default:
-                    return Vector();
+                    return Group();
             }
         }
 
@@ -666,7 +888,29 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (_failures > failures)
                 return Value.None;
 
-            return _token.Keyword == Keyword.On ? Referenced(name, arguments) : Kinded(name, arguments);
+            if (_token.Keyword == Keyword.On)
+                return Referenced(name, arguments);
+
+            var term = name.Form == ValueForm.Identifier ? ExpressionWords.FunctionTerm(name.Word) : null;
+            return term != null ? Function(name, term, arguments) : Kinded(name, arguments);
+        }
+
+        /// <summary><c>min(a, b)</c>, <c>max(a, b)</c>, <c>round(a)</c> or <c>abs(a)</c>, having read the arguments: they, then the function.</summary>
+        Value Function(Value name, string term, Value arguments)
+        {
+            var most = term == ExpressionWords.RoundFunction || term == ExpressionWords.AbsFunction;
+            if (most ? arguments.Count != 1 : arguments.Count < 2)
+            {
+                Fail(most ? $"expected one argument for {name.Word}." : $"expected two or more arguments for {name.Word}.");
+                return Value.None;
+            }
+
+            var terms = new List<Value>(arguments.Count + 1);
+            for (var i = 0; i < arguments.Count; i++)
+                terms.Add(_reading.Items[arguments.From + i]);
+
+            terms.Add(Value.Operating(term, arguments.Count));
+            return Expressed(terms);
         }
 
         /// <summary>The name <paramref name="token" />, an identifier, spells, remembering the contextual keyword a bare one is spelled as.</summary>
@@ -707,11 +951,41 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
         }
 
-        /// <summary>A vector, its three numbers written into the reading's shared run.</summary>
-        Value Vector()
+        /// <summary>
+        /// Past a <c>(</c>: a vector, where it holds numbers with no operator between the first two, <c>(3 0 -2)</c>, and else
+        /// the expression it groups.
+        /// </summary>
+        Value Group()
         {
             Step();
+            if ((_token.Kind == TokenKind.Integer || _token.Kind == TokenKind.Real)
+                && (Peek().Kind == TokenKind.Integer || Peek().Kind == TokenKind.Real))
+                return Vector();
 
+            var failures = _failures;
+            if (!Valuish())
+            {
+                Fail("expected three numbers in the vector, or a value to group.");
+                return Value.None;
+            }
+
+            var inner = Next();
+            if (_failures > failures)
+                return Value.None;
+
+            if (_token.Kind != TokenKind.VectorClose)
+            {
+                Fail("expected ')'.");
+                return Value.None;
+            }
+
+            Step();
+            return inner;
+        }
+
+        /// <summary>A vector, its three numbers written into the reading's shared run, having read its <c>(</c>.</summary>
+        Value Vector()
+        {
             var items = _reading.Items;
             var from = items.Count;
             for (var i = 0; i < 3; i++)

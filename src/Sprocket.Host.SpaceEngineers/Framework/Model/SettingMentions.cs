@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
@@ -63,11 +64,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 Walk(when.Arguments, into, was, now);
                 when.Value = Walk(when.Value, into, was, now);
                 when.IntervalSetting = Walk(when.IntervalSetting, into, was, now);
+                when.IntervalExpression = Walk(when.IntervalExpression, into, was, now);
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
+            {
                 every.IntervalSetting = Walk(every.IntervalSetting, into, was, now);
+                every.IntervalExpression = Walk(every.IntervalExpression, into, was, now);
+            }
 
             var watched = trigger as StateTrigger;
             if (watched != null)
@@ -92,15 +97,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var wait = step as Wait;
             if (wait != null)
+            {
                 wait.Setting = Walk(wait.Setting, into, was, now);
+                wait.Expression = Walk(wait.Expression, into, was, now);
+            }
 
             var abort = step as Abort;
             if (abort != null)
+            {
                 abort.Setting = Walk(abort.Setting, into, was, now);
+                abort.Expression = Walk(abort.Expression, into, was, now);
+            }
 
             var sets = step as SetState;
             if (sets != null && sets.From.Length == 0)
                 sets.Value = Walk(sets.Value, into, was, now);
+
+            if (sets != null)
+                sets.Expression = Walk(sets.Expression, into, was, now);
         }
 
         static void Walk(StateTest test, List<string> into, string was, string now)
@@ -117,13 +131,38 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             for (var i = 0; i < given.Count; i++)
             {
-                if (given[i].IsSetting)
+                if (given[i].IsSetting || given[i].IsExpression)
                     given[i] = Walk(given[i], into, was, now);
             }
         }
 
+        /// <summary>The expression <paramref name="tree" />, its settings added to <paramref name="into" /> where it is not null and renamed where it names <paramref name="was" />.</summary>
+        static Expression Walk(Expression tree, List<string> into, string was, string now)
+        {
+            if (tree == null)
+                return null;
+
+            return Walk(Literal.Worked(tree), into, was, now).Tree;
+        }
+
         static Literal Walk(Literal value, List<string> into, string was, string now)
         {
+            if (value.IsExpression)
+            {
+                if (into != null)
+                {
+                    var named = new List<string>();
+                    value.Tree.Settings(named);
+                    foreach (var name in named)
+                    {
+                        if (!into.Contains(name))
+                            into.Add(name);
+                    }
+                }
+
+                return was == null ? value : Literal.Worked(value.Tree.Renamed(was, now, false));
+            }
+
             return value.IsSetting ? Literal.Setting(Walk(value.Text, into, was, now), value.IsKinded) : value;
         }
 

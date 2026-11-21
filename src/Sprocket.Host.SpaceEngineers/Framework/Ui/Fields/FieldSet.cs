@@ -35,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         readonly List<bool> _texts = new List<bool>();
         readonly List<bool> _raws = new List<bool>();
         readonly List<string> _settings = new List<string>();
+        readonly List<string> _held = new List<string>();
         readonly List<Element> _rows = new List<Element>();
         readonly List<SettingChip> _chips = new List<SettingChip>();
         readonly List<Glyph> _marks = new List<Glyph>();
@@ -204,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 for (var i = 0; i < _fields.Count; i++)
                 {
                     var said = _fields[i].Text;
-                    if (Asked(i) && _settings[i].Length == 0 && (said.Length == 0 || _wanted[i].Refuses(_language, Called(i), said).Length > 0))
+                    if (Asked(i) && _settings[i].Length == 0 && !Holds(i) && (said.Length == 0 || _wanted[i].Refuses(_language, Called(i), said).Length > 0))
                         return false;
                 }
 
@@ -227,6 +228,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             }
         }
 
+        /// <summary>The word standing in a line for the <paramref name="at" />th expression held while the line is read.</summary>
+        static string Held(int at)
+        {
+            return $"~held{at.ToString(CultureInfo.InvariantCulture)}~";
+        }
+
         /// <summary>What a value is known by in <see cref="Spell" />: its name, or its place for a value nobody named.</summary>
         public static string Key(Field field, int at)
         {
@@ -238,10 +245,29 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// where a name is wanted as that name, and everything else as the line reads.
         /// </summary>
         /// <remarks>The answer comes as a line of text, which carries a chosen word as a bare word, and a bare word reads as text.</remarks>
-        public static List<Literal> Read(string said, IList<Field> fields)
+        public static List<Literal> Read(string said, IList<Field> fields, IList<Literal> held = null)
         {
+            // An expression the line still says as it was written is one value, which the words of a line would split.
+            var expressions = new List<Literal>();
+            for (var i = 0; held != null && i < held.Count; i++)
+            {
+                if (held[i].IsExpression && said.Contains(held[i].Tree.Written))
+                {
+                    said = said.Replace(held[i].Tree.Written, Held(expressions.Count));
+                    expressions.Add(held[i]);
+                }
+            }
+
             var values = new List<Literal>();
             ValueLine.Read(said, values);
+            for (var i = 0; i < values.Count; i++)
+            {
+                for (var k = 0; k < expressions.Count; k++)
+                {
+                    if (values[i].Text == Held(k) && values[i].Kind != ValueKind.Slots)
+                        values[i] = expressions[k];
+                }
+            }
 
             var at = 0;
             for (var f = 0; f < fields.Count && at < values.Count; f++)
@@ -272,6 +298,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             _fields.Clear();
             _seen.Clear();
             _settings.Clear();
+            _held.Clear();
             _rows.Clear();
             _chips.Clear();
             _marks.Clear();
@@ -287,6 +314,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 _fields.Add(field);
                 _seen.Add(false);
                 _settings.Add("");
+                _held.Add("");
 
                 var said = i < filled.Count ? filled[i] ?? "" : "";
 
@@ -399,7 +427,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             for (var i = 0; i < _fields.Count; i++)
             {
                 var said = _fields[i].Text;
-                if (!Asked(i) || _settings[i].Length > 0 || said.Length > 0 && _wanted[i].Refuses(_language, Called(i), said).Length == 0)
+                if (!Asked(i) || _settings[i].Length > 0 || Holds(i) || said.Length > 0 && _wanted[i].Refuses(_language, Called(i), said).Length == 0)
                     continue;
 
                 first = i;
@@ -585,6 +613,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             Changed();
         }
 
+        /// <summary>Has the value at <paramref name="at" /> hold the expression written <paramref name="written" />, which its field says and which passes as it stands.</summary>
+        /// <remarks>An expression is no value its field's editor takes, so it is held to nothing while the field still says it; typing over it makes it a value like any other.</remarks>
+        public void Hold(int at, string written)
+        {
+            if (at >= 0 && at < _held.Count)
+                _held[at] = written ?? "";
+        }
+
+        /// <summary>Whether the field at <paramref name="at" /> still says the expression it was given to hold.</summary>
+        bool Holds(int at)
+        {
+            return _held[at].Length > 0 && _fields[at].Text == _held[at];
+        }
+
         /// <summary>The mark choosing where the value at <paramref name="at" /> comes from, or null where it may come from nowhere else.</summary>
         public Glyph MarkOf(int at)
         {
@@ -633,7 +675,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>Why the value at <paramref name="at" /> will not do, or empty, where it is being held to anything at all.</summary>
         string Refuses(int at)
         {
-            if (!_judged || _settings[at].Length > 0)
+            if (!_judged || _settings[at].Length > 0 || Holds(at))
                 return "";
 
             var said = _fields[at].Text;

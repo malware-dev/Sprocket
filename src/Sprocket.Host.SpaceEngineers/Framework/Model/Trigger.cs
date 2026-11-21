@@ -1,4 +1,7 @@
 
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
+using System.Collections.Generic;
+
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
@@ -10,6 +13,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         protected Trigger()
         {
             Annotation = "";
+        }
+
+        /// <summary>Adds to <paramref name="into" /> every expression it holds, which a look works out.</summary>
+        public virtual void Worked(List<Expression> into)
+        {
+        }
+
+        /// <summary>Adds to <paramref name="into" /> every list of names the expressions it holds read blocks by, the lists themselves.</summary>
+        public void ReadLists(List<IList<string>> into)
+        {
+            var worked = new List<Expression>();
+            Worked(worked);
+            foreach (var expression in worked)
+                expression.NameLists(into);
         }
 
         /// <summary>The step it starts, which runs or stops a sequence.</summary>

@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                return $"Every {Lasting(every.Interval, every.IntervalSetting, through, true)}";
+                return every.IntervalExpression != null ? $"Every {every.IntervalExpression.Written}" : $"Every {Lasting(every.Interval, every.IntervalSetting, through, true)}";
 
             // A signal trigger naming nothing is answered from the construct's toolbars, so the line says so.
             return trigger is SignalTrigger ? "When something on this construct starts it" : SentenceText.Empty;
@@ -361,6 +361,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 return texts.StoppedAdrift;
             if (problem == SequenceProblem.NothingToAverage)
                 return texts.StoppedNothingToAverage;
+            if (problem == SequenceProblem.DividedByZero)
+                return texts.StoppedDividedByZero;
+            if (problem == SequenceProblem.NoValue)
+                return texts.StoppedNoValue;
+            if (problem == SequenceProblem.ManyBlocks)
+                return texts.StoppedManyBlocks;
+            if (problem == SequenceProblem.Overflowed)
+                return texts.StoppedOverflowed;
 
             return texts.StoppedFailed;
         }
@@ -433,6 +441,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 return texts.ProblemStalled;
             if (problem == SequenceProblem.NothingToAverage)
                 return texts.ProblemNothingToAverage;
+            if (problem == SequenceProblem.DividedByZero)
+                return texts.ProblemDividedByZero;
+            if (problem == SequenceProblem.NoValue)
+                return texts.ProblemNoValue;
+            if (problem == SequenceProblem.ManyBlocks)
+                return texts.ProblemManyBlocks;
+            if (problem == SequenceProblem.Overflowed)
+                return texts.ProblemOverflowed;
 
             return "";
         }
@@ -467,7 +483,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         {
             var wait = step as Wait;
             if (wait != null)
-                return $"{SentenceText.WaitWord} {Lasting(wait.Length, wait.Setting, through, false)}";
+                return wait.Expression != null ? $"{SentenceText.WaitWord} {wait.Expression.Written}" : $"{SentenceText.WaitWord} {Lasting(wait.Length, wait.Setting, through, false)}";
 
             var run = step as Model.Run;
             if (run != null)
@@ -501,12 +517,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 Literal given;
                 var answered = abort.Setting.Length > 0 && through != null && through.Gives(abort.Setting, out given) && given.Kind == ValueKind.Text;
                 var setting = answered ? "" : abort.Setting;
-                return $"{SentenceText.AbortWord} {SentenceText.Given(ArgumentsSlot.Aborting(abort.MessageIn(through), setting, abort.Level, null))}";
+                return $"{SentenceText.AbortWord} {SentenceText.Given(ArgumentsSlot.Aborting(abort.MessageIn(through), setting, abort.Expression?.Written, abort.Level, null))}";
             }
 
             var set = step as SetState;
             if (set != null)
-                return $"{SentenceText.SetWord} {set.State} to {(set.From.Length > 0 ? set.From : set.Value.Said)}";
+                return $"{SentenceText.SetWord} {set.State} to {(set.Expression != null ? set.Expression.Written : set.From.Length > 0 ? set.From : set.Value.Said)}";
 
             var act = step as Act;
             return act == null ? "wait for it to finish" : Action(bindings, act, through, slotted);

@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
 {
@@ -11,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         readonly EveryTrigger _trigger;
         readonly Duration _was;
         readonly string _wasSetting;
+        readonly Expression _wasExpression;
         readonly Duration _now;
         readonly string _nowSetting;
 
@@ -18,11 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         /// The repeat <paramref name="trigger" /> made to come round every <paramref name="now" />, or at the setting <paramref name="nowSetting" />
         /// where it is not empty, from every <paramref name="was" />, or the setting <paramref name="wasSetting" /> where it took one.
         /// </summary>
-        public SetCadence(EveryTrigger trigger, Duration was, string wasSetting, Duration now, string nowSetting = "")
+        public SetCadence(EveryTrigger trigger, Duration was, string wasSetting, Duration now, string nowSetting = "", Expression wasExpression = null)
         {
             _trigger = trigger;
             _was = was;
             _wasSetting = wasSetting;
+            _wasExpression = wasExpression;
             _now = now;
             _nowSetting = nowSetting ?? "";
         }
@@ -39,18 +42,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         }
 
         /// <inheritdoc />
-        public override bool Changes => _was != _now || _wasSetting != _nowSetting;
+        public override bool Changes => _was != _now || _wasSetting != _nowSetting || _wasExpression != null;
 
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
-            return _trigger.Interval == _now && _trigger.IntervalSetting == _nowSetting && Holds(system, _trigger, null, null);
+            return _trigger.Interval == _now && _trigger.IntervalSetting == _nowSetting && _trigger.IntervalExpression == null && Holds(system, _trigger, null, null);
         }
 
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return _trigger.Interval == _was && _trigger.IntervalSetting == _wasSetting && Holds(system, _trigger, null, null);
+            return _trigger.Interval == _was && _trigger.IntervalSetting == _wasSetting && _trigger.IntervalExpression == _wasExpression && Holds(system, _trigger, null, null);
         }
 
         /// <inheritdoc />
@@ -58,6 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         {
             _trigger.Interval = _now;
             _trigger.IntervalSetting = _nowSetting;
+            _trigger.IntervalExpression = null;
         }
 
         /// <inheritdoc />
@@ -65,6 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         {
             _trigger.Interval = _was;
             _trigger.IntervalSetting = _wasSetting;
+            _trigger.IntervalExpression = _wasExpression;
         }
     }
 }

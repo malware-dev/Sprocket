@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         public ChangeSetState(int index, SetState was, SetState now)
         {
             _index = index;
-            _was = new SetState { State = was.State, Value = was.Value, From = was.From };
+            _was = new SetState { State = was.State, Value = was.Value, From = was.From, Expression = was.Expression };
             _now = now;
         }
 
@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         }
 
         /// <inheritdoc />
-        public override bool Changes => _was.State != _now.State || _was.From != _now.From || !StateMentions.Same(_was.Value, _now.Value);
+        public override bool Changes => _was.State != _now.State || _was.From != _now.From || !StateMentions.Same(_was.Value, _now.Value) || _was.Expression != _now.Expression;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)
@@ -52,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
             set.State = from.State;
             set.Value = from.Value;
             set.From = from.From;
+            set.Expression = from.Expression;
         }
     }
 }

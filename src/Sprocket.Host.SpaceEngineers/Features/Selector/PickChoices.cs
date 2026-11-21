@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         public Quantifier Reading { get; set; }
 
         /// <summary>Whether the blocks are read by a total of a number on them, a sum or an average, which lists only numbers.</summary>
-        public bool Totals => Reading == Quantifier.Sum || Reading == Quantifier.Average;
+        public bool Totals => Quantifiers.Totals(Reading);
 
         /// <summary>A copy of every choice as it stands, which changes to these leave as it is.</summary>
         public PickChoices Copy()

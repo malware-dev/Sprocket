@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
@@ -19,5 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>What the member is compared with on this installation: the test's value, or the value it gives the setting standing there.</summary>
         public Literal Value;
+
+        /// <summary>Why an expression the test is given has no value, or none.</summary>
+        public ExpressionFailure Failure;
     }
 }

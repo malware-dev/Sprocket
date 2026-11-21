@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -100,8 +101,35 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return new Literal(ValueKind.Setting, new EntityValue(kinded ? 1 : 0), name);
         }
 
+        /// <summary>An expression, worked out when the step holding it is reached.</summary>
+        /// <remarks>A plain literal is never wrapped: only a value that holds an operator, a function or a reading is an expression.</remarks>
+        public static Literal Worked(Expression tree)
+        {
+            var worked = new Literal(ValueKind.Expression, new EntityValue(0), null);
+            worked.Tree = tree;
+            return worked;
+        }
+
+        /// <summary>Whether any of <paramref name="given" /> is an expression.</summary>
+        public static bool HoldsExpression(IList<Literal> given)
+        {
+            for (var i = 0; i < given.Count; i++)
+            {
+                if (given[i].IsExpression)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>The kind of value it is.</summary>
         public ValueKind Kind { get; private set; }
+
+        /// <summary>The expression, for <see cref="ValueKind.Expression" />, and null for the rest.</summary>
+        public Expression Tree { get; private set; }
+
+        /// <summary>Whether it is an expression, worked out when its step is reached, rather than a value.</summary>
+        public bool IsExpression => Kind == ValueKind.Expression;
 
         /// <summary>What it is, for every kind but <see cref="ValueKind.Text" />.</summary>
         public EntityValue Value { get; private set; }
@@ -131,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public ChoiceType Typed { get; private set; }
 
         /// <summary>This again, with a list of names of its own where it has one, so editing the copy cannot reach it.</summary>
-        public Literal Copied => Kind == ValueKind.Slots ? Slots(new List<string>(Names)) : this;
+        public Literal Copied => Kind == ValueKind.Slots ? Slots(new List<string>(Names)) : Kind == ValueKind.Expression ? Worked(Tree.Copied()) : this;
 
         /// <summary>It as a flag, for <see cref="ValueKind.Flag" />.</summary>
         public bool Flag => Value.Bits != 0;
@@ -185,6 +213,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                         ? $"{length.Seconds.ToString("R", CultureInfo.InvariantCulture)}s"
                         : $"{length.Ticks.ToString(CultureInfo.InvariantCulture)}t";
                 }
+
+                if (Kind == ValueKind.Expression)
+                    return Tree.Written;
 
                 if (Kind == ValueKind.Slots)
                     return string.Join(", ", Names);

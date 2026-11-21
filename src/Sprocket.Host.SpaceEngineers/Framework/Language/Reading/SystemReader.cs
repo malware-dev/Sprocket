@@ -684,13 +684,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>Checks every name a step acts on, as <see cref="Uses(Statement, string, AutomationSystem, Automation, bool, ScriptTrouble)" /> does.</summary>
-        public static void Uses(Statement statement, Act act, AutomationSystem system, Automation program, ScriptTrouble trouble)
+        public static void Uses(Statement statement, Step step, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
-            if (act == null)
+            if (step == null)
                 return;
 
             var lists = new List<IList<string>>();
-            act.NameLists(lists);
+            step.NameLists(lists);
             foreach (var names in lists)
             {
                 for (var i = 0; i < names.Count; i++)

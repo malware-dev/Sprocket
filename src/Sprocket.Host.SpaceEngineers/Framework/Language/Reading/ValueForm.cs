@@ -49,6 +49,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>
         /// A thing with its kind, <c>side(inside)</c>: the kind and the thing, a run of two in <see cref="ScriptValues.Parts" />.
         /// </summary>
-        Kinded
+        Kinded,
+
+        /// <summary>
+        /// Operands and operators, <c>sum gearbox.fill on [ tanks ] * 10</c>: the terms in postfix order, a run of <see cref="ScriptValues.Terms" />.
+        /// </summary>
+        Expression,
+
+        /// <summary>
+        /// An operator or function among the terms of an expression, spelled as <see cref="ExpressionWords" /> has it: the number of operands a function takes is its integer.
+        /// </summary>
+        Operator
     }
 }

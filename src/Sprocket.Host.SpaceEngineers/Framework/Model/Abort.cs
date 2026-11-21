@@ -1,4 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
+using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
@@ -10,6 +12,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>The setting whose text is the reason, each installation's own, or empty where the reason is <see cref="Message" />.</summary>
         public string Setting { get; set; } = "";
+
+        /// <summary>The expression whose text is the reason, worked out as the step is reached, or null where the reason is <see cref="Message" /> or a setting's.</summary>
+        public Expression Expression { get; set; }
+
+        /// <inheritdoc />
+        public override void Worked(List<Expression> into)
+        {
+            if (Expression != null)
+                into.Add(Expression);
+        }
 
         /// <summary>How loudly the sequence says it ended.</summary>
         public AbortLevel Level { get; set; }

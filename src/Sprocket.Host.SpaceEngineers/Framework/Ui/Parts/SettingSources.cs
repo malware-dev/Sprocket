@@ -67,6 +67,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             {
                 if (at < given.Count && given[at].IsSetting)
                     form.Choose(i, given[at].Text, Default(system, given[at].Text));
+                else if (at < given.Count && given[at].IsExpression)
+                    form.Hold(i, given[at].Tree.Written);
 
                 at += fields[i].Covers;
             }

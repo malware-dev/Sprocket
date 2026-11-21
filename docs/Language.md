@@ -88,10 +88,11 @@ optional slot button expects signal
 | **Flag** | `on`, `off` | The two choices of the built-in type `flag`, resolved as any choice is (§9.2). |
 | **Choice** | `inside`, `side(inside)`, `gearbox.door_status(closed)` | A choice of a type the system declares (§9.1) or of a host type (§5.2). Written bare, or with its type as a kind (§4.3). |
 | **Color** | `#FF8800`, `#FF8800CC` | Hexadecimal color literal (RGB or RGBA). |
-| **Vector** | `(3 0 -2)` | Three space-separated integers or reals enclosed in parentheses. |
+| **Vector** | `(3 0 -2)` | Three space-separated integers or reals enclosed in parentheses. No operator stands between them: `(3 + 4)` is an expression (§4.4). |
 | **List** | `[ 1, "two", three ]` | Comma-separated elements in square brackets. May nest lists and vectors: `[ 7, [ (0 2 -1), (3 0 0) ] ]`. |
 | **Block** | `block 'Door/LargeBlockDoor' [ … ]` | Concrete hardware block binding descriptor. |
 | **Setting** | `'Open angle'`, `setting('Open angle')` | Stands in for a literal wherever the language takes one: the value of the named setting (§8), which each instance supplies. The setting's type must suit the place, as a literal there would. |
+| **Expression** | `10 + setting(Margin)` | A value worked out, when it is used, from literals, settings, states and readings (§4.4). |
 
 ### 4.1 Identifiers vs. IDs (References)
 
@@ -127,6 +128,24 @@ if setting('Outer light') == on then { ... }
 * A kind is written like a function call, and is told from one by its name. A function always belongs to a host's namespace, so a function whose name is also a kind's is written with it: `gearbox.side(1)`.
 * A kind may itself have a kind: `type(side)(inside)` is a choice of the type `side` where a slot is also called `side`.
 
+### 4.4 Expressions
+
+```sprocket
+set gearbox.ride_height on [ pad ] to (sum gearbox.fill on [ tanks ] * 10) + setting(Margin)
+call gearbox.show_text("Pressure: " + average gearbox.pressure on [ vents ]) on [ panel ]
+wait setting(Delay) * 2
+```
+
+* An expression stands wherever a literal does, and its type must suit the place as a literal's would.
+* **Operands:** literals, settings, states, and readings.
+* **Readings:** `<member>[(<arguments>)] on [ <names> ]` reads the value of one block; naming more than one block is an error. A member that takes options is given them in parentheses, and each may be an expression. `sum`, `average`, `min` or `max` before it combines the values of every block named. Over no blocks, `sum` is 0; the others have no value, and the step fails.
+* **Operators**, binding tightest first: `-` before an operand; `*` and `/`; `+` and `-`. Parentheses group. A `-` written against its number, as in `(3 0 -2)`, is part of the number.
+* **Functions:** `min(<a>, <b>, ...)`, `max(<a>, <b>, ...)`, `round(<a>)` to the nearest integer, `abs(<a>)`.
+* **Numbers:** an integer with a real gives a real; `/` always gives a real. Dividing by zero fails the step.
+* **Text:** `+` with text on either side joins the two, writing the other side as text.
+* **Durations:** `+` and `-` between durations; `*` and `/` by a number.
+* An expression is evaluated whenever its value is needed: each time its step is reached, and on each check of its `when` or `every`.
+
 ---
 
 ## 5. Host Integration
@@ -149,7 +168,7 @@ Every member exposed by a host on a block is an **action**, a **value**, a **fun
   * Parentheses are written **only** when arguments are present. Writing empty parentheses `()` is a syntax error.
   * Argument counts and types must match the member's parameter signature. Supplying incompatible types or an integer exceeding parameter limits is an error.
   * A parameter may take slots. Its argument is a list of slot names in square brackets: `call gearbox.move_items([ cargo ], "Ingot/Iron", 100) on [ output ]`. The parameter's signature says what the slots must hold, blocks or things of a host type.
-  * A setting may stand in for an argument, as for any literal (§4): `call gearbox.rotate_to(setting('Open angle'), 2) on [ hinge ]`.
+  * A setting or an expression may stand in for an argument, as for any literal (§4): `call gearbox.rotate_to(setting('Open angle') + 10, 2) on [ hinge ]`.
 * **Return Types:** Values and functions return a flag, integer, real, text, color, or a choice of a host type.
 
 ### 5.2 Host Types
@@ -336,7 +355,8 @@ when average gearbox.fill on [ tank1, tank2 ] < 0.25 then run 7
   * `all`: The condition must hold across all specified blocks. Fires once when the final block satisfies the condition.
   * `sum`: Numeric values are summed across all blocks and compared once. Valid only on integers and reals.
   * `average`: Numeric values are averaged across all blocks and compared once. Valid only on integers and reals.
-  * **No blocks:** Over an empty set, `sum` is 0, `any` is false and `all` is true. `average` has no value, and the step fails.
+  * `min` and `max`: The lowest or highest value across all blocks, compared once. Valid only on integers and reals.
+  * **No blocks:** Over an empty set, `sum` is 0, `any` is false and `all` is true. `average`, `min` and `max` have no value, and the step fails.
 * **Polling Interval (`every`):** Sets the evaluation frequency. Defaults to `10t` if omitted. Hosts that provide push event updates for member changes may evaluate immediately, bypassing the poll timer.
 
 ### 10.3 State Watchers (`when`)
@@ -464,7 +484,7 @@ else {
 * **Comparisons:**
   * `==` and `!=`: Evaluated across all types.
   * `<`, `>`, `<=`, `>=`: Valid only on integers and reals.
-* **Aggregations:** Uses `any`, `all`, `sum`, or `average` under the same evaluation rules as `when`.
+* **Aggregations:** Uses `any`, `all`, `sum`, `average`, `min`, or `max` under the same evaluation rules as `when`.
 * **Disabling:** Placing `//` before an `if` statement disables the entire conditional block, including all subsequent `else if` and `else` branches. A step inside can be switched off on its own.
 
 ### 12.2 Condition on States

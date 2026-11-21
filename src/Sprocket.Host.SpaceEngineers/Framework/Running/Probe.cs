@@ -30,6 +30,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             Seen = signal != null && signal.Flag.Remembers ? Remembered(kept, false, clock) : null;
         }
 
+        // What Of made it from, so the value it compares with can be changed without making it again.
+        EntityAction _written;
+        OwnValue _ownValue;
+        ValueKind _kind;
+        bool _totals;
+        bool _readsWord;
+
+        /// <summary>Whether the value it compares with was refused, so it holds on no look until another is given.</summary>
+        public bool Refused { get; private set; }
+
         /// <summary>Whether the block can't answer what is asked of it, so a reading of several blocks leaves it out.</summary>
         public bool PassedOver { get; private set; }
 
@@ -116,14 +126,74 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             var same = relation == Relation.Is || relation == Relation.IsNot;
             var number = kind == ValueKind.Integer || kind == ValueKind.Real;
-            var totals = quantifier == Quantifier.Sum || quantifier == Quantifier.Average;
+            var totals = Quantifiers.Totals(quantifier);
             if ((!same || totals) && !number)
                 return null;
 
             if (totals)
                 operand = value;
 
-            return new Probe(entity, gauge, relation, operand, null, own == null ? null : written, kept, clock) { PassedOver = passedOver };
+            return new Probe(entity, gauge, relation, operand, null, own == null ? null : written, kept, clock)
+            {
+                PassedOver = passedOver,
+                _written = written,
+                _ownValue = own,
+                _kind = kind,
+                _totals = totals
+            };
+        }
+
+        /// <summary>
+        /// The value <paramref name="key" /> names as <paramref name="entity" /> has it, given <paramref name="arguments" />, to be read as
+        /// it is; null where the block has no such value or does not take those arguments.
+        /// </summary>
+        /// <remarks>A value of a type the host provides reads the facet numbered <paramref name="facet" />. Made as a step reaches it, never on a tick.</remarks>
+        public static Probe Reading(GridEntity entity, MemberKey key, IList<Literal> arguments, Func<int> clock, int facet = 0)
+        {
+            if (entity == null)
+                return null;
+
+            var written = Value(entity.Kind, key);
+            if (written == null)
+                return null;
+
+            var own = written.OwnValue;
+            if (own == null ? arguments.Count > 0 : own.Missing(arguments.Count) != null || own.Refused(arguments) != null)
+                return null;
+
+            Gauge gauge;
+            var passedOver = false;
+            if (own == null)
+            {
+                gauge = entity.Gauge(written);
+                if (gauge == null)
+                    return null;
+            }
+            else
+            {
+                var given = written.Type == null ? arguments : HostType.Arguments(facet, arguments);
+                gauge = own.Gauge(entity.Block, given, own.Remembers ? Remembered(null, true, clock) : null);
+                passedOver = !own.Answers(entity.Block, given);
+            }
+
+            return new Probe(entity, gauge, Relation.Is, default(Literal), null, own == null ? null : written, null, clock)
+            {
+                PassedOver = passedOver,
+                _readsWord = own != null && own.Kind == ValueKind.Name
+            };
+        }
+
+        /// <summary>The kind of value <paramref name="key" /> names as <paramref name="entity" /> has it, or null where the block has no such value.</summary>
+        public static ValueKind? KindOf(GridEntity entity, MemberKey key)
+        {
+            var written = entity == null ? null : Value(entity.Kind, key);
+            if (written == null)
+                return null;
+
+            if (written.OwnValue != null)
+                return written.OwnValue.Kind;
+
+            return entity.Gauge(written)?.Kind;
         }
 
         /// <summary>
@@ -177,10 +247,44 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Whether the comparison holds on the block now, or, for a signal, whether the block is in what it changes to.</summary>
         public bool Holds()
         {
+            if (Refused)
+                return false;
+
             if (Signal != null)
                 return Entity.In(Signal, Seen);
 
             return Gauge.Holds(Relation, Operand);
+        }
+
+        /// <summary>Has it compare with <paramref name="value" /> from now on, as <see cref="Of" /> would have made it; where the value cannot be compared so it holds on no look.</summary>
+        /// <remarks>Allocates nothing; asked on a look of a watcher whose value is an expression.</remarks>
+        public void Retarget(Literal value)
+        {
+            Refused = true;
+            if (_written == null)
+                return;
+
+            Literal operand;
+            if (!_written.Compares(value, out operand))
+                return;
+
+            if (_ownValue != null && _kind == ValueKind.Name)
+            {
+                var at = _ownValue.Position(operand.Text);
+                if (at < 0)
+                    return;
+
+                operand = Literal.Of(at);
+            }
+
+            Operand = _totals ? value : operand;
+            Refused = false;
+        }
+
+        /// <summary>What the value reads now as an expression takes it: a value that is one of a list by its name, and any other as it is.</summary>
+        public Literal Current()
+        {
+            return _readsWord ? Literal.Name(Gauge.Said()) : Gauge.Read();
         }
 
         /// <summary>What the value reads now as a number, for a sum.</summary>

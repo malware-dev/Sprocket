@@ -2448,6 +2448,38 @@
     <value>it had no blocks to take an average of.</value>
     <comment>Reason a run stopped: an if step took the average of a value over a set that holds no blocks, such as an empty slot. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
+  <data name="Sprocket.Problem.DividedByZero" xml:space="preserve">
+    <value>This step divides by zero.</value>
+    <comment>Problem when a step works out a value by dividing by zero, such as a number divided by a reading that came to nought, so the run ended there. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Stopped.DividedByZero" xml:space="preserve">
+    <value>it divided by zero.</value>
+    <comment>Reason a run stopped: a step divided by zero in a value it works out. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Problem.NoValue" xml:space="preserve">
+    <value>This step takes the average, smallest or largest value of no blocks, so it has no value.</value>
+    <comment>Problem when a step works out a value from the average, the smallest or the largest of a reading over a set that holds no blocks, such as an empty slot, so the run ended there. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Stopped.NoValue" xml:space="preserve">
+    <value>it took the average, smallest or largest value of no blocks.</value>
+    <comment>Reason a run stopped: a step worked out a value from the average, the smallest or the largest of a reading over a set that holds no blocks. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Problem.ManyBlocks" xml:space="preserve">
+    <value>This step reads the value of one block, but its slot holds several blocks.</value>
+    <comment>Problem when a step works out a value from a block's value with no sum, average, min or max to combine the blocks, and the slot it reads holds more than one block, so the run ended there. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Stopped.ManyBlocks" xml:space="preserve">
+    <value>it read the value of one block from a slot holding several.</value>
+    <comment>Reason a run stopped: a step read the value of one block from a slot that holds several blocks, with nothing to combine them. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Problem.Overflowed" xml:space="preserve">
+    <value>This step works out a number that is too large.</value>
+    <comment>Problem when a step works out a number too large to hold, such as a whole number past what an integer holds, a real that is no number, a length of time that is too long, or a rounding of a number too large to round, so the run ended there. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Stopped.Overflowed" xml:space="preserve">
+    <value>it worked out a number that was too large.</value>
+    <comment>Reason a run stopped: a step worked out a number too large to hold. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
   <data name="Sprocket.Problem.Aborted" xml:space="preserve">
     <value>This step ended the sequence.</value>
     <comment>Said where an abort step with no message of its own, set to show as a warning, ended a run: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...". An abort with a message says the message instead, as the player wrote it.</comment>

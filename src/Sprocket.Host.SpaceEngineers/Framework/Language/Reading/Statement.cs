@@ -272,6 +272,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return value.Form == ValueForm.Kinded ? _reading.Parts[value.From + 1] : Value.None;
         }
 
+        /// <summary>The terms of the expression <paramref name="value" />, in postfix order, or none where it is no expression.</summary>
+        public ValueRange Terms(Value value)
+        {
+            return value.Form == ValueForm.Expression ? new ValueRange(_reading.Terms, value.From, value.Count) : new ValueRange();
+        }
+
         /// <summary>The items of a list at a position, or none where there is no list there.</summary>
         public ValueRange Items(int index)
         {

@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last",
             "stop", "call", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
             "signal", "sum", "!=", "<", ">", "<=", ">=", "whenever", "from", "average", "|", "type",
-            "is", "not", "installed"
+            "is", "not", "installed", "min", "max"
         };
 
         static readonly Keyword[][] ByLength = Bucket();
@@ -99,10 +99,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return false;
         }
 
-        /// <summary>Whether <paramref name="keyword" /> arrived with <see cref="ContextualDraft" />, so a program written for an earlier format names things with it as with any other word: <c>is</c>, <c>not</c> or <c>installed</c>.</summary>
+        /// <summary>Whether <paramref name="keyword" /> arrived with <see cref="ContextualDraft" />, so a program written for an earlier format names things with it as with any other word: <c>is</c>, <c>not</c>, <c>installed</c>, <c>min</c> or <c>max</c>.</summary>
         public static bool ArrivedWithContextual(Keyword keyword)
         {
-            return keyword == Keyword.Is || keyword == Keyword.Not || keyword == Keyword.Installed;
+            return keyword == Keyword.Is || keyword == Keyword.Not || keyword == Keyword.Installed || keyword == Keyword.Min || keyword == Keyword.Max;
         }
 
         /// <summary>Whether <paramref name="word" /> is spelled as a reserved keyword, and so is quoted wherever it is a name.</summary>

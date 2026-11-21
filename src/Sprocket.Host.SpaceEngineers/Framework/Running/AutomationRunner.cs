@@ -224,6 +224,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </remarks>
         public void Set(AutomationSystem system, SystemInstance instance, SetState set)
         {
+            Set(system, instance, set, null);
+        }
+
+        /// <summary>Does what <paramref name="set" /> says, taking <paramref name="worked" /> as the value where it is not null: what an expression of the step came to.</summary>
+        public void Set(AutomationSystem system, SystemInstance instance, SetState set, Literal? worked)
+        {
             var state = system.FindState(set.State);
             if (state == null)
                 return;
@@ -233,7 +239,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return;
 
             // A setting with no value in the installation sets nothing; the sequence's check says so before it runs.
-            var value = from == null ? set.Value : _states.Read(system, instance, from);
+            var value = from == null ? worked ?? set.Value : _states.Read(system, instance, from);
             if (value.IsSetting && (instance == null || !instance.Gives(value.Text, out value)))
                 return;
 

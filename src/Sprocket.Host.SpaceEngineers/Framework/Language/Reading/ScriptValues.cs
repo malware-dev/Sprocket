@@ -13,6 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         readonly ValueChunks _values = new ValueChunks();
         readonly ValueChunks _items = new ValueChunks();
         readonly ValueChunks _parts = new ValueChunks();
+        readonly ValueChunks _terms = new ValueChunks();
 
         /// <summary>Every statement's values, each statement a run of them.</summary>
         public ValueChunks Values => _values;
@@ -22,6 +23,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         /// <summary>Every qualified name's parts, each name a run of them.</summary>
         public ValueChunks Parts => _parts;
+
+        /// <summary>Every expression's terms, each expression a run of them.</summary>
+        public ValueChunks Terms => _terms;
 
         /// <summary>
         /// Whether the script was written for a format earlier than <see cref="Keywords.ContextualDraft" />, where every keyword

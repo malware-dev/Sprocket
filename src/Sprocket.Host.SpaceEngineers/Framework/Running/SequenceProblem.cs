@@ -118,6 +118,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>The last run ended because a mod's awaitable action failed.</summary>
         /// <remarks>A problem a sequence's catch handles; the words come from the mod.</remarks>
-        Failed = 25
+        Failed = 25,
+
+        /// <summary>One of its steps divides by zero in a value it works out.</summary>
+        /// <remarks>The run ends there.</remarks>
+        DividedByZero = 26,
+
+        /// <summary>One of its steps takes the average, smallest or largest value of a reading over no blocks.</summary>
+        /// <remarks>The run ends there.</remarks>
+        NoValue = 27,
+
+        /// <summary>One of its steps reads the value of one block from a slot that holds several, with nothing to combine them.</summary>
+        /// <remarks>The run ends there.</remarks>
+        ManyBlocks = 28,
+
+        /// <summary>One of its steps works out a number too large for an integer, a real or a length of time.</summary>
+        /// <remarks>The run ends there.</remarks>
+        Overflowed = 29
     }
 }

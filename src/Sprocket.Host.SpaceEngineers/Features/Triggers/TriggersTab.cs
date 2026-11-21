@@ -166,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
                     var now = setting.Length > 0 || !interval.HasValue ? every.Interval : interval.Value;
                     if (now != every.Interval || setting != every.IntervalSetting)
-                        _editor.Do(_system, new SetCadence(every, every.Interval, every.IntervalSetting, now, setting));
+                        _editor.Do(_system, new SetCadence(every, every.Interval, every.IntervalSetting, now, setting, every.IntervalExpression));
                 });
             _rate.Hang();
         }
@@ -214,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                row.Starts.Add(new DurationSlot(every.Interval, every.IntervalSetting, _changes(CommandKind.OpenTrigger, () => OpenRate(every))));
+                row.Starts.Add(new DurationSlot(every.Interval, every.IntervalSetting, every.IntervalExpression?.Written, _changes(CommandKind.OpenTrigger, () => OpenRate(every))));
 
             var watch = trigger as StateTrigger;
             if (watch != null)
@@ -335,7 +335,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                     return;
 
                 var now = when.Copy();
-                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields), checks, value => now.Value = value);
+                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, given), checks, value => now.Value = value);
                 _editor.Do(_system, new ChangeTrigger(when, now));
             };
             if (ValuesQuestion.Offer(_editor, fields, given, said => answered(said, false)))

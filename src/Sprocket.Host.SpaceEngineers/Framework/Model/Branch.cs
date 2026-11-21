@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
@@ -22,5 +23,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <inheritdoc />
         public override IList<Literal> Arguments => Compared == null ? base.Arguments : Compared.Arguments;
+
+        /// <inheritdoc />
+        public override void Worked(List<Expression> into)
+        {
+            base.Worked(into);
+            if (Compared != null && Compared.Value.IsExpression)
+                into.Add(Compared.Value.Tree);
+        }
     }
 }

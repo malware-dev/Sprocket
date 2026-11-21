@@ -152,6 +152,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (quantifier == Quantifier.Average)
                 return "the average of the";
 
+            if (quantifier == Quantifier.Min)
+                return "the lowest of the";
+
+            if (quantifier == Quantifier.Max)
+                return "the highest of the";
+
             // A value read on every block is said for each of them, since "all" would want the value in the plural.
             var word = quantifier == Quantifier.All ? namesValue ? "each" : "all" : "any";
             if (slotted)

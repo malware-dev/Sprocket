@@ -1,5 +1,8 @@
 
 
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
+using System.Collections.Generic;
+
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
@@ -26,5 +29,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>The setting whose length of time is how long between one start and the next, each installation's own, or empty where <see cref="Interval" /> says.</summary>
         public string IntervalSetting { get; set; } = "";
+
+        /// <summary>The expression whose length of time is how long between one start and the next, worked out on each look, or null where <see cref="Interval" /> or a setting says.</summary>
+        public Expression IntervalExpression { get; set; }
+
+        /// <inheritdoc />
+        public override void Worked(List<Expression> into)
+        {
+            if (IntervalExpression != null)
+                into.Add(IntervalExpression);
+        }
     }
 }

@@ -19,9 +19,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 quantifier = Quantifier.Sum;
             else if (statement.Says(at, Keyword.Average))
                 quantifier = Quantifier.Average;
+            else if (statement.Says(at, Keyword.Min))
+                quantifier = Quantifier.Min;
+            else if (statement.Says(at, Keyword.Max))
+                quantifier = Quantifier.Max;
             else if (!statement.Says(at, Keyword.Any))
             {
-                trouble.Say(statement, $"expected any, all, sum or average after '{after}'.");
+                trouble.Say(statement, $"expected any, all, sum, average, min or max after '{after}'.");
                 return false;
             }
 
@@ -32,8 +36,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <remarks>Asked before a bare name there is read as a state's: the test's construct reads these words where it starts.</remarks>
         public static bool IsQuantifier(Statement statement, int at)
         {
+            // A name spelled min or max is a quantifier only before a member, as it may also name a state.
             return statement.Says(at, Keyword.Any) || statement.Says(at, Keyword.All) || statement.Says(at, Keyword.Sum)
-                || statement.Says(at, Keyword.Average);
+                || statement.Says(at, Keyword.Average) || (statement.Says(at, Keyword.Min) || statement.Says(at, Keyword.Max)) && statement.IsMember(at + 1);
         }
 
         /// <summary>
@@ -107,56 +112,62 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var given = statement.Arguments(index);
             for (var i = 0; i < given.Count; i++)
             {
-                var argument = given[i];
-                Literal flag;
-                bool shared;
-                if (Flagged(statement, argument, system, trouble, out flag, out shared))
-                {
-                    arguments.Add(flag);
-                    continue;
-                }
-
-                if (shared || !Kinds.Literal(statement, ref argument, trouble))
+                Literal one;
+                if (!ReadArgument(statement, given[i], system, trouble, out one))
                     return false;
 
-                if (argument.Form == ValueForm.List)
-                {
-                    var slots = new List<string>();
-                    if (!Names(statement.Within(argument), slots, statement, system, trouble))
-                        return false;
-
-                    arguments.Add(Literal.Slots(slots));
-                    continue;
-                }
-
-                var setting = SettingReader.Referenced(statement, argument, system);
-                if (setting != null)
-                {
-                    if (!SettingReader.Owe(statement, setting, system, null, null, trouble))
-                        return false;
-
-                    arguments.Add(Literal.Setting(setting, argument.Form == ValueForm.Kinded));
-                    continue;
-                }
-
-                Literal word;
-                bool wrong;
-                if (Word(statement, argument, system, trouble, out word, out wrong))
-                {
-                    arguments.Add(word);
-                    continue;
-                }
-
-                if (wrong)
-                    return false;
-
-                if (!Argument(statement, argument, trouble))
-                    return false;
-
-                arguments.Add(Given(argument));
+                arguments.Add(one);
             }
 
             return Names(statement.On(index), targets, statement, system, trouble);
+        }
+
+        /// <summary>
+        /// One value a member is given or compared with, <paramref name="argument" />, as the literal it is: a flag, a list of
+        /// slots, a setting, a word of the member or a host type, or a value; or an expression. False, and trouble, where it is none of them.
+        /// </summary>
+        public static bool ReadArgument(Statement statement, Value argument, AutomationSystem system, ScriptTrouble trouble, out Literal value)
+        {
+            value = default(Literal);
+            if (ExpressionReader.Is(argument))
+                return ExpressionReader.Read(statement, argument, system, trouble, out value);
+
+            bool shared;
+            if (Flagged(statement, argument, system, trouble, out value, out shared))
+                return true;
+
+            if (shared || !Kinds.Literal(statement, ref argument, trouble))
+                return false;
+
+            if (argument.Form == ValueForm.List)
+            {
+                var slots = new List<string>();
+                if (!Names(statement.Within(argument), slots, statement, system, trouble))
+                    return false;
+
+                value = Literal.Slots(slots);
+                return true;
+            }
+
+            var setting = SettingReader.Referenced(statement, argument, system);
+            if (setting != null)
+            {
+                if (!SettingReader.Owe(statement, setting, system, null, null, trouble))
+                    return false;
+
+                value = Literal.Setting(setting, argument.Form == ValueForm.Kinded);
+                return true;
+            }
+
+            bool wrong;
+            if (Word(statement, argument, system, trouble, out value, out wrong))
+                return true;
+
+            if (wrong || !Argument(statement, argument, trouble))
+                return false;
+
+            value = Given(argument);
+            return true;
         }
 
         /// <summary>
@@ -266,11 +277,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             var written = statement.ValueAt(at + 1);
+            if (ExpressionReader.Is(written))
+                return ExpressionReader.Read(statement, written, system, trouble, out value);
+
             var ordered = relation != Relation.Is && relation != Relation.IsNot;
             bool shared;
             if (Flagged(statement, written, system, trouble, out value, out shared))
             {
-                if (!ordered && quantifier != Quantifier.Sum)
+                if (!ordered && !Quantifiers.Numeric(quantifier))
                     return true;
 
                 trouble.Say(statement, $"expected a number after '{Keywords.Name(ProgramWriter.Said(relation))}'.");
@@ -284,7 +298,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (setting != null)
             {
                 value = Literal.Setting(setting, written.Form == ValueForm.Kinded);
-                return ordered || quantifier == Quantifier.Sum
+                return ordered || Quantifiers.Numeric(quantifier)
                     ? SettingReader.Owe(statement, setting, system, SettingReader.Numeric, "a number", trouble)
                     : SettingReader.Owe(statement, setting, system, null, null, trouble);
             }
@@ -294,7 +308,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (Word(statement, written, system, trouble, out word, out wrong))
             {
                 value = word;
-                if (!ordered && quantifier != Quantifier.Sum)
+                if (!ordered && !Quantifiers.Numeric(quantifier))
                     return true;
 
                 trouble.Say(statement, $"expected a number after '{Keywords.Name(ProgramWriter.Said(relation))}'.");
@@ -309,7 +323,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             value = Given(written);
 
-            if ((ordered || quantifier == Quantifier.Sum) && value.Kind != ValueKind.Integer && value.Kind != ValueKind.Real)
+            if ((ordered || Quantifiers.Numeric(quantifier)) && value.Kind != ValueKind.Integer && value.Kind != ValueKind.Real)
             {
                 trouble.Say(statement, $"expected a number after '{Keywords.Name(ProgramWriter.Said(relation))}'.");
                 return false;
@@ -341,7 +355,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     continue;
 
                 step.IsOff = statement.IsOff;
-                SystemReader.Uses(statement, step as Act, system, program, trouble);
+                SystemReader.Uses(statement, step, system, program, trouble);
                 into.Add(step);
             }
         }
@@ -446,6 +460,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             for (var i = 0; i < test.Targets.Count; i++)
                 SystemReader.Uses(statement, test.Targets[i], system, program, false, trouble);
 
+            if (value.IsExpression)
+            {
+                var lists = new List<IList<string>>();
+                value.Tree.NameLists(lists);
+                foreach (var names in lists)
+                {
+                    for (var i = 0; i < names.Count; i++)
+                        SystemReader.Uses(statement, names[i], system, program, false, trouble);
+                }
+            }
+
             return test;
         }
 
@@ -529,6 +554,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 if (Lasting(statement.ValueAt(0), 0, out length))
                     return ScriptQuotes.Ends(statement, 1, trouble) ? Noted(new Wait(length), statement) : null;
 
+                if (ExpressionReader.Is(statement.ValueAt(0)))
+                {
+                    Literal worked;
+                    if (!ExpressionReader.Read(statement, statement.ValueAt(0), system, trouble, out worked) || !ScriptQuotes.Ends(statement, 1, trouble))
+                        return null;
+
+                    return Noted(new Wait(0) { Expression = worked.Tree }, statement);
+                }
+
                 var name = SettingReader.Referenced(statement, statement.ValueAt(0), system);
                 if (name != null)
                 {
@@ -538,7 +572,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return ScriptQuotes.Ends(statement, 1, trouble) ? Noted(new Wait(0) { Setting = name }, statement) : null;
                 }
 
-                trouble.Say(statement, "expected a duration after 'wait', like 60t, or a setting holding one.");
+                trouble.Say(statement, "expected a duration after 'wait', like 60t, or a setting or an expression holding one.");
                 return null;
             }
 
@@ -578,8 +612,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (statement.ValueAt(0).Form == ValueForm.Identifier && statement.Word(0) == AbortWords.Saying)
             {
                 var message = statement.ValueAt(1);
-                var setting = message.Form == ValueForm.Text ? null : SettingReader.Referenced(statement, message, system);
-                if (setting != null)
+                var setting = message.Form == ValueForm.Text || ExpressionReader.Is(message) ? null : SettingReader.Referenced(statement, message, system);
+                if (ExpressionReader.Is(message))
+                {
+                    Literal worked;
+                    if (!ExpressionReader.Read(statement, message, system, trouble, out worked))
+                        return null;
+
+                    abort.Expression = worked.Tree;
+                }
+                else if (setting != null)
                 {
                     if (!SettingReader.Owe(statement, setting, system, SettingReader.Worded, "text", trouble))
                         return null;
@@ -662,6 +704,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
 
             var given = statement.ValueAt(2);
+            if (ExpressionReader.Is(given))
+            {
+                Literal worked;
+                if (!ExpressionReader.Read(statement, given, system, trouble, out worked))
+                    return null;
+
+                act.ActionId = id;
+                act.Form = ReachKind.Value;
+                act.Provider = provider;
+                act.Arguments.Add(worked);
+                return Noted(act, statement);
+            }
+
             Literal flag;
             bool shared;
             if (Flagged(statement, given, system, trouble, out flag, out shared))

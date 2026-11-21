@@ -73,10 +73,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// <summary>
         /// The part of a sentence saying the value the state <paramref name="named" /> of <paramref name="system" /> is given or
         /// compared with, pressed to <paramref name="opens" />: <paramref name="value" />, or the state <paramref name="other" />
-        /// where it is not empty.
+        /// where it is not empty, or the expression written <paramref name="expression" /> where that is.
         /// </summary>
-        public static SentenceSlot Part(AutomationSystem system, string named, Literal value, string other, ICommand opens, ArgumentRole role)
+        public static SentenceSlot Part(AutomationSystem system, string named, Literal value, string other, ICommand opens, ArgumentRole role, string expression = null)
         {
+            if (!string.IsNullOrEmpty(expression))
+                value = Literal.Of(expression);
+
             if (!string.IsNullOrEmpty(other))
                 return new SystemStateSlot(other, opens);
 

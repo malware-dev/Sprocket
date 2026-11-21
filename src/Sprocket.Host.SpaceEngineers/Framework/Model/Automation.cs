@@ -576,7 +576,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var every = trigger as EveryTrigger;
             var when = trigger as WhenTrigger;
             if (every != null)
-                copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting };
+                copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting, IntervalExpression = every.IntervalExpression?.Copied() };
             else if (when != null)
             {
                 var made = new WhenTrigger(when.EventId);
@@ -585,6 +585,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 made.Value = when.Value;
                 made.Interval = when.Interval;
                 made.IntervalSetting = when.IntervalSetting;
+                made.IntervalExpression = when.IntervalExpression?.Copied();
                 made.Key = when.Key;
                 for (var i = 0; i < when.Arguments.Count; i++)
                     made.Arguments.Add(when.Arguments[i]);
@@ -635,7 +636,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var wait = step as Wait;
             if (wait != null)
-                return Annotated(new Wait(wait.Ticks) { Setting = wait.Setting }, step);
+                return Annotated(new Wait(wait.Ticks) { Setting = wait.Setting, Expression = wait.Expression?.Copied() }, step);
 
             var run = step as Run;
             if (run != null)
@@ -646,7 +647,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var abort = step as Abort;
             if (abort != null)
-                return Annotated(new Abort { Message = abort.Message, Setting = abort.Setting, Level = abort.Level }, step);
+                return Annotated(new Abort { Message = abort.Message, Setting = abort.Setting, Expression = abort.Expression?.Copied(), Level = abort.Level }, step);
 
             var opens = step as If;
             if (opens != null)
@@ -667,7 +668,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var sets = step as SetState;
             if (sets != null)
-                return Annotated(new SetState { State = sets.State, Value = sets.Value, From = sets.From }, step);
+                return Annotated(new SetState { State = sets.State, Value = sets.Value, From = sets.From, Expression = sets.Expression?.Copied() }, step);
 
             return null;
         }

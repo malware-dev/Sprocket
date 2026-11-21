@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
 {
     /// <summary>What each act and test of a run comes to on its blocks, worked out once per change to the program or to what its names point at.</summary>
-    public sealed class CompiledRun
+    public sealed class CompiledRun : IExpressionScope
     {
         readonly Sequence _sequence;
         readonly SystemInstance _instance;
@@ -63,8 +64,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             Compilations++;
             var act = (Act)_sequence.Steps[step];
             compiled = new CompiledAct();
+            compiled.JustCompiled = true;
             compiled.Problem = Needed(act.Targets, SequenceProblem.MissingTarget, out compiled.Which, bindings);
+            var expressions = new List<Expression>();
+            act.Worked(expressions);
+            ReadsNeeded(expressions, SequenceProblem.MissingTarget, ref compiled.Problem, ref compiled.Which, bindings);
             var given = Reached(act.Arguments, compiled, bindings);
+
+            // What cannot be worked out is not cached: the next time the step is reached works it out afresh.
+            if (compiled.Failure != ExpressionFailure.None)
+                return compiled;
+
             var acting = ActedOn(act.Targets, bindings);
             foreach (var name in acting)
             {
@@ -120,10 +130,46 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (tested != null)
                 return tested;
 
-            tested = new CompiledTest();
+            // A test given an expression is worked out each time it is reached, and never cached.
+            var worked = test.Value.IsExpression || Literal.HoldsExpression(test.Arguments);
+            tested = Tested(test, bindings, worked);
+            if (!worked)
+                _tests[step] = tested;
+
+            return tested;
+        }
+
+        /// <summary>What <paramref name="test" /> comes to now, with the expressions it holds worked out where <paramref name="worked" /> says it holds some.</summary>
+        CompiledTest Tested(Comparison test, Bindings bindings, bool worked)
+        {
+            var tested = new CompiledTest();
             tested.Problem = Needed(test.Targets, SequenceProblem.MissingGate, out tested.Which, bindings);
-            tested.Value = Settled(test.Value, ref tested.Problem, ref tested.Which);
             var given = test.Arguments;
+            var value = test.Value;
+            if (worked)
+            {
+                var expressions = new List<Expression>();
+                if (test.Value.IsExpression)
+                    expressions.Add(test.Value.Tree);
+
+                foreach (var argument in given)
+                {
+                    if (argument.IsExpression)
+                        expressions.Add(argument.Tree);
+                }
+
+                ReadsNeeded(expressions, SequenceProblem.MissingGate, ref tested.Problem, ref tested.Which, bindings);
+                if (tested.Problem == SequenceProblem.None)
+                {
+                    value = WorkedValue(test.Value, ref tested.Failure, bindings);
+                    given = WorkedList(given, ref tested.Failure, bindings);
+                }
+
+                if (tested.Failure != ExpressionFailure.None)
+                    return tested;
+            }
+
+            tested.Value = Settled(value, ref tested.Problem, ref tested.Which);
             for (var i = 0; i < given.Count; i++)
                 Settled(given[i], ref tested.Problem, ref tested.Which);
 
@@ -149,8 +195,175 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 }
             }
 
-            _tests[step] = tested;
             return tested;
+        }
+
+        /// <summary>How many times an expression has been worked out.</summary>
+        public int Evaluations { get; private set; }
+
+        // The blocks the expression being worked out reads them from.
+        Bindings _evaluating;
+
+        /// <summary>Works out <paramref name="tree" /> against this installation and the blocks <paramref name="bindings" /> finds, into <paramref name="value" />.</summary>
+        /// <remarks>Asked as a step is reached, never on a tick; it allocates where text is joined or blocks are read.</remarks>
+        public ExpressionFailure Evaluate(Expression tree, Bindings bindings, out Literal value)
+        {
+            _evaluating = bindings;
+            Evaluations++;
+            return tree.Evaluate(this, out value);
+        }
+
+        /// <summary>
+        /// Works out again the expressions the act at <paramref name="step" /> is given, which is <paramref name="compiled" />, as the
+        /// step is reached, and has each block take them in place of the last time's; the failure is left in <paramref name="compiled" />.
+        /// </summary>
+        /// <remarks>Nothing where it is given none, and nothing the first time, which making it did.</remarks>
+        public void Refresh(int step, CompiledAct compiled, Bindings bindings)
+        {
+            var act = (Act)_sequence.Steps[step];
+            if (compiled.JustCompiled)
+            {
+                compiled.JustCompiled = false;
+                return;
+            }
+
+            if (!Literal.HoldsExpression(act.Arguments))
+                return;
+
+            compiled.Failure = ExpressionFailure.None;
+            var given = Reached(act.Arguments, compiled, bindings);
+            if (compiled.Failure != ExpressionFailure.None)
+                return;
+
+            foreach (var acted in compiled.Acts)
+            {
+                var converted = new List<Literal>(given.Count);
+                if (!acted.Action.Converts(given, converted))
+                {
+                    compiled.Failure = ExpressionFailure.Mistyped;
+                    return;
+                }
+
+                acted.Arguments = converted;
+                acted.Bound = acted.Action.OwnAction?.Bind(acted.Action.Type == null ? converted : HostType.Arguments(acted.Facet, converted));
+                acted.Order = acted.Entity.Prepare(acted.Action, acted.Bound, acted.Arguments);
+            }
+        }
+
+        /// <summary>
+        /// The first block the expressions <paramref name="expressions" /> read that is missing, as <paramref name="lost" /> where gone, into
+        /// <paramref name="problem" /> and <paramref name="which" /> where they say nothing yet.
+        /// </summary>
+        void ReadsNeeded(List<Expression> expressions, SequenceProblem lost, ref SequenceProblem problem, ref string which, Bindings bindings)
+        {
+            var lists = new List<IList<string>>();
+            foreach (var expression in expressions)
+                expression.NameLists(lists);
+
+            foreach (var names in lists)
+            {
+                if (problem != SequenceProblem.None)
+                    return;
+
+                string at;
+                var found = Needed(names, lost, out at, bindings);
+                if (found != SequenceProblem.None)
+                {
+                    problem = found;
+                    which = at;
+                }
+            }
+        }
+
+        /// <summary><paramref name="given" /> with each expression worked out into the value it comes to, a length of time as its ticks, as a member takes one; where one has no value, <paramref name="failure" /> says why where it says nothing yet.</summary>
+        IList<Literal> WorkedList(IList<Literal> given, ref ExpressionFailure failure, Bindings bindings)
+        {
+            var worked = new List<Literal>(given);
+            for (var i = 0; i < worked.Count; i++)
+            {
+                if (worked[i].IsExpression)
+                    worked[i] = WorkedValue(worked[i], ref failure, bindings);
+            }
+
+            return worked;
+        }
+
+        /// <summary>The value <paramref name="expression" /> comes to, a length of time as its ticks; where it has none, <paramref name="failure" /> says why where it says nothing yet.</summary>
+        Literal WorkedValue(Literal expression, ref ExpressionFailure failure, Bindings bindings)
+        {
+            if (!expression.IsExpression)
+                return expression;
+
+            Literal value;
+            var why = Evaluate(expression.Tree, bindings, out value);
+            if (why != ExpressionFailure.None)
+            {
+                if (failure == ExpressionFailure.None)
+                    failure = why;
+
+                return Literal.Of(0L);
+            }
+
+            return value.Kind == ValueKind.Duration ? Literal.Of(value.Length.Ticks) : value;
+        }
+
+        readonly Stack<List<Literal>> _lent = new Stack<List<Literal>>();
+
+        /// <inheritdoc />
+        List<Literal> IExpressionScope.Borrow()
+        {
+            return _lent.Count > 0 ? _lent.Pop() : new List<Literal>();
+        }
+
+        /// <inheritdoc />
+        void IExpressionScope.Return(List<Literal> list)
+        {
+            list.Clear();
+            _lent.Push(list);
+        }
+
+        /// <inheritdoc />
+        bool IExpressionScope.Setting(string name, out Literal value)
+        {
+            value = default(Literal);
+            return _instance != null && _instance.Gives(name, out value);
+        }
+
+        /// <inheritdoc />
+        bool IExpressionScope.State(string name, out Literal value)
+        {
+            value = default(Literal);
+            var system = _sequence.System;
+            var state = system?.FindState(name);
+            if (state == null)
+                return false;
+
+            value = _owner.States.Read(system, _instance, state);
+            return true;
+        }
+
+        /// <inheritdoc />
+        void IExpressionScope.Read(BlockReading reading, IList<Literal> arguments, List<Literal> into)
+        {
+            var settled = SystemInstance.Settled(_instance, arguments);
+            var bindings = _evaluating;
+            foreach (var name in ActedOn(reading.Targets, bindings))
+            {
+                var entity = bindings.Entity(name);
+                var member = entity == null ? null : Probe.Value(entity.Kind, reading.Key);
+                FacetsHeld(member?.Type, reading.Targets, name);
+                for (var f = 0; f < _facetsHeld.Count; f++)
+                {
+                    // A block lacking the facet its slot holds is left out.
+                    var facet = _facetsHeld[f];
+                    if (facet > 0 && member?.Type != null && member.Type.Find(entity.Kind, facet) == null)
+                        continue;
+
+                    var probe = Probe.Reading(entity, reading.Key, settled, _owner.Clock, facet);
+                    if (probe != null && !probe.PassedOver)
+                        into.Add(probe.Current());
+                }
+            }
         }
 
         /// <summary>Forgets what every act and test came to, where the program or what its names point at has changed since.</summary>
@@ -266,6 +479,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         reached = new List<Literal>(given);
 
                     reached[i] = Settled(given[i], ref compiled.Problem, ref compiled.Which);
+                    continue;
+                }
+
+                if (given[i].IsExpression)
+                {
+                    if (reached == null)
+                        reached = new List<Literal>(given);
+
+                    reached[i] = WorkedValue(given[i], ref compiled.Failure, bindings);
                     continue;
                 }
 

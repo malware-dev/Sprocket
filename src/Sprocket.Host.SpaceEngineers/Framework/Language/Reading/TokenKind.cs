@@ -82,6 +82,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary><c>|</c>, between the options of a type.</summary>
         Bar,
 
+        /// <summary><c>+</c>, which adds or joins in an expression.</summary>
+        Plus,
+
+        /// <summary><c>-</c> not written against a number, which subtracts or negates in an expression.</summary>
+        Minus,
+
+        /// <summary><c>*</c>, which multiplies in an expression.</summary>
+        Star,
+
+        /// <summary><c>/</c> on its own, which divides in an expression.</summary>
+        Slash,
+
         /// <summary>
         /// Text that is not a token at all, carrying what is wrong with it.
         /// </summary>

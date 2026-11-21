@@ -521,7 +521,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// The state or setting <paramref name="name" />, of the kind <paramref name="kind" />, written with it where alone it could
         /// also mean another thing; where it <paramref name="tests" />, it stands where a test starts.
         /// </summary>
-        static void Named(ScriptWriter pen, AutomationSystem system, string kind, string name, bool tests)
+        public static void Named(ScriptWriter pen, AutomationSystem system, string kind, string name, bool tests)
         {
             if (system != null && Meanings(system, name) > 1)
                 pen.Kinded("", kind, name);
@@ -873,7 +873,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         }
 
         /// <summary><c>sprocket.amount("Ingot/Iron") on [ cargo ]</c>: a member, bare or qualified, with its arguments where it has any, and its blocks.</summary>
-        static void WriteMember(ScriptWriter pen, AutomationSystem system, string provider, string id, IList<Literal> arguments, IList<string> targets)
+        public static void WriteMember(ScriptWriter pen, AutomationSystem system, string provider, string id, IList<Literal> arguments, IList<string> targets)
         {
             pen.HostQualified(provider, id);
             if (arguments.Count > 0)
@@ -897,6 +897,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 case Quantifier.All: return Keyword.All;
                 case Quantifier.Sum: return Keyword.Sum;
                 case Quantifier.Average: return Keyword.Average;
+                case Quantifier.Min: return Keyword.Min;
+                case Quantifier.Max: return Keyword.Max;
             }
 
             return Keyword.Any;
@@ -966,7 +968,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 WriteMember(pen, system, when.Provider, when.EventId, when.Arguments, when.Sources);
                 pen.Says(Said(when.Relation));
                 Word(pen, system, when.Value);
-                if (when.IntervalSetting.Length > 0)
+                if (when.IntervalExpression != null)
+                    pen.Says(Keyword.Every).Expression(ExpressionWriter.Text(system, when.IntervalExpression));
+                else if (when.IntervalSetting.Length > 0)
                     pen.Says(Keyword.Every).Word(when.IntervalSetting);
                 else if (when.IntervalTicks > 0)
                     Lasting(pen.Says(Keyword.Every), when.Interval);
@@ -981,7 +985,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (every == null)
                 throw new InvalidOperationException($"a {trigger.GetType().Name} has no way to be written.");
 
-            if (every.IntervalSetting.Length > 0)
+            if (every.IntervalExpression != null)
+                pen.Start(Keyword.Every).Expression(ExpressionWriter.Text(system, every.IntervalExpression));
+            else if (every.IntervalSetting.Length > 0)
                 pen.Start(Keyword.Every).Word(every.IntervalSetting);
             else
                 Lasting(pen.Start(Keyword.Every), every.Interval);
@@ -1089,7 +1095,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var abort = step as Abort;
             if (abort != null)
             {
-                if (abort.Setting.Length > 0)
+                if (abort.Expression != null)
+                    pen.Word(AbortWords.Saying).Expression(ExpressionWriter.Text(system, abort.Expression));
+                else if (abort.Setting.Length > 0)
                     pen.Word(AbortWords.Saying).Word(abort.Setting);
                 else if (abort.Message.Length > 0)
                     pen.Word(AbortWords.Saying).Text(abort.Message);
@@ -1104,7 +1112,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             {
                 Named(pen, system, Kinds.State, sets.State, false);
                 pen.Says(Keyword.To);
-                if (sets.From.Length > 0)
+                if (sets.Expression != null)
+                    pen.Expression(ExpressionWriter.Text(system, sets.Expression));
+                else if (sets.From.Length > 0)
                     State(pen, system, TypeOf(system, sets.State), sets.From);
                 else
                     Choice(pen, system, TypeOf(system, sets.State), sets.Value, false);
@@ -1135,7 +1145,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var wait = step as Wait;
             if (wait != null)
             {
-                if (wait.Setting.Length > 0)
+                if (wait.Expression != null)
+                    pen.Expression(ExpressionWriter.Text(system, wait.Expression));
+                else if (wait.Setting.Length > 0)
                     pen.Word(wait.Setting);
                 else
                     Lasting(pen, wait.Length);
@@ -1153,8 +1165,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// back as the kind it is; a word of the member spelled like a thing of <paramref name="system" />'s written with its host type,
         /// <c>door_status(closed)</c>, the type the word was read with or the one type that has it, so it is read back as the word.
         /// </summary>
-        static void Word(ScriptWriter pen, AutomationSystem system, Literal value)
+        public static void Word(ScriptWriter pen, AutomationSystem system, Literal value)
         {
+            if (value.IsExpression)
+            {
+                pen.Expression(ExpressionWriter.Text(system, value.Tree));
+                return;
+            }
+
             if (value.Kind == ValueKind.Flag && system != null && Meanings(system, Flag(value)) > 0)
             {
                 pen.Kinded("", SettingReader.Flag, Flag(value));
