@@ -32,6 +32,20 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         Assert.Equal("share", screen.Editor.Callouts.Shown?.Id);
     }
 
+    /// <summary>A player who turned callouts off meets none, and nothing is recorded as seen, so turning them on again offers what is still new.</summary>
+    [Fact]
+    public void APlayerWithCalloutsOffMeetsNone()
+    {
+        var screen = Screen.Fresh(LogicSystem);
+        screen.Scene.MeetCallouts(false);
+        screen.Run(3);
+
+        Assert.Null(screen.Editor.Callouts.Shown);
+        Assert.False(screen.Shows(screen.Editor.Texts.CalloutShare), screen.Dump);
+        Assert.Null(screen.Player().Seen);
+        Assert.Empty(screen.Player().Dismissed);
+    }
+
     /// <summary>A screen without any place a callout hangs from has none, whatever is due.</summary>
     [Fact]
     public void NoCalloutShowsWhereItsAnchorIsNot()

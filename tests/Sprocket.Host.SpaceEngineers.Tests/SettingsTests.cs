@@ -48,6 +48,23 @@ public class SettingsTests
         Assert.True(Settings.From(file.ToString(), null).DeveloperMode);
     }
 
+    /// <summary>A player's callouts are offered unless their own section says <c>callouts=false</c>, a line only a player writes: saving never adds it, and leaves one written by hand in place.</summary>
+    [Fact]
+    public void ACalloutsLineIsOnlyEverWrittenByThePlayer()
+    {
+        Assert.True(PlayerSettings.From(null).Callouts);
+        Assert.True(PlayerSettings.From(Ini("[Player]\ntips=false\n")).Callouts);
+        Assert.False(PlayerSettings.From(Ini("[Player]\ncallouts=false\n")).Callouts);
+
+        var untouched = Ini("[Sprocket]\ndeveloperMode=true\n");
+        new PlayerSettings(true).WithTips(false).WithDismissed("share").Write(untouched);
+        Assert.DoesNotContain("callouts", untouched.ToString());
+
+        var byHand = Ini("[Player]\ncallouts=false\n");
+        PlayerSettings.From(byHand).WithTips(false).WithSeen(new ModRelease(1, 1)).WithDismissed("share").Write(byHand);
+        Assert.False(PlayerSettings.From(Ini(byHand.ToString())).Callouts);
+    }
+
     /// <summary>The callouts a player was offered and dismissed live in their own section of the global file beside their tips, leaving every world's settings as they were.</summary>
     [Fact]
     public void APlayerKeepsWhatWasOfferedAndDismissed()
