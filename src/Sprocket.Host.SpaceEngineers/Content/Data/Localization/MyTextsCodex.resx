@@ -2020,6 +2020,10 @@
     <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the landing gear locks.</value>
     <comment>Codex entry on the block member "locks" of LandingGear, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.LandingGear.Unlocks" xml:space="preserve">
+    <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the landing gear unlocks.</value>
+    <comment>Codex entry on the block member "unlocks" of LandingGear, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.LandingGear.Lock" xml:space="preserve">
     <value>Locks the landing gear to what is in reach.</value>
     <comment>Codex entry on the block member "lock" of LandingGear, shown in the picker when it is chosen.</comment>
@@ -2067,6 +2071,10 @@
   <data name="Sprocket.Member.Connector.Locks" xml:space="preserve">
     <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the connector locks.</value>
     <comment>Codex entry on the block member "locks" of Connector, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Connector.Unlocks" xml:space="preserve">
+    <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the connector unlocks.</value>
+    <comment>Codex entry on the block member "unlocks" of Connector, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Connector.DockedShip" xml:space="preserve">
     <value>The name of the ship locked to the connector, or nothing when there is none.</value>

@@ -425,6 +425,18 @@ public sealed class Rig
         return Weld(new Door(id, name, Type<MyObjectBuilder_Door>(), "LargeBlockDoor", "Door"));
     }
 
+    /// <summary>A connector, named, unlocked, with the game's own type behind it.</summary>
+    public Coupling Connector(long id, string name)
+    {
+        return Weld(new Coupling(id, name, Type<MyObjectBuilder_ShipConnector>(), "Connector", "Connector"));
+    }
+
+    /// <summary>A magnetic plate, named, unlocked, with the game's own type behind it.</summary>
+    public Clamp MagneticPlate(long id, string name)
+    {
+        return Weld(new Clamp(id, name, Type<MyObjectBuilder_LandingGear>(), "LargeBlockSmallMagneticPlate", "Magnetic Plate"));
+    }
+
     /// <summary>A door of the game's subtype <paramref name="subtype" />, named.</summary>
     public Door Door(long id, string name, string subtype)
     {
