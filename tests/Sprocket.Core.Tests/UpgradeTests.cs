@@ -435,7 +435,7 @@ public class UpgradeTests
         var text = Switching.Replace("sprocket 1 alpha 14", header);
 
         Assert.Equal("", ProgramReader.Lone(text, new Values(), out var read));
-        Assert.StartsWith("sprocket 2 alpha 2", ProgramWriter.Blueprint(read!));
+        Assert.StartsWith("sprocket 2 alpha 3", ProgramWriter.Blueprint(read!));
     }
 
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>

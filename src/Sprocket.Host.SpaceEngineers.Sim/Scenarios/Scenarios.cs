@@ -8,7 +8,7 @@ namespace Sprocket.Sim.Scenarios;
 public static class Scenarios
 {
     /// <summary>Each scenario, newly made, and after them those kept in the Local folder of this machine.</summary>
-    public static IReadOnlyList<Scenario> All => new Scenario[] { new SplitTwin(), new StockWatch(), new MoveItems(), new InventoryReadings(), new RefineryMoves(), new PistonStatus(), new ScriptLimit(), new ForcedDoor(), new OldAirlock(), new KeptCount(), new MoveAmounts(), new StatusPages() }.Concat(Local()).ToList();
+    public static IReadOnlyList<Scenario> All => new Scenario[] { new SplitTwin(), new StockWatch(), new MoveItems(), new InventoryReadings(), new RefineryMoves(), new PistonStatus(), new ScriptLimit(), new ForcedDoor(), new OldAirlock(), new KeptCount(), new MoveAmounts(), new StatusPages(), new DockUnlocks() }.Concat(Local()).ToList();
 
     /// <summary>Every scenario kept in the Local folder of this machine, which git leaves out, newly made.</summary>
     static IEnumerable<Scenario> Local()

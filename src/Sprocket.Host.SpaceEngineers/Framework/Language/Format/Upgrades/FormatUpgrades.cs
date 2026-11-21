@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
 
         // The first and last draft of each version that a build wrote and this one reads, by version from 1.
         static readonly int[] FirstDrafts = { Oldest, 1 };
-        static readonly int[] LastDrafts = { 28, 2 };
+        static readonly int[] LastDrafts = { 28, 3 };
 
         // Each version's changes, in the order they arrived; immutable tables, read by every load. Version 1's are the
         // permanent upgrade into version 2.
