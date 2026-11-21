@@ -16,11 +16,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
         public const int Oldest = 14;
 
         // The first and last draft of each version that a build wrote and this one reads, by version from 1.
-        static readonly int[] FirstDrafts = { Oldest, 1 };
-        static readonly int[] LastDrafts = { 28, 4 };
+        static readonly int[] FirstDrafts = { Oldest, 1, 1 };
+        static readonly int[] LastDrafts = { 28, 3, 1 };
 
         // Each version's changes, in the order they arrived; immutable tables, read by every load. Version 1's are the
-        // permanent upgrade into version 2.
+        // permanent upgrade into version 2, and version 2's into version 3.
         static readonly FormatChange[][] Versions =
         {
             new FormatChange[]
@@ -43,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
                 new GetFunctions(),
                 new TextIds(),
             },
+            new FormatChange[0],
         };
 
         /// <summary>Whether a program written for <paramref name="draft" /> of version <paramref name="version" /> is upgraded rather than refused.</summary>

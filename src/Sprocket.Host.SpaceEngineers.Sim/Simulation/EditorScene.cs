@@ -182,10 +182,13 @@ namespace Sprocket.Sim.Simulation
         /// <summary>What the player has chosen, which the editor keeps here where the game keeps it in a file.</summary>
         public PlayerSettings Player => _player;
 
-        /// <summary>Opens the editor again for a player who has not been offered any callout, as one is after an update, with callouts offered where <paramref name="offered" /> says.</summary>
+        /// <summary>
+        /// Opens the editor again for a player who has been offered no callout since release 1.0, as one is after an update, so
+        /// every callout there is is due, with callouts offered where <paramref name="offered" /> says.
+        /// </summary>
         public void MeetCallouts(bool offered = true)
         {
-            _player = new PlayerSettings(true, callouts: offered);
+            _player = new PlayerSettings(true, new ModRelease(1, 0), callouts: offered);
             Reopen();
         }
 

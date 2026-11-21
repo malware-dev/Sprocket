@@ -10,7 +10,7 @@ namespace Sprocket.Tests;
 /// <summary>An abort step ends the sequence it is in, at once, saying why at its level; as a problem it also switches the installation off.</summary>
 public class AbortTests
 {
-    static readonly string Version = $"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}\n\n";
+    static readonly string Version = ScriptFormat.Line + "\n\n";
 
     const string Header = "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door\n{\n";
 

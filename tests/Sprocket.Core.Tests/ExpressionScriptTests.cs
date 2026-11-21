@@ -16,7 +16,7 @@ public class ExpressionScriptTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 2 alpha 4\n\n";
+    const string Version = "sprocket 3 alpha 1\n\n";
 
     const string Head = "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"
         + "    required slot pad expects InteriorLight\n"
@@ -244,17 +244,18 @@ public class ExpressionScriptTests
     public void AProgramOfTheDraftBeforeExpressionsIsUpgradedToTheCurrentOne()
     {
         var program = new Automation();
-        var text = Program("set Radius on [ pad ] to 4").Replace("sprocket 2 alpha 4", "sprocket 2 alpha 3");
+        var text = Program("set Radius on [ pad ] to 4").Replace("sprocket 3 alpha 1", "sprocket 2 alpha 3");
 
         Assert.Equal("", Load(text, program));
-        Assert.StartsWith("sprocket 2 alpha 4\n", ProgramWriter.Save(program, _store));
+        Assert.StartsWith("sprocket 3 alpha 1\n", ProgramWriter.Save(program, _store));
     }
 
-    /// <summary>The draft the build writes is the one with expressions, so an older build refuses what holds one.</summary>
+    /// <summary>The build writes the first draft of version 3, the one with expressions, so an older build refuses what holds one.</summary>
     [Fact]
     public void TheCurrentDraftIsTheOneWithExpressions()
     {
-        Assert.Equal(4, ScriptFormat.Draft);
+        Assert.Equal(3, ScriptFormat.Version);
+        Assert.Equal(1, ScriptFormat.Draft);
     }
 
     /// <summary>An attribute takes an expression as it takes a literal, and a program whose statement has one is written back as it was.</summary>

@@ -77,7 +77,7 @@ public class SlotTypeTests
         screen.Run(5);
         Assert.Contains(editor.Texts.SlotAnySignal, Said(editor));
 
-        editor.Back();
+        editor.Asked().Finish(true);
         screen.Run(5);
         part.IsSignal = false;
         part.Expects = "ButtonPanel";
@@ -85,7 +85,7 @@ public class SlotTypeTests
         screen.Run(5);
         Assert.Contains(editor.Texts.TypeButtonPanel, Said(editor));
 
-        editor.Back();
+        editor.Asked().Finish(true);
         screen.Run(5);
         part.Expects = "SomeModdedType";
         editor.OpenSlot(part.Id);
@@ -106,7 +106,7 @@ public class SlotTypeTests
     /// <summary>The kind of the block called <paramref name="name" />.</summary>
     static EntityKind Kind(Simulation sim, string name) => sim.Editor.World.Entities.First(entity => entity.Name == name).Kind;
 
-    /// <summary>Every word the screen showing says.</summary>
+    /// <summary>Every word the open panel says.</summary>
     static List<string> Said(SprocketEditor editor) =>
-        editor.Current.View!.Within().OfType<Label>().Where(label => label.IsVisible).Select(label => label.Text).ToList();
+        editor.Asked().Window.Within().OfType<Label>().Where(label => label.IsVisible).Select(label => label.Text).ToList();
 }

@@ -630,7 +630,7 @@
     <value>Lag en ny ![](mark:setting)&amp;nbsp;[innstilling](Term.Setting class=term), en verdi hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) gir for seg selv.</value>
   </data>
   <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
-    <value>Gi denne [innstillingen](Term.Setting class=term) et nytt navn, eller endre standardverdien.</value>
+    <value>Gi denne [innstillingen](Term.Setting class=term) et navn, si hva den er til, og endre standardverdien.</value>
   </data>
   <data name="Sprocket.Setting.ValueAbout" xml:space="preserve">
     <value>Velg verdien denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) gir [innstillingen](Term.Setting class=term), eller bruk standardverdien.</value>

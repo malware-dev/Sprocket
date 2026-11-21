@@ -22,12 +22,18 @@ namespace Sprocket.GameTests
 
         /// <summary>A grid at <paramref name="at" />, static where <paramref name="isStatic" /> holds, holding <paramref name="blocks" />, each at the cell its Min gives it.</summary>
         public BuiltGrid(Vector3D at, bool isStatic, params MyObjectBuilder_CubeBlock[] blocks)
+            : this(at, Vector3.Forward, Vector3.Up, isStatic, blocks)
+        {
+        }
+
+        /// <summary>A grid at <paramref name="at" /> turned to <paramref name="forward" /> and <paramref name="up" />, static where <paramref name="isStatic" /> holds, holding <paramref name="blocks" />, each at the cell its Min gives it.</summary>
+        public BuiltGrid(Vector3D at, Vector3 forward, Vector3 up, bool isStatic, params MyObjectBuilder_CubeBlock[] blocks)
         {
             var grid = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_CubeGrid>();
             grid.GridSizeEnum = MyCubeSize.Large;
             grid.IsStatic = isStatic;
             grid.PersistentFlags = MyPersistentEntityFlags2.InScene;
-            grid.PositionAndOrientation = new MyPositionAndOrientation(at, Vector3.Forward, Vector3.Up);
+            grid.PositionAndOrientation = new MyPositionAndOrientation(at, forward, up);
             grid.CubeBlocks.AddRange(blocks);
             Grid = (IMyCubeGrid)MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid);
             Grid.GetBlocks(_blocks);

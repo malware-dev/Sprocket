@@ -64,7 +64,7 @@
     <!-- Lumel's own content, from the package the mod compiles Lumel from. Only its folder is used here: the
          harness has Lumel's code through the mod's assembly. -->
     <ItemGroup>
-        <PackageReference Include="Mal.MdkModMixin.Lumel" Version="1.0.0-beta.5" GeneratePathProperty="true" ExcludeAssets="all" PrivateAssets="all" />
+        <PackageReference Include="Mal.MdkModMixin.Lumel" Version="1.0.0-beta.6" GeneratePathProperty="true" ExcludeAssets="all" PrivateAssets="all" />
     </ItemGroup>
     <PropertyGroup>
         <LumelContent>$(PkgMal_MdkModMixin_Lumel)\contentFiles\cs\any\Shared\Content\</LumelContent>

@@ -1,7 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
-using Sprocket.Host.SpaceEngineers.Features.Slots.Edits;
-using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Sim.Machine;
@@ -112,9 +110,9 @@ public class UndoTests
         Assert.Single(editor.Program.Sequences[0].Steps);
     }
 
-    /// <summary>A slot's page takes back what was written on it, and leaves the step on the sequence standing.</summary>
+    /// <summary>A slot's description is taken back on its logic system's screen, and leaves the step on the sequence standing.</summary>
     [Fact]
-    public void ASlotsPageTakesBackItsOwn()
+    public void ASlotsDescriptionIsTakenBackOnItsScreen()
     {
         var screen = Built();
         var editor = screen.Editor;
@@ -124,16 +122,26 @@ public class UndoTests
         screen.Run(2);
         system.Enabled = false;
         var slot = editor.SlotOf("Airlock Light");
-        editor.OpenSlot(slot);
+        editor.Invalidate();
         screen.Run(2);
         var part = system.FindPart(slot)!;
-        editor.Do(system, new AnnotatePart(part, "Over the inner door.", ChangeKind.DescribeSlot));
+        editor.PressTab(editor.Texts.SystemInstallationPanel);
         screen.Run(2);
+        editor.OpenSlot(slot);
+        screen.Run(2);
+        var panel = editor.Asked();
+        editor.Input.Focus(panel.About().Box);
+        screen.Do("type", "Over the inner door.").Run(1);
+        panel.Done();
+        screen.Run(2);
+        Assert.Equal("Over the inner door.", part.Annotation);
+        var said = $"before undo: {editor.Program.Sequences.Count} sequences, undo says '{editor.Screen.UndoText}', on {editor.Screen.Title()}";
 
         editor.Screen.Undo!.Execute();
         screen.Run(2);
 
         Assert.Equal("", part.Annotation);
+        Assert.True(editor.Program.Sequences.Count > 0, said + $"; after: {editor.Program.Sequences.Count}, on {editor.Screen.Title()}");
         Assert.Single(editor.Program.Sequences[0].Steps);
     }
 

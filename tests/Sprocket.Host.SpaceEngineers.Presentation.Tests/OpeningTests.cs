@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class OpeningTests
 {
     const string ARadiusStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press radius 1348 276 type 5 enter";
+        + "press step press task 200 485 press radius 1348 276 type 5 1394 72";
 
     /// <summary>A stage of the pick showing, counted from its first.</summary>
     static StageColumn Stage(Screen screen, int at)

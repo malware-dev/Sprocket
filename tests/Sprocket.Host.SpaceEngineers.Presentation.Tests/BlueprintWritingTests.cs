@@ -19,7 +19,7 @@ public class BlueprintWritingTests
         Assert.Equal("signal slot 1", Assert.Single(screen.Editor.SystemSlots()).Name);
     }
 
-    /// <summary>A slot renamed on its heading is renamed wherever its system names it, and one step back takes it back.</summary>
+    /// <summary>A slot renamed in its panel is renamed wherever its system names it, and one step back takes it back.</summary>
     [Fact]
     public void ASlotRenamedIsOneStepBack()
     {
@@ -29,7 +29,9 @@ public class BlueprintWritingTests
         var part = Assert.Single(system.Parts);
         var was = part.Id;
 
-        editor.Screen.Heading[0].Renames!("Call button");
+        var panel = editor.Asked();
+        panel.Form.Fields[0].Text = "Call button";
+        panel.Done();
         screen.Run(5);
         Assert.Equal("Call button", part.Id);
         Assert.NotNull(system.First!.FilledWith("Call button"));
@@ -37,29 +39,45 @@ public class BlueprintWritingTests
         editor.Screen.Undo!.Execute();
         screen.Run(5);
         Assert.Equal(was, part.Id);
-        Assert.Equal(was, editor.Slot().Title);
     }
 
-    /// <summary>A description typed into a slot's box is kept when the page is built again in the tick the box is left.</summary>
+    /// <summary>A description typed into a slot's panel is the slot's once the panel is done, and one step back takes it back.</summary>
     [Fact]
-    public void ADescriptionLeftAsThePageIsBuiltAgainIsKept()
+    public void ADescriptionTypedIsTheSlotsOnceThePanelIsDone()
     {
         var screen = OnTheSlot();
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
 
-        editor.Input.Focus(editor.Slot().About.Box);
+        var panel = editor.Asked();
+        editor.Input.Focus(panel.About().Box);
         screen.Do("type", "The button that cycles it.").Run(1);
-
-        editor.Input.Focus(null);
-        editor.Invalidate();
+        panel.Done();
         screen.Run(5);
-
         Assert.Equal("The button that cycles it.", part.Annotation);
-        Assert.Equal("The button that cycles it.", editor.Slot().About.Text);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(5);
+        Assert.Equal("", part.Annotation);
     }
 
-    /// <summary>A short name typed into a signal slot's box is the slot's once the box is left, and undo takes it back.</summary>
+    /// <summary>A description typed into a panel that is then put away is not the slot's.</summary>
+    [Fact]
+    public void APanelPutAwayKeepsNothingTypedInIt()
+    {
+        var screen = OnTheSlot();
+        var editor = screen.Editor;
+        var part = Assert.Single(editor.Program.Systems[0].Parts);
+
+        var panel = editor.Asked();
+        editor.Input.Focus(panel.About().Box);
+        screen.Do("type", "The button that cycles it.").Run(1);
+        panel.Finish(true);
+        screen.Run(5);
+        Assert.Equal("", part.Annotation);
+    }
+
+    /// <summary>A short name typed into a signal slot's panel is the slot's once the panel is done, and undo takes it back.</summary>
     [Fact]
     public void AShortNameTypedIsKeptAndUndone()
     {
@@ -67,40 +85,46 @@ public class BlueprintWritingTests
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
         Assert.True(part.IsSignal);
-        Assert.True(editor.Slot().Short.IsVisible);
 
-        editor.Input.Focus(editor.Slot().Short);
-        screen.Do("type", "Cycle").Run(1);
-        editor.Input.Focus(null);
+        var panel = editor.Asked();
+        Assert.Equal(2, panel.Form.Count);
+        panel.Form.Fields[1].Text = "Cycle";
+        panel.Done();
         screen.Run(5);
         Assert.Equal("Cycle", part.Short);
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
         Assert.Equal("", part.Short);
-        Assert.Equal("", editor.Slot().Short.Text);
     }
 
-    /// <summary>A slot's name is refused where a slot nothing uses has it, in any case, and both slots stay as they were.</summary>
+    /// <summary>A slot's name is refused where a slot nothing uses has it, in any case: the panel says why and stays, and both slots stay as they were.</summary>
     [Fact]
     public void ANameASlotNothingUsesHasIsRefused()
     {
-        var screen = OnTheSlot();
+        var screen = OnTheSystem();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         var part = Assert.Single(system.Parts);
         var spare = system.PartFor("Spare");
-
-        Assert.False(editor.Slot().AcceptsName("spare"));
-        editor.Screen.Heading[0].Renames!("Spare");
+        editor.Invalidate();
+        screen.Run(5);
+        editor.OpenSlot(part.Id);
         screen.Run(5);
 
+        var panel = editor.Asked();
+        panel.Form.Fields[0].Text = "spare";
+        panel.Done();
+        screen.Run(5);
+
+        Assert.True(panel.IsOpen);
+        Assert.Equal(editor.Texts.RenameTaken, panel.Why);
         Assert.Equal("signal slot 1", part.Id);
         Assert.Equal(new[] { part, spare }, system.Parts);
         Assert.Equal("Spare", spare.Id);
     }
 
-    /// <summary>A slot's name is refused where another slot in use has it, and the slot keeps the name it had.</summary>
+    /// <summary>A slot's name is refused where another slot in use has it, in any case, and the slot keeps the name it had.</summary>
     [Fact]
     public void ANameAnotherSlotHasIsRefused()
     {
@@ -117,29 +141,39 @@ public class BlueprintWritingTests
 
         editor.OpenSlot(part.Id);
         screen.Run(5);
-        Assert.False(editor.Slot().AcceptsName("Other"));
-        Assert.False(editor.Slot().AcceptsName("OTHER"));
-
-        editor.Screen.Heading[0].Renames!("Other");
+        var panel = editor.Asked();
+        panel.Form.Fields[0].Text = "OTHER";
+        panel.Done();
         screen.Run(5);
+
+        Assert.True(panel.IsOpen);
+        Assert.Equal(editor.Texts.RenameTaken, panel.Why);
         Assert.Equal("signal slot 1", part.Id);
     }
 
-    /// <summary>A slot's name is refused where another slot has it in any case; the slot's own name in another case, and a state's or a type's, are not.</summary>
+    /// <summary>A slot may take a state's or a type's name, and its own in another case.</summary>
     [Fact]
     public void ASlotMayShareAStatesOrATypesName()
     {
         var screen = OnTheSlot();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
-        system.PartFor("Lamp");
+        var part = Assert.Single(system.Parts);
         system.States.Add(new Framework.Model.State("Cycling", "", Framework.Model.Literal.Of(false)));
         system.Types.Add(new Framework.Model.DeclaredType("Side"));
 
-        Assert.False(editor.Slot().AcceptsName("LAMP"));
-        Assert.True(editor.Slot().AcceptsName("cycling"));
-        Assert.True(editor.Slot().AcceptsName("SIDE"));
-        Assert.True(editor.Slot().AcceptsName("Slot 1"));
+        foreach (var name in new[] { "SIGNAL SLOT 1", "cycling", "SIDE" })
+        {
+            editor.OpenSlot(part.Id);
+            screen.Run(5);
+            var panel = editor.Asked();
+            panel.Form.Fields[0].Text = name;
+            panel.Done();
+            screen.Run(5);
+
+            Assert.False(panel.IsOpen, $"{name} was refused: {panel.Why}");
+            Assert.Equal(name, part.Id);
+        }
     }
 
     /// <summary>A slot's name left empty is refused, and the slot keeps the name it had.</summary>
@@ -150,10 +184,12 @@ public class BlueprintWritingTests
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
 
-        Assert.True(editor.Slot().NameRequired);
-        editor.Screen.Heading[0].Renames!("");
+        var panel = editor.Asked();
+        panel.Form.Fields[0].Text = "";
+        panel.Done();
         screen.Run(5);
 
+        Assert.True(panel.IsOpen);
         Assert.Equal("signal slot 1", part.Id);
     }
 
@@ -180,47 +216,6 @@ public class BlueprintWritingTests
         Assert.Equal(2, chips.Count);
         Assert.Equal("Airlock Button", chips[0].Text);
         Assert.Contains("button 1 is pressed", chips[1].Text);
-    }
-
-    /// <summary>A step back taken while a box holds the keyboard takes back what was typed in it, and nothing before it.</summary>
-    [Fact]
-    public void AStepBackWhileTypingTakesBackWhatWasTyped()
-    {
-        var screen = OnTheSlot();
-        var editor = screen.Editor;
-        var part = Assert.Single(editor.Program.Systems[0].Parts);
-
-        editor.Slot().Required.Command!.Execute();
-        screen.Run(5);
-
-        editor.Input.Focus(editor.Slot().About.Box);
-        screen.Do("type", "The button that cycles it.").Run(1);
-
-        editor.Screen.Undo!.Execute();
-        screen.Run(5);
-
-        Assert.Equal("", part.Annotation);
-        Assert.Equal("", editor.Slot().About.Text);
-        Assert.Null(editor.Input.Focused);
-        Assert.True(part.Optional);
-    }
-
-    /// <summary>Making a slot optional is a step back of its own; every slot starts required, a signal slot too.</summary>
-    [Fact]
-    public void MakingASlotOptionalIsOneStepBack()
-    {
-        var screen = OnTheSlot();
-        var editor = screen.Editor;
-        var part = Assert.Single(editor.Program.Systems[0].Parts);
-        Assert.False(part.Optional);
-
-        editor.Slot().Required.Command!.Execute();
-        screen.Run(5);
-        Assert.True(part.Optional);
-
-        editor.Screen.Undo!.Execute();
-        screen.Run(5);
-        Assert.False(part.Optional);
     }
 
     /// <summary>A blueprint's description is written on its logic system's installation panel, as one step back.</summary>
@@ -255,7 +250,7 @@ public class BlueprintWritingTests
 
         editor.OpenSlot("signal slot 1");
         screen.Run(5);
-        Guides(screen, editor.Slot().View);
+        Guides(screen, editor.Asked().Window);
     }
 
     /// <summary>The first paste says, under the box pasted into, where text from outside the game comes in, and later ones do not.</summary>
@@ -265,7 +260,7 @@ public class BlueprintWritingTests
         var screen = OnTheSlot();
         var editor = screen.Editor;
         editor.Input.Clipboard = new Framework.Storage.ClipboardFile(new Folder(), delegate { }, editor.Pasted);
-        var box = editor.Slot().About.Box;
+        var box = editor.Asked().About().Box;
 
         editor.Input.Focus(box);
         editor.Input.Key(VRage.Input.MyKeys.V, false, true);
@@ -327,7 +322,7 @@ public class BlueprintWritingTests
         return screen;
     }
 
-    /// <summary>The page of the button's slot of a logic system switched off so it can be written.</summary>
+    /// <summary>The panel of the button's slot of a logic system switched off so it can be written, open.</summary>
     static Screen OnTheSlot()
     {
         var screen = OnTheSystem();

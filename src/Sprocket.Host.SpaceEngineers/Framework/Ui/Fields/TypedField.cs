@@ -49,5 +49,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
         /// <inheritdoc />
         public Element Keyboard => _box;
+
+        /// <summary>What the empty box shows.</summary>
+        public string Hint
+        {
+            get { return _box.Hint; }
+            set { _box.Hint = value; }
+        }
+
+        /// <summary>How many characters may be typed, or zero for no limit.</summary>
+        public int Longest
+        {
+            get { return _box.MaxLength; }
+            set { _box.MaxLength = value; }
+        }
     }
 }

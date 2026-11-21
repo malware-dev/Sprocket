@@ -87,11 +87,8 @@ public class MarkTests
 
         editor.OpenSlot(editor.SlotOf("Airlock Outer Door"));
         screen.Run(5);
-        editor.Screen.Heading[0].Renames!("Aft Door");
-        screen.Run(5);
-        editor.Back();
-        screen.Run(5);
-        editor.PressChoice(editor.Texts.PickSaveThem);
+        editor.Asked().Form.Fields[0].Text = "Aft Door";
+        editor.Asked().Done();
         screen.Run(5);
 
         Assert.Equal(new[] { "signal slot 1", "Aft Door", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
@@ -102,7 +99,7 @@ public class MarkTests
         Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
     }
 
-    /// <summary>Going back from a slot's page after changing it asks whether to keep the changes, and discarding takes them all back.</summary>
+    /// <summary>A slot's panel put away saves nothing changed in it.</summary>
     [Fact]
     public void DiscardingASlotsChangesTakesThemBack()
     {
@@ -111,17 +108,14 @@ public class MarkTests
 
         editor.OpenSlot(editor.SlotOf("Airlock Outer Door"));
         screen.Run(5);
-        editor.Screen.Heading[0].Renames!("Aft Door");
-        screen.Run(5);
-        editor.Back();
-        screen.Run(5);
-        editor.PressChoice(editor.Texts.PickDiscardThem);
+        editor.Asked().Form.Fields[0].Text = "Aft Door";
+        editor.Asked().Finish(true);
         screen.Run(5);
 
         Assert.Equal(new[] { "signal slot 1", "block slot 1", "block slot 2" }, editor.SystemSlots().Select(row => row.Name));
     }
 
-    /// <summary>Done on a slot's page keeps its changes without asking.</summary>
+    /// <summary>Done in a slot's panel saves its changes without asking.</summary>
     [Fact]
     public void DoneSavesASlotsChanges()
     {
@@ -130,9 +124,8 @@ public class MarkTests
 
         editor.OpenSlot(editor.SlotOf("Airlock Outer Door"));
         screen.Run(5);
-        editor.Screen.Heading[0].Renames!("Aft Door");
-        screen.Run(5);
-        editor.PressPrimary();
+        editor.Asked().Form.Fields[0].Text = "Aft Door";
+        editor.Asked().Done();
         screen.Run(5);
 
         Assert.False(screen.Scene.IsQuestioning, "Done asked whether to keep the changes");

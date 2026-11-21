@@ -6,13 +6,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format
     public static class ScriptFormat
     {
         /// <summary>The version of the format this build writes, the number after <c>sprocket</c> on a script's first line.</summary>
-        public const int Version = 2;
+        public const int Version = 3;
 
         /// <summary>
         /// The draft of the format's version this build writes, the number after <c>alpha</c> on a script's first line, or
         /// <see cref="Finished" /> where it writes the finished version.
         /// </summary>
-        public const int Draft = 4;
+        public const int Draft = 1;
 
         /// <summary>The draft a finished version is read as: later than every draft of it, and written with no <c>alpha</c>.</summary>
         public const int Finished = int.MaxValue;

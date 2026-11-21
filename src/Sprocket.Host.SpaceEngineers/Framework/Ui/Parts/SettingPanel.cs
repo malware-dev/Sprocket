@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Writing;
 using System;
 using System.Collections.Generic;
 using Lumel;
@@ -38,6 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         readonly Action<Part, DeclaredType> _made;
 
         ValuesQuestion _question;
+        Composer _about;
         List<Field> _fields;
         string _type;
         string _editorName;
@@ -45,9 +47,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
         SettingPanel(SprocketEditor editor, AutomationSystem system, Part part, bool free, string kind, Action<Part, DeclaredType> made)
         {
+            _part = part;
             _editor = editor;
             _system = system;
-            _part = part;
             _free = free;
             Choose(kind);
             _made = made;
@@ -98,11 +100,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return panel.Open(mark, start, closed);
         }
 
-        /// <summary>A panel opened on <paramref name="part" />, a setting of <paramref name="system" />, asking its name and its default.</summary>
+        /// <summary>A panel opened on <paramref name="part" />, a setting of <paramref name="system" />, asking its name, what it is for and its default.</summary>
         public static ValuesQuestion Edit(SprocketEditor editor, AutomationSystem system, Part part, Func<Element> mark, Action closed)
         {
             var panel = new SettingPanel(editor, system, part, false, KindOf(part), null);
-            return panel.Open(mark, part.HasDefault ? Shown(part.Setting, part.Default) : default(Literal), closed);
+            var start = part.HasDefault ? Shown(part.Setting, part.Default) : Initial(system, null, part.Setting, SettingEditor.Find(part.Editor));
+            return panel.Open(mark, start, closed);
         }
 
         /// <summary>What <paramref name="part" />, a setting, holds as the list of what a setting holds names it: its editor where this build has it, its type otherwise.</summary>
@@ -121,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var type = part.Setting;
             Literal now;
             if (!instance.Gives(part.Id, out now))
-                now = Initial(system, null, type);
+                now = Initial(system, null, type, SettingEditor.Find(part.Editor));
 
             var field = DefaultField(texts, system, null, type, SettingEditor.Find(part.Editor), texts.SettingValue, false);
             var fields = new[] { field };
@@ -147,26 +150,39 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var name = Field.Called(texts.SettingName);
             name.Entry = FieldInput.Text;
             name.Needed = true;
+            name.Refusing = said => Clashes(said) ? texts.RenameTaken : "";
 
             _fields = Fields(name);
             var given = new[]
             {
                 Literal.Of(_part != null ? _part.Id : _system.Free(texts.SettingNumbered)),
                 Literal.Name(Word(Kind)),
-                _part != null || !_free ? start : Initial(_system, _typeMade, _type)
+                Opening(start)
             };
 
+            _about = PartAbout.Composer(_editor, texts.SettingAboutHint, _part != null ? _part.Annotation : "");
             var fields = _fields;
             _question = new ValuesQuestion(_editor, null, fields, given, mark, (said, cancelled) =>
             {
                 closed();
                 if (!cancelled)
                     Done(said);
-            });
+            }, form => form.After(0, texts.SlotPurpose, _about));
             _question.Form.Edited += Chosen;
             Decorate();
             _question.Hang();
             return _question;
+        }
+
+        /// <summary>
+        /// What the default opens on: <paramref name="start" /> where what the setting holds is decided and it gives a value of
+        /// that kind, and otherwise the value a setting of its kind starts at, so a slider opens on a value it can stand at.
+        /// </summary>
+        Literal Opening(Literal start)
+        {
+            var shaped = SettingEditor.Find(_editorName);
+            var numeric = start.Kind == ValueKind.Real || start.Kind == ValueKind.Integer;
+            return _free || shaped != null && !numeric ? Initial(_system, _typeMade, _type, shaped) : start;
         }
 
         /// <summary>The name, what the setting holds and the default, as fields.</summary>
@@ -242,7 +258,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 value.Base.Padding = new Thickness(0f, Pad, 0f, Pad);
 
             var texts = _editor.Texts;
-            var empty = _type != "flag" && _system.FindType(_type) == null && (_typeMade == null || _typeMade.Name != _type);
+            var empty = _type != "flag" && SettingEditor.Find(_editorName) == null && _system.FindType(_type) == null && (_typeMade == null || _typeMade.Name != _type);
             _question.Hint(empty ? texts.SettingDefaultHint : "", HintHeight);
         }
 
@@ -268,9 +284,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             Choose(kind);
             var name = form.Fields[0].Text;
             _fields = Fields(_fields[0]);
-            var filled = new List<string> { name, Word(Kind), Shown(_type, Initial(_system, _typeMade, _type)).Said };
+            var filled = new List<string> { name, Word(Kind), Shown(_type, Initial(_system, _typeMade, _type, SettingEditor.Find(_editorName))).Said };
             form.Show(_fields, filled, null, texts);
             Decorate();
+        }
+
+        /// <summary>Whether another slot or setting of the logic system has <paramref name="said" /> for its name, in any case.</summary>
+        bool Clashes(string said)
+        {
+            var other = _system.FindPartInAnyCase(NameRules.Clean(said));
+            return other != null && other != _part;
         }
 
         bool Taken(string name)
@@ -286,10 +309,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var name = values.Count > 0 ? values[0].Text.Trim() : "";
             var hasDefault = values.Count > 2 && (values[2].Kind != ValueKind.Text || values[2].Text.Trim().Length > 0);
             var value = hasDefault ? Held(_type, values[2]) : default(Literal);
+            var about = _about.Text ?? "";
 
             if (_part != null)
             {
-                Change(name, hasDefault, value);
+                Change(name, hasDefault, value, about);
                 return;
             }
 
@@ -299,15 +323,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 Editor = _editorName,
                 Optional = hasDefault,
                 HasDefault = hasDefault,
-                Default = value
+                Default = value,
+                Annotation = about
             };
             _made(part, _typeMade != null && _typeMade.Name == _type && _system.FindType(_type) == null ? _typeMade : null);
         }
 
-        /// <summary>Renames the setting opened, and changes its default, as one change.</summary>
-        void Change(string name, bool hasDefault, Literal value)
+        /// <summary>Renames the setting opened, and changes what it is for and its default, as one change.</summary>
+        void Change(string name, bool hasDefault, Literal value, string about)
         {
             SystemEdit edit = new SetSettingDefault(_part, hasDefault, value);
+            if (about != (_part.Annotation ?? ""))
+                edit = new WithMade(new AnnotatePart(_part, about, ChangeKind.DescribeSlot), edit);
+
             if (name.Length > 0 && name != _part.Id)
             {
                 var wanted = _system.FindPartInAnyCase(name) == _part ? name : _system.Free(name);
@@ -342,8 +370,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 return either;
             }
 
+            // A shaped value is set on a slider, which always stands at a value, so it always has one.
             var box = Field.Called(called);
-            if (mayBeEmpty)
+            if (mayBeEmpty && shaped == null)
                 box.Default = "";
             else
                 box.Needed = true;
@@ -358,9 +387,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return box;
         }
 
-        /// <summary>The value a setting holding <paramref name="type" /> starts at in a panel that has none to show: off, the first choice, or nothing.</summary>
-        static Literal Initial(AutomationSystem system, DeclaredType made, string type)
+        /// <summary>The value a setting holding <paramref name="type" />, shaped by <paramref name="shaped" /> where it is not null, starts at in a panel that has none to show: off, the first choice, the least a shaped value may be, or nothing.</summary>
+        static Literal Initial(AutomationSystem system, DeclaredType made, string type, SettingEditor shaped)
         {
+            if (shaped != null)
+                return Literal.Of(double.Parse(shaped.Least, System.Globalization.CultureInfo.InvariantCulture));
+
             if (type == "flag")
                 return Literal.Of(false);
 

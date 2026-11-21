@@ -13,13 +13,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Versioning
         public const int Major = 1;
 
         /// <summary>The minor version.</summary>
-        public const int Minor = 1;
+        public const int Minor = 2;
 
         /// <summary>The patch.</summary>
         public const int Patch = 0;
 
         /// <summary>The Bleeding Edge build of this version, from 1; 0 for a stable release.</summary>
-        public const int Beta = 3;
+        public const int Beta = 1;
 
         /// <summary>Whether this build is a Bleeding Edge build rather than a stable release.</summary>
         /// <remarks>Read only, not const, so the text is built the same way whichever this build is.</remarks>

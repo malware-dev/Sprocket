@@ -24,3 +24,4 @@ sequence      press "+ logic system" type Airlock enter press Sequences press "+
 picker        press "+ logic system" type Airlock enter press Sequences press "+ sequence" press "+ step" press task type Standby press "Standby Battery" press "Terminal ›" press "Charge Mode"
 library       press Library
 guide         press "+ logic system" type Airlock enter press "Installation panel" press Markup
+setting       press "+ logic system" type Airlock enter press "Installation panel" press "+ slot" press "a setting" enter tick 5 press Setting tick 5

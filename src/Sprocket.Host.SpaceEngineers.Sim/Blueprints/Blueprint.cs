@@ -158,8 +158,11 @@ public static class Blueprint
 
         block.Add(new XElement("CustomName", fitting.Name));
 
+        // A block that pastes only with a toolbar has one written always; any other block, a cockpit say, where its slots hold anything.
         if (Toolbared(definition.Type))
-            block.Add(Toolbar(fitting.Toolbar));
+            block.Add(Toolbar(fitting.Toolbar, "ButtonPanel"));
+        else if (Holds(fitting.Toolbar))
+            block.Add(Toolbar(fitting.Toolbar, "Ship"));
 
         // Charged full, so the construct has power the moment it is pasted.
         if (definition.Stored != null)
@@ -260,8 +263,21 @@ public static class Blueprint
                 new XElement("Storage", items)));
     }
 
-    // Written even when empty: the paste needs the element.
-    static XElement Toolbar(Toolbar toolbar)
+    /// <summary>Whether any slot of <paramref name="toolbar" /> holds an item.</summary>
+    static bool Holds(Toolbar toolbar)
+    {
+        for (var index = 0; toolbar != null && index < toolbar.ItemCount; index++)
+        {
+            if (toolbar.TryGetItem(index, out _))
+                return true;
+        }
+
+        return false;
+    }
+
+    // Written even when empty where the block needs it: the paste needs the element. <paramref name="kind" /> is the game's
+    // name for the toolbar: a button panel's, or a cockpit's that steers a ship.
+    static XElement Toolbar(Toolbar toolbar, string kind)
     {
         var slots = new XElement("Slots");
         var parameters = new List<TerminalActionParameter>();
@@ -290,7 +306,7 @@ public static class Blueprint
         }
 
         return new XElement("Toolbar",
-            new XElement("ToolbarType", "ButtonPanel"),
+            new XElement("ToolbarType", kind),
             new XElement("SelectedSlot", new XAttribute(Xsi + "nil", true)),
             slots,
             new XElement("SlotsGamepad"));

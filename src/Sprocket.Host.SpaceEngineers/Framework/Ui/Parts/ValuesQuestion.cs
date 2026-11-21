@@ -38,10 +38,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>
         /// A panel asking for <paramref name="fields" />, opening on <paramref name="given" />, hung from what
         /// <paramref name="part" /> finds, and <paramref name="answered" /> with the values it closes on, written as a line of
-        /// values, and whether it was put away.
+        /// values, and whether it was put away; <paramref name="arranged" />, where given, places elements among the values before
+        /// they are shown.
         /// </summary>
         public ValuesQuestion(SprocketEditor editor, AutomationSystem system, IList<Field> fields, IList<Literal> given, Func<Element> part,
-            Action<string, bool> answered)
+            Action<string, bool> answered, Action<FieldSet> arranged = null)
         {
             _editor = editor;
             _system = system;
@@ -54,6 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (system != null && system.IsBlueprint)
                 _form.Sourced = field => SettingTypes.Of(field) != null;
 
+            arranged?.Invoke(_form);
             _form.Show(fields, filled, Offered(editor, fields), texts);
             Given(fields, given);
             _form.Sourcing += Source;

@@ -1,4 +1,5 @@
 # Sprocket Script Language Specification
+Version 3
 
 Sprocket is an imperative, event-driven domain-specific language designed for programming automated systems on constructs within host environments. Programs are written and read by the host's editor first: they carry what it needs to find everything again, such as GUIDs and entity ids. They are also kept plain text, so a person can read one and repair it by hand when that is needed.
 
@@ -197,7 +198,7 @@ The first statement of every program must declare the language format version:
 sprocket <format> [alpha <draft>]
 ```
 
-* `<format>`: Major format integer (currently `1`). Increments only when a change would break existing programs outright.
+* `<format>`: Major format integer. Increments only when a change would break existing programs outright.
 * `alpha <draft>`: Indicates an unfinished development format (e.g., `sprocket 1 alpha 18`). The draft goes up for every change to the language: a change that makes an existing program read differently or not at all, and every addition, so that a build refuses a program from a draft it does not know rather than misread it.
 * **Precedence:** A finalized format omitting `alpha` is strictly higher and later than all of its drafts:
   ```

@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Features.Slots;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -69,36 +70,39 @@ public class SlotTypeChoiceTests
         Assert.Equal(was, part.Expects);
     }
 
-    /// <summary>While its logic system may run, a slot's type is shown and cannot be pressed, its note saying why.</summary>
+    /// <summary>While its logic system may run, a slot's name opens nothing, so its type cannot be changed, and its note says why.</summary>
     [Fact]
     public void TheTypeWaitsForTheSwitch()
     {
-        var screen = OnTheDoorsSlot(out var system, out _);
+        var screen = OnTheDoorsSlot(out var system, out var part);
+        screen.Editor.Asked().Finish(true);
         system.Enabled = true;
         screen.Editor.Program.Edited();
         screen.Editor.Invalidate();
         screen.Run(2);
 
-        var expects = screen.Editor.Slot().Expects;
-        Assert.True(expects.IsVisible);
-        Assert.Null(expects.Command);
-        Assert.Equal(Lumel.Text.Template.Fill(screen.Editor.Texts.SystemLocked, "name", system.Name), expects.Tip!.Text);
+        var row = screen.Editor.SystemSlots().Single(one => one.Name == part.Id);
+        Assert.Null(row.Opens);
+        Assert.False(string.IsNullOrEmpty(row.OpensAbout));
+        Assert.NotEqual(screen.Editor.Texts.Codex.SlotOpenAbout, row.OpensAbout);
     }
 
-    /// <summary>A signal slot takes no type of block, so its page offers none to choose.</summary>
+    /// <summary>A signal slot takes no type of block, so its panel says it takes any signal and offers no type to choose.</summary>
     [Fact]
     public void ASignalSlotHasNoTypeToChoose()
     {
         var screen = OnTheDoorsSlot(out var system, out _);
-        screen.Editor.BackSaving();
+        screen.Editor.Asked().Finish(true);
         screen.Run(2);
         screen.Editor.OpenSlot(((SignalTrigger)system.Triggers[0]).Part);
         screen.Run(2);
 
-        Assert.False(screen.Editor.Slot().Expects.IsVisible);
+        var panel = screen.Editor.Asked();
+        Assert.Empty(Target.Within(panel.Window).OfType<SlotChip>());
+        Assert.Contains(Target.Within(panel.Window).OfType<Lumel.Text.Label>(), label => label.Text == screen.Editor.Texts.SlotAnySignal);
     }
 
-    /// <summary>The page of the slot of a step opening the inner door, its logic system switched off so it can be written.</summary>
+    /// <summary>The panel of the slot of a step opening the inner door, open, its logic system switched off so it can be written.</summary>
     static Screen OnTheDoorsSlot(out AutomationSystem system, out Part part)
     {
         var screen = Screen.On(Rig.Demo());
@@ -148,10 +152,10 @@ public class SlotTypeChoiceTests
         Assert.DoesNotContain(blocks.Kinds(), row => row.Text == editor.Texts.PickAnything);
     }
 
-    /// <summary>Presses the slot's type on its page, opening the picker of types.</summary>
+    /// <summary>Presses the slot's type in its panel, opening the picker of types.</summary>
     static SlotTypePage Open(Screen screen)
     {
-        screen.Editor.Slot().Expects.Command!.Execute();
+        Target.Within(screen.Editor.Asked().Window).OfType<SlotChip>().Single().Command!.Execute();
         screen.Run(2);
         return Assert.IsType<SlotTypePage>(screen.Editor.Current);
     }

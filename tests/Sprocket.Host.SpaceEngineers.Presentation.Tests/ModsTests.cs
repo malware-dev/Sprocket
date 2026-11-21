@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>An if, or an otherwise if, that checks whether a mod is installed is made and changed from the selector's Mods source.</summary>
 public class ModsTests : IDisposable
 {
-    static readonly string Head = $"sprocket {ScriptFormat.Version} alpha {ScriptFormat.Draft}\n\n"
+    static readonly string Head = ScriptFormat.Line + "\n\n"
         + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n";
 
     const string Empty = "    sequence 1 {\n    }\n}\n";

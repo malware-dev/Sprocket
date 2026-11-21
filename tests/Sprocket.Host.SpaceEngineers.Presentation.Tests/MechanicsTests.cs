@@ -37,6 +37,37 @@ public class MechanicsTests
         Assert.True(entries.IndexOf("retract") < entries.IndexOf("move to"), "the piston's members are sorted by their words");
     }
 
+    /// <summary>Enter in each of a task's values moves the keyboard on to the next, and in the last too it leaves the picker open: Enter says a value is given, not that the pick is done.</summary>
+    [Fact]
+    public void EnterMovesOnThroughATasksValues()
+    {
+        var rig = Rig.Demo();
+        rig.Piston(30, "Piston");
+        var screen = Screen.On(rig);
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.PressAdd("task");
+        screen.Run(2);
+        screen.Editor.PressBlock("Piston");
+        screen.Run(2);
+        screen.Editor.PressChoice("move to");
+        screen.Run(2);
+
+        var form = screen.Editor.Pick().Arguments!.Form;
+        Assert.True(form.Count >= 2, $"move to asks {form.Count} values");
+        screen.Editor.Input.Focus(form.Fields[0].Keyboard);
+        screen.Do("type", "3").Do("enter").Run(2);
+
+        Assert.IsType<Features.Selector.PickPage>(screen.Editor.Current);
+        Assert.Same(form.Fields[1].Keyboard, screen.Editor.Input.Focused);
+
+        screen.Do("type", "2").Do("enter").Run(2);
+        Assert.Same(form.Fields[2].Keyboard, screen.Editor.Input.Focused);
+
+        screen.Do("enter").Run(2);
+        Assert.IsType<Features.Selector.PickPage>(screen.Editor.Current);
+    }
+
     /// <summary>What the picker offers for <paramref name="block" /> under the step <paramref name="step" />, by its words.</summary>
     static List<string> Picked(string block, string step)
     {

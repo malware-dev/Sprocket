@@ -33,6 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots.Edits
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)
         {
+            Touch(screens, system);
             Touch(screens, _part);
         }
 

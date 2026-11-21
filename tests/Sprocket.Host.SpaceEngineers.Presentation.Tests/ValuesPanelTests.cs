@@ -187,7 +187,7 @@ public class ValuesPanelTests
         var sim = Simulation.Fresh();
         sim.Machine.Piston(50, "Arm Piston");
         sim.Tick();
-        const string program = "sprocket 2 alpha 4\n\n"
+        const string program = "sprocket 3 alpha 1\n\n"
             + "let 'Arm Piston' = block 'ExtendedPistonBase/LargePistonBase' [ 50, [ (50 0 0) ], \"Arm Piston\" ]\n\n"
             + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Arm\n{\n"
             + "    required slot arm expects ExtendedPistonBase\n"
@@ -265,7 +265,7 @@ public class ValuesPanelTests
     public void AStateIsSetToASettingOfItsType()
     {
         var sim = Simulation.Fresh();
-        const string program = "sprocket 2 alpha 4\n\n"
+        const string program = "sprocket 3 alpha 1\n\n"
             + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Hatch\n{\n"
             + "    optional slot Home expects side = outside\n"
             + "    optional slot Glow expects real = 1.5\n\n"

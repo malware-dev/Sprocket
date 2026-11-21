@@ -9,6 +9,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>The callouts that point out what a release brought: where they hang, how they are dismissed, and what the player's file keeps of them.</summary>
 public class CalloutTests
 {
+    /// <summary>The release whose callouts the player met last, before every callout there is.</summary>
+    static readonly ModRelease Before = new ModRelease(1, 0);
+
     /// <summary>A screen shown to a player who has not been offered any callout, on the page the script ends on.</summary>
     static Screen Meeting(params string[] script)
     {
@@ -42,7 +45,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
 
         Assert.Null(screen.Editor.Callouts.Shown);
         Assert.False(screen.Shows(screen.Editor.Texts.CalloutShare), screen.Dump);
-        Assert.Null(screen.Player().Seen);
+        Assert.Equal(Before, screen.Player().Seen);
         Assert.Empty(screen.Player().Dismissed);
     }
 
@@ -152,7 +155,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
     public void WhatIsDismissedIsSaved()
     {
         var screen = Meeting(LogicSystem);
-        Assert.Null(screen.Player().Seen);
+        Assert.Equal(Before, screen.Player().Seen);
         Assert.False(screen.Player().HasDismissed("share"));
 
         PressBubble(screen).Run(2);
@@ -160,13 +163,13 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         var file = new MyIni();
         screen.Player().Write(file);
         var text = file.ToString();
-        Assert.DoesNotContain("seen=", text);
+        Assert.DoesNotContain("seen=" + ModVersion.Release, text);
         Assert.Contains("dismissed=share", text);
 
         var read = new MyIni();
         Assert.True(read.TryParse(text));
         var back = PlayerSettings.From(read);
-        Assert.Null(back.Seen);
+        Assert.Equal(Before, back.Seen);
         Assert.True(back.HasDismissed("share"));
         Assert.False(back.HasDismissed("import"));
     }
@@ -180,7 +183,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
 
         // The first session meets the share callout only.
         PressBubble(screen).Run(2);
-        Assert.Null(screen.Player().Seen);
+        Assert.Equal(Before, screen.Player().Seen);
 
         // The next one still has the import and settings callouts due, and shows import at the library.
         screen.Do("escape").Run(2);
@@ -192,7 +195,7 @@ static string[] LogicSystem => new[] { "press", "+ logic system", "type", "Airlo
         Assert.Equal("import", screen.Editor.Callouts.Shown?.Id);
         PressBubble(screen).Run(2);
         Assert.True(screen.Player().HasDismissed("import"));
-        Assert.Null(screen.Player().Seen);
+        Assert.Equal(Before, screen.Player().Seen);
 
         // The last one is met in the installation panel, and the release is then seen.
         screen.Do("escape").Run(2);

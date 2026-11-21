@@ -21,7 +21,7 @@ using VRage.Input;
 namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 {
     /// <summary>The values something takes, one line each: what the value is, and where it is given.</summary>
-    public class FieldSet : Form
+    public partial class FieldSet : Form
     {
         // Past this many a list gets a row of its own, since its longest names need the room.
         const int Long = 20;
@@ -37,6 +37,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         readonly List<string> _settings = new List<string>();
         readonly List<string> _held = new List<string>();
         readonly List<Element> _rows = new List<Element>();
+        readonly List<Extra> _extras = new List<Extra>();
+        InputRoot _input;
         readonly List<SettingChip> _chips = new List<SettingChip>();
         readonly List<Glyph> _marks = new List<Glyph>();
         readonly RelayCommand _submit;
@@ -52,13 +54,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             Base.ColumnSpacing = 8f;
             Base.RowSpacing = 8f;
 
-            _submit = new RelayCommand(delegate
-            {
-                var submitted = Submitted;
-                if (submitted != null)
-                    submitted();
-            });
+            _submit = new RelayCommand(() => Submitted?.Invoke());
         }
+
+        /// <summary>Whether Enter in the last value finishes the form; where not, Enter only moves on, for values given among other choices still to make.</summary>
+        public bool FinishesOnEnter { get; set; } = true;
 
         /// <summary>Raised when somebody has changed any of the values.</summary>
         public event Action Edited;
@@ -285,6 +285,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             return values;
         }
 
+        /// <summary>
+        /// Shows <paramref name="element" /> under <paramref name="label" /> after the value at <paramref name="at" />, each time the values
+        /// are shown; it is not one of the values, and gives none.
+        /// </summary>
+        public void After(int at, string label, Element element)
+        {
+            _extras.Add(new Extra(at, label, element));
+        }
+
         /// <summary>Asks for <paramref name="fields" />, one line each, holding <paramref name="filled" /> or what each says is usual, its notes in <paramref name="texts" />.</summary>
         /// <remarks>
         /// Makes every field again, so it is for calling only when what the values are for changes; <paramref name="colors" /> are
@@ -325,6 +334,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 field.Edited += Changed;
 
                 Lay(i, field);
+                LayExtras(i);
             }
 
             Follow();
@@ -384,13 +394,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             _offered = true;
         }
 
-        /// <summary>Finishes the form on Enter, while it or a part of it that does not take Enter holds the keyboard, and no list of it is open.</summary>
+        /// <summary>Moves on to the next value on Enter, or finishes the form from the last, while it or a part of it that does not take Enter holds the keyboard, and no list of it is open.</summary>
         protected override bool OnKeyDown(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (key != MyKeys.Enter || IsListOpen())
                 return false;
 
-            _submit.Execute();
+            _input = input;
+            Enter();
             return true;
         }
 
@@ -420,6 +431,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>Gives the keyboard to the first value still to be given, or the first that is wrong, where it is typed into.</summary>
         public void Take(InputRoot input)
         {
+            _input = input;
             if (_fields.Count == 0)
                 return;
 
@@ -435,16 +447,62 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             }
 
             _seen[first] = true;
+            Give(first);
+        }
 
-            var keyboard = _fields[first].Keyboard;
-            if (input == null || keyboard == null)
+        /// <summary>Gives the keyboard to the field of the value at <paramref name="at" />, its text chosen where it is typed into.</summary>
+        void Give(int at)
+        {
+            var keyboard = _fields[at].Keyboard;
+            if (_input == null || keyboard == null)
                 return;
 
-            input.Focus(keyboard);
+            _input.Focus(keyboard);
 
             var box = keyboard as TextBox;
             if (box != null)
                 box.SelectAll();
+        }
+
+        /// <summary>Moves the keyboard on to the next value asked for after the one holding it, and from the last finishes the form where it <see cref="FinishesOnEnter" />.</summary>
+        void Enter()
+        {
+            var at = Holding();
+            for (var next = at + 1; at >= 0 && next < _fields.Count; next++)
+            {
+                if (!Asked(next) || _wanted[next].Fixed || _settings[next].Length > 0 || !Takes(next))
+                    continue;
+
+                _seen[next] = true;
+                Give(next);
+                return;
+            }
+
+            if (FinishesOnEnter)
+                Submitted?.Invoke();
+        }
+
+        /// <summary>Whether the field of the value at <paramref name="at" /> is shown and can take the keyboard.</summary>
+        bool Takes(int at)
+        {
+            var keyboard = _fields[at].Keyboard;
+            return keyboard != null && keyboard.Focusable && keyboard.IsEnabled && _rows[at].IsVisible;
+        }
+
+        /// <summary>The value whose field holds the keyboard, or -1 where none does.</summary>
+        int Holding()
+        {
+            var focused = _input?.Focused;
+            for (var i = 0; focused != null && i < _fields.Count; i++)
+            {
+                for (var at = focused; at != null; at = at.Parent)
+                {
+                    if (at == _fields[i].Keyboard || at == (Element)_fields[i])
+                        return i;
+                }
+            }
+
+            return -1;
         }
 
         /// <summary>What each value holds, as its field spells it, by the value it is: see <see cref="Key" />.</summary>
@@ -486,10 +544,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 return new ColorField(colors, texts);
 
             if (field.Edits == FieldEditor.Angle)
-                return new AngleField(field.Least, field.Most, _submit);
+                return new AngleField(field.Least, field.Most, null);
 
             if (field.Edits == FieldEditor.Duration)
-                return new DurationField(texts, _submit);
+                return new DurationField(texts, null);
 
             if (field.Edits == FieldEditor.Lines)
             {
@@ -525,15 +583,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 return new ListField(words);
 
             if (SliderField.Takes(field))
-                return new SliderField(field, _submit);
+                return new SliderField(field, null);
 
-            return NumberField.Takes(field) ? (IField)new NumberField(field, _submit) : new TypedField(_submit);
+            return NumberField.Takes(field) ? (IField)new NumberField(field, null) : new TypedField(null) { Longest = field.Longest, Hint = field.Hint };
         }
 
         /// <summary>Puts a value's label and field in a row: a color alone across the whole width, text under its label, anything else beside it where it fits.</summary>
         bool IsLong(int at, IField field)
         {
             return field is ListField && (_wanted[at].Searched || _wanted[at].Words.Count > Long);
+        }
+
+        /// <summary>Lays out each element <see cref="After" /> shows after the value at <paramref name="at" />.</summary>
+        void LayExtras(int at)
+        {
+            foreach (var extra in _extras)
+            {
+                if (extra.At == at)
+                    Rows.Add(new Label { Style = Styles.ValueLabel, Text = extra.Label }, extra.Element, FormLabelPlacement.Above);
+            }
         }
 
         void Lay(int at, IField field)

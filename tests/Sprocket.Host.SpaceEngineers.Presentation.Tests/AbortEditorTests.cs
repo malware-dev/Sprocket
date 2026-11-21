@@ -97,7 +97,7 @@ public class AbortEditorTests
     public void AnAbortsMarkChoosesASettingToSayItsMessage()
     {
         var sim = Simulation.Fresh();
-        const string program = "sprocket 2 alpha 4\n\n"
+        const string program = "sprocket 3 alpha 1\n\n"
             + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Hatch\n{\n"
             + "    optional slot Why expects text = \"Door jammed\"\n"
             + "    optional slot Glow expects real = 1.5\n\n"
@@ -120,7 +120,7 @@ public class AbortEditorTests
         sim.Tick();
         var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
         Assert.Equal(4, answers.Length);
-        Assert.StartsWith("Why", answers[3]);
+        Assert.Equal("Why", answers[3]);
 
         sim.Editor.PressAnswer(answers[3]);
         sim.Tick();

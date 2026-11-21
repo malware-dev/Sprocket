@@ -86,24 +86,24 @@ public class SaveOrDiscardTests
         Assert.IsType<LogicSystemPage>(editor.Current);
     }
 
-    /// <summary>What was kept on a slot's page is not asked about again on the logic system's screen it was opened from.</summary>
+    /// <summary>A slot renamed in its panel is one of the changes of the logic system's screen it was opened on: going back asks about it, and saving the screen saves the new name.</summary>
     [Fact]
-    public void WhatASlotsPageSavedIsNotAskedAgain()
+    public void WhatASlotsPanelChangedIsAskedAboutWithTheScreen()
     {
         var screen = Panel();
         var editor = screen.Editor;
         editor.OpenSlot(editor.SlotOf("Airlock Outer Door"));
         screen.Run(5);
-        editor.Screen.Heading[0].Renames!("Aft Door");
-        screen.Run(5);
-        editor.BackSaving();
+        editor.Asked().Form.Fields[0].Text = "Aft Door";
+        editor.Asked().Done();
         screen.Run(5);
         Assert.IsType<LogicSystemPage>(editor.Current);
 
         editor.Back();
         screen.Run(2);
-
-        Assert.NotEqual(editor.Texts.PickSaveQuestion, editor.Question());
+        Assert.Equal(editor.Texts.PickSaveQuestion, editor.Question());
+        editor.PressChoice(editor.Texts.PickSaveThem);
+        screen.Run(2);
         Assert.NotNull(editor.Program.Systems[0].FindPart("Aft Door"));
     }
 

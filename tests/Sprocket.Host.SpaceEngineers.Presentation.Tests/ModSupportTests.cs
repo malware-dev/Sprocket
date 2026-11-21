@@ -260,6 +260,33 @@ public class ModSupportTests
         Assert.Equal(TimeSpan.FromSeconds(2), held);
     }
 
+    /// <summary>Enter in a length's box, as in every box of the selector, leaves the pick open rather than finishing it.</summary>
+    [Fact]
+    public void EnterInALengthsBoxLeavesThePickOpen()
+    {
+        var rig = Rig.Demo();
+        var light = rig.Light(40, "Glow Light");
+        var screen = Screen.On(rig);
+        var sim = screen.Scene.Ship;
+        Registered(sim.Kinds.Mods, true, api => api.Block(Type(light)).InGroup(SprocketGroup.Behavior)
+            .Action("hold", Option.Duration("for"), (_, _) => { }).Named("hold for", "Holds still for a while."));
+
+        screen.Editor.NewButtonSystem("Glow");
+        screen.Run(2);
+        screen.Editor.PressAdd("task");
+        screen.Run(2);
+        screen.Editor.PressBlock("Glow Light");
+        screen.Run(2);
+        screen.Editor.PressChoice("hold for");
+        screen.Run(2);
+
+        var field = Assert.IsType<DurationField>(screen.Editor.Pick().Arguments!.Form.Fields[0]);
+        screen.Editor.Input.Focus(field.Keyboard);
+        screen.Do("type", "2").Do("enter").Run(2);
+
+        Assert.IsType<Features.Selector.PickPage>(screen.Editor.Current);
+    }
+
     /// <summary>A value that is a length of time is set by a step in seconds or ticks, and given to the mod's setter as a TimeSpan.</summary>
     [Fact]
     public void ADurationValueIsSetAsATimeSpan()
