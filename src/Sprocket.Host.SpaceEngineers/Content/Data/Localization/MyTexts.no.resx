@@ -624,6 +624,9 @@
   <data name="Sprocket.Blueprint.AboutHint" xml:space="preserve">
     <value>Hva denne plassen er til.</value>
   </data>
+  <data name="Sprocket.Setting.AboutHint" xml:space="preserve">
+    <value>Hva denne innstillingen er til.</value>
+  </data>
 
   <data name="Sprocket.Writing.Preview" xml:space="preserve">
     <value>Forhåndsvis</value>

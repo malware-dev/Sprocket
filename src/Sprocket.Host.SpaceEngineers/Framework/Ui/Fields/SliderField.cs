@@ -52,12 +52,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <inheritdoc />
         public event Action Edited;
 
+        /// <remarks>A slider always stands at a value, so given none it shows the least, where it stands.</remarks>
         /// <inheritdoc />
         public string Text
         {
             get { return _number.Text; }
             set
             {
+                if (string.IsNullOrEmpty(value))
+                    value = _field.Unscaled(Spelled(_least));
+
                 _number.Text = value;
                 Place(_field.Scaled(value));
             }

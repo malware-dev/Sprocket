@@ -219,8 +219,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 row.Mark = MarkText.OfSlot(part);
                 row.FillsAbout = part.IsSetting ? texts.Codex.SettingValueAbout : null;
                 row.Described = part.Annotation;
-                row.Opens = _changes(CommandKind.OpenSlot, part.IsSetting ? (Action)(() => _asking = SettingPanel.Edit(_editor, _system, part, () => row.NameButton, () => _asking = null))
-                    : () => _editor.Push(new SlotPage(_editor, _system, part)));
+                row.Opens = _changes(CommandKind.OpenSlot, () => _asking = part.IsSetting
+                    ? SettingPanel.Edit(_editor, _system, part, () => row.NameButton, () => _asking = null)
+                    : SlotQuestion.Edit(_editor, _system, part, () => row.NameButton, () => _asking = null));
                 row.OpensAbout = editable ? part.IsSetting ? texts.Codex.SettingOpenAbout : texts.Codex.SlotOpenAbout : locked;
                 row.FillsLocked = locked;
                 row.Fills = _changes(CommandKind.FillPart, part.IsSetting ? (Action)(() => _asking = SettingPanel.Value(_editor, _system, shown, part, () => row.ValueChip))

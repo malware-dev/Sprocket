@@ -81,7 +81,7 @@ public class LeavingTests
         Assert.True(picker.Scene.IsFilling, "the caret did not go to the field");
 
         picker.Do("type", "5");
-        picker.Do("enter");
+        picker.Do("1394", "72");
         picker.Run(2);
 
         // The step the picker was making, holding the value the column asked for.

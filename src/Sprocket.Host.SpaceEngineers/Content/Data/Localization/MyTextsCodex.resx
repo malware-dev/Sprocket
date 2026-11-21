@@ -270,7 +270,7 @@
   </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Name this slot and say what it is for.</value>
-    <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's page, where it is named and described.</comment>
+    <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's panel, where it is named and described.</comment>
   </data>
   <data name="Sprocket.Library.NameAbout" xml:space="preserve">
     <value>This blueprint's name.</value>
@@ -833,8 +833,8 @@
     <comment>Tooltip on &quot;a setting&quot; in the menu of the &quot;+ slot&quot; button on a logic system's installation panel tab.</comment>
   </data>
   <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
-    <value>Rename this [setting](Term.Setting class=term) or change its default.</value>
-    <comment>Tooltip on a setting's name in the slots list on a logic system's installation panel tab, while the logic system can be changed. Pressing the name opens the panel where the setting is renamed and its default changed.</comment>
+    <value>Name this [setting](Term.Setting class=term), say what it is for, and change its default.</value>
+    <comment>Tooltip on a setting's name in the slots list on a logic system's installation panel tab, while the logic system can be changed. Pressing the name opens the setting's panel, as a slot's name opens the slot's: it is named and described there, and its default changed.</comment>
   </data>
   <data name="Sprocket.Setting.ValueAbout" xml:space="preserve">
     <value>Choose the value this [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) gives the [setting](Term.Setting class=term), or use its default.</value>
@@ -886,7 +886,7 @@
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
     <value>The kind of block that can fill this [slot](Term.Slot class=term). Press it to choose another.</value>
-    <comment>Tooltip on the type of block a block slot takes, under the Expects heading on the slot's page. Pressing it opens a picker listing the types the slot can take, wider or narrower, down to one kind of block; only those offering everything the slot's steps and triggers do with it.</comment>
+    <comment>Tooltip on the type of block a block slot takes, under the Expects label in the slot's panel. Pressing it opens a picker listing the types the slot can take, wider or narrower, down to one kind of block; only those offering everything the slot's steps and triggers do with it.</comment>
   </data>
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
     <value>Show the guide to writing rich text.</value>

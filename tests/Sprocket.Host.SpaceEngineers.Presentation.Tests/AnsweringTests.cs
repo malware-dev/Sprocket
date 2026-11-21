@@ -16,7 +16,7 @@ public class AnsweringTests
     /// <summary>A new system's sequence given a step, and back pressed on it, which asks whether to keep the step.</summary>
     const string LeavingASequence =
         "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step press task "
-        + "150 203 type Tug 200 360 press \"Terminal ›\" press \"Forward Direction\" 1316 209 1316 327 enter 25 62";
+        + "150 203 type Tug 200 360 press \"Terminal ›\" press \"Forward Direction\" 1316 209 1316 327 1394 72 25 62";
 
     /// <summary>Enter takes the answer the page named, which for keeping changes is keeping them.</summary>
     [Fact]

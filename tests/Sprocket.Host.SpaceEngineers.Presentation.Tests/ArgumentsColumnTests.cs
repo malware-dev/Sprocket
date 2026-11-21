@@ -170,7 +170,7 @@ public class ArgumentsColumnTests
     [InlineData("208 182 press color")]
     public void LeavingAsksAboutAnyChange(string change)
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 25 62");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 1394 72 " + change + " 25 62");
 
         Assert.True(screen.Scene.IsQuestioning, "leaving asked nothing");
         Assert.True(screen.Shows("Save your changes?"), "the question is not about changes");
@@ -180,7 +180,7 @@ public class ArgumentsColumnTests
     [Fact]
     public void LeavingAsksNothingWhereNothingChanged()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + Values + " escape");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 1394 72 " + Values + " escape");
 
         Assert.False(screen.Scene.IsQuestioning, "leaving asked about 5 shown as 5.0");
         Assert.Equal("Sequence 1", screen.Ended);

@@ -152,6 +152,124 @@ public class SettingRowTests
         Assert.Equal("Speed", system.States[0].Start.Text);
     }
 
+    /// <summary>A setting's panel takes what it is for, as a slot's does, written as the panel is done, as one step back.</summary>
+    [Fact]
+    public void ASettingIsDescribedInItsPanel()
+    {
+        var screen = Panel(Real("Speed", 1.5));
+        var editor = screen.Editor;
+        Row(screen, "Speed").Opens!.Execute();
+        screen.Run(2);
+        var asking = Page(screen).Asking!;
+
+        editor.Input.Focus(asking.About().Box);
+        screen.Do("type", "How fast the door moves.").Run(1);
+        asking.Done();
+        screen.Run(2);
+
+        var part = System(screen).FindPart("Speed")!;
+        Assert.Equal("How fast the door moves.", part.Annotation);
+        Assert.Equal(1.5, part.Default.Number);
+        editor.Undo(System(screen), System(screen));
+        screen.Run(2);
+        Assert.Equal("", part.Annotation);
+    }
+
+    /// <summary>A setting with no default opens on an empty default, not on a value of another kind.</summary>
+    [Fact]
+    public void ASettingWithNoDefaultOpensOnAnEmptyDefault()
+    {
+        var screen = Panel(Required("Speed"), new Part("Note") { Setting = "text" });
+        foreach (var name in new[] { "Speed", "Note" })
+        {
+            Row(screen, name).Opens!.Execute();
+            screen.Run(2);
+            var asking = Page(screen).Asking!;
+            Assert.Equal("", asking.Form.Fields[2].Text);
+            asking.Finish(true);
+            screen.Run(2);
+        }
+    }
+
+    /// <summary>Enter in the panel's name moves on to the next value and leaves the panel open; Enter in its last value makes the setting.</summary>
+    [Fact]
+    public void EnterMovesOnUntilTheLastValue()
+    {
+        var screen = Panel();
+        var made = Add(screen);
+        screen.Editor.Input.Focus(made.Form.Fields[0].Keyboard);
+
+        screen.Do("enter").Run(2);
+        Assert.True(made.IsOpen);
+        Assert.NotSame(made.Form.Fields[0].Keyboard, screen.Editor.Input.Focused);
+
+        for (var i = 0; i < 5 && made.IsOpen; i++)
+            screen.Do("enter").Run(2);
+
+        Assert.False(made.IsOpen);
+        Assert.Single(System(screen).Parts, one => one.IsSetting);
+    }
+
+    /// <summary>A setting made from the panel takes what it is for from the panel too.</summary>
+    [Fact]
+    public void ANewSettingIsDescribedAsItIsMade()
+    {
+        var screen = Panel();
+        var made = Add(screen);
+        screen.Editor.Input.Focus(made.About().Box);
+        screen.Do("type", "What the screen says.").Run(1);
+        made.Done();
+        screen.Run(2);
+
+        Assert.Equal("What the screen says.", System(screen).Parts.Single(one => one.IsSetting).Annotation);
+    }
+
+    /// <summary>A setting's name another slot or setting has, in any case, is refused: the panel says why and stays open.</summary>
+    [Fact]
+    public void ANameAnotherHasIsRefused()
+    {
+        var screen = Panel(Real("Speed", 1.5), Real("Pace", 2));
+        Row(screen, "Speed").Opens!.Execute();
+        screen.Run(2);
+        var asking = Page(screen).Asking!;
+        asking.Form.Fields[0].Text = "PACE";
+        asking.Done();
+        screen.Run(2);
+
+        Assert.True(asking.IsOpen);
+        Assert.Equal(screen.Editor.Texts.RenameTaken, asking.Why);
+        Assert.NotNull(System(screen).FindPart("Speed"));
+    }
+
+    /// <summary>A percentage is set on a slider, which always stands at a value, so a new one starts with a default and is never left without one.</summary>
+    [Fact]
+    public void APercentageAlwaysHasADefault()
+    {
+        var screen = Panel();
+        var made = Add(screen);
+        Choose(screen, made, screen.Editor.Texts.SettingKindPercent);
+        Assert.IsType<SliderField>(made.Form.Fields[2]);
+        Assert.Equal(0.0, double.Parse(made.Form.Fields[2].Text, global::System.Globalization.CultureInfo.InvariantCulture));
+        made.Done();
+        screen.Run(2);
+
+        var part = System(screen).Parts.Single(one => one.IsSetting);
+        Assert.True(part.HasDefault);
+        Assert.Equal(0.0, part.Default.Number);
+    }
+
+    /// <summary>A percentage made from a value's mark with nothing given there opens on the least it may be, as one made from the panel does.</summary>
+    [Fact]
+    public void APercentageMadeFromAnEmptyValueOpensOnItsLeast()
+    {
+        var screen = Panel();
+        var marked = SettingPanel.New(screen.Editor, System(screen), SettingEditor.Percent.Name, default(Literal), () => Page(screen).View, (_, _) => { }, () => { });
+        screen.Run(2);
+
+        Assert.Equal(0.0, double.Parse(marked.Form.Fields[2].Text, global::System.Globalization.CultureInfo.InvariantCulture));
+        marked.Finish(true);
+    }
+
     /// <summary>Emptying the default makes the setting one every installation must give, and one step back gives the default back.</summary>
     [Fact]
     public void EmptyingTheDefaultMakesTheSettingRequired()

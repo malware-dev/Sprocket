@@ -56,6 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>Whether the value has to be given: a field that stands for nothing when it is empty.</summary>
         public bool Needed;
 
+        /// <summary>Why a value given is refused for what else it would clash with, empty where it is not, or null for no such check.</summary>
+        public Func<string, string> Refusing;
+
         /// <summary>Whether <see cref="Least" /> is a bound the value must be above, rather than one it may be.</summary>
         public bool Above;
 
@@ -119,8 +122,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>What may be typed into the box.</summary>
         public FieldInput Entry;
 
-        /// <summary>How many characters text written over several lines may run to, or zero for no limit: what the block itself holds.</summary>
+        /// <summary>How many characters text may run to, typed in a box or written over several lines, or zero for no limit: what the block or the game itself holds.</summary>
         public int Longest;
+
+        /// <summary>What an empty box shows, or null for nothing.</summary>
+        public string Hint;
 
         /// <summary>
         /// How many of the values behind the form this one field stands for.
@@ -417,6 +423,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         {
             if (string.IsNullOrEmpty(said))
                 return Needed ? Template.Fill(texts.ValueNeeded, "name", SentenceText.Capitalised(called)) : "";
+
+            var clash = Refusing?.Invoke(said) ?? "";
+            if (clash.Length > 0)
+                return clash;
 
             // What it holds is names with commas between rather than one of its words.
             if (TakesSlots)

@@ -4,7 +4,6 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using System;
 using System.Collections.Generic;
 using Lumel;
-using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 {
@@ -39,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
                 var name = part.Id;
                 var said = Default(system, name);
-                editor.Answer(said.Length == 0 ? name : $"{name}, {Template.Fill(texts.ValueByDefault, "value", said)}", () => chosen(name, said), name == now);
+                editor.Answer(name, () => chosen(name, said), name == now);
             }
         }
 

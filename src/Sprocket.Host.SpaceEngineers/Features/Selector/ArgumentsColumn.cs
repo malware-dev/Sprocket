@@ -43,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 }
             }.As(out _head));
             Children.Add(new RichText { Style = Styles.MemberAbout, IsVisible = false }.As(out _about));
-            Children.Add(new FieldSet().As(out _form));
+            Children.Add(new FieldSet { FinishesOnEnter = false }.As(out _form));
             Children.Add(new Label { Style = Styles.Refusal, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _why));
 
             // The rest of the strip's height, so the column stands as tall as the stages beside it.

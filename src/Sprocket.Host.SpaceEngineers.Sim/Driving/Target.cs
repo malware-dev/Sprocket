@@ -17,6 +17,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Writing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,14 +63,16 @@ namespace Sprocket.Sim.Driving
             return page;
         }
 
-        /// <summary>The page of the slot the editor is on, its view made.</summary>
-        public static SlotPage Slot(this SprocketEditor editor)
+        /// <summary>The panel open on the logic system's page, a slot's or a setting's, hung from its row.</summary>
+        public static ValuesQuestion Asked(this SprocketEditor editor)
         {
-            var page = editor.Current as SlotPage
-                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a slot's page.");
-            _ = page.View;
-            return page;
+            var page = editor.Current as LogicSystemPage
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a logic system's page.");
+            return page.Asking ?? throw new InvalidOperationException($"No panel is open on '{editor.Screen.Title()}'.");
         }
+
+        /// <summary>The box what a slot or a setting is for is written in, in <paramref name="panel" />.</summary>
+        public static Composer About(this ValuesQuestion panel) => Within(panel.Window).OfType<Composer>().Single();
 
         /// <summary>The lines under each blueprint on the root that add another installation, one for each blueprint.</summary>
         public static List<Button> RootAdds(this SprocketEditor editor) =>

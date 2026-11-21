@@ -120,7 +120,7 @@ public class AbortEditorTests
         sim.Tick();
         var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
         Assert.Equal(4, answers.Length);
-        Assert.StartsWith("Why", answers[3]);
+        Assert.Equal("Why", answers[3]);
 
         sim.Editor.PressAnswer(answers[3]);
         sim.Tick();

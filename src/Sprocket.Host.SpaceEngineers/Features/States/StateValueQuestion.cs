@@ -149,9 +149,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 }
 
                 var name = slot.Id;
-                var said = SettingSources.Default(system, name);
                 var marked = value.IsSetting && value.Text == name;
-                editor.Answer(said.Length == 0 ? name : $"{name}, {Template.Fill(editor.Texts.ValueByDefault, "value", said)}", delegate
+                editor.Answer(name, delegate
                 {
                     if (!marked)
                         chosen(Literal.Setting(name));

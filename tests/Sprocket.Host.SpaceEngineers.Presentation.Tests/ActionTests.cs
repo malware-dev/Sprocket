@@ -539,7 +539,7 @@ public class ActionTests
         screen.Do("press", "Recharge");
         Assert.Equal("Recharge", Given(screen));
 
-        screen.Do("enter");
+        screen.Do("1394", "72");
 
         // What the block is told, which is the number the game keeps its charge modes as.
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
@@ -556,7 +556,7 @@ public class ActionTests
     public void AStepMadeInTheTerminalViewIsEditedThere()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\" press Recharge enter").Split(' '));
+            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\" press Recharge 1394 72").Split(' '));
         var editor = screen.Editor;
         Assert.IsType<Act>(editor.Program.Sequences[0].Steps[0]);
 
@@ -595,7 +595,7 @@ public class ActionTests
         Assert.Equal("Left", Given(screen));
         Assert.False(screen.Shows("Down"), "choosing did not put the list away");
 
-        screen.Do("enter");
+        screen.Do("1394", "72");
 
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal(2, Assert.Single(act.Arguments).Whole);
