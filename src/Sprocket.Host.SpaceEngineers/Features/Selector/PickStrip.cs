@@ -30,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         ScrollView _scroller;
         bool _crowded;
         int _toEnd;
+        int _columns;
         int _glide = -1;
         float _glideFrom;
         float _glideTo;
@@ -148,8 +149,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             Columns();
             Given();
 
-            // The column furthest on is the one being answered, so the view glides to the end once this is laid out.
-            _toEnd = _scroller != null ? 2 : 0;
+            // A column that was not there before is the one being answered, so the view glides to the end once this is laid
+            // out; laid out again with no new column, the view stays where it was.
+            if (_scroller != null && Children.Count > _columns)
+                _toEnd = 2;
+
+            _columns = Children.Count;
         }
 
         /// <summary>Starts the view gliding to <paramref name="offset" /> across the strip, held within it.</summary>
@@ -169,8 +174,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>Moves the view a tick along its glide, where one is under way.</summary>
         void Gliding()
         {
-            // Once the tick that showed the columns has laid them out, so the strip's width is known.
-            if (_toEnd > 0 && --_toEnd == 0)
+            // Once the columns are laid out, so the strip's width is known: until the view is measured, it holds an offset as
+            // asked rather than within the strip, and the end would read as the furthest offset there is.
+            if (_toEnd > 0 && _scroller.IsMeasureValid && --_toEnd == 0)
                 Glide(float.MaxValue);
 
             if (_glide >= 0)
