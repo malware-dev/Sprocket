@@ -65,13 +65,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Callouts
         }
 
         /// <summary>Works out which callouts are due as the editor opens.</summary>
-        /// <remarks>A callout is due where its release is newer than the one recorded as seen, or, for a player with none recorded, is the current one; and it has not been dismissed. The current release is recorded as seen once none is due.</remarks>
+        /// <remarks>A callout is due where its release is newer than the one recorded as seen, or, for a player with none recorded, is the current one; and it has not been dismissed. The current release is recorded as seen once none is due. None is due while the player has callouts off.</remarks>
         public void Begin()
         {
             Close();
             _due.Clear();
 
+            // Turned off, nothing is offered and nothing recorded as seen, so turning them on again offers what is still new.
             var choices = _read();
+            if (!choices.Callouts)
+                return;
+
             for (var i = 0; i < _all.Count; i++)
             {
                 var callout = _all[i];

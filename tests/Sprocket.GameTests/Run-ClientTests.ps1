@@ -2,7 +2,8 @@
     Runs Sprocket's client tests in the game itself, against the mod as built from this repository.
 
     1. Refuses to run while Space Engineers is running: the game is never closed by this script.
-    2. Builds the test plugin and packs the mod into the test's own user data folder, -AppData, never the one played in.
+    2. Builds the test plugin and packs the mod into the test's own user data folder, -AppData, never the one played in, with
+       the other local mods -LocalMods names beside it.
     3. Puts back a clean test world there, its Sprocket mod pointed at that local copy, and writes the scenarios' blueprints.
     4. Starts the game through SevrLoader with the plugin, which loads the world, runs the tests, takes its pictures and closes
        the game. A game that has not finished by -TimeoutSeconds is stopped.
@@ -17,7 +18,12 @@ param(
     [int]$TimeoutSeconds = 900,
     # The parts to play, of scene, kept, pages, callouts, editor, sharedtext, settings, share, menus, move, remote and banner; every part where none is named. A test in the Local folder plays only when its part is named, with its scenario among -Scenarios.
     # hailstone plays only when named, with -Template a copy of Mal's world holding Hailstone Station.
-    [string[]]$Only = @()
+    [string[]]$Only = @(),
+    # Other local mods the -Template world loads, by their folder names, copied in from -ModsFrom so the world loads whole.
+    [string[]]$LocalMods = @(),
+    [string]$ModsFrom = 'E:\Data\sesaves\Mods',
+    # No callouts in the editor, for pictures: the player's file says callouts=false for this run.
+    [switch]$NoCallouts
 )
 $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path "$PSScriptRoot\..\.."
@@ -41,6 +47,12 @@ $packed = Get-ChildItem $pack -Directory | Select-Object -First 1
 if ($null -eq $packed) { throw 'The pack wrote no mod folder.' }
 robocopy $packed.FullName (Join-Path $AppData "Mods\$mod") /MIR /NJH /NJS /NP /NFL /NDL | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Copying the mod failed (robocopy $LASTEXITCODE)." }
+foreach ($local in $LocalMods) {
+    $from = Join-Path $ModsFrom $local
+    if (-not (Test-Path $from)) { throw "The local mod '$local' is not in $ModsFrom." }
+    robocopy $from (Join-Path $AppData "Mods\$local") /MIR /NJH /NJS /NP /NFL /NDL | Out-Null
+    if ($LASTEXITCODE -ge 8) { throw "Copying the local mod '$local' failed (robocopy $LASTEXITCODE)." }
+}
 
 # 3. A clean world whose Sprocket is the local copy: a mod with no Workshop id is read from the Mods folder by its name.
 $world = Join-Path $AppData 'Saves\Sprocket Client Test'
@@ -62,6 +74,8 @@ foreach ($file in (Join-Path $world 'Sandbox.sbc'), (Join-Path $world 'Sandbox_c
 # An empty library and no player settings (the callouts seen and dismissed among them), as a player new to Sprocket has;
 # both are stored in the user data, beside the worlds.
 Get-ChildItem (Join-Path $AppData 'Storage') -Filter 'sprocket*' -ErrorAction SilentlyContinue | Remove-Item -Force
+# A run for pictures has a player who turned callouts off, written after the clean-up above.
+if ($NoCallouts) { Set-Content (Join-Path $AppData 'Storage\Sprocket.ini') "[Player]`ncallouts=false" }
 
 # The world's own mod storage, where Sprocket keeps its backups: for a world outside a player's folder the game keeps it in
 # Saves\<player id>\<session name>\Storage, which the fresh world above does not replace (seen 2026-11-12).

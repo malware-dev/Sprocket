@@ -254,6 +254,27 @@ namespace Sprocket.GameTests
             return false;
         }
 
+        /// <summary>Picks the row of a selector's list saying <paramref name="name" />, such as a block, as one press of the pointer does, and says whether there was one.</summary>
+        public bool Pick(string name)
+        {
+            foreach (var element in Within(Root()))
+            {
+                if (element.GetType().Name != "PickRow" || Get(element, "Text") as string != name || Get(element, "IsVisible") is bool visible && !visible)
+                    continue;
+
+                // HeldModifier is a type of the mod's own assembly, so its value is made from the method's own parameter.
+                var pick = element.GetType().GetMethod("Pick");
+                var held = pick?.GetParameters()[0].ParameterType;
+                if (pick == null || held == null)
+                    return false;
+
+                pick.Invoke(element, new[] { Enum.Parse(held, "Alone"), (object)1 });
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Switches the logic system the editor is in <paramref name="on" />, by the switch at the top of its screen, and says whether there was one.</summary>
         public bool Switch(bool on)
         {
@@ -567,7 +588,7 @@ namespace Sprocket.GameTests
             for (var type = thing?.GetType(); type != null; type = type.BaseType)
             {
                 var property = type.GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-                if (property != null)
+                if (property != null && property.CanRead)
                     return property.GetValue(thing);
             }
 

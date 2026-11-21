@@ -5,7 +5,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
 {
-    /// <summary>What the player at this machine has chosen for themselves, for every world they play: whether the screens show tips, and which callouts they have dismissed.</summary>
+    /// <summary>What the player at this machine has chosen for themselves, for every world they play: whether the screens show tips, whether callouts are offered, and which they have dismissed.</summary>
     /// <remarks>Stored in a section of its own in the global file on the player's own machine, read there and never sent to a server.</remarks>
     public sealed class PlayerSettings
     {
@@ -20,22 +20,29 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
         // The ids of the callouts the player has dismissed, separated by commas.
         const string DismissedKey = "dismissed";
 
+        // Whether the editor offers callouts at all. Read only: written by hand, never by Sprocket, so a file without it offers them.
+        const string CalloutsKey = "callouts";
+
         const char Separator = ',';
 
         static readonly string[] NoIds = new string[0];
 
         readonly string[] _dismissed;
 
-        /// <summary>The player's choices: tips shown where <paramref name="tips" /> says, callouts dismissed up to release <paramref name="seen" /> where it has a value, and those named by <paramref name="dismissed" /> dismissed.</summary>
-        public PlayerSettings(bool tips, ModRelease? seen = null, IEnumerable<string> dismissed = null)
+        /// <summary>The player's choices: tips shown where <paramref name="tips" /> says, callouts dismissed up to release <paramref name="seen" /> where it has a value, those named by <paramref name="dismissed" /> dismissed, and callouts offered where <paramref name="callouts" /> says.</summary>
+        public PlayerSettings(bool tips, ModRelease? seen = null, IEnumerable<string> dismissed = null, bool callouts = true)
         {
             Tips = tips;
+            Callouts = callouts;
             Seen = seen;
             _dismissed = dismissed == null ? NoIds : new List<string>(dismissed).ToArray();
         }
 
         /// <summary>Whether the screens show tips, and terms look like terms; on until the player turns them off.</summary>
         public bool Tips { get; }
+
+        /// <summary>Whether the editor offers callouts; on unless the player's file says <c>callouts=false</c>.</summary>
+        public bool Callouts { get; }
 
         /// <summary>The highest release whose callouts have all been dismissed, or null where none has.</summary>
         public ModRelease? Seen { get; }
@@ -59,7 +66,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
             if (ini != null)
                 dismissed = ini.Get(Section, DismissedKey).ToString("").Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
 
-            return new PlayerSettings(tips, seen, dismissed);
+            bool callouts;
+            if (ini == null || !ini.Get(Section, CalloutsKey).TryGetBoolean(out callouts))
+                callouts = true;
+
+            return new PlayerSettings(tips, seen, dismissed, callouts);
         }
 
         /// <summary>What the global file on this machine says.</summary>
@@ -71,13 +82,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
         /// <summary>These choices with tips shown where <paramref name="on" /> says.</summary>
         public PlayerSettings WithTips(bool on)
         {
-            return new PlayerSettings(on, Seen, _dismissed);
+            return new PlayerSettings(on, Seen, _dismissed, Callouts);
         }
 
         /// <summary>These choices with the callouts of every release up to <paramref name="release" /> dismissed.</summary>
         public PlayerSettings WithSeen(ModRelease release)
         {
-            return new PlayerSettings(Tips, release, _dismissed);
+            return new PlayerSettings(Tips, release, _dismissed, Callouts);
         }
 
         /// <summary>Whether the callout <paramref name="id" /> has been dismissed.</summary>
@@ -93,10 +104,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Players
                 return this;
 
             var more = new List<string>(_dismissed) { id };
-            return new PlayerSettings(Tips, Seen, more);
+            return new PlayerSettings(Tips, Seen, more, Callouts);
         }
 
         /// <summary>Writes these choices into <paramref name="ini" />, leaving every other section as it was.</summary>
+        /// <remarks>Leaves <c>callouts</c> as the file has it, or has it not: only a player writes that line.</remarks>
         public void Write(MyIni ini)
         {
             ini.Set(Section, TipsKey, Tips);
