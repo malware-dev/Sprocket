@@ -118,6 +118,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
+            if (ExpressionReader.Is(statement.ValueAt(2)))
+            {
+                trouble.Constant(statement);
+                return;
+            }
+
             if (!ScriptQuotes.Ends(statement, 3, trouble))
                 return;
 
@@ -574,6 +580,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             if (!ScriptQuotes.Ends(statement, 3, trouble))
                 return null;
+
+            if (ExpressionReader.Is(statement.ValueAt(2)))
+            {
+                Literal worked;
+                return ExpressionReader.Read(statement, statement.ValueAt(2), system, trouble, out worked)
+                    ? new SetState { State = state.Name, Expression = worked.Tree }
+                    : null;
+            }
 
             Literal value;
             string other;

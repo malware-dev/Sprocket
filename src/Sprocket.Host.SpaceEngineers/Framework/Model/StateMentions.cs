@@ -93,6 +93,61 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 if (sets.From == was)
                     sets.From = now;
             }
+
+            foreach (var sequence in system.Sequences)
+            {
+                foreach (var step in sequence.Steps)
+                    RenameStateIn(step, was, now);
+            }
+
+            foreach (var trigger in system.Triggers)
+            {
+                var when = trigger as WhenTrigger;
+                if (when != null)
+                {
+                    if (when.Value.IsExpression)
+                        when.Value = Literal.Worked(when.Value.Tree.Renamed(was, now, true));
+
+                    for (var i = 0; i < when.Arguments.Count; i++)
+                    {
+                        if (when.Arguments[i].IsExpression)
+                            when.Arguments[i] = Literal.Worked(when.Arguments[i].Tree.Renamed(was, now, true));
+                    }
+
+                    when.IntervalExpression = when.IntervalExpression?.Renamed(was, now, true);
+                }
+
+                var every = trigger as EveryTrigger;
+                if (every != null)
+                    every.IntervalExpression = every.IntervalExpression?.Renamed(was, now, true);
+            }
+        }
+
+        /// <summary>Changes the state <paramref name="was" /> to <paramref name="now" /> in the expressions <paramref name="step" /> holds.</summary>
+        static void RenameStateIn(Step step, string was, string now)
+        {
+            var given = step.Arguments;
+            for (var i = 0; i < given.Count; i++)
+            {
+                if (given[i].IsExpression)
+                    given[i] = Literal.Worked(given[i].Tree.Renamed(was, now, true));
+            }
+
+            var compared = (step as Branch)?.Compared;
+            if (compared != null && compared.Value.IsExpression)
+                compared.Value = Literal.Worked(compared.Value.Tree.Renamed(was, now, true));
+
+            var wait = step as Wait;
+            if (wait != null && wait.Expression != null)
+                wait.Expression = wait.Expression.Renamed(was, now, true);
+
+            var abort = step as Abort;
+            if (abort != null)
+                abort.Expression = abort.Expression?.Renamed(was, now, true);
+
+            var sets = step as SetState;
+            if (sets != null)
+                sets.Expression = sets.Expression?.Renamed(was, now, true);
         }
 
         /// <summary>
@@ -172,6 +227,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     return one.Text == other.Text;
                 case ValueKind.Duration:
                     return one.Length.Ticks == other.Length.Ticks;
+                case ValueKind.Expression:
+                    return one.Tree.Written == other.Tree.Written;
             }
 
             return one.Value.Bits == other.Value.Bits;

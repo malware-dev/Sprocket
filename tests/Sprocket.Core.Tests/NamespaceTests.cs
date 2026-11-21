@@ -9,7 +9,7 @@ namespace Sprocket.Tests;
 /// <summary>A host's namespaces are the ones registered, each by one owner, of any number of parts, and a program reads whether or not they are.</summary>
 public class NamespaceTests
 {
-    const string Hovering = "sprocket 2 alpha 3\n\n"
+    const string Hovering = "sprocket 2 alpha 4\n\n"
         + "let pad = block 'Door/LargeBlockDoor' [ 7, \"Pad\" ]\n\n"
         + "system \"4b6e1f20-8c3a-4d5e-9f71-2a3b4c5d6e7f\" as Malforge.Hover\n{\n"
         + "    whenever malforge.hover_repulsors.landed on [ pad ] then run 1\n\n"

@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using System.Collections.Generic;
 
@@ -42,6 +43,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>The setting whose length of time is how often the blocks are looked at, each installation's own, or empty where <see cref="Interval" /> says.</summary>
         public string IntervalSetting { get; set; } = "";
 
+        /// <summary>The expression whose length of time is how often the blocks are looked at, worked out on each look, or null where <see cref="Interval" /> or a setting says.</summary>
+        public Expression IntervalExpression { get; set; }
+
+        /// <inheritdoc />
+        public override void Worked(List<Expression> into)
+        {
+            if (Value.IsExpression)
+                into.Add(Value.Tree);
+
+            foreach (var argument in _arguments)
+            {
+                if (argument.IsExpression)
+                    into.Add(argument.Tree);
+            }
+
+            if (IntervalExpression != null)
+                into.Add(IntervalExpression);
+        }
+
         /// <summary>The namespace the member is written qualified by, or empty where it is written bare.</summary>
         /// <remarks>Setting it keeps the id; the member is still named by <see cref="MomentTrigger.Key" />.</remarks>
         public string Provider
@@ -57,16 +77,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             {
                 Quantifier = Quantifier,
                 Relation = Relation,
-                Value = Value,
+                Value = Value.Copied,
                 Interval = Interval,
                 IntervalSetting = IntervalSetting,
+                IntervalExpression = IntervalExpression,
                 Key = Key
             };
 
             for (var i = 0; i < Sources.Count; i++)
                 copy.Sources.Add(Sources[i]);
 
-            copy._arguments.AddRange(_arguments);
+            foreach (var argument in _arguments)
+                copy._arguments.Add(argument.Copied);
             return copy;
         }
 

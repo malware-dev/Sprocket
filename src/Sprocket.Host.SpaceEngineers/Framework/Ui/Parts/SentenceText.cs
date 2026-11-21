@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         public const string TheWord = "the";
 
         /// <summary>Every way a test can read its blocks, in the order they are offered.</summary>
-        public static readonly IReadOnlyList<Quantifier> Readings = new[] { Quantifier.Any, Quantifier.All, Quantifier.Sum, Quantifier.Average };
+        public static readonly IReadOnlyList<Quantifier> Readings = new[] { Quantifier.Any, Quantifier.All, Quantifier.Sum, Quantifier.Average, Quantifier.Min, Quantifier.Max };
 
         const int Quoted = 48;
 
@@ -263,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         }
 
         /// <summary>Whether <paramref name="quantifier" /> reads a total of a number on the blocks, a sum or an average.</summary>
-        public static bool Totals(Quantifier quantifier) => quantifier == Quantifier.Sum || quantifier == Quantifier.Average;
+        public static bool Totals(Quantifier quantifier) => Quantifiers.Totals(quantifier);
 
         /// <summary>How a test reads its blocks, as the list choosing it offers it: any, all / each, the sum of, the average of.</summary>
         /// <remarks>A line says the reading in its own words, which <see cref="TestShape" /> gives.</remarks>
@@ -274,6 +274,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 case Quantifier.All: return "all / each";
                 case Quantifier.Sum: return "the sum of";
                 case Quantifier.Average: return "the average of";
+                case Quantifier.Min: return "the lowest of";
+                case Quantifier.Max: return "the highest of";
             }
 
             return "any";
@@ -409,7 +411,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return duration.Setting.Length > 0 ? duration.Setting : TimeText.Duration(duration.Length);
+                return duration.Expression.Length > 0 ? duration.Expression : duration.Setting.Length > 0 ? duration.Setting : TimeText.Duration(duration.Length);
 
             return Of(world, slot);
         }

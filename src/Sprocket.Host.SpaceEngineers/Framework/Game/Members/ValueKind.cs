@@ -42,6 +42,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
         /// <summary>One of a system blueprint's settings, by name, standing in for the value each installation gives it.</summary>
         /// <remarks>Never handed to a block: the installation's value takes its place first.</remarks>
-        Setting
+        Setting,
+
+        /// <summary>An expression, worked out when the step holding it is reached.</summary>
+        /// <remarks>Never handed to a block: the value it comes to takes its place first.</remarks>
+        Expression
     }
 }

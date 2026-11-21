@@ -16,13 +16,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>The built-in type a setting holds a length of time of.</summary>
         public const string Duration = "duration";
 
-        const string Integer = "integer";
+        /// <summary>The built-in type a setting holds an integer of.</summary>
+        public const string Integer = "integer";
 
-        const string Real = "real";
+        /// <summary>The built-in type a setting holds a real of.</summary>
+        public const string Real = "real";
 
-        const string Text = "text";
+        /// <summary>The built-in type a setting holds text of.</summary>
+        public const string Text = "text";
 
-        const string Color = "color";
+        /// <summary>The built-in type a setting holds a color of.</summary>
+        public const string Color = "color";
 
         // The built-in types a setting may hold, besides the types a system declares.
         static readonly string[] BuiltIn = { Flag, Text, Integer, Real, Duration, Color };
@@ -111,6 +115,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return;
             }
 
+            if (ExpressionReader.Is(statement.ValueAt(5)))
+            {
+                trouble.Constant(statement);
+                return;
+            }
+
             if (!ScriptQuotes.Ends(statement, 6, trouble))
                 return;
 
@@ -128,6 +138,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (statement.ValueAt(1).Form == ValueForm.List)
             {
                 trouble.Say(statement, $"setting '{part.Id}' is answered with one value, not a list, like '{part.Id}' = <value>.");
+                return;
+            }
+
+            if (ExpressionReader.Is(statement.ValueAt(1)))
+            {
+                trouble.Constant(statement);
                 return;
             }
 

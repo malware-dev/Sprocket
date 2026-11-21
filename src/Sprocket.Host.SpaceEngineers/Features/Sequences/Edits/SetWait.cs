@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
 {
@@ -9,18 +10,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         readonly int _index;
         readonly Duration _was;
         readonly string _wasSetting;
+        readonly Expression _wasExpression;
         readonly Duration _now;
         readonly string _nowSetting;
 
         /// <summary>
         /// The wait at <paramref name="index" /> made <paramref name="now" /> long, or as long as the setting <paramref name="nowSetting" />
-        /// where it is not empty, from <paramref name="was" />, or the setting <paramref name="wasSetting" /> where it took one.
+        /// where it is not empty, from <paramref name="was" />, or the setting <paramref name="wasSetting" /> where it took one, or the expression
+        /// <paramref name="wasExpression" /> where it took that, which a length or a setting takes the place of.
         /// </summary>
-        public SetWait(int index, Duration was, string wasSetting, Duration now, string nowSetting = "")
+        public SetWait(int index, Duration was, string wasSetting, Duration now, string nowSetting = "", Expression wasExpression = null)
         {
             _index = index;
             _was = was;
             _wasSetting = wasSetting;
+            _wasExpression = wasExpression;
             _now = now;
             _nowSetting = nowSetting ?? "";
         }
@@ -38,21 +42,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         }
 
         /// <inheritdoc />
-        public override bool Changes => _was != _now || _wasSetting != _nowSetting;
+        public override bool Changes => _was != _now || _wasSetting != _nowSetting || _wasExpression != null;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
-            Put(sequence, _now, _nowSetting);
+            Put(sequence, _now, _nowSetting, null);
         }
 
         /// <inheritdoc />
         public override void Undo(Sequence sequence)
         {
-            Put(sequence, _was, _wasSetting);
+            Put(sequence, _was, _wasSetting, _wasExpression);
         }
 
-        void Put(Sequence sequence, Duration length, string setting)
+        void Put(Sequence sequence, Duration length, string setting, Expression expression)
         {
             var wait = sequence.Steps[_index] as Wait;
             if (wait == null)
@@ -60,6 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
 
             wait.Length = length;
             wait.Setting = setting;
+            wait.Expression = expression;
         }
     }
 }

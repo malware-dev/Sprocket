@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
 {
@@ -9,6 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         readonly int _index;
         readonly string _wasMessage;
         readonly string _wasSetting;
+        readonly Expression _wasExpression;
+        readonly Expression _nowExpression;
         readonly AbortLevel _wasLevel;
         readonly string _nowMessage;
         readonly string _nowSetting;
@@ -32,10 +35,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
             _index = index;
             _wasMessage = step.Message;
             _wasSetting = step.Setting;
+            _wasExpression = step.Expression;
             _wasLevel = step.Level;
             _nowSetting = setting ?? "";
             _nowMessage = _nowSetting.Length > 0 ? "" : message ?? "";
             _nowLevel = level;
+
+            // An expression stays where the panel was closed with no words of its own and no setting.
+            _nowExpression = _nowSetting.Length == 0 && _nowMessage.Length == 0 ? step.Expression : null;
         }
 
         /// <inheritdoc />
@@ -49,21 +56,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         }
 
         /// <inheritdoc />
-        public override bool Changes => _wasMessage != _nowMessage || _wasSetting != _nowSetting || _wasLevel != _nowLevel;
+        public override bool Changes => _wasMessage != _nowMessage || _wasSetting != _nowSetting || _wasLevel != _nowLevel || _wasExpression != _nowExpression;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
-            Put(sequence, _nowMessage, _nowSetting, _nowLevel);
+            Put(sequence, _nowMessage, _nowSetting, _nowExpression, _nowLevel);
         }
 
         /// <inheritdoc />
         public override void Undo(Sequence sequence)
         {
-            Put(sequence, _wasMessage, _wasSetting, _wasLevel);
+            Put(sequence, _wasMessage, _wasSetting, _wasExpression, _wasLevel);
         }
 
-        void Put(Sequence sequence, string message, string setting, AbortLevel level)
+        void Put(Sequence sequence, string message, string setting, Expression expression, AbortLevel level)
         {
             var abort = sequence.Steps[_index] as Abort;
             if (abort == null)
@@ -71,6 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
 
             abort.Message = message;
             abort.Setting = setting;
+            abort.Expression = expression;
             abort.Level = level;
         }
     }

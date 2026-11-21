@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         Literal _value;
         IList<Literal> _arguments;
 
+        // What the trigger's expressions are worked out against, the expressions it holds, and whether what they came to as it was last compiled had a value.
+        readonly WatchScope _scope;
+        readonly List<Expression> _worked = new List<Expression>();
+        bool _hasWorked;
+        bool _valueOk = true;
+        bool _argumentsOk = true;
+
         // The length of the setting a trigger looks or starts as often as, in ticks, and the program's edit it was looked up at.
         int _intervalTicks;
         int _intervalEdits = int.MinValue;
@@ -68,6 +76,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _rota = owner.Rota;
             _memory = memory;
             _heard = Heard;
+            _scope = new WatchScope(system, instance, owner, _heard);
+            trigger.Worked(_worked);
+            _hasWorked = _worked.Count > 0;
 
             var kept = memory.Shift != null;
             if (!kept)
@@ -137,6 +148,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             var when = _trigger as WhenTrigger;
             var every = _trigger as EveryTrigger;
+            var expression = when != null ? when.IntervalExpression : every?.IntervalExpression;
+            if (expression != null)
+            {
+                // Worked out on each ask, from blocks made ready when the trigger was compiled.
+                Literal length;
+                return _scope.Evaluate(expression, out length) == ExpressionFailure.None && length.Kind == ValueKind.Duration ? length.Length.Ticks : 0;
+            }
+
             var setting = when != null ? when.IntervalSetting : every != null ? every.IntervalSetting : "";
             if (setting.Length == 0)
                 return when != null ? when.IntervalTicks : every != null ? every.IntervalTicks : 0;
@@ -170,12 +189,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _shift.Forget();
             _rota.Leave(_shift);
             Deafen();
+            _scope.Forget();
         }
 
         void Look(int tick)
         {
             _tick = tick;
             _bindings = _owner.Current;
+            Moved();
             Compile();
 
             var firings = Sampled();
@@ -220,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             var when = _trigger as WhenTrigger;
             var signal = _trigger as SignalTrigger;
             var watched = when != null ? (MomentTrigger)when : signal;
-            if (watched == null || (_bindings.Revision == _compiledBindings && _owner.Program.Edits == _compiledEdits
+            if ((watched == null && !_hasWorked) || (_bindings.Revision == _compiledBindings && _owner.Program.Edits == _compiledEdits
                     && HostNamespaces.Changes == _compiledNamespaces))
                 return;
 
@@ -230,11 +251,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             Deafen();
             _generation++;
 
+            _worked.Clear();
+            _trigger.Worked(_worked);
+            _hasWorked = _worked.Count > 0;
+            _scope.Prepare(_worked, _bindings, watched != null);
+            if (watched == null)
+                return;
+
             if (when != null)
-            {
-                SystemInstance.Settled(_instance, when.Value, out _value);
-                _arguments = SystemInstance.Settled(_instance, when.Arguments);
-            }
+                Given(when);
 
             Watched(watched.Sources);
             var count = _watched.Count;
@@ -286,7 +311,103 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _reads = reads;
             _memory.Readings.Clear();
             _memory.Readings.AddRange(reads);
-            _announced = all;
+            _announced = all && _scope.AllHeard;
+        }
+
+        /// <summary>
+        /// Looks at what a <c>when</c>'s value and options come to as expressions: the probes compare with the value that came, and a value or
+        /// options that come to something the probes were not made for have the watch made again on this look.
+        /// </summary>
+        /// <remarks>Works out numbers and allocates nothing where nothing changed.</remarks>
+        void Moved()
+        {
+            var when = _trigger as WhenTrigger;
+            if (when == null || _bindings.Revision != _compiledBindings || !(when.Value.IsExpression || Literal.HoldsExpression(when.Arguments)))
+                return;
+
+            if (when.Value.IsExpression)
+            {
+                Literal now;
+                var ok = _scope.Evaluate(when.Value.Tree, out now) == ExpressionFailure.None;
+                if (ok != _valueOk)
+                    _compiledEdits = -1;
+                else if (ok)
+                {
+                    now = AsGiven(now);
+                    if (!StateMentions.Same(_value, now))
+                    {
+                        _value = now;
+                        for (var i = 0; i < _probes.Length; i++)
+                            _probes[i]?.Retarget(now);
+                    }
+                }
+            }
+
+            var given = when.Arguments;
+            var allOk = true;
+            for (var i = 0; i < given.Count && allOk; i++)
+            {
+                Literal now;
+                if (!given[i].IsExpression)
+                    continue;
+
+                if (_scope.Evaluate(given[i].Tree, out now) != ExpressionFailure.None)
+                    allOk = false;
+                else if (_argumentsOk && !StateMentions.Same(_arguments[i], AsGiven(now)))
+                    _compiledEdits = -1;
+            }
+
+            if (allOk != _argumentsOk)
+                _compiledEdits = -1;
+        }
+
+        /// <summary><paramref name="value" /> as a member takes it: a length of time as its ticks.</summary>
+        static Literal AsGiven(Literal value)
+        {
+            return value.Kind == ValueKind.Duration ? Literal.Of(value.Length.Ticks) : value;
+        }
+
+        /// <summary>Works out the value and options a <c>when</c> gives its member on this installation, an expression of either worked out now.</summary>
+        void Given(WhenTrigger when)
+        {
+            _valueOk = true;
+            if (when.Value.IsExpression)
+            {
+                Literal now;
+                _valueOk = _scope.Evaluate(when.Value.Tree, out now) == ExpressionFailure.None;
+
+                // Where it has no value the expression stands, which no probe takes, until a look finds one.
+                _value = _valueOk ? AsGiven(now) : when.Value;
+            }
+            else
+            {
+                SystemInstance.Settled(_instance, when.Value, out _value);
+            }
+
+            _argumentsOk = true;
+            var given = when.Arguments;
+            if (!Literal.HoldsExpression(given))
+            {
+                _arguments = SystemInstance.Settled(_instance, given);
+                return;
+            }
+
+            var worked = new List<Literal>(given.Count);
+            for (var i = 0; i < given.Count; i++)
+            {
+                Literal now;
+                if (!given[i].IsExpression)
+                    worked.Add(given[i]);
+                else if (_scope.Evaluate(given[i].Tree, out now) == ExpressionFailure.None)
+                    worked.Add(AsGiven(now));
+                else
+                {
+                    _argumentsOk = false;
+                    worked.Add(Literal.Of(0L));
+                }
+            }
+
+            _arguments = SystemInstance.Settled(_instance, worked);
         }
 
         /// <summary>Stops listening to every block.</summary>
@@ -304,7 +425,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             _possible = false;
             var when = _trigger as WhenTrigger;
-            if (when != null && (when.Quantifier == Quantifier.Sum || when.Quantifier == Quantifier.Average))
+            if (when != null && Quantifiers.Totals(when.Quantifier))
                 return SampleSum(when) ? 1 : 0;
 
             if (when != null)
@@ -420,15 +541,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
-        /// Fires when the comparison comes to hold on the sum of what the blocks read, and not again until it stops holding.
+        /// Fires when the comparison comes to hold on the sum, average, lowest or highest of what the blocks read, and not again until it stops holding.
         /// </summary>
         /// <remarks>
         /// Every block is read, so a block the sum cannot read leaves it out of reach: it never holds. Over no blocks the sum
-        /// is 0 and the average never holds.
+        /// is 0 and the average, lowest and highest never hold.
         /// </remarks>
         bool SampleSum(WhenTrigger when)
         {
             var total = 0d;
+            var lowest = double.MaxValue;
+            var highest = double.MinValue;
             var read = 0;
             var readable = _entities.Length > 0 || when.Quantifier == Quantifier.Sum;
             string lost = null;
@@ -454,18 +577,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
                 read++;
                 Mark(probe, _reads[i].Ruling);
-                total += probe.Number();
+                var number = probe.Number();
+                total += number;
+                lowest = Math.Min(lowest, number);
+                highest = Math.Max(highest, number);
             }
 
             // Over the blocks that answered: none of them leaves no number to give.
-            if (when.Quantifier == Quantifier.Average)
+            if (when.Quantifier != Quantifier.Sum)
             {
                 readable = readable && read > 0;
                 if (read > 0)
-                    total /= read;
+                    total = when.Quantifier == Quantifier.Average ? total / read : when.Quantifier == Quantifier.Min ? lowest : highest;
             }
 
-            var holds = readable && Relations.Holds(Literal.Of(total), when.Relation, _value);
+            var holds = readable && _valueOk && Relations.Holds(Literal.Of(total), when.Relation, _value);
             Live = holds;
             Missed(lost);
             return Edge(holds);

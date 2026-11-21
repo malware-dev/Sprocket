@@ -1,4 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
+using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
@@ -23,6 +25,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>The setting whose length of time it waits, each installation's own, or empty where it waits <see cref="Length" />.</summary>
         public string Setting { get; set; } = "";
+
+        /// <summary>The expression whose length of time it waits, worked out as the step is reached, or null where it waits <see cref="Length" /> or a setting.</summary>
+        public Expression Expression { get; set; }
+
+        /// <inheritdoc />
+        public override void Worked(List<Expression> into)
+        {
+            if (Expression != null)
+                into.Add(Expression);
+        }
 
         /// <summary>How long to wait, in the game's own ticks, where it waits <see cref="Length" />.</summary>
         public int Ticks => Length.Ticks;

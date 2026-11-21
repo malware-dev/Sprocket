@@ -358,6 +358,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Rename(moment.Sources, was, name);
+
+                var read = new List<IList<string>>();
+                trigger.ReadLists(read);
+                foreach (var names in read)
+                    Rename(names, was, name);
             }
 
             foreach (var sequence in _sequences)
@@ -468,6 +473,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     uses += Count(moment.Sources, slot);
+
+                var read = new List<IList<string>>();
+                trigger.ReadLists(read);
+                foreach (var names in read)
+                    uses += Count(names, slot);
             }
 
             foreach (var sequence in _sequences)
@@ -546,6 +556,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Gather(moment.Sources, into);
+
+                var read = new List<IList<string>>();
+                trigger.ReadLists(read);
+                foreach (var names in read)
+                    Gather(names, into);
             }
 
             foreach (var sequence in _sequences)
@@ -567,6 +582,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null && moment.Sources.Count > 0)
                     into.Add(moment.Sources);
+
+                trigger.ReadLists(into);
             }
 
             foreach (var sequence in _sequences)

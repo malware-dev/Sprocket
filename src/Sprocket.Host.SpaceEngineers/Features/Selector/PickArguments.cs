@@ -159,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         public List<Literal> Read(string said)
         {
             var fields = Wanted();
-            var arguments = FieldSet.Read(said, fields);
+            var arguments = FieldSet.Read(said, fields, _arrivedValues);
             var at = 0;
             for (var f = 0; f < fields.Count && at < arguments.Count; f++)
             {

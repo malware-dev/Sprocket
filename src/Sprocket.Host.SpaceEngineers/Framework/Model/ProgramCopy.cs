@@ -155,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var when = trigger as WhenTrigger;
             var signal = trigger as SignalTrigger;
             if (every != null)
-                copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting };
+                copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting, IntervalExpression = every.IntervalExpression?.Copied() };
             else if (when != null)
                 copy = when.Copy();
             else if (signal != null)
@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var wait = step as Wait;
             if (wait != null)
-                return new Wait(wait.Length) { Setting = wait.Setting };
+                return new Wait(wait.Length) { Setting = wait.Setting, Expression = wait.Expression?.Copied() };
 
             var run = step as Run;
             if (run != null)
@@ -217,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var abort = step as Abort;
             if (abort != null)
-                return new Abort { Message = abort.Message, Setting = abort.Setting, Level = abort.Level };
+                return new Abort { Message = abort.Message, Setting = abort.Setting, Expression = abort.Expression?.Copied(), Level = abort.Level };
 
             var opens = step as If;
             if (opens != null)
@@ -237,7 +237,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 return new Finally();
 
             var sets = (SetState)step;
-            return new SetState { State = sets.State, Value = sets.Value, From = sets.From };
+            return new SetState { State = sets.State, Value = sets.Value, From = sets.From, Expression = sets.Expression?.Copied() };
         }
 
         static BranchTest Test(BranchTest test)

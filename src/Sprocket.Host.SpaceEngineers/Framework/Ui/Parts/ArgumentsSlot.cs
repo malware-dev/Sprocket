@@ -173,13 +173,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// the level it shows at, <paramref name="level" />, pressed to <paramref name="opens" />.
         /// </summary>
         /// <remarks>An abort with neither says "silently", so the part has words to press; one with either always says its level.</remarks>
-        public static ArgumentsSlot Aborting(string message, string setting, AbortLevel level, ICommand opens)
+        public static ArgumentsSlot Aborting(string message, string setting, string expression, AbortLevel level, ICommand opens)
         {
             var named = !string.IsNullOrEmpty(setting);
-            if (!named && string.IsNullOrEmpty(message) && level == AbortLevel.Note)
+            var worked = !string.IsNullOrEmpty(expression);
+            if (!named && !worked && string.IsNullOrEmpty(message) && level == AbortLevel.Note)
                 return new ArgumentsSlot(new[] { Literal.Name(SentenceText.SilentlyWord) }, new[] { Field.Called("") }, opens, ArgumentRole.Aborts);
 
-            var said = new[] { named ? Literal.Setting(setting) : Literal.Of(SentenceText.Quote(message)), Literal.Name(SentenceText.AbortLevels[(int)level]) };
+            var said = new[] { worked ? Literal.Of(expression) : named ? Literal.Setting(setting) : Literal.Of(SentenceText.Quote(message)), Literal.Name(SentenceText.AbortLevels[(int)level]) };
             var fields = new[] { SentenceText.AbortMessageField(""), SentenceText.AbortLevelField("") };
             return new ArgumentsSlot(said, fields, opens, ArgumentRole.Aborts);
         }

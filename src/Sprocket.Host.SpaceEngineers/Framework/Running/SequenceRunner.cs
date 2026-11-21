@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using Sprocket.ModSupport;
 using System;
@@ -769,7 +770,47 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _owner.Log?.Entered(this, _owner.CurrentTick, _memory.Step);
             var wait = _sequence.Steps[_memory.Step] as Wait;
             if (wait != null)
-                _memory.WaitTicks = wait.TicksIn(_instance);
+                _memory.WaitTicks = Waited(wait);
+        }
+
+        /// <summary>Works out the value the set step <paramref name="set" /> takes from its expression, into <paramref name="value" />, or why it has none; a value its state does not hold is mistyped.</summary>
+        ExpressionFailure Stated(SetState set, out Literal? value)
+        {
+            Literal worked;
+            value = null;
+            var failure = _workings.Evaluate(set.Expression, _bindings, out worked);
+            if (failure != ExpressionFailure.None)
+                return failure;
+
+            var state = _sequence.System.FindState(set.State);
+            if (state == null)
+                return ExpressionFailure.Mistyped;
+
+            var declared = state.IsFlag ? null : _sequence.System.FindType(state.Type);
+            if (state.IsFlag ? worked.Kind != ValueKind.Flag : worked.Kind != ValueKind.Name || declared == null || !declared.Has(worked.Text))
+                return ExpressionFailure.Mistyped;
+
+            value = worked;
+            return ExpressionFailure.None;
+        }
+
+        // Why the expression the wait just entered holds has no length, said where the run next looks at the step.
+        ExpressionFailure _unreckoned;
+
+        /// <summary>How long <paramref name="wait" /> lasts, in ticks, working out the expression it holds; none where that has no length.</summary>
+        /// <remarks>Asked as the step is entered, never on a tick.</remarks>
+        int Waited(Wait wait)
+        {
+            if (wait.Expression == null)
+                return wait.TicksIn(_instance);
+
+            Literal length;
+            var failure = _workings.Evaluate(wait.Expression, _bindings, out length);
+            if (failure == ExpressionFailure.None && length.Kind != ValueKind.Duration)
+                failure = ExpressionFailure.Mistyped;
+
+            _unreckoned = failure;
+            return failure == ExpressionFailure.None ? Math.Max(0, length.Length.Ticks) : 0;
         }
 
         /// <summary>
@@ -805,6 +846,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     {
                         Meet(new SequenceFault(needed.Problem, _memory.Step, BlockTrouble.None, needed.Which));
                         return;
+                    }
+
+                    // What the step is given is worked out as it is reached, so a step reached again takes the values of the moment.
+                    if (needed != null)
+                    {
+                        _workings.Refresh(_memory.Step, needed, _bindings);
+                        if (needed.Failure != ExpressionFailure.None)
+                        {
+                            Meet(SequenceFault.Worked(needed.Failure, _memory.Step));
+                            return;
+                        }
                     }
 
                     // Asked of a block that is off, an action or a value is lost, so the run ends here and says so.
@@ -876,7 +928,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     IsWaiting = false;
 
                     // Set in this step, and what it starts is started in it too, before the run goes on.
-                    _owner.Set(_sequence.System, _instance, sets);
+                    Literal? given = null;
+                    if (sets.Expression != null)
+                    {
+                        var failure = Stated(sets, out given);
+                        if (failure != ExpressionFailure.None)
+                        {
+                            Meet(SequenceFault.Worked(failure, _memory.Step));
+                            return;
+                        }
+                    }
+
+                    _owner.Set(_sequence.System, _instance, sets, given);
                     if (!IsRunning)
                         return;
 
@@ -971,6 +1034,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     continue;
                 }
 
+                if (_unreckoned != ExpressionFailure.None)
+                {
+                    var failure = _unreckoned;
+                    _unreckoned = ExpressionFailure.None;
+                    Meet(SequenceFault.Worked(failure, _memory.Step));
+                    return;
+                }
+
                 if (_memory.WaitUntil < 0)
                 {
                     // A tick of the game's, so a wait lasts as long as it says however often the runner is woken. Pinned
@@ -1030,9 +1101,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         return false;
                     }
 
+                    if (tested.Failure != ExpressionFailure.None)
+                    {
+                        Meet(SequenceFault.Worked(tested.Failure, at));
+                        return false;
+                    }
+
                     if (compared.Quantifier == Quantifier.Average && tested.Reads.Count == 0)
                     {
                         Meet(new SequenceFault(SequenceProblem.NothingToAverage, at));
+                        return false;
+                    }
+
+                    if ((compared.Quantifier == Quantifier.Min || compared.Quantifier == Quantifier.Max) && tested.Reads.Count == 0)
+                    {
+                        Meet(new SequenceFault(SequenceProblem.NoValue, at));
                         return false;
                     }
 
@@ -1066,21 +1149,32 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             }
         }
 
-        /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, on all, or on their sum or average.</summary>
+        /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, on all, or on their sum, average, lowest or highest.</summary>
         /// <remarks>
         /// Read once, when the run reaches the test; with no block to read, <c>all</c> holds, <c>any</c> does not and the sum
-        /// is 0. An average needs at least one block read.
+        /// is 0. An average, a lowest and a highest need at least one block read.
         /// </remarks>
         static bool Holds(CompiledTest tested, Comparison test)
         {
-            if (test.Quantifier == Quantifier.Sum || test.Quantifier == Quantifier.Average)
+            if (Quantifiers.Totals(test.Quantifier))
             {
                 var total = 0d;
+                var lowest = double.MaxValue;
+                var highest = double.MinValue;
                 foreach (var read in tested.Reads)
-                    total += read.Number();
+                {
+                    var number = read.Number();
+                    total += number;
+                    lowest = Math.Min(lowest, number);
+                    highest = Math.Max(highest, number);
+                }
 
                 if (test.Quantifier == Quantifier.Average)
                     total /= tested.Reads.Count;
+                else if (test.Quantifier == Quantifier.Min)
+                    total = lowest;
+                else if (test.Quantifier == Quantifier.Max)
+                    total = highest;
 
                 return Relations.Holds(Literal.Of(total), test.Relation, tested.Value);
             }
@@ -1138,6 +1232,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             _cause = SprocketCancelCause.Aborted;
             var message = abort.MessageIn(_instance);
+            if (abort.Expression != null)
+            {
+                Literal reason;
+                var failure = _workings.Evaluate(abort.Expression, _bindings, out reason);
+                if (failure != ExpressionFailure.None)
+                {
+                    Meet(SequenceFault.Worked(failure, _memory.Step));
+                    return;
+                }
+
+                message = reason.Said;
+            }
+
             if (abort.Level == AbortLevel.Note && message.Length == 0)
             {
                 Stop();
@@ -1322,5 +1429,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>How many times an act has been worked out.</summary>
         public int Compilations => _workings.Compilations;
+
+        /// <summary>How many times an expression of the steps has been worked out.</summary>
+        public int Evaluations => _workings.Evaluations;
     }
 }

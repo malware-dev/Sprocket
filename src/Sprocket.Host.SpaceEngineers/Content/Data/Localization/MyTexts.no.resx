@@ -1849,6 +1849,30 @@
   <data name="Sprocket.Stopped.NothingToAverage" xml:space="preserve">
     <value>det hadde ingen blokker å ta gjennomsnittet av.</value>
   </data>
+  <data name="Sprocket.Problem.DividedByZero" xml:space="preserve">
+    <value>Dette steget deler på null.</value>
+  </data>
+  <data name="Sprocket.Stopped.DividedByZero" xml:space="preserve">
+    <value>det delte på null.</value>
+  </data>
+  <data name="Sprocket.Problem.NoValue" xml:space="preserve">
+    <value>Dette steget tar gjennomsnittet, minste eller største verdi av ingen blokker, så det har ingen verdi.</value>
+  </data>
+  <data name="Sprocket.Stopped.NoValue" xml:space="preserve">
+    <value>det tok gjennomsnittet, minste eller største verdi av ingen blokker.</value>
+  </data>
+  <data name="Sprocket.Problem.ManyBlocks" xml:space="preserve">
+    <value>Dette steget leser verdien til én blokk, men plassen har flere blokker.</value>
+  </data>
+  <data name="Sprocket.Stopped.ManyBlocks" xml:space="preserve">
+    <value>det leste verdien til én blokk fra en plass med flere.</value>
+  </data>
+  <data name="Sprocket.Problem.Overflowed" xml:space="preserve">
+    <value>Dette steget regner ut et tall som er for stort.</value>
+  </data>
+  <data name="Sprocket.Stopped.Overflowed" xml:space="preserve">
+    <value>det regnet ut et tall som var for stort.</value>
+  </data>
   <data name="Sprocket.Problem.Aborted" xml:space="preserve">
     <value>Dette steget avsluttet sekvensen.</value>
   </data>

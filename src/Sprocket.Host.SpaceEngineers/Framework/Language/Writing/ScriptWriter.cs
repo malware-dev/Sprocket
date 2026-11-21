@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
 
         // The contextual keywords each place reads, which a name standing there and spelled like one is quoted against;
         // immutable tables, read by every write.
-        static readonly Keyword[] Testing = { Keyword.Any, Keyword.All, Keyword.Sum, Keyword.Average };
+        static readonly Keyword[] Testing = { Keyword.Any, Keyword.All, Keyword.Sum, Keyword.Average, Keyword.Min, Keyword.Max };
         static readonly Keyword[] Expecting = { Keyword.Signal };
 
         readonly StringBuilder _text = new StringBuilder();
@@ -215,6 +215,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             Space();
             Quote(_text, value, '"');
+            return this;
+        }
+
+        /// <summary>An expression already written as <paramref name="written" />, standing as one value.</summary>
+        public ScriptWriter Expression(string written)
+        {
+            Space();
+            _text.Append(written);
             return this;
         }
 

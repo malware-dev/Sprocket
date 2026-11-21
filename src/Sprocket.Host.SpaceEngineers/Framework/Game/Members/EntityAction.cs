@@ -394,14 +394,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// What the first of <paramref name="given" /> that this cannot take is called; empty where nothing names it, and null
         /// where it takes them all.
         /// </summary>
-        /// <remarks>Asked when a program is bound, never while it runs.</remarks>
-        public string Refused(IList<Literal> given)
+        /// <remarks>Asked when a program is bound, never while it runs. A number is held to the bounds the member gives it unless <paramref name="bounded" /> is false, for a value only its kind is known of.</remarks>
+        public string Refused(IList<Literal> given, bool bounded = true)
         {
             var some = new List<Literal>(given.Count);
             for (var i = 0; i < given.Count; i++)
             {
                 some.Add(given[i]);
-                if (!Converts(some, null))
+                if (!(bounded ? Converts(some, null) : Takes(some)))
                     return Called(i);
             }
 

@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
 {
@@ -22,6 +23,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             var fault = new SequenceFault(SequenceProblem.NeverTriggered, Trigger, BlockTrouble.None, block);
             fault.Unwired = why;
             return fault;
+        }
+
+        /// <summary>What the expression at <paramref name="step" /> having no value, as <paramref name="failure" /> says, comes to.</summary>
+        public static SequenceFault Worked(ExpressionFailure failure, int step)
+        {
+            switch (failure)
+            {
+                case ExpressionFailure.DividedByZero: return new SequenceFault(SequenceProblem.DividedByZero, step);
+                case ExpressionFailure.NoValue: return new SequenceFault(SequenceProblem.NoValue, step);
+                case ExpressionFailure.ManyBlocks: return new SequenceFault(SequenceProblem.ManyBlocks, step);
+                case ExpressionFailure.Overflowed: return new SequenceFault(SequenceProblem.Overflowed, step);
+                case ExpressionFailure.Unanswered: return new SequenceFault(SequenceProblem.Unfilled, step);
+            }
+
+            return new SequenceFault(SequenceProblem.Mistyped, step, BlockTrouble.None, "");
         }
 
         /// <summary>The step at <paramref name="step" /> does something in the namespace <paramref name="space" />, which the host lacks: the sequence waits for it.</summary>

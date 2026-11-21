@@ -97,12 +97,19 @@ public class WatchedNumberTests
 
         rig.Editor.Triggers()[0].Starts[0].Opens!.Execute();
         rig.Tick();
-        Assert.Equal(new[] { "any", "all / each", "the sum of", "the average of" }, rig.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "any", "all / each", "the sum of", "the average of", "the lowest of", "the highest of" }, rig.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
 
         rig.Editor.PressAnswer("the sum of");
         rig.Tick();
         Assert.Equal(Quantifier.Sum, ((WhenTrigger)system.Triggers[0]).Quantifier);
         Assert.Equal("the sum of the", Said(rig.Editor.Triggers()[0])[1]);
+
+        rig.Editor.Triggers()[0].Starts[0].Opens!.Execute();
+        rig.Tick();
+        rig.Editor.PressAnswer("the lowest of");
+        rig.Tick();
+        Assert.Equal(Quantifier.Min, ((WhenTrigger)system.Triggers[0]).Quantifier);
+        Assert.Equal("the lowest of the", Said(rig.Editor.Triggers()[0])[1]);
     }
 
     /// <summary>

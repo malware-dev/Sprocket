@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
@@ -34,6 +35,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>What it gives its member, in the order the member declares it; none for most steps.</summary>
         public virtual IList<Literal> Arguments => NoArguments;
 
+        /// <summary>Adds to <paramref name="into" /> every expression it holds: in its arguments, and in what it compares a reading with or waits for.</summary>
+        /// <remarks>For an edit, a check or a screen being built, never for a tick.</remarks>
+        public virtual void Worked(List<Expression> into)
+        {
+            var given = Arguments;
+            for (var i = 0; i < given.Count; i++)
+            {
+                if (given[i].IsExpression)
+                    into.Add(given[i].Tree);
+            }
+        }
+
         /// <summary>Adds to <paramref name="into" /> every list of names it holds, the lists themselves: what it acts on or reads, and each argument that takes slots.</summary>
         /// <remarks>Walks the step's arguments, so it is for an edit or a screen being built, never for a tick.</remarks>
         public void NameLists(List<IList<string>> into)
@@ -47,6 +60,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 if (given[i].Kind == ValueKind.Slots)
                     into.Add(given[i].Names);
             }
+
+            var worked = new List<Expression>();
+            Worked(worked);
+            for (var i = 0; i < worked.Count; i++)
+                worked[i].NameLists(into);
         }
     }
 }

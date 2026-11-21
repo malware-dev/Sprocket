@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format
         /// The draft of the format's version this build writes, the number after <c>alpha</c> on a script's first line, or
         /// <see cref="Finished" /> where it writes the finished version.
         /// </summary>
-        public const int Draft = 3;
+        public const int Draft = 4;
 
         /// <summary>The draft a finished version is read as: later than every draft of it, and written with no <c>alpha</c>.</summary>
         public const int Finished = int.MaxValue;

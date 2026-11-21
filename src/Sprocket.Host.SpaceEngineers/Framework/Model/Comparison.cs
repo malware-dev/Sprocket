@@ -55,11 +55,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 Key = Key,
                 Quantifier = Quantifier,
                 Relation = Relation,
-                Value = Value
+                Value = Value.Copied
             };
 
             copy._targets.AddRange(_targets);
-            copy._arguments.AddRange(_arguments);
+            foreach (var argument in _arguments)
+                copy._arguments.Add(argument.Copied);
             return copy;
         }
 

@@ -80,6 +80,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return new Value(ValueForm.Kinded, null, Run(from, 2));
         }
 
+        /// <summary>An expression whose terms are a run of <see cref="ScriptValues.Terms" />.</summary>
+        public static Value Expressed(int from, int count)
+        {
+            return new Value(ValueForm.Expression, null, Run(from, count));
+        }
+
+        /// <summary>An operator or function among an expression's terms, <paramref name="word" /> as <see cref="ExpressionWords" /> spells it, taking <paramref name="operands" /> operands.</summary>
+        public static Value Operating(string word, int operands = 0)
+        {
+            return new Value(ValueForm.Operator, word, operands);
+        }
+
         static long Run(int from, int count)
         {
             return ((long)from << 32) | (uint)count;

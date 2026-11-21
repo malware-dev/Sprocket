@@ -130,6 +130,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         Not,
 
         /// <summary>Whether the host has a namespace, after <c>is</c>.</summary>
-        Installed
+        Installed,
+
+        /// <summary>The smallest value a reading takes across the blocks it names: <c>min gearbox.fill on [ tanks ]</c>.</summary>
+        Min,
+
+        /// <summary>The largest value a reading takes across the blocks it names: <c>max gearbox.fill on [ tanks ]</c>.</summary>
+        Max
     }
 }

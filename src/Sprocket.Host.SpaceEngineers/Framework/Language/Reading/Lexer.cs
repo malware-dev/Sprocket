@@ -57,6 +57,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 case ':': return One(TokenKind.Colon);
                 case '.': return One(TokenKind.Dot);
                 case '|': return One(TokenKind.Bar);
+                case '+': return One(TokenKind.Plus);
+                case '*': return One(TokenKind.Star);
                 case '=': return Equality();
                 case '!': return Different();
                 case '<': return Ordered(Keyword.Below, Keyword.AtMost);
@@ -66,6 +68,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 case '"': return Quoted('"', TokenKind.Text);
                 case '\'': return Quoted('\'', TokenKind.Identifier);
             }
+
+            // A dash against its digits is part of the number; any other dash is the operator.
+            if (c == '-' && !Digit((_ptr + 1).Char))
+                return One(TokenKind.Minus);
 
             if (c == '-' || Digit(c))
                 return Number();
@@ -141,13 +147,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return new Token(TokenKind.Comparison, start.Index, keyword: inclusive);
         }
 
-        /// <summary><c>//</c>, or trouble where a single slash stands alone.</summary>
+        /// <summary><c>//</c>, or the division operator where a single slash stands alone.</summary>
         Token Slashes()
         {
             var start = _ptr;
             _ptr++;
             if (_ptr.IsOutOfBounds() || _ptr.Char != '/')
-                return Bad(start, "unexpected '/'.");
+                return new Token(TokenKind.Slash, start.Index);
 
             _ptr++;
             return new Token(TokenKind.Off, start.Index);
@@ -388,7 +394,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// A word starting with a letter, so a leading dash is always part of a number.
+        /// A word starting with a letter.
         /// </summary>
         Token Identifier()
         {
@@ -397,7 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             while (true)
             {
                 var c = ptr.Char;
-                // No dash: a-1 is a subtraction.
+                // No dash: a dash ends a word.
                 if (!Letter(c) && !Digit(c) && c != '_')
                     break;
 

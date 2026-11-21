@@ -1,6 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
-    /// <summary>How a test reads the blocks it names: <c>any</c>, <c>all</c>, <c>sum</c> or <c>average</c>.</summary>
+    /// <summary>How a test reads the blocks it names: <c>any</c>, <c>all</c>, <c>sum</c>, <c>average</c>, <c>min</c> or <c>max</c>.</summary>
     public enum Quantifier
     {
         /// <summary>The test holding on one block is enough.</summary>
@@ -13,6 +13,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         Sum,
 
         /// <summary>The member is read on every block and the readings averaged, and the average is tested once.</summary>
-        Average
+        Average,
+
+        /// <summary>The member is read on every block and the lowest reading is tested once.</summary>
+        Min,
+
+        /// <summary>The member is read on every block and the highest reading is tested once.</summary>
+        Max
     }
 }
