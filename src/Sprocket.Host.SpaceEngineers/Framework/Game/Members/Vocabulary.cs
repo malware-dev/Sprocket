@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             var candidates = entities[0].Kind.Events;
             for (var i = 0; i < candidates.Count; i++)
             {
-                if (AllHaveEvent(entities, candidates[i].Id))
+                if (AllHaveEvent(entities, candidates[i].Key))
                     result.Add(candidates[i]);
             }
             return result;
@@ -54,41 +54,41 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// The block decides whether the moment is answered from a toolbar slot or watched by Sprocket. Asked of all the
         /// blocks, a watched change is its value coming to be so on every one of them.
         /// </remarks>
-        public static MomentTrigger Starter(List<EntityEvent> events, string eventId, bool all)
+        public static MomentTrigger Starter(List<EntityEvent> events, MemberKey key, bool all)
         {
-            var picked = Find(events, eventId);
+            var picked = Find(events, key);
 
             if (picked != null && picked.Answered)
-                return new SignalTrigger(eventId);
+                return new SignalTrigger(key.Id);
 
             if (!all || picked == null || picked.Value.Length == 0)
-                return SignalTrigger.Written(BlockKinds.Own, eventId);
+                return SignalTrigger.Written(picked != null ? picked.Namespace : key.Namespace, key.Id);
 
             var when = new WhenTrigger(picked.Value);
-            when.Provider = BlockKinds.Own;
+            when.Key = picked.ValueKey;
             when.Quantifier = Quantifier.All;
             when.Value = picked.Becomes;
             return when;
         }
 
-        /// <summary>The moment among <paramref name="events" /> that <paramref name="eventId" /> names, worded for the one slot it names on a toolbar a person presses; null where none is.</summary>
-        public static EntityEvent Find(IList<EntityEvent> events, string eventId)
+        /// <summary>The moment among <paramref name="events" /> that <paramref name="key" /> names, worded for the one slot it names on a toolbar a person presses; null where none is.</summary>
+        public static EntityEvent Find(IList<EntityEvent> events, MemberKey key)
         {
             for (var i = 0; i < events.Count; i++)
             {
-                if (events[i].Names(eventId))
-                    return events[i].At(ToolbarSlot.Of(eventId));
+                if (events[i].Names(key))
+                    return events[i].At(ToolbarSlot.Of(key.Id));
             }
 
             return null;
         }
 
         /// <summary>
-        /// The signal among <paramref name="events" /> that is the value <paramref name="value" /> coming to be what
+        /// The signal among <paramref name="events" /> that is the value <paramref name="value" /> names coming to be what
         /// <paramref name="compared" /> says, with whether the comparison asks for the block to be in that state rather than
         /// out of it; null where no signal is, or the comparison is no sameness.
         /// </summary>
-        public static EntityEvent Change(IList<EntityEvent> events, string value, Relation relation, Literal compared,
+        public static EntityEvent Change(IList<EntityEvent> events, MemberKey value, Relation relation, Literal compared,
             out bool inState)
         {
             inState = relation == Relation.Is;
@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             for (var i = 0; i < events.Count; i++)
             {
                 var signal = events[i];
-                if (signal.Value == value && signal.IsState && signal.Becomes.Said == compared.Said)
+                if (signal.IsState && signal.Value.Length > 0 && value.Names(signal.ValueKey) && signal.Becomes.Said == compared.Said)
                     return signal;
             }
 
@@ -110,74 +110,56 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// trigger, the trigger on its block that the first toolbar slot answering it is among; for anything watched, what it
         /// watches for. Empty where there is none, or no program to ask.
         /// </summary>
-        public static string EventOf(Automation program, Bindings bindings, AutomationSystem system, MomentTrigger moment,
+        public static MemberKey EventOf(Automation program, Bindings bindings, AutomationSystem system, MomentTrigger moment,
             SystemInstance through)
         {
             var when = moment as WhenTrigger;
-            if (when != null && when.Provider == BlockKinds.Own && bindings != null)
+            if (when != null && bindings != null)
             {
                 bool inState;
-                var signal = Change(EventsFor(bindings, SystemInstance.Through(through, when.Sources)), when.EventId,
+                var signal = Change(EventsFor(bindings, SystemInstance.Through(through, when.Sources)), when.Key,
                     when.Relation, when.Value, out inState);
 
-                return signal != null && inState ? signal.Id : when.EventId;
+                return signal != null && inState ? signal.Key : when.Key;
             }
 
             var required = moment as SignalTrigger;
             if (required == null || required.IsWatched)
-                return moment.EventId;
+                return moment.Key;
 
             if (program == null || system == null)
-                return "";
+                return default(MemberKey);
 
             var blocks = new List<string>();
             var positions = new List<ToolbarSlot>();
             program.Answers(system, through, required, blocks, positions);
             if (positions.Count == 0)
-                return "";
+                return default(MemberKey);
 
             GridEntity block = bindings?.Entity(blocks[0]);
             EntityEvent stands = block?.Kind.Signal(positions[0]);
-            return stands != null ? stands.Id : positions[0].EventId;
+            return stands != null ? stands.Key : MemberKey.Bare(positions[0].EventId);
         }
 
         /// <summary>
         /// Whether <paramref name="when" /> compares a value on blocks raising <paramref name="events" />, rather than watching
-        /// for one of those moments: anything but Sprocket's own state coming to be.
+        /// for one of those moments: anything but a host's state coming to be.
         /// </summary>
         public static bool Compares(WhenTrigger when, IList<EntityEvent> events)
         {
-            if (when.Provider != BlockKinds.Own)
-                return true;
-
             bool inState;
-            return Change(events, when.EventId, when.Relation, when.Value, out inState) == null || !inState;
+            return Change(events, when.Key, when.Relation, when.Value, out inState) == null || !inState;
         }
 
-        /// <summary>
-        /// The namespace a step doing <paramref name="id" /> as <paramref name="form" /> on these blocks is qualified by:
-        /// Sprocket's own for its own actions and values, empty for the game's.
-        /// </summary>
-        public static string Provider(GridWorld world, IList<long> entityIds, string id, ReachKind form)
+        /// <summary>The type the host provides that the member <paramref name="key" /> names on these blocks is a member of; null where it is none's.</summary>
+        public static HostType TypeOf(GridWorld world, IList<long> entityIds, MemberKey key)
         {
-            if (form == ReachKind.Native)
-                return BlockKinds.Own;
-
-            if (form != ReachKind.Value)
-                return "";
-
-            return EntityAction.Value(ActionsOf(world, entityIds), BlockKinds.Own, id) != null ? BlockKinds.Own : "";
-        }
-
-        /// <summary>The type the host provides that the member <paramref name="id" /> these blocks share is a member of; null where it is none's.</summary>
-        public static HostType TypeOf(GridWorld world, IList<long> entityIds, string id)
-        {
-            if (string.IsNullOrEmpty(id))
+            if (key.IsEmpty)
                 return null;
 
             foreach (var action in ActionsOf(world, entityIds))
             {
-                if (action.Id == id && action.Type != null)
+                if (key.Names(action.Key) && action.Type != null)
                     return action.Type;
             }
 
@@ -196,49 +178,30 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return ActionsOf(Blocks(world, entityIds));
         }
 
-        /// <summary>The value <paramref name="id" /> every one of the blocks <paramref name="entityIds" /> has, set or read, or null where they share none.</summary>
-        public static EntityAction ValueOf(GridWorld world, IList<long> entityIds, string id)
+        /// <summary>The value <paramref name="key" /> names that every one of the blocks <paramref name="entityIds" /> has, set or read, or null where they share none.</summary>
+        public static EntityAction ValueOf(GridWorld world, IList<long> entityIds, MemberKey key)
         {
-            foreach (var action in ActionsOf(world, entityIds))
-            {
-                if (action.Id == id && (action.Sets || action.OwnValue != null))
-                    return action;
-            }
-
-            return null;
+            return EntityAction.Value(ActionsOf(world, entityIds), key);
         }
 
         /// <summary>
-        /// What each value the action <paramref name="actionId" /> of these blocks wants asks for, one per value.
+        /// What each value the member <paramref name="key" /> names on these blocks wants asks for, one per value.
         /// </summary>
         /// <remarks>
         /// Asked by id and by form, because a switch's value and the act that flips it share one id.
         /// </remarks>
-        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, ReachKind form)
+        public static List<Field> Fields(GridWorld world, IList<long> entityIds, MemberKey key, ReachKind form)
         {
             var said = new List<Field>();
-
-            var actions = ActionsOf(world, entityIds);
-            foreach (var action in actions)
-            {
-                if (action.Id == actionId && action.Form == form)
-                    action.Fields(said);
-            }
-
+            EntityAction.Find(ActionsOf(world, entityIds), key, form == ReachKind.Value)?.Fields(said);
             return said;
         }
 
-        /// <summary>Whether the action these blocks share by that id and form takes time to finish.</summary>
-        public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, ReachKind form)
+        /// <summary>Whether the member these blocks share that <paramref name="key" /> names, reached as <paramref name="form" /> says, takes time to finish.</summary>
+        public static bool Lasts(GridWorld world, IList<long> entityIds, MemberKey key, ReachKind form)
         {
-            var actions = ActionsOf(world, entityIds);
-            foreach (var action in actions)
-            {
-                if (action.Id == actionId && action.Form == form)
-                    return action.Lasts;
-            }
-
-            return false;
+            var action = EntityAction.Find(ActionsOf(world, entityIds), key, form == ReachKind.Value);
+            return action != null && action.Lasts;
         }
 
         /// <summary>Whether any of the blocks offers something the others do not, which the shared list leaves out.</summary>
@@ -288,7 +251,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
 
                 for (var other = 1; other < entities.Count; other++)
                 {
-                    var theirs = EntityAction.Value(entities[other].Kind.Actions, BlockKinds.Own, action.Id)?.OwnValue;
+                    var theirs = EntityAction.Value(entities[other].Kind.Actions, action.Key)?.OwnValue;
                     if (theirs != null && !parameters[i].Agrees(theirs.Parameters[i]))
                         return action.WithPartsNumbered();
                 }
@@ -391,19 +354,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 return given;
             }
 
-            given.ActionId = Toggle(world, entityIds, act.ActionId) ?? act.ActionId;
+            var toggle = Toggle(world, entityIds, act.Key);
+            given.Key = toggle != null ? MemberKey.Bare(toggle) : act.Key;
             given.Form = ReachKind.Action;
-            given.Provider = Provider(world, entityIds, given.ActionId, ReachKind.Action);
             return given;
         }
 
-        /// <summary>The game's toggle that flips the switch <paramref name="value" /> on the blocks, or null where none does.</summary>
-        public static string Toggle(GridWorld world, IList<long> entityIds, string value)
+        /// <summary>The id of the game's toggle that flips the switch <paramref name="value" /> names on the blocks, or null where none does.</summary>
+        /// <remarks>A toggle is the game's own, so its id alone is its key.</remarks>
+        public static string Toggle(GridWorld world, IList<long> entityIds, MemberKey value)
         {
             var entities = Blocks(world, entityIds);
             foreach (var entity in entities)
             {
-                var one = entity.Kind.FindAction(value, ReachKind.Value);
+                var one = EntityAction.Value(entity.Kind.Actions, value);
                 if (one != null && one.Flips)
                     return one.FlippedBy;
             }
@@ -411,8 +375,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return null;
         }
 
-        /// <summary>The switch the game's toggle <paramref name="toggle" /> flips on the blocks, or null where it flips none listed.</summary>
-        public static string Flipped(GridWorld world, IList<long> entityIds, string toggle)
+        /// <summary>The switch the game's toggle <paramref name="toggle" /> names flips on the blocks, or null where it flips none listed.</summary>
+        public static MemberKey? Flipped(GridWorld world, IList<long> entityIds, MemberKey toggle)
         {
             var entities = Blocks(world, entityIds);
             foreach (var entity in entities)
@@ -420,8 +384,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                 var actions = entity.Kind.Actions;
                 for (var a = 0; a < actions.Count; a++)
                 {
-                    if (actions[a].Form == ReachKind.Value && actions[a].FlippedBy == toggle)
-                        return actions[a].Id;
+                    if (actions[a].Form == ReachKind.Value && (toggle.IsBare || toggle.Namespace == BlockKinds.Game) && actions[a].FlippedBy == toggle.Id)
+                        return actions[a].Key;
                 }
             }
 
@@ -447,19 +411,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         }
 
         /// <summary>
-        /// What the first of the blocks that has the value <paramref name="id" /> holds in it now, read off the facet called
+        /// What the first of the blocks that has the value <paramref name="key" /> names holds in it now, read off the facet called
         /// <paramref name="facet" /> where the value is of a type the host provides, or null where none can say.
         /// </summary>
         /// <remarks>
         /// A value worked out from what was seen before, or one that wants arguments to be read, gives null. A block with no
         /// facet by that name is read off its first.
         /// </remarks>
-        public static Literal? Current(GridWorld world, IList<long> entityIds, string id, string facet)
+        public static Literal? Current(GridWorld world, IList<long> entityIds, MemberKey key, string facet)
         {
             var entities = Blocks(world, entityIds);
             foreach (var entity in entities)
             {
-                var value = entity.Kind.FindAction(id, ReachKind.Value);
+                var value = EntityAction.Value(entity.Kind.Actions, key);
                 if (value == null)
                     continue;
 
@@ -506,11 +470,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             return result;
         }
 
-        static bool AllHaveEvent(List<GridEntity> entities, string eventId)
+        static bool AllHaveEvent(List<GridEntity> entities, MemberKey key)
         {
             for (var i = 1; i < entities.Count; i++)
             {
-                if (entities[i].Kind.FindEvent(eventId) == null)
+                if (entities[i].Kind.FindEvent(key) == null)
                     return false;
             }
             return true;
@@ -520,7 +484,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         {
             for (var i = from; i < entities.Count; i++)
             {
-                if (entities[i].Kind.FindAction(action.Id, action.Form) == null)
+                if (entities[i].Kind.FindAction(action.Key, action.Form) == null)
                     return false;
             }
             return true;

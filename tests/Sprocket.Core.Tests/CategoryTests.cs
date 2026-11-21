@@ -56,10 +56,10 @@ public class CategoryTests
         Assert.Equal(Category.Appearance, Categories.Of("SetBlinkInterval"));
         Assert.Equal(Category.Appearance, Categories.Of("IncreaseBlink Interval"));
 
-        Assert.Equal(Category.Behaviour, Categories.Of("UseConveyor"));
-        Assert.Equal(Category.Behaviour, Categories.Of("useConveyor"));
+        Assert.Equal(Category.Behavior, Categories.Of("UseConveyor"));
+        Assert.Equal(Category.Behavior, Categories.Of("useConveyor"));
 
-        Assert.Equal(Category.Behaviour, Categories.Of("Auto-Refill"));
+        Assert.Equal(Category.Behavior, Categories.Of("Auto-Refill"));
 
         // A tank holds hydrogen as often as oxygen, so its store is gas; the air in a room is the vent's alone.
         Assert.Equal(Category.Gas, Categories.Of("Stockpile"));
@@ -75,7 +75,7 @@ public class CategoryTests
     {
         Assert.Equal(Category.Weapons, Categories.Of("TargetingGroup_Anything"));
         Assert.Equal(Category.Weapons, Categories.Of("TargetingGroup_CycleSubsystems"));
-        Assert.Equal(Category.Behaviour, Categories.Of("Detect Small Ships_On"));
+        Assert.Equal(Category.Behavior, Categories.Of("Detect Small Ships_On"));
         Assert.Equal(Category.Signals, Categories.Of("Transmit Message 3"));
         Assert.Equal(Category.Access, Categories.Of("SafeZoneDrillingCb"));
     }

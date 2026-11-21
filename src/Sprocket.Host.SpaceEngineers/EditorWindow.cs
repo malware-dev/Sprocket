@@ -1,4 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Admin;
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
@@ -41,6 +43,8 @@ namespace Sprocket.Host.SpaceEngineers
         readonly HazardButton _admin;
         readonly Glyph _close;
         readonly Button _library;
+        readonly Glyph _share;
+        readonly ShareMenu _shares;
         readonly Glyph _run;
         readonly Glyph _delete;
         readonly Label _subtitle;
@@ -71,6 +75,9 @@ namespace Sprocket.Host.SpaceEngineers
         int _seen = -1;
         int _asked;
         bool _hanging;
+
+        // Whether the screen changed since the callouts last looked for a place to hang from.
+        bool _calloutsDue;
 
         Element _raisedBy;
 
@@ -131,6 +138,7 @@ namespace Sprocket.Host.SpaceEngineers
                             new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
                             new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _undoes }.As(out _undo),
                             new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _redoes }.As(out _redo),
+                            new Glyph { Symbol = Symbols.Share, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f) }.As(out _share),
                             new Button { Style = Styles.Button, Command = _libraries }.As(out _library),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f), Command = _deletes }.As(out _delete),
                             new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
@@ -196,6 +204,9 @@ namespace Sprocket.Host.SpaceEngineers
             SayPinHint();
             _editor.Reworded += SayPinHint;
 
+            _shares = new ShareMenu(_editor, _share);
+            _share.Command = _shares.Toggles;
+
             _editor.Input = Input;
             _editor.Windows = _workspace.Windows;
             _editor.Renamer = Rename;
@@ -231,11 +242,22 @@ namespace Sprocket.Host.SpaceEngineers
             Input.FocusChanged += Refocused;
             Input.PreviewPointerDown += PressReaching;
             Input.PreviewWheel += Turning;
+            _editor.Callouts.Changed += CalloutsChanged;
+            _editor.Callouts.Begin();
+            _calloutsDue = true;
+        }
+
+        /// <summary>Has the callouts look for a place to hang, as one was dismissed or a place has come into view.</summary>
+        void CalloutsChanged()
+        {
+            _calloutsDue = true;
         }
 
         /// <inheritdoc />
         protected override void OnClosed(CloseReason reason)
         {
+            _editor.Callouts.Changed -= CalloutsChanged;
+            _editor.Callouts.Close();
             _editor.Reworded -= SayPinHint;
             EndRename();
             Input.FocusChanged -= Refocused;
@@ -283,7 +305,10 @@ namespace Sprocket.Host.SpaceEngineers
                 EndRename();
 
             if (_editor.Current != _shownPage)
+            {
                 Show(screen);
+                _calloutsDue = true;
+            }
 
             _banner.Show(_editor.Notice);
 
@@ -294,12 +319,28 @@ namespace Sprocket.Host.SpaceEngineers
                 _foot.IsVisible = _vitals.IsVisible || _actions.Children.Count > 0;
             }
 
-            if (screen.Revision == _seen)
-                return;
+            if (screen.Revision != _seen)
+            {
+                _seen = screen.Revision;
+                Wrote();
+                Dress(screen);
+                _calloutsDue = true;
+            }
 
-            _seen = screen.Revision;
-            Wrote();
-            Dress(screen);
+            if (_calloutsDue)
+            {
+                _calloutsDue = false;
+                _editor.Callouts.Offer(_editor.Texts, CalloutAnchor);
+            }
+        }
+
+        /// <summary>The element a callout hangs from at <paramref name="place" /> on the screen as it stands, or null where there is none.</summary>
+        Element CalloutAnchor(CalloutPlace place)
+        {
+            if (place == CalloutPlace.HeaderShare)
+                return _share;
+
+            return _shownPage?.CalloutAnchor(place);
         }
 
         /// <summary>
@@ -420,10 +461,11 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
             }
 
-            if (_shownPage != null && _shownPage.ScrollsItself || !Within(wheel.Target, _frame))
+            // A sideways turn goes on to whatever scrolls sideways under the pointer.
+            if (_shownPage != null && _shownPage.ScrollsItself || wheel.Amount.Y == 0 || !Within(wheel.Target, _frame))
                 return;
 
-            _scroll.ScrollBy(wheel.Amount);
+            _scroll.ScrollBy(wheel.Amount.Y);
             wheel.Handled = true;
         }
 
@@ -583,6 +625,10 @@ namespace Sprocket.Host.SpaceEngineers
             _library.Text = texts.SystemsLoad;
             _libraries.CanExecute = screen.Library != null;
             _library.Tip = CodexTip.For(_library.Tip, screen.Library != null ? texts.Codex.TermLibrary : null);
+
+            _share.IsVisible = screen.Shares != null;
+            _shares.Offer = screen.Shares;
+            _share.Tip = CodexTip.For(_share.Tip, screen.Shares != null ? texts.Codex.ShareSystemTip : null);
 
             // A play button held back keeps its place, as the bin does.
             var doing = screen.Running ? screen.Stops : screen.Runs;

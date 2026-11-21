@@ -73,9 +73,9 @@ public class SlotHeadingTests
         Assert.NotNull(editor.Program.Systems[0].FindPart("inner"));
     }
 
-    /// <summary>A name another slot, a state or a type has, in any case, is refused in the heading.</summary>
+    /// <summary>A name another slot has, in any case, is refused in the heading; a state's may be shared.</summary>
     [Fact]
-    public void ANameTakenInAnyCaseIsRefused()
+    public void AnotherSlotsNameInAnyCaseIsRefused()
     {
         var screen = Built();
         var editor = screen.Editor;
@@ -87,7 +87,7 @@ public class SlotHeadingTests
 
         var heading = editor.Screen.Heading[0];
         Assert.False(heading.Takes("SIGNAL SLOT 1"));
-        Assert.False(heading.Takes("cycling"));
+        Assert.True(heading.Takes("cycling"));
         Assert.True(heading.Takes("inner"));
     }
 

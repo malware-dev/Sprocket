@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System.Collections.Generic;
 
@@ -16,8 +17,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
 
         readonly List<string> _wasSources;
         readonly List<string> _nowSources;
-        readonly string _wasEvent;
-        readonly string _nowEvent;
+        readonly MemberKey? _wasKey;
+        readonly MemberKey? _nowKey;
 
         /// <summary>The trigger <paramref name="was" /> made into <paramref name="now" />.</summary>
         public ChangeTrigger(Trigger was, Trigger now)
@@ -31,9 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
             var wasMoment = was as MomentTrigger;
             var nowMoment = now as MomentTrigger;
             _wasSources = wasMoment == null ? null : CopyOf(wasMoment.Sources);
-            _wasEvent = wasMoment?.EventId;
+            _wasKey = wasMoment?.Key;
             _nowSources = nowMoment == null ? null : CopyOf(nowMoment.Sources);
-            _nowEvent = nowMoment?.EventId;
+            _nowKey = nowMoment?.Key;
         }
 
         /// <inheritdoc />
@@ -53,14 +54,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
                 if (_was.GetType() != _now.GetType())
                     return true;
 
-                if (_wasEvent != _nowEvent || _wasSources != null && _nowSources != null && !Same(_wasSources, _nowSources))
+                if (_wasKey != _nowKey || _wasSources != null && _nowSources != null && !Same(_wasSources, _nowSources))
                     return true;
 
                 var wasWhen = _was as WhenTrigger;
                 var nowWhen = _now as WhenTrigger;
                 return wasWhen != null && nowWhen != null
                        && (wasWhen.Quantifier != nowWhen.Quantifier || wasWhen.Relation != nowWhen.Relation
-                           || wasWhen.Provider != nowWhen.Provider || wasWhen.Value.Said != nowWhen.Value.Said
+                           || wasWhen.Value.Said != nowWhen.Value.Said
                            || !Same(wasWhen.Arguments, nowWhen.Arguments));
             }
         }
@@ -68,13 +69,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
-            return Holds(system, _now, _nowSources, _nowEvent);
+            return Holds(system, _now, _nowSources, _nowKey);
         }
 
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return Holds(system, _was, _wasSources, _wasEvent);
+            return Holds(system, _was, _wasSources, _wasKey);
         }
 
         /// <inheritdoc />

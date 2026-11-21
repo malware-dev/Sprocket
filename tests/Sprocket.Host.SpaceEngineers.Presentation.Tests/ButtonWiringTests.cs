@@ -267,7 +267,7 @@ public class ButtonWiringTests
         var trigger = (SignalTrigger)system.Triggers[0];
         Assert.Equal(1, system.Instances[0].Positions(trigger.Part)![0].Slot);
         Assert.Equal(3, system.Instances[1].Positions(trigger.Part)![0].Slot);
-        Assert.Contains("ext.toolbar(1, 1, 3) on [ ", ProgramWriter.Save(sim.Editor.Program, sim.World.Values));
+        Assert.Contains("sprocket.toolbar(1, 1, 3) on [ ", ProgramWriter.Save(sim.Editor.Program, sim.World.Values));
     }
 
     /// <summary>

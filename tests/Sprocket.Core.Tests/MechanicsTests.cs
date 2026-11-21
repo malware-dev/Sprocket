@@ -34,8 +34,7 @@ public class MechanicsTests
         {
             var when = new WhenTrigger(member) { Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = relation, Value = value };
             when.Sources.Add(Name(block));
-            when.Does = Off();
-            Program.AddSequence((Trigger)null!).System.AddTrigger(when);
+            Program.AddSequence(when).Steps.Add(Off());
         }
 
         /// <summary>An <c>on</c> for Sprocket's own <paramref name="signal" /> of <paramref name="block" /> that switches the lamp off.</summary>
@@ -43,8 +42,7 @@ public class MechanicsTests
         {
             var on = SignalTrigger.Written(BlockKinds.Own, signal);
             on.Sources.Add(Name(block));
-            on.Does = Off();
-            Program.AddSequence((Trigger)null!).System.AddTrigger(on);
+            Program.AddSequence(on).Steps.Add(Off());
         }
 
         Act Off()
@@ -82,7 +80,7 @@ public class MechanicsTests
             else if (kind.OwnValue.Kind == ValueKind.Text)
                 operand = Literal.Of("");
 
-            var probe = Probe.Of(Rig.Entity(block.Id), BlockKinds.Own, member, new Literal[0], Quantifier.Any, Relation.Is, operand)!;
+            var probe = Probe.Of(Rig.Entity(block.Id), new MemberKey(BlockKinds.Own, member), new Literal[0], Quantifier.Any, Relation.Is, operand)!;
             return probe.Gauge.Read();
         }
     }

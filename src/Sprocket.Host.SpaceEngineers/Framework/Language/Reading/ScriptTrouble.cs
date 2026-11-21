@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
@@ -52,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         public void Takes(Statement statement, string block, ToolbarSlot at)
         {
             if (!_taken.Add($"{block}\n{at.EventId}"))
-                Say(statement, $"ext.toolbar({at.Toolbar}, {at.Page}, {at.Slot}) on [ {ScriptWriter.Spelling("", block)} ] already starts something; a toolbar slot holds one action.");
+                Say(statement, $"{BlockKinds.Own}.toolbar({at.Toolbar}, {at.Page}, {at.Slot}) on [ {ScriptWriter.Spelling("", block)} ] already starts something; a toolbar slot holds one action.");
         }
 
         /// <summary>Says the line of <paramref name="at" /> reads but looks like a mistake, <paramref name="what" />, where nothing did before.</summary>

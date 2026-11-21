@@ -1,10 +1,11 @@
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
-    /// What a trigger does: the sequence it runs or stops, or an act of its own.
+    /// What a trigger does: the sequence it runs or stops.
     /// </summary>
     public sealed class PointTrigger : SystemEdit
     {
@@ -12,14 +13,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly Trigger _trigger;
         readonly Sequence _made;
 
-        readonly Step _was;
-        readonly Step _now;
+        readonly Run _was;
+        readonly Run _now;
 
         readonly List<string> _sources;
-        readonly string _eventId;
+        readonly MemberKey? _key;
 
         /// <summary>Has <paramref name="trigger" /> do <paramref name="does" />, carrying <paramref name="made" />, the sequence made for it, where one was.</summary>
-        public PointTrigger(Automation program, Trigger trigger, Step does, Sequence made)
+        public PointTrigger(Automation program, Trigger trigger, Run does, Sequence made)
         {
             _program = program;
             _trigger = trigger;
@@ -30,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var moment = trigger as MomentTrigger;
             _sources = moment == null ? null : CopyOf(moment.Sources);
-            _eventId = moment?.EventId;
+            _key = moment?.Key;
         }
 
         /// <inheritdoc />
@@ -47,10 +48,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             get
             {
-                var was = _was as Run;
-                var now = _now as Run;
-                if (was != null && now != null)
-                    return was.Number != now.Number || was.Stops != now.Stops;
+                if (_was != null && _now != null)
+                    return _was.Number != _now.Number || _was.Stops != _now.Stops;
 
                 return _was != _now;
             }
@@ -59,13 +58,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
-            return _trigger.Does == _now && Holds(system, _trigger, _sources, _eventId);
+            return _trigger.Does == _now && Holds(system, _trigger, _sources, _key);
         }
 
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return _trigger.Does == _was && Holds(system, _trigger, _sources, _eventId);
+            return _trigger.Does == _was && Holds(system, _trigger, _sources, _key);
         }
 
         /// <inheritdoc />

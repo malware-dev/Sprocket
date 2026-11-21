@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>Stable identifier, referenced by saved rules.</summary>
         public string Id { get; private set; }
 
+        /// <summary>The host's namespace this is in: Sprocket's own, or a mod's for one the mod adds.</summary>
+        public string Namespace { get; private set; } = BlockKinds.Own;
+
+        /// <summary>What names this in memory: its namespace and its id.</summary>
+        public MemberKey Key => new MemberKey(Namespace, Id);
+
+        /// <summary>Puts this in the host's namespace <paramref name="space" />, such as a mod's, in place of Sprocket's own.</summary>
+        public EntityEvent InNamespace(string space)
+        {
+            Namespace = space ?? "";
+            return this;
+        }
+
         /// <summary>
         /// Whether something on the construct answers this rather than the block reporting it.
         /// </summary>
@@ -91,8 +105,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>Whether this is a toolbar a person presses, its page and slot chosen beside it.</summary>
         public bool IsPressed => Pages > 0;
 
-        /// <summary>The id of Sprocket's own value this is a change in, or empty where it is a change in nothing a block has.</summary>
+        /// <summary>The id of the value, in this signal's namespace, this is a change in, or empty where it is a change in nothing a block has.</summary>
         public string Value { get; private set; } = "";
+
+        /// <summary>What names <see cref="Value" /> in memory: the value of that id in this signal's namespace.</summary>
+        public MemberKey ValueKey => new MemberKey(Namespace, Value);
 
         /// <summary>What <see cref="Value" /> comes to be as this happens.</summary>
         public Literal Becomes { get; private set; }
@@ -108,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             EntityEvent one;
             if (!_slots.TryGetValue(id, out one))
             {
-                one = new EntityEvent(slot, _says(slot)) { Vetted = Vetted };
+                one = new EntityEvent(slot, _says(slot)) { Vetted = Vetted, Namespace = Namespace };
                 _slots.Add(id, one);
             }
 
@@ -124,6 +141,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
             var whole = IsPressed ? ToolbarSlot.Of(Id) : null;
             var slot = whole == null ? null : ToolbarSlot.Of(eventId);
             return slot != null && !slot.IsMany && whole.Covers(slot);
+        }
+
+        /// <summary>Whether <paramref name="key" />, as a program wrote it, names this: in its namespace or bare, by its own id or one slot of a toolbar a person presses.</summary>
+        public bool Names(MemberKey key)
+        {
+            return (key.IsBare || key.Namespace == Namespace) && Names(key.Id);
         }
 
         /// <summary>Says this is <paramref name="value" /> coming to be <paramref name="becomes" />.</summary>

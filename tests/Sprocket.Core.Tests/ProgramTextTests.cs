@@ -291,7 +291,7 @@ public class ProgramTextTests
         reverse.Targets.Add("rotor");
         sequence.Steps.Add(reverse);
 
-        var rotate = new Act(Blocks.Rotor.RotateTo) { Form = ReachKind.Native };
+        var rotate = new Act(new MemberKey(BlockKinds.Own, Blocks.Rotor.RotateTo)) { Form = ReachKind.Native };
         rotate.Targets.Add("rotor");
         rotate.Arguments.Add(Literal.Of(90L));
         rotate.Arguments.Add(Literal.Of(2.5));
@@ -302,7 +302,7 @@ public class ProgramTextTests
         speed.Arguments.Add(Literal.Of(5.0));
         sequence.Steps.Add(speed);
 
-        var shut = new Act("close");
+        var shut = new Act(new MemberKey(BlockKinds.Own, "close"));
         shut.Targets.Add("inner");
         sequence.Steps.Add(shut);
 
@@ -314,9 +314,9 @@ public class ProgramTextTests
 
         var saved = Save(program);
         Assert.Contains("call Reverse on [ rotor ]", saved);
-        Assert.Contains("call ext.rotate_to(90, 2.5) on [ rotor ]", saved);
+        Assert.Contains("call sprocket.rotate_to(90, 2.5) on [ rotor ]", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
-        Assert.Contains("call ext.close on [ inner ]\n", saved);
+        Assert.Contains("call sprocket.close on [ inner ]\n", saved);
         Assert.DoesNotContain("with", saved);
         Assert.Contains("set Radius on [ light ] to 4.5", saved);
 

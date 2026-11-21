@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using BlockKinds = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.BlockKinds;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
@@ -83,7 +84,7 @@ public class AirlockTests
     /// <summary>One thing done to some blocks, on its own, with nothing waiting for it.</summary>
     static Act Do(string actionId, params string[] targets)
     {
-        var step = new Act(actionId);
+        var step = new Act(new MemberKey(BlockKinds.Own, actionId));
         foreach (var target in targets)
             step.Targets.Add(target);
         return Given.Defaults(step);
@@ -172,7 +173,7 @@ public class AirlockTests
         ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
 
         var saved = ProgramWriter.Save(a.Automation, a.World.Values);
-        Assert.Contains("call ext.depressurize(1) on [ ", saved);
+        Assert.Contains("call sprocket.depressurize(1) on [ ", saved);
 
         var after = new Automation();
         Assert.Equal("", ProgramReader.Load(saved, after, a.World.Values));
@@ -763,7 +764,7 @@ public class AirlockTests
 
         foreach (var lamp in new[] { one, other })
         {
-            var trigger = SignalTrigger.Written("ext", "turns_on");
+            var trigger = SignalTrigger.Written("sprocket", "turns_on");
             trigger.Sources.Add(a.Ref(a.Seen(lamp)));
             trigger.Does = new Run(a.LetMeOut.Number);
             system.AddTrigger(trigger);
@@ -1329,33 +1330,6 @@ public class AirlockTests
         Assert.Empty(a.Log);
     }
 
-    /// <summary>A <c>when</c> may act on the blocks itself, with no sequence to run.</summary>
-    [Fact]
-    public void AWhenMayActItself()
-    {
-        var a = Build();
-        var system = a.Automation.Systems[0];
-
-        var shut = SignalTrigger.Written("ext", "finishes_closing");
-        shut.Sources.Add(a.Ref(a.Seen(a.Inner)));
-        shut.Does = Do("open", a.Ref(a.Seen(a.Outer)));
-        system.AddTrigger(shut);
-        a.Automation.Edited();
-
-        var closing = a.Automation.AddSequence(system);
-        Then(closing, "close", a.Ref(a.Seen(a.Inner)));
-
-        a.Inner.ForceOpen();
-        a.Tick(20);
-        a.Log.Clear();
-
-        a.Runner.Call(closing);
-        a.Tick(200);
-
-        Assert.Equal(["Inner Door:close", "Outer Door:open"], a.Log);
-        Assert.Single(a.Automation.Sequences, s => s.System == system && s != a.LetMeOut);
-    }
-
     /// <summary>A <c>when</c> looks every thirty ticks, whether it asks for thirty or the runner allows no more often, and fires on the look that sees the moment.</summary>
     /// <remarks>
     /// Its first look is on the first tick after it is made, which is tick 1, and every thirtieth tick after that; so a full
@@ -1376,8 +1350,7 @@ public class AirlockTests
         else
             on.Interval = Duration.OfTicks(30);
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
-        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(on);
+        a.Automation.AddSequence(system, on).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Vent.Enabled = false;
@@ -1400,11 +1373,10 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var on = SignalTrigger.Written("ext", "turns_on");
+        var on = SignalTrigger.Written("sprocket", "turns_on");
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
         on.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(on);
+        a.Automation.AddSequence(system, on).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Vent.Enabled = false;
@@ -1433,12 +1405,11 @@ public class AirlockTests
         again.Keys.AddRange(vent.Keys);
         a.Automation.Restore(again);
 
-        var on = SignalTrigger.Written("ext", "turns_on");
+        var on = SignalTrigger.Written("sprocket", "turns_on");
         on.Sources.Add(vent.Name);
         on.Sources.Add(again.Name);
 
-        on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(on);
+        a.Automation.AddSequence(system, on).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Vent.Enabled = false;
@@ -1464,10 +1435,9 @@ public class AirlockTests
         a.Runner.FastestUpdate = fastestUpdate;
         var system = a.Automation.Systems[0];
 
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
+        var opened = SignalTrigger.Written("sprocket", "finishes_opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(opened);
+        a.Automation.AddSequence(system, opened).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Inner.ForceOpen();
@@ -1514,10 +1484,9 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opening = SignalTrigger.Written("ext", "starts_opening");
+        var opening = SignalTrigger.Written("sprocket", "starts_opening");
         opening.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opening.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(opening);
+        a.Automation.AddSequence(system, opening).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Inner.ForceOpen();
@@ -1538,10 +1507,9 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var closing = SignalTrigger.Written("ext", "starts_closing");
+        var closing = SignalTrigger.Written("sprocket", "starts_closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(closing);
+        a.Automation.AddSequence(system, closing).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Inner.ForceOpen();
@@ -1563,10 +1531,9 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var closing = SignalTrigger.Written("ext", "starts_closing");
+        var closing = SignalTrigger.Written("sprocket", "starts_closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(closing);
+        a.Automation.AddSequence(system, closing).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Inner.ForceOpen();
@@ -1589,10 +1556,9 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var closing = SignalTrigger.Written("ext", "starts_closing");
+        var closing = SignalTrigger.Written("sprocket", "starts_closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(closing);
+        a.Automation.AddSequence(system, closing).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
         a.Tick(10);
 
@@ -1616,15 +1582,13 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
+        var opened = SignalTrigger.Written("sprocket", "finishes_opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opened.Does = Do("close", a.Ref(a.Seen(a.Outer)));
-        system.AddTrigger(opened);
+        a.Automation.AddSequence(system, opened).Steps.Add(Do("close", a.Ref(a.Seen(a.Outer))));
 
-        var closing = SignalTrigger.Written("ext", "starts_closing");
+        var closing = SignalTrigger.Written("sprocket", "starts_closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(closing);
+        a.Automation.AddSequence(system, closing).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Inner.ForceOpen();
@@ -1644,10 +1608,9 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
+        var opened = SignalTrigger.Written("sprocket", "finishes_opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(opened);
+        a.Automation.AddSequence(system, opened).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
 
         a.Inner.ForceOpen();
@@ -1670,10 +1633,9 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
+        var opened = SignalTrigger.Written("sprocket", "finishes_opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
-        system.AddTrigger(opened);
+        a.Automation.AddSequence(system, opened).Steps.Add(Do("close", a.Ref(a.Seen(a.Inner))));
         a.Automation.Edited();
         a.Tick(3);
         Assert.Equal(3, a.Outer.Listeners);
@@ -1788,13 +1750,13 @@ public class AirlockTests
     /// </remarks>
     static void Mutex(Airlock a, Door door, Door other)
     {
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
+        var opened = SignalTrigger.Written("sprocket", "finishes_opening");
         opened.Sources.Add(a.Ref(a.Seen(door)));
         var secure = a.Automation.AddSequence(opened);
         secure.Name = $"Secure the other door while {door.Name} is open";
         Then(secure, Given.Power(false, a.Ref(a.Seen(other))));
 
-        var shut = SignalTrigger.Written("ext", "finishes_closing");
+        var shut = SignalTrigger.Written("sprocket", "finishes_closing");
         shut.Sources.Add(a.Ref(a.Seen(door)));
         var release = a.Automation.AddSequence(shut);
         release.Name = $"Release the other door when {door.Name} shuts";

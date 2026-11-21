@@ -1043,20 +1043,6 @@ public class EditorTests
         Assert.False(editor.RootHeadings()[0].SwitchIsOn);
     }
 
-    /// <summary>A sequence's row has no switch: the system's is the one switch for everything in it.</summary>
-    [Fact]
-    public void ASequenceRowHasNoSwitchOfItsOwn()
-    {
-        var ship = Build();
-        var editor = ship.Editor;
-
-        StartOnTheButton(editor);
-        editor.Back();
-        ship.Tick();
-
-        Assert.Null(editor.Rows()[0].Flips);
-    }
-
     /// <summary>
     /// Deleting a sequence happens at once, and its logic system's undo brings it back with the trigger that runs it.
     /// </summary>

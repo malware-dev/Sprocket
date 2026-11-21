@@ -271,8 +271,7 @@ public class ProductionTests
         {
             var off = Given.Power(false);
             off.Targets.Add(Name(Lamp));
-            trigger.Does = off;
-            Program.AddSequence((Trigger)null!).System.AddTrigger(trigger);
+            Program.AddSequence(trigger).Steps.Add(off);
         }
 
         public int Fired => Rig.Rig.Log.Count(line => line == "Lamp:off");

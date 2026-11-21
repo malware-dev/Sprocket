@@ -20,6 +20,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>The category a slot is shown under with the slots beside it under the same one, text: <c>#@ category: "Doors"</c>.</summary>
         public const string Category = "category";
 
+        /// <summary>How a setting's value is edited and shown beyond its type, text naming the editor: <c>#@ editor: "percent"</c>.</summary>
+        public const string Editor = "editor";
+
         /// <summary>The attributes of <paramref name="statement" /> other than those named in <paramref name="used" />, kept as written, or null where there are none.</summary>
         public static KeptAttributes Unused(Statement statement, params string[] used)
         {

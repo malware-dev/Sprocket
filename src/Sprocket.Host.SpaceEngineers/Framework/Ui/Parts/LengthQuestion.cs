@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using System;
@@ -19,21 +20,35 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         readonly SprocketEditor _editor;
         readonly DurationPanel _panel;
         readonly Popup _window;
-        readonly Action<Duration?, bool> _answered;
+        readonly Action<Duration?, string, bool> _answered;
+        ValuesQuestion _making;
 
         bool _done;
 
         /// <summary>
-        /// A panel opening on <paramref name="start" />, cautioning about cost where it is a <paramref name="rate" />, hung from
-        /// what <paramref name="chip" /> finds, and <paramref name="answered" /> with the length it closes on and whether it was
-        /// put away.
+        /// A panel opening on <paramref name="start" />, or on the setting <paramref name="setting" /> of <paramref name="system" /> where
+        /// it is not empty, cautioning about cost where it is a <paramref name="rate" />, hung from what <paramref name="chip" /> finds,
+        /// and <paramref name="answered" /> with the length and the setting it closes on and whether it was put away.
         /// </summary>
-        public LengthQuestion(SprocketEditor editor, Duration start, bool rate, Func<Element> chip, Action<Duration?, bool> answered)
+        /// <remarks>A setting may give the length where <paramref name="system" /> is a blueprint.</remarks>
+        public LengthQuestion(SprocketEditor editor, AutomationSystem system, Duration start, string setting, bool rate, Func<Element> chip,
+            Action<Duration?, string, bool> answered)
         {
             _editor = editor;
             _answered = answered;
 
-            _panel = new DurationPanel(editor.Texts, editor.Input, start) { Cautions = rate };
+            // A length that a setting gives is opened on the setting's default, which a fixed length chosen instead starts from.
+            var held = string.IsNullOrEmpty(setting) ? null : system?.FindPart(setting);
+            if (held != null && held.HasDefault && held.Default.Kind == ValueKind.Duration)
+                start = held.Default.Length;
+
+            _panel = new DurationPanel(editor.Texts, editor.Input, start) { Cautions = rate, Sourced = system != null && system.IsBlueprint };
+            if (!string.IsNullOrEmpty(setting) && _panel.Sourced)
+                _panel.Choose(setting, SettingSources.Default(system, setting));
+
+            _panel.Sourcing += mark => SettingSources.Offer(editor, system, type => type == "duration", _panel.Setting, _panel.Choose,
+                () => _making = SettingSources.New(editor, system, "duration", Literal.Of(_panel.Length ?? Duration.OfSeconds(1)), () => mark,
+                    made => _panel.Choose(made, SettingSources.Default(system, made)), () => _making = null));
             _panel.Submitted += Accept;
             _panel.Cancelled += () => Finish(true);
             _panel.Switched += editor.Prefer;
@@ -74,6 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (_done)
                 return;
 
+            _making?.Hang();
             var opening = !_window.IsOpen;
             _window.Hang();
             if (!opening || !_window.IsOpen)
@@ -102,8 +118,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 return;
 
             _done = true;
+            _making?.Finish(true);
             _window.Close();
-            _answered(_panel.Length, cancelled);
+            _answered(_panel.Length, _panel.Setting, cancelled);
         }
     }
 }

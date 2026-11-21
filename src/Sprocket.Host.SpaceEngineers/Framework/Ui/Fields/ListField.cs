@@ -94,6 +94,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             InvalidateMeasure();
         }
 
+        /// <summary>Draws a line in the list before the word at <paramref name="index" />, setting the words after it apart.</summary>
+        public void Rule(int index)
+        {
+            Items.Insert(Items.IndexOf(_items[index]), new Separator());
+        }
+
         /// <summary>Has the word at <paramref name="index" /> say <paramref name="about" /> under the pointer, in the list.</summary>
         public void Explain(int index, Tip about)
         {

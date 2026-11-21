@@ -578,6 +578,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             return null;
         }
 
+        /// <summary>The moment <paramref name="key" />, as a program wrote it, names; null where the kind has none, or a bare name meets more than one.</summary>
+        public EntityEvent FindEvent(MemberKey key)
+        {
+            EntityEvent found = null;
+            foreach (var entityEvent in _events)
+            {
+                if (!key.Names(entityEvent.Key))
+                    continue;
+
+                if (found != null)
+                    return null;
+
+                found = entityEvent;
+            }
+
+            return found;
+        }
+
         /// <summary>The signal the one toolbar slot <paramref name="at" /> is among, or null where none of this kind's is.</summary>
         public EntityEvent Signal(ToolbarSlot at)
         {
@@ -606,12 +624,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
             return null;
         }
 
+        /// <summary>The entry <paramref name="key" /> names exactly, reached as <paramref name="form" />, or null where there is none.</summary>
+        public EntityAction FindAction(MemberKey key, ReachKind form)
+        {
+            foreach (var action in _actions)
+            {
+                if (action.Form == form && action.Key == key)
+                    return action;
+            }
+            return null;
+        }
+
         /// <summary>The field a test of a value of Sprocket's own asks for what it is compared with.</summary>
         static Field Asked(string named, OwnValue being)
         {
             switch (being.Kind)
             {
+                case ValueKind.Text:
                 case ValueKind.Name:
+                    if (being.Names.Count == 0)
+                        break;
+
                     var words = new string[being.Names.Count];
                     var means = new string[being.Names.Count];
                     for (var i = 0; i < words.Length; i++)
@@ -621,7 +654,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                     }
 
                     var among = Field.Among(named, words, means);
-                    among.Entry = FieldInput.Name;
+                    among.Entry = being.Kind == ValueKind.Text ? FieldInput.Text : FieldInput.Name;
+                    among.Choices = being.Choices;
                     return among;
                 case ValueKind.Flag:
                     var either = Field.OneOf(named, Literal.Of(true).Said, Literal.Of(false).Said);

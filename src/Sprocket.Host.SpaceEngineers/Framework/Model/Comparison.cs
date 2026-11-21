@@ -13,11 +13,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly List<string> _targets = new List<string>();
         readonly List<Literal> _arguments = new List<Literal>();
 
-        /// <summary>The member's id.</summary>
-        public string MemberId { get; set; } = "";
+        /// <summary>The member this reads, as the program holds it: qualified by its namespace, or bare as it was written.</summary>
+        public MemberKey Key { get; set; }
 
-        /// <summary>The namespace the member is qualified by, or empty for a bare one.</summary>
-        public string Provider { get; set; } = "";
+        /// <summary>The id of the member this reads, within its namespace.</summary>
+        /// <remarks>Setting it keeps the namespace; the member is still named by <see cref="Key" />.</remarks>
+        public string MemberId
+        {
+            get { return Key.Id; }
+            set { Key = Key.WithId(value); }
+        }
+
+        /// <summary>The namespace the member is written qualified by, or empty where it is written bare.</summary>
+        /// <remarks>Setting it keeps the id; the member is still named by <see cref="Key" />.</remarks>
+        public string Provider
+        {
+            get { return Key.Namespace; }
+            set { Key = new MemberKey(value, Key.Id); }
+        }
 
         /// <summary>How the blocks are read: any of them, all, or their sum.</summary>
         public Quantifier Quantifier { get; set; }
@@ -39,8 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             var copy = new Comparison
             {
-                MemberId = MemberId,
-                Provider = Provider,
+                Key = Key,
                 Quantifier = Quantifier,
                 Relation = Relation,
                 Value = Value
@@ -51,10 +63,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return copy;
         }
 
-        /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>ext</c>, the block's own where it is bare; null where it names none.</summary>
+        /// <summary>The value among <paramref name="actions" /> that the member names; null where it names none, or a bare name meets more than one.</summary>
         public EntityAction Names(IList<EntityAction> actions)
         {
-            return EntityAction.Value(actions, Provider, MemberId);
+            return EntityAction.Value(actions, Key);
+        }
+
+        /// <summary>Whether this test's bare name meets more than one value among <paramref name="actions" />, so it names none of them.</summary>
+        public bool Ambiguous(IList<EntityAction> actions)
+        {
+            return EntityAction.Ambiguous(actions, Key, true);
         }
     }
 }

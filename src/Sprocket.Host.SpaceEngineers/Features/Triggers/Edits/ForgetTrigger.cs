@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System.Collections.Generic;
 
@@ -19,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         readonly List<Answer> _answers = new List<Answer>();
 
         readonly List<string> _sources;
-        readonly string _eventId;
+        readonly MemberKey? _key;
 
         /// <summary>Takes <paramref name="going" /> out of <paramref name="system" />, with the signal slot it names where nothing else names it.</summary>
         public ForgetTrigger(AutomationSystem system, Trigger going)
@@ -31,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
 
             var moment = going as MomentTrigger;
             _sources = moment == null ? null : CopyOf(moment.Sources);
-            _eventId = moment?.EventId;
+            _key = moment?.Key;
         }
 
         /// <inheritdoc />
@@ -61,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return Holds(system, _going, _sources, _eventId);
+            return Holds(system, _going, _sources, _key);
         }
 
         /// <inheritdoc />

@@ -1,5 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Features.Slots;
 using Sprocket.Host.SpaceEngineers.Features.States;
 using Sprocket.Host.SpaceEngineers.Features.Triggers;
@@ -112,6 +114,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public override bool Untouched => _system.Name == _madeName && _system.Annotation == _madeAbout
             && _system.Enabled == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
 
+        /// <summary>What the Share menu offers of the system: sharing it through the library, and copying it as it is on screen.</summary>
+        public override ShareOffer Shares => Editor.Holdings.Offering(_system);
+
         /// <summary>The command that deletes the system, asking first.</summary>
         public override ICommand Deletes => Editor.Act(CommandKind.DeleteSystem, () => Editor.DeleteSystem(_system));
 
@@ -172,6 +177,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <summary>The blueprint's slots, one row each, with the shown installation's blocks for each.</summary>
         public Element.Collection Slots => _slotPanel.Slots.Children;
+
+        /// <summary>The panel a setting is made, opened or given a value in on the installation panel tab while one is open, or null.</summary>
+        public ValuesQuestion Asking => _panelWork?.Asking;
 
         /// <summary>The rows of the Sequences tab, in order: each sequence's, and each category's heading and end.</summary>
         public Element.Collection SequenceRows => _sequenceList.Children;
@@ -246,6 +254,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Show(false);
         }
 
+        /// <inheritdoc />
+        public override Element CalloutAnchor(CalloutPlace place)
+        {
+            return place == CalloutPlace.SlotAdd && _slotPanel != null ? _slotPanel.AddSlot : null;
+        }
+
         /// <summary>Keeps the rows by trigger and by sequence, and fills the view.</summary>
         protected override void ViewCreated()
         {
@@ -269,7 +283,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (Editor.Habits.Tabs.TryGetValue(_system.Id, out shown))
                 _tabs.SelectedIndex = shown;
 
-            _tabs.SelectionChanged += at => Editor.Habits.Tabs[_system.Id] = at;
+            _tabs.SelectionChanged += at =>
+            {
+                Editor.Habits.Tabs[_system.Id] = at;
+
+                // The plus is on a tab, and shows only while that tab is chosen.
+                Editor.Callouts.Reconsider();
+            };
+
 
             Show(true);
         }
@@ -305,8 +326,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (recount)
                 {
                     var fault = _runs[i] == null ? SequenceFault.None : Fault(_runs[i], through);
-                    var own = _triggers[i].Acts != null && fault.Exists;
-                    row.Problem = own || IsStarting(fault) && Concerns(_triggers[i], fault)
+                    row.Problem = IsStarting(fault) && Concerns(_triggers[i], fault)
                         ? SequenceText.Problem(texts, fault, _runs[i])
                         : "";
                     row.Level = SequenceText.Level(fault);
@@ -379,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _runs.Clear();
             foreach (var trigger in _triggers)
             {
-                _runs.Add(trigger.Acts != null ? Editor.Runner.Alone(_system, trigger) : _system.FindSequence(trigger.Runs));
+                _runs.Add(_system.FindSequence(trigger.Runs));
             }
 
             _triggersWork.Arrange(texts, Editable, Locked());

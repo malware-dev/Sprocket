@@ -71,11 +71,11 @@ public class SoundTests
         var selected = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Selected, ReachKind.Value)!;
 
         Assert.Equal(new[] { "SoundBlockAlert1", "SoundBlockAlert2", "SoundBlockLightsOn" }, selected.OwnValue!.Names);
-        Assert.False(selected.OwnValue.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
+        Assert.False(selected.OwnValue.Is(Literal.Of("SoundBlockAlert2")).Holds(speaker.Block, null!));
 
         speaker.Selected = "SoundBlockAlert2";
-        Assert.True(selected.OwnValue.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
-        Assert.Equal(Literal.Of(1L), Ran.Read(ship, speaker, Blocks.Speaker.Selected));
+        Assert.True(selected.OwnValue.Is(Literal.Of("SoundBlockAlert2")).Holds(speaker.Block, null!));
+        Assert.Equal(Literal.Of("SoundBlockAlert2"), Ran.Read(ship, speaker, Blocks.Speaker.Selected));
     }
 
     /// <summary>The block's own stop, volume, range and loop time are said in Sprocket's words.</summary>

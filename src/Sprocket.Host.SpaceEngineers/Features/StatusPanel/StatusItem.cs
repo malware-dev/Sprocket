@@ -27,9 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel
         /// <summary>What the sequence at fault is called, or empty where it has no name.</summary>
         public string Sequence;
 
-        /// <summary>Whether the fault is in a trigger's own act rather than a sequence.</summary>
-        public bool Alone;
-
         /// <summary>The row of the step at fault, or 0 where no step is.</summary>
         public int Row;
 
@@ -46,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel
         public bool Same(StatusItem other)
         {
             return Level == other.Level && Logic == other.Logic && Number == other.Number && Blueprint == other.Blueprint
-                && Installation == other.Installation && Position == other.Position && Sequence == other.Sequence && Alone == other.Alone
+                && Installation == other.Installation && Position == other.Position && Sequence == other.Sequence
                 && Row == other.Row && Halted == other.Halted && Fault.Same(other.Fault) && Fault.Which == other.Fault.Which;
         }
     }

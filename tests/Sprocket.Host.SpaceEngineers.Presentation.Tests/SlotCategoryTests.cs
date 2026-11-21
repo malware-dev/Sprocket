@@ -239,7 +239,7 @@ public class SlotCategoryTests
         Assert.Equal(new[] { "signal slot 1", "# Doors", "block slot 1", "+ Doors", "block slot 2" }, Rows(screen));
     }
 
-    /// <summary>A category's end offers each kind of slot: blocks, a signal, a screen and an inventory.</summary>
+    /// <summary>A category's end offers each kind of slot: blocks, a signal, a screen, an inventory and a setting.</summary>
     [Fact]
     public void ACategorysEndOffersEachKindOfSlot()
     {
@@ -249,7 +249,7 @@ public class SlotCategoryTests
 
         var adds = ((CategoryEndRow)Row(screen, "+ Doors")).Adds;
 
-        Assert.Equal(new[] { texts.SlotAddBlocks, texts.SlotAddSignal, texts.SlotAddScreen, texts.SlotAddInventory }, adds.Choices.Select(choice => choice.Text));
+        Assert.Equal(new[] { texts.SlotAddBlocks, texts.SlotAddSignal, texts.SlotAddScreen, texts.SlotAddInventory, texts.SlotAddSetting }, adds.Choices.Select(choice => choice.Text));
     }
 
     /// <summary>

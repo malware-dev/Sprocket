@@ -50,7 +50,10 @@
     <value>En ![](mark:action)&amp;nbsp;**handling** er noe en blokk kan gjøre, som å åpne en dør eller skyve ut et stempel.</value>
   </data>
   <data name="Sprocket.Term.Option" xml:space="preserve">
-    <value>Et **valg** er en innstilling en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
+    <value>Et **valg** er en verdi en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) bruker, som posisjonen og farten til et stempel.</value>
+  </data>
+  <data name="Sprocket.Term.Setting" xml:space="preserve">
+    <value>En ![](mark:setting)&amp;nbsp;**innstilling** lar deg justere et logikksystem for hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) uten å endre stegene, for eksempel hvor lenge en luftsluse venter før den lukkes. Den vises på [installasjonspanelet](Term.InstallationPanel class=term) sammen med de andre plassene.</value>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
     <value>En **oppgave** er én operasjon: å kjøre eller stoppe en [![](mark:sequence)&amp;nbsp;sekvens](Term.Sequence class=term), en [![](mark:action)&amp;nbsp;handling](Term.Action class=term) på blokker, eller å [sette](Term.Set class=term) en [![](mark:value)&amp;nbsp;blokkverdi](Term.Value class=term).</value>
@@ -256,9 +259,6 @@
   <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
     <value>Endre hvor ofte den skal kjøre.</value>
   </data>
-  <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
-    <value>Velg hvilke blokker denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) virker på.</value>
-  </data>
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
     <value>Navnet på denne sekvensen.</value>
   </data>
@@ -334,9 +334,6 @@
   <data name="Sprocket.Part.TriggerBlocks" xml:space="preserve">
     <value>Blokker som får denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) til å utløses:</value>
   </data>
-  <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
-    <value>Blokker denne [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) virker på:</value>
-  </data>
   <data name="Sprocket.Part.FromSlot" xml:space="preserve">
     <value>Fra [plassen](Term.Slot class=term) {slots}.</value>
   </data>
@@ -355,12 +352,6 @@
   <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
     <value>Velg noe i hver kolonne først.</value>
   </data>
-  <data name="Sprocket.Pick.Back" xml:space="preserve">
-    <value>Tilbake</value>
-  </data>
-  <data name="Sprocket.Pick.Next" xml:space="preserve">
-    <value>Neste</value>
-  </data>
   <data name="Sprocket.Pick.ClearTyped" xml:space="preserve">
     <value>Tøm det som er skrevet</value>
   </data>
@@ -377,7 +368,7 @@
     <value>Vis bare én sort blokk.</value>
   </data>
   <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Velg hva [steget](Term.Step class=term), [hvis-steget](Term.If class=term) eller [![](mark:trigger)&amp;nbsp;utløseren](Term.Trigger class=term) arbeider med. `Eksisterende plass` bruker en [plass](Term.Slot class=term) [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) har fra før.</value>
+    <value>Velg hva dette arbeider med.</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>Dette er [![](mark:awaited)&amp;nbsp;avventbart](Term.Awaitable class=term). [![](mark:sequence)&amp;nbsp;Sekvensen](Term.Sequence class=term) går rett videre mens det virker, og et `wait for pending tasks`-[steg](Term.Step class=term) nedenfor venter til det er ferdig.</value>
@@ -634,6 +625,18 @@
   </data>
   <data name="Sprocket.Slot.AddInventoryAbout" xml:space="preserve">
     <value>Velg inventaret til en blokk å lage en ny [plass](Term.Slot class=term) av, fylt med det i denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term).</value>
+  </data>
+  <data name="Sprocket.Slot.AddSettingAbout" xml:space="preserve">
+    <value>Lag en ny ![](mark:setting)&amp;nbsp;[innstilling](Term.Setting class=term), en verdi hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) gir for seg selv.</value>
+  </data>
+  <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
+    <value>Gi denne [innstillingen](Term.Setting class=term) et navn, si hva den er til, og endre standardverdien.</value>
+  </data>
+  <data name="Sprocket.Setting.ValueAbout" xml:space="preserve">
+    <value>Velg verdien denne [![](mark:installation)&amp;nbsp;installasjonen](Term.Installation class=term) gir [innstillingen](Term.Setting class=term), eller bruk standardverdien.</value>
+  </data>
+  <data name="Sprocket.Setting.HoldsAbout" xml:space="preserve">
+    <value>Hva [innstillingen](Term.Setting class=term) inneholder. Det velges når innstillingen lages.</value>
   </data>
   <data name="Sprocket.Category.Open" xml:space="preserve">
     <value>Gi kategorien nytt navn, eller la [![](mark:sequence)&amp;nbsp;sekvensene](Term.Sequence class=term) i den kjøre én om gangen.</value>
@@ -1797,6 +1800,10 @@
     <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når landingsstellet låser seg.</value>
     <comment>Codex entry on the block member "locks" of LandingGear, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.LandingGear.Unlocks" xml:space="preserve">
+    <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når landingsstellet låser seg opp.</value>
+    <comment>Codex entry on the block member "unlocks" of LandingGear, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.LandingGear.Lock" xml:space="preserve">
     <value>Låser landingsstellet til det som er innen rekkevidde.</value>
     <comment>Codex entry on the block member "lock" of LandingGear, shown in the picker when it is chosen.</comment>
@@ -1844,6 +1851,10 @@
   <data name="Sprocket.Member.Connector.Locks" xml:space="preserve">
     <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når kontakten låser seg.</value>
     <comment>Codex entry on the block member "locks" of Connector, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Connector.Unlocks" xml:space="preserve">
+    <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når kontakten låser seg opp.</value>
+    <comment>Codex entry on the block member "unlocks" of Connector, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Connector.DockedShip" xml:space="preserve">
     <value>Navnet på skipet som er låst til kontakten, eller ingenting når det ikke er noe.</value>
@@ -3818,5 +3829,17 @@
   <data name="Sprocket.Member.Option.KeepAspectRatio" xml:space="preserve">
     <value>Om et bilde beholder proporsjonene sine. Brukes når `content` er `text and images`.</value>
     <comment>Codex entry on the option "keep aspect ratio" of ScreenType, shown as its tooltip in the picker.</comment>
+  </data>
+  <data name="Sprocket.Share.SystemTip" xml:space="preserve">
+    <value>Del dette logikksystemet, eller kopier det som tekst.</value>
+  </data>
+  <data name="Sprocket.Share.SystemAbout" xml:space="preserve">
+    <value>Lagre dette logikksystemet som en [![](mark:blueprint)&amp;nbsp;plantegning](Term.Blueprint class=term) i [biblioteket](Term.Library class=term), og velg så hvem du vil dele det med.</value>
+  </data>
+  <data name="Sprocket.Share.BlueprintTip" xml:space="preserve">
+    <value>Del denne plantegningen, eller kopier den som tekst.</value>
+  </data>
+  <data name="Sprocket.Share.BlueprintAbout" xml:space="preserve">
+    <value>Velg hvem du vil dele denne plantegningen med.</value>
   </data>
 </root>

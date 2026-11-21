@@ -152,7 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             var source = SourceName == null ? "" : SourceName();
             if (answer.Slots.Count == 0 && answer.SlotName == source)
             {
-                var type = Vocabulary.TypeOf(_editor.World, answer.Targets, answer.Chosen);
+                var type = Vocabulary.TypeOf(_editor.World, answer.Targets, answer.Key);
                 answer.SlotName = _editor.Picks.NewSlotName(System, "", false, type, source);
             }
 

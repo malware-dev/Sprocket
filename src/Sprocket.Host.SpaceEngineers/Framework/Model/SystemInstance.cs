@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
@@ -18,6 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             Enabled = true;
             _system = system;
         }
+
+        /// <summary>The system it is a run of.</summary>
+        public AutomationSystem System => _system;
 
         /// <summary>Which one of its system this is.</summary>
         public int Number { get; private set; }
@@ -72,11 +76,95 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         readonly Dictionary<string, string> _notes = new Dictionary<string, string>();
         readonly Dictionary<string, KeptAttributes> _kept = new Dictionary<string, KeptAttributes>();
 
+        readonly Dictionary<string, Literal> _settings = new Dictionary<string, Literal>();
+
         /// <summary>The slots it fills.</summary>
         public IEnumerable<string> Filled => _fills.Keys;
 
-        /// <summary>Whether no slot has been filled.</summary>
-        public bool IsEmpty => _fills.Count == 0;
+        /// <summary>The settings it answers.</summary>
+        public IEnumerable<string> Answered => _settings.Keys;
+
+        /// <summary>Whether no slot has been filled and no setting answered.</summary>
+        public bool IsEmpty => _fills.Count == 0 && _settings.Count == 0;
+
+        /// <summary>Answers the setting <paramref name="setting" /> with <paramref name="value" />, a value of the setting's type.</summary>
+        public void Answer(string setting, Literal value)
+        {
+            _settings[setting] = value;
+        }
+
+        /// <summary>Leaves the setting <paramref name="setting" /> unanswered, so its default stands.</summary>
+        public void Unanswer(string setting)
+        {
+            _settings.Remove(setting);
+        }
+
+        /// <summary>This installation's own answer to <paramref name="setting" />, and whether it gives one.</summary>
+        /// <remarks>Its answer alone: an unanswered setting's default is <see cref="Gives" />'s.</remarks>
+        public bool AnswerTo(string setting, out Literal value)
+        {
+            return _settings.TryGetValue(setting, out value);
+        }
+
+        /// <summary>
+        /// The value <paramref name="setting" /> has in this installation: its answer, or the setting's default where it gives
+        /// none; false where it has neither, or its system has no such setting.
+        /// </summary>
+        /// <remarks>Asked as a step is worked out or reached, never on a tick.</remarks>
+        public bool Gives(string setting, out Literal value)
+        {
+            value = default(Literal);
+            var part = _system?.FindPart(setting);
+            if (part == null || !part.IsSetting)
+                return false;
+
+            if (_settings.TryGetValue(setting, out value))
+                return true;
+
+            value = part.Default;
+            return part.HasDefault;
+        }
+
+        /// <summary>
+        /// <paramref name="value" /> as <paramref name="through" /> has it: the value it gives a setting standing there, a length
+        /// of time as its ticks, and any other value as it is; false where it gives the setting none.
+        /// </summary>
+        /// <remarks>For a value given a member, which takes a length of time as its ticks, as it takes one written there.</remarks>
+        public static bool Settled(SystemInstance through, Literal value, out Literal settled)
+        {
+            settled = value;
+            if (!value.IsSetting)
+                return true;
+
+            Literal given;
+            if (through == null || !through.Gives(value.Text, out given))
+                return false;
+
+            settled = given.Kind == ValueKind.Duration ? Literal.Of(given.Length.Ticks) : given;
+            return true;
+        }
+
+        /// <summary>
+        /// <paramref name="given" /> with each setting standing in it as <see cref="Settled(SystemInstance, Literal, out Literal)" />
+        /// has it, the same list where none does; a setting <paramref name="through" /> gives no value is left standing.
+        /// </summary>
+        public static IList<Literal> Settled(SystemInstance through, IList<Literal> given)
+        {
+            List<Literal> settled = null;
+            for (var i = 0; i < given.Count; i++)
+            {
+                Literal value;
+                if (!given[i].IsSetting || !Settled(through, given[i], out value))
+                    continue;
+
+                if (settled == null)
+                    settled = new List<Literal>(given);
+
+                settled[i] = value;
+            }
+
+            return settled ?? given;
+        }
 
         /// <summary>Slots this one's own blocks into one of the system's block slots.</summary>
         public void Fill(string slot, IList<string> entities)
@@ -150,10 +238,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 chosen.Add(entities[i]);
         }
 
-        /// <summary>Leaves <paramref name="slot" /> unfilled, forgetting what filled it and what was written above it.</summary>
+        /// <summary>Leaves <paramref name="slot" /> unfilled, or a setting unanswered, forgetting what filled it and what was written above it.</summary>
         public void Clear(string slot)
         {
             _fills.Remove(slot);
+            _settings.Remove(slot);
             _positions.Remove(slot);
             _facets.Remove(slot);
             _notes.Remove(slot);
@@ -196,11 +285,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public void RenameSlot(string was, string now)
         {
             List<string> chosen;
-            if (!_fills.TryGetValue(was, out chosen))
+            Literal setting;
+            if (_settings.TryGetValue(was, out setting))
+            {
+                _settings.Remove(was);
+                _settings[now] = setting;
+            }
+            else if (_fills.TryGetValue(was, out chosen))
+            {
+                _fills.Remove(was);
+                _fills[now] = chosen;
+            }
+            else
                 return;
-
-            _fills.Remove(was);
-            _fills[now] = chosen;
 
             string note;
             if (_notes.TryGetValue(was, out note))

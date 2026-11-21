@@ -31,11 +31,11 @@ public class SalvageTests
         + "when|any|pressed_1|entity1\n";
 
     /// <summary>A program of this version with a step no sequence can hold.</summary>
-    const string Broken = "sprocket 1\n\nsystem \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
+    const string Broken = "sprocket 2\n\nsystem \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
         + "    sequence 1 {\n        nonsense\n    }\n}\n";
 
     /// <summary>The same, mended.</summary>
-    const string Mended = "sprocket 1\n\nsystem \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
+    const string Mended = "sprocket 2\n\nsystem \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
         + "    sequence 1 {\n        wait 60t\n    }\n}\n";
 
     /// <summary>The notice on the screen, or null. The driving helper throws where there is none.</summary>
@@ -206,7 +206,7 @@ public class SalvageTests
 
         var saved = store.GetValue(BlockStorage.ProgramKey);
 
-        Assert.StartsWith("sprocket 1", saved);
+        Assert.StartsWith("sprocket 2", saved);
         Assert.Contains("Airlock", saved);
         Assert.DoesNotContain("|", saved);
 
@@ -289,7 +289,7 @@ public class SalvageTests
         rig.Save();
 
         Assert.False(rig.Editor.Screen.HasQuestion);
-        Assert.StartsWith("sprocket 1", store.GetValue(BlockStorage.ProgramKey));
+        Assert.StartsWith("sprocket 2", store.GetValue(BlockStorage.ProgramKey));
         Assert.Null(Said(rig));
     }
 
@@ -350,7 +350,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.StartsWith("sprocket 1", store.GetValue(BlockStorage.ProgramKey));
+        Assert.StartsWith("sprocket 2", store.GetValue(BlockStorage.ProgramKey));
         Assert.Contains("Airlock", store.GetValue(BlockStorage.ProgramKey));
     }
 }

@@ -11,9 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         New,
 
         /// <summary>Run, or stop, a sequence the system already has.</summary>
-        Existing,
-
-        /// <summary>Do one thing to some blocks, chosen next.</summary>
-        One
+        Existing
     }
 }

@@ -467,7 +467,7 @@ public static class RuntimeReport
                         .Append(fitting.Id.ToString(CultureInfo.InvariantCulture)).Append(", \"").Append(fitting.Name).Append("\" ]\n");
 
                 instances.Append("instance ").Append(a + 1).Append(" of \"").Append(Guid).Append("\" as '").Append(a + 1).Append("' {\n")
-                    .Append("    button = [ ext.toolbar(1, 1, 1) on [ '").Append(button.Name).Append("' ] ]\n")
+                    .Append("    button = [ sprocket.toolbar(1, 1, 1) on [ '").Append(button.Name).Append("' ] ]\n")
                     .Append("    inner = [ '").Append(inner.Name).Append("' ]\n")
                     .Append("    outer = [ '").Append(outer.Name).Append("' ]\n")
                     .Append("    vent = [ '").Append(vent.Name).Append("' ]\n")
@@ -499,24 +499,24 @@ public static class RuntimeReport
         + "    required slot vent expects AirVent\n"
         + "    required slot lamp\n\n"
         + "    whenever button then run 1\n"
-        + "    whenever ext.finishes_closing on [ inner ] then run 2\n"
-        + "    when any ext.oxygen_level on [ vent ] < 0.5 then run 3\n\n"
+        + "    whenever sprocket.finishes_closing on [ inner ] then run 2\n"
+        + "    when any sprocket.oxygen_level on [ vent ] < 0.5 then run 3\n\n"
         + "    sequence 1 as Cycle {\n"
-        + "        call ext.close on [ inner ]\n"
+        + "        call sprocket.close on [ inner ]\n"
         + "        await\n"
-        + "        call ext.open on [ outer ]\n"
+        + "        call sprocket.open on [ outer ]\n"
         + "        await\n"
         + "        wait 60t\n"
-        + "        call ext.close on [ outer ]\n"
+        + "        call sprocket.close on [ outer ]\n"
         + "        await\n"
-        + "        call ext.open on [ inner ]\n"
+        + "        call sprocket.open on [ inner ]\n"
         + "        await\n"
         + "    }\n\n"
         + "    sequence 2 as Shut {\n"
-        + "        set ext.power on [ lamp ] to on\n"
+        + "        set sprocket.power on [ lamp ] to on\n"
         + "    }\n\n"
         + "    sequence 3 as Thin {\n"
-        + "        set ext.power on [ lamp ] to off\n"
+        + "        set sprocket.power on [ lamp ] to off\n"
         + "    }\n"
         + "}\n";
 
@@ -529,7 +529,7 @@ public static class RuntimeReport
         + "    required slot lamp\n\n"
         + "    every 6000t run 1\n\n"
         + "    sequence 1 as Light {\n"
-        + "        set ext.power on [ lamp ] to on\n"
+        + "        set sprocket.power on [ lamp ] to on\n"
         + "    }\n"
         + "}\n";
 

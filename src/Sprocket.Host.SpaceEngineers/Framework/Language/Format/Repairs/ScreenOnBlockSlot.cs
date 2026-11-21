@@ -90,13 +90,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs
             if (actions == null)
                 return carried;
 
-            foreach (var trigger in system.Triggers)
-            {
-                var own = trigger.Acts;
-                if (own != null && !ReferenceEquals(own.Targets, replacing) && own.Targets.Contains(part.Id) && own.Names(actions)?.Type == type)
-                    carried.Add(own.Targets);
-            }
-
             foreach (var sequence in system.Sequences)
             {
                 foreach (var step in sequence.Steps)
@@ -179,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs
             return entity?.Kind.Actions;
         }
 
-        /// <summary>Whether every step and trigger of <paramref name="system" /> that names <paramref name="slot" /> does something of <paramref name="type" /> to its blocks, as <paramref name="shown" /> fills it.</summary>
+        /// <summary>Whether every step of <paramref name="system" /> that names <paramref name="slot" /> does something of <paramref name="type" /> to its blocks, as <paramref name="shown" /> fills it.</summary>
         /// <remarks>A trigger that watches the slot reads its blocks themselves, so it never does.</remarks>
         static bool AllUse(Bindings bindings, AutomationSystem system, SystemInstance shown, string slot, HostType type)
         {
@@ -191,10 +184,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs
             {
                 var moment = trigger as MomentTrigger;
                 if (moment != null && moment.Sources.Contains(slot))
-                    return false;
-
-                var own = trigger.Acts;
-                if (own != null && own.Targets.Contains(slot) && own.Names(actions)?.Type != type)
                     return false;
             }
 

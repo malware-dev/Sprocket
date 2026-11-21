@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Lumel.Text;
 using System.Collections.Generic;
 using Lumel.Input;
@@ -17,6 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         int _revision;
         string _subtitle = "";
         ICommand _library;
+        ShareOffer _shares;
         ICommand _flip;
         bool _switchIsOn;
         string _switchAbout;
@@ -85,6 +87,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         {
             get { return _library; }
             set { Set(ref _library, value); }
+        }
+
+        /// <summary>What the Share menu in the heading offers, or null on a screen with nothing to share.</summary>
+        public ShareOffer Shares
+        {
+            get { return _shares; }
+            set { Set(ref _shares, value); }
         }
 
         /// <summary>Switches this screen's subject the other way, or null when it has no such switch.</summary>

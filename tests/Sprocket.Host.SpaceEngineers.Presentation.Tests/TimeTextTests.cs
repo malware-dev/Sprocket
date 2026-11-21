@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <remarks>
 /// Core states how long ago something happened in ticks, because ticks are the only honest unit it
 /// has. Turning that into something a person reads is this target's job, and it is done for every
-/// visible sequence on every tick - so the cost of doing it is part of the behaviour rather than an
+/// visible sequence on every tick - so the cost of doing it is part of the behavior rather than an
 /// implementation detail.
 /// </remarks>
 public class TimeTextTests

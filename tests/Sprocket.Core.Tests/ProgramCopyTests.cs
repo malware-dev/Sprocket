@@ -233,7 +233,7 @@ public class ProgramCopyTests
 
         var finished = SignalTrigger.Written(BlockKinds.Own, "finishes_closing");
         finished.Sources.Add("inner");
-        finished.Does = new SetState { State = "where", Value = Literal.Name("inside") };
+        finished.Does = new Run(3);
         system.AddTrigger(finished);
 
         var outside = new StateTrigger(new StateTest { State = "where", Relation = Relation.Is, Value = Literal.Name("outside") });

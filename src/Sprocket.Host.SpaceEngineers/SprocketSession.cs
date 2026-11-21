@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Features.Sharing;
 using Sprocket.Host.SpaceEngineers.Features.Sharing.Messages;
 using Sprocket.Host.SpaceEngineers.Features.StatusPanel;
@@ -15,6 +16,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -86,6 +88,7 @@ namespace Sprocket.Host.SpaceEngineers
         ShareDesk _desk;
 
         StatusWatch _watch;
+        SlotPresses _presses;
 
         Constructs _constructs;
 
@@ -333,15 +336,18 @@ namespace Sprocket.Host.SpaceEngineers
 
             Speak();
 
-            // On every machine: a server presses slots, and a client draws them.
-            SignalAction.Begin(_texts);
+            // On every machine: a client draws slots and presses a ship's, and a server presses a button panel's and fires them all.
+            _presses = new SlotPresses(id => MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock,
+                (block, sender) => block.HasPlayerAccess(MyAPIGateway.Players.TryGetIdentityId(sender)), (block, key) => On(block)?.Fire(key));
+            SignalAction.Begin(_texts, _presses.Pressed);
 
             _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
                 Settled, written => Rule(Settings.Of(written)));
             _constructs = new Constructs(_roster);
             _motion = new ScreenMotion(_rota);
             _watch = new StatusWatch(_rota, Frame, _constructs.Of, Connected);
-            _channel = ShareCourier.Carry(StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType())))).Build();
+            _channel = SlotPresses.Carry(ShareCourier.Carry(StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType()))))).Build();
+            _presses.Listen(_channel);
             _handover.Listen(_channel);
             _watch.Listen(_channel);
             _shares = new ShareCourier(Desk, Told);
@@ -357,6 +363,7 @@ namespace Sprocket.Host.SpaceEngineers
                     _rota.At(_reclaim, _rota.Now + Reclaiming);
             };
 
+            GameLog.Say($"Sprocket Automation {ModVersion.Text}");
             GameLog.Say(IsServer
                 ? "this machine runs the Sprockets"
                 : "this machine is a client; the Sprockets run on the server");
@@ -807,6 +814,9 @@ namespace Sprocket.Host.SpaceEngineers
             unit.Shelf = _shelf;
             unit.Editor.PlayerName = Named;
             unit.Editor.OpenedFrom = block.EntityId;
+            unit.Editor.OpenedFromData = () => block.CustomData;
+            unit.Editor.IsInFaction = () => MyAPIGateway.Session?.Player != null &&
+                                            MyAPIGateway.Session.Factions?.TryGetPlayerFaction(MyAPIGateway.Session.Player.IdentityId) != null;
             unit.Editor.Sharing = MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive ? _shares.Board : null;
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);
@@ -816,6 +826,11 @@ namespace Sprocket.Host.SpaceEngineers
                 _choices = Choices.WithTips(on);
                 _choices.Keep();
             };
+            unit.Editor.Callouts.Keeping(() => Choices, kept =>
+            {
+                _choices = kept;
+                kept.Keep();
+            });
             unit.Editor.Preferred = IsServer ? null : (Action)(() => _handover.Prefer(_mine));
             unit.Administers = Administers;
             unit.WorldSettings = () => Asked;
@@ -984,6 +999,9 @@ namespace Sprocket.Host.SpaceEngineers
                 StandsDown = false;
                 return;
             }
+
+            // The next world may run without the mods that registered namespaces in this one.
+            HostNamespaces.Clear();
 
             if (MyAPIGateway.TerminalControls != null)
             {

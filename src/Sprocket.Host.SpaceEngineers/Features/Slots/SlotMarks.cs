@@ -10,6 +10,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <summary>What <paramref name="instance" /> still has to do about <paramref name="part" />.</summary>
         public static SlotMark Of(Bindings bindings, SystemInstance instance, Part part)
         {
+            // A setting is still to be set only where it has no default and the installation has given it no value.
+            if (part.IsSetting)
+            {
+                Literal answer;
+                return part.HasDefault || instance.AnswerTo(part.Id, out answer) ? SlotMark.None : SlotMark.New;
+            }
+
             var filled = instance.FilledWith(part.Id);
             if (filled == null || filled.Count == 0)
                 return SlotMark.New;
@@ -36,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
             {
-                if (parts[i].IsSignal || !used.Contains(parts[i].Id))
+                if (parts[i].IsSignal || parts[i].IsSetting || !used.Contains(parts[i].Id))
                     continue;
 
                 if (Misfits(bindings, instance, parts[i]))
@@ -49,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <summary>Whether a block <paramref name="instance" /> fills the block slot <paramref name="part" /> with is of a kind the slot's type no longer takes.</summary>
         static bool Misfits(Bindings bindings, SystemInstance instance, Part part)
         {
-            if (part.IsSignal || part.Holds.Length != 0)
+            if (part.IsSignal || part.IsSetting || part.Holds.Length != 0)
                 return false;
 
             var filled = instance.FilledWith(part.Id);

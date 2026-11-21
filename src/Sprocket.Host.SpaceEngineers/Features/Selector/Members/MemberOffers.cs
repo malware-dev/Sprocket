@@ -29,7 +29,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         readonly bool _forTests;
         readonly bool _signalsOnly;
         readonly List<string> _names = new List<string>();
-        readonly List<string> _ids = new List<string>();
+        readonly List<MemberKey> _keys = new List<MemberKey>();
+        readonly List<string> _owners = new List<string>();
+        readonly Dictionary<string, int> _valueIds = new Dictionary<string, int>();
+        readonly Dictionary<string, int> _otherIds = new Dictionary<string, int>();
         readonly List<ReachKind> _forms = new List<ReachKind>();
         readonly List<int> _groups = new List<int>();
         readonly List<string> _marks = new List<string>();
@@ -61,8 +64,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             return _groups[at] == Statuses;
         }
 
-        /// <summary>The id of each offer.</summary>
-        public List<string> Ids => _ids;
+        /// <summary>What names each offer: its namespace and its id.</summary>
+        public List<MemberKey> Keys => _keys;
+
+        /// <summary>
+        /// The name of what adds each offer, shown under it where another offer shares its id, as the title its namespace is
+        /// registered with or the namespace as written; empty where its id is the only one of its kind listed.
+        /// </summary>
+        public List<string> Owners => _owners;
 
         /// <summary>How each offer reaches the block: an action, a value, or the block's own.</summary>
         public List<ReachKind> Forms => _forms;
@@ -92,10 +101,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         /// Lists what <paramref name="selection" /> offers, numbers alone where <paramref name="totals" /> asks for a sum or an
         /// average, and only the member <paramref name="only" /> where that is not null.
         /// </summary>
-        public void Fill(List<long> selection, bool totals, string only)
+        public void Fill(List<long> selection, bool totals, MemberKey? only)
         {
             _names.Clear();
-            _ids.Clear();
+            _keys.Clear();
+            _owners.Clear();
             _forms.Clear();
             _groups.Clear();
             _marks.Clear();
@@ -121,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                     _names.Add(entityEvent.Text);
                     _marks.Add(MarkText.Of(entityEvent));
 
-                    _ids.Add(entityEvent.Id);
+                    _keys.Add(entityEvent.Key);
                     _sets.Add(false);
                     _forms.Add(ReachKind.Native);
                     _groups.Add(Moments);
@@ -147,10 +157,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             {
                 var actions = Vocabulary.ActionsOf(_editor.World, selection);
                 if (only != null)
-                    actions.RemoveAll(action => action.Id != only);
+                    actions.RemoveAll(action => action.Key != only.Value);
 
                 Grouped(actions);
             }
+
+            Own();
+        }
+
+        /// <summary>Names what adds each offer whose id another offer of the same kind shares, so the two are told apart.</summary>
+        /// <remarks>Once for each fill of the pick: one count of the offers, then one look for each.</remarks>
+        void Own()
+        {
+            _valueIds.Clear();
+            _otherIds.Clear();
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                var counted = _forms[i] == ReachKind.Value ? _valueIds : _otherIds;
+                int had;
+                counted.TryGetValue(_keys[i].Id, out had);
+                counted[_keys[i].Id] = had + 1;
+            }
+
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                var counted = _forms[i] == ReachKind.Value ? _valueIds : _otherIds;
+                _owners.Add(counted[_keys[i].Id] > 1 ? Owner(_keys[i].Namespace) : "");
+            }
+        }
+
+        /// <summary>What a list calls what adds the members of the namespace <paramref name="space" />: the title it is registered with, such as a mod's or the game's, or the namespace as written where none is known.</summary>
+        string Owner(string space)
+        {
+            var known = HostNamespaces.Find(space);
+            return known != null && !string.IsNullOrEmpty(known.Title) ? known.Title : space;
         }
 
         /// <summary>Whether <paramref name="value" /> is a number, which is what a sum can be taken of.</summary>
@@ -207,7 +247,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             {
                 var word = states.Words[i];
                 _names.Add(word);
-                _ids.Add(ComparisonQuestion.Id(status.Id, states.Means == null ? word : states.Means[i]));
+                _keys.Add(new MemberKey(status.Namespace, ComparisonQuestion.Id(status.Id, states.Means == null ? word : states.Means[i])));
                 _forms.Add(ReachKind.Native);
                 _groups.Add(Statuses);
                 _marks.Add(Symbols.Value);
@@ -223,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         void Read(EntityAction one, int group)
         {
             _names.Add(Said(one));
-            _ids.Add(one.Id);
+            _keys.Add(one.Key);
             _forms.Add(ReachKind.Value);
             _groups.Add(group);
             _marks.Add(Symbols.Value);
@@ -258,7 +298,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                     continue;
 
                 _names.Add(Said(one));
-                _ids.Add(one.Id);
+                _keys.Add(one.Key);
                 _forms.Add(one.Form);
                 _groups.Add(group);
                 _marks.Add(MarkText.Of(one));
@@ -296,20 +336,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
                 : named;
         }
 
-        /// <summary>Whether what is on offer under <paramref name="id" />, reached as <paramref name="form" />, can be made into a step.</summary>
-        public Readiness ReadinessOf(string id, ReachKind form)
+        /// <summary>Whether what is on offer under <paramref name="key" />, reached as <paramref name="form" />, can be made into a step.</summary>
+        public Readiness ReadinessOf(MemberKey key, ReachKind form)
         {
-            var at = At(id, form);
+            var at = At(key, form);
             return at >= 0 && at < _ready.Count ? _ready[at] : Readiness.Ready;
         }
 
-        /// <summary>Where what is on offer under <paramref name="id" />, reached as <paramref name="form" />, is in the list, or -1 where it is not listed.</summary>
-        /// <remarks>By the id and by which of the three ways it reaches the block, because a switch's value and the act that flips it share one id.</remarks>
-        public int At(string id, ReachKind form)
+        /// <summary>Where what is on offer under <paramref name="key" />, reached as <paramref name="form" />, is in the list, or -1 where it is not listed.</summary>
+        /// <remarks>By the key and by which of the three ways it reaches the block, because a switch's value and the act that flips it share one id.</remarks>
+        public int At(MemberKey key, ReachKind form)
         {
-            for (var i = 0; i < _ids.Count; i++)
+            for (var i = 0; i < _keys.Count; i++)
             {
-                if (_ids[i] == id && (_forms.Count > i ? _forms[i] : ReachKind.Native) == form)
+                if (_keys[i] == key && (_forms.Count > i ? _forms[i] : ReachKind.Native) == form)
                     return i;
             }
 

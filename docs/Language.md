@@ -1,4 +1,5 @@
 # Sprocket Script Language Specification
+Version 2
 
 Sprocket is an imperative, event-driven domain-specific language designed for programming automated systems on constructs within host environments. Programs are written and read by the host's editor first: they carry what it needs to find everything again, such as GUIDs and entity ids. They are also kept plain text, so a person can read one and repair it by hand when that is needed.
 
@@ -48,7 +49,10 @@ Following the mandatory version declaration, a script file may contain:
 * **Brace Placement:** The opening brace `{` of a block may appear either at the end of the statement line or on a new line immediately beneath it.
 * **Statement Heads:** The head of a statement is an unquoted identifier, a quoted name, or a language keyword.
 * **Case Sensitivity:** Identifiers and keywords are strictly case-sensitive (`run` and `Run` are distinct tokens).
-* **Contextual Keywords:** Keywords are contextual. A quoted identifier is never evaluated as a keyword (e.g., an action named `every` must be escaped as `'every'`).
+* **Keywords:** The language has reserved keywords and contextual keywords.
+  * **Reserved:** `system`, `blueprint`, `instance`, `sequence`, `slot`, `type`, `let`, `required`, `optional`, `if`, `else`, `then`, `call`, `run`, `stop`, `set`, `wait`, `await`, `when`, `whenever`, `every`, `is` and `not`. A name spelled like one is always quoted: an action named `every` is written `'every'`.
+  * **Contextual:** Every other word the grammar uses, such as `of`, `as`, `to`, `on`, `expects`, `all` or `installed`, is a keyword only where its construct expects it, and a name anywhere else. It is quoted only where it stands at that place.
+  * A quoted name is never read as a keyword.
 
 ---
 
@@ -82,12 +86,13 @@ optional slot button expects signal
 | **Integer** | `60`, `74857693847562934` | 64-bit signed whole integer. |
 | **Real** | `0.25`, `1E-05` | Floating-point value, denoted by a decimal point or an exponent. An integer may substitute for a real where accepted. |
 | **Duration** | `600t`, `2s`, `1.5s` | Token pairing a numeric scalar with a unit suffix: `t` (game ticks) or `s` (seconds, where `1s = 60t`). Seconds can have fractional parts and round to the nearest whole tick (`0.25s` = 15t, `0.01s` = 1t). |
-| **Flag** | `on`, `off` | Boolean literal values. |
-| **Choice** | `inside`, `side.inside`, `Gearbox.status.closed` | Enumerated choice defined by a system `type` or host enum. Can be bare or qualified. |
+| **Flag** | `on`, `off` | The two choices of the built-in type `flag`, resolved as any choice is (§9.2). |
+| **Choice** | `inside`, `side(inside)`, `gearbox.door_status(closed)` | A choice of a type the system declares (§9.1) or of a host type (§5.2). Written bare, or with its type as a kind (§4.3). |
 | **Color** | `#FF8800`, `#FF8800CC` | Hexadecimal color literal (RGB or RGBA). |
 | **Vector** | `(3 0 -2)` | Three space-separated integers or reals enclosed in parentheses. |
 | **List** | `[ 1, "two", three ]` | Comma-separated elements in square brackets. May nest lists and vectors: `[ 7, [ (0 2 -1), (3 0 0) ] ]`. |
 | **Block** | `block 'Door/LargeBlockDoor' [ … ]` | Concrete hardware block binding descriptor. |
+| **Setting** | `'Open angle'`, `setting('Open angle')` | Stands in for a literal wherever the language takes one: the value of the named setting (§8), which each instance supplies. The setting's type must suit the place, as a literal there would. |
 
 ### 4.1 Identifiers vs. IDs (References)
 
@@ -96,11 +101,38 @@ Any entity possessing both an ID and a name (such as a sequence or a system blue
 * **By Name:** An identifier or quoted name (e.g., `run 'Cycle'`, `instance 1 of MalTek.Airlock`). If the target is renamed, references using the name must be updated.
 * **Numeric Disambiguation:** A sequence explicitly named `"2"` must be quoted as `'2'`; a bare `2` is always parsed as sequence ID 2.
 
+### 4.2 Namespaces
+
+Every name in a program lives in the same world: its slots, types, states, sequences and settings, and the host's own members and types. Two things with the same name collide. A type and a sequence both named `cycle` leave `cycle` meaning either.
+
+A name is written bare wherever that means one thing, and with more detail where it could mean more. A name that could mean more than one thing as written is an error. There are two kinds of detail, and they combine:
+
+* **A namespace**, with a dot: `gearbox.close`. The host's members and types belong to its namespaces.
+* **A kind** (§4.3): `sequence(cycle)`, `side(inside)`.
+
+`closed`, `door_status(closed)` and `gearbox.door_status(closed)` are the same choice, each written with more detail than the one before.
+
+* Each part of a qualified name is judged on its own, so any part spelled like a reserved keyword is quoted: `gearbox.'every'`.
+
+### 4.3 Kinds
+
+`<kind>(<thing>)` says what kind of thing `<thing>` is. A kind is a built-in type (`flag`, `text`, `integer`, `real`, `duration`, `color`, `vector`, `list`), a type the system declares (§9.1), a host type (§5.2), a block type, written `block_type(Door)`, or a kind of thing a program names: `slot`, `type`, `state`, `setting` or `sequence`.
+
+```sprocket
+run sequence(cycle)          # the sequence, where a type is also called cycle
+let home = side(outside)
+if setting('Outer light') == on then { ... }
+```
+
+* A kind only chooses among what `<thing>` could already be, and never turns one thing into another. `real(4)` is the real 4, as `4` already stands for a real; `text(4)` is an error, as `4` is never text.
+* A kind is written like a function call, and is told from one by its name. A function always belongs to a host's namespace, so a function whose name is also a kind's is written with it: `gearbox.side(1)`.
+* A kind may itself have a kind: `type(side)(inside)` is a choice of the type `side` where a slot is also called `side`.
+
 ---
 
 ## 5. Host Integration
 
-The host engine supplies runtime members and types beyond the core language grammar. The examples in this document are written for a host with a namespace called `Gearbox`.
+The host engine supplies runtime members and types beyond the core language grammar. The examples in this document are written for a host with a namespace called `gearbox` for its members and types.
 
 ### 5.1 Block Members
 
@@ -109,37 +141,33 @@ Every member exposed by a host on a block is an **action**, a **value**, a **fun
 1. **Action:** An operation executed via `call`. May declare parameters.
 2. **Value:** A block property read via `if` or `when`, and mutated via `set` if writable by the host. `set` on a value the host offers only to be read is an error.
 3. **Function:** A parameterized reader evaluated like a value. Must take at least one argument.
-4. **Signal:** An asynchronous event emitted by a block (e.g., `Gearbox.closes`). Functions may also return signals, named by where they are sent from: a place the host offers, such as a position on a block's toolbar, or a thing of a host type. Used with `whenever` or bound to signal slots.
+4. **Signal:** An asynchronous event emitted by a block (e.g., `gearbox.closes`). Functions may also return signals, named by where they are sent from: a place the host offers, such as a position on a block's toolbar, or a thing of a host type. Used with `whenever` or bound to signal slots.
 
 #### Member Semantics and Validation
 * Invoking a non-existent member, or using a member as the wrong kind (e.g., calling `call` on a value, or `set` on a function), is an error.
 * An action and a value on the same block may share the same ID. The statement head (`call` vs. `set`/read) disambiguates them.
-* **Arguments:** Supplied in comma-separated parentheses immediately following the member identifier: `Gearbox.rotate_to(0, 90, 2)`.
+* **Arguments:** Supplied in comma-separated parentheses immediately following the member identifier: `gearbox.rotate_to(0, 90, 2)`.
   * Parentheses are written **only** when arguments are present. Writing empty parentheses `()` is a syntax error.
   * Argument counts and types must match the member's parameter signature. Supplying incompatible types or an integer exceeding parameter limits is an error.
-  * A parameter may take slots. Its argument is a list of slot names in square brackets: `call Gearbox.move_items([ cargo ], "Ingot/Iron", 100) on [ output ]`. The parameter's signature says what the slots must hold, blocks or things of a host type.
-* **Return Types:** Values and functions return a flag, integer, real, text, color, or a host choice name.
+  * A parameter may take slots. Its argument is a list of slot names in square brackets: `call gearbox.move_items([ cargo ], "Ingot/Iron", 100) on [ output ]`. The parameter's signature says what the slots must hold, blocks or things of a host type.
+  * A setting may stand in for an argument, as for any literal (§4): `call gearbox.rotate_to(setting('Open angle'), 2) on [ hinge ]`.
+* **Return Types:** Values and functions return a flag, integer, real, text, color, or a choice of a host type.
 
 ### 5.2 Host Types
 
 A host may provide non-block object types associated with a block (such as an LCD text surface).
-* Host types are namespaced: `Gearbox.screen`.
-* Returned by host functions: `Gearbox.screen(1) on [ board ]` is the first screen of the block `board`.
+* Host types are namespaced: `gearbox.screen`.
+* Returned by host functions: `gearbox.get_screen(1) on [ board ]` is the first screen of the block `board`.
 * Entities of a host type expose members defined by the host for that type:
   ```sprocket
-  call Gearbox.'show text'("Docked") on [ status ]
+  call gearbox.'show text'("Docked") on [ status ]
   ```
   where `status` holds screens. A member the host does not provide for that type is an error.
 * Which types a host provides, which functions return each, and which members each has, is the host's to say.
 
-### 5.3 Namespaces
+### 5.3 Namespaces the Host Lacks
 
-Every block member resides in a namespace:
-* **Root Namespace:** Members are written bare (e.g., `Reverse`, `Radius`).
-* **Named Namespaces:** Members are written qualified with a dot (e.g., `Gearbox.close`, `Gearbox.rotate_to`).
-* Each part of a qualified name is judged on its own, so any part spelled like a keyword is quoted: `Gearbox.'on'`.
-* A host may have a root namespace, named namespaces, or both. A host with no root namespace has every member written qualified.
-* Referencing a member in a non-existent namespace is an error.
+A host may gain namespaces as it runs, such as one for each extension it loads, and may lack a namespace a program names. A program naming a member, signal or type in a namespace the host lacks reads as written. Such a member is not offered (§5.1) until the host has its namespace.
 
 ---
 
@@ -151,7 +179,7 @@ The first statement of every program must declare the language format version:
 sprocket <format> [alpha <draft>]
 ```
 
-* `<format>`: Major format integer (currently `1`). Increments only when a change would break existing programs outright.
+* `<format>`: Major format integer. Increments only when a change would break existing programs outright.
 * `alpha <draft>`: Indicates an unfinished development format (e.g., `sprocket 1 alpha 18`). The draft goes up for every change to the language: a change that makes an existing program read differently or not at all, and every addition, so that a build refuses a program from a draft it does not know rather than misread it.
 * **Precedence:** A finalized format omitting `alpha` is strictly higher and later than all of its drafts:
   ```
@@ -210,18 +238,22 @@ required slot inner expects Door
 required slot hangar expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'
 optional slot lamp expects LightingBlock
 optional slot button expects signal
-optional slot display expects Gearbox.screen
+optional slot display expects gearbox.screen
 optional slot generic
+optional slot 'Open angle' expects real = 45
+required slot mode expects side
 ```
 
 * **Cardinality:** Must be declared as either `required` or `optional`. An instance may leave an optional slot unassigned. Leaving a required slot unassigned marks the instance as missing that slot.
 * **Expectation (`expects`):**
-  * **Game Type:** A game type id with the `MyObjectBuilder_` prefix dropped (e.g., `LightingBlock`, `Door`). Takes every block of that type and of every type the game builds on it, so `LightingBlock` takes interior lights and spotlights alike.
+  * **Game Type:** A game type id with the `MyObjectBuilder_` prefix dropped (e.g., `LightingBlock`, `Door`). Takes every block of that type and of every type the game builds on it, so `LightingBlock` takes interior lights and spotlights alike. Where the system also declares a type of that name, it is written `block_type(Door)`.
   * **Exact Subtype:** A quoted name `'Type/Subtype'`, taking that one exact block.
   * **`signal`:** For slots bound to functions returning signals.
-  * **Host Type:** A qualified host type identifier (e.g., `Gearbox.screen`), for slots answered by functions that return one. `optional slot output expects Gearbox.inventory`, answered by `Gearbox.inventory(2) on [ refinery ]`, holds that inventory of the block.
+  * **Host Type:** A qualified host type identifier (e.g., `gearbox.screen`), for slots answered by functions that return one. `optional slot output expects gearbox.inventory`, answered by `gearbox.get_inventory(2) on [ refinery ]`, holds that inventory of the block.
   * **Omitted:** A slot declared with no `expects` clause accepts any block.
+  * **Value:** A built-in value type (`flag`, `text`, `integer`, `real`, `duration`, `color`) or a type the system declares (§9.1). The slot is a **setting**: each instance answers it with one value of that type instead of blocks.
 * When a slot is populated from multiple blocks, it expects the nearest common ancestor type shared by all assigned blocks.
+* **Settings:** An `optional` setting gives a default after `=`, a literal of its type: `optional slot 'Open angle' expects real = 45`. An instance that leaves it unassigned uses the default. A `required` setting gives none, and every instance must answer it. An optional setting without a default, or a required one with a default, is an error.
 
 ---
 
@@ -243,15 +275,14 @@ type stage = idle | 'cycling in' | 'cycling out'
 
 ### 9.2 Choice Resolution
 
-* Choices can be written bare (`inside`) or qualified by type (`side.inside`).
-* Host enum choices are qualified by namespace and member (`Gearbox.status.closed`).
-* In an expression, a bare identifier resolves first to a state of that name, and then to a choice of that name.
-* If a bare choice is ambiguous (defined across multiple declared types) and its type cannot be told from where it stands, as in a state's starting value, it is an error and must be explicitly qualified:
+* Choices can be written bare (`inside`) or with their type as a kind (`side(inside)`), and a host type's choices with its namespace too (`gearbox.door_status(closed)`).
+* Where the type a value must have is known, a bare choice is looked for among that type's choices alone. A name that could also mean anything else the program names, such as a state, a setting or a slot, is ambiguous whatever its type.
+* Where no type is known, as in a state's starting value, a bare choice that more than one type has is an error, and is written with its type:
   ```sprocket
   type valve = open | shut
   type hatch = open | shut
 
-  let intake = valve.open  # `open` alone is an ambiguous error
+  let intake = valve(open)  # `open` alone is an ambiguous error
   ```
 
 ### 9.3 States
@@ -260,28 +291,30 @@ A state is a persistent, mutable memory cell scoped to an instance of a system o
 
 ```sprocket
 let where = inside
-let home = side.outside
+let home = side(outside)
 let cycling = off
 ```
 
 * **Declaration:** `let <name> = <value>`. The starting value is mandatory.
 * **Typing:** The state's type is inferred entirely from its initial value; a type is never written in the declaration. It must be a flag (`on` or `off`) or a choice of a declared type. Other types are an error.
 * **Scoping:** States must be declared after their associated types and before any statement referencing them.
-* **Namespace Collision:** Slots, types, and states within a single system share one flat namespace. No duplicate names are permitted. In a plain system, a state cannot share a name with a file-level variable. Names in other systems do not count.
-* **Referencing:** States are referenced bare (without block brackets `[]`, `any`, or `all`). They are mutated via `set`, queried via `if`, and watched via `when`.
+* **Names:** Within a single system, no two things of the same kind share a name, except sequences, which are told apart by their numbers (§4.1). Things of different kinds may share one (§4.2). In a plain system, a state cannot share a name with a file-level variable. Names in other systems do not count.
+* **Referencing:** States are referenced by name (without block brackets `[]`, `any`, or `all`). They are mutated via `set`, queried via `if`, and watched via `when`.
 
 ---
 
 ## 10. Reactive Automation (Triggers, Watchers, Clocks)
 
-Triggers, watchers, and clocks react to asynchronous conditions and initiate a single step (`run`, `stop`, `call`, or `set`). They have no identifiers.
+Triggers, watchers, and clocks react to asynchronous conditions and run or stop a sequence (`run` or `stop`). They have no identifiers.
+
+* A trigger whose signal or member is in a namespace the host lacks (§5.3) never fires, and is not an error. It waits for the namespace.
 
 ### 10.1 Signal Triggers (`whenever`)
 
 ```sprocket
 whenever 'call pressed' then run 1
-whenever Gearbox.closes on [ inner ] then run 2
-whenever Gearbox.closes on [ inner, outer ] then run 2
+whenever gearbox.closes on [ inner ] then run 2
+whenever gearbox.closes on [ inner, outer ] then run 2
 ```
 
 * Executes its target step every time the specified signal is fired.
@@ -291,10 +324,10 @@ whenever Gearbox.closes on [ inner, outer ] then run 2
 ### 10.2 Block Watchers (`when`)
 
 ```sprocket
-when all Gearbox.status on [ inner, outer ] == closed then call Gearbox.open on [ hangar ]
-when any Gearbox.filled on [ vent ] == on every 30t then run 4
-when sum Gearbox.amount("Ingot/Iron") on [ cargo ] >= 1000 then run 6
-when average Gearbox.fill on [ tank1, tank2 ] < 0.25 then run 7
+when all gearbox.status on [ inner, outer ] == closed then run 3
+when any gearbox.filled on [ vent ] == on every 30t then run 4
+when sum gearbox.amount("Ingot/Iron") on [ cargo ] >= 1000 then run 6
+when average gearbox.fill on [ tank1, tank2 ] < 0.25 then run 7
 ```
 
 * **Syntax:** `when <aggregation> <member> on [ <names> ] <comparison> <value> [every <duration>] then <step>`
@@ -335,9 +368,9 @@ every 600t stop 3
 
 ```sprocket
 sequence 1 as Cycle {
-    call Gearbox.close on [ inner ]
+    call gearbox.close on [ inner ]
     await
-    call Gearbox.open on [ outer ]
+    call gearbox.open on [ outer ]
 }
 ```
 
@@ -348,7 +381,6 @@ sequence 1 as Cycle {
 * **Mutual exclusion (`exclusive`):** `sequence <n> [as <name>] exclusive <id> { ... }`. Sequences of a system that name the same id run one at a time in each instance: a start while another of them runs is skipped, as a start of a sequence already running is, and the skipped sequence says which one holds it. A sequence names at most one id. The id is an identifier or a quoted name, compared exactly, and shares no namespace with anything else.
 
 ```sprocket
-#@ category: "Drilling"
 sequence 2 as 'Shallow Drill' exclusive Drilling {
     wait 1s
 }
@@ -379,9 +411,9 @@ Within sequences, prefixing a step with `//` (following indentation) disables it
 
 ```sprocket
 sequence 1 as Cycle {
-    call Gearbox.close on [ inner ]
+    call gearbox.close on [ inner ]
     await
-    // call Gearbox.open on [ outer ]
+    // call gearbox.open on [ outer ]
     wait 60t
 }
 ```
@@ -394,10 +426,10 @@ sequence 1 as Cycle {
 ```sprocket
 sequence 2 as Deploy {
     set busy to on
-    call Gearbox.extend on [ piston ]
+    call gearbox.extend on [ piston ]
     await
     catch {
-        call Gearbox.retract on [ piston ]
+        call gearbox.retract on [ piston ]
     }
     finally {
         set busy to off
@@ -417,14 +449,14 @@ sequence 2 as Deploy {
 ### 12.1 Condition on Blocks
 
 ```sprocket
-if all Gearbox.pressurized on [ vent ] == on then {
-    call Gearbox.open on [ outer ]
+if all gearbox.pressurized on [ vent ] == on then {
+    call gearbox.open on [ outer ]
 }
-else if any Gearbox.status on [ inner ] == open then {
-    call Gearbox.close on [ inner ]
+else if any gearbox.status on [ inner ] == open then {
+    call gearbox.close on [ inner ]
 }
 else {
-    call Gearbox.close on [ inner, outer ]
+    call gearbox.close on [ inner, outer ]
 }
 ```
 
@@ -440,16 +472,33 @@ else {
 
 ```sprocket
 if where == inside then {
-    call Gearbox.close on [ inner ]
+    call gearbox.close on [ inner ]
 }
 else if where == outside then {
-    call Gearbox.open on [ outer ]
+    call gearbox.open on [ outer ]
 }
 ```
 
-* **Syntax:** `if <state> <comparison> <value> then { ... }`
+* **Syntax:** `if <state or setting> <comparison> <value> then { ... }`
 * Evaluates equality (`==` or `!=`) against a choice, flag, or another state of matching type; comparing with a value of another type is an error.
+* A setting is tested the same way, on the instance's value: `if setting('Outer light') == on then { ... }`.
 * Block conditions and state conditions may be freely mixed within the same `if / else if / else` chain.
+
+### 12.3 Condition on the Host
+
+```sprocket
+if gearbox.lifts is installed then {
+    call gearbox.lifts.raise on [ pad ]
+}
+else {
+    call gearbox.open on [ hatch ]
+}
+```
+
+* **Syntax:** `if <namespace> is installed then { ... }`, or `is not installed`.
+* Decided when the program is bound to its construct, not when the step is reached, and again whenever the host gains or loses that namespace.
+* Members in that namespace, inside a branch taken only while it is installed, are no error where the host lacks it.
+* Combines with `else if` and `else` as any other condition does.
 
 ---
 
@@ -461,7 +510,7 @@ File-level variables assign names to hardware blocks or construct-level signals:
 
 ```sprocket
 let door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, [ (3 0 -2) ], "Airlock Inner Door" ]
-let button = Gearbox.toolbar(1, 1, 4) on [ panel1 ]
+let button = gearbox.toolbar(1, 1, 4) on [ panel1 ]
 ```
 
 * Defined once at the file level before any system or instance references them.
@@ -488,12 +537,13 @@ An instance binds concrete blocks and signals on the construct to the abstract s
 instance 1 of MalTek.Airlock as 'Port Airlock' {
     inner = [ door1 ]
     hangar = [ door2, door3 ]
-    button = [ Gearbox.toolbar(1, 1, 4) on [ panel1 ] ]
+    button = [ gearbox.toolbar(1, 1, 4) on [ panel1 ] ]
 }
 ```
 
 * **Identification:** Designated by a numeric ID (`instance <n> of <blueprint>`) and an optional name (`as '<name>'`).
-* **Slot Assignment (`<slot> = [ <answers> ]`):**
+* **Slot Assignment (`<slot> = [ <answers> ]`, `<setting> = <value>`):**
   * Populated by variables, inline host functions returning host types, or signals.
   * A slot may receive multiple answers. For a slot expecting `signal`, supplying multiple answers indicates that a signal from **any** of the answers triggers the associated automation.
   * Leaving a `required` slot unassigned marks the instance as missing that slot.
+  * A setting is answered with one value of its type, written as a value, not a list: `'Open angle' = 85`.

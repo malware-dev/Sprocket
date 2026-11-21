@@ -24,6 +24,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>The whole script, so trouble can be placed on a line after the fact.</summary>
         public string Script => _ptr.Content;
 
+        /// <summary>
+        /// Whether the script was written for a format earlier than <see cref="Keywords.ContextualDraft" />, and is read as that
+        /// format reads: every keyword a keyword wherever it stands, and <c>is</c>, <c>not</c> and <c>installed</c> names.
+        /// </summary>
+        public bool Earlier { get; set; }
+
         /// <summary>The next token, past any spaces before it.</summary>
         public Token Next()
         {
@@ -401,10 +407,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             _ptr = ptr;
             var word = Since(start);
             var keyword = Keywords.Find(word);
-            if (keyword != Keyword.None)
+            if (Earlier)
+            {
+                return keyword != Keyword.None && !Keywords.ArrivedWithContextual(keyword)
+                    ? new Token(TokenKind.Keyword, start.Index, default(StringSegment), 0, 0, keyword)
+                    : new Token(TokenKind.Identifier, start.Index, word);
+            }
+
+            // A contextual keyword is a name that remembers the keyword it is spelled as, for the construct that reads it.
+            if (Keywords.IsReserved(keyword))
                 return new Token(TokenKind.Keyword, start.Index, default(StringSegment), 0, 0, keyword);
 
-            return new Token(TokenKind.Identifier, start.Index, word);
+            return new Token(TokenKind.Identifier, start.Index, word, 0, 0, keyword);
         }
     }
 }

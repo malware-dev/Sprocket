@@ -296,7 +296,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
             arguments.Set("blockset", holder.System.IsBlueprint && holder.Instance != null
                 ? SystemSummary.DescribeInstanceOf(_editor.Texts, _editor.Runner.Bindings, holder.System, holder.Instance)
                 : holder.System.Name);
-            _editor.AskHere(holder.Trigger.Acts != null ? _editor.Texts.ButtonActs : holder.Trigger.Stops ? _editor.Texts.ButtonStops : _editor.Texts.ButtonStarts,
+            _editor.AskHere(holder.Trigger.Stops ? _editor.Texts.ButtonStops : _editor.Texts.ButtonStarts,
                 arguments);
         }
 

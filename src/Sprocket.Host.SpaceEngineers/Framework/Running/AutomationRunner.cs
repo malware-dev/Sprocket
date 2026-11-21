@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         int _checkedWiring = -1;
         int _checkedUnstarted = -1;
         int _checkedStarts = -1;
+        int _checkedNamespaces = -1;
         int _matchedSwitches = -1;
         int _lookedBindings = -1;
         int _lookedEdits = -1;
@@ -206,15 +208,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return _runs.Get(Runners.Key(sequence.Id, instance?.Number ?? 0));
         }
 
-        /// <summary>
-        /// What runs the act a trigger does itself: a sequence with no number and that act for its one step, or null
-        /// where the trigger runs or stops a sequence instead.
-        /// </summary>
-        public Sequence Alone(AutomationSystem system, Trigger trigger)
-        {
-            return _runs.Alone(system, trigger);
-        }
-
         /// <summary>The runners of the program.</summary>
         public Runners Runs => _runs;
 
@@ -239,7 +232,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (set.From.Length > 0 && from == null)
                 return;
 
+            // A setting with no value in the installation sets nothing; the sequence's check says so before it runs.
             var value = from == null ? set.Value : _states.Read(system, instance, from);
+            if (value.IsSetting && (instance == null || !instance.Gives(value.Text, out value)))
+                return;
 
             // What held before the set, of each when on the state, so only what came to hold is started.
             List<StateTrigger> watching = null;
@@ -291,40 +287,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             Log?.Fired(system, trigger, instance, CurrentTick);
 
-            // A state set by a trigger is set where it stands, as switched on as the system and installation are.
-            var sets = trigger.Sets;
-            if (sets != null)
-            {
-                if (system.Enabled && (instance == null || instance.Enabled))
-                    Set(system, instance, sets);
+            var run = trigger.Does;
+            if (run == null)
+                return;
 
+            var sequence = system.FindSequence(run.Number);
+            if (sequence == null)
+                return;
+
+            if (run.Stops)
+            {
+                Halt(sequence, instance, StopCause.Trigger, 0);
                 return;
             }
 
-            var run = trigger.Does as Run;
-            if (run != null)
-            {
-                var sequence = system.FindSequence(run.Number);
-                if (sequence == null)
-                    return;
-
-                if (run.Stops)
-                {
-                    Halt(sequence, instance, StopCause.Trigger, 0);
-                    return;
-                }
-
-                var runner = Get(sequence, instance);
-                if (runner != null)
-                    runner.Triggered(_bindings, CurrentTick);
-
-                return;
-            }
-
-            var alone = Alone(system, trigger);
-            var acting = alone == null ? null : Get(alone, instance);
-            if (acting != null)
-                acting.Triggered(_bindings, CurrentTick);
+            var runner = Get(sequence, instance);
+            if (runner != null)
+                runner.Triggered(_bindings, CurrentTick);
         }
 
         /// <summary>Starts a named sequence, as a trigger or another sequence would.</summary>
@@ -376,7 +355,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Matches the runners to the program where it gained or lost something, checks it where it or its wiring changed, and matches what is watched where a switch was flipped; nothing otherwise.</summary>
         /// <remarks>
         /// Asked as the program is brought up to date with a change, and by an editor about to show what is wrong; a flag and
-        /// five integer comparisons.
+        /// six integer comparisons. The host gaining or losing a namespace is a change to the program's wiring, so what is
+        /// in that namespace is checked and watched as if the program were bound with the host as it now is.
         /// </remarks>
         public void Checking()
         {
@@ -390,7 +370,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             }
 
             if (_automation.Edits != _checkedEdits || _automation.Wiring != _checkedWiring || _world.Unstartable.Told != _checkedUnstarted
-                || _automation.Starts != _checkedStarts)
+                || _automation.Starts != _checkedStarts || HostNamespaces.Changes != _checkedNamespaces)
             {
                 Check();
             }
@@ -423,6 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _checkedWiring = _automation.Wiring;
             _checkedUnstarted = _world.Unstartable.Told;
             _checkedStarts = _automation.Starts;
+            _checkedNamespaces = HostNamespaces.Changes;
 
             Match();
 
@@ -433,8 +414,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 var instances = system.Uses;
                 var sequences = system.Sequences;
 
-                var triggers = system.Triggers;
-
                 for (var n = 0; n < instances.Count; n++)
                 {
                     for (var q = 0; q < sequences.Count; q++)
@@ -442,14 +421,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         var runner = Get(sequences[q], instances[n]);
                         if (runner != null)
                             Checked(runner, SequenceSummary.Checked(_world, Bindings, sequences[q], instances[n]), afresh);
-                    }
-
-                    for (var t = 0; t < triggers.Count; t++)
-                    {
-                        var alone = Alone(system, triggers[t]);
-                        var runner = alone == null ? null : Get(alone, instances[n]);
-                        if (runner != null)
-                            Checked(runner, SequenceSummary.Checked(_world, Bindings, alone, instances[n]), afresh);
                     }
                 }
 
@@ -484,13 +455,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 var faulted = false;
                 for (var q = 0; q < sequences.Count && !faulted; q++)
                     faulted = Parks(sequences[q], instances[n]);
-
-                var triggers = system.Triggers;
-                for (var t = 0; t < triggers.Count && !faulted; t++)
-                {
-                    var alone = Alone(system, triggers[t]);
-                    faulted = alone != null && Parks(alone, instances[n]);
-                }
             }
         }
 
@@ -506,15 +470,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
-        /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances that may run, and one
-        /// runner for each trigger that acts itself, and retires the rest; and stops each run of what is switched off.
+        /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances that may run and retires the rest; and stops each run of what is switched off.
         /// </summary>
         /// <remarks>Done with the check, when the program or its wiring has changed, and alone when a switch is flipped.</remarks>
         void Match()
         {
             _matchedSwitches = _automation.Switches;
             _watches.Begin();
-            _runs.Begin();
 
             var systems = _automation.Systems;
             for (var s = 0; s < systems.Count; s++)
@@ -526,25 +488,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 for (var t = 0; t < triggers.Count; t++)
                 {
                     var trigger = triggers[t];
-                    _runs.KeepTrigger(trigger);
                     var signal = trigger as SignalTrigger;
                     var watched = trigger is WhenTrigger || trigger is EveryTrigger || (signal != null && signal.IsWatched);
-                    var alone = _runs.Alone(system, trigger);
 
                     for (var n = 0; n < instances.Count; n++)
                     {
                         // Switched off, or waiting to be filled in, it has nothing watched, so it costs no look until it may run.
-                        if (watched && system.Enabled && instances[n].Enabled && !SequenceSummary.Waits(system, trigger, alone, instances[n]))
+                        if (watched && system.Enabled && instances[n].Enabled && !SequenceSummary.Waits(system, trigger, instances[n]))
                             _watches.Keep(system, t, trigger, instances[n]);
-
-                        if (alone != null)
-                            _runs.Keep(system, t, alone, instances[n]);
                     }
                 }
             }
 
             _watches.Sweep();
-            _runs.Sweep();
 
             // A run of what was just switched off stops on the tick of the switch.
             _runs.Switched();
@@ -563,7 +519,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             // A slot or an option is named as it is; a block by the name it goes by.
             var block = fault.Which == null || fault.Problem == SequenceProblem.EmptySlot
-                || fault.Problem == SequenceProblem.Unfilled || fault.Problem == SequenceProblem.Mistyped
+                || fault.Problem == SequenceProblem.Unfilled || fault.Problem == SequenceProblem.Mistyped || fault.Problem == SequenceProblem.Ambiguous
                 || fault.Problem == SequenceProblem.AbortedProblem
                 ? fault.Which
                 : _automation.Called(fault.Which, _world.Values);

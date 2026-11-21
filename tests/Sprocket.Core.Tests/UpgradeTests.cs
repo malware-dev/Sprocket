@@ -18,7 +18,7 @@ public class UpgradeTests
     const string Switching = "sprocket 1 alpha 14\n\n"
         + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Lamp {\n"
         + "    required slot lamp expects InteriorLight\n\n"
-        + "    every 600t call ext.'off' on [ lamp ]\n\n"
+        + "    every 600t run 1\n\n"
         + "    sequence 1 as Flash {\n"
         + "        call ext.'on' on [ lamp ]\n"
         + "        wait 60t\n"
@@ -104,12 +104,12 @@ public class UpgradeTests
 
         var written = ProgramWriter.Save(program, values);
         Assert.StartsWith(ScriptFormat.Line, written);
-        Assert.Contains("call ext.detach on [ stage ]", written);
+        Assert.Contains("call sprocket.detach on [ stage ]", written);
         Assert.Contains("call Detach on [ arm ]", written);
-        Assert.Contains("call ext.detach on [ charge ]", written);
-        Assert.Contains("set ext.countdown on [ emitter ] to 5", written);
-        Assert.Contains("if any ext.countdown on [ emitter ] >= 5 then", written);
-        Assert.Contains("call ext.discharge on [ emitter ]", written);
+        Assert.Contains("call sprocket.detach on [ charge ]", written);
+        Assert.Contains("set sprocket.countdown on [ emitter ] to 5", written);
+        Assert.Contains("if any sprocket.countdown on [ emitter ] >= 5 then", written);
+        Assert.Contains("call sprocket.discharge on [ emitter ]", written);
     }
 
     /// <summary>An assembler's mode, set, checked and watched as alpha 21 called it, says disassembling.</summary>
@@ -216,7 +216,7 @@ public class UpgradeTests
 
         var part = Upgraded(OnABlockSlot("TextPanel/LargeTextPanel"), ship, out var system);
 
-        Assert.Equal(HostTypes.Returned("screen")!.Id, part.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, part.Holds);
         Assert.Single(system.Instances[0].Facets("status")!);
         Assert.Equal(new[] { "status" }, ((Act)system.Sequences[0].Steps[0]).Targets);
     }
@@ -258,7 +258,7 @@ public class UpgradeTests
         var system = program.Systems[0];
         var show = (Act)system.Sequences[0].Steps[0];
         var slot = Assert.Single(show.Targets);
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Equal(new[] { 2 }, system.Instances[0].Facets(slot));
         Assert.Equal(new[] { Literal.Of("Docked") }, show.Arguments);
     }
@@ -275,8 +275,8 @@ public class UpgradeTests
 
         var written = ProgramWriter.Save(program, ship.World.Values);
 
-        Assert.Contains("expects ext.screen", written);
-        Assert.Contains("ext.screen(2) on [ board ]", written);
+        Assert.Contains("expects sprocket.screen", written);
+        Assert.Contains("sprocket.get_screen(2) on [ board ]", written);
         Assert.DoesNotContain("\"Back\"", written);
         var again = new Automation();
         Assert.Equal("", ProgramReader.Load(written, again, ship.World.Values));
@@ -330,7 +330,7 @@ public class UpgradeTests
 
         var system = program.Systems[0];
         var slot = ((Act)system.Sequences[0].Steps[0]).Targets[0];
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Null(system.Instances[0].FilledWith(slot));
     }
 
@@ -353,7 +353,6 @@ public class UpgradeTests
         var steps = read!.Sequences[0].Steps;
         Power((Act)steps[0], true);
         Power((Act)steps[2], false);
-        Power((Act)read.Triggers[0].Does, false);
     }
 
     /// <summary>The power value named switched-on is named power wherever it is set, checked or watched.</summary>
@@ -382,8 +381,8 @@ public class UpgradeTests
         var written = ProgramWriter.Blueprint(read!);
 
         Assert.StartsWith(ScriptFormat.Line, written);
-        Assert.DoesNotContain("ext.'on'", written);
-        Assert.DoesNotContain("ext.'off'", written);
+        Assert.DoesNotContain("sprocket.'on'", written);
+        Assert.DoesNotContain("sprocket.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
         Assert.Equal(written, ProgramWriter.Blueprint(again!));
     }
@@ -424,12 +423,27 @@ public class UpgradeTests
         Assert.Equal("on", ((Act)read!.Sequences[0].Steps[0]).Targets[0]);
     }
 
+    /// <summary>
+    /// A program written for finished version 1, or for its last draft, is carried into version 2 and written back in it:
+    /// a finished version counts as later than all of its drafts.
+    /// </summary>
+    [Theory]
+    [InlineData("sprocket 1")]
+    [InlineData("sprocket 1 alpha 28")]
+    public void VersionOneIsCarriedIntoVersionTwo(string header)
+    {
+        var text = Switching.Replace("sprocket 1 alpha 14", header);
+
+        Assert.Equal("", ProgramReader.Lone(text, new Values(), out var read));
+        Assert.StartsWith("sprocket 2", ProgramWriter.Blueprint(read!));
+    }
+
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
     [InlineData("sprocket 1 alpha 29")]
     [InlineData("sprocket 2 alpha 14")]
-    [InlineData("sprocket 2")]
+    [InlineData("sprocket 3")]
     public void AnyOtherFormatIsRefused(string header)
     {
         var text = Switching.Replace("sprocket 1 alpha 14", header);

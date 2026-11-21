@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// <summary>Writes the version line this build writes, with its draft where the version is unfinished.</summary>
         static void Head(ScriptWriter pen)
         {
-            pen.Start(Keyword.Sprocket).Whole(ScriptFormat.Version);
+            pen.Start(ScriptFormat.Header, false).Whole(ScriptFormat.Version);
             if (ScriptFormat.IsDraft)
                 pen.Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
         }
@@ -264,7 +264,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             pen.Real(real);
         }
 
-        /// <summary><c>let button = ext.toolbar(1, 1, 4) on [ panel1 ]</c>: a signal, sent from a slot on the toolbars of blocks above.</summary>
+        /// <summary><c>let button = sprocket.toolbar(1, 1, 4) on [ panel1 ]</c>: a signal, sent from a slot on the toolbars of blocks above.</summary>
         static void WriteSignalRef(ScriptWriter pen, SignalRef declared)
         {
             pen.Note(declared.Annotation);
@@ -309,15 +309,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
 
             pen.BodyBelow();
 
-            // The slots before what uses them, so a reader meets the vocabulary before the answers.
+            // The slots before what uses them, so a reader meets the vocabulary before the answers. A setting is written
+            // whether anything uses it or not, since every installation's answer to it is stored with it.
             var used = new List<string>();
             system.Acted(used);
 
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
             {
-                if (used.Contains(parts[i].Id) || kept && Held(system, parts[i].Id))
-                    WriteSlot(pen, parts[i]);
+                if (parts[i].IsSetting || used.Contains(parts[i].Id) || kept && Held(system, parts[i].Id))
+                    WriteSlot(pen, system, parts[i]);
             }
 
             if (system.Types.Count > 0)
@@ -347,8 +348,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         /// <c>required slot inner expects Door</c>: something the construct has to provide, or may leave out where it is
         /// <c>optional</c>.
         /// </summary>
-        /// <remarks>What a slot for a block expects is written only where the author said it; nothing means any block.</remarks>
-        static void WriteSlot(ScriptWriter pen, Part part)
+        /// <remarks>
+        /// What a slot for a block expects is written only where the author said it; nothing means any block. A setting is
+        /// written with its type, and its default where it has one: <c>optional slot 'Open angle' expects real = 45</c>.
+        /// </remarks>
+        static void WriteSlot(ScriptWriter pen, AutomationSystem system, Part part)
         {
             if (part.Annotation.Length > 0)
                 pen.Blank();
@@ -360,15 +364,33 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (part.Category.Length > 0)
                 pen.AttributeText(ScriptAttributes.Category, part.Category);
 
+            if (part.Editor.Length > 0)
+                pen.AttributeText(ScriptAttributes.Editor, part.Editor);
+
             pen.Attributes(part.Attributes);
             pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Slot).Word(part.Id);
 
-            if (part.IsSignal)
+            if (part.IsSetting)
+            {
+                if (!SettingReader.IsBuiltIn(part.Setting) && (BlockKinds.IsGameType(part.Setting) || Meanings(system, part.Setting) > 1))
+                    pen.Says(Keyword.Expects).Kinded("", Keywords.Name(Keyword.Type), part.Setting);
+                else
+                    pen.Says(Keyword.Expects).Expected(part.Setting);
+
+                if (part.HasDefault)
+                {
+                    pen.Says(Keyword.Equals);
+                    Written(pen, part.Default);
+                }
+            }
+            else if (part.IsSignal)
                 pen.Says(Keyword.Expects).Says(Keyword.Signal);
             else if (part.Holds.Length > 0)
-                pen.Says(Keyword.Expects).Qualified(Space(part.Holds), Name(part.Holds));
+                pen.Says(Keyword.Expects).HostQualified(Space(part.Holds), Name(part.Holds));
+            else if (part.Expects.Length > 0 && system.FindType(part.Expects) != null)
+                pen.Says(Keyword.Expects).Kinded("", Kinds.BlockType, part.Expects);
             else if (part.Expects.Length > 0)
-                pen.Says(Keyword.Expects).Word(part.Expects);
+                pen.Says(Keyword.Expects).Expected(part.Expects);
 
             pen.End();
         }
@@ -401,40 +423,127 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         }
 
         /// <summary>
-        /// A state's value: a flag, or a choice of <paramref name="type" />, qualified where written alone it would read as
-        /// a state, or, as a <paramref name="starting" /> value, as a choice of another type too.
+        /// A state's or a setting's value: a flag, a choice of <paramref name="type" />, or a setting standing in for one, each
+        /// written with its kind exactly where alone it could also mean something else.
         /// </summary>
         static void Choice(ScriptWriter pen, AutomationSystem system, string type, Literal value, bool starting)
         {
-            if (value.Kind != ValueKind.Name || system == null || !Mistaken(system, value.Text, starting))
+            if (system != null && value.Kind == ValueKind.Flag && FlagShared(system, Flag(value), starting))
             {
-                Written(pen, value);
+                pen.Kinded("", SettingReader.Flag, Flag(value));
                 return;
             }
 
-            pen.Qualified(type, value.Text);
+            if (system != null && value.Kind == ValueKind.Name && Shared(system, type, value.Text, starting))
+            {
+                if (Meanings(system, type) > 1)
+                    pen.Typed(type, value.Text);
+                else
+                    pen.Kinded("", type, value.Text);
+
+                return;
+            }
+
+            if (system != null && value.IsSetting && Shared(system, type, value.Text, starting))
+            {
+                pen.Kinded("", Kinds.Setting, value.Text);
+                return;
+            }
+
+            Written(pen, value);
         }
 
         /// <summary>
-        /// Whether <paramref name="choice" /> written alone would read as something else: a state of that name, or, where it
-        /// is a <paramref name="starting" /> value, a choice of more than one type.
+        /// Whether <paramref name="name" />, written bare where a value of <paramref name="type" /> stands, could mean more than
+        /// one thing: a slot, setting, type, state or sequence of <paramref name="system" />, or a choice of that type, or, where
+        /// it is a <paramref name="starting" /> value, of any type, or the flag where it is spelled like one and a flag could stand.
         /// </summary>
-        static bool Mistaken(AutomationSystem system, string choice, bool starting)
+        static bool Shared(AutomationSystem system, string type, string name, bool starting)
         {
-            if (system.FindState(choice) != null)
-                return true;
-
-            if (!starting)
-                return false;
-
-            var having = 0;
-            foreach (var type in system.Types)
+            var meanings = Meanings(system, name);
+            foreach (var declared in system.Types)
             {
-                if (type.Has(choice))
-                    having++;
+                if ((starting || declared.Name == type) && declared.Has(name))
+                    meanings++;
             }
 
-            return having > 1;
+            if (Kinds.SpelledLikeFlag(name) && (starting || type.Length == 0 || type == SettingReader.Flag))
+                meanings++;
+
+            return meanings > 1;
+        }
+
+        /// <summary>
+        /// Whether the flag <paramref name="word" />, <c>on</c> or <c>off</c>, written bare where a value stands, could also mean a
+        /// thing of <paramref name="system" /> so named, or, where it is a <paramref name="starting" /> value, a choice of any type.
+        /// </summary>
+        static bool FlagShared(AutomationSystem system, string word, bool starting)
+        {
+            if (Meanings(system, word) > 0)
+                return true;
+
+            foreach (var declared in system.Types)
+            {
+                if (starting && declared.Has(word))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>How <paramref name="value" />, a flag, is spelled: <c>on</c> or <c>off</c>.</summary>
+        static string Flag(Literal value)
+        {
+            return Keywords.Name(value.Flag ? Keyword.On : Keyword.Off);
+        }
+
+        /// <summary>How many things of <paramref name="system" /> are called <paramref name="name" />: its slot or setting, type, state and sequence.</summary>
+        static int Meanings(AutomationSystem system, string name)
+        {
+            var meanings = new List<string>();
+            Kinds.Meanings(system, name, meanings, new List<string>());
+            return meanings.Count;
+        }
+
+        /// <summary>
+        /// The state <paramref name="state" />, a state or a setting holding <paramref name="type" /> is set to or compared with,
+        /// written with its kind, <c>state(home)</c>, where alone it could also mean another thing.
+        /// </summary>
+        static void State(ScriptWriter pen, AutomationSystem system, string type, string state)
+        {
+            if (system != null && Shared(system, type, state, false))
+                pen.Kinded("", Kinds.State, state);
+            else
+                pen.Word(state);
+        }
+
+        /// <summary>
+        /// The state or setting <paramref name="name" />, of the kind <paramref name="kind" />, written with it where alone it could
+        /// also mean another thing; where it <paramref name="tests" />, it stands where a test starts.
+        /// </summary>
+        static void Named(ScriptWriter pen, AutomationSystem system, string kind, string name, bool tests)
+        {
+            if (system != null && Meanings(system, name) > 1)
+                pen.Kinded("", kind, name);
+            else if (tests)
+                pen.Tested(name);
+            else
+                pen.Word(name);
+        }
+
+        /// <summary>The slots <paramref name="names" />, in brackets, each written <c>slot(side)</c> where alone it could also mean another thing.</summary>
+        static void WriteSlots(ScriptWriter pen, AutomationSystem system, IList<string> names)
+        {
+            pen.OpenList();
+            foreach (var name in names)
+            {
+                if (system != null && system.FindPart(name) != null && Meanings(system, name) > 1)
+                    pen.Kinded("", Keywords.Name(Keyword.Slot), name);
+                else
+                    pen.Word(name);
+            }
+
+            pen.CloseList();
         }
 
         /// <summary>The name of the type of the state called <paramref name="name" />, or empty where it is a flag or not found.</summary>
@@ -444,14 +553,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return state == null ? "" : state.Type;
         }
 
-        /// <summary>The namespace of a qualified id: <c>ext</c> of <c>ext.screen</c>.</summary>
+        /// <summary>The type the setting called <paramref name="name" /> holds, or empty where it is not found.</summary>
+        static string SettingType(AutomationSystem system, string name)
+        {
+            var part = system?.FindPart(name);
+            return part == null ? "" : part.Setting;
+        }
+
+        /// <summary>The namespace of a qualified id: <c>sprocket</c> of <c>sprocket.screen</c>.</summary>
         static string Space(string id)
         {
             var dot = id.IndexOf('.');
             return dot < 0 ? "" : id.Substring(0, dot);
         }
 
-        /// <summary>The name of a qualified id: <c>screen</c> of <c>ext.screen</c>.</summary>
+        /// <summary>The name of a qualified id: <c>screen</c> of <c>sprocket.screen</c>.</summary>
         static string Name(string id)
         {
             return id.Substring(id.IndexOf('.') + 1);
@@ -487,6 +603,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 pen.Attributes(instance.KeptOn(part));
                 pen.Head(part).Says(Keyword.Equals);
 
+                Literal answer;
+                if (instance.AnswerTo(part, out answer))
+                {
+                    Written(pen, answer);
+                    pen.End();
+                    continue;
+                }
+
                 var positions = instance.Positions(part);
                 var facets = instance.Facets(part);
                 var type = facets == null ? null : HostTypes.Named(system.FindPart(part)?.Holds);
@@ -504,8 +628,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         }
 
         /// <summary>
-        /// Which parts <paramref name="instance" /> fills, in a settled order, leaving out a part nothing in the system uses and no installation
-        /// holds blocks in.
+        /// Which parts <paramref name="instance" /> fills or answers, in a settled order, leaving out a part nothing in the system uses and no installation
+        /// holds blocks in, and an answer to a setting the system does not have.
         /// </summary>
         static List<string> Sorted(AutomationSystem system, SystemInstance instance, bool replacing)
         {
@@ -519,6 +643,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             {
                 if (used.Contains(slot) || !replacing && (system.FindPart(slot) == null || Held(system, slot)))
                     parts.Add(slot);
+            }
+
+            // An answer to a setting is written where the system has the setting.
+            foreach (var setting in instance.Answered)
+            {
+                var part = system.FindPart(setting);
+                if (part != null && part.IsSetting)
+                    parts.Add(setting);
             }
 
             parts.Sort(StringComparer.Ordinal);
@@ -659,7 +791,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             pen.Body();
         }
 
-        /// <summary><c>if all ext.filled on [ vent ] == on then {</c>: the line an if starts, and its block opened.</summary>
+        /// <summary><c>if all sprocket.filled on [ vent ] == on then {</c>: the line an if starts, and its block opened.</summary>
         static void WriteIf(ScriptWriter pen, AutomationSystem system, If step)
         {
             if (step.Annotation.Length > 0)
@@ -688,52 +820,73 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             pen.Body();
         }
 
-        /// <summary>What a branch tests, then <c>then</c>: a member read on blocks, or one of the system's states.</summary>
+        /// <summary>What a branch tests, then <c>then</c>: a member read on blocks, one of the system's states, or the host.</summary>
         static void WriteTest(ScriptWriter pen, AutomationSystem system, BranchTest test)
         {
             var compared = test as Comparison;
+            var host = test as HostTest;
             if (compared != null)
-                WriteComparison(pen, compared);
+                WriteComparison(pen, system, compared);
+            else if (host != null)
+                WriteHostTest(pen, host);
             else
                 WriteStateTest(pen, system, (StateTest)test);
         }
 
-        /// <summary><c>where == inside then</c>, or <c>where != home then</c>: a state compared with a value or another state.</summary>
+        /// <summary><c>gearbox.lifts is installed then</c> or <c>gearbox.lifts is not installed then</c>: whether the host has a namespace.</summary>
+        static void WriteHostTest(ScriptWriter pen, HostTest test)
+        {
+            pen.Namespace(test.Namespace).Says(Keyword.Is);
+            if (!test.Installed)
+                pen.Says(Keyword.Not);
+
+            pen.Says(Keyword.Installed).Says(Keyword.Then);
+        }
+
+        /// <summary>
+        /// <c>where == inside then</c>, <c>where != home then</c> or <c>'Outer light' == on then</c>: a state or a
+        /// setting compared with a value or a state.
+        /// </summary>
         static void WriteStateTest(ScriptWriter pen, AutomationSystem system, StateTest test)
         {
-            pen.Word(test.State).Says(test.Relation == Relation.IsNot ? Keyword.NotEqualTo : Keyword.EqualTo);
-            if (test.Other.Length > 0)
-                pen.Word(test.Other);
+            if (test.Setting.Length > 0)
+                Named(pen, system, Kinds.Setting, test.Setting, true);
             else
-                Choice(pen, system, TypeOf(system, test.State), test.Value, false);
+                Named(pen, system, Kinds.State, test.State, true);
+
+            pen.Says(test.Relation == Relation.IsNot ? Keyword.NotEqualTo : Keyword.EqualTo);
+            if (test.Other.Length > 0)
+                State(pen, system, test.Setting.Length > 0 ? SettingType(system, test.Setting) : TypeOf(system, test.State), test.Other);
+            else
+                Choice(pen, system, test.Setting.Length > 0 ? SettingType(system, test.Setting) : TypeOf(system, test.State), test.Value, false);
 
             pen.Says(Keyword.Then);
         }
 
-        static void WriteComparison(ScriptWriter pen, Comparison test)
+        static void WriteComparison(ScriptWriter pen, AutomationSystem system, Comparison test)
         {
             pen.Says(Said(test.Quantifier));
-            WriteMember(pen, test.Provider, test.MemberId, test.Arguments, test.Targets);
+            WriteMember(pen, system, test.Provider, test.MemberId, test.Arguments, test.Targets);
             pen.Says(Said(test.Relation));
-            Written(pen, test.Value);
+            Word(pen, system, test.Value);
             pen.Says(Keyword.Then);
         }
 
-        /// <summary><c>ext.amount("Ingot/Iron") on [ cargo ]</c>: a member, bare or qualified, with its arguments where it has any, and its blocks.</summary>
-        static void WriteMember(ScriptWriter pen, string provider, string id, IList<Literal> arguments, IList<string> targets)
+        /// <summary><c>sprocket.amount("Ingot/Iron") on [ cargo ]</c>: a member, bare or qualified, with its arguments where it has any, and its blocks.</summary>
+        static void WriteMember(ScriptWriter pen, AutomationSystem system, string provider, string id, IList<Literal> arguments, IList<string> targets)
         {
-            pen.Qualified(provider, id);
+            pen.HostQualified(provider, id);
             if (arguments.Count > 0)
             {
                 pen.Open();
                 for (var i = 0; i < arguments.Count; i++)
-                    Written(pen, arguments[i]);
+                    Word(pen, system, arguments[i]);
 
                 pen.Close();
             }
 
             pen.Says(Keyword.On);
-            WriteNames(pen, targets);
+            WriteSlots(pen, system, targets);
         }
 
         /// <summary>How <paramref name="quantifier" /> is written.</summary>
@@ -765,7 +918,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         }
 
         /// <summary>
-        /// <c>whenever button then run 1</c>, <c>when all ext.status on [ inner ] == closed then run 2</c>, or <c>every 600t stop 3</c>.
+        /// <c>whenever button then run 1</c>, <c>when all sprocket.status on [ inner ] == closed then run 2</c>, or <c>every 600t stop 3</c>.
         /// </summary>
         /// <remarks>The step it does is written as a sequence writes it.</remarks>
         static void WriteTrigger(ScriptWriter pen, AutomationSystem system, Trigger trigger)
@@ -781,12 +934,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (needed != null)
             {
                 pen.Start(Keyword.Whenever);
-                if (!needed.IsWritten)
+                if (!needed.IsWritten && system != null && system.FindPart(needed.Part) != null && Meanings(system, needed.Part) > 1)
+                    pen.Kinded("", Keywords.Name(Keyword.Slot), needed.Part);
+                else if (!needed.IsWritten)
                     pen.Word(needed.Part);
                 else if (needed.At != null)
                     pen.Signal(needed.Sources, needed.At);
                 else
-                    WriteMember(pen, needed.Provider, needed.EventId, NoArguments, needed.Sources);
+                    WriteMember(pen, system, needed.Provider, needed.EventId, NoArguments, needed.Sources);
 
                 pen.Says(Keyword.Then);
                 WriteDoes(pen, system, trigger.Does);
@@ -808,10 +963,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (when != null)
             {
                 pen.Start(Keyword.When).Says(Said(when.Quantifier));
-                WriteMember(pen, when.Provider, when.EventId, when.Arguments, when.Sources);
+                WriteMember(pen, system, when.Provider, when.EventId, when.Arguments, when.Sources);
                 pen.Says(Said(when.Relation));
-                Written(pen, when.Value);
-                if (when.IntervalTicks > 0)
+                Word(pen, system, when.Value);
+                if (when.IntervalSetting.Length > 0)
+                    pen.Says(Keyword.Every).Word(when.IntervalSetting);
+                else if (when.IntervalTicks > 0)
                     Lasting(pen.Says(Keyword.Every), when.Interval);
 
                 pen.Says(Keyword.Then);
@@ -824,7 +981,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (every == null)
                 throw new InvalidOperationException($"a {trigger.GetType().Name} has no way to be written.");
 
-            Lasting(pen.Start(Keyword.Every), every.Interval);
+            if (every.IntervalSetting.Length > 0)
+                pen.Start(Keyword.Every).Word(every.IntervalSetting);
+            else
+                Lasting(pen.Start(Keyword.Every), every.Interval);
             WriteDoes(pen, system, trigger.Does);
             pen.End();
         }
@@ -929,7 +1089,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var abort = step as Abort;
             if (abort != null)
             {
-                if (abort.Message.Length > 0)
+                if (abort.Setting.Length > 0)
+                    pen.Word(AbortWords.Saying).Word(abort.Setting);
+                else if (abort.Message.Length > 0)
                     pen.Word(AbortWords.Saying).Text(abort.Message);
                 if (abort.Level != AbortLevel.Note)
                     pen.Says(Keyword.As).Word(AbortWords.Name(abort.Level));
@@ -940,9 +1102,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var sets = step as SetState;
             if (sets != null)
             {
-                pen.Word(sets.State).Says(Keyword.To);
+                Named(pen, system, Kinds.State, sets.State, false);
+                pen.Says(Keyword.To);
                 if (sets.From.Length > 0)
-                    pen.Word(sets.From);
+                    State(pen, system, TypeOf(system, sets.State), sets.From);
                 else
                     Choice(pen, system, TypeOf(system, sets.State), sets.Value, false);
 
@@ -954,16 +1117,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             {
                 if (act.Form == ReachKind.Value)
                 {
-                    WriteMember(pen, act.Provider, act.ActionId, NoArguments, act.Targets);
+                    WriteMember(pen, system, act.Provider, act.ActionId, NoArguments, act.Targets);
                     if (act.Arguments.Count > 0)
                     {
                         pen.Says(Keyword.To);
-                        Written(pen, act.Arguments[0]);
+                        Word(pen, system, act.Arguments[0]);
                     }
                 }
                 else
                 {
-                    WriteMember(pen, act.Form == ReachKind.Native ? act.Provider : "", act.ActionId, act.Arguments, act.Targets);
+                    WriteMember(pen, system, act.Provider, act.ActionId, act.Arguments, act.Targets);
                 }
 
                 return;
@@ -972,13 +1135,37 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             var wait = step as Wait;
             if (wait != null)
             {
-                Lasting(pen, wait.Length);
+                if (wait.Setting.Length > 0)
+                    pen.Word(wait.Setting);
+                else
+                    Lasting(pen, wait.Length);
+
                 return;
             }
 
             var run = step as Run;
             if (run != null)
                 pen.Whole(run.Number);
+        }
+
+        /// <summary>
+        /// Writes <paramref name="value" />, given to or compared with a member,
+        /// back as the kind it is; a word of the member spelled like a thing of <paramref name="system" />'s written with its host type,
+        /// <c>door_status(closed)</c>, the type the word was read with or the one type that has it, so it is read back as the word.
+        /// </summary>
+        static void Word(ScriptWriter pen, AutomationSystem system, Literal value)
+        {
+            if (value.Kind == ValueKind.Flag && system != null && Meanings(system, Flag(value)) > 0)
+            {
+                pen.Kinded("", SettingReader.Flag, Flag(value));
+                return;
+            }
+
+            var type = value.Kind == ValueKind.Name && ((system != null && Meanings(system, value.Text) > 0) || Kinds.SpelledLikeFlag(value.Text)) ? value.Typed ?? ChoiceTypes.Having(value.Text) : null;
+            if (type != null)
+                pen.Kinded(system != null && Meanings(system, type.Id) > 0 ? type.Namespace : "", type.Id, value.Text);
+            else
+                Written(pen, value);
         }
 
         /// <summary>Writes <paramref name="value" /> back as the kind it is.</summary>
@@ -1017,6 +1204,31 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (value.Kind == ValueKind.Real)
             {
                 pen.Real(value.Real);
+                return;
+            }
+
+            if (value.Kind == ValueKind.Duration)
+            {
+                Lasting(pen, value.Length);
+                return;
+            }
+
+            if (value.IsKinded)
+            {
+                pen.Kinded("", Kinds.Setting, value.Text);
+                return;
+            }
+
+            // A setting spelled like a flag is written with its kind, since alone where a value stands it could be the flag.
+            if (value.Kind == ValueKind.Setting && Kinds.SpelledLikeFlag(value.Text))
+            {
+                pen.Kinded("", Kinds.Setting, value.Text);
+                return;
+            }
+
+            if (value.Kind == ValueKind.Setting)
+            {
+                pen.Word(value.Text);
                 return;
             }
 

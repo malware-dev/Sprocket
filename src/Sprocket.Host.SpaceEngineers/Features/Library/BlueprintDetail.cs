@@ -19,15 +19,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
     {
         readonly SprocketEditor _editor;
         readonly List<string> _names = new List<string>();
+        readonly ShareMenu _shareMenu;
 
         /// <summary>The details of no blueprint, in the editor <paramref name="editor" />.</summary>
         public BlueprintDetail(SprocketEditor editor)
         {
             _editor = editor;
             CreateView();
+            _shareMenu = new ShareMenu(editor, _share);
+            _share.Command = _shareMenu.Toggles;
             editor.Codex.Explain(_firstHeading);
             editor.Codex.Explain(_secondHeading);
         }
+
+        /// <summary>The Share mark of the details.</summary>
+        public Element SharePart => _share;
 
         /// <summary>Shows what <paramref name="chosen" /> holds, with <paramref name="refusal" /> where a move on it was just refused.</summary>
         public void Show(LibraryListing chosen, string refusal)
@@ -76,16 +82,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             var texts = _editor.Texts;
             var board = _editor.Sharing;
-            var volume = board != null && chosen.Section == LibrarySection.Kept ? _editor.Shelf?.Find(chosen.Identity) : null;
-            var mine = volume == null ? null : board.MineOf(volume.Identity);
+            var volume = chosen.Section == LibrarySection.Kept ? _editor.Shelf?.Find(chosen.Identity) : null;
+            var mine = volume == null || board == null ? null : board.MineOf(volume.Identity);
             var line = chosen.Share;
 
-            var shares = volume != null && system != null && !board.IsBarred && board.Limit > 0;
+            var onConstruct = chosen.Section == LibrarySection.OnConstruct && system != null;
+            var shares = onConstruct || volume != null && system != null;
+            var inWorld = board != null && board.CanShare;
             _share.IsVisible = shares;
-            if (shares)
+            if (onConstruct)
             {
-                _share.Text = mine == null ? texts.LibraryShare : texts.LibraryShareChange;
-                _share.Command = _editor.Act(CommandKind.Expand, () => _editor.Windows?.Open(new ShareDialog(_editor, volume.Name, volume.Text, mine)));
+                // A logic system on the construct shares as the editor shares it, through the library.
+                _share.Tip = CodexTip.For(_share.Tip, texts.Codex.ShareSystemTip);
+                _shareMenu.Offer = _editor.Holdings.Offering(system);
+            }
+            else if (shares)
+            {
+                _share.Tip = CodexTip.For(_share.Tip, texts.Codex.ShareBlueprintTip);
+                var offer = new ShareOffer { FnName = () => volume.Name, FnText = () => volume.Text };
+                if (inWorld)
+                {
+                    offer.Shares = _editor.Act(CommandKind.Expand, () => _editor.Windows?.Open(new ShareDialog(_editor, volume.Name, volume.Text, mine)));
+                    offer.SharesText = mine == null ? texts.LibraryShare : texts.LibraryShareChange;
+                    offer.SharesAbout = texts.Codex.ShareBlueprintAbout;
+                }
+
+                _shareMenu.Offer = offer;
+            }
+            else
+            {
+                _shareMenu.Offer = null;
             }
 
             _withdraw.IsVisible = mine != null;
@@ -111,7 +137,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 _block.Command = _editor.Act(CommandKind.Expand, () => board?.Block(line.Sharer));
             }
 
-            _shares.IsVisible = _share.IsVisible || _withdraw.IsVisible || _keep.IsVisible;
+            _shares.IsVisible = _withdraw.IsVisible || _keep.IsVisible || _block.IsVisible;
+            _acting.IsVisible = _shares.IsVisible || _reach.IsVisible;
         }
 
         /// <summary>Why the server last turned down a blueprint offered for sharing, or empty.</summary>

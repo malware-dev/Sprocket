@@ -90,10 +90,11 @@ public class DialogFitTests
         screen.Run(2);
         var found = new List<string>();
         Look(screen, language, "the library", found);
+        screen.PressDetailShare();
         screen.Do("press", texts.LibraryShare).Run(2);
 
         // Each reach in turn, chosen by its first letter as a key chooses in a list: everyone, a faction, players by name.
-        var who = Target.Within(screen.Scene.Workspace.Windows.Top).OfType<ListField>().Single(field => field.Text == texts.ShareEveryone);
+        var who = Target.Within(screen.Scene.Workspace.Windows.Top).OfType<ListField>().Single(field => field.Text == texts.ShareFaction);
         foreach (var reach in new[] { texts.ShareEveryone, texts.ShareFaction, texts.SharePlayers })
         {
             ((IInputTarget)who).Text(reach[0]);

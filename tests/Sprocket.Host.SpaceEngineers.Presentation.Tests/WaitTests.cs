@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel.Controls;
+using Sprocket.Sim.Machine;
 using VRage.Input;
 using Xunit;
 
@@ -107,6 +108,86 @@ public class WaitTests
 
         screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);
         Assert.Equal(Duration.OfSeconds(1), wait.Length);
+    }
+
+    /// <summary>
+    /// A wait that takes a setting says the setting, and its panel opens on the setting; a fixed value chosen under the mark and
+    /// a length given take the setting's place, as one change, and undo gives it back.
+    /// </summary>
+    [Fact]
+    public void AWaitsSettingIsShownAndAFixedLengthTakesItsPlace()
+    {
+        var sim = Pausing("wait Pause", out var system, out var sequence);
+        var wait = Assert.IsType<Wait>(Assert.Single(sequence.Steps));
+        Assert.Equal("Pause", sim.Editor.StepRows()[0].Slots.OfType<DurationSlot>().Single().Setting);
+
+        sim.Editor.StepRows()[0].Slots.OfType<DurationSlot>().Single().Opens!.Execute();
+        sim.Tick();
+        var panel = Assert.IsType<SequencePage>(sim.Editor.Current).Lengths!;
+        Assert.Equal("Pause", panel.Setting);
+        panel.Mark.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueFixed);
+        sim.Tick();
+        panel.Box.SelectAll();
+        panel.Box.Insert("3");
+        panel.Box.Submit!.Execute();
+        sim.Tick();
+
+        Assert.Equal("", wait.Setting);
+        Assert.Equal(Duration.OfSeconds(3), wait.Length);
+        sim.Editor.Undo(system, sequence);
+        Assert.Equal("Pause", wait.Setting);
+    }
+
+    /// <summary>A blueprint's wait offers its length's settings under its mark; one chosen gives the wait its length, as one change.</summary>
+    [Fact]
+    public void AWaitsMarkChoosesASettingForItsLength()
+    {
+        var sim = Pausing("wait 1s", out var system, out var sequence);
+        sim.Editor.StepRows()[0].Slots.OfType<DurationSlot>().Single().Opens!.Execute();
+        sim.Tick();
+        var panel = Assert.IsType<SequencePage>(sim.Editor.Current).Lengths!;
+        Assert.True(panel.Sourced);
+        panel.Mark.Command!.Execute();
+        sim.Tick();
+        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
+        Assert.Equal(4, answers.Length);
+        Assert.StartsWith("Pause", answers[3]);
+
+        sim.Editor.PressAnswer(answers[3]);
+        sim.Tick();
+        Assert.Equal("Pause", panel.Setting);
+        panel.Box.Submit!.Execute();
+        sim.Tick();
+
+        var wait = Assert.IsType<Wait>(Assert.Single(sequence.Steps));
+        Assert.Equal("Pause", wait.Setting);
+        sim.Editor.Undo(system, sequence);
+        Assert.Equal("", wait.Setting);
+    }
+
+    /// <summary>A blueprint with a length setting and a real one, its one sequence holding <paramref name="step" />, open on its page while switched off.</summary>
+    static Simulation Pausing(string step, out AutomationSystem system, out Sequence sequence)
+    {
+        var sim = Simulation.Fresh();
+        var program = "sprocket 2\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Pause\n{\n"
+            + "    optional slot Pause expects duration = 2s\n"
+            + "    optional slot Glow expects real = 1.5\n\n"
+            + "    sequence 1 {\n        " + step + "\n    }\n}\n";
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        system = sim.Editor.Program.Systems[0];
+        sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        return sim;
     }
 
     /// <summary>Escape, or a press anywhere else, on the panel of a wait already there closes it and leaves the wait as it was.</summary>

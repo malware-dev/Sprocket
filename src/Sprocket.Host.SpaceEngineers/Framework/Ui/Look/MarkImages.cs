@@ -32,6 +32,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Add("blueprint", Symbols.Blueprint);
             Add("logic-system", Symbols.LogicSystem);
             Add("installation", Symbols.Installation);
+            Add("setting", Symbols.Setting);
+            Add("link", Symbols.Link);
             Add("play", Symbols.Play);
             Add("stop", Symbols.Stop);
             Add("pause", Symbols.Pause);

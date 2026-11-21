@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots.Edits
         readonly List<int> _droppedAt = new List<int>();
         readonly List<List<SlotAnswer>> _droppedAnswers = new List<List<SlotAnswer>>();
 
-        /// <summary>Changes to the slots of <paramref name="system" />, filled as <paramref name="shown" /> fills them.</summary>
+        /// <summary>Changes to the slots of <paramref name="system" />, filled as <paramref name="shown" /> fills them, or filled by none where it is null.</summary>
         public Reslot(AutomationSystem system, SystemInstance shown)
         {
             System = system;
@@ -225,7 +225,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots.Edits
 
             for (var i = _made.Count - 1; i >= 0; i--)
             {
-                _shown.Clear(_made[i].Id);
+                _shown?.Clear(_made[i].Id);
                 System.ForgetPart(_made[i]);
             }
         }
@@ -274,6 +274,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots.Edits
         /// <summary>Fills <paramref name="slot" /> of <paramref name="instance" /> with <paramref name="blocks" />, each holding its facet of <paramref name="facets" /> where there are any.</summary>
         static void Fill(SystemInstance instance, string slot, IList<string> blocks, IList<int> facets)
         {
+            if (instance == null)
+                return;
+
             if (facets == null)
                 instance.Fill(slot, blocks);
             else

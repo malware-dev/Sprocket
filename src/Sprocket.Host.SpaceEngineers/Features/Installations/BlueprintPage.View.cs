@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Installations
         Label _locked;
         PartList _partList;
 
-        /// <summary>What the blueprint's author wrote about it, then the slots with how many still need a block.</summary>
+        /// <summary>What the blueprint's author wrote about it, then the slots with how many still need filling in.</summary>
         protected override Element CreateView()
         {
             return new VStack

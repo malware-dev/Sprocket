@@ -23,7 +23,9 @@ param(
     [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
     [string]$Workshop = 'E:\Steam\steamapps\workshop\content\244850\3807234771',
     [string]$Address = '127.0.0.1:27021',
-    [int]$TimeoutSeconds = 1200
+    [int]$TimeoutSeconds = 1200,
+    # The client's tests to play, of notice, edits, cockpit and hands; every one where none is named.
+    [string[]]$Only = @()
 )
 $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path "$PSScriptRoot\..\.."
@@ -47,7 +49,7 @@ function Restore-Workshop {
 Restore-Workshop
 
 # 3. The plugin, and the mod packed as the game would load it.
-dotnet build "$repo\tests\Sprocket.GameTests" -v q | Out-Null
+dotnet build "$repo\tests\Sprocket.GameTests" -v q -p:MdkBuildConfiguration=none | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'The test plugin did not build.' }
 $pack = Join-Path $work 'pack'
 if (Test-Path $pack) { Remove-Item $pack -Recurse -Force }
@@ -77,7 +79,7 @@ try {
     robocopy $packed.FullName $Workshop /MIR /XF metadata.mod modinfo.sbmi /NJH /NJS /NP /NFL /NDL | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "Copying the mod to the client failed (robocopy $LASTEXITCODE)." }
 
-    # 5. A clean world, Kept Count's and Status Pages' blueprints, the server, and the client once the server is ready.
+    # 5. A clean world, the scenarios' blueprints, the server, and the client once the server is ready.
     $world = Join-Path $Instance 'Saves\Sprocket Test'
     Get-ChildItem $world | Remove-Item -Recurse -Force
     Copy-Item (Join-Path $Instance 'WorldTemplate\*') $world -Recurse
@@ -88,6 +90,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Status Pages' was not written." }
     dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint 'Sprocket Forced Door' $blueprints | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Forced Door' was not written." }
+    dotnet run --project "$repo\src\Sprocket.Host.SpaceEngineers.Sim" -- --blueprint 'Sprocket Cockpit Press' $blueprints | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "The blueprint for 'Sprocket Cockpit Press' was not written." }
 
     # A folder both machines write to, for the client to ask the server to switch a logic system, and the server to answer.
     $signals = Join-Path $work 'signals'
@@ -115,6 +119,7 @@ try {
 
     $env:SPROCKET_CLIENTTEST_REPORT = $clientReport
     $env:SPROCKET_CLIENTTEST_JOIN = $Address
+    $env:SPROCKET_CLIENTTEST_ONLY = $Only -join ','
     $env:SPROCKET_CLIENTTEST_SHOTS = Join-Path $work 'shots'
     Remove-Item Env:SPROCKET_CLIENTTEST_WORLD -ErrorAction SilentlyContinue
     $clientProcess = Start-Process $Loader -ArgumentList '--game', "`"$Game\Bin64`"", '--plugin', "`"$plugin`"", '-appdata', "`"$AppData`"", '-nosplash', '-skipintro' -WorkingDirectory (Split-Path $Loader) -PassThru
@@ -134,6 +139,7 @@ finally {
     if ($clientProcess -and -not $clientProcess.HasExited) { Stop-Process -Id $clientProcess.Id -Force }
     if ($serverProcess -and -not $serverProcess.HasExited) { Stop-Process -Id $serverProcess.Id -Force }
     Remove-Item Env:SPROCKET_CLIENTTEST_JOIN -ErrorAction SilentlyContinue
+    Remove-Item Env:SPROCKET_CLIENTTEST_ONLY -ErrorAction SilentlyContinue
     Restore-Workshop
 }
 

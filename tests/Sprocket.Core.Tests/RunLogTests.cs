@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using BlockKinds = Sprocket.Host.SpaceEngineers.Framework.Game.Blocks.BlockKinds;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -58,14 +60,14 @@ public class RunLogTests
 
         public Comparison Closed(Door door)
         {
-            var test = new Comparison { MemberId = "status", Provider = "ext", Quantifier = Quantifier.All, Value = Literal.Name("closed") };
+            var test = new Comparison { MemberId = "status", Provider = "sprocket", Quantifier = Quantifier.All, Value = Literal.Name("closed") };
             test.Targets.Add(Name(door));
             return test;
         }
 
         public Act Do(string action, Fitting block)
         {
-            var act = new Act(action);
+            var act = new Act(new MemberKey(BlockKinds.Own, action));
             act.Targets.Add(Name(block));
             return Given.Defaults(act);
         }
@@ -112,9 +114,9 @@ public class RunLogTests
         Assert.All(a.Lines, line => Assert.Contains("\"Mining Barge\", \"Airlock\" on installation 1, sequence 1 \"Cycle\": ", line));
         In(a.Lines,
             "sequence 1 \"Cycle\": started by a call",
-            "step 1: if all ext.status on",
+            "step 1: if all sprocket.status on",
             "step 1 holds: \"Outer Door\" reads closed",
-            "step 2: call ext.open on [ 'Inner Door' ]",
+            "step 2: call sprocket.open on [ 'Inner Door' ]",
             "step 2 asked \"Inner Door\" to open",
             "step 3: else",
             "step 6: await",

@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -18,10 +17,13 @@ public class StateStepTests
                            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.'Fueling'\nchanged \"2026-10-16T10:00:00Z\"\n{\n"
                            + "    required slot 'Tank' expects OxygenTank\n\n"
                            + "    let filling = off\n\n"
-                           + "    when filling == on then set Stockpile on [ 'Tank' ] to on\n\n"
+                           + "    when filling == on then run 2\n\n"
                            + "    sequence 1 as Fill {\n"
                            + "        set Stockpile on [ 'Tank' ] to on\n"
                            + "        set Stockpile on [ 'Tank' ] to off\n"
+                           + "    }\n\n"
+                           + "    sequence 2 as Stock {\n"
+                           + "        set Stockpile on [ 'Tank' ] to on\n"
                            + "    }\n"
                            + "}\n\n"
                            + "instance 1 of \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as 'Installation 1' {\n"
@@ -81,32 +83,7 @@ public class StateStepTests
         var toggled = Assert.IsType<Act>(sequence.Steps[0]);
         Assert.Equal(ReachKind.Action, toggled.Form);
         Assert.Empty(toggled.Arguments);
-        Assert.Equal("Stockpile", Vocabulary.Flipped(sim.World, sim.Editor.Blocks(sequence.System, toggled.Targets), toggled.ActionId));
-    }
-
-    /// <summary>The verb of what a trigger does is chosen from a menu under it, as one edit.</summary>
-    [Fact]
-    public void ATriggersVerbIsChosenFromAMenuUnderIt()
-    {
-        var sim = Fueling(out var sequence);
-        var system = sequence.System;
-        sim.Editor.Push(new LogicSystemPage(sim.Editor, system));
-        sim.Tick();
-
-        sim.Editor.Triggers()[0].Does[0].Opens!.Execute();
-        sim.Tick();
-        Assert.Equal(new[] { "enable", "disable", "toggle" }, sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
-        sim.Editor.PressAnswer("disable");
-        sim.Tick();
-        var act = Assert.IsType<Act>(system.Triggers[0].Does);
-        Assert.False(act.Arguments[0].Flag);
-        Assert.Equal("Stockpile", act.ActionId);
-        Assert.Equal(new[] { "Tank" }, act.Targets);
-        Assert.Equal("disable", Assert.IsType<ArgumentsSlot>(sim.Editor.Triggers()[0].Does[0]).Filled[0]);
-
-        sim.Editor.Screen.Undo!.Execute();
-        sim.Tick();
-        Assert.True(((Act)system.Triggers[0].Does).Arguments[0].Flag);
+        Assert.Equal("Stockpile", Vocabulary.Flipped(sim.World, sim.Editor.Blocks(sequence.System, toggled.Targets), toggled.Key)?.Id);
     }
 
     /// <summary>The fueling program in a world with its tank, read in, its system switched off so it can be changed.</summary>

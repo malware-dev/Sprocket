@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
@@ -65,6 +66,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 if (!triggers[i].Stops)
                     starts++;
 
+                // One in a namespace the host lacks never fires, and waits for the namespace without trouble.
+                if (Awaits(triggers[i]))
+                    continue;
+
                 // A signal part left unanswered is said by Empty; whether the slots it is given answer is the
                 // construct's to say below. One that names no part yet is somebody still building it.
                 var required = triggers[i] as SignalTrigger;
@@ -78,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         foreach (var source in sending)
                         {
                             GridEntity block = bindings.Entity(source);
-                            if (block != null && Probe.Watching(block, required.Provider, required.EventId) == null)
+                            if (block != null && Probe.Watching(block, required.Key) == null)
                                 return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
                         }
                     }
@@ -122,20 +127,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 foreach (var source in watched)
                 {
                     GridEntity block = bindings.Entity(source);
+                    if (block != null && when.Ambiguous(block.Kind.Actions))
+                        return new SequenceFault(SequenceProblem.Ambiguous, SequenceFault.Trigger, BlockTrouble.None, when.EventId);
+
                     var asked = block == null ? null : when.Names(block.Kind.Actions)?.OwnValue;
                     var left = asked?.Missing(when.Arguments.Count);
                     if (left != null)
                         return new SequenceFault(SequenceProblem.Unfilled, SequenceFault.Trigger, BlockTrouble.None, left);
 
-                    var refused = asked?.Refused(when.Arguments);
+                    var shared = block == null ? null : Shared(when.Names(block.Kind.Actions), when.Arguments, when.Value);
+                    if (shared != null)
+                        return new SequenceFault(SequenceProblem.Ambiguous, SequenceFault.Trigger, BlockTrouble.None, shared);
+
+                    var refused = asked?.Refused(SystemInstance.Settled(through, when.Arguments));
                     if (refused != null)
                         return new SequenceFault(SequenceProblem.Mistyped, SequenceFault.Trigger, BlockTrouble.None, refused);
 
-                    if (block != null && Probe.Of(block, when.Provider, when.EventId, when.Arguments, when.Quantifier,
-                            when.Relation, when.Value) == null)
+                    if (block != null && Probe.Of(block, when.Key, SystemInstance.Settled(through, when.Arguments), when.Quantifier,
+                            when.Relation, Settled(through, when.Value)) == null)
                         return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
 
-                    if (asked != null && !asked.Answers(block.Block, when.Arguments) && !passed.Exists)
+                    if (asked != null && !asked.Answers(block.Block, SystemInstance.Settled(through, when.Arguments)) && !passed.Exists)
                         passed = new SequenceFault(SequenceProblem.PassedOver, SequenceFault.Trigger, BlockTrouble.None, block.Name);
                 }
             }
@@ -153,6 +165,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             var why = world.Unstartable.Why(sequence, through);
             return why == null ? SequenceFault.Unstarted(Unwired.Unknown, null) : SequenceFault.Unstarted(why.Why, why.Block);
+        }
+
+        /// <summary>Whether <paramref name="trigger" /> watches a signal or a member in a namespace the host lacks, and so never fires until the host has it.</summary>
+        static bool Awaits(Trigger trigger)
+        {
+            var signal = trigger as SignalTrigger;
+            var when = trigger as WhenTrigger;
+            var provider = signal != null ? signal.Provider : when != null ? when.Provider : "";
+            return provider.Length > 0 && !HostNamespaces.Has(provider);
         }
 
         /// <summary>Ticks since it last ran, or -1 if it never has.</summary>
@@ -201,6 +222,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (circular.Exists)
                 return circular;
 
+            SequenceFault uninstalled = Uninstalled(sequence);
+            if (uninstalled.Exists)
+                return uninstalled;
+
             SequenceFault unoffered = Unoffered(bindings, sequence, through);
             if (unoffered.Exists)
                 return unoffered;
@@ -212,6 +237,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             SequenceFault unfilled = Unfilled(bindings, sequence, through);
             if (unfilled.Exists)
                 return unfilled;
+
+            SequenceFault ambiguous = Ambiguous(bindings, sequence, through);
+            if (ambiguous.Exists)
+                return ambiguous;
 
             SequenceFault mistyped = Mistyped(bindings, sequence, through);
             if (mistyped.Exists)
@@ -383,13 +412,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return SequenceFault.None;
         }
 
-        /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs or <paramref name="alone" />, waits for a slot <paramref name="through" /> leaves empty.</summary>
+        /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs, waits for a slot <paramref name="through" /> leaves empty, or for a namespace the host lacks.</summary>
         /// <remarks>Asked when the program is checked, and on no tick.</remarks>
-        public static bool Waits(AutomationSystem system, Trigger trigger, Sequence alone, SystemInstance through)
+        public static bool Waits(AutomationSystem system, Trigger trigger, SystemInstance through)
         {
-            var run = trigger.Does as Run;
-            var started = run != null ? system.FindSequence(run.Number) : alone;
-            return started != null && Empty(started, through).Exists;
+            var started = trigger.Does == null ? null : system.FindSequence(trigger.Does.Number);
+            return started != null && (Empty(started, through).Exists || Uninstalled(started).Exists);
         }
 
         /// <summary>The first slot, of what starts it and then what its steps act on, that <paramref name="through" /> leaves empty and may not, or none.</summary>
@@ -411,6 +439,29 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, BlockTrouble.None, slot);
             }
 
+            var settings = new List<string>();
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                if (!triggers[i].IsAbout(sequence))
+                    continue;
+
+                settings.Clear();
+                SettingMentions.Named(triggers[i], settings);
+                var unanswered = Unanswered(through, settings, SequenceFault.Trigger);
+                if (unanswered.Exists)
+                    return unanswered;
+            }
+
+            // A state starting at a setting may be read by any step, so its setting is owed by the first.
+            settings.Clear();
+            SettingMentions.Started(system, settings);
+            if (sequence.Steps.Count > 0)
+            {
+                var unanswered = Unanswered(through, settings, 0);
+                if (unanswered.Exists)
+                    return unanswered;
+            }
+
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var lists = new List<IList<string>>();
@@ -421,9 +472,49 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     if (slot != null)
                         return new SequenceFault(SequenceProblem.EmptySlot, i, BlockTrouble.None, slot);
                 }
+
+                settings.Clear();
+                SettingMentions.Named(sequence.Steps[i], settings);
+                var unanswered = Unanswered(through, settings, i);
+                if (unanswered.Exists)
+                    return unanswered;
             }
 
             return SequenceFault.None;
+        }
+
+        /// <summary>
+        /// The first of <paramref name="settings" /> that <paramref name="through" /> gives no value, named by the step at
+        /// <paramref name="at" />, or none.
+        /// </summary>
+        static SequenceFault Unanswered(SystemInstance through, List<string> settings, int at)
+        {
+            for (var i = 0; i < settings.Count; i++)
+            {
+                Literal value;
+                if (!through.Gives(settings[i], out value))
+                    return new SequenceFault(Unanswered(through, settings[i]), at, BlockTrouble.None, settings[i]);
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>
+        /// Why <paramref name="through" /> gives the setting <paramref name="setting" /> no value: a required setting it leaves
+        /// unanswered is an empty slot, waited for, and a setting its system does not have is a value the step goes without.
+        /// </summary>
+        public static SequenceProblem Unanswered(SystemInstance through, string setting)
+        {
+            var part = through?.System?.FindPart(setting);
+            return part != null && part.IsSetting ? SequenceProblem.EmptySlot : SequenceProblem.Unfilled;
+        }
+
+        /// <summary><paramref name="value" /> as <paramref name="through" /> has it, as <see cref="SystemInstance.Settled(SystemInstance, Literal, out Literal)" /> says.</summary>
+        static Literal Settled(SystemInstance through, Literal value)
+        {
+            Literal settled;
+            SystemInstance.Settled(through, value, out settled);
+            return settled;
         }
 
         static string EmptyOf(AutomationSystem system, SystemInstance through, IList<string> names)
@@ -454,7 +545,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         static SequenceFault Circular(Sequence sequence)
         {
             var system = sequence.System;
-            if (system == null || sequence.IsAlone)
+            if (system == null)
                 return SequenceFault.None;
 
             var steps = sequence.Steps;
@@ -548,12 +639,78 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 {
                     GridEntity entity = bindings.Entity(target);
                     var value = entity == null ? null : test.Names(entity.Kind.Actions);
-                    if (value?.OwnValue != null && !value.OwnValue.Answers(entity.Block, test.Arguments))
+                    if (value?.OwnValue != null && !value.OwnValue.Answers(entity.Block, SystemInstance.Settled(through, test.Arguments)))
                         return new SequenceFault(SequenceProblem.PassedOver, i, BlockTrouble.None, entity.Name);
                 }
             }
 
             return SequenceFault.None;
+        }
+
+        /// <summary>The first step naming a setting, written alone, that its member on one of its blocks also takes as one of its words; or none.</summary>
+        /// <remarks>A member's words are known only from its blocks, so this is where such a name is found to mean two things.</remarks>
+        static SequenceFault Ambiguous(Bindings bindings, Sequence sequence, SystemInstance through)
+        {
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var test = TestOf(sequence.Steps[i]);
+                var act = sequence.Steps[i] as Act;
+                var targets = test != null ? test.Targets : act != null && act.HasAction ? act.Targets : null;
+                if (targets == null)
+                    continue;
+
+                foreach (var target in SystemInstance.Through(through, targets))
+                {
+                    var entity = bindings.Entity(target);
+                    if (entity == null)
+                        continue;
+
+                    var shared = test != null
+                        ? Shared(test.Names(entity.Kind.Actions), test.Arguments, test.Value)
+                        : Shared(act.Names(entity.Kind.Actions), act.Arguments, default(Literal));
+                    if (shared != null)
+                        return new SequenceFault(SequenceProblem.Ambiguous, i, BlockTrouble.None, shared);
+                }
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>
+        /// The first setting written alone among <paramref name="given" />, or as <paramref name="compared" />, that
+        /// <paramref name="member" /> also takes as one of its words, where it stands; or null where there is none.
+        /// </summary>
+        static string Shared(EntityAction member, IList<Literal> given, Literal compared)
+        {
+            if (member == null)
+                return null;
+
+            var fields = new List<Field>();
+            member.Fields(fields);
+            var covered = 0;
+            for (var f = 0; f < fields.Count; f++)
+            {
+                for (var i = covered; i < covered + fields[f].Covers && i < given.Count; i++)
+                {
+                    if (Takes(fields[f], given[i]))
+                        return given[i].Text;
+                }
+
+                covered += fields[f].Covers;
+            }
+
+            // What a value is compared with is one of the value's own words, where it is asked for nothing.
+            return given.Count == 0 && fields.Count == 1 && Takes(fields[0], compared) ? compared.Text : null;
+        }
+
+        /// <summary>Whether <paramref name="value" /> is a setting written alone that <paramref name="field" /> also takes as one of its words.</summary>
+        static bool Takes(Field field, Literal value)
+        {
+            if (!value.IsSetting || value.IsKinded)
+                return false;
+
+            var words = field.Means ?? field.Words;
+            return words != null && words.Contains(value.Text);
         }
 
         /// <summary>The first step given a value its action takes as another kind, or none.</summary>
@@ -566,7 +723,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 if (test != null)
                 {
                     compared.Clear();
-                    compared.Add(test.Value);
+                    compared.Add(Settled(through, test.Value));
                     var refused = TestRefused(bindings, test, through, compared);
                     if (refused != null)
                         return new SequenceFault(SequenceProblem.Mistyped, i, BlockTrouble.None, refused);
@@ -586,7 +743,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                         continue;
 
                     EntityAction doing = act.Names(entity.Kind.Actions);
-                    var refused = doing?.Refused(act.Arguments);
+                    var refused = doing?.Refused(SystemInstance.Settled(through, act.Arguments));
                     if (refused != null)
                         return new SequenceFault(SequenceProblem.Mistyped, i, BlockTrouble.None, refused);
                 }
@@ -612,13 +769,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 if (value != null && !value.Takes(compared))
                     return "";
 
-                var refused = value?.OwnValue?.Refused(test.Arguments);
+                var refused = value?.OwnValue?.Refused(SystemInstance.Settled(through, test.Arguments));
                 if (refused != null)
                     return refused;
 
                 var offered = value != null;
-                if (offered && Probe.Of(entity, test.Provider, test.MemberId, test.Arguments, test.Quantifier, test.Relation,
-                        test.Value) == null)
+                if (offered && Probe.Of(entity, test.Key, SystemInstance.Settled(through, test.Arguments), test.Quantifier,
+                        test.Relation, Settled(through, test.Value)) == null)
                     return "";
             }
 
@@ -658,19 +815,66 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return SequenceFault.None;
         }
 
-        /// <summary>The first step whose blocks do not offer what it does, or none.</summary>
-        /// <remarks>Every block the step names has to offer it.</remarks>
+        /// <summary>
+        /// The first step doing something in a namespace the host lacks, outside a branch taken only while the host has it, as
+        /// a fault the sequence waits on; or none.
+        /// </summary>
+        /// <remarks>Asked when the program is checked and when its watches are matched, on no tick; it reads no block.</remarks>
+        static SequenceFault Uninstalled(Sequence sequence)
+        {
+            HashSet<string> assumed = null;
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var provider = ProviderOf(sequence.Steps[i]);
+                if (provider.Length == 0 || HostNamespaces.Has(provider))
+                    continue;
+
+                if (assumed == null)
+                    assumed = new HashSet<string>();
+
+                HostTest.Assumed(sequence.Steps, i, assumed);
+                if (!assumed.Contains(provider))
+                    return SequenceFault.Uninstalled(i, provider);
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>The namespace what <paramref name="step" /> reads or does is in, or empty where it names none or no member.</summary>
+        static string ProviderOf(Step step)
+        {
+            var test = TestOf(step);
+            if (test != null)
+                return test.Provider;
+
+            var act = step as Act;
+            return act != null && act.HasAction ? act.Provider : "";
+        }
+
+        /// <summary>The first step whose blocks do not offer what it does, or offer more than one member its bare name could mean; or none.</summary>
+        /// <remarks>
+        /// Every block the step names has to offer it. A step in a namespace the host lacks is <see cref="Uninstalled" />'s
+        /// to say, or is in a branch taken only while the host has it, which is never reached.
+        /// </remarks>
         static SequenceFault Unoffered(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var test = TestOf(sequence.Steps[i]);
+                var act = sequence.Steps[i] as Act;
+                var provider = ProviderOf(sequence.Steps[i]);
+                if (provider.Length > 0 && !HostNamespaces.Has(provider))
+                    continue;
+
                 if (test != null)
                 {
                     var read = SystemInstance.Through(through, test.Targets);
                     foreach (var source in read)
                     {
                         GridEntity entity = bindings.Entity(source);
+                        if (entity != null && test.Ambiguous(entity.Kind.Actions))
+                            return new SequenceFault(SequenceProblem.Ambiguous, i, BlockTrouble.None, test.MemberId);
+
                         if (entity != null && test.Names(entity.Kind.Actions) == null)
                             return new SequenceFault(SequenceProblem.Unoffered, i);
                     }
@@ -678,7 +882,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     continue;
                 }
 
-                var act = sequence.Steps[i] as Act;
                 if (act == null || !act.HasAction)
                     continue;
 
@@ -686,6 +889,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 foreach (var target in targets)
                 {
                     GridEntity entity = bindings.Entity(target);
+                    if (entity != null && act.Ambiguous(entity.Kind.Actions))
+                        return new SequenceFault(SequenceProblem.Ambiguous, i, BlockTrouble.None, act.ActionId);
+
                     if (entity != null && act.Names(entity.Kind.Actions) == null)
                         return new SequenceFault(SequenceProblem.Unoffered, i);
                 }

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using System.Collections.Generic;
 using VRage.Game.ModAPI.Ingame.Utilities;
 
@@ -82,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (_token.Kind == TokenKind.VectorOpen)
                 return true;
 
-            return _token.Kind == TokenKind.Keyword && _token.Keyword == Keyword.On && Peek().Kind == TokenKind.ListOpen;
+            return _token.Keyword == Keyword.On && Peek().Kind == TokenKind.ListOpen;
         }
 
         /// <summary>
@@ -209,7 +210,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
                 statement.IsOff = off;
                 into.Add(statement);
+                if (!nested && into.Count == 1)
+                    Versioned(statement);
             }
+        }
+
+        /// <summary>
+        /// Has the rest of the script read as the format <paramref name="first" /> names, where it is the version line: one
+        /// written for a format earlier than the first with contextual keywords reads as that format did.
+        /// </summary>
+        /// <remarks>
+        /// Only the next line's first token is read already, and it starts a statement or is none, which reads the same either way.
+        /// </remarks>
+        void Versioned(Statement first)
+        {
+            if (first.Key != Keyword.None || first.Head != ScriptFormat.Header || first.ValueAt(0).Form != ValueForm.Integer)
+                return;
+
+            var version = first.Whole(0);
+            var draft = first.Says(1, Keyword.Alpha) ? first.Whole(2) : int.MaxValue;
+            _lexer.Earlier = version < Keywords.ContextualVersion || (version == Keywords.ContextualVersion && draft < Keywords.ContextualDraft);
+            _reading.Earlier = _lexer.Earlier;
         }
 
         /// <summary>
@@ -227,7 +248,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             Step();
             if (_token.Kind == TokenKind.Keyword)
             {
-                Fail($"unexpected '{Keywords.Name(_token.Keyword)}' as an attribute's name; a name spelled like a keyword is quoted.");
+                Fail($"unexpected '{Keywords.Name(_token.Keyword)}' as an attribute's name; a name spelled like a reserved keyword is quoted.");
                 Recover();
                 return;
             }
@@ -291,8 +312,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
             }
 
+            // A head spelled like a contextual keyword is a name: no statement starts with one.
             var at = _token.At;
-            var key = _token.Keyword;
+            var key = kind == TokenKind.Keyword ? _token.Keyword : Keyword.None;
             var head = kind == TokenKind.Keyword ? "" : _token.Text.ToString();
             var failures = _failures;
             var values = _reading.Values;
@@ -377,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <summary>Whether <paramref name="token" /> starts a line of a system's header: <c>changed</c> or <c>from</c>.</summary>
         static bool Clause(Token token)
         {
-            return token.Kind == TokenKind.Keyword && (token.Keyword == Keyword.Changed || token.Keyword == Keyword.From);
+            return token.Keyword == Keyword.Changed || token.Keyword == Keyword.From;
         }
 
         bool Valuish()
@@ -409,7 +431,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             {
                 case TokenKind.Identifier:
                     Step();
-                    var name = new Value(ValueForm.Identifier, token.Text.ToString());
+                    var name = Named(token);
                     if (_token.Kind == TokenKind.Dot)
                     {
                         var failures = _failures;
@@ -418,19 +440,30 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                             return Value.None;
                     }
 
-                    return Referencing() ? Referenced(name) : name;
+                    if (_token.Kind == TokenKind.VectorOpen)
+                        return Called(name);
+
+                    return Referencing() ? Referenced(name, Value.Listed(0, 0)) : name;
 
                 case TokenKind.Keyword:
                     Step();
 
-                    // A name spelled like a keyword is quoted, beside a dot as anywhere: ext.'on'.
+                    // A name spelled like a reserved keyword is quoted, beside a dot as anywhere: sprocket.'every'.
                     if (_token.Kind == TokenKind.Dot)
                     {
-                        Fail($"unexpected '{Keywords.Name(token.Keyword)}' before '.'; a name spelled like a keyword is quoted.");
+                        Fail($"unexpected '{Keywords.Name(token.Keyword)}' before '.'; a name spelled like a reserved keyword is quoted.");
                         return Value.None;
                     }
 
-                    return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
+                    var keyword = new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
+                    if (_token.Kind == TokenKind.VectorOpen && Kinds.IsKeyword(token.Keyword))
+                    {
+                        var failures = _failures;
+                        var arguments = Arguments();
+                        return _failures > failures ? Value.None : Kinded(keyword, arguments);
+                    }
+
+                    return keyword;
 
                 case TokenKind.Equals:
                     Step();
@@ -563,7 +596,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             {
                 Step();
                 if (_token.Kind == TokenKind.Identifier)
-                    parts.Add(new Value(ValueForm.Identifier, _token.Text.ToString()));
+                    parts.Add(Named(_token));
                 else
                 {
                     Fail("expected a name after '.'.");
@@ -577,24 +610,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// A member and the blocks it is read on or done to, <c>ext.amount("Ingot/Iron") on [ cargo ]</c>, having read the
+        /// A member and the blocks it is read on or done to, <c>sprocket.amount("Ingot/Iron") on [ cargo ]</c>, having read the
         /// member's name already.
         /// </summary>
         /// <remarks>
         /// The run holds the name's parts, then the arguments as a list, empty where there are none, then the names.
         /// </remarks>
-        Value Referenced(Value member)
+        Value Referenced(Value member, Value arguments)
         {
             var failures = _failures;
-            var arguments = Value.Listed(0, 0);
-            if (_token.Kind == TokenKind.VectorOpen)
-            {
-                arguments = Arguments();
-                if (_failures > failures)
-                    return Value.None;
-            }
-
-            if (_token.Kind != TokenKind.Keyword || _token.Keyword != Keyword.On)
+            if (_token.Keyword != Keyword.On)
             {
                 Fail("expected 'on' and a list of names after the arguments.");
                 return Value.None;
@@ -628,6 +653,58 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             parts.Add(arguments);
             parts.Add(names);
             return Value.Referenced(from, parts.Count - from);
+        }
+
+        /// <summary>
+        /// <c>name(...)</c>, having read the name: a member and its arguments where <c>on</c> and its names follow, or else a
+        /// thing with the name as its kind, <c>side(inside)</c>.
+        /// </summary>
+        Value Called(Value name)
+        {
+            var failures = _failures;
+            var arguments = Arguments();
+            if (_failures > failures)
+                return Value.None;
+
+            return _token.Keyword == Keyword.On ? Referenced(name, arguments) : Kinded(name, arguments);
+        }
+
+        /// <summary>The name <paramref name="token" />, an identifier, spells, remembering the contextual keyword a bare one is spelled as.</summary>
+        /// <remarks>A name spelled like a keyword takes the keyword's own spelling, so it makes no string.</remarks>
+        static Value Named(Token token)
+        {
+            return token.Keyword != Keyword.None
+                ? new Value(ValueForm.Identifier, null, 0, 0, token.Keyword)
+                : new Value(ValueForm.Identifier, token.Text.ToString());
+        }
+
+        /// <summary>
+        /// A thing with its kind, <paramref name="kind" />, the thing the one value of <paramref name="arguments" />, and any
+        /// kinds written after it: <c>type(side)(inside)</c>.
+        /// </summary>
+        Value Kinded(Value kind, Value arguments)
+        {
+            while (true)
+            {
+                if (arguments.Count != 1)
+                {
+                    Fail("expected one value in a kind's parentheses, like real(4), or 'on' and a list of names after a member's arguments.");
+                    return Value.None;
+                }
+
+                var parts = _reading.Parts;
+                var from = parts.Count;
+                parts.Add(kind);
+                parts.Add(_reading.Items[arguments.From]);
+                kind = Value.Kinded(from);
+                if (_token.Kind != TokenKind.VectorOpen)
+                    return kind;
+
+                var failures = _failures;
+                arguments = Arguments();
+                if (_failures > failures)
+                    return Value.None;
+            }
         }
 
         /// <summary>A vector, its three numbers written into the reading's shared run.</summary>

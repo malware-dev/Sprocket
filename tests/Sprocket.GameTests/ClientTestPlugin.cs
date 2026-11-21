@@ -200,9 +200,12 @@ namespace Sprocket.GameTests
                 ? "the player stands in a space suit" : "the player has no character a minute after asking to respawn");
             yield return 2 * PluginUpdates.PerSecond;
 
-            var notice = new TerminalNoticeClientTest(_shots, _report, _input).Run();
-            while (notice.MoveNext())
-                yield return notice.Current;
+            if (Wants("notice"))
+            {
+                var notice = new TerminalNoticeClientTest(_shots, _report, _input).Run();
+                while (notice.MoveNext())
+                    yield return notice.Current;
+            }
 
             var signals = Environment.GetEnvironmentVariable("SPROCKET_GAMETEST_SIGNALS");
             if (string.IsNullOrEmpty(signals))
@@ -211,13 +214,26 @@ namespace Sprocket.GameTests
                 yield break;
             }
 
-            var edits = new JoinedEditsClientTest(_report, _input, signals).Run();
-            while (edits.MoveNext())
-                yield return edits.Current;
+            if (Wants("edits"))
+            {
+                var edits = new JoinedEditsClientTest(_report, _input, signals).Run();
+                while (edits.MoveNext())
+                    yield return edits.Current;
+            }
 
-            var hands = new ChangingHandsClientTest(_shots, _report, _input, new EditorTour(_shots, _report, _input), signals).Run();
-            while (hands.MoveNext())
-                yield return hands.Current;
+            if (Wants("cockpit"))
+            {
+                var press = new CockpitPressClientTest(_report, signals).Run();
+                while (press.MoveNext())
+                    yield return press.Current;
+            }
+
+            if (Wants("hands"))
+            {
+                var hands = new ChangingHandsClientTest(_shots, _report, _input, new EditorTour(_shots, _report, _input), signals).Run();
+                while (hands.MoveNext())
+                    yield return hands.Current;
+            }
         }
 
         IEnumerator<int> Steps()
@@ -239,7 +255,7 @@ namespace Sprocket.GameTests
                     yield return shot.Current;
             }
 
-            if (Wants("kept") || Wants("editor") || Wants("menus"))
+            if (Wants("kept") || Wants("editor") || Wants("menus") || Wants("callouts") || Wants("settings") || Wants("share"))
             {
                 var kept = new KeptCountClientTest(_blueprints, _shots, _report).Run();
                 while (kept.MoveNext())
@@ -254,6 +270,15 @@ namespace Sprocket.GameTests
             }
 
             var tour = new EditorTour(_shots, _report, _input);
+
+            // Before any other editor test, which would meet the what's-new bubbles first.
+            if (Wants("callouts"))
+            {
+                var callouts = new CalloutsClientTest(tour, _report, _input).Run();
+                while (callouts.MoveNext())
+                    yield return callouts.Current;
+            }
+
             if (Wants("editor"))
             {
                 var editor = new EditorShotClientTest(tour, _report).Run("Kept Automation");
@@ -269,6 +294,27 @@ namespace Sprocket.GameTests
                     yield return hailstone.Current;
             }
 
+            if (Wants("sharedtext"))
+            {
+                var shared = new SharedTextClientTest(_report).Run();
+                while (shared.MoveNext())
+                    yield return shared.Current;
+            }
+
+            if (Wants("settings"))
+            {
+                var settings = new SettingsClientTest(tour, _report, _input).Run();
+                while (settings.MoveNext())
+                    yield return settings.Current;
+            }
+
+            if (Wants("share"))
+            {
+                var share = new ShareImportClientTest(tour, _report, _input).Run();
+                while (share.MoveNext())
+                    yield return share.Current;
+            }
+
             if (Wants("menus"))
             {
                 var menus = new EditorShotClientTest(tour, _report).Menus("Kept Automation");
@@ -281,6 +327,26 @@ namespace Sprocket.GameTests
                 var move = new MoveItemsClientTest(_blueprints, _report, tour).Run(Wants);
                 while (move.MoveNext())
                     yield return move.Current;
+            }
+
+            foreach (var local in LocalTests())
+            {
+                if (!Named(local.Part))
+                    continue;
+
+                var steps = local.Run(_blueprints, tour, _report);
+                while (steps.MoveNext())
+                    yield return steps.Current;
+            }
+        }
+
+        /// <summary>Every client test kept in the Local folder of this machine, newly made.</summary>
+        static IEnumerable<ILocalClientTest> LocalTests()
+        {
+            foreach (var type in typeof(ClientTestPlugin).Assembly.GetTypes())
+            {
+                if (!type.IsAbstract && typeof(ILocalClientTest).IsAssignableFrom(type))
+                    yield return (ILocalClientTest)Activator.CreateInstance(type);
             }
         }
 

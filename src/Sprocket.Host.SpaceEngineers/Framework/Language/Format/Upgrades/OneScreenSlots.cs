@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             bindings.Refresh(world, program);
 
             var held = 0;
-            var type = HostTypes.Returned("screen");
+            var type = HostTypes.Named(ScreenType.TypeId);
             foreach (var system in program.Systems)
             {
                 if (!system.IsBlueprint)
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             return held == 0 ? "" : $"alpha 18: {held} block slot{(held == 1 ? "" : "s")} of one screen each made a screen slot.";
         }
 
-        /// <summary>Whether something in <paramref name="system" /> names <paramref name="slot" />, and everything that does is a step or a trigger's act on a screen's member.</summary>
+        /// <summary>Whether something in <paramref name="system" /> names <paramref name="slot" />, and everything that does is a step on a screen's member.</summary>
         static bool OnlyScreens(AutomationSystem system, string slot)
         {
             var any = false;
@@ -61,15 +61,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
                 var moment = trigger as MomentTrigger;
                 if (moment != null && moment.Sources.Contains(slot))
                     return false;
-
-                var does = trigger.Acts;
-                if (does != null && does.Targets.Contains(slot))
-                {
-                    if (!Screened(does.Provider, does.ActionId))
-                        return false;
-
-                    any = true;
-                }
             }
 
             foreach (var sequence in system.Sequences)

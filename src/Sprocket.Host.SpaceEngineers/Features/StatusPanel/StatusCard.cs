@@ -114,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.StatusPanel
             if (item.Halted)
                 return SequenceText.Stopped(texts, new Halt(fault.Problem, 0, fault.Step, fault.Because, fault.Which), item.Sequence, item.Row, false);
 
-            return SequenceText.Failing(texts, fault, item.Sequence, item.Alone, item.Row);
+            return SequenceText.Failing(texts, fault, item.Sequence, item.Row);
         }
     }
 }

@@ -148,7 +148,7 @@ public class StateEditingTests
     public void AnIfOnBlocksBecomesAnIfOnAState()
     {
         var screen = OnSequence(Head.Replace("system ", "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n\nsystem ")
-            + "    sequence 1 {\n        if all ext.status on [ door1 ] == closed then {\n            set where to outside\n        }\n    }\n}\n", out var sequence);
+            + "    sequence 1 {\n        if all sprocket.status on [ door1 ] == closed then {\n            set where to outside\n        }\n    }\n}\n", out var sequence);
         var editor = screen.Editor;
 
         var row = editor.StepRows()[0];
@@ -217,7 +217,7 @@ public class StateEditingTests
         Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
         screen.Run(1);
         Assert.True(editor.Screen.HasQuestion);
-        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.ValueNewSetting, editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
         Assert.Equal("outside", editor.Screen.Default!.Text);
 
         editor.PressAnswer("inside");
@@ -281,16 +281,16 @@ public class StateEditingTests
         Assert.Equal("", set.From);
     }
 
-    /// <summary>A flag no other state holds the like of is offered on and off alone.</summary>
+    /// <summary>A flag no other state holds the like of is offered on, off and a new setting, and no other state's value.</summary>
     [Fact]
-    public void AFlagsMenuOffersOnAndOffAlone()
+    public void AFlagsMenuOffersNoOtherStatesValue()
     {
         var screen = OnSequence(Head + "    sequence 1 {\n        set cycling to on\n    }\n}\n", out _);
         var editor = screen.Editor;
 
         Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { "on", "off" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "on", "off", editor.Texts.ValueNewSetting }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
     }
 
     /// <summary>The value an if on a state checks is chosen from a menu under it, as one edit.</summary>
@@ -310,30 +310,23 @@ public class StateEditingTests
         Assert.Equal(Relation.Is, test.Relation);
     }
 
-    /// <summary>The value a when watches a state for, and the value its trigger sets a state to, are each chosen from a menu under it.</summary>
+    /// <summary>The value a when watches a state for is chosen from a menu under it.</summary>
     [Fact]
-    public void ATriggersStateValuesAreChosenFromMenusUnderThem()
+    public void AWatchedStateValueIsChosenFromAMenuUnderIt()
     {
-        var screen = OnSystem(Head + "    when where == outside then set cycling to off\n\n    sequence 1 {\n    }\n}\n", out var system);
+        var screen = OnSystem(Head + "    when where == outside then run 1\n\n    sequence 1 {\n    }\n}\n", out var system);
         var editor = screen.Editor;
 
         editor.Triggers()[0].Starts[2].Opens!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.ValueNewSetting, editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
         editor.PressAnswer("inside");
         screen.Run(1);
         Assert.Equal("inside", Assert.IsType<StateTrigger>(system.Triggers[0]).Test.Value.Text);
 
-        editor.Triggers()[0].Does[1].Opens!.Execute();
-        screen.Run(1);
-        Assert.Equal(new[] { "on", "off" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
-        editor.PressAnswer("on");
-        screen.Run(1);
-        Assert.Equal("on", Assert.IsType<SetState>(system.Triggers[0].Does).Value.Said);
-
         editor.Screen.Undo!.Execute();
         screen.Run(1);
-        Assert.Equal("off", Assert.IsType<SetState>(system.Triggers[0].Does).Value.Said);
+        Assert.Equal("outside", Assert.IsType<StateTrigger>(system.Triggers[0]).Test.Value.Text);
     }
 
     /// <summary>When state can watch a state made in its own picker, which is added with the trigger as one undo step.</summary>
@@ -849,10 +842,11 @@ public class StateEditingTests
         Assert.Equal("place", system.FindState("where")!.Type);
     }
 
-    /// <summary>A state is refused a name a type has in another case, and takes its own name in another case.</summary>
+    /// <summary>A state is refused a name another state has in another case, takes its own name in another case, and may share a type's.</summary>
     [Theory]
-    [InlineData("SIDE", "where")]
+    [InlineData("THERE", "where")]
     [InlineData("Where", "Where")]
+    [InlineData("SIDE", "SIDE")]
     public void AStatesNameIsCheckedInAnyCase(string typed, string after)
     {
         var screen = OnSystem(Program, out var system);

@@ -42,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
         Element _focused;
         string _naming;
+        ValuesQuestion _asking;
 
         /// <summary>
         /// The installation panel tab of <paramref name="system" />, shown in <paramref name="panel" />, its changes made through
@@ -74,6 +75,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             };
         }
 
+        /// <summary>The panel a setting is made, opened or given a value in while one is open, or null.</summary>
+        public ValuesQuestion Asking => _asking != null && _asking.IsOpen ? _asking : null;
+
         bool Editable => _locked().Length == 0;
 
         /// <summary>Lays the tab out again from the blueprint's description and slots.</summary>
@@ -89,6 +93,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <remarks>Called every tick.</remarks>
         public void Refocused()
         {
+            // A panel asked in follows its row, which may be made again.
+            _asking?.Hang();
+
             var now = _editor.Input?.Focused;
             if (ReferenceEquals(now, _focused))
                 return;
@@ -164,7 +171,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
             var add = _panel.AddCategory;
             var optimize = _panel.Optimize;
-            _panel.Slotting.IsVisible = _parts.Count > 0;
+            // Shown while a slot can be added, so the first one can be.
+            _panel.Slotting.IsVisible = _parts.Count > 0 || editable && shown != null;
             _panel.SlotsHeading.Markdown = CodexPages.Term(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
             add.IsVisible = editable;
             add.Text = StatusRow.Plus + texts.CategoryAdd;
@@ -173,8 +181,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             add.Tip = CodexTip.For(add.Tip, texts.Codex.TermCategory);
             _panel.AddSlot.IsVisible = editable && shown != null;
             if (shown != null)
-                _panel.AddSlot.Show(Adds(texts, shown, "", null));
+                _panel.AddSlot.Show(Adds(texts, shown, "", null, () => _panel.AddSlot));
 
+            optimize.IsVisible = _parts.Count > 0;
             optimize.Text = texts.SlotOptimize;
             optimize.Command = _changes(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system));
             optimize.Tip = editable ? CodexTip.For(optimize.Tip, texts.Codex.SlotOptimizeAbout) : KeptTip.For(optimize.Tip, locked);
@@ -194,7 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                     var at = i;
                     var row = (CategoryEndRow)_slotRows[end];
                     row.Category = end.Name;
-                    row.Adds.Show(Adds(texts, shown, end.Name, made => _arranger.Placed(_slotKeys, at, made)));
+                    row.Adds.Show(Adds(texts, shown, end.Name, made => _arranger.Placed(_slotKeys, at, made), () => row.Adds));
                 }
             }
 
@@ -208,11 +217,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 row.Name = part.Id;
                 row.Short = part.IsSignal ? part.Short : "";
                 row.Mark = MarkText.OfSlot(part);
+                row.FillsAbout = part.IsSetting ? texts.Codex.SettingValueAbout : null;
                 row.Described = part.Annotation;
-                row.Opens = _changes(CommandKind.OpenSlot, () => _editor.Push(new SlotPage(_editor, _system, part)));
-                row.OpensAbout = editable ? texts.Codex.SlotOpenAbout : locked;
+                row.Opens = _changes(CommandKind.OpenSlot, () => _asking = part.IsSetting
+                    ? SettingPanel.Edit(_editor, _system, part, () => row.NameButton, () => _asking = null)
+                    : SlotQuestion.Edit(_editor, _system, part, () => row.NameButton, () => _asking = null));
+                row.OpensAbout = editable ? part.IsSetting ? texts.Codex.SettingOpenAbout : texts.Codex.SlotOpenAbout : locked;
                 row.FillsLocked = locked;
-                row.Fills = _changes(CommandKind.FillPart, () => _fill.Ask(part, shown));
+                row.Fills = _changes(CommandKind.FillPart, part.IsSetting ? (Action)(() => _asking = SettingPanel.Value(_editor, _system, shown, part, () => row.ValueChip))
+                    : () => _fill.Ask(part, shown));
 
                 // A slot nothing uses asks nothing of any installation, and is offered its bin.
                 var unused = !_used.Contains(part.Id);
@@ -224,11 +237,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                     : replaced == null ? null : Template.Fill(texts.StoppedBlockReplaced, "block", replaced[0].Name);
                 row.Level = NoticeLevel.Warning;
                 row.Accepts(replaced == null ? null : _changes(CommandKind.FillPart, () => Accept(shown, part, replaced)));
-                row.Removable = unused;
+                row.Removable = true;
                 row.Removes = unused ? _changes(CommandKind.RemoveSlot, () => _editor.Do(_system, ChangeSlots.Removing(_system, shown, part))) : null;
-                row.RemovesAbout = editable ? texts.Codex.SlotRemoveAbout : locked;
+                row.RemovesAbout = !editable ? locked : unused ? texts.Codex.SlotRemoveAbout : texts.SlotKept;
 
-                if (row.Blocks.Count > 0)
+                if (part.IsSetting)
+                    SettingRows.Show(row, part, shown, unused);
+                else if (row.Blocks.Count > 0)
                     row.Show(_editor.World);
                 else
                     row.Say(SentenceText.Empty, !part.Optional && !unused);
@@ -272,9 +287,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
         /// <summary>
         /// The kinds of slot that can be added, in <paramref name="texts" />, each made from what is selected for
-        /// <paramref name="shown" />, under <paramref name="category" />, and placed by <paramref name="placed" />, or after every slot where that is null.
+        /// <paramref name="shown" />, under <paramref name="category" />, and placed by <paramref name="placed" />, or after every slot where that is null; a setting is made in a panel hung from <paramref name="anchor" />.
         /// </summary>
-        AddOption Adds(Texts texts, SystemInstance shown, string category, Func<Part, Arrangement> placed)
+        AddOption Adds(Texts texts, SystemInstance shown, string category, Func<Part, Arrangement> placed, Func<Element> anchor)
         {
             return new AddOption(texts.SlotAdd, null, new[]
             {
@@ -283,9 +298,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 new AddOption(texts.SlotAddSignal, texts.Codex.SlotAddSignalAbout,
                     _changes(CommandKind.AddSlot, () => _fill.New(shown, true, null, category, placed))),
                 new AddOption(texts.SlotAddScreen, texts.Codex.SlotAddScreenAbout,
-                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Returned("screen"), category, placed))),
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Named(ScreenType.TypeId), category, placed))),
                 new AddOption(texts.SlotAddInventory, texts.Codex.SlotAddInventoryAbout,
-                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Returned("inventory"), category, placed)))
+                    _changes(CommandKind.AddSlot, () => _fill.New(shown, false, HostTypes.Named(InventoryType.TypeId), category, placed))),
+                new AddOption(texts.SlotAddSetting, texts.Codex.SlotAddSettingAbout,
+                    _changes(CommandKind.AddSlot, () => _asking = _fill.NewSetting(category, placed, anchor, () => _asking = null)))
             });
         }
 

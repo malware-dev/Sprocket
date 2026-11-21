@@ -39,6 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             var numeric = value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real;
             var relation = Field.Among(Name, numeric ? Measured : Same, numeric ? MeasuredMeans : SameMeans);
+            relation.Worded = texts => texts.PickComparison;
             relation.Entry = FieldInput.Name;
             relation.Default = Same[0];
             fields.Add(relation);
@@ -182,6 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         public static List<Field> StateFields()
         {
             var relation = Field.Among(Name, Same, SameMeans);
+            relation.Worded = texts => texts.PickComparison;
             relation.Entry = FieldInput.Name;
             relation.Default = Same[0];
             return new List<Field> { relation };

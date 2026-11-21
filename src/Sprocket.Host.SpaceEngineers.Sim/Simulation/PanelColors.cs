@@ -20,7 +20,7 @@ public static class PanelColors
         Pair("white-on-red", Color.White, new Color(170, 30, 30)),
         Pair("black-on-amber", Color.Black, new Color(235, 165, 30)),
         Pair("green-on-black", new Color(70, 255, 70), Color.Black),
-        Pair("grey-on-grey", new Color(130, 130, 130), new Color(70, 70, 70))
+        Pair("gray-on-gray", new Color(130, 130, 130), new Color(70, 70, 70))
     ];
 
     /// <summary>A pair called <paramref name="name" />: the app's text color, then its background.</summary>

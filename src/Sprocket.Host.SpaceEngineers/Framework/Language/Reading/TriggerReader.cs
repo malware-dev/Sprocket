@@ -2,13 +2,14 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 {
     /// <summary>Reads what starts a logic system's sequences out of the script: whenever, when and every.</summary>
     public static class TriggerReader
     {
-        /// <summary><c>whenever</c>, <c>when</c> or <c>every</c>: a trigger of <paramref name="system" /> and the step it does, or trouble where it is none of those.</summary>
+        /// <summary><c>whenever</c>, <c>when</c> or <c>every</c>: a trigger of <paramref name="system" /> and the sequence it runs or stops, or trouble where it is none of those.</summary>
         public static void ReadTrigger(Statement statement, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
             var trigger = Kind(statement, system, trouble);
@@ -18,8 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             trigger.Does = Does(statement, Doing(statement), system, trouble);
             if (trigger.Does == null)
                 return;
-
-            SystemReader.Uses(statement, trigger.Acts, system, program, trouble);
 
             var when = trigger as WhenTrigger;
             for (var i = 0; when != null && i < when.Sources.Count; i++)
@@ -90,16 +89,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>The step a trigger does, which is one a sequence could hold and that starts something: run, stop, call or set.</summary>
-        static Step Does(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
+        static Run Does(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
         {
             var step = statement.Rest(at);
-            if (step.Key != Keyword.Run && step.Key != Keyword.Stop && step.Key != Keyword.Call && step.Key != Keyword.Set)
+            if (step.Key != Keyword.Run && step.Key != Keyword.Stop)
             {
-                trouble.Say(statement, "expected run, stop, call or set.");
+                trouble.Say(statement, "expected run or stop.");
                 return null;
             }
 
-            var does = StepReader.ReadStep(step, system, trouble);
+            var does = StepReader.ReadStep(step, system, trouble) as Run;
             if (does != null)
                 does.Annotation = "";
 
@@ -108,55 +107,71 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         static Trigger Kind(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
-            if (statement.Key == Keyword.When && ScriptQuotes.Named(statement.ValueAt(0)))
+            if (statement.Key == Keyword.When && !StepReader.IsQuantifier(statement, 0) && StateReader.Called(statement, statement.ValueAt(0)) != null)
                 return Watched(statement, system, trouble);
 
             if (statement.Key == Keyword.When)
-                return When(statement, trouble);
+                return When(statement, system, trouble);
 
             if (statement.Key == Keyword.Every)
-                return Every(statement, trouble);
+                return Every(statement, system, trouble);
 
-            if (!statement.Says(1, Keyword.Then) || (!ScriptQuotes.Named(statement.ValueAt(0)) && !statement.IsMember(0)))
+            var slot = Kinds.Named(statement, statement.ValueAt(0), Keywords.Name(Keyword.Slot));
+            if (!statement.Says(1, Keyword.Then) || (slot == null && !ScriptQuotes.Named(statement.ValueAt(0)) && !statement.IsMember(0)))
             {
                 trouble.Say(statement, "expected whenever <signal> then <step>.");
                 return null;
             }
 
+            if (slot != null)
+                return SignalTrigger.Named(slot);
+
             // whenever button then run 1: the signal button, a variable of a system's or a signal slot of a blueprint's.
             if (ScriptQuotes.Named(statement.ValueAt(0)))
-                return SignalTrigger.Named(statement.Word(0));
+            {
+                var name = statement.Word(0);
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                if (system.FindPart(name) != null)
+                    Kinds.Meanings(system, name, meanings, spellings);
 
-            return Written(statement, trouble);
+                if (meanings.Count > 1)
+                {
+                    Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
+                    return null;
+                }
+
+                return SignalTrigger.Named(name);
+            }
+
+            return Written(statement, system, trouble);
         }
 
         /// <summary>
-        /// <c>whenever ext.finishes_closing on [ inner ] then</c> or <c>whenever ext.toolbar(1, 1, 4) on [ panel1 ] then</c>: a signal
+        /// <c>whenever sprocket.finishes_closing on [ inner ] then</c> or <c>whenever sprocket.toolbar(1, 1, 4) on [ panel1 ] then</c>: a signal
         /// written in place, a block's own change or a slot on the blocks' toolbars; or null and trouble where it is neither.
         /// </summary>
-        static Trigger Written(Statement statement, ScriptTrouble trouble)
+        static Trigger Written(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var member = statement.Parts(0);
-            if (member.Count != 2 || member[0].Word.Length == 0 || member[1].Word.Length == 0)
+            if (member.Count < 2 || !ScriptQuotes.Whole(member))
             {
-                trouble.Say(statement, "expected a signal qualified by its namespace, like ext.finishes_closing on [ inner ].");
+                trouble.Say(statement, "expected a signal qualified by its namespace, like sprocket.finishes_closing on [ inner ].");
                 return null;
             }
 
-            if (member[0].Word != BlockKinds.Own)
-            {
-                trouble.Say(statement, $"no namespace '{member[0].Word}'; expected a signal qualified by ext.");
-                return null;
-            }
+            var space = ScriptQuotes.Namespace(member);
+            var signal = member[member.Count - 1].Word;
+            // A namespace no mod has registered reads all the same, and its signal is not given until one does.
 
-            var written = SignalTrigger.Written(member[0].Word, member[1].Word);
+            var written = SignalTrigger.Written(space, signal);
             var given = statement.Arguments(0);
-            if (member[1].Word == ScriptFormat.Toolbar)
+            if (space == BlockKinds.Own && signal == ScriptFormat.Toolbar)
             {
                 if (given.Count != 3 || Statement.Counted(given[0]) == 0 || Statement.Counted(given[1]) == 0
                     || Statement.Counted(given[2]) == 0)
                 {
-                    trouble.Say(statement, "expected ext.toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
+                    trouble.Say(statement, "expected sprocket.toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
                     return null;
                 }
 
@@ -168,10 +183,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return null;
             }
 
-            return StepReader.Names(statement.On(0), written.Sources, statement, trouble) ? written : null;
+            return StepReader.Names(statement.On(0), written.Sources, statement, system, trouble) ? written : null;
         }
 
-        static Trigger When(Statement statement, ScriptTrouble trouble)
+        static Trigger When(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             Quantifier quantifier;
             if (!StepReader.Quantified(statement, 0, "when", trouble, out quantifier))
@@ -186,13 +201,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             var when = new WhenTrigger("");
             string provider, id;
-            if (!StepReader.Member(statement, 1, "a value on a list of names, like ext.closed on [ inner ]", trouble, out provider, out id,
+            if (!StepReader.Member(statement, system, 1, "a value on a list of names, like sprocket.closed on [ inner ]", trouble, out provider, out id,
                     when.Arguments, when.Sources))
                 return null;
 
             Relation relation;
             Literal value;
-            if (!StepReader.Compared(statement, 2, quantifier, trouble, out relation, out value))
+            if (!StepReader.Compared(statement, system, provider, id, 2, quantifier, trouble, out relation, out value))
                 return null;
 
             when.EventId = id;
@@ -204,14 +219,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var at = 4;
             if (statement.Says(at, Keyword.Every))
             {
+                var setting = SettingReader.Referenced(statement, statement.ValueAt(at + 1), system);
                 Duration interval;
-                if (!StepReader.Lasting(statement.ValueAt(at + 1), 1, out interval))
+                if (setting != null)
+                {
+                    if (!SettingReader.Owe(statement, setting, system, SettingReader.Lasting, "a duration", trouble))
+                        return null;
+
+                    when.IntervalSetting = setting;
+                }
+                else if (!StepReader.Lasting(statement.ValueAt(at + 1), 1, out interval))
                 {
                     trouble.Say(statement, "expected a duration after 'every', like 30t.");
                     return null;
                 }
+                else
+                    when.Interval = interval;
 
-                when.Interval = interval;
                 at += 2;
             }
 
@@ -250,8 +274,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return new StateTrigger(test);
         }
 
-        static Trigger Every(Statement statement, ScriptTrouble trouble)
+        static Trigger Every(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
+            var setting = SettingReader.Referenced(statement, statement.ValueAt(0), system);
+            if (setting != null)
+            {
+                return SettingReader.Owe(statement, setting, system, SettingReader.Lasting, "a duration", trouble)
+                    ? new EveryTrigger(0) { IntervalSetting = setting }
+                    : null;
+            }
+
             Duration interval;
             if (!StepReader.Lasting(statement.ValueAt(0), 1, out interval))
             {

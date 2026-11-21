@@ -14,17 +14,12 @@ namespace Sprocket.Tests;
 public class TriggerWordsTests
 {
     [Theory]
-    [InlineData(TriggerKind.When, false, true, false, "then run")]
-    [InlineData(TriggerKind.When, true, true, false, "then stop")]
-    [InlineData(TriggerKind.When, false, false, false, "then")]
-    [InlineData(TriggerKind.When, false, false, true, "then set")]
-    [InlineData(TriggerKind.Every, false, true, false, "run")]
-    [InlineData(TriggerKind.Every, true, true, false, "stop")]
-    [InlineData(TriggerKind.Every, false, false, false, "")]
-    [InlineData(TriggerKind.Every, false, false, true, "set")]
-    public void WhatStartsItIsJoinedToWhatItDoesAsTheProgramWritesIt(TriggerKind kind, bool stops,
-        bool sequence, bool sets, string said)
+    [InlineData(TriggerKind.When, false, "then run")]
+    [InlineData(TriggerKind.When, true, "then stop")]
+    [InlineData(TriggerKind.Every, false, "run")]
+    [InlineData(TriggerKind.Every, true, "stop")]
+    public void WhatStartsItIsJoinedToWhatItDoesAsTheProgramWritesIt(TriggerKind kind, bool stops, string said)
     {
-        Assert.Equal(said, SentenceText.Then(kind, stops, sequence, sets));
+        Assert.Equal(said, SentenceText.Then(kind, stops));
     }
 }

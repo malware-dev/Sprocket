@@ -24,6 +24,18 @@ public class GameItemsTests : IDisposable
     }
 
     /// <summary>The game's items, or null where neither the game nor the cache has them.</summary>
+    /// <summary>Whether <paramref name="element" /> is on screen: it and every element it stands in are visible.</summary>
+    static bool Shown(Element element)
+    {
+        for (var at = element; at != null; at = at.Parent)
+        {
+            if (!at.IsVisible)
+                return false;
+        }
+
+        return true;
+    }
+
     static GameStock? Stock()
     {
         var stock = GameStock.FromGame();
@@ -175,7 +187,7 @@ public class GameItemsTests : IDisposable
 
         var screen = Amount(stock, "Cargo 1");
         var form = screen.Editor.Pick().Arguments!.Form;
-        var number = Assert.IsType<NumberBox>(form.Fields.OfType<NumberField>().Single(field => field.IsVisible).Children[0]);
+        var number = Assert.IsType<NumberBox>(form.Fields.OfType<NumberField>().Single(Shown).Children[0]);
 
         Choose(screen, Items(screen), "Iron Ingot");
         Assert.Equal("Iron Ingot", Items(screen).Text);
@@ -238,7 +250,7 @@ public class GameItemsTests : IDisposable
         var screen = Moving(stock);
         Choose(screen, Items(screen), item);
         Assert.Equal(item, Items(screen).Text);
-        screen.Editor.Pick().Arguments!.Form.Fields.OfType<NumberField>().Single(field => field.IsVisible).Text = "100";
+        screen.Editor.Pick().Arguments!.Form.Fields.OfType<NumberField>().Single(Shown).Text = "100";
         ((SlotsField)screen.Editor.Pick().Arguments!.Form.Fields[0]).Select();
         screen.Run(2);
         screen.Editor.PressBlock("Cargo 2");

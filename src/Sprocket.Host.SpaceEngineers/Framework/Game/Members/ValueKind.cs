@@ -34,6 +34,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         Name,
 
         /// <summary>Slots, by name, for a parameter that takes slots.</summary>
-        Slots
+        Slots,
+
+        /// <summary>A length of time, as a setting holds one: in ticks, or in seconds.</summary>
+        /// <remarks>No block's value is one; a step given one is given its ticks.</remarks>
+        Duration,
+
+        /// <summary>One of a system blueprint's settings, by name, standing in for the value each installation gives it.</summary>
+        /// <remarks>Never handed to a block: the installation's value takes its place first.</remarks>
+        Setting
     }
 }

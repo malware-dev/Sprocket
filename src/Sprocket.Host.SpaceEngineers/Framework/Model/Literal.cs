@@ -11,6 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
     /// <remarks>Made when somebody writes a sequence, and never on a tick.</remarks>
     public struct Literal
     {
+        // The text of a length of time written in seconds.
+        const string InSeconds = "s";
+
         Literal(ValueKind kind, EntityValue value, string text) : this()
         {
             Kind = kind;
@@ -48,6 +51,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return new Literal(ValueKind.Name, new EntityValue(0), name);
         }
 
+        /// <summary>One of the choices of the host type <paramref name="typed" />, written with it: <c>door_status(closed)</c>.</summary>
+        public static Literal Name(string name, ChoiceType typed)
+        {
+            var named = Name(name);
+            named.Typed = typed;
+            return named;
+        }
+
         /// <summary>The slots <paramref name="names" /> name, kept as that list, for a parameter that takes slots.</summary>
         public static Literal Slots(IList<string> names)
         {
@@ -70,20 +81,54 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return new Literal(ValueKind.Color, EntityValue.Of(r, g, b, a), null);
         }
 
+        /// <summary>A length of time, kept in the unit it was written in.</summary>
+        /// <remarks>Its ticks where it is in ticks, and its seconds where it is in seconds, marked by the text <see cref="InSeconds" />.</remarks>
+        public static Literal Of(Duration length)
+        {
+            return length.InSeconds
+                ? new Literal(ValueKind.Duration, EntityValue.Of(length.Seconds), InSeconds)
+                : new Literal(ValueKind.Duration, EntityValue.Of(length.Ticks), null);
+        }
+
+        /// <summary>
+        /// The setting called <paramref name="name" />, standing in for the value each installation gives it, written with its
+        /// kind, <c>setting('Open angle')</c>, where <paramref name="kinded" /> says.
+        /// </summary>
+        /// <remarks>Where it stands among a member's values the spelling is kept, since only the member's blocks say whether alone it could be one of its words.</remarks>
+        public static Literal Setting(string name, bool kinded = false)
+        {
+            return new Literal(ValueKind.Setting, new EntityValue(kinded ? 1 : 0), name);
+        }
+
         /// <summary>The kind of value it is.</summary>
         public ValueKind Kind { get; private set; }
 
         /// <summary>What it is, for every kind but <see cref="ValueKind.Text" />.</summary>
         public EntityValue Value { get; private set; }
 
-        /// <summary>The text, for <see cref="ValueKind.Text" />, or the name, for <see cref="ValueKind.Name" />, and empty for the rest.</summary>
+        /// <summary>
+        /// The text, for <see cref="ValueKind.Text" />, or the name, for <see cref="ValueKind.Name" /> and <see cref="ValueKind.Setting" />,
+        /// and empty for the rest.
+        /// </summary>
         public string Text { get; private set; }
+
+        /// <summary>Whether it is a setting standing in for a value, rather than a value.</summary>
+        public bool IsSetting => Kind == ValueKind.Setting;
+
+        /// <summary>Whether it is a setting written with its kind, <c>setting('Open angle')</c>.</summary>
+        public bool IsKinded => Kind == ValueKind.Setting && Value.Bits != 0;
+
+        /// <summary>It as a length of time, for <see cref="ValueKind.Duration" />.</summary>
+        public Duration Length => Text == InSeconds ? Duration.OfSeconds(Real) : Duration.OfTicks((int)Whole);
 
         /// <summary>The names, for <see cref="ValueKind.Slots" />, and null for the rest.</summary>
         public IList<string> Names { get; private set; }
 
         /// <summary>What the slots hold, for <see cref="ValueKind.Slots" /> in a step that has been worked out, and null otherwise.</summary>
         public IList<HeldThing> Held { get; private set; }
+
+        /// <summary>The host type a choice was written with, or null where it was written alone.</summary>
+        public ChoiceType Typed { get; private set; }
 
         /// <summary>This again, with a list of names of its own where it has one, so editing the copy cannot reach it.</summary>
         public Literal Copied => Kind == ValueKind.Slots ? Slots(new List<string>(Names)) : this;
@@ -130,8 +175,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         {
             get
             {
-                if (Kind == ValueKind.Text || Kind == ValueKind.Name)
+                if (Kind == ValueKind.Text || Kind == ValueKind.Name || Kind == ValueKind.Setting)
                     return Text;
+
+                if (Kind == ValueKind.Duration)
+                {
+                    var length = Length;
+                    return length.InSeconds
+                        ? $"{length.Seconds.ToString("R", CultureInfo.InvariantCulture)}s"
+                        : $"{length.Ticks.ToString(CultureInfo.InvariantCulture)}t";
+                }
 
                 if (Kind == ValueKind.Slots)
                     return string.Join(", ", Names);

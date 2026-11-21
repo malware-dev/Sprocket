@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Lumel;
+using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;
@@ -14,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         ScrollView _hereScroll;
         LibraryMoves _moves;
         TextBox _search;
+        Glyph _import;
         VStack _list;
         ScrollView _listScroll;
         Gutter _opened;
@@ -51,7 +53,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new TextBox { Style = Styles.Search, Focusable = true }.As(out _search),
+                            new HStack
+                            {
+                                Base = { Spacing = Gaps.Parts },
+                                Children =
+                                {
+                                    new TextBox { Style = Styles.Search, Focusable = true, Placement = Flex.Grow }.As(out _search),
+                                    new Glyph { Symbol = Symbols.Import, Style = Styles.Icon, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _import)
+                                }
+                            },
                             new ScrollView
                             {
                                 Style = Styles.ScrollView,

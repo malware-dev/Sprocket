@@ -152,7 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
                 return;
             }
 
-            var forecast = Forecast(system, answer.Targets, answer.Chosen, answer.Facet, watched, null, false, replacing, "");
+            var forecast = Forecast(system, answer.Targets, answer.Key, answer.Facet, watched, null, false, replacing, "");
             if (forecast.Matched != null)
             {
                 named(forecast.Matched);
@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <remarks>The trigger's own slot is changed once asked where another trigger uses it too.</remarks>
         public void NameSignal(AutomationSystem system, IList<long> blocks, ToolbarSlot at, string keeps, string called, Action<string> named)
         {
-            var forecast = Forecast(system, blocks, "", "", true, at, true, null, keeps);
+            var forecast = Forecast(system, blocks, default(MemberKey), "", true, at, true, null, keeps);
             if (forecast.Matched != null)
                 named(forecast.Matched[0]);
             else if (forecast.Changes == null)
@@ -210,10 +210,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         /// <paramref name="keeps" />.
         /// </summary>
         /// <remarks>The one prediction the picker's heading shows and the edit made from the pick follows. Walks every slot's blocks, so it is asked as the picks change, never on a tick.</remarks>
-        public SlotForecast Forecast(AutomationSystem system, IList<long> blocks, string chosen, string facet, bool watched, ToolbarSlot at,
+        public SlotForecast Forecast(AutomationSystem system, IList<long> blocks, MemberKey chosen, string facet, bool watched, ToolbarSlot at,
             bool signal, IList<string> replacing, string keeps)
         {
-            var type = watched || signal || facet.Length == 0 || chosen.Length == 0 ? null : Vocabulary.TypeOf(_editor.World, blocks, chosen);
+            var type = watched || signal || facet.Length == 0 || chosen.IsEmpty ? null : Vocabulary.TypeOf(_editor.World, blocks, chosen);
             SystemInstance shown = system != null && system.IsBlueprint ? _editor.StandIn(system) : null;
             if (shown == null)
                 return new SlotForecast(null, null, false, signal, type);
@@ -392,18 +392,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
         public bool Frees(AutomationSystem system, string name)
         {
             var clean = NameRules.Clean(name);
-            return clean.Length > 0 && With(system, () => !system.TakesInAnyCase(clean));
+            return clean.Length > 0 && With(system, () => system.FindPartInAnyCase(clean) == null);
         }
 
         /// <summary><paramref name="called" /> where a new slot of <paramref name="system" /> can take it, and otherwise the numbered slot name free next.</summary>
         string Free(AutomationSystem system, string called, bool signal, HostType holds, string avoiding = "")
         {
             var clean = NameRules.Clean(called ?? "");
-            if (clean.Length > 0 && !system.TakesInAnyCase(clean))
+            if (clean.Length > 0 && system.FindPartInAnyCase(clean) == null)
                 return clean;
 
             return NumberedName.Free(SlotNames.Numbered(_editor.Texts, signal, holds), system.SlotsAlike(signal, holds == null ? "" : holds.Id),
-                name => name == avoiding || system.TakesInAnyCase(name));
+                name => name == avoiding || system.FindPartInAnyCase(name) != null);
         }
 
         /// <summary>The slots <paramref name="shown" /> fills exactly with the blocks <paramref name="picked" />, by entity id, or null.</summary>
@@ -421,7 +421,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             var fills = new List<List<long>>();
             foreach (var part in system.Parts)
             {
-                if (part.IsSignal || part.Holds.Length != 0)
+                if (part.IsSignal || part.IsSetting || part.Holds.Length != 0)
                     continue;
 
                 var filled = Ids(shown.FilledWith(part.Id));

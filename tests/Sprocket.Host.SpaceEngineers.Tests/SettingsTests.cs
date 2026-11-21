@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using VRage.Game.ModAPI.Ingame.Utilities;
 using Xunit;
 
@@ -32,16 +33,6 @@ public class SettingsTests
         Assert.False(Settings.Of(new Settings(false).Written()).DeveloperMode);
     }
 
-    /// <summary>A settings file still holding how tips were kept open reads as though it held nothing of it, and is written without it.</summary>
-    [Fact]
-    public void ARetiredTipSettingIsLeftOut()
-    {
-        var read = Settings.From(null, "[Sprocket]\ntipKeeping=alt\ndebugLog=true\n");
-
-        Assert.True(read.DebugLog);
-        Assert.DoesNotContain("tipKeeping", read.Written());
-    }
-
     /// <summary>A player's tips are on unless their own section of the global file turns them off, and writing it leaves every world's settings as they were.</summary>
     [Fact]
     public void APlayersTipsAreOnUnlessTheyTurnedThemOff()
@@ -55,6 +46,46 @@ public class SettingsTests
 
         Assert.False(PlayerSettings.From(file).Tips);
         Assert.True(Settings.From(file.ToString(), null).DeveloperMode);
+    }
+
+    /// <summary>The callouts a player was offered and dismissed live in their own section of the global file beside their tips, leaving every world's settings as they were.</summary>
+    [Fact]
+    public void APlayerKeepsWhatWasOfferedAndDismissed()
+    {
+        var none = PlayerSettings.From(Ini("[Player]\ntips=false\n"));
+        Assert.Null(none.Seen);
+        Assert.Empty(none.Dismissed);
+
+        var file = Ini("[Sprocket]\ndeveloperMode=true\n");
+        new PlayerSettings(true).WithSeen(new ModRelease(1, 3)).WithDismissed("share").WithDismissed("import").WithDismissed("share").Write(file);
+
+        Assert.Contains("[Player]", file.ToString());
+        Assert.Contains("seen=1.3", file.ToString());
+        Assert.Contains("dismissed=share,import", file.ToString());
+
+        var read = PlayerSettings.From(Ini(file.ToString()));
+        Assert.Equal(new ModRelease(1, 3), read.Seen);
+        Assert.Equal(new[] { "share", "import" }, read.Dismissed);
+        Assert.True(read.HasDismissed("import"));
+        Assert.False(read.WithTips(false).HasDismissed("settings"));
+        Assert.Equal(new ModRelease(1, 3), read.WithTips(false).Seen);
+        Assert.True(Settings.From(file.ToString(), null).DeveloperMode);
+    }
+
+    /// <summary>
+    /// A file of release 1 says its release as a whole number, which reads as that release of major version 1 and is
+    /// written back as a version; a release newer than it is still offered.
+    /// </summary>
+    [Fact]
+    public void AReleaseOneFilesWholeNumberReadsAsAVersion()
+    {
+        var read = PlayerSettings.From(Ini("[Player]\nseen=1\n"));
+        Assert.Equal(new ModRelease(1, 1), read.Seen);
+        Assert.True(new ModRelease(1, 2) > read.Seen!.Value);
+
+        var file = Ini("");
+        read.Write(file);
+        Assert.Contains("seen=1.1", file.ToString());
     }
 
     static MyIni Ini(string text)
@@ -153,10 +184,4 @@ public class SettingsTests
         Assert.Contains(GameLog.Lines.Skip(from), line => line.Contains("fastestUpdate as " + written) && line.Contains("taken as " + taken));
     }
 
-    /// <summary>The old name for the fastest update is not read, so an old file leaves it at every tick.</summary>
-    [Fact]
-    public void TheOldNameIsNotRead()
-    {
-        Assert.Equal(1, Settings.From(null, "[Sprocket]\nquickestLook=100\n").FastestUpdate);
-    }
 }

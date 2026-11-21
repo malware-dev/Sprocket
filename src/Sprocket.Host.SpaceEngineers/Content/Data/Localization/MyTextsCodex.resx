@@ -65,8 +65,12 @@
     <comment>Codex page on "Action", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Option" xml:space="preserve">
-    <value>An **option** is a setting an [![](mark:action)&amp;nbsp;action](Term.Action class=term) takes, like a piston's position and speed.</value>
+    <value>An **option** is a value an [![](mark:action)&amp;nbsp;action](Term.Action class=term) takes, like a piston's position and speed.</value>
     <comment>Codex page on "Option", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
+  </data>
+  <data name="Sprocket.Term.Setting" xml:space="preserve">
+    <value>A ![](mark:setting)&amp;nbsp;**setting** allows you to adjust a logic system for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) without changing its steps, such as how long one airlock waits before it closes. It shows up on the [installation panel](Term.InstallationPanel class=term) alongside the other slots.</value>
+    <comment>Codex page on "Setting", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
     <value>A **task** is one operation: running or stopping a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term), an [![](mark:action)&amp;nbsp;action](Term.Action class=term) on blocks, or [setting](Term.Set class=term) a [![](mark:value)&amp;nbsp;block value](Term.Value class=term).</value>
@@ -266,7 +270,7 @@
   </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Name this slot and say what it is for.</value>
-    <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's page, where it is named and described.</comment>
+    <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's panel, where it is named and described.</comment>
   </data>
   <data name="Sprocket.Library.NameAbout" xml:space="preserve">
     <value>This blueprint's name.</value>
@@ -330,15 +334,11 @@
   </data>
   <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
     <value>Select what this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) does.</value>
-    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the sequence it starts or the action it does. Pressing the part changes it.</comment>
+    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the sequence it starts or stops. Pressing the part changes it.</comment>
   </data>
   <data name="Sprocket.Trigger.RateAbout" xml:space="preserve">
     <value>Change how often it should run.</value>
     <comment>Tooltip on the length in an Every trigger's sentence on a logic system's screen, which says how often the trigger runs. Pressing it opens the length panel.</comment>
-  </data>
-  <data name="Sprocket.Trigger.TargetsAbout" xml:space="preserve">
-    <value>Select which blocks this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) acts on.</value>
-    <comment>Tooltip on the part of a trigger's sentence, on a logic system's screen, that names the blocks the trigger's own action acts on. Pressing the part changes them.</comment>
   </data>
   <data name="Sprocket.Sequence.NameAbout" xml:space="preserve">
     <value>This sequence's name.</value>
@@ -440,10 +440,6 @@
     <value>Blocks that fire this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term):</value>
     <comment>First line of the tooltip on the blocks a trigger watches, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
   </data>
-  <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
-    <value>Blocks this [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) acts on:</value>
-    <comment>First line of the tooltip on the blocks a trigger's own action acts on, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
-  </data>
   <data name="Sprocket.Part.FromSlot" xml:space="preserve">
     <value>From the [slot](Term.Slot class=term) {slots}.</value>
     <comment>In the tooltip on the blocks of a step or a trigger, over the line that heads the list of the blocks: the slot of the logic system the blocks fill. {slots} is the slot's name, in bold.</comment>
@@ -468,14 +464,6 @@
     <value>Select something in every column first.</value>
     <comment>Tooltip on the Done button in the editor's heading bar in the picker, and on the page choosing how often a timer trigger fires, while it cannot be pressed yet.</comment>
   </data>
-  <data name="Sprocket.Pick.Back" xml:space="preserve">
-    <value>Back</value>
-    <comment>Tooltip on the narrow folded column at the left edge of the picker, which turns back to the picker's page before.</comment>
-  </data>
-  <data name="Sprocket.Pick.Next" xml:space="preserve">
-    <value>Next</value>
-    <comment>Tooltip on the narrow folded column at the right edge of the picker, which turns on to the picker's page after.</comment>
-  </data>
   <data name="Sprocket.Pick.ClearTyped" xml:space="preserve">
     <value>Clear what is typed</value>
     <comment>Tooltip on the cross at the end of a search box in the picker, which empties the box.</comment>
@@ -497,8 +485,8 @@
     <comment>Tooltip on the line in the picker's column of blocks that opens the list of kinds of block.</comment>
   </data>
   <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Select what this [step](Term.Step class=term), [if](Term.If class=term) or [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) works with. `Existing slot` uses a [slot](Term.Slot class=term) the [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term) has already.</value>
-    <comment>Tooltip on the Source box heading the first column of the selector a step, an if, an otherwise if or a when is made with, which chooses what it works with: blocks, a slot the logic system already has (the choice Existing slot, quoted here as the box shows it), or, for all but a step, one of the logic system's states.</comment>
+    <value>Select what this works with.</value>
+    <comment>Tooltip on the Source box heading the first column of a selector, which chooses what the thing being made works with, such as blocks or a slot the logic system already has.</comment>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>This is [![](mark:awaited)&amp;nbsp;awaitable](Term.Awaitable class=term). The [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) goes straight on while it works, and a `wait for pending tasks` [step](Term.Step class=term) below waits for it to finish.</value>
@@ -840,6 +828,22 @@
     <value>Select a block's inventory to make a new [slot](Term.Slot class=term) of, filled with it in this [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term).</value>
     <comment>Tooltip on "an inventory" in the menu of the "+ slot" button on a logic system's installation panel tab.</comment>
   </data>
+  <data name="Sprocket.Slot.AddSettingAbout" xml:space="preserve">
+    <value>Make a new ![](mark:setting)&amp;nbsp;[setting](Term.Setting class=term), a value each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) gives for itself.</value>
+    <comment>Tooltip on &quot;a setting&quot; in the menu of the &quot;+ slot&quot; button on a logic system's installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Setting.OpenAbout" xml:space="preserve">
+    <value>Name this [setting](Term.Setting class=term), say what it is for, and change its default.</value>
+    <comment>Tooltip on a setting's name in the slots list on a logic system's installation panel tab, while the logic system can be changed. Pressing the name opens the setting's panel, as a slot's name opens the slot's: it is named and described there, and its default changed.</comment>
+  </data>
+  <data name="Sprocket.Setting.ValueAbout" xml:space="preserve">
+    <value>Choose the value this [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) gives the [setting](Term.Setting class=term), or use its default.</value>
+    <comment>Tooltip on a setting's value on an installation panel. Pressing it opens the panel the installation's value is given in.</comment>
+  </data>
+  <data name="Sprocket.Setting.HoldsAbout" xml:space="preserve">
+    <value>What the [setting](Term.Setting class=term) holds. It is chosen when the setting is made.</value>
+    <comment>Tooltip on the label of what a setting holds, in the panel a setting is made or opened in.</comment>
+  </data>
   <data name="Sprocket.Category.Open" xml:space="preserve">
     <value>Rename this category, or have its [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term) run one at a time.</value>
     <comment>Tooltip on a category's name on a logic system's Sequences tab. Pressing it opens a panel with the category's name and the "One at a time" switch.</comment>
@@ -882,7 +886,7 @@
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
     <value>The kind of block that can fill this [slot](Term.Slot class=term). Press it to choose another.</value>
-    <comment>Tooltip on the type of block a block slot takes, under the Expects heading on the slot's page. Pressing it opens a picker listing the types the slot can take, wider or narrower, down to one kind of block; only those offering everything the slot's steps and triggers do with it.</comment>
+    <comment>Tooltip on the type of block a block slot takes, under the Expects label in the slot's panel. Pressing it opens a picker listing the types the slot can take, wider or narrower, down to one kind of block; only those offering everything the slot's steps and triggers do with it.</comment>
   </data>
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
     <value>Show the guide to writing rich text.</value>
@@ -2016,6 +2020,10 @@
     <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the landing gear locks.</value>
     <comment>Codex entry on the block member "locks" of LandingGear, shown in the picker when it is chosen.</comment>
   </data>
+  <data name="Sprocket.Member.LandingGear.Unlocks" xml:space="preserve">
+    <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the landing gear unlocks.</value>
+    <comment>Codex entry on the block member "unlocks" of LandingGear, shown in the picker when it is chosen.</comment>
+  </data>
   <data name="Sprocket.Member.LandingGear.Lock" xml:space="preserve">
     <value>Locks the landing gear to what is in reach.</value>
     <comment>Codex entry on the block member "lock" of LandingGear, shown in the picker when it is chosen.</comment>
@@ -2063,6 +2071,10 @@
   <data name="Sprocket.Member.Connector.Locks" xml:space="preserve">
     <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the connector locks.</value>
     <comment>Codex entry on the block member "locks" of Connector, shown in the picker when it is chosen.</comment>
+  </data>
+  <data name="Sprocket.Member.Connector.Unlocks" xml:space="preserve">
+    <value>Fires a [![](mark:trigger)&amp;nbsp;trigger](Term.Trigger class=term) when the connector unlocks.</value>
+    <comment>Codex entry on the block member "unlocks" of Connector, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.Connector.DockedShip" xml:space="preserve">
     <value>The name of the ship locked to the connector, or nothing when there is none.</value>
@@ -4043,5 +4055,21 @@
   <data name="Sprocket.Member.Option.KeepAspectRatio" xml:space="preserve">
     <value>Whether an image keeps its proportions. Used when `content` is `text and images`.</value>
     <comment>Codex entry on the option "keep aspect ratio" of ScreenType, shown as its tooltip in the picker.</comment>
+  </data>
+  <data name="Sprocket.Share.SystemTip" xml:space="preserve">
+    <value>Share this logic system, or copy it as text.</value>
+    <comment>Tooltip on the share mark in the editor's heading bar on a logic system's screen, and on a logic system's row on the home screen; it opens the Share menu.</comment>
+  </data>
+  <data name="Sprocket.Share.SystemAbout" xml:space="preserve">
+    <value>Save this logic system as a [![](mark:blueprint)&amp;nbsp;blueprint](Term.Blueprint class=term) in the [library](Term.Library class=term), then choose who to share it with.</value>
+    <comment>Tooltip on the Share... item of the Share menu of a logic system, which puts the logic system in the library and opens the dialog for choosing who to share it with.</comment>
+  </data>
+  <data name="Sprocket.Share.BlueprintTip" xml:space="preserve">
+    <value>Share this blueprint, or copy it as text.</value>
+    <comment>Tooltip on the Share button in the library blueprint detail; it opens the Share menu.</comment>
+  </data>
+  <data name="Sprocket.Share.BlueprintAbout" xml:space="preserve">
+    <value>Choose who to share this blueprint with.</value>
+    <comment>Tooltip on the Share... item of the Share menu of a blueprint in the library, which opens the dialog for choosing who to share it with.</comment>
   </data>
 </root>

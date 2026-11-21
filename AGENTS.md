@@ -23,6 +23,7 @@ Run from the repository root.
 dotnet build src/Sprocket.Host.SpaceEngineers -p:MdkBuildConfiguration=none   # compile the mod
 dotnet build src/Sprocket.Host.SpaceEngineers                                 # compile it and deploy it into the game
 dotnet test -p:MdkBuildConfiguration=none                                     # every test project in Sprocket.slnx
+./tools/Test.ps1                                                              # the same, split into shards run side by side
 dotnet test tests/Sprocket.Core.Tests -p:MdkBuildConfiguration=none --filter "FullyQualifiedName~AbortTests"
 ```
 
@@ -53,8 +54,17 @@ profile restyles every file.
 ## Deploys and the game
 
 - Every build of the mod packs it into the game's Mods folder, including the builds that `dotnet test`, the simulator
-  and `jb inspectcode` start. Pass `MdkBuildConfiguration=none` unless deploying is the point. On `main` the mod
-  deploys as "Sprocket Automation (Bleeding Edge)"; `mdk.ini` maps branches to folders.
+  and `jb inspectcode` start. Pass `MdkBuildConfiguration=none` unless deploying is the point. On `update` and
+  `bleeding-edge` the mod deploys as "Sprocket Automation (Bleeding Edge)", and on `main` as the stable mod; `mdk.ini`
+  maps branches to folders.
+- `main` holds what is published on the stable Workshop item, and `bleeding-edge` what is published on Bleeding Edge,
+  nothing more. New code is made on `update`, and a published branch takes it only as it is published.
+- No work is done on `update` itself. Each piece of work has its own branch from `update`, and is merged into it only
+  when it is done and reviewed, so `update` holds only finished work.
+- Nothing is released by accident. Before any upload, the maintainer is shown everything it carries that the item
+  does not have yet: every commit (`git log --oneline origin/<published branch>..<source>`) and the format version it
+  writes beside the one published. He approves that content, not only the act of uploading. An upload that would carry
+  more than he asked for is not made: it waits, or is built from the published branch with only what was asked for.
 - A pack clears the deployed folder before it writes, so a pack that fails on a file the running game holds leaves the
   mod half deployed. Check the folder after a failed pack.
 - Never close, kill or restart a game the developer is running. After a deploy, say what takes it in: code and the
@@ -90,6 +100,9 @@ profile restyles every file.
   renamed id included, comes with its upgrade in the same commit.
 - Anything else Sprocket writes to disk or a save, and anything added to what a construct's block stores, is agreed
   before it is built, with the maintainer's go-ahead.
+- The stable release writes a finished format version, without `alpha`, and Bleeding Edge writes the same until the
+  next change to the language. That change opens the next version's first draft: after a stable `sprocket 2`, the
+  first language change makes Bleeding Edge write `sprocket 3 alpha 1`.
 - `docs/Language.md` is the language's spec. A language change lands there first, its exact wording approved, before
   any reader or writer code for it. Where code and spec disagree, the code is suspect: raise it, and never edit the
   spec to match.

@@ -93,11 +93,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             }
         }
 
-        /// <summary>The tooltip of <paramref name="part" />: its length in the unit it is not written in, and <paramref name="press" />, what pressing it does, or nothing for null.</summary>
+        /// <summary>The tooltip of <paramref name="part" />: its length in the unit it is not written in, where it says no setting, and <paramref name="press" />, what pressing it does, or nothing for null.</summary>
         public static string Length(Texts texts, DurationSlot part, string press)
         {
             var said = new StringBuilder();
-            Paragraph(said, Markdown.Escape(TimeText.Other(texts, part.Length)));
+            if (part.Setting.Length == 0)
+                Paragraph(said, Markdown.Escape(TimeText.Other(texts, part.Length)));
+
             Paragraph(said, press);
             return said.ToString();
         }

@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Slots;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel;
@@ -151,14 +152,11 @@ public class SlotListTests
         var name = row.Name;
         screen.Editor.OpenSlot(name);
         screen.Run(2);
-        var page = (SlotPage)screen.Editor.Current!;
-        Assert.Equal(512, page.Short.MaxLength);
-        screen.Editor.Input!.Focus(page.Short);
-        page.Short.Insert("Call");
-        screen.Run(2);
-        screen.Editor.PressPrimary();
-        screen.Run(2);
-        screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
+        var panel = screen.Editor.Asked();
+        var shortName = Assert.IsType<TypedField>(panel.Form.Fields[1]);
+        Assert.Equal(512, shortName.Longest);
+        shortName.Text = "Call";
+        panel.Done();
         screen.Run(2);
 
         row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single();
@@ -183,7 +181,7 @@ public class SlotListTests
         Assert.Equal(row.Name, button.AutomationId);
 
         screen.Do("press", row.Name);
-        Assert.IsType<SlotPage>(screen.Editor.Current);
+        Assert.Equal(row.Name, screen.Editor.Asked().Form.Fields[0].Text);
     }
 
     /// <summary>The line saying how many more there are is said in the player's language.</summary>

@@ -66,6 +66,13 @@ namespace Sprocket.Sim.Simulation
                     continue;
                 }
 
+                // A player new to this release, who is offered its callouts, which a script otherwise never meets.
+                if (word == "callouts")
+                {
+                    script.Add(Step.Callouts);
+                    continue;
+                }
+
                 if (word == "enter" || word == "escape" || word == "clear")
                 {
                     script.Add(word == "enter" ? Step.Enter : word == "escape" ? Step.Escape : Step.Clear);
@@ -257,6 +264,13 @@ namespace Sprocket.Sim.Simulation
             if (step.Kind == Step.Move)
             {
                 scene.MoveTo(step.At);
+                drawn();
+                return;
+            }
+
+            if (step.Kind == Step.Callouts)
+            {
+                scene.MeetCallouts();
                 drawn();
                 return;
             }

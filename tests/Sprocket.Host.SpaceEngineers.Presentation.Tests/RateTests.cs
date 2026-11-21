@@ -98,6 +98,38 @@ public class RateTests
         Assert.Equal(Duration.OfSeconds(1), every.Interval);
     }
 
+    /// <summary>A repeat that comes round at a setting's rate says the setting; a fixed value chosen under the mark and a rate given take the setting's place, and undo gives it back.</summary>
+    [Fact]
+    public void ARatesSettingIsShownAndAFixedRateTakesItsPlace()
+    {
+        var screen = Made();
+        var every = Assert.IsType<EveryTrigger>(System(screen).Triggers[0]);
+        Assert.True(System(screen).IsBlueprint);
+        screen.Editor.MakeSetting(System(screen), new Part("Pace") { Setting = "duration", Optional = true, Default = Literal.Of(Duration.OfSeconds(2)), HasDefault = true });
+        every.IntervalSetting = "Pace";
+        screen.Editor.Invalidate();
+        screen.Run(2);
+        Assert.Equal("Every Pace", screen.Editor.Says(0));
+
+        screen.Editor.PressWhen(0);
+        screen.Run(2);
+        var rate = screen.Editor.RateLengths();
+        Assert.Equal("Pace", rate.Setting);
+        rate.Mark.Command!.Execute();
+        screen.Run(2);
+        screen.Editor.PressAnswer(screen.Editor.Texts.ValueFixed);
+        screen.Run(2);
+        rate.Give("1", false);
+        rate.Box.Submit!.Execute();
+        screen.Run(2);
+
+        Assert.Equal("", every.IntervalSetting);
+        Assert.Equal("Every second", screen.Editor.Says(0));
+
+        screen.Editor.Undo(System(screen), System(screen));
+        Assert.Equal("Pace", every.IntervalSetting);
+    }
+
     /// <summary>Escape on a row's rate leaves it as it was.</summary>
     [Fact]
     public void EscapeLeavesARateAsItWas()

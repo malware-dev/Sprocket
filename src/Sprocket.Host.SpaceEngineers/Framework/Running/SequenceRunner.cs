@@ -471,7 +471,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (_faults.Found.Waits)
             {
                 RefusedCount++;
-                _owner.Log?.Refused(this, tick, RunRefusal.EmptySlot);
+                _owner.Log?.Refused(this, tick, _faults.Found.AwaitsNamespace ? RunRefusal.Uninstalled : RunRefusal.EmptySlot);
                 return;
             }
 
@@ -508,7 +508,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             if (!CanRun || _faults.Found.Waits)
             {
-                _owner.Log?.Refused(this, tick, CanRun ? RunRefusal.EmptySlot : RunRefusal.Off);
+                _owner.Log?.Refused(this, tick, !CanRun ? RunRefusal.Off : _faults.Found.AwaitsNamespace ? RunRefusal.Uninstalled : RunRefusal.EmptySlot);
                 return;
             }
 
@@ -615,7 +615,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>Ends a run that has done its last step, leaving what it started to carry on.</summary>
-        /// <remarks>A trigger's own act has no wait after it, so what it started is still in flight when the run ends.</remarks>
+        /// <remarks>A last step with no wait after it leaves what it started still in flight when the run ends.</remarks>
         void Finish()
         {
             IsRunning = false;
@@ -759,7 +759,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _owner.Log?.Entered(this, _owner.CurrentTick, _memory.Step);
             var wait = _sequence.Steps[_memory.Step] as Wait;
             if (wait != null)
-                _memory.WaitTicks = wait.Ticks;
+                _memory.WaitTicks = wait.TicksIn(_instance);
         }
 
         /// <summary>
@@ -1029,6 +1029,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     holds = Holds(tested, compared);
                     _owner.Log?.Tested(this, _memory.Looked, at, tested, holds);
                 }
+                else if (test is HostTest)
+                {
+                    holds = ((HostTest)test).Holds;
+                }
                 else
                 {
                     holds = Holds((StateTest)test);
@@ -1068,7 +1072,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 if (test.Quantifier == Quantifier.Average)
                     total /= tested.Reads.Count;
 
-                return Relations.Holds(Literal.Of(total), test.Relation, test.Value);
+                return Relations.Holds(Literal.Of(total), test.Relation, tested.Value);
             }
 
             var all = test.Quantifier == Quantifier.All;
@@ -1122,7 +1126,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </summary>
         void Aborted(Abort abort)
         {
-            if (abort.Level == AbortLevel.Note && abort.Message.Length == 0)
+            var message = abort.MessageIn(_instance);
+            if (abort.Level == AbortLevel.Note && message.Length == 0)
             {
                 Stop();
                 return;
@@ -1131,7 +1136,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             var problem = abort.Level == AbortLevel.Problem ? SequenceProblem.AbortedProblem
                 : abort.Level == AbortLevel.Warning ? SequenceProblem.AbortedWarning
                 : SequenceProblem.Aborted;
-            var said = new SequenceFault(problem, _memory.Step, BlockTrouble.None, abort.Message);
+            var said = new SequenceFault(problem, _memory.Step, BlockTrouble.None, message);
             if (abort.Level == AbortLevel.Problem)
             {
                 Meet(said);
@@ -1229,7 +1234,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 acted.Done = false;
 
                 _owner.Forced.Told(acted, this);
-                if (act.Form != ReachKind.Native)
+
+                // The member bound decides how it is done: a bare name may be a host's action as well as the game's.
+                if (acted.Action.Form != ReachKind.Native)
                 {
                     if (acted.Order != null)
                         acted.Order.Give();
@@ -1285,13 +1292,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         SequenceFault Refused(int step)
         {
             var act = (Act)_sequence.Steps[step];
-            if (!act.HasAction || act.Form != ReachKind.Native)
+            if (!act.HasAction || act.Sets)
                 return SequenceFault.None;
 
             var compiled = _workings.Compile(step, _bindings);
             foreach (var acted in compiled.Acts)
             {
-                if (acted.Bound == null || acted.Action.Until != null)
+                if (acted.Bound == null || acted.Action.Form != ReachKind.Native || acted.Action.Until != null)
                     continue;
 
                 var said = acted.Bound.Trouble(acted.Entity.Block, acted.Seen);

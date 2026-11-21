@@ -82,7 +82,7 @@ public class ScreenChoiceTests
         var system = screen.Editor.Program.Systems[0];
         var act = Assert.IsType<Act>(system.Sequences[0].Steps[0]);
         var slot = Assert.Single(act.Targets);
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Equal(new[] { 2 }, system.First.Facets(slot));
     }
 
@@ -205,7 +205,7 @@ public class ScreenChoiceTests
         screen.Run(5);
 
         var made = system.Parts.Last();
-        Assert.Equal(HostTypes.Returned("screen")!.Id, made.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, made.Holds);
         Assert.Equal(new[] { 2 }, system.First!.Facets(made.Id));
     }
 
@@ -234,7 +234,7 @@ public class ScreenChoiceTests
 
         var system = screen.Editor.Program.Systems[0];
         var slot = Assert.Single(Assert.IsType<If>(system.Sequences[0].Steps[0]).Compared.Targets);
-        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(HostTypes.Returned("get_screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Equal(new[] { 2 }, system.First.Facets(slot));
     }
 
@@ -580,36 +580,6 @@ public class ScreenChoiceTests
         Assert.Equal(new[] { 1 }, system.First.Facets(slot));
     }
 
-    /// <summary>A trigger's task on a screen, opened on what it does and left with nothing changed, goes back without asking.</summary>
-    [Fact]
-    public void LeavingATriggersScreenTaskUnchangedAsksNothing()
-    {
-        var rig = Rig.Demo();
-        rig.TextPanel(40, "Status Panel");
-        var screen = Screen.On(rig);
-        screen.Editor.NewButtonSystem("Stock");
-        screen.Editor.Back();
-        screen.Run(2);
-        screen.Editor.PressStart("every");
-        screen.Editor.DeveloperMode = true;
-        screen.Run(1);
-        screen.Editor.PressChoice("A task on blocks…");
-        screen.Editor.PressBlock("Status Panel");
-        screen.Run(2);
-        screen.Editor.PressChoice("show text");
-        screen.Run(2);
-        screen.Editor.Pick().Arguments!.Form.Fields.First(field => field is LinesField).Text = "Docked";
-        screen.Editor.PressPrimary();
-        screen.Run(4);
-
-        screen.Editor.Triggers().Last().Does.OfType<EntitiesSlot>().First().Opens!.Execute();
-        screen.Run(3);
-        screen.Editor.Back();
-        screen.Run(4);
-
-        Assert.Equal("Stock", screen.Editor.Screen.Title());
-    }
-
     static (Screen Screen, Billboard Board) Picking(Action<Rig>? also = null)
     {
         var rig = Rig.Demo();
@@ -660,11 +630,11 @@ public class ScreenChoiceTests
     }
 
     /// <summary>
-    /// A trigger's own action on a screen, named as a trigger names it, takes the slot of screens the picker's heading shows for
+    /// An action on a screen, named as a step names it, takes the slot of screens the picker's heading shows for
     /// the same pick, rather than making a slot of the blocks.
     /// </summary>
     [Fact]
-    public void ATriggersScreenActionNamesTheSlotItsHeadingShows()
+    public void AnActionOnAScreenNamesTheSlotItsHeadingShows()
     {
         var (screen, _) = Picking();
         screen.Editor.Facets()!.Choose("Back");
@@ -676,9 +646,9 @@ public class ScreenChoiceTests
         var slot = act.Targets[0];
         var board = editor.World.Entities.First(e => e.Name == "Status Board").Id;
 
-        var forecast = editor.Picks.Forecast(system, new[] { board }, act.ActionId, "Back", false, null, false, null, "");
+        var forecast = editor.Picks.Forecast(system, new[] { board }, act.Key, "Back", false, null, false, null, "");
         List<string>? named = null;
-        editor.Picks.Name(system, new PickAnswer(new[] { board }, act.ActionId, Quantifier.Any, null, act.Form, "Back"), false, null,
+        editor.Picks.Name(system, new PickAnswer(new[] { board }, act.Key, Quantifier.Any, null, act.Form, "Back"), false, null,
             names => named = names);
 
         Assert.Equal(new[] { slot }, forecast.Matched);

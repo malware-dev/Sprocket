@@ -57,7 +57,7 @@ static class PaperTarget
     static string Draw(PickStrip pick)
     {
         var paper = new StringBuilder();
-        foreach (var stage in pick.Stages.Skip(pick.Page))
+        foreach (var stage in pick.Stages)
         {
             paper.Append("pick: ").AppendLine(stage.Title);
 

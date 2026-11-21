@@ -17,11 +17,14 @@ public class StateEditTests
         + "    let home = outside\n"
         + "    let doing = idle\n"
         + "    let cycling = off\n\n"
-        + "    when where == outside then set cycling to off\n\n"
+        + "    when where == outside then run 2\n\n"
         + "    sequence 1 {\n"
         + "        if where != home then {\n"
         + "            set where to outside\n"
         + "        }\n"
+        + "    }\n\n"
+        + "    sequence 2 {\n"
+        + "        set cycling to off\n"
         + "    }\n"
         + "}\n";
 

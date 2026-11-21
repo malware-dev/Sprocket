@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using System;
 using System.Collections.Generic;
+using Lumel;
 using Lumel.Input;
 using Lumel.Text;
 
@@ -90,8 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// there is one to take, marked where <paramref name="other" /> is not empty. <paramref name="chosen" /> is given a value
         /// chosen other than the one it has; <paramref name="picks" /> opens the selector, at once where the state is not the system's.
         /// </summary>
-        public static void Offer(SprocketEditor editor, AutomationSystem system, string named, Literal value, string other, Action<Literal> chosen,
-            Action picks)
+        public static void Offer(SprocketEditor editor, AutomationSystem system, string named, Literal value, string other, Func<Element> part,
+            Action<Literal> chosen, Action picks)
         {
             var state = system?.FindState(named);
             if (state == null)
@@ -114,8 +115,48 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 }, marked);
             }
 
+            var type = state.IsFlag ? "flag" : state.Type;
+            var held = taken ? value : default(Literal);
+            if (system.IsBlueprint)
+            {
+                editor.Answer(editor.Texts.ValueNewSetting, () => SettingSources.New(editor, system, type, held.IsSetting ? default(Literal) : held, part,
+                    made => chosen(Literal.Setting(made)), delegate { }));
+            }
+
             if (!taken || Others(system, state).Count != 0)
                 editor.Answer(editor.Texts.PickStateValueOf, picks, !taken);
+
+            if (system.IsBlueprint)
+                Settings(editor, system, type, held, chosen);
+        }
+
+        /// <summary>
+        /// Adds to the standing question, after a line, each setting of <paramref name="system" /> holding <paramref name="type" />,
+        /// with its default, <paramref name="value" /> marked where it is one; <paramref name="chosen" /> is given the setting chosen.
+        /// </summary>
+        static void Settings(SprocketEditor editor, AutomationSystem system, string type, Literal value, Action<Literal> chosen)
+        {
+            var ruled = false;
+            foreach (var slot in system.Parts)
+            {
+                if (!slot.IsSetting || slot.Setting != type)
+                    continue;
+
+                if (!ruled)
+                {
+                    editor.AnswerRule();
+                    ruled = true;
+                }
+
+                var name = slot.Id;
+                var marked = value.IsSetting && value.Text == name;
+                editor.Answer(name, delegate
+                {
+                    if (!marked)
+                        chosen(Literal.Setting(name));
+                }, marked);
+            }
+
         }
 
         /// <summary>A flag starting off, which a state made new starts as.</summary>

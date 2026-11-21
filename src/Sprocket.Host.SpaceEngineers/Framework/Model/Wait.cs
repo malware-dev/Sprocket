@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
@@ -17,10 +18,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             Length = length;
         }
 
-        /// <summary>How long to wait, as the script writes it.</summary>
+        /// <summary>How long to wait, as the script writes it, where <see cref="Setting" /> is empty.</summary>
         public Duration Length { get; set; }
 
-        /// <summary>How long to wait, in the game's own ticks.</summary>
+        /// <summary>The setting whose length of time it waits, each installation's own, or empty where it waits <see cref="Length" />.</summary>
+        public string Setting { get; set; } = "";
+
+        /// <summary>How long to wait, in the game's own ticks, where it waits <see cref="Length" />.</summary>
         public int Ticks => Length.Ticks;
+
+        /// <summary>How long to wait in <paramref name="through" />, in ticks: <see cref="Length" />, or the length its setting has there; none where that setting has no length.</summary>
+        /// <remarks>Asked as the step is reached, never on a tick.</remarks>
+        public int TicksIn(SystemInstance through)
+        {
+            if (Setting.Length == 0)
+                return Ticks;
+
+            Literal value;
+            return through != null && through.Gives(Setting, out value) && value.Kind == ValueKind.Duration
+                ? value.Length.Ticks
+                : 0;
+        }
     }
 }

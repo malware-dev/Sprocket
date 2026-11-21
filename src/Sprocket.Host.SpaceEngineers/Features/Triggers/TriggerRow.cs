@@ -95,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <summary>The words between the two halves, "then run" or "then", as the program writes them.</summary>
         public string DoesLead { get; set; }
 
-        /// <summary>What it does: the sequence it is about, or the one act it does itself.</summary>
+        /// <summary>What it does: the sequence it runs or stops.</summary>
         public List<SentenceSlot> Does { get; }
 
         /// <summary>Whether what it watches for is true at this instant.</summary>
@@ -156,7 +156,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             {
                 _does[i].Texts = texts;
                 var press = Does[i].Opens == null ? Why() : Doing(texts, Does[i]);
-                _does[i].Tip = KeptTip.For(_does[i].Tip, PartTips.Of(texts, world, Does[i], texts.Codex.PartTriggerTargets, press));
+                _does[i].Tip = KeptTip.For(_does[i].Tip, press);
 
                 // Before Part, which records the part as shown.
                 if (!ReferenceEquals(_shown[Starts.Count + i], Does[i]))
@@ -214,15 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <summary>What pressing a part of what it does does, or null where it goes without saying.</summary>
         static string Doing(Texts texts, SentenceSlot part)
         {
-            if (part is SequenceSlot || part is ActionSlot)
-                return texts.Codex.TriggerDoesAbout;
-
-            var blocks = part as EntitiesSlot;
-            if (blocks != null)
-                return blocks.IsOption ? texts.Codex.SequenceOptionSlotsAbout : texts.Codex.TriggerTargetsAbout;
-
-            var given = part as ArgumentsSlot;
-            return given?.About(texts);
+            return part is SequenceSlot ? texts.Codex.TriggerDoesAbout : null;
         }
 
         /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>

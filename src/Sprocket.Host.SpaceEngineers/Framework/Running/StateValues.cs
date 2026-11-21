@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             var kept = Kept(system, instance, state, false);
             if (kept == null)
-                return state.Start;
+                return Starting(instance, state);
 
             var value = kept.Choice.Length > 0 ? Literal.Name(kept.Choice) : Literal.Of(kept.Flag);
             if (Fits(system, state, value))
@@ -37,7 +37,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             GameLog.Say($"State {state.Name} of {system.Name} held a value it can no longer hold, and starts over at its starting value.");
             Drop(instance, state, kept);
-            return state.Start;
+            return Starting(instance, state);
+        }
+
+        /// <summary>The value <paramref name="state" /> starts at in <paramref name="instance" />: its starting value, or the value the installation gives the setting it starts at.</summary>
+        /// <remarks>A setting with no value there leaves the setting standing; the sequence's check says so before anything runs.</remarks>
+        static Literal Starting(SystemInstance instance, State state)
+        {
+            Literal given;
+            return state.Start.IsSetting && instance != null && instance.Gives(state.Start.Text, out given) ? given : state.Start;
         }
 
         /// <summary>Gives <paramref name="state" /> of <paramref name="instance" /> the value <paramref name="value" />, answering whether that changed what it holds.</summary>
@@ -53,17 +61,32 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             return true;
         }
 
-        /// <summary>Whether <paramref name="test" /> holds on what <paramref name="instance" /> holds in its states.</summary>
-        /// <remarks>False where the state it names is gone.</remarks>
+        /// <summary>Whether <paramref name="test" /> holds on what <paramref name="instance" /> holds in its states and gives its settings.</summary>
+        /// <remarks>False where a state it names is gone, or a setting it names has no value in <paramref name="instance" />.</remarks>
         public bool Holds(AutomationSystem system, SystemInstance instance, StateTest test)
         {
-            var state = system.FindState(test.State);
-            if (state == null)
-                return false;
+            Literal tested;
+            if (test.Setting.Length > 0)
+            {
+                if (instance == null || !instance.Gives(test.Setting, out tested))
+                    return false;
+            }
+            else
+            {
+                var state = system.FindState(test.State);
+                if (state == null)
+                    return false;
+
+                tested = Read(system, instance, state);
+            }
 
             Literal other;
             if (test.Other.Length == 0)
+            {
                 other = test.Value;
+                if (other.IsSetting && (instance == null || !instance.Gives(other.Text, out other)))
+                    return false;
+            }
             else
             {
                 var compared = system.FindState(test.Other);
@@ -73,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 other = Read(system, instance, compared);
             }
 
-            var same = StateMentions.Same(Read(system, instance, state), other);
+            var same = StateMentions.Same(tested, other);
             return test.Relation == Relation.IsNot ? !same : same;
         }
 

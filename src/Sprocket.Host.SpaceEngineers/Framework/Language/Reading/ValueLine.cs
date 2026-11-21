@@ -37,12 +37,59 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     continue;
                 }
 
+                // A setting standing in for the value, spelled as the language spells it: setting('Open angle').
+                string setting;
+                if (Setting(said, ref at, out setting))
+                {
+                    into.Add(Literal.Setting(setting, true));
+                    continue;
+                }
+
                 var from = at;
                 while (at < said.Length && said[at] != ' ')
                     at++;
 
                 into.Add(Bare(said.Substring(from, at - from)));
             }
+        }
+
+        /// <summary><c>setting('Open angle')</c> from <paramref name="at" />, its name, bare or in single quotes, into <paramref name="name" />, and <paramref name="at" /> past it; false where none starts there.</summary>
+        static bool Setting(string said, ref int at, out string name)
+        {
+            name = null;
+            var opening = Kinds.Setting + "(";
+            if (string.CompareOrdinal(said, at, opening, 0, opening.Length) != 0)
+                return false;
+
+            var from = at + opening.Length;
+            var spelt = "";
+            var i = from;
+            if (i < said.Length && said[i] == '\'')
+            {
+                for (i++; i < said.Length; i++)
+                {
+                    if (said[i] != '\'')
+                        spelt += said[i];
+                    else if (i + 1 < said.Length && said[i + 1] == '\'')
+                        spelt += said[++i];
+                    else
+                        break;
+                }
+
+                i++;
+            }
+            else
+            {
+                while (i < said.Length && said[i] != ')')
+                    spelt += said[i++];
+            }
+
+            if (i >= said.Length || said[i] != ')' || spelt.Length == 0)
+                return false;
+
+            name = spelt;
+            at = i + 1;
+            return true;
         }
 
         /// <summary>

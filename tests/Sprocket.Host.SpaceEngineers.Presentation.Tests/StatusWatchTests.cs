@@ -259,7 +259,7 @@ public class StatusWatchTests : IDisposable
                 },
                 new StatusItem
                 {
-                    Level = StatusLevel.Warning, Logic = "", Number = 4, Installation = "", Sequence = "", Alone = true,
+                    Level = StatusLevel.Warning, Logic = "", Number = 4, Installation = "", Sequence = "",
                     Fault = SequenceFault.Unstarted(Unwired.Cleared, "Button Panel")
                 }
             ]

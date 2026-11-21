@@ -15,7 +15,7 @@ param(
     [string]$Template = 'E:\Data\sprocket-ds-test\WorldTemplate',
     [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count', 'Sprocket Move Items', 'Sprocket Status Pages'),
     [int]$TimeoutSeconds = 900,
-    # The parts to play, of scene, kept, pages, editor, menus, move, remote and banner; every part where none is named.
+    # The parts to play, of scene, kept, pages, callouts, editor, sharedtext, settings, share, menus, move, remote and banner; every part where none is named. A test in the Local folder plays only when its part is named, with its scenario among -Scenarios.
     # hailstone plays only when named, with -Template a copy of Mal's world holding Hailstone Station.
     [string[]]$Only = @()
 )
@@ -28,7 +28,7 @@ New-Item -ItemType Directory -Force $work | Out-Null
 if (Get-Process -Name 'SpaceEngineers', 'SevrLoader' -ErrorAction SilentlyContinue) { throw 'Space Engineers is running; it is never closed for a test.' }
 
 # 2. The plugin, and the mod packed as the game would load it, as a local mod of the test's own user data.
-dotnet build "$repo\tests\Sprocket.GameTests" -v q | Out-Null
+dotnet build "$repo\tests\Sprocket.GameTests" -v q -p:MdkBuildConfiguration=none | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'The test plugin did not build.' }
 $pack = Join-Path $work 'pack'
 if (Test-Path $pack) { Remove-Item $pack -Recurse -Force }
@@ -59,8 +59,9 @@ foreach ($file in (Join-Path $world 'Sandbox.sbc'), (Join-Path $world 'Sandbox_c
     [IO.File]::WriteAllText($file, $xml)
 }
 
-# An empty library, as a player new to Sprocket has; it is kept in the user data, beside the worlds.
-Get-ChildItem (Join-Path $AppData 'Storage') -Filter 'sprocket-*' -ErrorAction SilentlyContinue | Remove-Item -Force
+# An empty library and no player settings (the callouts seen and dismissed among them), as a player new to Sprocket has;
+# both are stored in the user data, beside the worlds.
+Get-ChildItem (Join-Path $AppData 'Storage') -Filter 'sprocket*' -ErrorAction SilentlyContinue | Remove-Item -Force
 
 # The world's own mod storage, where Sprocket keeps its backups: for a world outside a player's folder the game keeps it in
 # Saves\<player id>\<session name>\Storage, which the fresh world above does not replace (seen 2026-11-12).

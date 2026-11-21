@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
         readonly IList<string> _replacing;
         readonly List<long> _stated = new List<long>();
         readonly List<string> _statedSlots = new List<string>();
-        string _statedChosen;
+        MemberKey? _statedChosen;
         string _statedFacet;
         SlotForecast _forecast;
         List<string> _fills;
@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
         /// the heading changes with it.
         /// </summary>
         /// <remarks>Asked as the page is built, which every change to the picks brings about.</remarks>
-        public bool Restate(IList<long> selection, string chosen, string facet, ToolbarSlot at, IList<string> picked, bool byName)
+        public bool Restate(IList<long> selection, MemberKey chosen, string facet, ToolbarSlot at, IList<string> picked, bool byName)
         {
             if (_statedChosen != null && _statedChosen == chosen && _statedFacet == facet && ListComparison.Same(_stated, selection)
                 && ListComparison.Same(_statedSlots, picked))
@@ -106,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
             var matched = byName ? new List<string>(picked) : forecast.Matched;
             // Named for what it will hold, which a pick can change until somebody names it themselves.
             // A forecast knows a type only once a facet is chosen, which the page does after asking.
-            _holds = forecast.Type ?? (_forEvents || chosen.Length == 0 ? null : Vocabulary.TypeOf(_editor.World, selection, chosen));
+            _holds = forecast.Type ?? (_forEvents || chosen.IsEmpty ? null : Vocabulary.TypeOf(_editor.World, selection, chosen));
             var kind = forecast.Signal ? "signal" : _holds?.Id ?? "";
             var renamed = false;
             if (forecast.Makes && (_newName == null || kind != _newKind))
@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
                 _existingAccepts = name =>
                 {
                     var wanted = NameRules.Clean(name);
-                    return wanted.Length > 0 && (_system.FindPartInAnyCase(wanted) == slot || !_system.TakesInAnyCase(wanted));
+                    return wanted.Length > 0 && (_system.FindPartInAnyCase(wanted) == slot || _system.FindPartInAnyCase(wanted) == null);
                 };
                 _existingRenames = _editor.Renaming(name => Rename(slot, NameRules.Clean(name)), _existingAccepts);
             }
@@ -268,9 +268,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
         }
 
         /// <summary>Whether <paramref name="chosen" /> is a signal a toolbar sends on the blocks <paramref name="selection" />, which a signal slot carries rather than the blocks.</summary>
-        bool Signals(IList<long> selection, string chosen)
+        bool Signals(IList<long> selection, MemberKey chosen)
         {
-            var picked = chosen.Length == 0 ? null : Vocabulary.Find(Vocabulary.EventsOf(_editor.World, selection), chosen);
+            var picked = chosen.IsEmpty ? null : Vocabulary.Find(Vocabulary.EventsOf(_editor.World, selection), chosen);
             return picked != null && picked.Answered;
         }
     }

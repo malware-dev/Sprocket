@@ -13,12 +13,12 @@ public class AttributeTests
 {
     /// <summary>A program with an attribute Sprocket does not use on every kind of statement that can carry one.</summary>
     const string Everywhere = "#@ headerNote: 1\n"
-        + "sprocket 1\n\n"
+        + "sprocket 2\n\n"
         + "#@ doorNote: [ 1, 2 ]\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n"
         + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n"
         + "#@ bellNote: 600t\n"
-        + "let bell = ext.toolbar(1, 1, 3) on [ panel1 ]\n\n"
+        + "let bell = sprocket.toolbar(1, 1, 3) on [ panel1 ]\n\n"
         + "# The airlock.\n"
         + "#@ systemNote: \"one\"\n"
         + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n"
@@ -31,7 +31,7 @@ public class AttributeTests
         + "    #@ sequenceNote: MalTek.Thing\n"
         + "    sequence 1 as Cycle {\n"
         + "        #@ stepNote: #FF0000\n"
-        + "        call ext.close on [ inner ]\n"
+        + "        call sprocket.close on [ inner ]\n"
         + "    }\n"
         + "}\n\n"
         + "#@ instanceNote: 3\n"
@@ -43,14 +43,14 @@ public class AttributeTests
 
     /// <summary>Every attribute Sprocket does not use is written back as it was, above the statement it was above.</summary>
     [Theory]
-    [InlineData("#@ headerNote: 1\nsprocket 1\n")]
+    [InlineData("#@ headerNote: 1\nsprocket 2\n")]
     [InlineData("#@ doorNote: [ 1, 2 ]\nlet door1 = ")]
     [InlineData("#@ bellNote: 600t\nlet bell = ")]
     [InlineData("# The airlock.\n#@ systemNote: \"one\"\nsystem blueprint ")]
     [InlineData("    #@ slotNote: on\n    required slot inner expects Door\n")]
     [InlineData("    #@ triggerNote: 2.5\n    whenever button then run 1\n")]
     [InlineData("    #@ sequenceNote: MalTek.Thing\n    sequence 1 as Cycle {\n")]
-    [InlineData("        #@ stepNote: #FF0000\n        call ext.close on [ inner ]\n")]
+    [InlineData("        #@ stepNote: #FF0000\n        call sprocket.close on [ inner ]\n")]
     [InlineData("#@ instanceNote: 3\ninstance 1 of \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\"")]
     [InlineData("    #@ answerNote: \"door\"\n    inner = [ door1 ]\n")]
     public void AnAttributeNothingUsesIsWrittenBackAsItWas(string line)
@@ -127,15 +127,24 @@ public class AttributeTests
         Assert.NotEqual("", ProgramReader.Load(text, new Automation(), new Values()));
     }
 
-    /// <summary>A name spelled like a keyword is quoted, as everywhere else.</summary>
+    /// <summary>A name spelled like a reserved keyword is quoted, as everywhere else.</summary>
     [Fact]
-    public void AnAttributeNamedLikeAKeywordIsQuoted()
+    public void AnAttributeNamedLikeAReservedKeywordIsQuoted()
     {
-        Assert.NotEqual("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ on:"), new Automation(), new Values()));
+        Assert.NotEqual("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ every:"), new Automation(), new Values()));
 
         var program = new Automation();
-        Assert.Equal("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ 'on':"), program, new Values()));
-        Assert.Contains("#@ 'on': \"one\"\n", ProgramWriter.Save(program, new Values()));
+        Assert.Equal("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ 'every':"), program, new Values()));
+        Assert.Contains("#@ 'every': \"one\"\n", ProgramWriter.Save(program, new Values()));
+    }
+
+    /// <summary>A name spelled like a contextual keyword is bare: no attribute's name is a keyword's place.</summary>
+    [Fact]
+    public void AnAttributeNamedLikeAContextualKeywordIsBare()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(Everywhere.Replace("#@ systemNote:", "#@ on:"), program, new Values()));
+        Assert.Contains("#@ on: \"one\"\n", ProgramWriter.Save(program, new Values()));
     }
 
     /// <summary>A signal slot's <c>short</c> is the few words shown with its toolbar slots, read as text and written back.</summary>

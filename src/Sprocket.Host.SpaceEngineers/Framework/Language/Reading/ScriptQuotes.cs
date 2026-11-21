@@ -38,7 +38,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return $"'{Spelling(statement.Member(value))}'";
 
             if (value.Form == ValueForm.Qualified)
-                return "a qualified name";
+                return $"'{Spelling(statement.PartsOf(value))}'";
+
+            if (value.Form == ValueForm.Kinded)
+                return $"'{Kinded(statement, value)}'";
 
             if (value.Form == ValueForm.Real)
                 return value.Real.ToString(CultureInfo.InvariantCulture);
@@ -74,7 +77,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return "what follows";
         }
 
-        /// <summary>A name's parts joined as they are written: <c>ext.closed</c>.</summary>
+        /// <summary>A thing with its kind as it is written, <c>side(inside)</c>, its kind and thing spelled as trouble names them.</summary>
+        static string Kinded(Statement statement, Value value)
+        {
+            return $"{Bare(statement, statement.KindOf(value))}({Bare(statement, statement.ThingOf(value))})";
+        }
+
+        /// <summary>A value as <see cref="Spelled(Statement, Value)" /> spells it, without the quotes around a name.</summary>
+        static string Bare(Statement statement, Value value)
+        {
+            if (value.Form == ValueForm.Kinded)
+                return Kinded(statement, value);
+
+            if (value.Form == ValueForm.Qualified)
+                return Spelling(statement.PartsOf(value));
+
+            return value.IsWord ? value.Word : Spelled(statement, value);
+        }
+
+        /// <summary>A name's parts joined as they are written: <c>sprocket.closed</c>.</summary>
         public static string Spelling(ValueRange parts)
         {
             var joined = "";
@@ -84,7 +105,33 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return joined;
         }
 
-        /// <summary>Whether <paramref name="value" /> is a name, bare or quoted, rather than one of the language's words or anything else.</summary>
+        /// <summary>The namespace of a qualified name: every part before the last, joined as written, or empty where it has one part.</summary>
+        public static string Namespace(ValueRange parts)
+        {
+            var joined = "";
+            for (var i = 0; i < parts.Count - 1; i++)
+                joined += (i > 0 ? "." : "") + parts[i].Word;
+
+            return joined;
+        }
+
+        /// <summary>Whether every part of a name has a word, so it is a name of one part or more with nothing left out.</summary>
+        public static bool Whole(ValueRange parts)
+        {
+            if (parts.Count == 0)
+                return false;
+
+            for (var i = 0; i < parts.Count; i++)
+            {
+                if (parts[i].Word.Length == 0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>Whether <paramref name="value" /> is a name, bare or quoted, rather than one of the language's reserved words or anything else.</summary>
+        /// <remarks>A bare name spelled like a contextual keyword is one; the construct that reads that keyword asks for it first.</remarks>
         public static bool Named(Value value)
         {
             return value.Form == ValueForm.Identifier && value.Word.Length > 0;

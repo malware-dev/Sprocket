@@ -621,6 +621,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (kept != null)
                     Tested(row, step, kept);
 
+                var host = branch.Test as HostTest;
+                if (host != null)
+                    row.Slots.Add(new HostSlot(host, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, host, OpeningColumn.Blocks))));
+
                 return;
             }
 
@@ -634,14 +638,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var wait = step as Wait;
             if (wait != null)
             {
-                row.Slots.Add(new DurationSlot(wait.Length, Changes(CommandKind.StepSlot, () => Open(wait, false))));
+                row.Slots.Add(new DurationSlot(wait.Length, wait.Setting, Changes(CommandKind.StepSlot, () => Open(wait, false))));
                 return;
             }
 
             var abort = step as Abort;
             if (abort != null)
             {
-                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
+                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Setting, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
                 return;
             }
 
@@ -734,7 +738,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var opens = Changes(CommandKind.StepSlot, () => _stepwork.ChangeSetState(set));
             row.Slots.Add(new SystemStateSlot(set.State, opens));
             row.Slots.Add(StateValueQuestion.Part(_sequence.System, set.State, set.Value, set.From,
-                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set)), ArgumentRole.NewValue));
+                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set, () => Chip(set, ArgumentRole.NewValue))), ArgumentRole.NewValue));
         }
 
         /// <summary>Gives the row of an if, or of a branch, that tests one of the system's states the parts of its test.</summary>
@@ -745,7 +749,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
                 Changes(CommandKind.StepSlot, () => _stepwork.RelateState(step, test)), ArgumentRole.Compared));
             row.Slots.Add(StateValueQuestion.Part(_sequence.System, test.State, test.Value, test.Other,
-                Changes(CommandKind.StepSlot, () => _stepwork.CompareState(step, test)), ArgumentRole.Checked));
+                Changes(CommandKind.StepSlot, () => _stepwork.CompareState(step, test, () => Chip(step, ArgumentRole.Checked))), ArgumentRole.Checked));
         }
 
         /// <summary>A row for a step, whose opening words explain their term with the codex's page on it.</summary>
@@ -847,8 +851,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_length != null)
                 _length.Finish(false);
 
-            _length = new LengthQuestion(Editor, wait.Length, false, () => Chip<DurationSlot>(wait),
-                (length, cancelled) => _stepwork.Closed(wait, length, added, cancelled));
+            _length = new LengthQuestion(Editor, _sequence.System, wait.Length, wait.Setting, false, () => Chip<DurationSlot>(wait),
+                (length, setting, cancelled) => _stepwork.Closed(wait, length, setting, added, cancelled));
             _length.Hang();
         }
 
@@ -874,7 +878,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (_values != null)
                     _values.Finish(true);
 
-                _values = new ValuesQuestion(Editor, fields, act.Arguments, () => Chip(act, holds), answered);
+                _values = new ValuesQuestion(Editor, _sequence.System, fields, act.Arguments, () => Chip(act, holds), answered);
                 _values.Hang();
             });
         }
@@ -910,7 +914,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_values != null)
                 _values.Finish(true);
 
-            _values = new ValuesQuestion(Editor, fields, given, () => Chip(step, holds), answered);
+            _values = new ValuesQuestion(Editor, _sequence.System, fields, given, () => Chip(step, holds), answered);
             _values.Hang();
         }
 
@@ -920,8 +924,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_abort != null)
                 _abort.Finish(false);
 
-            _abort = new AbortQuestion(Editor, abort, () => Chip<ArgumentsSlot>(abort),
-                (message, level, cancelled) => _stepwork.Closed(abort, message, level, cancelled));
+            _abort = new AbortQuestion(Editor, _sequence.System, abort, () => Chip<ArgumentsSlot>(abort),
+                (message, setting, level, cancelled) => _stepwork.Closed(abort, message, setting, level, cancelled));
             _abort.Hang();
         }
 

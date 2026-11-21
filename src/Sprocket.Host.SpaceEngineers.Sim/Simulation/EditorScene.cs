@@ -1,8 +1,10 @@
 using Sprocket.Host.SpaceEngineers;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Sprocket.Host.SpaceEngineers.Framework.Versioning;
 using System;
 using System.Collections.Generic;
 using Ship = Sprocket.Sim.Machine.Simulation;
@@ -30,6 +32,9 @@ namespace Sprocket.Sim.Simulation
         readonly Ship _ship;
         readonly SprocketWorkspace _workspace = new SprocketWorkspace();
         EditorWindow _view;
+
+        // The player's choices, as a player already offered this release's callouts has them, so a screen shows none.
+        PlayerSettings _player = new PlayerSettings(true, ModVersion.Release);
 
         Vector2 _at;
 
@@ -69,6 +74,7 @@ namespace Sprocket.Sim.Simulation
         EditorScene(Ship ship)
         {
             _ship = ship;
+            Kept();
             _view = new EditorWindow(_ship.Editor, _workspace);
             _workspace.Open(_view);
         }
@@ -167,9 +173,26 @@ namespace Sprocket.Sim.Simulation
         public void Reopen()
         {
             _view.Close();
+            Kept();
             _view = new EditorWindow(_ship.Editor, _workspace);
             _workspace.Open(_view);
             _ship.Editor.Opened();
+        }
+
+        /// <summary>What the player has chosen, which the editor keeps here where the game keeps it in a file.</summary>
+        public PlayerSettings Player => _player;
+
+        /// <summary>Opens the editor again for a player who has not been offered any callout, as one is after an update.</summary>
+        public void MeetCallouts()
+        {
+            _player = new PlayerSettings(true);
+            Reopen();
+        }
+
+        /// <summary>Has the editor keep the player's choices here.</summary>
+        void Kept()
+        {
+            _ship.Editor.Callouts.Keeping(() => _player, kept => _player = kept);
         }
 
         /// <summary>The frame the ship is on, which the screen is timed by.</summary>
@@ -318,7 +341,13 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Moves whatever is under the pointer. Positive scrolls down.</summary>
         public void ScrollBy(Vector2 point, float amount)
         {
-            _workspace.Wheel(point, amount);
+            _workspace.Wheel(point, new Vector2(0f, amount));
+        }
+
+        /// <summary>Turns the wheel sideways over <paramref name="point" />, as Shift and the wheel do in the game. Positive scrolls right.</summary>
+        public void ScrollSideways(Vector2 point, float amount)
+        {
+            _workspace.Wheel(point, new Vector2(amount, 0f));
         }
 
         /// <summary>How many times the screen has written what the editor says onto its controls.</summary>

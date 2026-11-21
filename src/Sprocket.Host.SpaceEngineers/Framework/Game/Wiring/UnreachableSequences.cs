@@ -68,8 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             if (trigger.Stops)
                 return SlotKeys.KeyOf(system, instance, sequence, true);
 
-            var needed = trigger as SignalTrigger;
-            return needed != null && needed.Acts != null ? SlotKeys.KeyOf(system, instance, needed) : SlotKeys.KeyOf(system, instance, sequence);
+            return SlotKeys.KeyOf(system, instance, sequence);
         }
 
         void Claims()
@@ -163,7 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             for (var s = 0; s < _program.Systems.Count; s++)
             {
                 AutomationSystem system = _program.Systems[s];
-                var sequences = _buttons.Runs(system);
+                var sequences = system.Sequences;
                 var instances = system.Uses;
 
                 foreach (var sequence in sequences)

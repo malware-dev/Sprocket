@@ -24,9 +24,9 @@ public class StateScriptTests
         + "    sequence 1 as Cycle {\n"
         + "        if where == inside then {\n"
         + "            set cycling to on\n"
-        + "            call ext.close on [ inner ]\n"
+        + "            call sprocket.close on [ inner ]\n"
         + "            await\n"
-        + "            call ext.open on [ outer ]\n"
+        + "            call sprocket.open on [ outer ]\n"
         + "            set where to outside\n"
         + "            set cycling to off\n"
         + "        }\n"
@@ -94,16 +94,16 @@ public class StateScriptTests
             + "    let home = outside\n\n"
             + "    sequence 1 as Cycle {\n"
             + "        if where != home then {\n"
-            + "            call ext.close on [ outer ]\n"
+            + "            call sprocket.close on [ outer ]\n"
             + "        }\n"
-            + "        else if all ext.status on [ outer ] == closed then {\n"
+            + "        else if all sprocket.status on [ outer ] == closed then {\n"
             + "            set where to home\n"
             + "        }\n"
-            + "        else if where == side.outside then {\n"
+            + "        else if where == side(outside) then {\n"
             + "            await\n"
             + "        }\n"
             + "        else {\n"
-            + "            call ext.close on [ outer ]\n"
+            + "            call sprocket.close on [ outer ]\n"
             + "        }\n"
             + "    }\n"
             + "}\n";
@@ -125,27 +125,6 @@ public class StateScriptTests
         Assert.Equal(written, Save(again));
     }
 
-    /// <summary>A when on a state may set a state, and a flag state is compared with a flag.</summary>
-    [Fact]
-    public void AWhenOnAStateMaySetAState()
-    {
-        var text = Version
-            + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n{\n"
-            + "    let cycling = off\n"
-            + "    let alarm = off\n\n"
-            + "    when cycling == on then set alarm to on\n"
-            + "}\n";
-
-        var program = new Automation();
-        Assert.Equal("", Load(text, program));
-
-        var watched = Assert.IsType<StateTrigger>(Assert.Single(program.Systems[0].Triggers));
-        Assert.Equal(Literal.Of(true), watched.Test.Value);
-        Assert.Same(watched.Does, watched.Sets);
-        Assert.Equal("alarm", watched.Sets!.State);
-        Assert.Contains("    when cycling == on then set alarm to on\n", Save(program));
-    }
-
     /// <summary>
     /// A choice is written qualified where alone it would read as something else: where a state has its name, and as a
     /// starting value where another type has it too.
@@ -158,11 +137,11 @@ public class StateScriptTests
             + "    type valve = open | shut\n"
             + "    type hatch = open | shut\n"
             + "    type side = inside | outside\n\n"
-            + "    let intake = valve.open\n"
+            + "    let intake = valve(open)\n"
             + "    let outside = off\n"
-            + "    let where = side.outside\n\n"
+            + "    let where = side(outside)\n\n"
             + "    sequence 1 {\n"
-            + "        set where to side.outside\n"
+            + "        set where to side(outside)\n"
             + "        set intake to shut\n"
             + "    }\n"
             + "}\n";
@@ -171,9 +150,9 @@ public class StateScriptTests
         Assert.Equal("", Load(text, program));
 
         var written = Save(program);
-        Assert.Contains("    let intake = valve.open\n", written);
-        Assert.Contains("    let where = side.outside\n", written);
-        Assert.Contains("        set where to side.outside\n", written);
+        Assert.Contains("    let intake = valve(open)\n", written);
+        Assert.Contains("    let where = side(outside)\n", written);
+        Assert.Contains("        set where to side(outside)\n", written);
         Assert.Contains("        set intake to shut\n", written);
 
         var again = new Automation();
@@ -189,7 +168,7 @@ public class StateScriptTests
             + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n{\n"
             + "    required slot 'type' expects Door\n\n"
             + "    sequence 1 {\n"
-            + "        call ext.close on [ 'type' ]\n"
+            + "        call sprocket.close on [ 'type' ]\n"
             + "    }\n"
             + "}\n";
 
@@ -206,14 +185,13 @@ public class StateScriptTests
     [InlineData("    type side = inside outside\n", "expected '|'")]
     [InlineData("    type flag = inside | outside\n", "built-in type")]
     [InlineData("    type side = inside | outside\n    type side = up | down\n", "already the name of a type")]
-    [InlineData("    type side = inside | outside\n    let side = inside\n", "already the name of a type")]
     [InlineData("    let where = nowhere\n", "no choice 'nowhere'")]
     [InlineData("    let where = 5\n", "a state starts as on, off or one of the system's choices")]
     [InlineData("    let where = on\n    let where = off\n", "already the name of a state")]
-    [InlineData("    type valve = open | shut\n    type hatch = open | shut\n    let intake = open\n", "qualify it")]
+    [InlineData("    type valve = open | shut\n    type hatch = open | shut\n    let intake = open\n", "write the one meant with its kind: valve(open) or hatch(open)")]
     [InlineData("    type side = inside | outside\n    let where = inside\n    let home = where\n", "'where' is a state")]
-    [InlineData("    type side = inside | outside\n    let where = side.nowhere\n", "no choice 'nowhere' in type 'side'")]
-    [InlineData("    type side = inside | outside\n    let where = Gearbox.status.closed\n", "no type")]
+    [InlineData("    type side = inside | outside\n    let where = side(nowhere)\n", "no choice 'nowhere' in type 'side'")]
+    [InlineData("    type side = inside | outside\n    let where = Gearbox(closed)\n", "no type 'Gearbox'")]
     [InlineData("    let cycling = off\n    sequence 1 {\n        set nothing to on\n    }\n", "no state 'nothing'")]
     [InlineData("    let cycling = off\n    sequence 1 {\n        set cycling to inside\n    }\n", "holds on or off")]
     [InlineData("    type side = inside | outside\n    let where = inside\n    sequence 1 {\n        set where to on\n    }\n", "not a flag")]

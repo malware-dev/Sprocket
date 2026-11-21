@@ -158,13 +158,13 @@ public class GasTests
 
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
-        var stockpile = new Act(Blocks.Tank.Stockpile);
+        var stockpile = new Act(new MemberKey(BlockKinds.Own, Blocks.Tank.Stockpile));
         stockpile.Arguments.Add(Literal.Of(false));
         stockpile.Targets.Add(automation.Declare(ship.World, ship.Entity(tank.Id)).Name);
         sequence.Steps.Add(stockpile);
 
         var saved = ProgramWriter.Save(automation, ship.World.Values);
-        Assert.Contains("call ext.stockpile(off) on [ ", saved);
+        Assert.Contains("call sprocket.stockpile(off) on [ ", saved);
         Assert.Equal("", ProgramReader.Load(saved, new Automation(), ship.World.Values));
     }
 

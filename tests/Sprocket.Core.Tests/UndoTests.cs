@@ -52,7 +52,7 @@ public class UndoTests
 
     static Act StepFor(string actionId, params string[] targets)
     {
-        var step = new Act(actionId);
+        var step = new Act(new MemberKey(BlockKinds.Own, actionId));
         foreach (var target in targets)
             step.Targets.Add(target);
         return Given.Defaults(step);
@@ -165,7 +165,7 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         Sequence sequence = Build();
-        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", ReachKind.Native, BlockKinds.Own, new[] { Literal.Of(4L) }, true));
+        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, new MemberKey(BlockKinds.Own, "lock"), ReachKind.Native, new[] { Literal.Of(4L) }, true));
     }
 
     /// <summary>A step changed to something that takes no time loses the wait after it, and undoing puts that wait back.</summary>
@@ -177,7 +177,7 @@ public class UndoTests
         sequence.Steps.Insert(1, awaited);
         var before = Shape(sequence);
 
-        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "on", ReachKind.Native, BlockKinds.Own, new Literal[0], false);
+        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, new MemberKey(BlockKinds.Own, "on"), ReachKind.Native, new Literal[0], false);
         edit.Apply(sequence);
         Assert.IsNotType<Await>(sequence.Steps[1]);
 
@@ -191,13 +191,36 @@ public class UndoTests
     {
         Sequence sequence = Build();
         sequence.Steps[1] = new Wait(60);
-        var edit = new SetWait(1, Duration.OfTicks(60), Duration.OfTicks(120));
+        var edit = new SetWait(1, Duration.OfTicks(60), "", Duration.OfTicks(120));
 
         var before = Shape(sequence);
         edit.Apply(sequence);
         Assert.NotEqual(before, Shape(sequence));
         edit.Undo(sequence);
         Assert.Equal(before, Shape(sequence));
+    }
+
+    /// <summary>An abort saying a setting keeps it through a change of level, a written message replaces it, and undo brings it back.</summary>
+    [Fact]
+    public void ChangingAnAbortKeepsItsSettingUntilAMessageReplacesIt()
+    {
+        Sequence sequence = Build();
+        var abort = new Abort { Setting = "why" };
+        sequence.Steps[1] = abort;
+
+        var louder = new SetAbort(1, abort, "", AbortLevel.Warning);
+        louder.Apply(sequence);
+        Assert.Equal("why", abort.Setting);
+        Assert.Equal(AbortLevel.Warning, abort.Level);
+
+        var written = new SetAbort(1, abort, "Jammed", AbortLevel.Warning);
+        written.Apply(sequence);
+        Assert.Equal("", abort.Setting);
+        Assert.Equal("Jammed", abort.Message);
+
+        written.Undo(sequence);
+        Assert.Equal("why", abort.Setting);
+        Assert.Equal("", abort.Message);
     }
 
     [Fact]
@@ -277,7 +300,7 @@ public class UndoTests
         var every = new EveryTrigger(60);
         var sequence = program.AddSequence(program.AddSystem(), every);
 
-        RoundTrip(sequence, new SetCadence(every, Duration.OfTicks(60), Duration.OfTicks(600)));
+        RoundTrip(sequence, new SetCadence(every, Duration.OfTicks(60), "", Duration.OfTicks(600)));
     }
 
     /// <summary>
@@ -584,7 +607,7 @@ public class UndoTests
     {
         Sequence sequence = Build();
 
-        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", ReachKind.Native, BlockKinds.Own, new Literal[0], true).Changes);
+        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, new MemberKey(BlockKinds.Own, "close"), ReachKind.Native, new Literal[0], true).Changes);
         Assert.False(new RenameSequence("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
 

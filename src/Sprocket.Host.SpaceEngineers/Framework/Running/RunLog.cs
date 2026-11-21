@@ -74,6 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 case RunRefusal.Held:
                     _line.Append("another sequence with its exclusive id is running");
                     break;
+                case RunRefusal.Uninstalled:
+                    _line.Append("a step needs a mod that is not installed");
+                    break;
                 default:
                     _line.Append("a slot it needs is empty");
                     break;

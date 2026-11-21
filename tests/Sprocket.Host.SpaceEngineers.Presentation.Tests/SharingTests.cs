@@ -6,7 +6,10 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Network;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
+using Lumel.Controls;
+using Lumel.Input;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -307,9 +310,68 @@ public class SharingTests
         Assert.True(Assert.Single(read.Known).IsBlocked);
     }
 
+    /// <summary>A new share opens on the player's faction, and on players they choose where they are in no faction.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ANewShareOpensOnTheFactionWhereThereIsOne(bool inFaction)
+    {
+        var screen = Screen.On(Rig.Demo());
+        ShareBoard board = null!;
+        // ReSharper disable once AccessToModifiedClosure - the board answers itself, and is set before it is ever asked.
+        board = new ShareBoard(order => board.Heard(_desk.Hear(order, Me, false)));
+        screen.Editor.Sharing = board;
+        screen.Editor.IsInFaction = () => inFaction;
+        screen.Editor.Shelf = new LibraryShelf(new Folder(), delegate { });
+        screen.Editor.Shelf.Keep(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar", Namespace = "Shop", IsBlueprint = true });
+        var texts = screen.Editor.Texts;
+        screen.Editor.OpenLibrary();
+        screen.Run(2);
+        screen.Do("press", "Hangar").Run(2);
+        screen.PressDetailShare();
+        screen.Do("press", texts.LibraryShare).Run(2);
+
+        var who = Target.Within(screen.Scene.Workspace.Windows.Top).OfType<ListField>().Single();
+        Assert.Equal(inFaction ? texts.ShareFaction : texts.SharePlayers, who.Text);
+    }
+
+    /// <summary>A player ticked in the share dialog, with Chosen players picked, is the one the blueprint is shared with.</summary>
+    [Fact]
+    public void ATickedPlayerIsSharedWith()
+    {
+        var screen = Screen.On(Rig.Demo());
+        ShareBoard board = null!;
+        // ReSharper disable once AccessToModifiedClosure - the board answers itself, and is set before it is ever asked.
+        board = new ShareBoard(order => board.Heard(_desk.Hear(order, Me, false)));
+        screen.Editor.Sharing = board;
+        board.Changed += screen.Editor.Invalidate;
+        board.Ask();
+        screen.Editor.Shelf = new LibraryShelf(new Folder(), delegate { });
+        screen.Editor.Shelf.Keep(new AutomationSystem(1, Guid.NewGuid()) { Name = "Hangar", Namespace = "Shop", IsBlueprint = true });
+        var texts = screen.Editor.Texts;
+        screen.Editor.OpenLibrary();
+        screen.Run(2);
+        screen.Do("press", "Hangar").Run(2);
+        screen.PressDetailShare();
+        screen.Do("press", texts.LibraryShare).Run(2);
+
+        var who = Target.Within(screen.Scene.Workspace.Windows.Top).OfType<ListField>().Single();
+        ((IInputTarget)who).Text(texts.SharePlayers[0]);
+        screen.Run(2);
+        Assert.Equal(texts.SharePlayers, who.Text);
+        screen.Do("press", "Ann").Run(2);
+        var ann = Target.Within(screen.Scene.Workspace.Windows.Top).OfType<CheckBox>().Single(tick => tick.Text == "Ann");
+        Assert.True(ann.IsChecked, screen.Dump);
+        screen.Do("press", texts.ShareConfirm).Run(2);
+
+        var shared = Assert.Single(_shares);
+        Assert.Equal(ShareReach.Players, shared.Reach);
+        Assert.Contains(Ann, shared.Players);
+    }
+
     /// <summary>
     /// With the world's limit set to 0 while the library is open, sharing is refused with the reason the world gives, and the
-    /// library opened again offers no sharing.
+    /// Share menu opened again offers only the copies.
     /// </summary>
     [Fact]
     public void ALimitOfNoneRefusesWithItsReason()
@@ -337,6 +399,7 @@ public class SharingTests
         screen.Run(2);
 
         _limit = 0;
+        screen.PressDetailShare();
         screen.Do("press", texts.LibraryShare).Run(2);
         screen.Do("press", texts.ShareConfirm).Run(2);
         Assert.True(screen.Shows(texts.LibraryShareClosed), screen.Dump);
@@ -347,6 +410,8 @@ public class SharingTests
         kept = screen.Drawings.Last(drawn => drawn.IsText && drawn.Text == "Airlock");
         screen.Scene.Press(Screen.Ui(kept.At.X + 4f, screen.MiddleOf(kept)), 1);
         screen.Run(2);
+        screen.PressDetailShare();
+        Assert.True(screen.Shows(texts.ShareCopyText), screen.Dump);
         Assert.False(screen.Shows(texts.LibraryShare), screen.Dump);
     }
 

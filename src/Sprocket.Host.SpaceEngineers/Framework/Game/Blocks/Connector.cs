@@ -13,9 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <remarks>The connector raises its properties-changed event every hundred ticks whether anything changed or not.</remarks>
     public sealed partial class Connector : Capability
     {
-        static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
-
-        static readonly OwnValue State = OwnValue.OneOf<IMyShipConnector>(Statuses, connector => Position(connector.Status));
+        static readonly OwnValue State = OwnValue.OneOf<IMyShipConnector>(ChoiceTypes.LockStatus, connector => Position(connector.Status));
 
         static readonly OwnValue Docked = OwnValue.Text<IMyShipConnector>(Ship);
 
@@ -34,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
                 .Announced().Reading("is ready to lock", "is not ready to lock")
                 .WithChange("locks", "locks", "status", Literal.Name("locked")).Announced()
                 .Reading("is locked", "is not locked")
+                .WithEvent("unlocks", State.Is(Literal.Name("locked")), SignalEdge.Falling, "unlocks").Announced()
                 .WithValue("docked_ship", "docked ship", Docked).Announced().In(Category.Locking)
                 .Renaming("Lock", false, "lock")
                 .Renaming("Unlock", false, "unlock")

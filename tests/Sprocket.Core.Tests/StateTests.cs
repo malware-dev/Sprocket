@@ -50,17 +50,11 @@ public class StateTests
         return after;
     }
 
-    /// <summary>Nothing parked writes nothing, and who the automation belongs to and who paused it are the world's, so a block with nothing off keeps nothing.</summary>
+    /// <summary>A block with nothing switched off stores nothing.</summary>
     [Fact]
-    public void NothingParkedWritesNothingAndOwnersAndAPauseAreNotKeptInTheBlock()
+    public void NothingParkedWritesNothing()
     {
-        var before = Ship();
-        Assert.Equal("", BlockSwitches.Save(before, Binary));
-
-        before.Owners.Add(144115188075855874);
-        before.PausedFrom.Add(144115188075855873);
-
-        Assert.Equal("", BlockSwitches.Save(before, Binary));
+        Assert.Equal("", BlockSwitches.Save(Ship(), Binary));
     }
 
     /// <summary>What is off is kept and read back, with why where Sprocket switched it off.</summary>
@@ -270,11 +264,9 @@ public class StateTests
         Assert.True(program.Systems[0].Instances[0].Enabled);
     }
 
-    /// <summary>
-    /// The program itself says nothing about switches, so copying a system carries none.
-    /// </summary>
+    /// <summary>A program written from a construct with its systems switched off reads back with everything running.</summary>
     [Fact]
-    public void TheProgramSaysNothingAboutSwitches()
+    public void AProgramCarriesNoSwitches()
     {
         var program = Ship();
         program.Systems[0].Enabled = false;
@@ -283,10 +275,6 @@ public class StateTests
 
         var text = ProgramWriter.Save(program, new Values());
 
-        Assert.DoesNotContain(" is on", text);
-        Assert.DoesNotContain(" is off", text);
-
-        // And a program read without its switches is a construct with everything running.
         var after = new Automation();
         Assert.Equal("", ProgramReader.Load(text, after, new Values()));
         Assert.True(after.Systems[0].Enabled);

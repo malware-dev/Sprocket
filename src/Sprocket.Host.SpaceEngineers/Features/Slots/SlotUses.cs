@@ -33,20 +33,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
             foreach (var trigger in system.Triggers)
             {
-                var missing = Missing(trigger.Acts, actions, system, one);
-                if (missing != null)
-                    return missing;
-
                 var moment = trigger as MomentTrigger;
                 if (moment == null || !moment.Sources.Contains(slot.Id) || moment is SignalTrigger && !((SignalTrigger)moment).IsWritten)
                     continue;
 
                 var when = moment as WhenTrigger;
-                if (when != null && when.Names(actions) != null || Vocabulary.Find(events, moment.EventId) != null)
+                if (when != null && when.Names(actions) != null || Vocabulary.Find(events, moment.Key) != null)
                     continue;
 
                 var said = when?.Names(_editor.SlotBlocks.Actions(system, one));
-                return said != null ? said.Text : Vocabulary.Find(_editor.SlotBlocks.Events(system, one), moment.EventId)?.Text ?? moment.EventId;
+                return said != null ? said.Text : Vocabulary.Find(_editor.SlotBlocks.Events(system, one), moment.Key)?.Text ?? moment.EventId;
             }
 
             foreach (var sequence in system.Sequences)

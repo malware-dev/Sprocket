@@ -148,27 +148,6 @@ public class StateRuntimeTests
         Assert.Equal(Literal.Name("inside"), Held(runner, system, self, "where"));
     }
 
-    /// <summary>Two whens that set each other's state stop within the step, the last value set kept.</summary>
-    [Fact]
-    public void WhensThatSetEachOtherStop()
-    {
-        var (program, runner) = Running(Version + Header
-            + "    let ping = off\n"
-            + "    let pong = off\n\n"
-            + "    when ping == on then set pong to on\n"
-            + "    when pong == on then set ping to off\n"
-            + "    when ping == off then set pong to off\n"
-            + "    when pong == off then set ping to on\n\n"
-            + "    sequence 1 {\n        set ping to on\n    }\n"
-            + "}\n");
-        var system = program.Systems[0];
-        var self = system.Uses[0];
-
-        runner.Call(system.FindSequence(1)!, self);
-
-        Assert.False(runner.Get(system.FindSequence(1)!, self)!.IsRunning);
-    }
-
     /// <summary>A renamed state keeps the value it holds, and one whose type changed starts over from its starting value.</summary>
     [Fact]
     public void AnEditKeepsValuesWhereItCan()
@@ -195,8 +174,9 @@ public class StateRuntimeTests
         + "    type side = inside | outside\n\n"
         + "    let where = inside\n"
         + "    let hits = off\n\n"
-        + "    when where == outside then set hits to on\n\n"
-        + "    sequence 1 {\n        set where to outside\n    }\n"
+        + "    when where == outside then run 2\n\n"
+        + "    sequence 1 {\n        set where to outside\n    }\n\n"
+        + "    sequence 2 {\n        set hits to on\n    }\n"
         + "}\n";
 
     /// <summary>What <paramref name="program" /> holds is written as the world saves and read back into <paramref name="text" />, as a world loads it.</summary>
@@ -294,8 +274,9 @@ public class StateRuntimeTests
         var (program, runner) = Running(Version + Header
             + "    let cycling = off\n"
             + "    let alarm = off\n\n"
-            + "    when cycling == on then set alarm to on\n\n"
-            + "    sequence 1 {\n        set cycling to on\n    }\n"
+            + "    when cycling == on then run 2\n\n"
+            + "    sequence 1 {\n        set cycling to on\n    }\n\n"
+            + "    sequence 2 {\n        set alarm to on\n    }\n"
             + "}\n");
         var system = program.Systems[0];
         var self = system.Uses[0];

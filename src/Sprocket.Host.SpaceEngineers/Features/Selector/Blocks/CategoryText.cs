@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
                 case Category.Weapons: return texts.CategoryWeapons;
                 case Category.Detection: return texts.CategoryDetection;
                 case Category.Automation: return texts.CategoryAutomation;
-                case Category.Behaviour: return texts.CategoryBehavior;
+                case Category.Behavior: return texts.CategoryBehavior;
                 case Category.Signals: return texts.CategorySignals;
                 case Category.Appearance: return texts.CategoryAppearance;
                 case Category.Screen: return texts.CategoryScreens;

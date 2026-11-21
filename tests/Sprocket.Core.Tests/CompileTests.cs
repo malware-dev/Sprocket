@@ -122,7 +122,7 @@ public class CompileTests
         frame = RunOut(ship, runner, sequence, frame);
         Assert.InRange(rotor.Degrees, 89.9f, 90.1f);
 
-        editor.Do(sequence, new ChangeStep(0, turn, turn.Targets, turn.ActionId, turn.Form, turn.Provider,
+        editor.Do(sequence, new ChangeStep(0, turn, turn.Targets, turn.Key, turn.Form,
             [Literal.Of(Directly), Literal.Of(45.0), Literal.Of(10L)], true));
 
         RunOut(ship, runner, sequence, frame);

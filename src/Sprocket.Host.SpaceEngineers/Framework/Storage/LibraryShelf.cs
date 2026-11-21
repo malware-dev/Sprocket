@@ -73,8 +73,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage
         /// <remarks>A file the library named after the blueprint is renamed with it; a file a player named keeps its name.</remarks>
         public LibraryEntry Keep(AutomationSystem blueprint)
         {
+            return Keep(blueprint, Guid.NewGuid());
+        }
+
+        /// <summary>
+        /// Puts the blueprint <paramref name="blueprint" />, brought in from elsewhere, in the library under its own identity, in
+        /// place of the blueprint here that has it, so a newer copy of a blueprint updates the one kept.
+        /// </summary>
+        public LibraryEntry Import(AutomationSystem blueprint)
+        {
+            if (Find(blueprint.Identity) != null)
+                blueprint.Origin = blueprint.Identity;
+
+            return Keep(blueprint, blueprint.Identity);
+        }
+
+        LibraryEntry Keep(AutomationSystem blueprint, Guid fresh)
+        {
             var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
-            var identity = had?.Identity ?? Guid.NewGuid();
+            var identity = had?.Identity ?? fresh;
             var text = ProgramWriter.Blueprint(blueprint, identity);
             if (had == null)
             {

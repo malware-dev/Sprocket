@@ -23,7 +23,7 @@ public class IfStepTests
         var opens = Assert.IsType<If>(sequence.Steps[before]);
         Assert.IsType<EndIf>(sequence.Steps[before + 1]);
         Assert.Equal("status", opens.Compared.MemberId);
-        Assert.Equal("ext", opens.Compared.Provider);
+        Assert.Equal("sprocket", opens.Compared.Provider);
         Assert.Equal(Relation.Is, opens.Compared.Relation);
         Assert.Equal("closed", opens.Compared.Value.Text);
     }
@@ -183,7 +183,7 @@ public class IfStepTests
             + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n"
             + "    sequence 1 {\n"
-            + "        if all ext.status on [ door1 ] == closed then {\n"
+            + "        if all sprocket.status on [ door1 ] == closed then {\n"
             + "        }\n"
             + "    }\n"
             + "}\n");
@@ -230,6 +230,33 @@ public class IfStepTests
         rig.Tick();
         Assert.Equal(5, sequence.Steps.Count);
         Assert.IsType<If>(sequence.Steps[0]);
+    }
+
+    /// <summary>An if testing the host says the namespace and whether it is installed, and is deleted as any if is.</summary>
+    [Theory]
+    [InlineData(true, "gearbox.lifts is installed")]
+    [InlineData(false, "gearbox.lifts is not installed")]
+    public void AnIfTestingTheHostSaysItAndIsDeleted(bool installed, string said)
+    {
+        var rig = Airlock(out var sequence);
+        sequence.Steps.Clear();
+        sequence.Steps.Add(new If(new HostTest { Namespace = "gearbox.lifts", Installed = installed }));
+        sequence.Steps.Add(new Wait(60));
+        sequence.Steps.Add(new EndIf());
+        sequence.Steps.Add(new Wait(30));
+        rig.Editor.Program.Edited();
+        rig.Tick();
+
+        var row = rig.Editor.StepRows()[0];
+        var part = Assert.IsType<HostSlot>(Assert.Single(row.Slots));
+        Assert.Equal(said, SentenceText.InStep(rig.World, part));
+
+        row.Deletes!.Execute();
+        rig.Tick();
+        rig.Editor.PressAnswer(rig.Texts.SequenceDeleteSteps);
+        rig.Tick();
+
+        Assert.Equal(30, Assert.IsType<Wait>(Assert.Single(sequence.Steps)).Ticks);
     }
 
     /// <summary>Deleting an if can take the steps in it with it.</summary>
@@ -417,7 +444,7 @@ public class IfStepTests
     static Comparison Closed(Simulation rig)
     {
         var door = rig.World.Entities.First(entity => entity.Name == "Airlock Outer Door");
-        var test = new Comparison { MemberId = "status", Provider = "ext", Value = Literal.Name("closed") };
+        var test = new Comparison { MemberId = "status", Provider = "sprocket", Value = Literal.Name("closed") };
         test.Targets.Add(rig.Editor.Program.Declare(rig.World, door).Name);
         return test;
     }

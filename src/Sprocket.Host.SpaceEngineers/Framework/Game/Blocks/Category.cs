@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
         /// How the machine is set up to behave: what it does when nobody tells it, and what it was
         /// tuned to when it was built.
         /// </summary>
-        Behaviour,
+        Behavior,
 
         /// <summary>Who is using it now.</summary>
         Usage,

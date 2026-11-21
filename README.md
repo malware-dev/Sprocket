@@ -30,8 +30,9 @@ Keep **blueprints** of your logic systems in the library, and share them, whethe
 your faction, or the entire system.
 
 The mod API gives no way to share them through the Workshop, so sharing happens within a world. To share outside the
-game, share a grid blueprint holding the logic, or the blueprint files themselves, which live in the game's Storage folder
-(`%AppData%\SpaceEngineers\Storage` by default).
+game, open the **Share** menu on a logic system or a blueprint and pick **Copy as text**, or **Copy compact**, which is
+small enough to post in a chat. Paste it into a programmable block's Custom Data in any world, and press the library's
+import button, beside its search box.
 
 ## Getting started
 

@@ -15,7 +15,7 @@ using VRage.ObjectBuilders;
 namespace Sprocket.Sim.Machine;
 
 /// <summary>
-/// The ship testers are given, as blocks the game would recognise.
+/// The ship testers are given, as blocks the game would recognize.
 /// </summary>
 /// <remarks>
 /// Chosen to support the three tasks the prototype is meant to answer: open the hangar when a ship
@@ -93,12 +93,8 @@ public sealed class Rig
     /// <summary>Gives the construct the game's items in <paramref name="stock" />: the mod lists them, and each block's inventories take what its definition says, on the blocks welded on already and on those to come.</summary>
     public Rig Stocked(GameStock stock)
     {
-        // The game registers its kinds of object by name as it starts, which reading an item's kind from its name needs:
-        // ores, ingots, components and tools in one assembly, bottles, datapads and seeds in the other.
-        MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
-        MyObjectBuilderType.RegisterFromAssembly(typeof(MyObjectBuilder_Refinery).Assembly);
-
         Stock = stock;
+        RegisterKinds();
         foreach (var fitting in Fitted)
         {
             if (fitting is Stockroom room)
@@ -429,6 +425,18 @@ public sealed class Rig
         return Weld(new Door(id, name, Type<MyObjectBuilder_Door>(), "LargeBlockDoor", "Door"));
     }
 
+    /// <summary>A connector, named, unlocked, with the game's own type behind it.</summary>
+    public Coupling Connector(long id, string name)
+    {
+        return Weld(new Coupling(id, name, Type<MyObjectBuilder_ShipConnector>(), "Connector", "Connector"));
+    }
+
+    /// <summary>A magnetic plate, named, unlocked, with the game's own type behind it.</summary>
+    public Clamp MagneticPlate(long id, string name)
+    {
+        return Weld(new Clamp(id, name, Type<MyObjectBuilder_LandingGear>(), "LargeBlockSmallMagneticPlate", "Magnetic Plate"));
+    }
+
     /// <summary>A door of the game's subtype <paramref name="subtype" />, named.</summary>
     public Door Door(long id, string name, string subtype)
     {
@@ -451,6 +459,12 @@ public sealed class Rig
     public Vent Vent(long id, string name)
     {
         return Weld(new Vent(id, name, Type<MyObjectBuilder_AirVent>(), "SmallAirVent", "Air Vent"));
+    }
+
+    /// <summary>An air vent, named, of the game's <paramref name="subtype" />, such as "" for the large grid's.</summary>
+    public Vent Vent(long id, string name, string subtype)
+    {
+        return Weld(new Vent(id, name, Type<MyObjectBuilder_AirVent>(), subtype, "Air Vent"));
     }
 
     /// <summary>A button panel, named, with as many buttons as asked for.</summary>
@@ -724,6 +738,9 @@ public sealed class Rig
     /// <summary>The block Sprocket runs in, which is what the mod is handed.</summary>
     public Programmable Sprocket { get; private set; }
 
+    /// <summary>The name the game gives the player at this machine, which a blueprint made here names as its author: the user's own unless set.</summary>
+    public string PlayerName { get; set; } = Environment.UserName;
+
     /// <summary>Every block on every grid of the construct.</summary>
     public IReadOnlyList<Fitting> Fitted
     {
@@ -762,6 +779,14 @@ public sealed class Rig
         _grid.Journal.Clear();
     }
 
+    /// <summary>Registers the game's kinds of object by name, as the game does at start, so a block type or an item's kind reads from its name.</summary>
+    /// <remarks>Ores, ingots, components and tools are in one assembly; blocks, bottles, datapads and seeds in the other.</remarks>
+    static void RegisterKinds()
+    {
+        MyObjectBuilderType.RegisterFromAssembly(typeof(VRage.Game.MyObjectBuilder_Ingot).Assembly);
+        MyObjectBuilderType.RegisterFromAssembly(typeof(MyObjectBuilder_Refinery).Assembly);
+    }
+
     /// <summary>
     /// Puts the harness behind the statics the mod reaches the world through.
     /// </summary>
@@ -785,6 +810,8 @@ public sealed class Rig
 
         // The game's log, as the game makes it at start. This one is never opened, so it takes every line and keeps none.
         MyLog.Default ??= new MyLog();
+
+        RegisterKinds();
 
         MyAPIGateway.GridGroups = Pretend.To<IMyGridGroups>()
             .Does("GetGroup", arguments =>
@@ -812,7 +839,7 @@ public sealed class Rig
             .Done();
 
         MyAPIGateway.Multiplayer = Pretend.To<IMyMultiplayer>()
-            .Gives("MyName", () => Environment.UserName)
+            .Gives("MyName", () => PlayerName)
             .Gives("IsServer", () => true)
             .Done();
 

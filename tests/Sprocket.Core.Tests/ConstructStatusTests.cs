@@ -53,7 +53,7 @@ public class ConstructStatusTests
         system.Name = name;
         system.Enabled = true;
 
-        var opened = SignalTrigger.Written("ext", "finishes_opening");
+        var opened = SignalTrigger.Written("sprocket", "finishes_opening");
         opened.Sources.Add(ship.Ref(watches));
 
         var sequence = ship.Program.AddSequence(system, opened);

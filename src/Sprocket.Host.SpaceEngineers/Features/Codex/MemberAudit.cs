@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                 if (forEvents || forTests)
                     continue;
 
-                foreach (var field in _editor.Fields(selection, offers.Ids[at], offers.Forms[at]))
+                foreach (var field in _editor.Fields(selection, offers.Keys[at], offers.Forms[at]))
                 {
                     // A value's box for its new value goes under the value's own name, and the value's text covers it.
                     if (!string.Equals(field.Name, name, StringComparison.OrdinalIgnoreCase) && _editor.Codex.Option(kind, field.Name) == null)

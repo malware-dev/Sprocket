@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Wiring;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs;
@@ -23,17 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
 
         /// <summary>
-        /// What a trigger does: run a sequence, stop one, or the one thing it does itself.
+        /// What a trigger does: run a sequence or stop one.
         /// </summary>
         /// <remarks>
         /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
         /// </remarks>
         public static string Runs(Bindings bindings, AutomationSystem system, Trigger trigger, SystemInstance through)
         {
-            var act = trigger.Acts;
-            if (act != null)
-                return Action(bindings, act, through, false);
-
             Sequence sequence = system?.FindSequence(trigger.Runs);
             if (sequence == null)
                 return trigger.Stops ? "stops a sequence that was deleted" : "runs a sequence that was deleted";
@@ -69,17 +64,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                return $"Every {TimeText.Rate(every.Interval)}";
+                return $"Every {Lasting(every.Interval, every.IntervalSetting, through, true)}";
 
             // A signal trigger naming nothing is answered from the construct's toolbars, so the line says so.
             return trigger is SignalTrigger ? "When something on this construct starts it" : SentenceText.Empty;
         }
 
 
-        /// <summary>The words for the moment <paramref name="eventId" /> on <paramref name="sources" />, or an unfilled gap.</summary>
-        static string Happening(Bindings bindings, string eventId, IList<string> sources)
+        /// <summary>The words for the moment <paramref name="key" /> names on <paramref name="sources" />, or an unfilled gap.</summary>
+        static string Happening(Bindings bindings, MemberKey key, IList<string> sources)
         {
-            var happening = Vocabulary.Find(Vocabulary.EventsFor(bindings, sources), eventId);
+            var happening = Vocabulary.Find(Vocabulary.EventsFor(bindings, sources), key);
             return happening == null ? SentenceText.Empty : happening.Text;
         }
 
@@ -186,6 +181,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
             if (fault.Problem == SequenceProblem.EmptySlot)
                 return Template.Fill(texts.ProblemEmptySlot, "slot", fault.Which);
 
+            if (fault.AwaitsNamespace)
+                return Template.Fill(texts.ProblemUninstalled, "namespace", fault.Which);
+
             if (fault.Problem == SequenceProblem.NeverTriggered)
                 return Unstarted(texts, fault.Unwired, fault.Which);
 
@@ -197,6 +195,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
             if (fault.Problem == SequenceProblem.Unfilled && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(fault.Step == SequenceFault.Trigger ? texts.ProblemTriggerOptionMissing : texts.ProblemOptionMissing, "name", fault.Which);
+
+            if (fault.Problem == SequenceProblem.Ambiguous)
+                return Template.Fill(texts.ProblemAmbiguous, "name", fault.Which);
 
             if (fault.Problem == SequenceProblem.Mistyped && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(fault.Step == SequenceFault.Trigger ? texts.ProblemTriggerOptionWrong : texts.ProblemOptionWrong, "name", fault.Which);
@@ -227,20 +228,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
         public static string Failing(Texts texts, SequenceFault fault, Sequence sequence)
         {
-            return Failing(texts, fault, sequence.HasName ? sequence.Name : "", sequence.IsAlone, Row(sequence, fault.Step));
+            return Failing(texts, fault, sequence.HasName ? sequence.Name : "", Row(sequence, fault.Step));
         }
 
         /// <summary>
         /// What is wrong and where, for a line about the whole of a logic system: in the sequence called
         /// <paramref name="sequence" />, or one with no name where it is empty, at the step whose row is <paramref name="row" />,
-        /// or none where it is 0, or in a trigger's own act where <paramref name="alone" />.
+        /// or none where it is 0.
         /// </summary>
-        public static string Failing(Texts texts, SequenceFault fault, string sequence, bool alone, int row)
+        public static string Failing(Texts texts, SequenceFault fault, string sequence, int row)
         {
-            // A trigger's own act has no steps to count, and no name.
             var problem = Problem(texts, fault, null);
-            if (alone)
-                return problem;
 
             var step = row.ToString(CultureInfo.InvariantCulture);
             if (!string.IsNullOrEmpty(sequence))
@@ -330,6 +328,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 return Template.Fill(texts.StoppedBlockReplaced, "block", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Unfilled)
                 return Template.Fill(texts.StoppedOptionMissing, "name", block);
+            if (problem == SequenceProblem.Ambiguous)
+                return Template.Fill(texts.StoppedAmbiguous, "name", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Mistyped)
                 return Template.Fill(texts.StoppedOptionWrong, "name", block);
             if (problem == SequenceProblem.MissingFacet)
@@ -436,6 +436,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         }
 
 
+        /// <summary>
+        /// A length of time a step or trigger takes, as a <paramref name="rate" /> after "every" or as a duration:
+        /// <paramref name="length" />, or where it takes the setting <paramref name="setting" />, the length
+        /// <paramref name="through" /> gives it, and the setting's name where it gives none.
+        /// </summary>
+        static string Lasting(Duration length, string setting, SystemInstance through, bool rate)
+        {
+            Literal given;
+            if (setting.Length > 0)
+            {
+                if (through == null || !through.Gives(setting, out given) || given.Kind != ValueKind.Duration)
+                    return setting;
+
+                length = given.Length;
+            }
+
+            return rate ? TimeText.Rate(length) : TimeText.Duration(length);
+        }
+
         /// <summary>One numbered line of the sequence, in the words its row reads in; the line closing an if says nothing.</summary>
         /// <remarks>
         /// Its blocks are found through <paramref name="bindings" /> as <paramref name="through" /> fills the slots, or as written
@@ -446,7 +465,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         {
             var wait = step as Wait;
             if (wait != null)
-                return $"{SentenceText.WaitWord} {TimeText.Duration(wait.Length)}";
+                return $"{SentenceText.WaitWord} {Lasting(wait.Length, wait.Setting, through, false)}";
 
             var run = step as Model.Run;
             if (run != null)
@@ -465,7 +484,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                     return "otherwise";
 
                 var compared = branch.Test as Comparison;
-                var tested = compared != null ? Tested(bindings, compared, through, slotted) : Tested((StateTest)branch.Test);
+                var host = branch.Test as HostTest;
+                var tested = compared != null ? Tested(bindings, compared, through, slotted)
+                    : host != null ? SentenceText.Installed(host) : Tested((StateTest)branch.Test);
                 return (step is If ? "if " : "otherwise if ") + tested;
             }
 
@@ -474,7 +495,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
             var abort = step as Abort;
             if (abort != null)
-                return $"{SentenceText.AbortWord} {SentenceText.Given(ArgumentsSlot.Aborting(abort.Message, abort.Level, null))}";
+            {
+                Literal given;
+                var answered = abort.Setting.Length > 0 && through != null && through.Gives(abort.Setting, out given) && given.Kind == ValueKind.Text;
+                var setting = answered ? "" : abort.Setting;
+                return $"{SentenceText.AbortWord} {SentenceText.Given(ArgumentsSlot.Aborting(abort.MessageIn(through), setting, abort.Level, null))}";
+            }
 
             var set = step as SetState;
             if (set != null)
@@ -495,7 +521,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
         static string Tested(Bindings bindings, Comparison test, SystemInstance through, bool slotted)
         {
             var targets = SystemInstance.Through(through, test.Targets);
-            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Provider, test.MemberId);
+            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Key);
             var shape = TestShape.Of(test.Quantifier, value == null || !value.IsStatus, slotted || targets.Count > 1, slotted, ComparisonQuestion.Join(value, test.Arguments));
             var blocks = Named(bindings, targets, shape.JoinsAll, slotted ? test.Targets : null);
             if (value == null)
@@ -509,23 +535,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
         /// <summary>
         /// What <paramref name="when" /> compares on the blocks <paramref name="targets" />, as a sentence reads it: the blocks
-        /// and the state they are read for, for one of Sprocket's own, or the value on the blocks and what it is compared with.
+        /// and the state they are read for, for a host's state, or the value on the blocks and what it is compared with.
         /// </summary>
         static string Compared(Bindings bindings, WhenTrigger when, IList<string> targets, IList<string> slots)
         {
             var blocks = Named(bindings, targets, when.Quantifier != Quantifier.Any, slots);
-            if (when.Provider == BlockKinds.Own)
+            bool inState;
+            var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), when.Key, when.Relation, when.Value, out inState);
+            if (state != null)
             {
-                bool inState;
-                var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), when.EventId, when.Relation, when.Value, out inState);
-                if (state != null)
-                {
-                    var said = inState ? state.State : state.Unstate;
-                    return $"{blocks} {(when.Quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said)}";
-                }
+                var said = inState ? state.State : state.Unstate;
+                return $"{blocks} {(when.Quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said)}";
             }
 
-            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), when.Provider, when.EventId);
+            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), when.Key);
             var shape = TestShape.Of(when.Quantifier, true, slots != null || targets.Count > 1, slots != null, ComparisonQuestion.Join(value, when.Arguments));
             var read = Named(bindings, targets, shape.JoinsAll, slots);
 
@@ -551,12 +574,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
             return slots != null ? SentenceText.Slots(slots) : SentenceText.Named(bindings, targets, requiresAll);
         }
 
-        /// <summary>Whether <paramref name="when" /> is a value of Sprocket's own coming to be what one of its signals says it becomes, which reads as that signal.</summary>
+        /// <summary>Whether <paramref name="when" /> is a host's value coming to be what one of its signals says it becomes, which reads as that signal.</summary>
         static bool Watched(Bindings bindings, WhenTrigger when, IList<string> sources)
         {
             bool inState;
-            return when.Provider == BlockKinds.Own
-                   && Vocabulary.Change(Vocabulary.EventsFor(bindings, sources), when.EventId, when.Relation, when.Value, out inState) != null
+            return Vocabulary.Change(Vocabulary.EventsFor(bindings, sources), when.Key, when.Relation, when.Value, out inState) != null
                    && inState;
         }
 

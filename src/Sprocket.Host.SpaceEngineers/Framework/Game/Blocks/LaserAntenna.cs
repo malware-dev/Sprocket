@@ -16,14 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// </remarks>
     public sealed partial class LaserAntenna : Capability
     {
-        static readonly string[] Links = { "idle", "turning", "searching", "connecting", "connected", "out-of-range" };
-
         static readonly Reading Idle = Reading.Of<IMyLaserAntenna>(antenna => antenna.Status == MyLaserAntennaStatus.Idle);
 
         static readonly Reading Connected =
             Reading.Of<IMyLaserAntenna>(antenna => antenna.Status == MyLaserAntennaStatus.Connected);
 
-        static readonly OwnValue Link = OwnValue.OneOf<IMyLaserAntenna>(Links, antenna => Position(antenna.Status));
+        static readonly OwnValue Link = OwnValue.OneOf<IMyLaserAntenna>(ChoiceTypes.LinkStatus, antenna => Position(antenna.Status));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

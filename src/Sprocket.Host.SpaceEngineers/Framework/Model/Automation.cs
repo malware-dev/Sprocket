@@ -576,7 +576,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var every = trigger as EveryTrigger;
             var when = trigger as WhenTrigger;
             if (every != null)
-                copy = new EveryTrigger(every.Interval);
+                copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting };
             else if (when != null)
             {
                 var made = new WhenTrigger(when.EventId);
@@ -584,7 +584,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 made.Relation = when.Relation;
                 made.Value = when.Value;
                 made.Interval = when.Interval;
-                made.Provider = when.Provider;
+                made.IntervalSetting = when.IntervalSetting;
+                made.Key = when.Key;
                 for (var i = 0; i < when.Arguments.Count; i++)
                     made.Arguments.Add(when.Arguments[i]);
 
@@ -594,7 +595,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             {
                 var signal = (SignalTrigger)trigger;
                 var made = new SignalTrigger(signal.EventId);
-                made.Provider = signal.Provider;
+                made.Key = signal.Key;
                 made.At = signal.At;
                 copy = made;
             }
@@ -613,7 +614,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             }
 
             copy.Annotation = trigger.Annotation;
-            copy.Does = Copied(trigger.Does);
+            copy.Does = Copied(trigger.Does) as Run;
             return copy;
         }
 
@@ -623,9 +624,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var act = step as Act;
             if (act != null)
             {
-                var copy = new Act(act.ActionId);
+                var copy = new Act(act.Key);
                 copy.Form = act.Form;
-                copy.Provider = act.Provider;
                 for (var i = 0; i < act.Targets.Count; i++)
                     copy.Targets.Add(act.Targets[i]);
                 for (var i = 0; i < act.Arguments.Count; i++)
@@ -635,7 +635,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var wait = step as Wait;
             if (wait != null)
-                return Annotated(new Wait(wait.Ticks), step);
+                return Annotated(new Wait(wait.Ticks) { Setting = wait.Setting }, step);
 
             var run = step as Run;
             if (run != null)
@@ -646,7 +646,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
             var abort = step as Abort;
             if (abort != null)
-                return Annotated(new Abort { Message = abort.Message, Level = abort.Level }, step);
+                return Annotated(new Abort { Message = abort.Message, Setting = abort.Setting, Level = abort.Level }, step);
 
             var opens = step as If;
             if (opens != null)
@@ -682,15 +682,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             if (compared != null)
                 return Copied(compared);
 
-            return ((StateTest)test).Copy();
+            var host = test as HostTest;
+            return host != null ? (BranchTest)host.Copy() : ((StateTest)test).Copy();
         }
 
         /// <summary>A comparison again, deep enough that editing the copy cannot reach the original.</summary>
         static Comparison Copied(Comparison test)
         {
             var copy = new Comparison();
-            copy.MemberId = test.MemberId;
-            copy.Provider = test.Provider;
+            copy.Key = test.Key;
             copy.Quantifier = test.Quantifier;
             copy.Relation = test.Relation;
             copy.Value = test.Value;

@@ -58,28 +58,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             _reconciled = int.MinValue;
         }
 
-        readonly List<Sequence> _runs = new List<Sequence>();
-
-        /// <summary>The sequences of <paramref name="system" />, and the runtime's sequence for each trigger that acts itself.</summary>
-        public List<Sequence> Runs(AutomationSystem system)
-        {
-            _runs.Clear();
-
-            var sequences = system.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
-                _runs.Add(sequences[i]);
-
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var alone = _runner.Alone(system, triggers[i]);
-                if (alone != null)
-                    _runs.Add(alone);
-            }
-
-            return _runs;
-        }
-
         List<WantedWiring> _wanted = new List<WantedWiring>();
 
         List<WantedWiring> _wanting = new List<WantedWiring>();
@@ -136,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
             for (var s = 0; s < _program.Systems.Count; s++)
             {
                 AutomationSystem system = _program.Systems[s];
-                var sequences = Runs(system);
+                var sequences = system.Sequences;
                 var instances = system.Uses;
 
                 foreach (var sequence in sequences)
@@ -184,7 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Wiring
                 want.PanelId = PanelId(blocks[i]);
                 want.Toolbar = at.Toolbar;
                 want.Slot = slot;
-                want.Key = needed.Acts != null ? SlotKeys.KeyOf(system, instance, needed) : SlotKeys.KeyOf(system, instance, sequence, needed.Stops);
+                want.Key = SlotKeys.KeyOf(system, instance, sequence, needed.Stops);
                 want.Reference = blocks[i];
                 want.Start = UnstartableSequences.Key(sequence.Id, instance);
                 want.Name = needed.IsWritten ? null : Shown(system, needed.Part);

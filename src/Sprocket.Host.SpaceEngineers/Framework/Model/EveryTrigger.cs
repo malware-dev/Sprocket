@@ -23,5 +23,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 
         /// <summary>How long between one start and the next, in ticks.</summary>
         public int IntervalTicks => Interval.Ticks;
+
+        /// <summary>The setting whose length of time is how long between one start and the next, each installation's own, or empty where <see cref="Interval" /> says.</summary>
+        public string IntervalSetting { get; set; } = "";
     }
 }

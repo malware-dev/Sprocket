@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -11,9 +12,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
     /// <summary>
     /// Writes script text: statements, blocks, lists and annotations.
     /// </summary>
+    /// <remarks>
+    /// A name spelled like a reserved keyword is quoted wherever it stands, and one spelled like a contextual keyword only
+    /// where its construct reads that keyword.
+    /// </remarks>
     public sealed class ScriptWriter
     {
         const string Indent = "    ";
+
+        // The contextual keywords each place reads, which a name standing there and spelled like one is quoted against;
+        // immutable tables, read by every write.
+        static readonly Keyword[] Testing = { Keyword.Any, Keyword.All, Keyword.Sum, Keyword.Average };
+        static readonly Keyword[] Expecting = { Keyword.Signal };
 
         readonly StringBuilder _text = new StringBuilder();
         int _depth;
@@ -154,6 +164,42 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
+        /// <summary>A name where a test starts: quoted also where it is spelled like <c>any</c>, <c>all</c>, <c>sum</c> or <c>average</c>, which a test of blocks starts with.</summary>
+        public ScriptWriter Tested(string id)
+        {
+            return Among(id, Testing);
+        }
+
+        /// <summary>A name after <c>expects</c>: quoted also where it is spelled <c>signal</c>, which a slot answered by a signal expects.</summary>
+        public ScriptWriter Expected(string id)
+        {
+            return Among(id, Expecting);
+        }
+
+        /// <summary>A namespace where a test starts, <c>gearbox.lifts</c>, each part spelled on its own, and one of one part as <see cref="Tested" /> spells it.</summary>
+        public ScriptWriter Namespace(string space)
+        {
+            if (space.IndexOf('.') < 0)
+                return Tested(space);
+
+            Space();
+            var dot = space.LastIndexOf('.');
+            SpellHost(_text, space.Substring(0, dot), space.Substring(dot + 1));
+            return this;
+        }
+
+        /// <summary>A name where its construct also reads one of <paramref name="standing" />: quoted where it is spelled like one, or cannot be bare.</summary>
+        ScriptWriter Among(string id, Keyword[] standing)
+        {
+            Space();
+            if (Array.IndexOf(standing, Keywords.Find(id)) >= 0)
+                Quote(_text, id, '\'');
+            else
+                Write(id);
+
+            return this;
+        }
+
         /// <summary>
         /// One of the format's own words, written bare.
         /// </summary>
@@ -172,7 +218,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A thing of the type <paramref name="type" /> on some blocks, by number from 1: <c>ext.screen(1) on [ board ]</c>.</summary>
+        /// <summary>A thing of the type <paramref name="type" /> on some blocks, by number from 1: <c>sprocket.get_screen(1) on [ board ]</c>.</summary>
         /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
         public ScriptWriter Facet(HostType type, IList<string> blocks, int number)
         {
@@ -190,7 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
-        /// <summary>A signal sent from a toolbar slot on some blocks: <c>ext.toolbar(1, 1, 4) on [ panel1 ]</c>.</summary>
+        /// <summary>A signal sent from a toolbar slot on some blocks: <c>sprocket.toolbar(1, 1, 4) on [ panel1 ]</c>.</summary>
         /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
         public ScriptWriter Signal(IList<string> blocks, ToolbarSlot at)
         {
@@ -235,6 +281,33 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             Space();
             Spell(_text, space, name);
             return this;
+        }
+
+        /// <summary>A thing with its kind, <c>side(inside)</c>, the kind in <paramref name="space" /> where it is not empty: <c>sprocket.door_status(closed)</c>.</summary>
+        public ScriptWriter Kinded(string space, string kind, string thing)
+        {
+            Space();
+            Kind(_text, space, kind, thing);
+            return this;
+        }
+
+        /// <summary>A choice with its type, and the type with its kind: <c>type(side)(inside)</c>.</summary>
+        public ScriptWriter Typed(string type, string choice)
+        {
+            Space();
+            Kind(_text, "", Keywords.Name(Keyword.Type), type);
+            _text.Append('(');
+            Spell(_text, choice);
+            _text.Append(')');
+            return this;
+        }
+
+        /// <summary>How a thing with its kind, <c>state(where)</c>, is spelled, exactly as the writer spells it.</summary>
+        public static string KindSpelling(string kind, string thing)
+        {
+            var spelt = new StringBuilder();
+            Kind(spelt, "", kind, thing);
+            return spelt.ToString();
         }
 
         /// <summary>A whole number.</summary>
@@ -419,11 +492,55 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             }
 
             Spell(into, space);
+
             into.Append('.');
             Spell(into, name);
         }
 
-        /// <summary>A name: bare where it can be, in single quotes where it cannot.</summary>
+        /// <summary>A name in one of the host's namespaces, whose parts are joined by dots in <paramref name="space" />, each part spelled on its own.</summary>
+        static void SpellHost(StringBuilder into, string space, string name)
+        {
+            if (!string.IsNullOrEmpty(space))
+            {
+                foreach (var part in space.Split('.'))
+                {
+                    Spell(into, part);
+                    into.Append('.');
+                }
+            }
+
+            Spell(into, name);
+        }
+
+        /// <summary>How a name in one of the host's namespaces is spelled, <c>malforge.hover_repulsors.lift</c>, exactly as the writer spells it.</summary>
+        public static string HostSpelling(string space, string name)
+        {
+            var spelt = new StringBuilder();
+            SpellHost(spelt, space, name);
+            return spelt.ToString();
+        }
+
+        /// <summary>A name in one of the host's namespaces, <c>malforge.hover_repulsors.lift</c>, or the name alone where it has none.</summary>
+        public ScriptWriter HostQualified(string space, string name)
+        {
+            Space();
+            SpellHost(_text, space, name);
+            return this;
+        }
+
+        /// <summary>Writes <paramref name="thing" /> with its kind, a keyword such as <c>type</c> written bare as the kind it is.</summary>
+        static void Kind(StringBuilder into, string space, string kind, string thing)
+        {
+            if (string.IsNullOrEmpty(space) && Kinds.IsKeyword(Keywords.Find(kind)))
+                into.Append(kind);
+            else
+                SpellHost(into, space, kind);
+
+            into.Append('(');
+            Spell(into, thing);
+            into.Append(')');
+        }
+
         static void Spell(StringBuilder into, string id)
         {
             if (Keywords.Bare(id))

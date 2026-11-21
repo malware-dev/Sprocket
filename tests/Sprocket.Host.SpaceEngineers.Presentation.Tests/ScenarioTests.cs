@@ -10,6 +10,8 @@ using Sprocket.Sim.Blueprints;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Scenarios;
 using Xunit;
+using LandingGearMode = SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode;
+using MyShipConnectorStatus = Sandbox.ModAPI.Ingame.MyShipConnectorStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -158,6 +160,45 @@ public class ScenarioTests
             Run(sim);
             Assert.Equal(Sandbox.ModAPI.Ingame.DoorStatus.Closed, scenario.Door.Status);
         }
+    }
+
+    /// <summary>Locking the dock's connector and plate leaves both lights on, and unlocking each switches its own light off.</summary>
+    [Fact]
+    public void TheDockUnlocksSwitchEachLightOffAsItsBlockUnlocks()
+    {
+        var scenario = new DockUnlocks();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+        scenario.Connector.Lock(MyShipConnectorStatus.Connectable);
+        scenario.Plate.Lock(LandingGearMode.ReadyToLock);
+        Run(sim);
+
+        scenario.Connector.Lock(MyShipConnectorStatus.Connected);
+        scenario.Plate.Lock(LandingGearMode.Locked);
+        Run(sim);
+        Assert.True(scenario.ConnectorLight.Enabled && scenario.PlateLight.Enabled, "a light went off as its block locked");
+
+        scenario.Connector.Lock(MyShipConnectorStatus.Connectable);
+        Run(sim);
+        Assert.False(scenario.ConnectorLight.Enabled, "the connector unlocked and its light stayed on");
+        Assert.True(scenario.PlateLight.Enabled, "the plate's light went off as the connector unlocked");
+
+        scenario.Plate.Lock(LandingGearMode.Unlocked);
+        Run(sim);
+        Assert.False(scenario.PlateLight.Enabled, "the plate unlocked and its light stayed on");
+    }
+
+    /// <summary>The cockpit's first toolbar slot, pressed as a seated player presses it, switches the light off.</summary>
+    [Fact]
+    public void TheCockpitPressSwitchesTheLightOff()
+    {
+        var scenario = new CockpitPress();
+        var sim = scenario.Build(BlockDefinitions.FromGame()).Sim;
+        Assert.True(scenario.Light.Enabled, "the light is off before the press");
+
+        scenario.Cockpit.Press(0);
+        Run(sim);
+
+        Assert.False(scenario.Light.Enabled, "pressing the cockpit's first slot left the light on");
     }
 
     /// <summary>Store Button moves the ingots out of the refinery's output, its second inventory, into the cargo container.</summary>

@@ -14,9 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
     /// <remarks>The game raises its merge state changes on the server alone.</remarks>
     public sealed partial class MergeBlock : Capability
     {
-        static readonly string[] Statuses = { "merged", "ready-to-merge", "nothing-in-reach", "not-working" };
-
-        static readonly OwnValue State = OwnValue.OneOf<IMyShipMergeBlock>(Statuses, merge => Position(merge.State));
+        static readonly OwnValue State = OwnValue.OneOf<IMyShipMergeBlock>(ChoiceTypes.MergeStatus, merge => Position(merge.State));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

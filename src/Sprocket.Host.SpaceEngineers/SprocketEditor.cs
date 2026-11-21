@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
@@ -112,6 +113,9 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>How a trigger is made, changed or copied.</summary>
         public TriggerQuestions Starts => _starts;
 
+        /// <summary>The callouts pointing out what arrived in a release, which the player dismisses.</summary>
+        public CalloutBook Callouts { get; } = new CalloutBook();
+
         /// <summary>Moving logic systems between the construct and the library.</summary>
         public LibraryTransfers Holdings => _holdings;
 
@@ -200,6 +204,12 @@ namespace Sprocket.Host.SpaceEngineers
 
         /// <summary>The id of the block the editor was opened from, or 0 where nothing says.</summary>
         public long OpenedFrom { get; set; }
+
+        /// <summary>Answers whether this player is in a faction, or is null where nothing says.</summary>
+        public Func<bool> IsInFaction { get; set; }
+
+        /// <summary>Reads the Custom Data of the block the editor was opened from, or null where there is no such block.</summary>
+        public Func<string> OpenedFromData { get; set; }
 
         /// <summary>
         /// Whether <paramref name="system" /> is listed from the block the editor was opened on: always, unless it is kept to
@@ -358,6 +368,14 @@ namespace Sprocket.Host.SpaceEngineers
             _screen.Ask(question, arguments, false);
         }
 
+        /// <summary>Gives <paramref name="system" /> the setting <paramref name="setting" />, as one change.</summary>
+        public void MakeSetting(AutomationSystem system, Part setting)
+        {
+            var reslot = new Reslot(system, null);
+            reslot.Make(setting, new List<string>());
+            Do(system, new ChangeSlots(ChangeKind.AddSlot, reslot));
+        }
+
         /// <summary>Puts the question <paramref name="question" /> under the control somebody just pressed, to be answered before anything else.</summary>
         public void AskHere(string question)
         {
@@ -440,10 +458,10 @@ namespace Sprocket.Host.SpaceEngineers
             Settle();
         }
 
-        /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
-        public List<Field> Fields(IList<long> entityIds, string actionId, ReachKind form)
+        /// <summary>What the values of the member <paramref name="key" /> names ask for, one per value, asked of the blocks it acts on.</summary>
+        public List<Field> Fields(IList<long> entityIds, MemberKey key, ReachKind form)
         {
-            return Vocabulary.Fields(_world, entityIds, actionId, form);
+            return Vocabulary.Fields(_world, entityIds, key, form);
         }
 
         /// <summary>
@@ -1002,6 +1020,7 @@ namespace Sprocket.Host.SpaceEngineers
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(CommandKind.Back, Leave) : null;
             _screen.Library = page.Library;
+            _screen.Shares = page.Shares;
             _screen.Flip = page.CanSwitch ? Act(CommandKind.Switch, () => page.Switch(!page.SwitchIsOn)) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -134,7 +135,7 @@ public class ArgumentsColumnTests
         var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
         var speed = 0;
         door.Kind.WithValue("speed", "speed",
-                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new[] { "low", "middle", "high" }, _ => speed)
+                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new ChoiceType(BlockKinds.Own, "speed", "low", "middle", "high"), _ => speed)
                     .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
             .Looked("A test value.");
         screen.Editor.PressBlock("Airlock Inner Door");
@@ -169,7 +170,7 @@ public class ArgumentsColumnTests
     [InlineData("208 182 press color")]
     public void LeavingAsksAboutAnyChange(string change)
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 25 62");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 1394 72 " + change + " 25 62");
 
         Assert.True(screen.Scene.IsQuestioning, "leaving asked nothing");
         Assert.True(screen.Shows("Save your changes?"), "the question is not about changes");
@@ -179,7 +180,7 @@ public class ArgumentsColumnTests
     [Fact]
     public void LeavingAsksNothingWhereNothingChanged()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + Values + " escape");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 1394 72 " + Values + " escape");
 
         Assert.False(screen.Scene.IsQuestioning, "leaving asked about 5 shown as 5.0");
         Assert.Equal("Sequence 1", screen.Ended);

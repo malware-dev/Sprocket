@@ -146,7 +146,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
 
                 for (var p = 0; p < parts.Count && set.Part == null; p++)
                 {
-                    if (!parts[p].IsSignal && parts[p].Holds == "" && !_taken.Contains(parts[p].Id) &&
+                    if (!parts[p].IsSignal && !parts[p].IsSetting && parts[p].Holds == "" && !_taken.Contains(parts[p].Id) &&
                         ListComparison.SameAnyOrder(_shown.FilledWith(parts[p].Id), set.Blocks))
                         set.Part = parts[p];
                 }
@@ -222,7 +222,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             var parts = _system.Parts;
             for (var p = 0; p < parts.Count; p++)
             {
-                if (!used.Contains(parts[p].Id))
+                // A setting holds no blocks, so a pick never answers it, and it stays wherever it is named.
+                if (!parts[p].IsSetting && !used.Contains(parts[p].Id))
                     reslot.Drop(parts[p]);
             }
         }
@@ -233,7 +234,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             for (var n = _system.SlotsAlike(false, "") + _made + 1; ; n++)
             {
                 var name = _numbered(n);
-                if (!_system.TakesInAnyCase(name) && !Taken(name))
+                if (_system.FindPartInAnyCase(name) == null && !Taken(name))
                     return name;
             }
         }

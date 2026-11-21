@@ -760,6 +760,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Disabled = { Tint = Palette.Dim }
         };
 
+        /// <summary>The mark choosing where a value comes from: an <see cref="Icon" />, lit in the link's color while a setting gives the value.</summary>
+        public static readonly IStyle<Glyph> Source = new GlyphStyle(Icon)
+        {
+            [LookStates.Chosen] = { Tint = Palette.Link }
+        };
+
         /// <summary>The words of a codex page in a tip: its terms brighter than the words around them, lit and hovered while the tip is pinned.</summary>
         public static readonly IStyle<RichText> TipPage = new RichTextStyle(Tip)
         {
@@ -962,6 +968,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
         };
 
+        /// <summary>A callout: the tone every hanging thing shares, edged in the accent, its words quiet, with a tail aimed at what it points out.</summary>
+        public static readonly IStyle<CoachMark> Callout = new CoachMarkStyle(Popup)
+        {
+            Base = { Border = Palette.Accent, Padding = new Thickness(12f, 8f), Gap = 12f, MaxWidth = Sizes.Popup, BodyStyle = Tip }
+        };
+
         /// <summary>A menu hanging open from what opened it, on the tone every hanging thing shares.</summary>
         public static readonly IStyle<Menu> Menu = new MenuStyle(Popup)
         {
@@ -986,7 +998,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Disabled = { Color = Palette.Dim, Mark = Palette.Dim }
         };
 
-        /// <summary>A drop-down saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used.</summary>
+        /// <summary>A drop-down saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used, and dimmed while it cannot be changed.</summary>
         public static readonly IStyle<DropDown> ListBox = new DropDownStyle
         {
             Base =
@@ -997,7 +1009,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             },
             PointerOver = { Background = Palette.Panel, Border = Palette.Muted },
             [State.FocusVisible] = { Background = Palette.Panel, Border = Palette.Muted },
-            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem },
+            Disabled = { Color = Palette.Dim, HintColor = Palette.Dim, Arrow = Palette.Dim, Background = Palette.Well }
         };
 
         /// <summary>A color's panel hanging from the box that opened it, close under it.</summary>
@@ -1050,14 +1063,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(16f) }
         };
 
-        /// <summary>A column standing for a page of a pick, pressed anywhere down its length to turn to it.</summary>
-        public static readonly IStyle<Stack> Fold = new StackStyle
-        {
-            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(0f, 16f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click },
-            PointerOver = { Background = Palette.PanelHot },
-            [State.FocusVisible] = { Background = Palette.PanelHot }
-        };
-
 
 
         /// <summary>A quiet line under what a column asks, or about what it lists.</summary>
@@ -1073,8 +1078,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Font = MyFontEnum.White, StrongFont = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted, StrongColor = Palette.Ink }
         };
 
-        /// <summary>A box a list is narrowed by typing into.</summary>
-        public static readonly IStyle<TextBox> Search = new TextBoxStyle(Value);
+        /// <summary>A box a list is narrowed by typing into, sunk and dim while the list cannot be used.</summary>
+        public static readonly IStyle<TextBox> Search = new TextBoxStyle(Value)
+        {
+            Disabled = { Color = Palette.Dim, HintColor = Palette.Dim, Background = Palette.Well }
+        };
 
         /// <summary>The box a long list is searched from: the words and a cross clearing them, as a selector's search has.</summary>
         public static readonly IStyle<SearchBox> ListSearch = new SearchBoxStyle
@@ -1201,7 +1209,20 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             [State.FocusVisible] = { Background = Palette.PanelHot }
         };
 
-        /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens; dim on a paused step.</summary>
+        /// <summary>A box saying whether something has been chosen, with its name after it, pressed by itself and lit under the pointer.</summary>
+        public static readonly IStyle<CheckBox> NamedPickBox = new CheckBoxStyle(PickBoxPressed)
+        {
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Small, Color = Palette.Ink, WordPadding = new Thickness(12f, 0f, 0f, 0f), Padding = new Thickness(8f, 4f) },
+            Disabled = { Color = Palette.Dim, Box = Palette.Dim, Mark = Palette.Dim }
+        };
+
+        /// <summary>A list in a frame of its own, as a dialog holds one.</summary>
+        public static readonly IStyle<ScrollView> FramedList = new ScrollViewStyle(ScrollView)
+        {
+            Base = { Background = Palette.Page, Border = Palette.Line, Padding = new Thickness(4f) }
+        };
+
+        /// <summary>A mark beside words, muted: the kind of thing they name; dim on a paused step.</summary>
         public static readonly IStyle<Glyph> Waits = new GlyphStyle
         {
             Base = { Font = Symbols.Font, FontSize = TextSizes.Small, Tint = Palette.Muted },

@@ -22,6 +22,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>What it is called, or empty to leave it numbered.</summary>
         public string Name;
 
+        /// <summary>What it is called on screen, in the language the editor speaks, or null where that is <see cref="Name" />.</summary>
+        public Func<Texts, string> Worded;
+
+        /// <summary>What it is called on screen in <paramref name="texts" />' language.</summary>
+        public string Title(Texts texts)
+        {
+            return Worded != null ? Worded(texts) : Name ?? "";
+        }
+
         /// <summary>The name of the value of the same form whose word decides whether this one is asked for, or null where it always is.</summary>
         public string AskedWith;
 
@@ -46,6 +55,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
         /// <summary>Whether the value has to be given: a field that stands for nothing when it is empty.</summary>
         public bool Needed;
+
+        /// <summary>Why a value given is refused for what else it would clash with, empty where it is not, or null for no such check.</summary>
+        public Func<string, string> Refusing;
 
         /// <summary>Whether <see cref="Least" /> is a bound the value must be above, rather than one it may be.</summary>
         public bool Above;
@@ -110,8 +122,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// <summary>What may be typed into the box.</summary>
         public FieldInput Entry;
 
-        /// <summary>How many characters text written over several lines may run to, or zero for no limit: what the block itself holds.</summary>
+        /// <summary>How many characters text may run to, typed in a box or written over several lines, or zero for no limit: what the block or the game itself holds.</summary>
         public int Longest;
+
+        /// <summary>What an empty box shows, or null for nothing.</summary>
+        public string Hint;
 
         /// <summary>
         /// How many of the values behind the form this one field stands for.
@@ -144,6 +159,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// </summary>
         public IList<string> Means;
 
+        /// <summary>The host type whose choices <see cref="Words" /> are, or null where they are no host type's.</summary>
+        public ChoiceType Choices;
+
         /// <summary>What the program holds for a word somebody chose.</summary>
         public string Meaning(string word)
         {
@@ -169,6 +187,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             if (Unfilled(given))
                 return true;
 
+            // A choice written with its type, door_status(closed), is only ever one of that type's.
+            if (given.Typed != null && given.Typed != Choices)
+                return false;
+
             var words = Means ?? Words;
             if (!Open && words != null && words.Count > 0 && !words.Contains(given.Said))
                 return false;
@@ -186,6 +208,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
         /// <summary>Whether what this asks for is slots of the logic system, which a step gives as a list of names.</summary>
         public bool TakesSlots;
+
+        /// <summary>Whether its label stands above it, whatever kind of field it is, so a form that changes the kind of one keeps its lines.</summary>
+        public bool Stacked;
 
         /// <summary>Whether its words are a list searched whatever its length, for a list as long as what the game and its mods hold.</summary>
         public bool Searched;
@@ -350,7 +375,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         /// </summary>
         public string Label(Texts texts)
         {
-            string name = Name ?? "";
+            string name = Title(texts);
             string takes = Takes(texts);
 
             if (takes.Length == 0)
@@ -398,6 +423,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         {
             if (string.IsNullOrEmpty(said))
                 return Needed ? Template.Fill(texts.ValueNeeded, "name", SentenceText.Capitalised(called)) : "";
+
+            var clash = Refusing?.Invoke(said) ?? "";
+            if (clash.Length > 0)
+                return clash;
 
             // What it holds is names with commas between rather than one of its words.
             if (TakesSlots)

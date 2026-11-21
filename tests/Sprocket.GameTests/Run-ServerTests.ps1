@@ -17,7 +17,7 @@ param(
     [string]$Instance = 'E:\Data\sprocket-ds-test',
     [string]$Server = 'E:\Steam\steamapps\common\SpaceEngineersDedicatedServer',
     [string]$Branch = 'steamctg',
-    [string[]]$Scenarios = @('Sprocket Stock Watch', 'Sprocket Move Items', 'Sprocket Move Amounts', 'Sprocket Inventory Readings', 'Sprocket Refinery Moves', 'Sprocket Piston Status', 'Sprocket Script Limit', 'Sprocket Forced Door', 'Sprocket Old Airlock'),
+    [string[]]$Scenarios = @('Sprocket Stock Watch', 'Sprocket Move Items', 'Sprocket Move Amounts', 'Sprocket Inventory Readings', 'Sprocket Refinery Moves', 'Sprocket Piston Status', 'Sprocket Script Limit', 'Sprocket Forced Door', 'Sprocket Old Airlock', 'Sprocket Dock Unlocks'),
     [int]$TimeoutSeconds = 600
 )
 $ErrorActionPreference = 'Stop'
@@ -31,7 +31,7 @@ $installed = (Select-String $manifest -Pattern '"BetaKey"\s+"([^"]*)"' | Select-
 if ($installed -ne $Branch) { throw "The dedicated server is on branch '$installed', not '$Branch'." }
 
 # 2. The plugin, and the mod packed as the game would load it.
-dotnet build "$repo\tests\Sprocket.GameTests" -v q | Out-Null
+dotnet build "$repo\tests\Sprocket.GameTests" -v q -p:MdkBuildConfiguration=none | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'The test plugin did not build.' }
 $pack = Join-Path $work 'pack'
 if (Test-Path $pack) { Remove-Item $pack -Recurse -Force }

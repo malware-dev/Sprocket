@@ -107,6 +107,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return string.IsNullOrEmpty(message) ? "" : $"\"{message}\"";
         }
 
+        /// <summary>The words a test of the host says after the namespace it holds where the host has: "gearbox.lifts is installed".</summary>
+        public const string InstalledWords = "is installed";
+
+        /// <summary>The words a test of the host says after the namespace it holds where the host lacks: "gearbox.lifts is not installed".</summary>
+        public const string NotInstalledWords = "is not installed";
+
+        /// <summary>A test of the host as its row reads: "gearbox.lifts is installed".</summary>
+        public static string Installed(HostTest test)
+        {
+            return $"{test.Namespace} {(test.Installed ? InstalledWords : NotInstalledWords)}";
+        }
+
         /// <summary>The word joining a value to the blocks it is read or set on.</summary>
         public const string OnWord = "on";
 
@@ -149,20 +161,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
 
         /// <summary>The words between what starts a trigger and what it does.</summary>
-        public static string Then(TriggerKind kind, bool stops, bool sequence, bool sets)
+        public static string Then(TriggerKind kind, bool stops)
         {
             var clock = kind == TriggerKind.Every;
-
             if (stops)
                 return clock ? "stop" : "then stop";
 
-            if (sequence)
-                return clock ? "run" : "then run";
-
-            if (sets)
-                return clock ? SetWord : "then set";
-
-            return clock ? "" : "then";
+            return clock ? "run" : "then run";
         }
 
 
@@ -171,7 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Rate(duration.Length);
+                return duration.Setting.Length > 0 ? duration.Setting : TimeText.Rate(duration.Length);
 
             return Of(world, slot);
         }
@@ -404,7 +409,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Duration(duration.Length);
+                return duration.Setting.Length > 0 ? duration.Setting : TimeText.Duration(duration.Length);
 
             return Of(world, slot);
         }
@@ -692,6 +697,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (kept != null)
                 return kept.IsEmpty ? null : Symbols.State;
 
+            var duration = slot as DurationSlot;
+            if (duration != null)
+                return duration.Setting.Length > 0 ? Symbols.Setting : null;
+
+            var values = slot as ArgumentsSlot;
+            if (values != null)
+                return values.Arguments.Count == 1 && values.Arguments[0].IsSetting ? Symbols.Setting : null;
+
             return null;
         }
 
@@ -721,7 +734,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Duration(duration.Length);
+                return duration.Setting.Length > 0 ? duration.Setting : TimeText.Duration(duration.Length);
 
             var given = slot as ArgumentsSlot;
             if (given != null)
@@ -739,6 +752,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             var kept = slot as SystemStateSlot;
             if (kept != null)
                 return kept.IsEmpty ? Empty : kept.Name;
+
+            var host = slot as HostSlot;
+            if (host != null)
+                return host.IsEmpty ? Empty : Installed(host.Test);
 
             // A slot kind with no words here; saying nothing would read as an empty slot.
             return $"({slot.GetType().Name})";

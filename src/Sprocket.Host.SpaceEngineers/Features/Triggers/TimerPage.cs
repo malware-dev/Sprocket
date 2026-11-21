@@ -15,7 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         readonly Action<Duration> _done;
         readonly Duration _start;
 
-        bool _goesOn;
         PickStrip _strip;
         StageColumn _rates;
         StageColumn _does;
@@ -27,7 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         {
             _start = start;
             _aim = aim;
-            aim.Onward = Primary;
             aim.MovesOn = delegate
             {
                 if (_finish != null && CanPrimary)
@@ -43,10 +41,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         public override bool Asks => true;
 
         /// <inheritdoc />
-        public override string PrimaryText => _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
+        public override string PrimaryText => Editor.Texts.ChromeDone;
 
         /// <inheritdoc />
-        public override bool CanPrimary => _aim.Finishes && (_rate == null || _rate.Length.HasValue);
+        public override bool CanPrimary => _rate == null || _rate.Length.HasValue;
 
         /// <inheritdoc />
         public override string PrimaryAbout => "";
@@ -57,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <inheritdoc />
         public override bool ScrollsItself => true;
 
-        /// <summary>The strip the pick is drawn in, which the page the single action is chosen on goes on in.</summary>
+        /// <summary>The strip the pick is drawn in.</summary>
         public PickStrip Strip => _strip;
 
         /// <summary>The panel the rate is given in, once the page is built.</summary>
@@ -93,30 +91,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 _does.Title = Editor.Texts.PickWhatItDoes;
             }
 
-            _aim.Pick = _strip;
-
-            // Back from the page after this one, whatever that page asked goes with it.
-            _strip.Return(0, 2);
             if (_strip.Stages.Count == 0)
             {
                 _strip.Add(_rates);
                 _strip.Add(_does);
             }
 
-            _strip.Returns = null;
             _strip.ShowsArguments = false;
-            _strip.Onward = _aim.Outcome == Outcome.One ? Editor.Act(CommandKind.PageOn, Primary) : null;
 
             _rates.ShowEmpty();
             _aim.Fill(_does);
 
             _strip.Show();
-
-            if (!_goesOn)
-                return;
-
-            _goesOn = false;
-            Primary();
         }
 
         /// <inheritdoc />
@@ -125,13 +111,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             _strip.Tick();
         }
 
-        /// <summary>Goes straight on to the page after this one as soon as this is built.</summary>
-        public void GoOn()
-        {
-            _goesOn = true;
-        }
-
-        /// <summary>The strip of the pick, which the page the single action is chosen on shares.</summary>
+        /// <summary>The strip of the pick.</summary>
         protected override Element CreateView()
         {
             return _strip;

@@ -63,7 +63,7 @@ public class LeavingTests
     /// </summary>
     /// <remarks>
     /// The two are the same act arrived at from two directions, so an answer that did half of it -
-    /// applying the blocks and dropping the values - would be a third behaviour wearing the words
+    /// applying the blocks and dropping the values - would be a third behavior wearing the words
     /// of the second.
     /// </remarks>
     [Fact]
@@ -81,7 +81,7 @@ public class LeavingTests
         Assert.True(picker.Scene.IsFilling, "the caret did not go to the field");
 
         picker.Do("type", "5");
-        picker.Do("enter");
+        picker.Do("1394", "72");
         picker.Run(2);
 
         // The step the picker was making, holding the value the column asked for.

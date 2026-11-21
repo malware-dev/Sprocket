@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
     public static class KeptReasons
     {
         // The last value of each, so a number a newer build kept reads as none.
-        const int LastProblem = (int)SequenceProblem.AbortedProblem;
+        const int LastProblem = (int)SequenceProblem.Ambiguous;
         const int LastCause = (int)Cause.PistonHeld;
 
         /// <summary>The problem <paramref name="number" /> or <paramref name="spelled" /> holds, or none.</summary>

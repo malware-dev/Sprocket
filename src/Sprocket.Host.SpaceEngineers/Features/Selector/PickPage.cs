@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         readonly Action<PickAnswer> _done;
         readonly OpeningColumn _opens;
         readonly OutcomeColumn _aim;
-        readonly int _base;
         readonly Func<GridEntity, bool> _fits;
         readonly bool _memberOnly;
         readonly PickChoices _picked = new PickChoices();
@@ -38,8 +38,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         readonly PickArguments _arguments;
         readonly PickStrip _strip;
 
-        bool _goesOn;
-        bool _straight;
         bool _selectedTarget;
 
         // Where the pick names slots of a blueprint: its heading.
@@ -51,17 +49,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
         /// <summary>Asks what to point at and what should happen to it, starting from whatever the answer is now.</summary>
         /// <remarks>
-        /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
-        /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
+        /// <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
         /// them. <paramref name="signalsOnly" /> offers only what the construct does to start something, for a signal slot.
         /// <paramref name="forTests" /> offers what an if can test.
         /// <paramref name="facet" /> is the name of the facet the step acts on, where what it does is a member of a type the host
         /// provides.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
-            IList<long> targets, string chosen, ReachKind chosenForm, Action<PickAnswer> done,
+            IList<long> targets, MemberKey chosen, ReachKind chosenForm, Action<PickAnswer> done,
             bool asksAll = false, Quantifier quantifier = Quantifier.Any, IList<Literal> arguments = null,
-            OpeningColumn opens = OpeningColumn.Blocks, OutcomeColumn aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
+            OpeningColumn opens = OpeningColumn.Blocks, OutcomeColumn aim = null, Func<GridEntity, bool> admits = null,
             bool signalsOnly = false, bool forTests = false, string facet = "")
             : base(editor)
         {
@@ -69,26 +66,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             _opens = opens;
             _aim = aim;
             if (aim != null)
-            {
-                aim.Onward = Primary;
                 aim.MovesOn = MoveOn;
-            }
 
-            _strip = after ?? new PickStrip(editor.Texts);
-            _base = after == null ? 0 : after.Stages.Count;
+            _strip = new PickStrip(editor.Texts);
 
             _title = title;
             _forEvents = forEvents;
-            _picked.Member = chosen ?? "";
-            _picked.Form = chosenForm;
+            var form = chosenForm;
+            _picked.Member = Resolved(editor.World, targets, chosen, forEvents, ref form);
+            _picked.Form = form;
             _picked.Reading = quantifier;
             _done = done;
 
             var pressed = forEvents ? SlotOccupancy.Pressing(editor.World, targets, _picked.Member) : null;
             if (pressed != null)
             {
-                _picked.Slot = ToolbarSlot.Of(_picked.Member);
-                _picked.Member = pressed.Id;
+                _picked.Slot = ToolbarSlot.Of(_picked.Member.Id);
+                _picked.Member = pressed.Key;
             }
 
             for (var i = 0; i < targets.Count; i++)
@@ -100,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 : null;
             if (flipped != null)
             {
-                _picked.Member = flipped;
+                _picked.Member = flipped.Value;
                 _picked.Form = ReachKind.Value;
             }
 
@@ -118,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>Asks which blocks fill a slot: the blocks alone, only those <paramref name="fits" /> allows, starting from <paramref name="targets" />.</summary>
         public PickPage(SprocketEditor editor, string title, IList<long> targets, Func<GridEntity, bool> fits,
             Action<PickAnswer> done)
-            : this(editor, title, false, targets, "", ReachKind.Native, done)
+            : this(editor, title, false, targets, default(MemberKey), ReachKind.Native, done)
         {
             _fits = fits;
         }
@@ -129,11 +123,45 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// for none of its values, starting from <paramref name="targets" /> and the facet called <paramref name="facet" />,
         /// and only blocks <paramref name="admits" /> allows listed.
         /// </summary>
-        public PickPage(SprocketEditor editor, string title, IList<long> targets, string member, ReachKind form, string facet,
+        public PickPage(SprocketEditor editor, string title, IList<long> targets, MemberKey member, ReachKind form, string facet,
             Func<GridEntity, bool> admits, Action<PickAnswer> done)
             : this(editor, title, false, targets, member, form, done, admits: admits, facet: facet)
         {
             _memberOnly = true;
+        }
+
+        /// <summary>
+        /// <paramref name="chosen" />, as a program holds it, as the member of <paramref name="targets" /> it names: a bare name
+        /// given the namespace of the one member it meets, so the pick opens on that member; as it is where it is qualified, meets
+        /// none or meets more than one. The member's own <paramref name="form" />, the game's action or a host's, replaces the one
+        /// the program was written with.
+        /// </summary>
+        static MemberKey Resolved(GridWorld world, IList<long> targets, MemberKey chosen, bool forEvents, ref ReachKind form)
+        {
+            if (!chosen.IsBare || chosen.IsEmpty)
+                return chosen;
+
+            if (forEvents && form != ReachKind.Value)
+            {
+                var happening = Vocabulary.Find(Vocabulary.EventsOf(world, targets), chosen);
+                return happening != null ? new MemberKey(happening.Namespace, chosen.Id) : chosen;
+            }
+
+            // A state checked is its status and the state as one id, in the status's namespace.
+            string value, state;
+            var actions = Vocabulary.ActionsOf(world, targets);
+            if (ComparisonQuestion.Split(chosen.Id, out value, out state))
+            {
+                var status = EntityAction.Value(actions, MemberKey.Bare(value));
+                return status != null ? new MemberKey(status.Namespace, chosen.Id) : chosen;
+            }
+
+            var member = EntityAction.Find(actions, chosen, form == ReachKind.Value);
+            if (member == null)
+                return chosen;
+
+            form = member.Form;
+            return member.Key;
         }
 
         /// <summary>
@@ -189,11 +217,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         public override bool Asks => true;
 
         /// <inheritdoc />
-        /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>
-        public override string PrimaryText => _aim == null || _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
+        public override string PrimaryText => Editor.Texts.ChromeDone;
 
         /// <inheritdoc />
-        public override bool CanPrimary => IsComplete && (_aim == null || _aim.Finishes);
+        public override bool CanPrimary => IsComplete;
 
         /// <inheritdoc />
         public override string PrimaryAbout => "";
@@ -219,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <inheritdoc />
         public override bool ScrollsItself => true;
 
-        /// <summary>The strip the pick is drawn in, shared with the pages before and after this one.</summary>
+        /// <summary>The strip the pick is drawn in.</summary>
         public PickStrip Strip => _strip;
 
         /// <summary>
@@ -255,8 +282,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
         // A slot of a type no step acts on yet is filled by its blocks alone, and the facet among them.
         bool IsComplete => _picked.Blocks.Count > 0 && (_fits != null || PicksSignal && (_aim == null || _aim.Chosen)
-            || FacetOnly != null && string.IsNullOrEmpty(_arrived.Member)
-            || !string.IsNullOrEmpty(_picked.Member)
+            || FacetOnly != null && _arrived.Member.IsEmpty
+            || !_picked.Member.IsEmpty
             && _members.ReadinessOf(_picked.Member, _picked.Form) == Readiness.Ready
             && (_aim == null || _aim.Chosen));
 
@@ -272,14 +299,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>The slots picked by name, none where blocks are picked.</summary>
         IList<string> PickedSlots => Slots != null ? Slots.Picked : NoSlots;
 
-        /// <summary>The stages this page asks, which are the last in the pick while it is on top.</summary>
-        int Own => (_blocks.Column == null ? 0 : 1) + (_members.Column == null ? 0 : 1) + (_does == null ? 0 : 1);
-
         /// <summary>The stage whose box takes the keyboard when its page is first shown, or minus one where none does.</summary>
-        int Opens => _opens == OpeningColumn.Blocks ? _base : _opens == OpeningColumn.What ? _base + 1 : -1;
+        int Opens => _opens == OpeningColumn.Blocks ? 0 : _opens == OpeningColumn.What ? 1 : -1;
 
         /// <summary>What is chosen as the program names it: the one slot, where a toolbar a person presses is chosen.</summary>
-        string AnswerId => _picked.Slot == null ? _picked.Member : _picked.Slot.EventId;
+        MemberKey AnswerId => _picked.Slot == null ? _picked.Member : _picked.Member.WithId(_picked.Slot.EventId);
+
+        /// <summary>
+        /// <paramref name="chosen" />, reached as <paramref name="form" /> says, as the program writes it: one of the game's own
+        /// bare where nothing else on the blocks picked has its id, and qualified where something does; anything else as it is.
+        /// </summary>
+        MemberKey Written(MemberKey chosen, ReachKind form)
+        {
+            if (chosen.Namespace != BlockKinds.Game)
+                return chosen;
+
+            // A state checked is its status and the state as one id; the status is the value read.
+            string value, state;
+            var stated = ComparisonQuestion.Split(chosen.Id, out value, out state);
+            var read = MemberKey.Bare(stated ? value : chosen.Id);
+            return EntityAction.Ambiguous(Vocabulary.ActionsOf(Editor.World, _picked.Blocks), read, stated || form == ReachKind.Value)
+                ? chosen
+                : MemberKey.Bare(chosen.Id);
+        }
 
         /// <summary>The facet the chosen member acts on, or empty where it is no member of a type the host provides.</summary>
         string Facet => FacetOnly == null && Vocabulary.TypeOf(Editor.World, _picked.Blocks, _picked.Member) == null ? "" : _picked.Facet;
@@ -323,11 +365,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// </remarks>
         public override bool Leaving()
         {
-            if (_base > 0)
-                return _straight ? LeavingStraight() : true;
-
-            var after = _aim?.Following;
-            if (!IsComplete || !Moved && (after == null || !after.Moved))
+            if (!IsComplete || !Moved)
                 return true;
 
             Editor.Ask(Editor.Texts.PickKeepQuestion);
@@ -344,7 +382,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             var arguments = _strip.Arguments;
             if (_forEvents && _picked.Form != ReachKind.Value || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
-                Finish(new PickAnswer(_picked.Blocks, AnswerId, _picked.Reading, null, _picked.Form, Facet));
+                Finish(new PickAnswer(_picked.Blocks, Written(AnswerId, _picked.Form), _picked.Reading, null, _picked.Form, Facet));
                 return;
             }
 
@@ -368,12 +406,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             // Toggle on a switch is the game's toggle for it, which takes nothing.
             if (Vocabulary.Toggles(_picked.Form, arguments))
             {
-                var toggle = Vocabulary.Toggle(Editor.World, _picked.Blocks, _picked.Member) ?? _picked.Member;
-                Finish(new PickAnswer(_picked.Blocks, toggle, _picked.Reading, new List<Literal>(), ReachKind.Action, Facet));
+                var toggle = Vocabulary.Toggle(Editor.World, _picked.Blocks, _picked.Member);
+                Finish(new PickAnswer(_picked.Blocks, toggle != null ? MemberKey.Bare(toggle) : _picked.Member, _picked.Reading,
+                    new List<Literal>(), ReachKind.Action, Facet));
                 return;
             }
 
-            Finish(new PickAnswer(_picked.Blocks, _picked.Member, _picked.Reading, arguments, _picked.Form, Facet));
+            Finish(new PickAnswer(_picked.Blocks, Written(_picked.Member, _picked.Form), _picked.Reading, arguments, _picked.Form, Facet));
         }
 
         /// <inheritdoc />
@@ -384,25 +423,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 _picked.Facet = Slots.Facet;
 
             _blocks.Collect(_fits);
-
-            if (_aim != null)
-                _aim.Pick = _strip;
-
-            // Back from a page after this one, whatever that page asked goes with it; and back here from the page before,
-            // what this one asked is put back.
-            _strip.Return(_base, _base + Own);
-            if (_strip.Stages.Count == _base && _blocks.Column != null)
-            {
-                _strip.Add(_blocks.Column);
-                if (_members.Column != null)
-                    _strip.Add(_members.Column);
-
-                if (_does != null)
-                    _strip.Add(_does);
-            }
-
-            _strip.Returns = _base > 0 ? Editor.Act(CommandKind.PageBack, PageBack) : null;
-            _strip.Onward = _aim != null && _aim.Outcome == Outcome.One ? Editor.Act(CommandKind.PageOn, Primary) : null;
 
             if (_finish == null)
                 _finish = Editor.Act(CommandKind.Primary, Primary);
@@ -429,7 +449,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
             if (_members.Column != null)
             {
-                _members.Fill(SlotType, _memberOnly ? _arrived.Member : null, FacetOnly);
+                _members.Fill(SlotType, _memberOnly ? _arrived.Member : (MemberKey?)null, FacetOnly);
 
                 // Filling a slot shows the column only where there is a screen, or whatever else, to choose; it still works out
                 // what the slot holds.
@@ -437,7 +457,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             }
 
             // What the trigger does, beside what happens, once what happens is chosen or a signal slot is picked.
-            var does = _aim != null && (PicksSignal || _members.Column != null && !string.IsNullOrEmpty(_picked.Member));
+            var does = _aim != null && (PicksSignal || _members.Column != null && !_picked.Member.IsEmpty);
             if (does && _does == null)
             {
                 _does = new StageColumn(_strip.Width, false, null, Editor.Texts);
@@ -448,7 +468,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 DropDoes();
 
             if (_does != null)
-                _does.Title = string.IsNullOrEmpty(_members.ChosenName) ? Editor.Texts.PickWhatItDoes : _members.ChosenName;
+                _does.Title = !_memberOnly || string.IsNullOrEmpty(_members.ChosenName) ? Editor.Texts.PickWhatItDoes : _members.ChosenName;
 
             // A moment is described and takes nothing; a number watched asks how it compares, and with what, over what the trigger does.
             if (_memberOnly)
@@ -468,11 +488,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             if (_opens == OpeningColumn.Target)
                 SelectTarget();
 
-            if (!_goesOn)
-                return;
-
-            _goesOn = false;
-            Primary();
         }
 
         /// <summary>Opens the selector of the target the page was opened for; back from it with nothing selected, this page goes too, having never been looked at.</summary>
@@ -488,27 +503,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 return;
 
             Editor.Pop();
-            if (_straight)
-                Editor.Pop();
         }
 
-        /// <summary>Moves the strip's page turning on a tick.</summary>
+        /// <summary>Moves the strip's glide on a tick.</summary>
         public override void Refresh()
         {
             _strip.Tick();
-        }
-
-        /// <summary>Goes straight on to the page after this one as soon as this is built, for a part pressed that stands for something on that page.</summary>
-        /// <remarks>Built first all the same, because the page after carries on from the stages this one asks.</remarks>
-        public void GoOn()
-        {
-            _goesOn = true;
-        }
-
-        /// <summary>Says whether this page is being opened straight onto, rather than paged to.</summary>
-        public void Arrived(bool straight)
-        {
-            _straight = straight;
+            _arguments.Making?.Hang();
         }
 
         /// <summary>
@@ -548,7 +549,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             }
         }
 
-        bool Restate() => _slotHeading.Restate(_picked.Blocks, _picked.Member, Facet, _picked.Slot ?? ToolbarSlot.Of(_picked.Member),
+        bool Restate() => _slotHeading.Restate(_picked.Blocks, _picked.Member, Facet, _picked.Slot ?? ToolbarSlot.Of(_picked.Member.Id),
             PickedSlots, ListsSlots);
 
         /// <summary>Hands <paramref name="answer" /> back, with the name of the slot the heading says the picks make.</summary>
@@ -567,7 +568,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// </summary>
         void MoveOn()
         {
-            if (PrimaryText.Length == 0 || !CanPrimary)
+            if (!CanPrimary)
                 return;
 
             var arguments = _strip.Arguments;
@@ -579,33 +580,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
             if (_finish != null)
                 _finish.Execute();
-        }
-
-        /// <summary>Pages back to the page before, which from then on this page was paged to.</summary>
-        void PageBack()
-        {
-            _straight = false;
-            Editor.Pop();
-        }
-
-        /// <summary>Leaves the pick from a page opened straight onto, past the page before that was never looked at, asking first where anything has changed.</summary>
-        bool LeavingStraight()
-        {
-            if (!IsComplete || !Moved)
-            {
-                Editor.Pop();
-                return true;
-            }
-
-            Editor.Ask(Editor.Texts.PickKeepQuestion);
-            Editor.AnswerPrimary(Editor.Texts.PickKeepThem, true);
-            Editor.Answer(Editor.Texts.PickDiscardThem, delegate
-            {
-                Editor.Pop();
-                Editor.Pop();
-            });
-
-            return false;
         }
     }
 }

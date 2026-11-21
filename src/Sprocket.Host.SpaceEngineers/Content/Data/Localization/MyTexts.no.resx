@@ -130,6 +130,9 @@
   <data name="Sprocket.Slot.Unused" xml:space="preserve">
     <value>Ubrukt</value>
   </data>
+  <data name="Sprocket.Slot.Kept" xml:space="preserve">
+    <value>Denne plassen er i bruk, så den kan ikke fjernes.</value>
+  </data>
   <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
     <value>Installasjoner på andre konstruksjoner eller i biblioteket kan ha blokker som ikke lenger passer. Gjøre den smalere?</value>
   </data>
@@ -337,9 +340,6 @@
   <data name="Sprocket.Button.Stops" xml:space="preserve">
     <value>**{block}** stopper allerede {sequence} på {blockset}.</value>
   </data>
-  <data name="Sprocket.Button.Acts" xml:space="preserve">
-    <value>**{block}** gjør allerede en oppgave på {blockset}.</value>
-  </data>
   <data name="Sprocket.Button.Elsewhere" xml:space="preserve">
     <value>Knapp {button} på **{block}** gjør allerede noe annet.</value>
   </data>
@@ -407,6 +407,9 @@
   <data name="Sprocket.Pick.NothingDone" xml:space="preserve">
     <value>Disse blokkene har ingenting til felles som kan gjøres med dem.</value>
   </data>
+  <data name="Sprocket.Pick.Comparison" xml:space="preserve">
+    <value>sammenligning</value>
+  </data>
   <data name="Sprocket.Pick.WhatItDoes" xml:space="preserve">
     <value>Hva den gjør</value>
   </data>
@@ -455,12 +458,6 @@
   <data name="Sprocket.Plan.SorterList" xml:space="preserve">
     <value>innstilling av listen i en conveyor sorter</value>
   </data>
-  <data name="Sprocket.Pick.SingleAction" xml:space="preserve">
-    <value>En oppgave på blokker…</value>
-  </data>
-  <data name="Sprocket.Pick.SingleTask" xml:space="preserve">
-    <value>En oppgave på blokker</value>
-  </data>
   <data name="Sprocket.Pick.HeadingTask" xml:space="preserve">
     <value>Oppgave</value>
   </data>
@@ -493,6 +490,15 @@
   </data>
   <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
     <value>Tilstander</value>
+  </data>
+  <data name="Sprocket.Pick.SourceMods" xml:space="preserve">
+    <value>Mods</value>
+  </data>
+  <data name="Sprocket.Pick.ModCheck" xml:space="preserve">
+    <value>Sjekk</value>
+  </data>
+  <data name="Sprocket.Pick.ModsEmpty" xml:space="preserve">
+    <value>Ingen mods å velge mellom.</value>
   </data>
   <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
     <value>Eksisterende plass</value>
@@ -601,10 +607,10 @@
     <value>Plasser</value>
   </data>
   <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
-    <value>1 mangler fortsatt en blokk</value>
+    <value>1 må fortsatt fylles ut</value>
   </data>
   <data name="Sprocket.Blueprint.StillMany" xml:space="preserve">
-    <value>{count} mangler fortsatt en blokk</value>
+    <value>{count} må fortsatt fylles ut</value>
   </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} gikk tapt.</value>
@@ -617,6 +623,9 @@
   </data>
   <data name="Sprocket.Blueprint.AboutHint" xml:space="preserve">
     <value>Hva denne plassen er til.</value>
+  </data>
+  <data name="Sprocket.Setting.AboutHint" xml:space="preserve">
+    <value>Hva denne innstillingen er til.</value>
   </data>
 
   <data name="Sprocket.Writing.Preview" xml:space="preserve">
@@ -765,6 +774,9 @@
   </data>
   <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
     <value>Dette steget gjør noe blokkene ikke lenger tilbyr. Erstatt dette steget.</value>
+  </data>
+  <data name="Sprocket.Problem.Uninstalled" xml:space="preserve">
+    <value>Dette steget trenger en mod som ikke er installert: {namespace}. Sekvensen venter på den.</value>
   </data>
   <data name="Sprocket.Problem.Unfilled" xml:space="preserve">
     <value>Dette steget mangler noe det trenger.</value>
@@ -1200,6 +1212,60 @@
   </data>
   <data name="Sprocket.Value.Numbered" xml:space="preserve">
     <value>Valg {number}</value>
+  </data>
+  <data name="Sprocket.Setting.Name" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="Sprocket.Setting.Numbered" xml:space="preserve">
+    <value>Innstilling</value>
+  </data>
+  <data name="Sprocket.Setting.Default" xml:space="preserve">
+    <value>Standardverdi</value>
+  </data>
+  <data name="Sprocket.Setting.Holds" xml:space="preserve">
+    <value>Inneholder</value>
+  </data>
+  <data name="Sprocket.Setting.DefaultHint" xml:space="preserve">
+    <value>La standardverdien stå tom, så må hver installasjon velge sin egen.</value>
+  </data>
+  <data name="Sprocket.Setting.Value" xml:space="preserve">
+    <value>Verdi</value>
+  </data>
+  <data name="Sprocket.Setting.UseDefault" xml:space="preserve">
+    <value>Bruk standardverdien</value>
+  </data>
+  <data name="Sprocket.Setting.KindInteger" xml:space="preserve">
+    <value>heltall</value>
+  </data>
+  <data name="Sprocket.Setting.KindReal" xml:space="preserve">
+    <value>tall</value>
+  </data>
+  <data name="Sprocket.Setting.KindPercent" xml:space="preserve">
+    <value>prosent</value>
+  </data>
+  <data name="Sprocket.Setting.KindText" xml:space="preserve">
+    <value>tekst</value>
+  </data>
+  <data name="Sprocket.Setting.KindDuration" xml:space="preserve">
+    <value>tidsrom</value>
+  </data>
+  <data name="Sprocket.Setting.NewType" xml:space="preserve">
+    <value>Ny tilstandstype…</value>
+  </data>
+  <data name="Sprocket.Slot.AddSetting" xml:space="preserve">
+    <value>en innstilling</value>
+  </data>
+  <data name="Sprocket.Value.Fixed" xml:space="preserve">
+    <value>En fast verdi</value>
+  </data>
+  <data name="Sprocket.Value.NewSetting" xml:space="preserve">
+    <value>Ny innstilling…</value>
+  </data>
+  <data name="Sprocket.Value.ByDefault" xml:space="preserve">
+    <value>{value} som standard</value>
+  </data>
+  <data name="Sprocket.Value.SourceAbout" xml:space="preserve">
+    <value>Velg en kilde for denne verdien.</value>
   </data>
   <data name="Sprocket.Slot.Short" xml:space="preserve">
     <value>Kort navn</value>
@@ -2527,6 +2593,15 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
   <data name="Sprocket.Change.AddType" xml:space="preserve">
     <value>La til tilstandstypen &quot;{thing}&quot;</value>
   </data>
+  <data name="Sprocket.Change.AnswerSetting" xml:space="preserve">
+    <value>Satte innstillingen &quot;{thing}&quot; i {place} til {now}</value>
+  </data>
+  <data name="Sprocket.Change.UseSettingDefault" xml:space="preserve">
+    <value>Satte innstillingen &quot;{thing}&quot; i {place} tilbake til standardverdien</value>
+  </data>
+  <data name="Sprocket.Change.SettingDefault" xml:space="preserve">
+    <value>Endret standardverdien til innstillingen &quot;{thing}&quot;</value>
+  </data>
   <data name="Sprocket.Change.RenameType" xml:space="preserve">
     <value>Omdøpte tilstandstypen &quot;{was}&quot; til &quot;{now}&quot;</value>
   </data>
@@ -2579,10 +2654,10 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
     <value>Ingenting er delt med deg.</value>
   </data>
   <data name="Sprocket.Library.Share" xml:space="preserve">
-    <value>Del...</value>
+    <value>Del…</value>
   </data>
   <data name="Sprocket.Library.ShareChange" xml:space="preserve">
-    <value>Endre deling...</value>
+    <value>Endre deling…</value>
   </data>
   <data name="Sprocket.Library.ShareWithdraw" xml:space="preserve">
     <value>Slutt å dele</value>
@@ -2628,9 +2703,6 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Share.Title" xml:space="preserve">
     <value>Del {name}</value>
   </data>
-  <data name="Sprocket.Share.Who" xml:space="preserve">
-    <value>Hvem er den for?</value>
-  </data>
   <data name="Sprocket.Share.Everyone" xml:space="preserve">
     <value>Alle</value>
   </data>
@@ -2645,6 +2717,12 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   </data>
   <data name="Sprocket.Share.Cancel" xml:space="preserve">
     <value>Avbryt</value>
+  </data>
+  <data name="Sprocket.Share.CopyText" xml:space="preserve">
+    <value>Kopier som tekst</value>
+  </data>
+  <data name="Sprocket.Share.InWorld" xml:space="preserve">
+    <value>Del i denne verdenen</value>
   </data>
   <data name="Sprocket.Admin.ShareLimit" xml:space="preserve">
     <value>Delte plantegninger per spiller</value>
@@ -2699,5 +2777,68 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   </data>
   <data name="Sprocket.Systems.KeepHereAbout" xml:space="preserve">
     <value>Viser dette logikksystemet bare når redigereren åpnes fra denne blokken. Det kjører som vanlig, og vises overalt hvis det svikter eller blokken forsvinner.</value>
+  </data>
+  <data name="Sprocket.Library.ImportNone" xml:space="preserve">
+    <value>Custom Data på denne blokken har ingen plantegningstekst.</value>
+  </data>
+  <data name="Sprocket.Library.ImportOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Sprocket.Library.ImportUnreadable" xml:space="preserve">
+    <value>Noe av plantegningsteksten i Custom Data på denne blokken kan ikke leses. Den kan være avkortet, eller fra en nyere versjon.</value>
+  </data>
+  <data name="Sprocket.Share.Copied" xml:space="preserve">
+    <value>Kopiert til utklippstavlen. For å importere den, lim den inn i Custom Data på en programmerbar blokk, og trykk **Importer** i plantegningsbiblioteket.</value>
+  </data>
+  <data name="Sprocket.Share.CopiedOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Sprocket.Library.ImportAbout" xml:space="preserve">
+    <value>Legger plantegningene som er limt inn som tekst i Custom Data på denne blokken, i biblioteket ditt.</value>
+  </data>
+  <data name="Sprocket.Share.CopyTextAbout" xml:space="preserve">
+    <value>Kopierer plantegningen som lesbar tekst.</value>
+  </data>
+  <data name="Sprocket.Library.ImportConfirm" xml:space="preserve">
+    <value>Importer</value>
+  </data>
+  <data name="Sprocket.Library.ImportKeep" xml:space="preserve">
+    <value>Ikke importer</value>
+  </data>
+  <data name="Sprocket.Library.ImportQuestion" xml:space="preserve">
+    <value>Importere disse plantegningene fra Custom Data på denne blokken til biblioteket ditt?</value>
+  </data>
+  <data name="Sprocket.Library.ImportHave" xml:space="preserve">
+    <value>**{name}** er i biblioteket ditt allerede, like ny eller nyere, og blir som den er.</value>
+  </data>
+  <data name="Sprocket.Library.ImportUpdates" xml:space="preserve">
+    <value>**{name}**, som oppdaterer den i biblioteket ditt</value>
+  </data>
+  <data name="Sprocket.Share.CopiedPlain" xml:space="preserve">
+    <value>Kopiert til utklippstavlen. For å importere den, lim den inn som eneste tekst i Custom Data på en programmerbar blokk, og trykk **Importer** i plantegningsbiblioteket.</value>
+  </data>
+  <data name="Sprocket.Share.CopyCompact" xml:space="preserve">
+    <value>Kopier kompakt</value>
+  </data>
+  <data name="Sprocket.Share.CopyCompactAbout" xml:space="preserve">
+    <value>Kopierer plantegningen pakket lite, så den passer i en chatmelding.</value>
+  </data>
+  <data name="Sprocket.Problem.Ambiguous" xml:space="preserve">
+    <value>Dette stegets {name} kan bety mer enn én ting. Velg hvilken i steget.</value>
+  </data>
+  <data name="Sprocket.Stopped.Ambiguous" xml:space="preserve">
+    <value>{name} kan bety mer enn én ting.</value>
+  </data>
+  <data name="Sprocket.Callout.Share" xml:space="preserve">
+    <value>Del et logikksystem herfra.</value>
+  </data>
+  <data name="Sprocket.Callout.Import" xml:space="preserve">
+    <value>Importer et logikksystem fra tekst.</value>
+  </data>
+  <data name="Sprocket.Callout.Settings" xml:space="preserve">
+    <value>Legg til en innstilling her.</value>
+  </data>
+  <data name="Sprocket.Callout.New" xml:space="preserve">
+    <value>**Nytt:** {said}</value>
   </data>
 </root>

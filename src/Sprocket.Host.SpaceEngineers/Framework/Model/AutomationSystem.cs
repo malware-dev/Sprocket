@@ -295,19 +295,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return null;
         }
 
-        /// <summary>Whether one of its slots, types or states is called <paramref name="name" />: the one set of names they share.</summary>
-        public bool Takes(string name)
-        {
-            return FindPart(name) != null || FindType(name) != null || FindState(name) != null;
-        }
-
-        /// <summary>Whether one of its slots, types or states is called <paramref name="name" /> in any case: the names the editor refuses for another.</summary>
-        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
-        public bool TakesInAnyCase(string name)
-        {
-            return FindPartInAnyCase(name) != null || TypeInAnyCase(name) || StateInAnyCase(name);
-        }
-
         /// <summary>The slot called <paramref name="name" /> in any case, or null where it has none.</summary>
         public Part FindPartInAnyCase(string name)
         {
@@ -320,7 +307,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return null;
         }
 
-        bool TypeInAnyCase(string name)
+        /// <summary>Whether one of its types is called <paramref name="name" /> in any case: the names the editor refuses for another type.</summary>
+        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
+        public bool HasTypeInAnyCase(string name)
         {
             foreach (var type in _types)
             {
@@ -331,7 +320,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return false;
         }
 
-        bool StateInAnyCase(string name)
+        /// <summary>Whether one of its states is called <paramref name="name" /> in any case: the names the editor refuses for another state.</summary>
+        /// <remarks>The script tells names apart by case; a person reading the editor does not.</remarks>
+        public bool HasStateInAnyCase(string name)
         {
             foreach (var state in _states)
             {
@@ -367,8 +358,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Rename(moment.Sources, was, name);
-
-                RenameIn(trigger.Acts, was, name);
             }
 
             foreach (var sequence in _sequences)
@@ -378,6 +367,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     RenameIn(steps[i], was, name);
             }
 
+            SettingMentions.Rename(this, was, name);
             foreach (var instance in _instances)
                 instance.RenameSlot(was, name);
         }
@@ -459,11 +449,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return name;
         }
 
-        /// <summary><paramref name="called" />, numbered where a slot, type or state already has it: Door, Door 2.</summary>
+        /// <summary><paramref name="called" />, numbered where a slot already has it: Door, Door 2.</summary>
         public string Free(string called)
         {
             var name = called;
-            for (var n = 2; Takes(name); n++)
+            for (var n = 2; FindPart(name) != null; n++)
                 name = $"{called} {n}";
 
             return name;
@@ -478,8 +468,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     uses += Count(moment.Sources, slot);
-
-                uses += CountIn(trigger.Acts, slot);
             }
 
             foreach (var sequence in _sequences)
@@ -519,16 +507,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return uses;
         }
 
-        /// <summary>The first action of its triggers and steps that acts on <paramref name="slot" />, or null where none does.</summary>
+        /// <summary>The first action of its steps that acts on <paramref name="slot" />, or null where none does.</summary>
         public Act ActingOn(string slot)
         {
-            foreach (var trigger in _triggers)
-            {
-                var own = trigger.Acts;
-                if (own != null && own.Targets.Contains(slot))
-                    return own;
-            }
-
             foreach (var sequence in _sequences)
             {
                 foreach (var step in sequence.Steps)
@@ -555,7 +536,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             return count;
         }
 
-        /// <summary>Puts into <paramref name="into" /> every slot its triggers and steps name, each once.</summary>
+        /// <summary>Puts into <paramref name="into" /> every slot its triggers and steps name, each once, and every setting its states start at.</summary>
         public void Acted(List<string> into)
         {
             into.Clear();
@@ -565,8 +546,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Gather(moment.Sources, into);
-
-                GatherFrom(trigger.Acts, into);
             }
 
             foreach (var sequence in _sequences)
@@ -574,6 +553,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 for (var s = 0; s < sequence.Steps.Count; s++)
                     GatherFrom(sequence.Steps[s], into);
             }
+
+            SettingMentions.Named(this, into);
         }
 
         /// <summary>Puts into <paramref name="into" /> every list of names its triggers and steps hold, the lists themselves, leaving out empty ones.</summary>
@@ -586,8 +567,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var moment = trigger as MomentTrigger;
                 if (moment != null && moment.Sources.Count > 0)
                     into.Add(moment.Sources);
-
-                trigger.Acts?.NameLists(into);
             }
 
             foreach (var sequence in _sequences)

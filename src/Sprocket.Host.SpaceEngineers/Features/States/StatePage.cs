@@ -41,7 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         string _seenWord;
         Relation _relation;
         string _valueAsked;
-        bool _goesOn;
         PickStrip _strip;
         StageColumn _states;
         StageColumn _define;
@@ -81,7 +80,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             if (aim == null)
                 return;
 
-            aim.Onward = Primary;
             aim.MovesOn = delegate
             {
                 if (_finish != null && CanPrimary)
@@ -113,10 +111,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         public override bool Asks => true;
 
         /// <inheritdoc />
-        public override string PrimaryText => _aim == null || _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
+        public override string PrimaryText => Editor.Texts.ChromeDone;
 
         /// <inheritdoc />
-        public override bool CanPrimary => Chosen != null && Why.Length == 0 && (Word.Length != 0 || Copy.Length != 0) && (_aim == null || _aim.Finishes);
+        public override bool CanPrimary => Chosen != null && Why.Length == 0 && (Word.Length != 0 || Copy.Length != 0);
 
         /// <inheritdoc />
         public override string PrimaryAbout => "";
@@ -127,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// <inheritdoc />
         public override bool ScrollsItself => true;
 
-        /// <summary>The strip the pick is drawn in, which the page the single action is chosen on goes on in.</summary>
+        /// <summary>The strip the pick is drawn in.</summary>
         public PickStrip Strip => _strip;
 
         /// <summary>
@@ -262,12 +260,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 }
             }
 
-            if (_aim != null)
-                _aim.Pick = _strip;
-
-            // The columns are laid again on every build: the new state's comes and goes with it, and whatever a page after this
-            // one asked goes too.
-            _strip.Return(0, 0);
+            // The columns are laid again on every build: the new state's comes and goes with it.
+            _strip.Clear();
             _strip.Add(_states);
             if (_making)
                 _strip.Add(_define);
@@ -276,9 +270,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             if (_does != null)
                 _strip.Add(_does);
 
-            _strip.Returns = null;
             _strip.ShowsArguments = false;
-            _strip.Onward = _aim != null && _aim.Outcome == Outcome.One ? Editor.Act(CommandKind.PageOn, Primary) : null;
 
             FillStates();
             FillValue();
@@ -286,18 +278,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 _aim.Fill(_does);
 
             _strip.Show();
-
-            if (!_goesOn)
-                return;
-
-            _goesOn = false;
-            Primary();
-        }
-
-        /// <summary>Goes straight on to the page after this one as soon as this is built.</summary>
-        public void GoOn()
-        {
-            _goesOn = true;
         }
 
         /// <inheritdoc />
@@ -306,7 +286,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             _strip.Tick();
         }
 
-        /// <summary>The strip of the pick, which the page the single action is chosen on shares.</summary>
+        /// <summary>The strip of the pick.</summary>
         protected override Element CreateView()
         {
             return _strip;

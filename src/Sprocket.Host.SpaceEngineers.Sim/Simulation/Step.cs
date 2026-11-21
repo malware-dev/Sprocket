@@ -57,6 +57,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>A drag held where it has got to rather than let go, so the picture is of something being carried.</summary>
         public const int Carry = 15;
 
+        /// <summary>The editor opened again for a player who has not been offered this release's callouts.</summary>
+        public const int Callouts = 16;
+
         /// <summary>Which of the kinds above it is.</summary>
         public int Kind;
 

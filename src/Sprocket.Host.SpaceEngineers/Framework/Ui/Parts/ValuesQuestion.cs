@@ -22,8 +22,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
     public class ValuesQuestion
     {
         readonly SprocketEditor _editor;
+        readonly AutomationSystem _system;
+        ValuesQuestion _making;
         readonly FieldSet _form;
         readonly Label _why;
+        readonly Label _hint;
+        readonly VStack _hintRoom;
+        readonly Button _useDefault;
+        Action _defaulted;
         readonly Popup _window;
         readonly Action<string, bool> _answered;
 
@@ -32,18 +38,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>
         /// A panel asking for <paramref name="fields" />, opening on <paramref name="given" />, hung from what
         /// <paramref name="part" /> finds, and <paramref name="answered" /> with the values it closes on, written as a line of
-        /// values, and whether it was put away.
+        /// values, and whether it was put away; <paramref name="arranged" />, where given, places elements among the values before
+        /// they are shown.
         /// </summary>
-        public ValuesQuestion(SprocketEditor editor, IList<Field> fields, IList<Literal> given, Func<Element> part, Action<string, bool> answered)
+        public ValuesQuestion(SprocketEditor editor, AutomationSystem system, IList<Field> fields, IList<Literal> given, Func<Element> part,
+            Action<string, bool> answered, Action<FieldSet> arranged = null)
         {
             _editor = editor;
+            _system = system;
             _answered = answered;
 
             var texts = editor.Texts;
             var filled = new List<string>();
             ColorChannels.Shown(given, fields, filled);
             _form = new FieldSet();
+            if (system != null && system.IsBlueprint)
+                _form.Sourced = field => SettingTypes.Of(field) != null;
+
+            arranged?.Invoke(_form);
             _form.Show(fields, filled, Offered(editor, fields), texts);
+            Given(fields, given);
+            _form.Sourcing += Source;
             _form.Submitted += Done;
             _form.Edited += () => Explain(_form.Wrong);
 
@@ -58,12 +73,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                     {
                         _form,
                         new Label { Style = Styles.Refusal, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _why),
-                        new Button
+                        new VStack { IsVisible = false, Children = { new Label { Style = Styles.Detail, TextWrapping = TextWrapping.Wrap }.As(out _hint) } }.As(out _hintRoom),
+                        new HStack
                         {
-                            Style = Styles.Primary,
-                            Text = texts.ChromeDone,
                             Align = Align.Right,
-                            Command = new RelayCommand(Done)
+                            Base = { Spacing = Gaps.Parts },
+                            Children =
+                            {
+                                new Button { Style = Styles.Button, IsVisible = false, Command = new RelayCommand(UseDefault) }.As(out _useDefault),
+                                new Button { Style = Styles.Primary, Text = texts.ChromeDone, Command = new RelayCommand(Done) }
+                            }
                         }
                     }
                 }
@@ -116,6 +135,31 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return true;
         }
 
+        /// <summary>The panel a new setting for one of the values is asked in while it is open, or null.</summary>
+        public ValuesQuestion Making => _making;
+
+        /// <summary>Offers <paramref name="text" /> beside Done, which answers that nothing is chosen of its own and carries out <paramref name="chosen" />, or offers nothing where <paramref name="text" /> is null.</summary>
+        public void Defaults(string text, Action chosen)
+        {
+            _defaulted = chosen;
+            _useDefault.IsVisible = text != null;
+            _useDefault.Text = text ?? "";
+        }
+
+        /// <summary>Says <paramref name="words" /> under the values, in a place that keeps its height whether it says anything or not, so the panel does not resize; nothing where null.</summary>
+        public void Hint(string words, float height)
+        {
+            _hintRoom.IsVisible = true;
+            _hintRoom.Placement = FixedSize.Height(height);
+            _hint.Text = words ?? "";
+        }
+
+        /// <summary>The button that has the part give no value of its own, shown only where <see cref="Defaults" /> offers it.</summary>
+        public Button UsesDefault => _useDefault;
+
+        /// <summary>The popup the panel stands in.</summary>
+        public Popup Window => _window;
+
         /// <summary>The form the values are given in.</summary>
         public FieldSet Form => _form;
 
@@ -132,6 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             if (_done)
                 return;
 
+            _making?.Hang();
             var opening = !_window.IsOpen;
             _window.Hang();
             if (opening && _window.IsOpen)
@@ -146,8 +191,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 return;
 
             _done = true;
+            _making?.Finish(true);
             _window.Close();
             _answered(_form.Answer, cancelled);
+        }
+
+        /// <summary>Puts the panel away, answering that it was put away, and carries out what was offered by <see cref="Defaults" />.</summary>
+        void UseDefault()
+        {
+            var chosen = _defaulted;
+            Finish(true);
+            chosen?.Invoke();
         }
 
         /// <summary>Answers with the values, once each holds what it takes; otherwise says why, and gives the keyboard to the first that fails.</summary>
@@ -165,6 +219,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 _window.Accept();
             else
                 Finish(false);
+        }
+
+        /// <summary>Shows a chip in place of each of <paramref name="fields" /> that <paramref name="given" /> gives a setting.</summary>
+        void Given(IList<Field> fields, IList<Literal> given)
+        {
+            SettingSources.Given(_form, _system, fields, given);
+        }
+
+        /// <summary>
+        /// Asks under the mark of the value at <paramref name="at" /> where the value comes from: a fixed value, one of the system's
+        /// settings that hold what it takes, or a new setting, made in a panel hung from <paramref name="mark" />.
+        /// </summary>
+        void Source(int at, Element mark)
+        {
+            SettingSources.Source(_editor, _system, _form, at, mark, made => _making = made);
         }
 
         /// <summary>The colors offered where any of <paramref name="fields" /> asks for one: those the player paints with, only ever read.</summary>

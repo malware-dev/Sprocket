@@ -54,9 +54,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Toolbar
         /// The toolbar a person presses among what <paramref name="targets" /> share that <paramref name="eventId" /> names,
         /// the toolbar itself or one of its slots; null where it names none.
         /// </summary>
-        public static EntityEvent Pressing(GridWorld world, IList<long> targets, string eventId)
+        public static EntityEvent Pressing(GridWorld world, IList<long> targets, MemberKey eventId)
         {
-            if (string.IsNullOrEmpty(eventId) || ToolbarSlot.Of(eventId) == null)
+            if (eventId.IsEmpty || ToolbarSlot.Of(eventId.Id) == null)
                 return null;
 
             foreach (var entityEvent in Vocabulary.EventsOf(world, targets))

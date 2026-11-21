@@ -66,10 +66,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
                 var when = trigger as WhenTrigger;
                 if (when != null && Screened(system, when.Provider, when.EventId, when.Arguments, when.Sources, bindings))
                     count++;
-
-                var does = trigger.Does as Act;
-                if (does != null && Screened(system, does.Provider, does.ActionId, does.Arguments, does.Targets, bindings))
-                    count++;
             }
 
             return count;
@@ -97,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Format.Upgrades
             if (!system.IsBlueprint)
                 return true;
 
-            var type = HostTypes.Returned("screen");
+            var type = HostTypes.Named(ScreenType.TypeId);
             var slot = system.Free(names.Count == 1 ? names[0] : "Screens");
             system.PartFor(slot).Holds = type.Id;
 

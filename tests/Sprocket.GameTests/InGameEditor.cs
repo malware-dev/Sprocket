@@ -124,21 +124,43 @@ namespace Sprocket.GameTests
             return null;
         }
 
-        /// <summary>Goes back to the screen the editor opens on, as its back button does, answering any question back asks with its first answer.</summary>
+        /// <summary>
+        /// Goes back to the screen the editor opens on, as its back button does. A question back asks is answered by saving the
+        /// page's changes; where saving stays on the page, as it does on one whose values are not all given, back is pressed again
+        /// and the last answer, which discards them, is taken.
+        /// </summary>
         public void Home()
         {
             for (var guard = 0; _editor.Screen.CanGoBack && guard < 20; guard++)
             {
+                object page = _editor.Current;
                 Run(_editor.Screen.Back);
-                if (_editor.Screen.HasQuestion)
-                {
-                    foreach (dynamic answer in _editor.Screen.Answers)
-                    {
-                        Run(answer.Command);
-                        break;
-                    }
-                }
+                if (!(bool)_editor.Screen.HasQuestion)
+                    continue;
+
+                Take(true);
+                if (!ReferenceEquals(_editor.Current, page))
+                    continue;
+
+                Run(_editor.Screen.Back);
+                if ((bool)_editor.Screen.HasQuestion)
+                    Take(false);
             }
+        }
+
+        /// <summary>Answers the question the editor asks with its first answer where <paramref name="first" />, its last otherwise.</summary>
+        void Take(bool first)
+        {
+            dynamic chosen = null;
+            foreach (dynamic answer in _editor.Screen.Answers)
+            {
+                chosen = answer;
+                if (first)
+                    break;
+            }
+
+            if (chosen != null)
+                Run(chosen.Command);
         }
 
         static void Run(dynamic command)
@@ -341,6 +363,127 @@ namespace Sprocket.GameTests
             return true;
         }
 
+        /// <summary>The glyph the mod's <c>Symbols</c> names <paramref name="name" />, such as <c>Share</c>, or null where it has none.</summary>
+        public static string Symbol(string name)
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var symbols = assembly.GetType("Sprocket.Host.SpaceEngineers.Framework.Ui.Look.Symbols", false);
+                var field = symbols?.GetField(name, BindingFlags.Static | BindingFlags.Public);
+                if (field != null)
+                    return (string)field.GetRawConstantValue();
+            }
+
+            return null;
+        }
+
+        /// <summary>The page the editor is on.</summary>
+        public dynamic Current => _editor.Current;
+
+        /// <summary>The editor's texts, in the language the game is in.</summary>
+        public dynamic Texts => _editor.Texts;
+
+        /// <summary>The program the editor shows.</summary>
+        public dynamic Program => _editor.Program;
+
+        /// <summary>The library of blueprints, or null where the editor has none.</summary>
+        public dynamic Shelf => _editor.Shelf;
+
+        /// <summary>Whether the screen the editor is on has one to go back to, which is false at home.</summary>
+        public bool CanGoBack => (bool)_editor.Screen.CanGoBack;
+
+        /// <summary>The id of the callout hanging now, or null where none is.</summary>
+        public string ShownCallout()
+        {
+            dynamic shown = _editor.Callouts.Shown;
+            return shown == null ? null : (string)shown.Id;
+        }
+
+        /// <summary>What the callout hanging now says, or null where none is.</summary>
+        public string ShownCalloutSaid()
+        {
+            dynamic shown = _editor.Callouts.Shown;
+            return shown == null ? null : (string)((Delegate)shown.Said).DynamicInvoke((object)_editor.Texts);
+        }
+
+        /// <summary>The ids of the callouts due in this editor's session, in the order they are offered.</summary>
+        public List<string> DueCallouts()
+        {
+            var due = new List<string>();
+            foreach (dynamic callout in _editor.Callouts.Due)
+                due.Add((string)callout.Id);
+            return due;
+        }
+
+        /// <summary>Whether the player has dismissed the callout <paramref name="id" />.</summary>
+        public bool CalloutDismissed(string id)
+        {
+            return (bool)_editor.Callouts.Choices.HasDismissed(id);
+        }
+
+        /// <summary>The number of the release the player has dismissed every callout of, or null where there is none.</summary>
+        public int? SeenRelease()
+        {
+            dynamic seen = _editor.Callouts.Choices.Seen;
+            return seen == null ? (int?)null : (int)seen;
+        }
+
+        /// <summary>Answers the question the editor asks with the answer saying <paramref name="text" />, and says whether there was one.</summary>
+        public bool Answer(string text)
+        {
+            if (!(bool)_editor.Screen.HasQuestion)
+                return false;
+
+            foreach (dynamic answer in _editor.Screen.Answers)
+            {
+                if ((string)answer.Text != text)
+                    continue;
+
+                Run(answer.Command);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>The words of the answers the editor offers now.</summary>
+        public string Answers()
+        {
+            return string.Join(", ", AnswerTexts());
+        }
+
+        /// <summary>The words of each answer the editor's question offers, in order, whole, since an answer's words may hold a comma.</summary>
+        public List<string> AnswerTexts()
+        {
+            var said = new List<string>();
+            foreach (dynamic answer in _editor.Screen.Answers)
+                said.Add((string)answer.Text);
+            return said;
+        }
+
+        /// <summary>Presses the screen's primary button, as Done does, and says whether it could be pressed.</summary>
+        public bool Done()
+        {
+            dynamic primary = _editor.Screen.Primary;
+            if (primary == null || !primary.CanExecute)
+                return false;
+
+            primary.Execute();
+            return true;
+        }
+
+        /// <summary>Whether the tab headed <paramref name="header" /> is showing on the page.</summary>
+        public bool IsTabShown(string header)
+        {
+            foreach (var element in Within(Root()))
+            {
+                if (Get(element, "Header") as string == header && Get(element, "IsSelected") is bool selected)
+                    return selected;
+            }
+
+            return false;
+        }
+
         /// <summary>The words on everything in the editor that can be pressed, for a report where a press finds none.</summary>
         public string Buttons()
         {
@@ -419,7 +562,7 @@ namespace Sprocket.GameTests
         /// The public property <paramref name="name" /> of <paramref name="thing" />, the one its own type declares where it hides one
         /// of its base's, such as a slot chip's words over its button's text; or null where it has none.
         /// </summary>
-        static object? Get(object? thing, string name)
+        public static object? Get(object? thing, string name)
         {
             for (var type = thing?.GetType(); type != null; type = type.BaseType)
             {

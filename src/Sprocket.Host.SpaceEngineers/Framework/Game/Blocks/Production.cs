@@ -23,8 +23,6 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         const string Repeat = "Repeat is set in the production screen, which raises nothing.";
 
-        static readonly string[] Modes = { "assembling", "disassembling" };
-
         static readonly Reading Making = Reading.Of<IMyProductionBlock>(block => block.IsProducing);
 
         static readonly OwnValue Producing = OwnValue.Flag(Making);
@@ -36,13 +34,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Blocks
 
         static readonly OwnValue Progress = OwnValue.Number<IMyAssembler>(assembler => assembler.CurrentProgress * 100.0);
 
-        static readonly OwnValue Mode = OwnValue.OneOf<IMyAssembler>(Modes, Position)
+        static readonly OwnValue Mode = OwnValue.OneOf<IMyAssembler>(ChoiceTypes.AssemblerMode, Position)
             .Writing<IMyAssembler>((assembler, mode) =>
                 assembler.Mode = mode.Whole == 1 ? MyAssemblerMode.Disassembly : MyAssemblerMode.Assembly);
 
         // The mode of an assembler whose definition keeps it from disassembling, which its production screen offers no
         // choice of.
-        static readonly OwnValue Locked = OwnValue.OneOf<IMyAssembler>(Modes, Position);
+        static readonly OwnValue Locked = OwnValue.OneOf<IMyAssembler>(ChoiceTypes.AssemblerMode, Position);
 
         static readonly OwnValue Repeating = OwnValue.Flag(Reading.Of<IMyAssembler>(assembler => assembler.Repeating))
             .Writing<IMyAssembler>((assembler, repeating) => assembler.Repeating = repeating.Flag);
