@@ -31,18 +31,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         /// <paramref name="setting" /> where it is not empty, or <paramref name="message" /> otherwise, at <paramref name="level" />.
         /// </summary>
         public SetAbort(int index, Abort step, string message, string setting, AbortLevel level)
+            : this(index, step, message, setting, null, level)
+        {
+        }
+
+        /// <summary>
+        /// The abort <paramref name="step" />, at <paramref name="index" />, made to say what <paramref name="expression" /> works
+        /// out to where it is given, or else the text of the setting <paramref name="setting" /> where it is not empty, or
+        /// <paramref name="message" />, at <paramref name="level" />.
+        /// </summary>
+        public SetAbort(int index, Abort step, string message, string setting, Expression expression, AbortLevel level)
         {
             _index = index;
             _wasMessage = step.Message;
             _wasSetting = step.Setting;
             _wasExpression = step.Expression;
             _wasLevel = step.Level;
-            _nowSetting = setting ?? "";
-            _nowMessage = _nowSetting.Length > 0 ? "" : message ?? "";
+            _nowSetting = expression != null ? "" : setting ?? "";
+            _nowMessage = expression != null || _nowSetting.Length > 0 ? "" : message ?? "";
             _nowLevel = level;
 
             // An expression stays where the panel was closed with no words of its own and no setting.
-            _nowExpression = _nowSetting.Length == 0 && _nowMessage.Length == 0 ? step.Expression : null;
+            _nowExpression = expression ?? (_nowSetting.Length == 0 && _nowMessage.Length == 0 ? step.Expression : null);
         }
 
         /// <inheritdoc />

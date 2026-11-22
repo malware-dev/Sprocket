@@ -217,7 +217,7 @@ public class StateEditingTests
         Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
         screen.Run(1);
         Assert.True(editor.Screen.HasQuestion);
-        Assert.Equal(new[] { "inside", "outside", editor.Texts.ValueNewSetting, editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf, editor.Texts.ValueSetting, editor.Texts.ValueExpression }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
         Assert.Equal("outside", editor.Screen.Default!.Text);
 
         editor.PressAnswer("inside");
@@ -290,7 +290,7 @@ public class StateEditingTests
 
         Assert.Single(editor.StepRows()).Slots[1].Opens!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { "on", "off", editor.Texts.ValueNewSetting }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "on", "off", editor.Texts.ValueSetting, editor.Texts.ValueExpression }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
     }
 
     /// <summary>The value an if on a state checks is chosen from a menu under it, as one edit.</summary>
@@ -319,7 +319,7 @@ public class StateEditingTests
 
         editor.Triggers()[0].Starts[2].Opens!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { "inside", "outside", editor.Texts.ValueNewSetting, editor.Texts.PickStateValueOf }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "inside", "outside", editor.Texts.PickStateValueOf, editor.Texts.ValueSetting }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
         editor.PressAnswer("inside");
         screen.Run(1);
         Assert.Equal("inside", Assert.IsType<StateTrigger>(system.Triggers[0]).Test.Value.Text);

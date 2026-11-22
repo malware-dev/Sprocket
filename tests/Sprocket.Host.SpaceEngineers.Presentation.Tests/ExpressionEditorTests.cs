@@ -1,3 +1,5 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
+using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
@@ -15,10 +17,13 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 public class ExpressionEditorTests
 {
-    const string Expression = "10 + Reach";
+    const string Expression = "10 * Reach";
+
+    // How the expression reads on screen: its calculation as mathematics writes it.
+    const string Shown = "10 × Reach";
 
     /// <summary>The arm's blueprint, its one sequence holding <paramref name="step" />, open on its page.</summary>
-    static Simulation Arm(string step, out AutomationSystem system, out Sequence sequence)
+    internal static Simulation Arm(string step, out AutomationSystem system, out Sequence sequence)
     {
         var sim = Simulation.Fresh();
         sim.Machine.Piston(50, "Arm Piston");
@@ -45,6 +50,61 @@ public class ExpressionEditorTests
         return sim;
     }
 
+    /// <summary>
+    /// A text panel's text calculated on the expression page is held in the step's panel as it reads, and Done saves it as
+    /// the expression, never as its words.
+    /// </summary>
+    [Fact]
+    public void ATextCalculatedForAPanelIsSavedAsTheExpression()
+    {
+        var sim = Simulation.Fresh();
+        sim.Machine.TextPanel(60, "Board");
+        sim.Tick();
+        var program = "sprocket 3 alpha 1\n\n"
+            + "let 'Board' = block 'TextPanel/LargeTextPanel' [ 60, [ (60 0 0) ], \"Board\" ]\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Sign\n{\n"
+            + "    required slot board expects sprocket.screen\n"
+            + "    optional slot Reach expects real = 5\n\n"
+            + "    sequence 1 {\n        call sprocket.show_text(\"Shut\") on [ board ]\n    }\n}\n\n"
+            + "instance 1 of \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as 'Installation 1' {\n    board = [ sprocket.get_screen(1) on [ 'Board' ] ]\n}\n";
+        Assert.Equal("", ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        OpenValues(sim);
+        Assert.IsType<PickPage>(sim.Editor.Current);
+        var form = sim.Editor.Pick().Arguments!.Form;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueExpression);
+        sim.Tick();
+
+        var builder = Assert.IsType<ExpressionPage>(sim.Editor.Current);
+        var draft = builder.Panel.Draft;
+        draft.Remove(draft.Root);
+        draft.Fill((DraftHole)draft.Root, new DraftJoin(JoinKind.Add));
+        draft.Fill((DraftHole)((DraftJoin)draft.Root).Parts[0], new DraftValue(new Framework.Model.Expressions.Operand(Literal.Of("Reach "))));
+        draft.Fill((DraftHole)((DraftJoin)draft.Root).Parts[1], new DraftValue(new Framework.Model.Expressions.Operand(Literal.Setting("Reach"))));
+        Assert.True(builder.Panel.Reads, builder.Panel.Why);
+        builder.Primary();
+        sim.Tick();
+
+        Assert.Equal("\"Reach \" + Reach", form.Fields[0].Text);
+        sim.Editor.Current.Primary();
+        sim.Tick();
+
+        var act = Assert.IsType<Act>(Assert.Single(sequence.Steps));
+        Assert.True(act.Arguments[0].IsExpression, act.Arguments[0].Said);
+        Assert.Equal("\"Reach \" + Reach", act.Arguments[0].Tree.Written);
+    }
+
     static Simulation Moving(out AutomationSystem system, out Sequence sequence) =>
         Arm("call sprocket.move_to(" + Expression + ", 0.3) on [ arm ]", out system, out sequence);
 
@@ -54,24 +114,24 @@ public class ExpressionEditorTests
         sim.Tick();
     }
 
-    /// <summary>A step given an expression says it as one chip, in the expression's own words.</summary>
+    /// <summary>A step given an expression says it as one chip, reading as mathematics writes it rather than as the script does.</summary>
     [Fact]
     public void AStepGivenAnExpressionShowsItsText()
     {
         var sim = Moving(out _, out _);
 
         var slot = sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().First();
-        Assert.Contains(Expression, SentenceText.Given(slot));
+        Assert.Contains(Shown, SentenceText.Given(slot));
     }
 
-    /// <summary>The panel opens on the expression's text, and closing it without a change leaves the step as it was.</summary>
+    /// <summary>The panel opens on the expression as it reads, and closing it without a change leaves the step as it was.</summary>
     [Fact]
     public void ClosingThePanelUnchangedKeepsTheExpression()
     {
         var sim = Moving(out _, out var sequence);
         OpenValues(sim);
         var page = Assert.IsType<SequencePage>(sim.Editor.Current);
-        Assert.Equal(Expression, page.Giving!.Form.Fields[0].Text);
+        Assert.Equal(Shown, page.Giving!.Form.Fields[0].Text);
 
         page.Giving!.Done();
         sim.Tick();
@@ -124,8 +184,7 @@ public class ExpressionEditorTests
         page.Giving!.Form.MarkOf(0)!.Command!.Execute();
         sim.Tick();
 
-        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
-        sim.Editor.PressAnswer(answers.First(answer => answer.StartsWith("Reach")));
+        sim.Editor.PressAnswer("Reach");
         sim.Tick();
         page.Giving!.Done();
         sim.Tick();
@@ -154,19 +213,22 @@ public class ExpressionEditorTests
         Assert.Equal(7, act.Arguments[0].Number);
     }
 
-    /// <summary>A wait holding an expression says it in the expression's words, and is saved as written.</summary>
+    /// <summary>A wait holding an expression shows it as it reads, its calculations as mathematics writes them, and is saved as written.</summary>
     [Fact]
     public void AWaitGivenAnExpressionShowsItsText()
     {
         var sim = Arm("wait setting(Pause) * 2", out _, out var sequence);
 
         var slot = sim.Editor.StepRows()[0].Slots.OfType<DurationSlot>().Single();
-        Assert.Equal("setting(Pause) * 2", slot.Expression);
+        Assert.Equal("Pause × 2", slot.Expression);
         Assert.Contains("wait setting(Pause) * 2\n", ProgramWriter.Save(sim.Editor.Program, sim.World.Values));
         Assert.NotNull(Assert.IsType<Wait>(Assert.Single(sequence.Steps)).Expression);
     }
 
-    /// <summary>A length given in the panel of a wait holding an expression takes its place, as one change that undoing brings the expression back from; leaving the panel as it is keeps it.</summary>
+    /// <summary>
+    /// A wait holding an expression opens the page it is built on; a length given there takes its place, as one change that
+    /// undoing brings the expression back from, and leaving the page as it is keeps it.
+    /// </summary>
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -175,14 +237,17 @@ public class ExpressionEditorTests
         var sim = Arm("wait setting(Pause) * 2", out var system, out var sequence);
         sim.Editor.StepRows()[0].Slots.OfType<DurationSlot>().Single().Opens!.Execute();
         sim.Tick();
-        var panel = Assert.IsType<SequencePage>(sim.Editor.Current).Lengths!;
+        sim.Tick();
+        var builder = Assert.IsType<ExpressionPage>(sim.Editor.Current);
         if (changed)
         {
-            panel.Box.SelectAll();
-            panel.Box.Insert("4");
+            builder.Panel.Draft.Remove(builder.Panel.Draft.Root);
+            builder.Panel.Draft.Fill((DraftHole)builder.Panel.Draft.Root, new DraftValue(new Framework.Model.Expressions.Operand(Literal.Of(Duration.OfSeconds(4)))));
         }
 
-        panel.Box.Submit!.Execute();
+        builder.Panel.Reckon();
+        Assert.True(builder.Panel.Reads, builder.Panel.Why);
+        builder.Primary();
         sim.Tick();
 
         var wait = Assert.IsType<Wait>(Assert.Single(sequence.Steps));
@@ -200,7 +265,7 @@ public class ExpressionEditorTests
     }
 
     /// <summary>A blueprint holding <paramref name="line" /> among its triggers and steps, its triggers tab open.</summary>
-    static Simulation Loaded(string line, out AutomationSystem system)
+    internal static Simulation Loaded(string line, out AutomationSystem system)
     {
         var sim = Simulation.Fresh();
         sim.Machine.Piston(50, "Arm Piston");
@@ -228,29 +293,29 @@ public class ExpressionEditorTests
         return sim;
     }
 
-    /// <summary>A clock whose interval is an expression says it in the expression's words, and is saved as written.</summary>
+    /// <summary>A clock whose interval is an expression shows it as it reads, and is saved as written.</summary>
     [Fact]
     public void AClockGivenAnExpressionShowsItsText()
     {
         var sim = Loaded("every Pause * 2 run 1", out _);
 
         var slot = sim.Editor.Triggers()[0].Starts.OfType<DurationSlot>().Single();
-        Assert.Equal("Pause * 2", slot.Expression);
+        Assert.Equal("Pause × 2", slot.Expression);
         Assert.Contains("    every Pause * 2 run 1\n", ProgramWriter.Save(sim.Editor.Program, sim.World.Values));
     }
 
-    /// <summary>What a watcher compares with is an expression's chip, and the watcher is saved as written.</summary>
+    /// <summary>What a watcher compares with is an expression's chip, reading as mathematics writes it, and the watcher is saved as written.</summary>
     [Fact]
     public void AWatcherGivenAnExpressionShowsItsText()
     {
         var sim = Loaded("when all sprocket.position on [ arm ] > Reach * 2 then run 1", out _);
 
         var slot = sim.Editor.Triggers()[0].Starts.OfType<ArgumentsSlot>().Single(part => part.Holds == ArgumentRole.Checked);
-        Assert.Contains("Reach * 2", SentenceText.Given(slot));
+        Assert.Contains("Reach × 2", SentenceText.Given(slot));
         Assert.Contains("    when all sprocket.position on [ arm ] > Reach * 2 then run 1\n", ProgramWriter.Save(sim.Editor.Program, sim.World.Values));
     }
 
-    /// <summary>An abort whose message is an expression says it in the expression's words and keeps it when its level is changed.</summary>
+    /// <summary>An abort whose message is an expression shows it as it reads, its text quoted, and keeps it when its level is changed.</summary>
     [Fact]
     public void AnAbortGivenAnExpressionShowsItsText()
     {
@@ -262,7 +327,7 @@ public class ExpressionEditorTests
         Assert.NotNull(Assert.IsType<Abort>(Assert.Single(sequence.Steps)).Expression);
     }
 
-    /// <summary>A step setting a state to an expression says the expression, and is saved as written.</summary>
+    /// <summary>A step setting a state to an expression shows the block value by its name, never in the script's words, and is saved as written.</summary>
     [Fact]
     public void ASetStateGivenAnExpressionShowsItsText()
     {
@@ -278,7 +343,8 @@ public class ExpressionEditorTests
             sim.Tick();
 
         var slot = sim.Editor.StepRows()[1].Slots.OfType<ArgumentsSlot>().Single();
-        Assert.Contains("sprocket.stopped on [ arm ]", SentenceText.Given(slot));
+        Assert.DoesNotContain("sprocket.", SentenceText.Given(slot));
+        Assert.Contains("arm", SentenceText.Given(slot));
         Assert.Contains("set lit to sprocket.stopped on [ arm ]\n", ProgramWriter.Save(sim.Editor.Program, sim.World.Values));
     }
 
@@ -291,7 +357,7 @@ public class ExpressionEditorTests
         var test = sequence.Steps.OfType<If>().Single().Compared!;
         Assert.True(test.Value.IsExpression);
         var slot = sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().Single(part => part.Holds == ArgumentRole.Checked);
-        Assert.Contains("Reach * 2", SentenceText.Given(slot));
+        Assert.Contains("Reach × 2", SentenceText.Given(slot));
         Assert.Contains("> Reach * 2 then", ProgramWriter.Save(sim.Editor.Program, sim.World.Values));
     }
 }

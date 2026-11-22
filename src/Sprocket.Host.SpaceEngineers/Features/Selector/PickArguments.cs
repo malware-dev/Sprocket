@@ -25,8 +25,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         readonly Func<bool> _complete;
         readonly bool _forEvents;
         readonly bool _forTests;
+        readonly bool _forReadings;
         readonly bool _opensHere;
         readonly List<Literal> _arrivedValues = new List<Literal>();
+
+        // The form the options are given in, whose expressions a line of its words is read back with.
+        FieldSet _form;
         readonly List<string> _filled = new List<string>();
         readonly List<Field> _nothing = new List<Field>();
         readonly List<Field> _shownFields = new List<Field>();
@@ -42,11 +46,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>
         /// The arguments asked on <paramref name="page" /> for what <paramref name="picked" /> holds, which opened as
         /// <paramref name="arrived" /> holds it, given <paramref name="arguments" /> or none; they are asked only once
-        /// <paramref name="complete" /> says the pick can be finished, and take the keyboard once where <paramref name="opensHere" />.
+        /// <paramref name="complete" /> says the pick can be finished, and take the keyboard once where <paramref name="opensHere" />;
+        /// where <paramref name="forReadings" />, only the options a value is read with are asked, as an expression reads it.
         /// </summary>
         public PickArguments(SprocketEditor editor, EditorPage page, PickChoices picked, PickChoices arrived, IList<Literal> arguments,
-            Func<bool> complete, bool forEvents, bool forTests, bool opensHere)
+            Func<bool> complete, bool forEvents, bool forTests, bool opensHere, bool forReadings = false)
         {
+            _forReadings = forReadings;
             _editor = editor;
             _page = page;
             _picked = picked;
@@ -91,6 +97,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             string value = "", state;
             var stated = _forTests && ComparisonQuestion.Split(_picked.Member.Id, out value, out state);
             var read = stated ? _picked.Member.WithId(value) : _picked.Member;
+            if (_forReadings)
+                return ComparisonQuestion.Parameters(Vocabulary.ValueOf(_editor.World, selection, read));
+
             return ComparisonQuestion.Asked(Vocabulary.ValueOf(_editor.World, selection, read), Vocabulary.EventsOf(_editor.World, selection), stated);
         }
 
@@ -159,7 +168,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         public List<Literal> Read(string said)
         {
             var fields = Wanted();
-            var arguments = FieldSet.Read(said, fields, _arrivedValues);
+            var held = new List<Literal>(_arrivedValues);
+            if (_form != null)
+                held.AddRange(_form.Holding());
+
+            var arguments = FieldSet.Read(said, fields, held);
             var at = 0;
             for (var f = 0; f < fields.Count && at < arguments.Count; f++)
             {
@@ -220,8 +233,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             strip.Sourced = system != null && system.IsBlueprint ? field => SettingTypes.Of(field) != null : (Func<Field, bool>)null;
             var made = strip.Arguments == null;
             var arguments = strip.Restate(shown, chosenName, fields, Filled, new ColorOffer(colors, _editor.Viewer, _editor.Preferred));
+            _form = arguments.Form;
             if (system != null && _arrivedValues.Count > 0 && _picked.Member == _arrived.Member && _picked.Form == _arrived.Form)
-                SettingSources.Given(arguments.Form, system, fields, _arrivedValues);
+                SettingSources.Given(_editor, arguments.Form, system, fields, _arrivedValues);
 
             Target.Reads(arguments.Form);
             if (_offering)

@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Features.Mods;
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Sequences.Edits;
@@ -6,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format.Repairs;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
@@ -300,14 +302,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>
         /// Offers the values the state <paramref name="step" /> sets can hold in a menu under the part pressed, and sets it to the
-        /// one chosen as one edit; the value of another state opens the selector. A new setting is asked in a panel hung from what
-        /// <paramref name="part" /> finds.
+        /// one chosen as one edit; the value of another state opens the selector, and an expression the page it is built on. A new
+        /// setting is asked in a panel hung from what <paramref name="part" /> finds.
         /// </summary>
         public void SetStateTo(SetState step, Func<Element> part)
         {
-            StateValueQuestion.Offer(_editor, _sequence.System, step.State, step.Value, step.From, part, value =>
-                _editor.Do(_sequence, new ChangeSetState(_sequence.Steps.IndexOf(step), step, new SetState { State = step.State, Value = value })),
-                () => ChangeSetState(step));
+            StateValueQuestion.Offer(_editor, _sequence.System, step.State, step.Value, step.From, part, value => SetStateTo(step, value),
+                () => ChangeSetState(step), () => BuildStateValue(step));
+        }
+
+        /// <summary>Has <paramref name="step" /> set its state to <paramref name="value" />, an expression, a setting or a value of its own, as one edit.</summary>
+        void SetStateTo(SetState step, Literal value)
+        {
+            var index = _sequence.Steps.IndexOf(step);
+            if (index < 0)
+                return;
+
+            var now = value.IsExpression ? new SetState { State = step.State, Expression = value.Tree } : new SetState { State = step.State, Value = value };
+            _editor.Do(_sequence, new ChangeSetState(index, step, now));
+        }
+
+        /// <summary>Opens the page the value <paramref name="step" /> sets its state to is built on as an expression, which changes it as one edit when done.</summary>
+        void BuildStateValue(SetState step)
+        {
+            var state = _sequence.System.FindState(step.State);
+            if (state == null)
+                return;
+
+            var start = step.Expression != null ? Literal.Worked(step.Expression)
+                : step.From.Length > 0 ? (Literal?)null
+                : step.Value;
+            _editor.Push(new ExpressionPage(_editor, _sequence.System, state.IsFlag ? "flag" : state.Type, step.State, start, built => SetStateTo(step, built)));
         }
 
         /// <summary>The picker a test of a state is made and changed with, its sentence led by <paramref name="lead" />, opened on <paramref name="test" /> where there is one.</summary>
@@ -580,14 +605,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _editor.Do(_sequence, new SetWait(index, wait.Length, wait.Setting, now, setting, wait.Expression));
         }
 
-        /// <summary>Gives <paramref name="abort" /> the <paramref name="message" />, or the setting <paramref name="setting" /> where it is not empty, and <paramref name="level" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
-        public void Closed(Abort abort, string message, string setting, AbortLevel level, bool cancelled)
+        /// <summary>Opens the page the length of the wait at <paramref name="index" /> is built on as an expression, which changes it as one edit when done.</summary>
+        public void BuildLength(int index)
+        {
+            var wait = _sequence.Steps[index] as Wait;
+            if (wait == null)
+                return;
+
+            var start = wait.Expression != null ? Literal.Worked(wait.Expression)
+                : wait.Setting.Length > 0 ? Literal.Setting(wait.Setting)
+                : Literal.Of(wait.Length);
+            _editor.Push(new ExpressionPage(_editor, _sequence.System, "duration", SentenceText.WaitWord, start, built => Lasting(index, built)));
+        }
+
+        /// <summary>Has the wait at <paramref name="index" /> last as <paramref name="built" /> says: an expression, a setting or a length of its own.</summary>
+        void Lasting(int index, Literal built)
+        {
+            var wait = index < _sequence.Steps.Count ? _sequence.Steps[index] as Wait : null;
+            if (wait == null)
+                return;
+
+            var edit = built.IsExpression ? new SetWait(index, wait.Length, wait.Setting, wait.Length, "", wait.Expression, built.Tree)
+                : built.IsSetting ? new SetWait(index, wait.Length, wait.Setting, wait.Length, built.Text, wait.Expression)
+                : new SetWait(index, wait.Length, wait.Setting, built.Length, "", wait.Expression);
+            _editor.Do(_sequence, edit);
+        }
+
+        /// <summary>Gives <paramref name="abort" /> the <paramref name="message" />, or the setting <paramref name="setting" /> where it is not empty, or <paramref name="expression" /> where it is given, and <paramref name="level" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
+        public void Closed(Abort abort, string message, string setting, Expression expression, AbortLevel level, bool cancelled)
         {
             var index = _sequence.Steps.IndexOf(abort);
             if (index < 0 || cancelled)
                 return;
 
-            _editor.Do(_sequence, new SetAbort(index, abort, message, setting, level));
+            _editor.Do(_sequence, new SetAbort(index, abort, message, setting, expression, level));
         }
 
         /// <summary>Deletes the step at <paramref name="index" />; an if, or a branch of one, asks first whether the steps in it go too.</summary>

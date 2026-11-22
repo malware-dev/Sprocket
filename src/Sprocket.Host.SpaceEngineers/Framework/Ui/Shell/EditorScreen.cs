@@ -328,6 +328,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             _revision++;
         }
 
+        /// <summary>Adds <paramref name="answer" /> to the menu <paramref name="opening" />, one of the standing question's answers, opens; the one Enter takes where <paramref name="byDefault" />.</summary>
+        public void AnswerWithin(ChoiceEntry opening, ChoiceEntry answer, bool byDefault)
+        {
+            opening.Within.Add(answer);
+            if (byDefault)
+                _default = answer;
+
+            _revision++;
+        }
+
         /// <summary>Takes the standing question away, answers and all.</summary>
         public void Unask()
         {

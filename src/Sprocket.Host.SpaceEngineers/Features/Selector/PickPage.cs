@@ -52,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
         /// them. <paramref name="signalsOnly" /> offers only what the construct does to start something, for a signal slot.
         /// <paramref name="forTests" /> offers what an if can test.
+        /// <paramref name="forReadings" /> offers what an expression can read: what an if can test, without what it is compared to.
         /// <paramref name="facet" /> is the name of the facet the step acts on, where what it does is a member of a type the host
         /// provides.
         /// </remarks>
@@ -59,10 +60,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             IList<long> targets, MemberKey chosen, ReachKind chosenForm, Action<PickAnswer> done,
             bool asksAll = false, Quantifier quantifier = Quantifier.Any, IList<Literal> arguments = null,
             OpeningColumn opens = OpeningColumn.Blocks, OutcomeColumn aim = null, Func<GridEntity, bool> admits = null,
-            bool signalsOnly = false, bool forTests = false, string facet = "")
+            bool signalsOnly = false, bool forTests = false, string facet = "", bool forReadings = false)
             : base(editor)
         {
             _picked.Facet = facet ?? "";
+            forTests = forTests || forReadings;
             _opens = opens;
             _aim = aim;
             if (aim != null)
@@ -100,13 +102,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
 
             _arrived = _picked.Copy();
             _arguments = new PickArguments(editor, this, _picked, _arrived, arguments, () => IsComplete, forEvents, forTests,
-                opens == OpeningColumn.Arguments);
+                opens == OpeningColumn.Arguments, forReadings);
             if (flipped != null)
                 _arguments.Arrive(Literal.Of(EntityAction.Toggle));
 
             _arguments.Target.SourceName = () => _slotHeading?.NewName ?? "";
-            _members = new MemberStage(editor, _picked, forEvents, forTests, signalsOnly);
-            _blocks = new BlockStage(editor, _picked, editor.Opener, admits, forEvents, forTests, asksAll, signalsOnly);
+            _members = new MemberStage(editor, _picked, forEvents, forTests, signalsOnly, forReadings);
+            _blocks = new BlockStage(editor, _picked, editor.Opener, admits, forEvents, forTests, asksAll, signalsOnly, forReadings);
         }
 
         /// <summary>Asks which blocks fill a slot: the blocks alone, only those <paramref name="fits" /> allows, starting from <paramref name="targets" />.</summary>

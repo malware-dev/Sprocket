@@ -57,15 +57,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         /// <summary>
         /// The member stage of a pick of <paramref name="picked" />: what happens to the blocks where <paramref name="forEvents" />,
         /// what can be checked of them where <paramref name="forTests" />, only what starts something for a signal slot where
-        /// <paramref name="signalsOnly" />, and otherwise what can be done to them.
+        /// <paramref name="signalsOnly" />, and otherwise what can be done to them; what an expression can read of them where <paramref name="forReadings" />.
         /// </summary>
-        public MemberStage(SprocketEditor editor, PickChoices picked, bool forEvents, bool forTests, bool signalsOnly)
+        public MemberStage(SprocketEditor editor, PickChoices picked, bool forEvents, bool forTests, bool signalsOnly, bool forReadings = false)
         {
             _editor = editor;
             _picked = picked;
             _forEvents = forEvents;
             _forTests = forTests;
-            _offers = new MemberOffers(editor, forEvents, forTests, signalsOnly);
+            _offers = new MemberOffers(editor, forEvents, forTests, signalsOnly, forReadings);
             _occupancy = new SlotOccupancy(editor);
         }
 

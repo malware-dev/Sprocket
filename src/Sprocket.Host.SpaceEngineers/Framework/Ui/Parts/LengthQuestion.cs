@@ -28,11 +28,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>
         /// A panel opening on <paramref name="start" />, or on the setting <paramref name="setting" /> of <paramref name="system" /> where
         /// it is not empty, cautioning about cost where it is a <paramref name="rate" />, hung from what <paramref name="chip" /> finds,
-        /// and <paramref name="answered" /> with the length and the setting it closes on and whether it was put away.
+        /// and <paramref name="answered" /> with the length and the setting it closes on and whether it was put away; where <paramref name="expression" /> is given, the link mark offers an expression, which it is carried out for.
         /// </summary>
         /// <remarks>A setting may give the length where <paramref name="system" /> is a blueprint.</remarks>
         public LengthQuestion(SprocketEditor editor, AutomationSystem system, Duration start, string setting, bool rate, Func<Element> chip,
-            Action<Duration?, string, bool> answered)
+            Action<Duration?, string, bool> answered, Action expression = null)
         {
             _editor = editor;
             _answered = answered;
@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             _panel.Sourcing += mark => SettingSources.Offer(editor, system, type => type == "duration", _panel.Setting, _panel.Choose,
                 () => _making = SettingSources.New(editor, system, "duration", Literal.Of(_panel.Length ?? Duration.OfSeconds(1)), () => mark,
-                    made => _panel.Choose(made, SettingSources.Default(system, made)), () => _making = null));
+                    made => _panel.Choose(made, SettingSources.Default(system, made)), () => _making = null), expression);
             _panel.Submitted += Accept;
             _panel.Cancelled += () => Finish(true);
             _panel.Switched += editor.Prefer;

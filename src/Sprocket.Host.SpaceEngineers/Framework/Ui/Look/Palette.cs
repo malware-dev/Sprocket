@@ -80,6 +80,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <remarks>Every wash stays darker than <see cref="Panel" />, so a row's kind never rests on hue alone.</remarks>
         public static readonly Color LiveWash = new Color(14, 40, 10);
 
+        /// <summary>The ground of the place something dragged would be dropped on: <see cref="LiveWash" />, brighter.</summary>
+        public static readonly Color LiveWashHot = new Color(30, 78, 20);
+
         /// <summary>The ink of something wrong: its words, its mark, and the edge of a refusing box.</summary>
         public static readonly Color Problem = new Color(232, 74, 58);
 

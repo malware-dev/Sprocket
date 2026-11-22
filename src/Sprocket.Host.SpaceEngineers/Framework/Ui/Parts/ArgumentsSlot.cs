@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using System;
@@ -58,6 +59,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
         /// <summary>What the arguments are to what holds them.</summary>
         public ArgumentRole Holds => _holds;
+
+        /// <summary>Has each field given an expression show it in the words <paramref name="shows" /> gives it, rather than the script's.</summary>
+        public void ShowExpressions(Func<Expression, string> shows)
+        {
+            var at = 0;
+            for (var i = 0; i < _fields.Count && i < _filled.Count; i++)
+            {
+                if (at < _arguments.Count && _arguments[at].IsExpression)
+                    _filled[i] = _fields[i].Wording(shows(_arguments[at].Tree));
+
+                at += _fields[i].Covers;
+            }
+        }
 
         readonly Color? _sample;
 

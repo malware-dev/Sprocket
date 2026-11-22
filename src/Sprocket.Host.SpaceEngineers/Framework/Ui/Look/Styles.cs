@@ -941,6 +941,56 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             [LookStates.Chosen] = { Color = Palette.Ink, Background = Palette.Line }
         };
 
+        /// <summary>A box of an expression being built, joining the values in it, edged where what is dragged can go on it.</summary>
+        public static readonly IStyle<Stack> ExpressionBox = new StackStyle
+        {
+            Base = { Background = Palette.Well, Border = Palette.Line, Padding = new Thickness(4f), Spacing = Gaps.Parts },
+            [LookStates.Lit] = { Border = Palette.Live, BorderThickness = 2f },
+            [LookStates.Aimed] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
+        };
+
+        /// <summary>An empty place in an expression being built, lit where what is dragged can go in it.</summary>
+        public static readonly IStyle<Stack> ExpressionHole = new StackStyle
+        {
+            Base = { Background = Palette.Page, Border = Palette.ControlEdge, Padding = new Thickness(12f, 4f) },
+            [LookStates.Lit] = { Border = Palette.Live, Background = Palette.LiveWash, BorderThickness = 2f },
+            [LookStates.Aimed] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
+        };
+
+        /// <summary>A value in an expression being built: square, like the editor's other chips, its kind told by a lit left edge and a small word.</summary>
+        public static readonly IStyle<Stack> ExpressionChip = new StackStyle
+        {
+            Base = { Background = Palette.SlotFill, Border = Palette.Line, Padding = new Thickness(0f, 0f, 8f, 0f), Spacing = Gaps.Parts },
+            [LookStates.Lit] = { Border = Palette.Live, BorderThickness = 2f },
+            [LookStates.Aimed] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
+        };
+
+        /// <summary>The well an expression is built in, across the page.</summary>
+        public static readonly IStyle<Stack> ExpressionLine = new StackStyle
+        {
+            Base = { Background = Palette.Well, Border = Palette.Line, Padding = new Thickness(12f, 16f) }
+        };
+
+        /// <summary>A shelf of the tray over an expression being built: its heading over the pieces it holds.</summary>
+        public static readonly IStyle<Stack> ExpressionShelf = new StackStyle
+        {
+            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(8f), Spacing = Gaps.Parts }
+        };
+
+        /// <summary>A piece to drag into an expression being built: a calculation or a kind of value.</summary>
+        public static readonly IStyle<Stack> ExpressionPiece = new StackStyle
+        {
+            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(4f, 4f, 12f, 4f), Spacing = Gaps.Parts }
+        };
+
+        /// <summary>Where a part of an expression being built is dropped to remove it, washed red while what is dragged can go in it.</summary>
+        public static readonly IStyle<Stack> ExpressionBin = new StackStyle
+        {
+            Base = { Background = Palette.Well, Border = Palette.ControlEdge, Padding = new Thickness(12f, 8f) },
+            [LookStates.Lit] = { Border = Palette.Problem, BorderThickness = 2f },
+            [LookStates.Aimed] = { Background = Palette.WrongFill, Border = Palette.Problem, BorderThickness = 3f }
+        };
+
         /// <summary>A length to pick in a row of them, its words given the row's narrow width.</summary>
         public static readonly IStyle<Button> LengthPick = new ButtonStyle(Word)
         {

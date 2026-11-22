@@ -1,5 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Lumel.Controls;
@@ -118,11 +120,12 @@ public class AbortEditorTests
         var form = Assert.IsType<SequencePage>(sim.Editor.Current).Aborting!;
         form.MarkOf(0)!.Command!.Execute();
         sim.Tick();
-        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
-        Assert.Equal(4, answers.Length);
-        Assert.Equal("Why", answers[3]);
+        var texts = sim.Editor.Texts;
+        var answers = sim.Editor.Screen.Answers;
+        Assert.Equal(new[] { texts.ValueFixed, texts.ValueSetting, texts.ValueExpression }, answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { "Why", "", texts.ValueNewSetting }, answers[1].Within.Select(answer => answer.Text).ToArray());
 
-        sim.Editor.PressAnswer(answers[3]);
+        sim.Editor.PressAnswer("Why");
         sim.Tick();
         Assert.Equal("Why", form.SettingAt(0));
         form.Parent!.Within().OfType<Button>().Single(button => button.Text == sim.Editor.Texts.ChromeDone).Command!.Execute();
@@ -134,6 +137,57 @@ public class AbortEditorTests
         sim.Editor.Undo(system, sequence);
         Assert.Equal("", abort.Setting);
         Assert.Equal("Stuck", abort.Message);
+    }
+
+    /// <summary>
+    /// A message calculated on the expression page is held in the abort's panel as it reads, and Done saves it as the
+    /// expression, never as its words.
+    /// </summary>
+    [Fact]
+    public void AMessageCalculatedIsSavedAsTheExpression()
+    {
+        var sim = Simulation.Fresh();
+        const string program = "sprocket 3 alpha 1\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Hatch\n{\n"
+            + "    optional slot Glow expects real = 1.5\n\n"
+            + "    sequence 1 {\n        abort saying \"Stuck\" as warning\n    }\n}\n";
+        Assert.Equal("", Framework.Language.Reading.ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().Single().Opens!.Execute();
+        sim.Tick();
+        var form = Assert.IsType<SequencePage>(sim.Editor.Current).Aborting!;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueExpression);
+        sim.Tick();
+
+        var builder = Assert.IsType<ExpressionPage>(sim.Editor.Current);
+        var draft = builder.Panel.Draft;
+        draft.Remove(draft.Root);
+        draft.Fill((DraftHole)draft.Root, new DraftJoin(JoinKind.Add));
+        var join = (DraftJoin)draft.Root;
+        draft.Fill((DraftHole)join.Parts[0], new DraftValue(new Operand(Literal.Of("Glow "))));
+        draft.Fill((DraftHole)((DraftJoin)draft.Root).Parts[1], new DraftValue(new Operand(Literal.Setting("Glow"))));
+        Assert.True(builder.Panel.Reads, builder.Panel.Why);
+        builder.Primary();
+        sim.Tick();
+
+        form = Assert.IsType<SequencePage>(sim.Editor.Current).Aborting!;
+        Assert.Equal("\"Glow \" + Glow", form.Fields[0].Text);
+        form.Parent!.Within().OfType<Button>().Single(button => button.Text == sim.Editor.Texts.ChromeDone).Command!.Execute();
+        sim.Tick();
+
+        var abort = Assert.IsType<Abort>(Assert.Single(sequence.Steps));
+        Assert.Equal("\"Glow \" + Glow", abort.Expression?.Written);
     }
 
     static Screen Added()

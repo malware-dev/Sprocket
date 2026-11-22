@@ -31,18 +31,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         readonly Button _useDefault;
         Action _defaulted;
         readonly Popup _window;
-        readonly Action<string, bool> _answered;
+        readonly Action<string, List<Literal>, bool> _answered;
 
         bool _done;
 
         /// <summary>
         /// A panel asking for <paramref name="fields" />, opening on <paramref name="given" />, hung from what
         /// <paramref name="part" /> finds, and <paramref name="answered" /> with the values it closes on, written as a line of
-        /// values, and whether it was put away; <paramref name="arranged" />, where given, places elements among the values before
-        /// they are shown.
+        /// values, the expressions that line still says, to read it back with, and whether it was put away; <paramref name="arranged" />,
+        /// where given, places elements among the values before they are shown.
         /// </summary>
         public ValuesQuestion(SprocketEditor editor, AutomationSystem system, IList<Field> fields, IList<Literal> given, Func<Element> part,
-            Action<string, bool> answered, Action<FieldSet> arranged = null)
+            Action<string, List<Literal>, bool> answered, Action<FieldSet> arranged = null)
         {
             _editor = editor;
             _system = system;
@@ -193,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             _done = true;
             _making?.Finish(true);
             _window.Close();
-            _answered(_form.Answer, cancelled);
+            _answered(_form.Answer, _form.Holding(), cancelled);
         }
 
         /// <summary>Puts the panel away, answering that it was put away, and carries out what was offered by <see cref="Defaults" />.</summary>
@@ -224,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// <summary>Shows a chip in place of each of <paramref name="fields" /> that <paramref name="given" /> gives a setting.</summary>
         void Given(IList<Field> fields, IList<Literal> given)
         {
-            SettingSources.Given(_form, _system, fields, given);
+            SettingSources.Given(_editor, _form, _system, fields, given);
         }
 
         /// <summary>

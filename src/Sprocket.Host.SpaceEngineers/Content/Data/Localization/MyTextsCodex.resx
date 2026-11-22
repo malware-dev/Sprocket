@@ -72,6 +72,10 @@
     <value>A ![](mark:setting)&amp;nbsp;**setting** allows you to adjust a logic system for each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) without changing its steps, such as how long one airlock waits before it closes. It shows up on the [installation panel](Term.InstallationPanel class=term) alongside the other slots.</value>
     <comment>Codex page on "Setting", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
+  <data name="Sprocket.Term.Expression" xml:space="preserve">
+    <value>An **expression** is a value worked out from [![](mark:value)&amp;nbsp;block values](Term.Value class=term), [![](mark:setting)&amp;nbsp;settings](Term.Setting class=term) and [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), with +, -, × and ÷ and the functions min, max, round and abs. It is built on its own page by dragging calculations and values into place. A block value read from several blocks is combined as their sum, average, lowest or highest. It is worked out each time the [step](Term.Step class=term) using it runs. Make one with "Expression…", from a value's ![](mark:link)&amp;nbsp;link mark or from the menu under the value a step sets a state to. A value that has to be fixed beforehand takes none: a state's starting value, a setting's default and an [installation](Term.Installation class=term)'s answer.</value>
+    <comment>Codex page on "Expression", shown in a tip on the line an expression is built in. It says what the term is, naming it in bold.</comment>
+  </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
     <value>A **task** is one operation: running or stopping a [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term), an [![](mark:action)&amp;nbsp;action](Term.Action class=term) on blocks, or [setting](Term.Set class=term) a [![](mark:value)&amp;nbsp;block value](Term.Value class=term).</value>
     <comment>Codex page on "Task", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
@@ -414,7 +418,7 @@
   </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
     <value>60 ticks is one second.</value>
-    <comment>Tooltip on the number box where a length of time is typed: in the panel for a wait's length on a sequence's screen, the panel for a timer trigger's interval on a logic system's screen, and the column choosing how often a new timer trigger fires.</comment>
+    <comment>Tooltip on the number box where a timespan is typed: in the panel for a wait's length on a sequence's screen, the panel for a timer trigger's interval on a logic system's screen, and the column choosing how often a new timer trigger fires.</comment>
   </data>
   <data name="Sprocket.Part.RunsAbout" xml:space="preserve">
     <value>Select which [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) this [step](Term.Step class=term) runs.</value>
@@ -843,6 +847,26 @@
   <data name="Sprocket.Setting.HoldsAbout" xml:space="preserve">
     <value>What the [setting](Term.Setting class=term) holds. It is chosen when the setting is made.</value>
     <comment>Tooltip on the label of what a setting holds, in the panel a setting is made or opened in.</comment>
+  </data>
+  <data name="Sprocket.Expression.ReadingAbout" xml:space="preserve">
+    <value>Drop it where it goes, then select blocks and one of their [![](mark:value)&amp;nbsp;block values](Term.Value class=term). Several blocks are always combined: as their sum, unless you choose average, lowest or highest.</value>
+    <comment>Tooltip on the "A reading…" button on the page an expression is built on. Pressing it opens the selector.</comment>
+  </data>
+  <data name="Sprocket.Expression.LowestAbout" xml:space="preserve">
+    <value>The lower of the two values.</value>
+    <comment>Tooltip on the "lowest of" button on the page an expression is built on.</comment>
+  </data>
+  <data name="Sprocket.Expression.HighestAbout" xml:space="preserve">
+    <value>The higher of the two values.</value>
+    <comment>Tooltip on the "highest of" button on the page an expression is built on.</comment>
+  </data>
+  <data name="Sprocket.Expression.RoundedAbout" xml:space="preserve">
+    <value>The value rounded to the nearest whole number.</value>
+    <comment>Tooltip on the "rounded" button on the page an expression is built on.</comment>
+  </data>
+  <data name="Sprocket.Expression.WithoutSignAbout" xml:space="preserve">
+    <value>The value without its minus sign, so -5 becomes 5.</value>
+    <comment>Tooltip on the "without sign" button on the page an expression is built on.</comment>
   </data>
   <data name="Sprocket.Category.Open" xml:space="preserve">
     <value>Rename this category, or have its [![](mark:sequence)&amp;nbsp;sequences](Term.Sequence class=term) run one at a time.</value>
@@ -4071,5 +4095,49 @@
   <data name="Sprocket.Share.BlueprintAbout" xml:space="preserve">
     <value>Choose who to share this blueprint with.</value>
     <comment>Tooltip on the Share... item of the Share menu of a blueprint in the library, which opens the dialog for choosing who to share it with.</comment>
+  </data>
+  <data name="Sprocket.Expression.AddAbout" xml:space="preserve">
+    <value>Adds the two values. With a text on either side, joins them as text.</value>
+    <comment>Tip of the expression builder's + piece.</comment>
+  </data>
+  <data name="Sprocket.Expression.SubtractAbout" xml:space="preserve">
+    <value>Takes the second value from the first.</value>
+    <comment>Tip of the expression builder's - piece.</comment>
+  </data>
+  <data name="Sprocket.Expression.MultiplyAbout" xml:space="preserve">
+    <value>Multiplies the two values.</value>
+    <comment>Tip of the expression builder's × piece.</comment>
+  </data>
+  <data name="Sprocket.Expression.DivideAbout" xml:space="preserve">
+    <value>Divides the first value by the second. Dividing by zero fails the step.</value>
+    <comment>Tip of the expression builder's ÷ piece.</comment>
+  </data>
+  <data name="Sprocket.Expression.NegateAbout" xml:space="preserve">
+    <value>The value with its sign turned around: 5 becomes -5.</value>
+    <comment>Tip of the expression builder's -x piece, which turns a value's sign around.</comment>
+  </data>
+  <data name="Sprocket.Expression.BinAbout" xml:space="preserve">
+    <value>Drop a value or a calculation here to remove it and leave its place empty.</value>
+    <comment>Tip of the expression builder's bin, Sprocket.Expression.Bin.</comment>
+  </data>
+  <data name="Sprocket.Expression.OptimizeAbout" xml:space="preserve">
+    <value>Works out the parts made only of fixed values, and drops what changes nothing, such as × 1 or + 0. What the expression comes to stays the same.</value>
+    <comment>Tip of Sprocket.Expression.Optimize, the button under the expression being built.</comment>
+  </data>
+  <data name="Sprocket.Expression.EmptyAbout" xml:space="preserve">
+    <value>Empty: drop a value or a calculation here.</value>
+    <comment>Tip of an empty place in the expression being built.</comment>
+  </data>
+  <data name="Sprocket.Expression.SettingAbout" xml:space="preserve">
+    <value>Drop it where it goes, then pick which setting.</value>
+    <comment>Tip of the expression builder's piece for a setting, Sprocket.Expression.Setting.</comment>
+  </data>
+  <data name="Sprocket.Expression.StateAbout" xml:space="preserve">
+    <value>Drop it where it goes, then pick which state.</value>
+    <comment>Tip of the expression builder's piece for a state, Sprocket.Expression.State.</comment>
+  </data>
+  <data name="Sprocket.Expression.TypedAbout" xml:space="preserve">
+    <value>Drop it in an empty place, then set its value right there.</value>
+    <comment>Tip of each of the expression builder's pieces for a fixed value, under Sprocket.Expression.Typed.</comment>
   </data>
 </root>

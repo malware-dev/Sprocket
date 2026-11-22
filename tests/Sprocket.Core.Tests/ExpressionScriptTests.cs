@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sharing.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
@@ -387,5 +388,80 @@ public class ExpressionScriptTests
         StateMentions.RenameState(program.Systems[0], "lit", "glowing");
 
         Assert.Contains("\"Light \" + glowing", ProgramWriter.Save(program, _store));
+    }
+
+    /// <summary>Words read as the value of a step are read: an expression comes back as the program would hold it, a literal alone as itself.</summary>
+    [Theory]
+    [InlineData("sum Radius on [ tanks ] * 10 + setting(Margin)", "sum Radius on [ tanks ] * 10 + setting(Margin)")]
+    [InlineData("(1 + 2)*3", "(1 + 2) * 3")]
+    [InlineData("lit", "lit")]
+    public void WordsReadAsAStepsValue(string words, string written)
+    {
+        var program = new Automation();
+        Assert.Equal("", Load(Program("wait 1s"), program));
+        var system = program.Systems[0];
+
+        Assert.Equal("", ExpressionReader.FromText(words, system, out var value));
+        Assert.Equal(written, value.IsExpression ? ExpressionWriter.Text(system, value.Tree) : value.Text);
+    }
+
+    /// <summary>A length alone reads as that length, as a wait takes it, where a block's value would take its number.</summary>
+    [Theory]
+    [InlineData("4s", 240)]
+    [InlineData("0.5s", 30)]
+    public void ALengthAloneReadsAsALength(string words, int ticks)
+    {
+        var program = new Automation();
+        Assert.Equal("", Load(Program("wait 1s"), program));
+
+        Assert.Equal("", ExpressionReader.FromText(words, program.Systems[0], out var value));
+        Assert.Equal(ValueKind.Duration, value.Kind);
+        Assert.Equal(ticks, value.Length.Ticks);
+    }
+
+    /// <summary>Words that are no value say what is wrong, without the line number a script's trouble starts with.</summary>
+    [Theory]
+    [InlineData("1 +")]
+    [InlineData("1 2")]
+    [InlineData("")]
+    public void WordsThatAreNoValueSayWhy(string words)
+    {
+        var program = new Automation();
+        Assert.Equal("", Load(Program("wait 1s"), program));
+
+        var why = ExpressionReader.FromText(words, program.Systems[0], out _);
+        Assert.NotEqual("", why);
+        Assert.DoesNotContain("Line ", why);
+    }
+
+    /// <summary>An expression written into a pen comes as its words and, apart, each setting, state and reading it reads, which together spell its text.</summary>
+    [Fact]
+    public void APenIsGivenTheWordsAndTheOperandsApart()
+    {
+        var program = new Automation();
+        Assert.Equal("", Load(Program("set Radius on [ pad ] to (sum Radius on [ tanks ] + setting(Margin)) * 2 + lit"), program));
+        var system = program.Systems[0];
+        var tree = ((Act)system.Sequences[0].Steps[0]).Arguments[0].Tree;
+
+        var pen = new Parts();
+        ExpressionWriter.Write(pen, system, tree);
+
+        Assert.Equal(new[] { "sum Radius on [ tanks ]", "setting(Margin)", "lit" }, pen.Operands);
+        Assert.Equal(ExpressionWriter.Text(system, tree), pen.Spelled);
+    }
+
+    /// <summary>A pen that keeps apart what it is given.</summary>
+    sealed class Parts : IExpressionPen
+    {
+        public readonly List<string> Operands = new();
+        public string Spelled = "";
+
+        public void Words(string words) => Spelled += words;
+
+        public void Operand(Expression operand, string written)
+        {
+            Operands.Add(written);
+            Spelled += written;
+        }
     }
 }

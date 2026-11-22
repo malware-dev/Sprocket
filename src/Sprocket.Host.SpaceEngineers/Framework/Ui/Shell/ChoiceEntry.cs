@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
@@ -33,5 +34,29 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         /// <summary>Whether it is a line between answers rather than an answer.</summary>
         public bool IsRule { get; private set; }
+
+        /// <summary>The answers it opens beside itself, in a menu of answers, or none for an answer that is chosen.</summary>
+        public List<ChoiceEntry> Within { get; } = new List<ChoiceEntry>();
+
+        /// <summary>An answer reading <paramref name="text" /> that opens the answers <see cref="Within" /> it rather than being chosen.</summary>
+        public static ChoiceEntry Opening(string text)
+        {
+            return new ChoiceEntry(text, false, null);
+        }
+
+        /// <summary>Whether <paramref name="answer" /> is this one or stands among those it opens.</summary>
+        public bool Holds(ChoiceEntry answer)
+        {
+            if (answer == this)
+                return true;
+
+            foreach (var within in Within)
+            {
+                if (within.Holds(answer))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

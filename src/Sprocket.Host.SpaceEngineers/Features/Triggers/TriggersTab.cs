@@ -1,9 +1,11 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.States;
 using Sprocket.Host.SpaceEngineers.Features.Triggers.Edits;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Arranging;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
@@ -96,6 +98,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                     row.Indented = trigger.Category.Length > 0;
                     row.Grips(editable, editable ? texts.Codex.TriggerDrag : locked);
                     Word(row, trigger);
+                    Readable(row.Starts);
+                    Readable(row.Does);
                     continue;
                 }
 
@@ -152,11 +156,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 _values.Hang();
         }
 
+        // Has each part of slots given an expression show it as it reads.
+        void Readable(List<SentenceSlot> slots)
+        {
+            foreach (var slot in slots)
+                (slot as ArgumentsSlot)?.ShowExpressions(Shown);
+        }
+
+        // How expression reads where it stands in a trigger, or null where there is none.
+        string Shown(Expression expression) => expression == null ? null : ExpressionShown.Of(_editor, _system, expression);
+
         /// <summary>Opens the panel the rate of <paramref name="every" /> is given in, which changes it as it closes.</summary>
         void OpenRate(EveryTrigger every)
         {
             if (_rate != null)
                 _rate.Finish(false);
+
+            // A rate that is an expression is changed on the page the expression is built on, which has its words.
+            if (every.IntervalExpression != null)
+            {
+                BuildRate(every);
+                return;
+            }
 
             _rate = new LengthQuestion(_editor, _system, every.Interval, every.IntervalSetting, true, () => RateChip(every),
                 (interval, setting, cancelled) =>
@@ -167,8 +188,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                     var now = setting.Length > 0 || !interval.HasValue ? every.Interval : interval.Value;
                     if (now != every.Interval || setting != every.IntervalSetting)
                         _editor.Do(_system, new SetCadence(every, every.Interval, every.IntervalSetting, now, setting, every.IntervalExpression));
+                },
+                () =>
+                {
+                    _rate.Finish(false);
+                    BuildRate(every);
                 });
             _rate.Hang();
+        }
+
+        /// <summary>Opens the page the rate of <paramref name="every" /> is built on as an expression, which changes it as one edit when done.</summary>
+        void BuildRate(EveryTrigger every)
+        {
+            var start = every.IntervalExpression != null ? Literal.Worked(every.IntervalExpression)
+                : every.IntervalSetting.Length > 0 ? Literal.Setting(every.IntervalSetting)
+                : Literal.Of(every.Interval);
+            _editor.Push(new ExpressionPage(_editor, _system, "duration", "", start, built =>
+            {
+                if (_system.IndexOfTrigger(every) < 0)
+                    return;
+
+                var edit = built.IsExpression ? new SetCadence(every, every.Interval, every.IntervalSetting, every.Interval, "", every.IntervalExpression, built.Tree)
+                    : built.IsSetting ? new SetCadence(every, every.Interval, every.IntervalSetting, every.Interval, built.Text, every.IntervalExpression)
+                    : new SetCadence(every, every.Interval, every.IntervalSetting, built.Length, "", every.IntervalExpression);
+                _editor.Do(_system, edit);
+            }));
         }
 
         /// <summary>The chip of <paramref name="every" />'s rate, or null where its row does not show one.</summary>
@@ -214,7 +258,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                row.Starts.Add(new DurationSlot(every.Interval, every.IntervalSetting, every.IntervalExpression?.Written, _changes(CommandKind.OpenTrigger, () => OpenRate(every))));
+                row.Starts.Add(new DurationSlot(every.Interval, every.IntervalSetting, Shown(every.IntervalExpression), _changes(CommandKind.OpenTrigger, () => OpenRate(every))));
 
             var watch = trigger as StateTrigger;
             if (watch != null)
@@ -329,16 +373,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             var checks = holds == ArgumentRole.Checked;
             var given = checks ? new[] { when.Value } : when.Arguments;
-            Action<string, bool> answered = (said, cancelled) =>
+            Action<string, List<Literal>, bool> answered = (said, held, cancelled) =>
             {
                 if (cancelled || _system.IndexOfTrigger(when) < 0)
                     return;
 
                 var now = when.Copy();
-                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, given), checks, value => now.Value = value);
+                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, held), checks, value => now.Value = value);
                 _editor.Do(_system, new ChangeTrigger(when, now));
             };
-            if (ValuesQuestion.Offer(_editor, fields, given, said => answered(said, false)))
+            if (ValuesQuestion.Offer(_editor, fields, given, said => answered(said, new List<Literal>(given), false)))
                 return;
 
             if (_values != null)

@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Slots
             }
 
             var expects = Expects(texts);
-            _question = new ValuesQuestion(_editor, null, _fields, given, mark, (said, cancelled) =>
+            _question = new ValuesQuestion(_editor, null, _fields, given, mark, (said, held, cancelled) =>
             {
                 closed();
                 if (!cancelled)

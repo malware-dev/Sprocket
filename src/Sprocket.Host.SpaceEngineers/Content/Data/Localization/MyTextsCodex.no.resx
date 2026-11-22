@@ -1617,7 +1617,7 @@
     <comment>Codex entry on the block member "speed" of ShipController, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.ShipController.ToolbarSlotIsPressed" xml:space="preserve">
-    <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når den valgte plassen på verktÃ¸ylinjen trykkes.</value>
+    <value>En [![](mark:trigger)&amp;nbsp;utløser](Term.Trigger class=term) utløses når den valgte plassen på verktøylinjen trykkes.</value>
     <comment>Codex entry on the block member "toolbar slot is pressed" of ShipController, shown in the picker when it is chosen.</comment>
   </data>
   <data name="Sprocket.Member.ShipController.GetsATargetLock" xml:space="preserve">
@@ -3841,5 +3841,56 @@
   </data>
   <data name="Sprocket.Share.BlueprintAbout" xml:space="preserve">
     <value>Velg hvem du vil dele denne plantegningen med.</value>
+  </data>
+  <data name="Sprocket.Term.Expression" xml:space="preserve">
+    <value>En **formel** er en verdi som regnes ut fra [![](mark:value)&amp;nbsp;blokkverdier](Term.Value class=term), [![](mark:setting)&amp;nbsp;innstillinger](Term.Setting class=term) og [![](mark:state)&amp;nbsp;tilstander](Term.LogicSystemStates class=term), med +, -, × og ÷ og funksjonene min, max, round og abs. Den bygges på sin egen side ved å dra utregninger og verdier på plass. En blokkverdi som leses fra flere blokker settes sammen som summen, gjennomsnittet, den laveste eller den høyeste av dem. Den regnes ut hver gang [steget](Term.Step class=term) som bruker den, kjøres. Lag en med «Formel…», fra en verdis ![](mark:link)&amp;nbsp;lenkemerke eller fra menyen under verdien et steg setter en tilstand til. En verdi som må være fastsatt på forhånd, får ingen: en tilstands startverdi, en innstillings standardverdi og svaret til en [installasjon](Term.Installation class=term).</value>
+  </data>
+  <data name="Sprocket.Expression.ReadingAbout" xml:space="preserve">
+    <value>Slipp den der den hører hjemme, og velg så blokker og en av blokkenes [![](mark:value)&amp;nbsp;blokkverdier](Term.Value class=term). Flere blokker settes alltid sammen: som summen, med mindre du velger gjennomsnitt, laveste eller høyeste.</value>
+  </data>
+  <data name="Sprocket.Expression.LowestAbout" xml:space="preserve">
+    <value>Den laveste av de to verdiene.</value>
+  </data>
+  <data name="Sprocket.Expression.HighestAbout" xml:space="preserve">
+    <value>Den høyeste av de to verdiene.</value>
+  </data>
+  <data name="Sprocket.Expression.RoundedAbout" xml:space="preserve">
+    <value>Verdien rundet av til nærmeste hele tall.</value>
+  </data>
+  <data name="Sprocket.Expression.WithoutSignAbout" xml:space="preserve">
+    <value>Verdien uten minustegn, så -5 blir 5.</value>
+  </data>
+  <data name="Sprocket.Expression.AddAbout" xml:space="preserve">
+    <value>Legger sammen de to verdiene. Hvis en av dem er en tekst, settes de sammen som tekst.</value>
+  </data>
+  <data name="Sprocket.Expression.SubtractAbout" xml:space="preserve">
+    <value>Trekker den andre verdien fra den første.</value>
+  </data>
+  <data name="Sprocket.Expression.MultiplyAbout" xml:space="preserve">
+    <value>Ganger de to verdiene.</value>
+  </data>
+  <data name="Sprocket.Expression.DivideAbout" xml:space="preserve">
+    <value>Deler den første verdien på den andre. Deling på null får steget til å feile.</value>
+  </data>
+  <data name="Sprocket.Expression.NegateAbout" xml:space="preserve">
+    <value>Verdien med motsatt fortegn: 5 blir -5.</value>
+  </data>
+  <data name="Sprocket.Expression.BinAbout" xml:space="preserve">
+    <value>Slipp en verdi eller en utregning her for å fjerne den og la plassen stå tom.</value>
+  </data>
+  <data name="Sprocket.Expression.OptimizeAbout" xml:space="preserve">
+    <value>Regner ut delene som bare består av faste verdier, og fjerner det som ikke endrer noe, som × 1 eller + 0. Hva formelen blir til, er det samme som før.</value>
+  </data>
+  <data name="Sprocket.Expression.EmptyAbout" xml:space="preserve">
+    <value>Tom: slipp en verdi eller en utregning her.</value>
+  </data>
+  <data name="Sprocket.Expression.SettingAbout" xml:space="preserve">
+    <value>Slipp den der den hører hjemme, og velg så hvilken innstilling.</value>
+  </data>
+  <data name="Sprocket.Expression.StateAbout" xml:space="preserve">
+    <value>Slipp den der den hører hjemme, og velg så hvilken tilstand.</value>
+  </data>
+  <data name="Sprocket.Expression.TypedAbout" xml:space="preserve">
+    <value>Slipp den på en tom plass, og still inn verdien med en gang.</value>
   </data>
 </root>

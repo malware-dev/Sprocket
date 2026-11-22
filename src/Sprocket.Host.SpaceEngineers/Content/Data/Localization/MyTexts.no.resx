@@ -1264,6 +1264,9 @@
   <data name="Sprocket.Value.Fixed" xml:space="preserve">
     <value>En fast verdi</value>
   </data>
+  <data name="Sprocket.Value.Setting" xml:space="preserve">
+    <value>En innstilling</value>
+  </data>
   <data name="Sprocket.Value.NewSetting" xml:space="preserve">
     <value>Ny innstilling…</value>
   </data>
@@ -2870,5 +2873,110 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   </data>
   <data name="Sprocket.Callout.New" xml:space="preserve">
     <value>**Nytt:** {said}</value>
+  </data>
+  <data name="Sprocket.Pick.HeadingReading" xml:space="preserve">
+    <value>Avlesning</value>
+  </data>
+  <data name="Sprocket.Value.Expression" xml:space="preserve">
+    <value>Formel…</value>
+  </data>
+  <data name="Sprocket.Expression.Title" xml:space="preserve">
+    <value>Regn ut en verdi</value>
+  </data>
+  <data name="Sprocket.Expression.For" xml:space="preserve">
+    <value>for {value}</value>
+  </data>
+  <data name="Sprocket.Expression.Now" xml:space="preserve">
+    <value>Gjeldende resultat: {value}</value>
+  </data>
+  <data name="Sprocket.Expression.NoValue" xml:space="preserve">
+    <value>ikke ennå</value>
+  </data>
+  <data name="Sprocket.Expression.Reading" xml:space="preserve">
+    <value>En blokkverdi…</value>
+  </data>
+  <data name="Sprocket.Expression.Setting" xml:space="preserve">
+    <value>En innstilling…</value>
+  </data>
+  <data name="Sprocket.Expression.State" xml:space="preserve">
+    <value>En tilstand…</value>
+  </data>
+  <data name="Sprocket.Expression.Lowest" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="Sprocket.Expression.Highest" xml:space="preserve">
+    <value>max</value>
+  </data>
+  <data name="Sprocket.Expression.Rounded" xml:space="preserve">
+    <value>round</value>
+  </data>
+  <data name="Sprocket.Expression.WithoutSign" xml:space="preserve">
+    <value>abs</value>
+  </data>
+  <data name="Sprocket.Expression.WrongKind" xml:space="preserve">
+    <value>Feil type: blir {kind}, må være {wanted}.</value>
+  </data>
+  <data name="Sprocket.Expression.KindSetting" xml:space="preserve">
+    <value>innstilling</value>
+  </data>
+  <data name="Sprocket.Expression.KindState" xml:space="preserve">
+    <value>tilstand</value>
+  </data>
+  <data name="Sprocket.Expression.KindReading" xml:space="preserve">
+    <value>blokkverdi</value>
+  </data>
+  <data name="Sprocket.Expression.KindSum" xml:space="preserve">
+    <value>sum</value>
+  </data>
+  <data name="Sprocket.Expression.KindAverage" xml:space="preserve">
+    <value>gjennomsnitt</value>
+  </data>
+  <data name="Sprocket.Expression.KindLowest" xml:space="preserve">
+    <value>laveste</value>
+  </data>
+  <data name="Sprocket.Expression.KindHighest" xml:space="preserve">
+    <value>høyeste</value>
+  </data>
+  <data name="Sprocket.Expression.Bin" xml:space="preserve">
+    <value>Slipp her for å fjerne</value>
+  </data>
+  <data name="Sprocket.Expression.Optimize" xml:space="preserve">
+    <value>Forenkle</value>
+  </data>
+  <data name="Sprocket.Expression.NothingToOptimize" xml:space="preserve">
+    <value>Ingenting å forenkle</value>
+  </data>
+  <data name="Sprocket.Expression.Calculations" xml:space="preserve">
+    <value>Utregninger</value>
+  </data>
+  <data name="Sprocket.Expression.CurrentValues" xml:space="preserve">
+    <value>Gjeldende verdier</value>
+  </data>
+  <data name="Sprocket.Expression.Dragging" xml:space="preserve">
+    <value>Slipp den på et markert sted. Slipp et annet sted for å avbryte.</value>
+  </data>
+  <data name="Sprocket.Expression.Empty" xml:space="preserve">
+    <value>Tom</value>
+  </data>
+  <data name="Sprocket.Expression.KindValue" xml:space="preserve">
+    <value>verdi</value>
+  </data>
+  <data name="Sprocket.Expression.Nowhere" xml:space="preserve">
+    <value>Dette har ingen plass å havne på ennå.</value>
+  </data>
+  <data name="Sprocket.Expression.Typed" xml:space="preserve">
+    <value>Skriv en verdi</value>
+  </data>
+  <data name="Sprocket.Expression.TypedNumber" xml:space="preserve">
+    <value>et tall</value>
+  </data>
+  <data name="Sprocket.Expression.TypedLength" xml:space="preserve">
+    <value>et tidsrom</value>
+  </data>
+  <data name="Sprocket.Expression.TypedText" xml:space="preserve">
+    <value>en tekst</value>
+  </data>
+  <data name="Sprocket.Expression.TypedFlag" xml:space="preserve">
+    <value>på eller av</value>
   </data>
 </root>

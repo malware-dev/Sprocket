@@ -33,7 +33,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         public static bool Fits(Field field, string type)
         {
             var wanted = Of(field);
-            return wanted != null && (type == wanted || wanted == "real" && type == "integer");
+            return wanted != null && Fits(wanted, type);
+        }
+
+        /// <summary>Whether a value of the type <paramref name="type" /> may stand where the type <paramref name="wanted" /> is asked for: one of its type, or an integer for a real.</summary>
+        public static bool Fits(string wanted, string type)
+        {
+            return type == wanted || wanted == "real" && type == "integer";
         }
     }
 }

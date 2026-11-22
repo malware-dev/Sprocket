@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
+using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
@@ -12,6 +13,48 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         public static bool Is(Value written)
         {
             return written.Form == ValueForm.Expression || written.Form == ValueForm.Reference;
+        }
+
+        /// <summary>
+        /// The value <paramref name="words" /> say, read as the value of a step of <paramref name="system" /> is: an expression, or a
+        /// literal or setting standing alone; empty where it reads, else what is wrong with it, without a line number.
+        /// </summary>
+        /// <remarks>Read with the parser and readers a program is read with, so the words mean what they would mean in it.</remarks>
+        public static string FromText(string words, AutomationSystem system, out Literal value)
+        {
+            value = default(Literal);
+            const string head = "set x on [ x ] to ";
+            var text = head + (words ?? "") + "\n";
+            var parser = new Parser(text);
+            var statements = parser.Read();
+            var trouble = new ScriptTrouble(text, parser.Trouble);
+            if (trouble.What.Length == 0 && (statements.Count != 1 || statements[0].Count < 3))
+                trouble.Say("expected a value.");
+
+            if (trouble.What.Length == 0)
+            {
+                var statement = statements[0];
+                var given = statement.ValueAt(2);
+                Duration length;
+                if (statement.Count > 3)
+                    trouble.Say(statement, "unexpected words after the value.");
+                else if (StepReader.Lasting(given, 0, out length))
+                    value = Literal.Of(length);
+                else if (!StepReader.ReadArgument(statement, given, system, trouble, out value))
+                    value = default(Literal);
+            }
+
+            return Unlined(trouble.What);
+        }
+
+        /// <summary><paramref name="what" /> without the line number a script's trouble starts with, which one line of words has no use for.</summary>
+        static string Unlined(string what)
+        {
+            if (!what.StartsWith("Line "))
+                return what;
+
+            var colon = what.IndexOf(": ", StringComparison.Ordinal);
+            return colon < 0 ? what : what.Substring(colon + 2);
         }
 
         /// <summary>

@@ -151,11 +151,13 @@ public class WaitTests
         Assert.True(panel.Sourced);
         panel.Mark.Command!.Execute();
         sim.Tick();
-        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
-        Assert.Equal(4, answers.Length);
-        Assert.StartsWith("Pause", answers[3]);
+        var texts = sim.Editor.Texts;
+        var answers = sim.Editor.Screen.Answers;
+        Assert.Equal(new[] { texts.ValueFixed, texts.ValueSetting, texts.ValueExpression }, answers.Select(answer => answer.Text).ToArray());
+        var pause = answers[1].Within[0].Text;
+        Assert.StartsWith("Pause", pause);
 
-        sim.Editor.PressAnswer(answers[3]);
+        sim.Editor.PressAnswer(pause);
         sim.Tick();
         Assert.Equal("Pause", panel.Setting);
         panel.Box.Submit!.Execute();

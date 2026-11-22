@@ -128,7 +128,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             var field = DefaultField(texts, system, null, type, SettingEditor.Find(part.Editor), texts.SettingValue, false);
             var fields = new[] { field };
-            var question = new ValuesQuestion(editor, null, fields, new[] { Shown(type, now) }, mark, (said, cancelled) =>
+            var question = new ValuesQuestion(editor, null, fields, new[] { Shown(type, now) }, mark, (said, held, cancelled) =>
             {
                 if (cancelled)
                     return;
@@ -162,7 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             _about = PartAbout.Composer(_editor, texts.SettingAboutHint, _part != null ? _part.Annotation : "");
             var fields = _fields;
-            _question = new ValuesQuestion(_editor, null, fields, given, mark, (said, cancelled) =>
+            _question = new ValuesQuestion(_editor, null, fields, given, mark, (said, held, cancelled) =>
             {
                 closed();
                 if (!cancelled)

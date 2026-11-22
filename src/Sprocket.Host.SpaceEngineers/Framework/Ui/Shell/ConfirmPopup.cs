@@ -30,20 +30,32 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             while (Items.Count > 1)
                 Items.Remove(Items[Items.Count - 1]);
 
-            for (var i = 0; i < answers.Count; i++)
+            Fill(this, answers, taken);
+            Anchor = anchor;
+            layer.Open(this);
+        }
+
+        // Puts answers into menu, an answer with answers within it opening them as a menu of its own.
+        static void Fill(Menu menu, IList<ChoiceEntry> answers, ChoiceEntry taken)
+        {
+            foreach (var answer in answers)
             {
-                var answer = answers[i];
                 if (answer.IsRule)
                 {
-                    Items.Add(new Separator());
+                    menu.Items.Add(new Separator());
                     continue;
                 }
 
-                Items.Add(new MenuItem { Style = Styles.MenuItem, Text = answer.Text, Command = answer.Command, IsChosen = answer == taken });
-            }
+                if (answer.Within.Count == 0)
+                {
+                    menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = answer.Text, Command = answer.Command, IsChosen = answer == taken });
+                    continue;
+                }
 
-            Anchor = anchor;
-            layer.Open(this);
+                var within = new Menu { Style = Styles.Menu };
+                Fill(within, answer.Within, taken);
+                menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = answer.Text, Submenu = within, IsChosen = taken != null && answer.Holds(taken) });
+            }
         }
     }
 }

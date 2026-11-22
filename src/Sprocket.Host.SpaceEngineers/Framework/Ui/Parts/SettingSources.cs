@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
@@ -11,35 +12,36 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
     public static class SettingSources
     {
         /// <summary>
-        /// Asks under the mark just pressed where a value comes from: a fixed value, a new setting, or, after a line, each
-        /// setting of <paramref name="system" /> <paramref name="fits" /> takes, with its default; the one it comes from, <paramref name="now" />,
-        /// marked. <paramref name="chosen" /> is given the setting chosen and its default as said, or two empty texts for a fixed
-        /// value, and <paramref name="fresh" /> is carried out for a new one.
+        /// Asks under the mark just pressed where a value comes from: a fixed value, or a setting, in a menu of its own holding
+        /// each setting of <paramref name="system" /> <paramref name="fits" /> takes and, after a line, a new setting; the one it
+        /// comes from, <paramref name="now" />, marked. <paramref name="chosen" /> is given the setting chosen and its default as
+        /// said, or two empty texts for a fixed value, and <paramref name="fresh" /> is carried out for a new one. Where
+        /// <paramref name="expression" /> is given, an expression is offered last, which it is carried out for; a value that has
+        /// to be a constant is given none.
         /// </summary>
         public static void Offer(SprocketEditor editor, AutomationSystem system, Func<string, bool> fits, string now, Action<string, string> chosen,
-            Action fresh)
+            Action fresh, Action expression = null)
         {
             var texts = editor.Texts;
             editor.AskHere("");
             editor.Answer(texts.ValueFixed, () => chosen("", ""), now.Length == 0);
-            editor.Answer(texts.ValueNewSetting, fresh);
-
-            var ruled = false;
+            var settings = editor.AnswerOpening(texts.ValueSetting);
             foreach (var part in system.Parts)
             {
                 if (!part.IsSetting || !fits(part.Setting))
                     continue;
 
-                if (!ruled)
-                {
-                    editor.AnswerRule();
-                    ruled = true;
-                }
-
                 var name = part.Id;
                 var said = Default(system, name);
-                editor.Answer(name, () => chosen(name, said), name == now);
+                editor.Answer(settings, name, () => chosen(name, said), name == now);
             }
+
+            if (settings.Within.Count > 0)
+                editor.AnswerRule(settings);
+
+            editor.Answer(settings, texts.ValueNewSetting, fresh, false);
+            if (expression != null)
+                editor.Answer(texts.ValueExpression, expression);
         }
 
         /// <summary>
@@ -55,11 +57,40 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             Offer(editor, system, kind => SettingTypes.Fits(field, kind), form.SettingAt(at),
                 (setting, said) => form.Choose(at, setting, said),
                 () => making(New(editor, system, shaped != null ? shaped.Name : type, Read(type, form.ValueAt(at)), () => mark,
-                    made => form.Choose(at, made, Default(system, made)), () => making(null))));
+                    made => form.Choose(at, made, Default(system, made)), () => making(null))),
+                type == null ? null : (Action)(() => Build(editor, system, form, at, type)));
+        }
+
+        /// <summary>Opens the page the value at <paramref name="at" /> in <paramref name="form" />, of <paramref name="type" />, is built on as an expression of <paramref name="system" />.</summary>
+        public static void Build(SprocketEditor editor, AutomationSystem system, FieldSet form, int at, string type)
+        {
+            var held = form.HeldAt(at);
+            var setting = form.SettingAt(at);
+            var start = held.IsExpression ? held : setting.Length > 0 ? Literal.Setting(setting)
+                : form.ValueAt(at).Trim().Length == 0 ? (Literal?)null : Read(type, form.ValueAt(at));
+            editor.Push(new ExpressionPage(editor, system, type, form.LabelOf(at), start, built => Put(editor, system, form, at, built)));
+        }
+
+        /// <summary>Has the value at <paramref name="at" /> in <paramref name="form" /> be <paramref name="built" />: an expression held, a setting chosen, or a value of its own.</summary>
+        static void Put(SprocketEditor editor, AutomationSystem system, FieldSet form, int at, Literal built)
+        {
+            if (built.IsExpression)
+            {
+                form.Choose(at, "", "");
+                form.Hold(at, built, ExpressionShown.Of(editor, system, built.Tree));
+            }
+            else if (built.IsSetting)
+            {
+                form.Choose(at, built.Text, Default(system, built.Text));
+            }
+            else
+            {
+                form.Write(at, built.Said);
+            }
         }
 
         /// <summary>Shows in <paramref name="form" /> a chip in place of each of <paramref name="fields" /> that <paramref name="given" /> gives one of <paramref name="system" />'s settings.</summary>
-        public static void Given(FieldSet form, AutomationSystem system, IList<Field> fields, IList<Literal> given)
+        public static void Given(SprocketEditor editor, FieldSet form, AutomationSystem system, IList<Field> fields, IList<Literal> given)
         {
             var at = 0;
             for (var i = 0; i < fields.Count; i++)
@@ -67,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 if (at < given.Count && given[at].IsSetting)
                     form.Choose(i, given[at].Text, Default(system, given[at].Text));
                 else if (at < given.Count && given[at].IsExpression)
-                    form.Hold(i, given[at].Tree.Written);
+                    form.Hold(i, given[at], ExpressionShown.Of(editor, system, given[at].Tree));
 
                 at += fields[i].Covers;
             }

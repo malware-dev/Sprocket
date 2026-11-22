@@ -1,4 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
@@ -21,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         readonly SprocketEditor _editor;
         readonly FieldSet _form;
         readonly Popup _window;
-        readonly Action<string, string, AbortLevel, bool> _answered;
+        readonly Action<string, string, Expression, AbortLevel, bool> _answered;
         ValuesQuestion _making;
 
         bool _done;
@@ -33,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// </summary>
         /// <remarks>A text setting may say the message where <paramref name="system" /> is a blueprint.</remarks>
         public AbortQuestion(SprocketEditor editor, AutomationSystem system, Abort abort, Func<Element> part,
-            Action<string, string, AbortLevel, bool> answered)
+            Action<string, string, Expression, AbortLevel, bool> answered)
         {
             _editor = editor;
             _answered = answered;
@@ -50,11 +52,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _form.Show(new[] { message, level }, new[] { abort.Message, SentenceText.AbortLevels[(int)abort.Level] }, null, texts);
             if (abort.Setting.Length > 0)
                 _form.Choose(0, abort.Setting, SettingSources.Default(system, abort.Setting));
+            if (abort.Expression != null)
+                _form.Hold(0, Literal.Worked(abort.Expression), system == null ? abort.Expression.Written : ExpressionShown.Of(editor, system, abort.Expression));
 
             _form.Sourcing += (at, mark) => SettingSources.Offer(editor, system, type => type == "text", _form.SettingAt(at),
                 (setting, said) => _form.Choose(at, setting, said),
                 () => _making = SettingSources.New(editor, system, "text", Literal.Of(_form.ValueAt(at)), () => mark,
-                    made => _form.Choose(at, made, SettingSources.Default(system, made)), () => _making = null));
+                    made => _form.Choose(at, made, SettingSources.Default(system, made)), () => _making = null),
+                () => SettingSources.Build(editor, system, _form, at, "text"));
             _form.Submitted += Accept;
 
             _window = new Popup
@@ -121,7 +126,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _making?.Finish(true);
             _window.Close();
 
-            _answered(_form.Fields[0].Text, _form.SettingAt(0), SentenceText.AbortLevelOf(_form.Fields[1].Text), cancelled);
+            var held = _form.HeldAt(0);
+            _answered(_form.Fields[0].Text, _form.SettingAt(0), held.IsExpression ? held.Tree : null, SentenceText.AbortLevelOf(_form.Fields[1].Text), cancelled);
         }
     }
 }

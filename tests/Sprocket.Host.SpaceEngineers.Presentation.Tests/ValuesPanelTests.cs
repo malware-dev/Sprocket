@@ -148,7 +148,7 @@ public class ValuesPanelTests
     }
 
     /// <summary>
-    /// A value's mark offers a fixed value, the settings holding what it takes and a new one; a setting chosen stands in the
+    /// A value's mark offers a fixed value, a setting and an expression, the settings holding what it takes and a new setting in a menu of their own; a setting chosen stands in the
     /// value's place, and Enter keeps the step giving the setting, as one change.
     /// </summary>
     [Fact]
@@ -159,14 +159,16 @@ public class ValuesPanelTests
         var form = page.Giving!.Form;
         form.MarkOf(0)!.Command!.Execute();
         sim.Tick();
-        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToArray();
-        Assert.Equal(4, answers.Length);
-        Assert.Equal(sim.Editor.Texts.ValueFixed, answers[0]);
-        Assert.Equal(sim.Editor.Texts.ValueNewSetting, answers[1]);
-        Assert.True(sim.Editor.Screen.Answers[2].IsRule, "the settings stand apart, after a line");
-        Assert.StartsWith("Reach", answers[3]);
+        var texts = sim.Editor.Texts;
+        var answers = sim.Editor.Screen.Answers;
+        Assert.Equal(new[] { texts.ValueFixed, texts.ValueSetting, texts.ValueExpression }, answers.Select(answer => answer.Text).ToArray());
+        var settings = answers[1].Within;
+        Assert.Equal(3, settings.Count);
+        Assert.StartsWith("Reach", settings[0].Text);
+        Assert.True(settings[1].IsRule, "a new setting stands apart from the settings there are, after a line");
+        Assert.Equal(texts.ValueNewSetting, settings[2].Text);
 
-        sim.Editor.PressAnswer(answers[3]);
+        sim.Editor.PressAnswer(settings[0].Text);
         sim.Tick();
         Assert.NotNull(page.Giving);
         Assert.Equal("Reach", form.SettingAt(0));
@@ -182,7 +184,7 @@ public class ValuesPanelTests
     }
 
     /// <summary>The arm's blueprint, its step moving the piston, with a real setting and a text one, its page open on the step's values panel.</summary>
-    static Simulation Arm(out AutomationSystem system, out Sequence sequence)
+    internal static Simulation Arm(out AutomationSystem system, out Sequence sequence)
     {
         var sim = Simulation.Fresh();
         sim.Machine.Piston(50, "Arm Piston");
@@ -285,7 +287,8 @@ public class ValuesPanelTests
 
         sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().Single(part => part.Holds == ArgumentRole.NewValue).Opens!.Execute();
         sim.Tick();
-        var answers = sim.Editor.Screen.Answers.Select(answer => answer.Text).ToList();
+        var setting = sim.Editor.Screen.Answers.Single(answer => answer.Text == sim.Editor.Texts.ValueSetting);
+        var answers = setting.Within.Select(answer => answer.Text).ToList();
         Assert.Contains(sim.Editor.Texts.ValueNewSetting, answers);
         var home = answers.Single(answer => answer.StartsWith("Home"));
         Assert.DoesNotContain(answers, answer => answer.StartsWith("Glow"));

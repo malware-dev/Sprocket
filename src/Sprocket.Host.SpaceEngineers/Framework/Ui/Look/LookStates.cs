@@ -29,6 +29,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>A thing set aside from what it stands among: switched off, as tips are, or listed only to be read about.</summary>
         public static readonly State Off = State.Declare("Off", 50);
 
+        /// <summary>What is being dragged can be dropped on it.</summary>
+        public static readonly State Lit = State.Declare("Lit", 70);
+
+        /// <summary>What is being dragged is over it, and would be dropped on it.</summary>
+        public static readonly State Aimed = State.Declare("Aimed", 80);
+
         /// <summary>It stands under another, one step in.</summary>
         public static readonly State Nested = State.Declare("Nested", 50);
 

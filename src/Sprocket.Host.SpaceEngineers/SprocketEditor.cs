@@ -414,6 +414,27 @@ namespace Sprocket.Host.SpaceEngineers
             _screen.Answer(ChoiceEntry.Rule(), false);
         }
 
+        /// <summary>Adds to the standing question an answer reading <paramref name="text" /> that opens a menu of its own, after the answers already offered, and returns it to give answers within.</summary>
+        public ChoiceEntry AnswerOpening(string text)
+        {
+            var opening = ChoiceEntry.Opening(text);
+            _screen.Answer(opening, false);
+            return opening;
+        }
+
+        /// <summary>Adds the answer <paramref name="text" />, carrying out <paramref name="chosen" />, to the menu <paramref name="opening" /> opens, after the answers already in it; the one Enter takes where <paramref name="byDefault" />.</summary>
+        public void Answer(ChoiceEntry opening, string text, Action chosen, bool byDefault)
+        {
+            var command = _gate.Refuses(CommandKind.Answer) ? null : new RelayCommand(() => Reply(chosen));
+            _screen.AnswerWithin(opening, new ChoiceEntry(text, false, command), byDefault);
+        }
+
+        /// <summary>Adds a line to the menu <paramref name="opening" /> opens, between the answers in it so far and those given after it.</summary>
+        public void AnswerRule(ChoiceEntry opening)
+        {
+            _screen.AnswerWithin(opening, ChoiceEntry.Rule(), false);
+        }
+
         /// <summary>Carries out an answer to the standing question, which takes the question away first.</summary>
         void Reply(Action chosen)
         {

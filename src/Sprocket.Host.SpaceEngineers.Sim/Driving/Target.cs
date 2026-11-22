@@ -535,7 +535,28 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>Answers the question hanging over the screen.</summary>
         public static void PressAnswer(this SprocketEditor editor, string text) =>
-            Run(editor.Screen.Answers.First(a => a.Text == text).Command);
+            Run((Answered(editor.Screen.Answers, text) ?? throw new InvalidOperationException($"No answer says '{text}'.")).Command);
+
+        /// <summary>The answer saying <paramref name="text" /> among <paramref name="answers" />, or in a menu one of them opens, as a player opening it reaches it; null where none does.</summary>
+        static ChoiceEntry? Answered(IList<ChoiceEntry> answers, string text)
+        {
+            foreach (var answer in answers)
+            {
+                if (answer.Within.Count == 0)
+                {
+                    if (answer.Text == text)
+                        return answer;
+
+                    continue;
+                }
+
+                var within = Answered(answer.Within, text);
+                if (within != null)
+                    return within;
+            }
+
+            return null;
+        }
 
         /// <summary>Presses one of the ways to add a step to the sequence the screen shows.</summary>
         public static void PressAdd(this SprocketEditor editor, string text) => PressOffered(editor, text);

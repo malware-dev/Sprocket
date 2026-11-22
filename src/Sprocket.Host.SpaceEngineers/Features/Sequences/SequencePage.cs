@@ -1,9 +1,11 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Sequences.Edits;
 using Sprocket.Host.SpaceEngineers.Features.States;
 using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
@@ -178,6 +180,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public override bool IsAbout(AutomationSystem system)
         {
             return system == _sequence.System;
+        }
+
+        // How expression reads where it stands in a step, or null where there is none.
+        string Shown(Expression expression)
+        {
+            if (expression == null)
+                return null;
+
+            return _sequence.System == null ? expression.Written : ExpressionShown.Of(Editor, _sequence.System, expression);
         }
 
         /// <inheritdoc />
@@ -443,6 +454,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.DraggedWithCount = step is If ? Within(i) : Kind(step) == StepKind.OtherwiseIf ? Branch(i) : 0;
                 row.Slots.Clear();
                 Word(row, step);
+                foreach (var slot in row.Slots)
+                    (slot as ArgumentsSlot)?.ShowExpressions(Shown);
+
                 row.Deletes = closes ? null : Changes(CommandKind.DeleteStep, () => _stepwork.Remove(index));
                 row.Copies = closes || handler || branch && Kind(step) != StepKind.OtherwiseIf
                     ? null
@@ -638,14 +652,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var wait = step as Wait;
             if (wait != null)
             {
-                row.Slots.Add(new DurationSlot(wait.Length, wait.Setting, wait.Expression?.Written, Changes(CommandKind.StepSlot, () => Open(wait, false))));
+                row.Slots.Add(new DurationSlot(wait.Length, wait.Setting, Shown(wait.Expression), Changes(CommandKind.StepSlot, () => Open(wait, false))));
                 return;
             }
 
             var abort = step as Abort;
             if (abort != null)
             {
-                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Setting, abort.Expression?.Written, abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
+                row.Slots.Add(ArgumentsSlot.Aborting(abort.Message, abort.Setting, Shown(abort.Expression), abort.Level, Changes(CommandKind.StepSlot, () => Open(abort))));
                 return;
             }
 
@@ -738,7 +752,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var opens = Changes(CommandKind.StepSlot, () => _stepwork.ChangeSetState(set));
             row.Slots.Add(new SystemStateSlot(set.State, opens));
             row.Slots.Add(StateValueQuestion.Part(_sequence.System, set.State, set.Value, set.From,
-                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set, () => Chip(set, ArgumentRole.NewValue))), ArgumentRole.NewValue, set.Expression?.Written));
+                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set, () => Chip(set, ArgumentRole.NewValue))), ArgumentRole.NewValue, Shown(set.Expression)));
         }
 
         /// <summary>Gives the row of an if, or of a branch, that tests one of the system's states the parts of its test.</summary>
@@ -851,8 +865,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_length != null)
                 _length.Finish(false);
 
+            // A wait whose length is an expression is changed on the page the expression is built on, which has its words.
+            if (wait.Expression != null)
+            {
+                _stepwork.BuildLength(_sequence.Steps.IndexOf(wait));
+                return;
+            }
+
             _length = new LengthQuestion(Editor, _sequence.System, wait.Length, wait.Setting, false, () => Chip<DurationSlot>(wait),
-                (length, setting, cancelled) => _stepwork.Closed(wait, length, setting, added, cancelled));
+                (length, setting, cancelled) => _stepwork.Closed(wait, length, setting, added, cancelled),
+                () =>
+                {
+                    var index = _sequence.Steps.IndexOf(wait);
+                    _length.Finish(false);
+                    _stepwork.BuildLength(index);
+                });
             _length.Hang();
         }
 
@@ -869,10 +896,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return;
             }
 
-            Action<string, bool> answered = (said, cancelled) => _stepwork.Closed(act, FieldSet.Read(said, fields, act.Arguments), cancelled);
+            Action<string, List<Literal>, bool> answered = (said, held, cancelled) => _stepwork.Closed(act, FieldSet.Read(said, fields, held), cancelled);
             _stepwork.Repaired(act, delegate
             {
-                if (ValuesQuestion.Offer(Editor, fields, act.Arguments, said => answered(said, false)))
+                if (ValuesQuestion.Offer(Editor, fields, act.Arguments, said => answered(said, new List<Literal>(act.Arguments), false)))
                     return;
 
                 if (_values != null)
@@ -899,16 +926,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var checks = holds == ArgumentRole.Checked;
             var given = checks ? new[] { test.Value } : test.Arguments;
-            Action<string, bool> answered = (said, cancelled) =>
+            Action<string, List<Literal>, bool> answered = (said, held, cancelled) =>
             {
                 if (cancelled)
                     return;
 
                 var now = test.Copy();
-                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, given), checks, value => now.Value = value);
+                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, held), checks, value => now.Value = value);
                 _stepwork.Retest(step, test, now);
             };
-            if (ValuesQuestion.Offer(Editor, fields, given, said => answered(said, false)))
+            if (ValuesQuestion.Offer(Editor, fields, given, said => answered(said, new List<Literal>(given), false)))
                 return;
 
             if (_values != null)
@@ -925,7 +952,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _abort.Finish(false);
 
             _abort = new AbortQuestion(Editor, _sequence.System, abort, () => Chip<ArgumentsSlot>(abort),
-                (message, setting, level, cancelled) => _stepwork.Closed(abort, message, setting, level, cancelled));
+                (message, setting, expression, level, cancelled) => _stepwork.Closed(abort, message, setting, expression, level, cancelled));
             _abort.Hang();
         }
 

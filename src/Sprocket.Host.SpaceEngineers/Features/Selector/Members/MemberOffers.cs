@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         readonly SprocketEditor _editor;
         readonly bool _forEvents;
         readonly bool _forTests;
+        readonly bool _forReadings;
         readonly bool _signalsOnly;
         readonly List<string> _names = new List<string>();
         readonly List<MemberKey> _keys = new List<MemberKey>();
@@ -46,10 +47,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
         /// <summary>
         /// The offers of a pick in <paramref name="editor" />: of what starts something where <paramref name="forEvents" />, of
         /// what an if can check where <paramref name="forTests" />, and otherwise of what a step can do; only what the
-        /// construct does to start something where <paramref name="signalsOnly" />.
+        /// construct does to start something where <paramref name="signalsOnly" />; the values alone where <paramref name="forReadings" />, as an expression reads them, without the states an if compares.
         /// </summary>
-        public MemberOffers(SprocketEditor editor, bool forEvents, bool forTests, bool signalsOnly)
+        public MemberOffers(SprocketEditor editor, bool forEvents, bool forTests, bool signalsOnly, bool forReadings = false)
         {
+            _forReadings = forReadings;
             _editor = editor;
             _forEvents = forEvents;
             _forTests = forTests;
@@ -220,7 +222,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Members
             // A sum or an average is taken of numbers alone, so while one is asked for nothing else is listed.
             var sums = totals;
             var events = Vocabulary.EventsOf(_editor.World, selection);
-            for (var i = 0; i < actions.Count && !sums; i++)
+            for (var i = 0; i < actions.Count && !sums && !_forReadings; i++)
             {
                 if (actions[i].IsStatus)
                     States(actions[i], events);

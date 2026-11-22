@@ -23,6 +23,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
     /// </summary>
     public class BlockStage
     {
+        // The ways an expression combines the values of several blocks it reads.
+        static readonly IReadOnlyList<Quantifier> Combinings = new[] { Quantifier.Sum, Quantifier.Average, Quantifier.Min, Quantifier.Max };
+
         readonly SprocketEditor _editor;
         readonly PickChoices _picked;
         readonly EditorPage _screen;
@@ -30,6 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         readonly KindFilter _kinds = new KindFilter();
         readonly bool _forEvents;
         readonly bool _forTests;
+        readonly bool _forReadings;
         readonly bool _asksAll;
         readonly bool _signalsOnly;
 
@@ -50,11 +54,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         /// <summary>
         /// The blocks stage of a pick of <paramref name="picked" />, searched as <paramref name="screen" /> keeps its search, listing
         /// only the blocks <paramref name="admits" /> allows, or all of them for null. <paramref name="asksAll" /> asks how
-        /// several blocks are read; <paramref name="signalsOnly" /> is a pick of what starts something for a signal slot.
+        /// several blocks are read; <paramref name="signalsOnly" /> is a pick of what starts something for a signal slot; <paramref name="forReadings" /> is a pick of what an expression reads, several blocks always combined.
         /// </summary>
         public BlockStage(SprocketEditor editor, PickChoices picked, EditorPage screen, Func<GridEntity, bool> admits,
-            bool forEvents, bool forTests, bool asksAll, bool signalsOnly)
+            bool forEvents, bool forTests, bool asksAll, bool signalsOnly, bool forReadings = false)
         {
+            _forReadings = forReadings;
             _editor = editor;
             _picked = picked;
             _screen = screen;
@@ -311,6 +316,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         {
             var asks = _asksAll && (_forTests || _forEvents && !_signalsOnly
                 && (_picked.Member.IsEmpty || Watched() || _picked.Form == ReachKind.Value || _picked.Totals));
+            if (asks && _forReadings)
+                asks = Combined();
+
             if (!asks)
             {
                 _blocks.Options.Clear();
@@ -319,9 +327,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
 
             if (_reads == null)
             {
+                var offered = _forReadings ? Combinings : SentenceText.Readings;
                 var words = new List<string>();
-                for (var i = 0; i < SentenceText.Readings.Count; i++)
-                    words.Add(SentenceText.Quantified(SentenceText.Readings[i]));
+                for (var i = 0; i < offered.Count; i++)
+                    words.Add(SentenceText.Quantified(offered[i]));
 
                 _reads = new ListField(words) { Tip = CodexTip.For(null, _editor.Texts.Codex.SequenceReadAbout) };
                 _reads.Edited += delegate
@@ -338,6 +347,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
             var said = SentenceText.Quantified(_picked.Reading);
             if (_reads.Text != said)
                 _reads.Text = said;
+        }
+
+        /// <summary>
+        /// Whether the blocks of a reading are combined: one block is read as it is, and several are always combined, as a sum
+        /// where no way of combining them is chosen yet.
+        /// </summary>
+        bool Combined()
+        {
+            if (_picked.Blocks.Count < 2)
+            {
+                if (_picked.Totals)
+                    Quantify(Quantifier.Any);
+
+                return false;
+            }
+
+            if (!_picked.Totals)
+                Quantify(Quantifier.Sum);
+
+            return true;
         }
 
         /// <summary>The way of reading the blocks <paramref name="said" /> names, as <see cref="SentenceText.Quantified" /> says them.</summary>

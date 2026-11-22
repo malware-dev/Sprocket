@@ -4,7 +4,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
 {
-    /// <summary>How long a wait step waits: a fixed length, or a setting.</summary>
+    /// <summary>How long a wait step waits: a fixed length, a setting, or an expression.</summary>
     public sealed class SetWait : SequenceEdit
     {
         readonly int _index;
@@ -13,14 +13,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         readonly Expression _wasExpression;
         readonly Duration _now;
         readonly string _nowSetting;
+        readonly Expression _nowExpression;
 
         /// <summary>
         /// The wait at <paramref name="index" /> made <paramref name="now" /> long, or as long as the setting <paramref name="nowSetting" />
         /// where it is not empty, from <paramref name="was" />, or the setting <paramref name="wasSetting" /> where it took one, or the expression
-        /// <paramref name="wasExpression" /> where it took that, which a length or a setting takes the place of.
+        /// <paramref name="wasExpression" /> where it took that, which a length or a setting takes the place of; or as long as <paramref name="nowExpression" /> works out to, where it is given.
         /// </summary>
-        public SetWait(int index, Duration was, string wasSetting, Duration now, string nowSetting = "", Expression wasExpression = null)
+        public SetWait(int index, Duration was, string wasSetting, Duration now, string nowSetting = "", Expression wasExpression = null,
+            Expression nowExpression = null)
         {
+            _nowExpression = nowExpression;
             _index = index;
             _was = was;
             _wasSetting = wasSetting;
@@ -42,12 +45,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         }
 
         /// <inheritdoc />
-        public override bool Changes => _was != _now || _wasSetting != _nowSetting || _wasExpression != null;
+        public override bool Changes => _was != _now || _wasSetting != _nowSetting || _wasExpression != _nowExpression;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
-            Put(sequence, _now, _nowSetting, null);
+            Put(sequence, _now, _nowSetting, _nowExpression);
         }
 
         /// <inheritdoc />
