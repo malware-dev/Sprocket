@@ -9,14 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
 {
     public partial class ExpressionPanel
     {
-        Label _calculations;
-        Flow _operators;
-        Label _typedHeading;
-        Flow _typed;
-        Label _values;
-        Flow _sources;
-        HStack _bin;
-        Label _binWords;
+        ExpressionTray _tray;
         Label _hint;
         ScrollView _scroll;
         HStack _board;
@@ -35,23 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             Base.Spacing = Gaps.Items;
             Base.Padding = new Thickness(Gaps.Sections);
 
-            Children.Add(new HStack
-            {
-                Base = { Spacing = Gaps.Items },
-                Align = Align.FillWidth,
-                Children =
-                {
-                    Shelf(out _calculations, out _operators),
-                    Shelf(out _typedHeading, out _typed),
-                    Shelf(out _values, out _sources),
-                    new HStack
-                    {
-                        Style = Styles.ExpressionBin,
-                        Align = Align.FillHeight,
-                        Children = { new Label { Style = Styles.Detail, Align = Align.Center }.As(out _binWords) }
-                    }.As(out _bin)
-                }
-            });
+            Children.Add(new ExpressionTray(Grab).As(out _tray));
             Children.Add(new Label { Style = Styles.Detail }.As(out _hint));
             Children.Add(new HStack
             {
@@ -82,22 +59,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             });
             Children.Add(new Label { Style = Styles.Problem, TextWrapping = TextWrapping.Wrap, IsVisible = false }.As(out _why));
             Children.Add(new Label { Style = Styles.ValueLabel }.As(out _now));
-        }
-
-        // A shelf of the tray: its heading over the pieces it holds, sharing the tray's width with the others.
-        static VStack Shelf(out Label heading, out Flow pieces)
-        {
-            return new VStack
-            {
-                Style = Styles.ExpressionShelf,
-                Placement = Flex.Grow,
-                Align = Align.FillHeight,
-                Children =
-                {
-                    new Label { Style = Styles.Detail }.As(out heading),
-                    new Flow { Base = { Spacing = Gaps.Parts, LineSpacing = Gaps.Parts }, Align = Align.FillWidth }.As(out pieces)
-                }
-            };
         }
     }
 }

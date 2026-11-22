@@ -2,6 +2,8 @@ using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Lumel.Text;
@@ -17,10 +19,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         /// </summary>
         /// <remarks>
         /// Blocks are named through <paramref name="bindings" /> as <paramref name="through" /> fills the slots, or as written where
-        /// it is null, and a trigger's words are looked up in <paramref name="program" />.
+        /// it is null, a trigger's words are looked up in <paramref name="program" />, and an expression of a logic system is said
+        /// as <paramref name="shows" /> shows it.
         /// </remarks>
         public static string Of<T>(Texts texts, Edit<T> edit, T subject, bool done, Automation program, Bindings bindings,
-            SystemInstance through)
+            SystemInstance through, Func<AutomationSystem, Expression, string> shows)
         {
             if (edit == null)
                 return "";
@@ -31,17 +34,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
             var change = edit.Change;
             var system = subject as AutomationSystem ?? name.Place as AutomationSystem;
             var said = Wording(texts, change);
-            said = Template.Fill(said, "thing", Words(texts, change, name.Thing, name, program, bindings, system, through));
-            said = Template.Fill(said, "place", Words(texts, change, name.Place, name, program, bindings, system, through));
-            said = Template.Fill(said, "was", Words(texts, change, name.Was, name, program, bindings, system, through));
-            said = Template.Fill(said, "now", Words(texts, change, name.Now, name, program, bindings, system, through));
+            said = Template.Fill(said, "thing", Words(texts, change, name.Thing, name, program, bindings, system, through, shows));
+            said = Template.Fill(said, "place", Words(texts, change, name.Place, name, program, bindings, system, through, shows));
+            said = Template.Fill(said, "was", Words(texts, change, name.Was, name, program, bindings, system, through, shows));
+            said = Template.Fill(said, "now", Words(texts, change, name.Now, name, program, bindings, system, through, shows));
             said = Template.Fill(said, "number", name.Number.ToString(CultureInfo.InvariantCulture));
             return Template.Fill(said, "count", name.Count.ToString(CultureInfo.InvariantCulture));
         }
 
+        /// <summary>How <paramref name="shows" /> shows an expression of <paramref name="system" />, or null where there is no system.</summary>
+        static Func<Expression, string> Shown(AutomationSystem system, Func<AutomationSystem, Expression, string> shows)
+        {
+            if (system == null)
+                return null;
+
+            return expression => shows(system, expression);
+        }
+
         /// <summary>What <paramref name="thing" />, one of the things a change names, is called on the screens.</summary>
         static string Words(Texts texts, ChangeKind change, object thing, ChangeName name, Automation program, Bindings bindings,
-            AutomationSystem system, SystemInstance through)
+            AutomationSystem system, SystemInstance through, Func<AutomationSystem, Expression, string> shows)
         {
             if (thing == null)
                 return "";
@@ -62,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
             if (step != null)
             {
                 var steps = name.Place as Sequence;
-                return steps == null ? "" : SentenceText.Short(SequenceText.Step(bindings, steps, step, through, Slotted(system)));
+                return steps == null ? "" : SentenceText.Short(SequenceText.Step(bindings, steps, step, through, Slotted(system), Shown(system, shows)));
             }
 
             var sequence = thing as Sequence;
@@ -71,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
 
             var trigger = thing as Trigger;
             if (trigger != null)
-                return SentenceText.Short(SequenceText.Trigger(program, bindings, system, trigger, through, Slotted(system)));
+                return SentenceText.Short(SequenceText.Trigger(program, bindings, system, trigger, through, Slotted(system), Shown(system, shows)));
 
             var part = thing as Part;
             if (part != null)
@@ -96,6 +108,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
             var blocks = thing as IList<string>;
             if (blocks != null)
                 return SentenceText.Named(bindings, blocks, false);
+
+            var expression = thing as Expression;
+            if (expression != null)
+                return system == null ? expression.Written : shows(system, expression);
 
             if (thing is Duration)
                 return TimeText.Duration((Duration)thing);

@@ -40,8 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences.Edits
         {
             name.Thing = sequence.Steps[_index];
             name.Number = sequence.NumberOf(_index);
-            name.Was = _was;
-            name.Now = _now;
+            name.Was = _wasExpression ?? (!string.IsNullOrEmpty(_wasSetting) ? (object)_wasSetting : _was);
+            name.Now = _nowExpression ?? (!string.IsNullOrEmpty(_nowSetting) ? (object)_nowSetting : _now);
         }
 
         /// <inheritdoc />

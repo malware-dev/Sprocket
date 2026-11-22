@@ -1,6 +1,8 @@
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
+using System;
 using System.Collections.Generic;
 using Lumel.Text;
 
@@ -15,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         readonly Automation _program;
         readonly AutomationRunner _runner;
         readonly Texts _texts;
+        readonly Func<AutomationSystem, Expression, string> _shows;
 
         readonly History<AutomationSystem> _systems = new History<AutomationSystem>();
         readonly History<Automation> _construct = new History<Automation>();
@@ -30,9 +33,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         // Counts the blocks renamed in the game, which the arrows' words name.
         int _renames;
 
-        /// <summary>A history of <paramref name="program" />'s changes, worded in <paramref name="texts" /> with the names <paramref name="runner" /> binds.</summary>
-        public EditHistory(Automation program, AutomationRunner runner, Texts texts)
+        /// <summary>
+        /// A history of <paramref name="program" />'s changes, worded in <paramref name="texts" /> with the names <paramref name="runner" />
+        /// binds, and each expression of a logic system as <paramref name="shows" /> shows it.
+        /// </summary>
+        public EditHistory(Automation program, AutomationRunner runner, Texts texts, Func<AutomationSystem, Expression, string> shows)
         {
+            _shows = shows;
             _program = program;
             _runner = runner;
             _texts = texts;
@@ -108,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         /// <summary>Takes back the last change to <paramref name="system" /> on <paramref name="screen" />, with every later change it takes along, remembering it in words as seen through <paramref name="through" />, and returns it, or null for none.</summary>
         public Edit<AutomationSystem> Undo(AutomationSystem system, object screen, SystemInstance through)
         {
-            var said = ChangeText.Of(_texts, _systems.Undoes(system, screen), system, true, _program, _runner.Bindings, through);
+            var said = ChangeText.Of(_texts, _systems.Undoes(system, screen), system, true, _program, _runner.Bindings, through, _shows);
             return Undone(_systems.Undo(system, screen), said);
         }
 
@@ -145,7 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
         /// <summary>Walks back the last change to the program as a whole and returns it, or null for none.</summary>
         public Edit<Automation> UndoConstruct()
         {
-            var said = ChangeText.Of(_texts, _construct.Undoes(_program, null), _program, true, _program, _runner.Bindings, null);
+            var said = ChangeText.Of(_texts, _construct.Undoes(_program, null), _program, true, _program, _runner.Bindings, null, _shows);
             return Undone(_construct.Undo(_program, null), said);
         }
 
@@ -275,7 +282,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
             if (!back && change != null && _undoneSaid.TryGetValue(change, out said))
                 return said;
 
-            return ChangeText.Of(_texts, change, subject, back, _program, _runner.Bindings, through);
+            return ChangeText.Of(_texts, change, subject, back, _program, _runner.Bindings, through, _shows);
         }
 
         /// <summary><paramref name="edit" />, just taken back, remembered as said in <paramref name="said" />.</summary>

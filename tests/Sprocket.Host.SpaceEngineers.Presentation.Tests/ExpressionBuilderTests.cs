@@ -59,7 +59,7 @@ public class ExpressionBuilderTests
         var screen = Builder(null, _ => { });
         var panel = Panel(screen);
 
-        Drag(screen, panel.PieceFor(JoinKind.Add), panel.ShownFor(panel.Draft.Root)!);
+        Drag(screen, panel.Tray.PieceFor(JoinKind.Add), panel.ShownFor(panel.Draft.Root)!);
 
         var join = Assert.IsType<DraftJoin>(panel.Draft.Root);
         Assert.Equal(JoinKind.Add, join.Kind);
@@ -74,7 +74,7 @@ public class ExpressionBuilderTests
         var screen = Builder(null, _ => { });
         var panel = Panel(screen);
 
-        Drag(screen, panel.PieceFor(ValueSource.Setting), panel.ShownFor(panel.Draft.Root)!);
+        Drag(screen, panel.Tray.PieceFor(ValueSource.Setting), panel.ShownFor(panel.Draft.Root)!);
         screen.Editor.PressAnswer("Reach");
         screen.Run(3);
 
@@ -91,7 +91,7 @@ public class ExpressionBuilderTests
         var screen = Builder(null, _ => { });
         var panel = Panel(screen);
 
-        Drag(screen, panel.PieceFor(KindClass.Number), panel.ShownFor(panel.Draft.Root)!);
+        Drag(screen, panel.Tray.PieceFor(KindClass.Number), panel.ShownFor(panel.Draft.Root)!);
         var value = Assert.IsType<DraftValue>(panel.Draft.Root);
         Assert.Equal("0", value.Atom.Written);
 
@@ -115,12 +115,12 @@ public class ExpressionBuilderTests
         var screen = Builder(null, _ => { });
         var panel = Panel(screen);
 
-        Assert.True(panel.PieceFor(KindClass.Number).IsVisible);
-        Assert.False(panel.PieceFor(KindClass.Text).IsVisible);
-        Assert.False(panel.PieceFor(KindClass.Duration).IsVisible);
-        Assert.False(panel.PieceFor(KindClass.Flag).IsVisible);
+        Assert.True(panel.Tray.PieceFor(KindClass.Number).IsVisible);
+        Assert.False(panel.Tray.PieceFor(KindClass.Text).IsVisible);
+        Assert.False(panel.Tray.PieceFor(KindClass.Duration).IsVisible);
+        Assert.False(panel.Tray.PieceFor(KindClass.Flag).IsVisible);
 
-        Drag(screen, panel.PieceFor(ValueSource.Setting), panel.ShownFor(panel.Draft.Root)!);
+        Drag(screen, panel.Tray.PieceFor(ValueSource.Setting), panel.ShownFor(panel.Draft.Root)!);
         Assert.True(screen.Shows("Reach"));
         Assert.False(screen.Shows("Label"));
     }
@@ -133,10 +133,10 @@ public class ExpressionBuilderTests
         var panel = Panel(screen);
         var label = panel.ShownFor(panel.Draft.Root)!;
 
-        Drag(screen, panel.PieceFor(JoinKind.Multiply), label, held: true);
+        Drag(screen, panel.Tray.PieceFor(JoinKind.Multiply), label, held: true);
         Assert.True(panel.IsDragging);
         Assert.False(ExpressionPanel.IsLit(label));
-        Assert.False(ExpressionPanel.IsLit(panel.Bin));
+        Assert.False(ExpressionPanel.IsLit(panel.Tray.Bin));
         screen.Scene.Up();
         screen.Run(3);
 
@@ -151,7 +151,7 @@ public class ExpressionBuilderTests
         var screen = Builder(Reach, _ => { });
         var panel = Panel(screen);
 
-        Drag(screen, panel.PieceFor(JoinKind.Add), panel.ShownFor(panel.Draft.Root)!);
+        Drag(screen, panel.Tray.PieceFor(JoinKind.Add), panel.ShownFor(panel.Draft.Root)!);
 
         var join = Assert.IsType<DraftJoin>(panel.Draft.Root);
         Assert.IsType<DraftValue>(join.Parts[0]);
@@ -166,7 +166,7 @@ public class ExpressionBuilderTests
         var panel = Panel(screen);
         var join = (DraftJoin)panel.Draft.Root;
 
-        Drag(screen, panel.ShownFor(join.Parts[0])!, panel.Bin);
+        Drag(screen, panel.ShownFor(join.Parts[0])!, panel.Tray.Bin);
         Assert.IsType<DraftHole>(((DraftJoin)panel.Draft.Root).Parts[0]);
 
         screen.Editor.Screen.Undo!.Execute();
@@ -180,7 +180,7 @@ public class ExpressionBuilderTests
     {
         var screen = Builder(Reach, _ => { });
         var panel = Panel(screen);
-        Drag(screen, panel.PieceFor(JoinKind.Subtract), panel.ShownFor(panel.Draft.Root)!);
+        Drag(screen, panel.Tray.PieceFor(JoinKind.Subtract), panel.ShownFor(panel.Draft.Root)!);
         var join = (DraftJoin)panel.Draft.Root;
 
         Drag(screen, panel.ShownFor(join.Parts[0])!, panel.ShownFor(join.Parts[1])!);
@@ -235,7 +235,7 @@ public class ExpressionBuilderTests
         var screen = Builder(Literal.Worked(TwiceThreePlusReach()), _ => { });
         var panel = Panel(screen);
         var join = (DraftJoin)panel.Draft.Root;
-        Drag(screen, panel.ShownFor(join.Parts[1])!, panel.Bin);
+        Drag(screen, panel.ShownFor(join.Parts[1])!, panel.Tray.Bin);
 
         panel.Optimize();
         screen.Run(3);

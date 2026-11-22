@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Features.Callouts;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.Installations.Edits;
 using Sprocket.Host.SpaceEngineers.Features.Library;
@@ -78,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers
             _program = program;
             _runner = runner;
             Texts = texts;
-            _history = new EditHistory(program, runner, texts);
+            _history = new EditHistory(program, runner, texts, (system, expression) => ExpressionShown.Of(this, system, expression));
             Ago = new AgoText(texts);
             Codex = new CodexPages(texts);
             Guides = new RelayCommand(() => Act(CommandKind.OpenGuide, OpenGuide)?.Execute());

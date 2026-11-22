@@ -36,6 +36,7 @@ public class ExpressionEntryTests
         Assert.Equal("Pause * 2", wait.Expression?.Written);
         var read = Assert.IsType<Wait>(Assert.Single(Reloaded(sim).Systems[0].Sequences[0].Steps));
         Assert.Equal("Pause * 2", read.Expression?.Written);
+        Assert.Contains("Pause × 2", sim.Editor.Screen.UndoText);
     }
 
     /// <summary>A clock's interval built as an expression is saved as the expression.</summary>
@@ -75,6 +76,8 @@ public class ExpressionEntryTests
         var test = sequence.Steps.OfType<If>().Single().Compared!;
         Assert.Equal("Reach * 2", test.Value.Tree?.Written);
         Assert.Equal("Reach * 2", Reloaded(sim).Systems[0].Sequences[0].Steps.OfType<If>().Single().Compared!.Value.Tree?.Written);
+        var words = Framework.Text.SequenceText.Step(sim.Runner.Bindings, sequence, sequence.Steps[0], sequence.System.First, true, expression => ExpressionShown.Of(sim.Editor, sequence.System, expression));
+        Assert.Contains("Reach × 2", words);
     }
 
     /// <summary>What a watcher compares with, built as an expression, is saved as the expression.</summary>
@@ -121,6 +124,8 @@ public class ExpressionEntryTests
         var set = Assert.IsType<SetState>(sequence.Steps[1]);
         Assert.Equal("sprocket.stopped on [ arm ]", set.Expression?.Written);
         Assert.Equal(set.Expression?.Written, Assert.IsType<SetState>(Reloaded(sim).Systems[0].Sequences[0].Steps[1]).Expression?.Written);
+        Assert.DoesNotContain("sprocket.", sim.Editor.Screen.UndoText);
+        Assert.Contains("arm", sim.Editor.Screen.UndoText);
         sim.Editor.Undo(system, sequence);
         Assert.Null(set.Expression);
         Assert.True(set.Value.Flag);

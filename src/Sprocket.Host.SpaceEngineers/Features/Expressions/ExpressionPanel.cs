@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         readonly List<Element> _targets = new List<Element>();
         readonly List<DraftPiece> _targetPieces = new List<DraftPiece>();
 
-        Carried _carried;
+        Dragged _carried;
         Element _grabbed;
         Vector2 _from;
         Vector2 _at;
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             _wanted = wanted;
             _draft = new ExpressionDraft(Start(start));
             CreateView();
-            MakeTray();
+            Offer();
             Wire();
             Show();
             Lay();
@@ -83,24 +83,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             return at < 0 ? null : _targets[at];
         }
 
-        /// <summary>The bin parts are dropped in to remove them.</summary>
-        public Element Bin => _bin;
-
-        /// <summary>The tray's piece for the calculation <paramref name="kind" />.</summary>
-        public Element PieceFor(JoinKind kind) => _operators.Children[ExpressionOffers.PlaceOf(ExpressionOffers.Calculations, kind)];
-
-        /// <summary>The tray's piece for the kind of value <paramref name="source" />.</summary>
-        public Element PieceFor(ValueSource source) => _sources.Children[ExpressionOffers.PlaceOf(ExpressionOffers.Sources, source)];
-
-        /// <summary>The tray's piece for a value of <paramref name="kind" /> typed in.</summary>
-        public Element PieceFor(KindClass kind) => _typed.Children[ExpressionOffers.PlaceOf(ExpressionOffers.Typables, kind)];
-
         /// <summary>The box or switch the fixed value <paramref name="piece" /> is set by, or null where it shows none.</summary>
         public TypedValue TypedFor(DraftValue piece)
         {
             var shown = ShownFor(piece) as HStack;
             return shown == null ? null : shown.Children[shown.Children.Count - 1] as TypedValue;
         }
+
+        /// <summary>The shelves pieces are dragged from, and the bin.</summary>
+        public ExpressionTray Tray => _tray;
 
         /// <summary>Whether the place showing <paramref name="element" /> is lit, so what is dragged can be dropped there.</summary>
         public static bool IsLit(Element element) => element.Is(LookStates.Lit);
@@ -109,34 +100,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         public void Show()
         {
             var texts = _editor.Texts;
-            _calculations.Text = texts.ExpressionCalculations;
-            _typedHeading.Text = texts.ExpressionTyped;
-            _values.Text = texts.ExpressionCurrentValues;
-            _binWords.Text = texts.ExpressionBin;
             _optimize.Text = texts.ExpressionOptimize;
             _optimize.Tip = CodexTip.For(null, texts.Codex.ExpressionOptimizeAbout);
-            _bin.Tip = CodexTip.For(null, texts.Codex.ExpressionBinAbout);
-            for (var i = 0; i < ExpressionOffers.Calculations.Count; i++)
-            {
-                var piece = (HStack)_operators.Children[i];
-                ((Label)piece.Children[1]).Text = ExpressionWords.Symbol(texts, ExpressionOffers.Calculations[i]);
-                piece.Tip = CodexTip.For(null, ExpressionWords.About(texts, ExpressionOffers.Calculations[i]));
-            }
-
-            for (var i = 0; i < ExpressionOffers.Typables.Count; i++)
-            {
-                var piece = (HStack)_typed.Children[i];
-                ((Label)piece.Children[1]).Text = ExpressionWords.Said(texts, ExpressionOffers.Typables[i]);
-                piece.Tip = CodexTip.For(null, texts.Codex.ExpressionTypedAbout);
-            }
-
-            for (var i = 0; i < ExpressionOffers.Sources.Count; i++)
-            {
-                var piece = (HStack)_sources.Children[i];
-                ((Label)piece.Children[1]).Text = ExpressionWords.Said(texts, ExpressionOffers.Sources[i]);
-                piece.Tip = CodexTip.For(null, ExpressionWords.About(texts, ExpressionOffers.Sources[i]));
-            }
-
+            _tray.Show(texts);
             Reckon();
         }
 
@@ -207,66 +173,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             _optimize.Command = new RelayCommand(Optimize);
         }
 
-        void MakeTray()
-        {
-            foreach (var kind in ExpressionOffers.Calculations)
-            {
-                var carried = new Carried { Kind = kind };
-                _operators.Children.Add(Piece(carried));
-            }
-
-            foreach (var kind in ExpressionOffers.Typables)
-            {
-                var carried = new Carried { Source = ValueSource.Typed, Typed = kind };
-                _typed.Children.Add(Piece(carried));
-            }
-
-            foreach (var source in ExpressionOffers.Sources)
-            {
-                var carried = new Carried { Source = source };
-                _sources.Children.Add(Piece(carried));
-            }
-
-            Offer();
-        }
-
-        // Shows in the tray only what can go somewhere in a value of the kind being built, and a shelf only while it holds a piece.
+        // Shows in the tray only what can go somewhere in a value of the kind being built.
         void Offer()
         {
             var types = Types();
-            var usable = ExpressionOffers.Usable(DraftKinds.Wanted(_wanted), types);
-            for (var i = 0; i < ExpressionOffers.Calculations.Count; i++)
-                _operators.Children[i].IsVisible = ExpressionOffers.Offers(ExpressionOffers.Calculations[i], usable, types);
-
-            for (var i = 0; i < ExpressionOffers.Typables.Count; i++)
-                _typed.Children[i].IsVisible = (ExpressionOffers.Typables[i] & usable) != KindClass.None;
-
-            _sources.Children[ExpressionOffers.PlaceOf(ExpressionOffers.Sources, ValueSource.Setting)].IsVisible = ExpressionOffers.Settings(_system, usable, types).Count > 0;
-            _sources.Children[ExpressionOffers.PlaceOf(ExpressionOffers.Sources, ValueSource.State)].IsVisible = ExpressionOffers.States(_system, usable, types).Count > 0;
-            _operators.Parent.IsVisible = AnyShown(_operators);
-            _typed.Parent.IsVisible = AnyShown(_typed);
-        }
-
-        static bool AnyShown(Flow pieces)
-        {
-            foreach (var piece in pieces.Children)
-            {
-                if (piece.IsVisible)
-                    return true;
-            }
-
-            return false;
-        }
-
-        // A piece of the tray: a grip and the words, dragged as a copy of itself.
-        HStack Piece(Carried carried)
-        {
-            var piece = new HStack { Style = Styles.ExpressionPiece };
-            var grip = new DragHandle { Placement = FixedSize.Size(16f, 24f), CanDrag = true };
-            piece.Children.Add(grip);
-            piece.Children.Add(new Label { Base = { Color = Palette.Ink } });
-            Grab(grip, piece, carried);
-            return piece;
+            _tray.Offer(_system, ExpressionOffers.Usable(DraftKinds.Wanted(_wanted), types), types);
         }
 
         // Shows the draft on the board again, as it now is, and says again what it comes to.
@@ -274,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         {
             _targets.Clear();
             _targetPieces.Clear();
-            _targets.Add(_bin);
+            _targets.Add(_tray.Bin);
             _targetPieces.Add(null);
             _board.Children.Clear();
             _board.Children.Add(Shown(_draft.Root));
@@ -300,7 +211,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             var shown = new HStack { Style = piece is DraftJoin ? Styles.ExpressionBox : Styles.ExpressionChip };
             var grip = new DragHandle { Placement = FixedSize.Size(16f, 24f), CanDrag = true, Align = Align.Center };
             shown.Children.Add(grip);
-            Grab(grip, shown, new Carried { Piece = piece });
+            Grab(grip, shown, new Dragged { Piece = piece });
             Target(shown, piece);
 
             var value = piece as DraftValue;
@@ -364,7 +275,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             _targetPieces.Add(piece);
         }
 
-        void Grab(DragHandle grip, Element shown, Carried carried)
+        void Grab(DragHandle grip, Element shown, Dragged carried)
         {
             grip.DragStarted += point => Begin(carried, shown, point);
             grip.DragDelta += Over;
@@ -373,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         }
 
         // Takes hold of what is dragged and lights every place it could go.
-        void Begin(Carried carried, Element shown, Vector2 point)
+        void Begin(Dragged carried, Element shown, Vector2 point)
         {
             _carried = carried;
             _grabbed = shown;
@@ -479,7 +390,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         }
 
         // Whether what is carried can go on the place showing piece, or in the bin where bin says it is the bin.
-        bool Fits(Carried carried, DraftPiece piece, bool bin)
+        bool Fits(Dragged carried, DraftPiece piece, bool bin)
         {
             if (bin)
                 return carried.Piece != null;
