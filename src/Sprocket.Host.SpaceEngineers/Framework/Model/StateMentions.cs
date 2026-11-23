@@ -28,20 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         /// <summary>Whether an expression a step or trigger of <paramref name="system" /> holds reads the state called <paramref name="state" />.</summary>
         static bool Reads(AutomationSystem system, string state)
         {
-            var worked = new List<Expression>();
-            foreach (var trigger in system.Triggers)
-                trigger.Worked(worked);
-
-            foreach (var sequence in system.Sequences)
-            {
-                foreach (var step in sequence.Steps)
-                    step.Worked(worked);
-            }
-
             var reads = false;
-            foreach (var tree in worked)
-                tree.Walk(e => reads |= (e as StateOperand)?.Name == state);
-
+            ExpressionSites.Each(system, (tree, wanted) => tree.Walk(e => reads |= (e as StateOperand)?.Name == state));
             return reads;
         }
 
@@ -73,7 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     return true;
             }
 
-            return false;
+            var expressed = false;
+            ExpressionSites.Each(system, (tree, wanted) => expressed |= ExpressionChoices.Names(system, tree, wanted, type, choice));
+            return expressed;
         }
 
         /// <summary>Whether any state or setting of <paramref name="system" /> holds the type called <paramref name="type" />.</summary>
@@ -115,80 +105,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     sets.From = now;
             }
 
-            foreach (var sequence in system.Sequences)
-            {
-                foreach (var step in sequence.Steps)
-                    RenameStateIn(step, was, now);
-            }
-
-            foreach (var trigger in system.Triggers)
-            {
-                var when = trigger as WhenTrigger;
-                if (when != null)
-                {
-                    if (when.Value.IsExpression)
-                        when.Value = Literal.Worked(when.Value.Tree.Renamed(was, now, true));
-
-                    for (var i = 0; i < when.Arguments.Count; i++)
-                    {
-                        if (when.Arguments[i].IsExpression)
-                            when.Arguments[i] = Literal.Worked(when.Arguments[i].Tree.Renamed(was, now, true));
-                    }
-
-                    when.IntervalExpression = when.IntervalExpression?.Renamed(was, now, true);
-                }
-
-                var every = trigger as EveryTrigger;
-                if (every != null)
-                    every.IntervalExpression = every.IntervalExpression?.Renamed(was, now, true);
-
-                var expressed = trigger as ExpressionTrigger;
-                if (expressed != null)
-                {
-                    expressed.Condition = expressed.Condition.Renamed(was, now, true);
-                    expressed.IntervalExpression = expressed.IntervalExpression?.Renamed(was, now, true);
-                }
-            }
-        }
-
-        /// <summary>Changes the state <paramref name="was" /> to <paramref name="now" /> in the expressions <paramref name="step" /> holds.</summary>
-        static void RenameStateIn(Step step, string was, string now)
-        {
-            var given = step.Arguments;
-            for (var i = 0; i < given.Count; i++)
-            {
-                if (given[i].IsExpression)
-                    given[i] = Literal.Worked(given[i].Tree.Renamed(was, now, true));
-            }
-
-            var compared = (step as Branch)?.Compared;
-            if (compared != null && compared.Value.IsExpression)
-                compared.Value = Literal.Worked(compared.Value.Tree.Renamed(was, now, true));
-
-            var tested = (step as Branch)?.Test as ExpressionTest;
-            if (tested != null)
-                tested.Condition = tested.Condition.Renamed(was, now, true);
-
-            var wait = step as Wait;
-            if (wait != null && wait.Expression != null)
-                wait.Expression = wait.Expression.Renamed(was, now, true);
-
-            var abort = step as Abort;
-            if (abort != null)
-                abort.Expression = abort.Expression?.Renamed(was, now, true);
-
-            var sets = step as SetState;
-            if (sets != null)
-                sets.Expression = sets.Expression?.Renamed(was, now, true);
+            ExpressionSites.Rewrite(system, (tree, wanted) => tree.Renamed(was, now, true));
         }
 
         /// <summary>
         /// Changes every mention of the choice <paramref name="was" /> of <paramref name="type" /> to <paramref name="now" />:
-        /// the starting values, the values set, the values compared with, and the settings' defaults and answers.
+        /// the starting values, the values set, the values compared with, the settings' defaults and answers, and the choice
+        /// where an expression names it.
         /// </summary>
         /// <remarks>Run after the type's own choice is renamed, as it reads each state's type off the system.</remarks>
         public static void RenameChoice(AutomationSystem system, string type, string was, string now)
         {
+            ExpressionSites.Rewrite(system, (tree, wanted) => ExpressionChoices.Renamed(system, tree, wanted, type, was, now));
             var old = Literal.Name(was);
             var renamed = Literal.Name(now);
             foreach (var state in system.States)
