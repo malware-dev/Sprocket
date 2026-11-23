@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
         public Expression Right { get; }
 
         /// <inheritdoc />
-        public override int Precedence => Op == Operator.Add || Op == Operator.Subtract ? 1 : 2;
+        public override int Precedence => Op == Operator.Add || Op == Operator.Subtract ? 4 : 5;
 
         /// <inheritdoc />
         public override ExpressionFailure Evaluate(IExpressionScope scope, out Literal value)

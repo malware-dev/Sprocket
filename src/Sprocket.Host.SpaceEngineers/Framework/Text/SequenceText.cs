@@ -64,6 +64,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
                 return $"When {Named(bindings, sources, all, named)} {(all && sources.Count > 1 ? SentenceText.Plural(happening) : happening)}";
             }
 
+            var expressed = trigger as ExpressionTrigger;
+            if (expressed != null)
+                return $"When {Shown(expressed.Condition, shown)}";
+
             var every = trigger as EveryTrigger;
             if (every != null)
                 return every.IntervalExpression != null ? $"Every {Shown(every.IntervalExpression, shown)}" : $"Every {Lasting(every.Interval, every.IntervalSetting, through, true)}";
@@ -506,8 +510,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Text
 
                 var compared = branch.Test as Comparison;
                 var host = branch.Test as HostTest;
+                var worked = branch.Test as ExpressionTest;
                 var tested = compared != null ? Tested(bindings, compared, through, slotted, shown)
-                    : host != null ? SentenceText.Installed(host) : Tested((StateTest)branch.Test);
+                    : host != null ? SentenceText.Installed(host)
+                    : worked != null ? Shown(worked.Condition, shown)
+                    : Tested((StateTest)branch.Test);
                 return (step is If ? "if " : "otherwise if ") + tested;
             }
 

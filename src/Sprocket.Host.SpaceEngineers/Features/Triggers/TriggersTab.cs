@@ -126,7 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             return new AddOption(texts.SystemTrigger, null, new[]
             {
                 new AddOption(SentenceText.WhenWord, texts.Codex.SystemWhenAbout,
-                    _changes(CommandKind.StartWhen, () => _editor.Starts.StartSequence(_system, new WhenTrigger(""), placed))),
+                    SourceSwitch.Options(texts, true, false, from => _changes(CommandKind.StartWhen, () => _editor.Starts.StartSequence(_system, new WhenTrigger(""), placed, from)))),
                 new AddOption(SentenceText.EveryWord, texts.Codex.SystemEveryAbout,
                     _changes(CommandKind.StartEvery, () => _editor.Starts.StartSequence(_system, new EveryTrigger(_editor.NewLength), placed)))
             });
@@ -264,6 +264,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (watch != null)
                 Watched(row, watch);
 
+            // A condition written as an expression is shown as it reads; the builder does not yet make one.
+            var expressed = trigger as ExpressionTrigger;
+            if (expressed != null)
+                row.Starts.Add(ArgumentsSlot.Testing(Shown(expressed.Condition), null));
+
             Doing(row, trigger);
 
             row.Deletes = _changes(CommandKind.DeleteTrigger, () => _editor.Starts.Forget(_system, trigger));
@@ -277,7 +282,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (trigger is EveryTrigger)
                 return TriggerKind.Every;
 
-            return trigger is WhenTrigger || trigger is StateTrigger ? TriggerKind.When : TriggerKind.Signal;
+            return trigger is WhenTrigger || trigger is StateTrigger || trigger is ExpressionTrigger ? TriggerKind.When : TriggerKind.Signal;
         }
 
         /// <summary>Gives <paramref name="row" /> the parts of a when on one of the system's states: the state, how it compares, and with what.</summary>
@@ -286,7 +291,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             var test = watch.Test;
             var opens = Starts(watch, OpeningColumn.Blocks);
             row.Starts.Add(new SystemStateSlot(test.State, opens));
-            row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
+            row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(_system.FindState(test.State)?.IsOrdered == true),
                 _changes(CommandKind.OpenTrigger, () => RelateWatch(watch)), ArgumentRole.Compared));
             row.Starts.Add(StateValueQuestion.Part(_system, test.State, test.Value, test.Other,
                 _changes(CommandKind.OpenTrigger, () => CompareWatch(watch, () => Chip(watch, ArgumentRole.Checked))), ArgumentRole.Checked));
@@ -305,14 +310,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 now.Value = value;
                 now.Other = "";
                 _editor.Do(_system, new SetWatch(watch, test, now));
-            }, () => _editor.Starts.ChangeTrigger(_system, watch, OpeningColumn.Blocks));
+            }, () => _editor.Starts.ChangeTrigger(_system, watch, OpeningColumn.Blocks), question =>
+            {
+                if (_values != null && _values != question)
+                    _values.Finish(true);
+
+                _values = question;
+            });
         }
 
-        /// <summary>Offers is and is not in a menu under the part pressed, and changes what <paramref name="watch" /> starts on to the one chosen.</summary>
+        /// <summary>Offers is and is not in a menu under the part pressed, and the orderings for a number or a length, and changes what <paramref name="watch" /> starts on to the one chosen.</summary>
         void RelateWatch(StateTrigger watch)
         {
             _editor.AskHere("");
-            foreach (var related in new[] { Relation.Is, Relation.IsNot })
+            var state = _system.FindState(watch.Test.State);
+            foreach (var related in ComparisonQuestion.StateRelations(state != null && state.IsOrdered))
             {
                 var relation = related;
                 _editor.Answer(ComparisonQuestion.Said(relation), delegate

@@ -86,7 +86,7 @@ optional slot button expects signal
 | **Integer** | `60`, `74857693847562934` | 64-bit signed whole integer. |
 | **Real** | `0.25`, `1E-05` | Floating-point value, denoted by a decimal point or an exponent. An integer may substitute for a real where accepted. |
 | **Duration** | `600t`, `2s`, `1.5s` | Token pairing a numeric scalar with a unit suffix: `t` (game ticks) or `s` (seconds, where `1s = 60t`). Seconds can have fractional parts and round to the nearest whole tick (`0.25s` = 15t, `0.01s` = 1t). |
-| **Flag** | `on`, `off` | The two choices of the built-in type `flag`, resolved as any choice is (§9.2). |
+| **Flag** | `on`, `off` | The two choices of the built-in type `flag`, resolved as any choice is (§9.2). The language's truth value: `on` is true and `off` is false. Comparisons give a flag, and `if`, `when`, `not`, `and` and `or` take one. |
 | **Choice** | `inside`, `side(inside)`, `gearbox.door_status(closed)` | A choice of a type the system declares (§9.1) or of a host type (§5.2). Written bare, or with its type as a kind (§4.3). |
 | **Color** | `#FF8800`, `#FF8800CC` | Hexadecimal color literal (RGB or RGBA). |
 | **Vector** | `(3 0 -2)` | Three space-separated integers or reals enclosed in parentheses. No operator stands between them: `(3 + 4)` is an expression (§4.4). |
@@ -139,8 +139,10 @@ wait setting(Delay) * 2
 
 * An expression stands wherever a literal does, and its type must suit the place as a literal's would.
 * **Operands:** literals, settings, states, and readings.
-* **Readings:** `<member>[(<arguments>)] on [ <names> ]` reads the value of one block; naming more than one block is an error. A member that takes options is given them in parentheses, and each may be an expression. `sum`, `average`, `min` or `max` before it combines the values of every block named. Over no blocks, `sum` is 0; the others have no value, and the step fails.
-* **Operators**, binding tightest first: `-` before an operand; `*` and `/`; `+` and `-`. Parentheses group. A `-` written against its number, as in `(3 0 -2)`, is part of the number.
+* **Readings:** `<member>[(<arguments>)] on [ <names> ]` reads the value of one block; naming more than one block is an error. A member that takes options is given them in parentheses, and each may be an expression. `sum`, `average`, `min` or `max` before it combines the values of every block named. Over no blocks, `sum` is 0; the others have no value, and the step fails. `any` or `all` before it, with a comparison after it, compares the value of each block named and gives a flag: whether the comparison holds on any of them, or on all of them. Over no blocks, `any` is `off` and `all` is `on`.
+* **Operators**, binding tightest first: `-` and `not` before an operand; `*` and `/`; `+` and `-`; the comparisons; `and`; `or`. Parentheses group. A `-` written against its number, as in `(3 0 -2)`, is part of the number.
+* **Comparisons** give a flag. `==` and `!=` compare two values of one type; `<`, `<=`, `>` and `>=` compare integers, reals and durations. Comparisons do not chain: `a < b < c` is an error.
+* **Flags:** `not`, `and` and `or` take flags and give a flag. `and` and `or` evaluate their right side only where the left side does not already decide the result.
 * **Functions:** `min(<a>, <b>, ...)`, `max(<a>, <b>, ...)`, `round(<a>)` to the nearest integer, `abs(<a>)`.
 * **Numbers:** an integer with a real gives a real; `/` always gives a real. Dividing by zero fails the step.
 * **Text:** `+` with text on either side joins the two, writing the other side as text.
@@ -312,10 +314,13 @@ A state is a persistent, mutable memory cell scoped to an instance of a system o
 let where = inside
 let home = side(outside)
 let cycling = off
+let count = 0
+let label = "Idle"
 ```
 
 * **Declaration:** `let <name> = <value>`. The starting value is mandatory.
-* **Typing:** The state's type is inferred entirely from its initial value; a type is never written in the declaration. It must be a flag (`on` or `off`) or a choice of a declared type. Other types are an error.
+* **Typing:** The state's type is inferred entirely from its initial value; a type is never written in the declaration. It must be a flag (`on` or `off`), an integer, a real, a text, a duration, or a choice of a declared type. Other types are an error. A whole number starts an integer state; `real(0)` or `0.0` starts a real one.
+* **Values:** A state is only ever given a value of its own type, or an integer where it holds a real.
 * **Scoping:** States must be declared after their associated types and before any statement referencing them.
 * **Names:** Within a single system, no two things of the same kind share a name, except sequences, which are told apart by their numbers (§4.1). Things of different kinds may share one (§4.2). In a plain system, a state cannot share a name with a file-level variable. Names in other systems do not count.
 * **Referencing:** States are referenced by name (without block brackets `[]`, `any`, or `all`). They are mutated via `set`, queried via `if`, and watched via `when`.
@@ -380,6 +385,18 @@ every 600t stop 3
 * **Syntax:** `every <duration> <step>`
 * Fires the target step periodically at fixed time intervals.
 
+### 10.5 Expression Watchers
+
+```sprocket
+when average gearbox.fill on [ tanks ] < setting(Low) or alarm == on then run 7
+```
+
+* **Syntax:** `when <expression> [every <duration>] then <step>`, where the expression gives a flag (§4.4). The watchers in §10.2 and §10.3 are expressions of this kind.
+* Fires when the expression becomes true, and not again until it has been false.
+* Checked on its `every` and on the host's updates for the blocks it reads, as a block watcher is, and whenever a state it reads is set. `every` is written only where the expression reads a block.
+* An `any` that is the whole expression fires for each block, as in §10.2. Inside a larger expression it is one flag.
+* An expression that reads neither a block nor a state is an error.
+
 ---
 
 ## 11. Sequences and Control Flow
@@ -412,7 +429,7 @@ sequence 2 as 'Shallow Drill' exclusive Drilling {
 | :--- | :--- |
 | `call <member>[(<args>)] on [ <names> ]` | Invokes an action on all blocks identified by `<names>`. |
 | `set <member> on [ <names> ] to <value>` | Assigns a writable host block property. Where an id names both an action and a value, `set` always means the value. |
-| `set <state> to <value>` | Updates a system state within the current instance. Value must be a valid choice, flag, or another state of identical type. |
+| `set <state> to <value>` | Updates a system state within the current instance. Value must be of the state's type (§9.3), or another state of that type. |
 | `run <sequence>` | Starts a sequence of the same system asynchronously. If it is already running, or another sequence with the same `exclusive` id is, does nothing. Self-recursion or cyclical invocation chains produce an error. |
 | `stop <sequence>` | Halts a sequence of the same system if running. A sequence can stop itself, terminating execution immediately. |
 | `abort [saying <text>] [as <level>]` | Ends the sequence it is in, at once. `saying` gives the reason the sequence shows, as written. `as` says how it shows: `note`, the default; `warning`; or `problem`, which also switches off the installation it ran on, with the reason. |
@@ -500,7 +517,7 @@ else if where == outside then {
 ```
 
 * **Syntax:** `if <state or setting> <comparison> <value> then { ... }`
-* Evaluates equality (`==` or `!=`) against a choice, flag, or another state of matching type; comparing with a value of another type is an error.
+* Evaluates equality (`==` or `!=`) against a value of the state's type, or another state of that type; a state holding an integer, a real or a duration is also compared with `<`, `<=`, `>` and `>=`. Comparing with a value of another type is an error.
 * A setting is tested the same way, on the instance's value: `if setting('Outer light') == on then { ... }`.
 * Block conditions and state conditions may be freely mixed within the same `if / else if / else` chain.
 
@@ -519,6 +536,15 @@ else {
 * Decided when the program is bound to its construct, not when the step is reached, and again whenever the host gains or loses that namespace.
 * Members in that namespace, inside a branch taken only while it is installed, are no error where the host lacks it.
 * Combines with `else if` and `else` as any other condition does.
+
+### 12.4 Condition as an Expression
+
+```sprocket
+if all gearbox.pressurized on [ vent ] == on and not cycling then { ... }
+```
+
+* **Syntax:** `if <expression> then { ... }`, where the expression gives a flag (§4.4). The conditions in §12.1 and §12.2 are expressions of this kind.
+* The expression is evaluated once, when the step is reached.
 
 ---
 

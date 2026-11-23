@@ -482,16 +482,16 @@
   <data name="Sprocket.Pick.States" xml:space="preserve">
     <value>Tilstander</value>
   </data>
-  <data name="Sprocket.Pick.Source" xml:space="preserve">
-    <value>Kilde</value>
-  </data>
   <data name="Sprocket.Pick.SourceBlocks" xml:space="preserve">
-    <value>Blokker</value>
+    <value>Blokker…</value>
   </data>
   <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
-    <value>Tilstander</value>
+    <value>Tilstander…</value>
   </data>
   <data name="Sprocket.Pick.SourceMods" xml:space="preserve">
+    <value>Mods…</value>
+  </data>
+  <data name="Sprocket.Pick.Mods" xml:space="preserve">
     <value>Mods</value>
   </data>
   <data name="Sprocket.Pick.ModCheck" xml:space="preserve">
@@ -501,13 +501,13 @@
     <value>Ingen mods å velge mellom.</value>
   </data>
   <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
-    <value>Eksisterende plass</value>
+    <value>Eksisterende plass…</value>
   </data>
   <data name="Sprocket.Pick.Slots" xml:space="preserve">
     <value>Plasser</value>
   </data>
   <data name="Sprocket.Pick.NoSlots" xml:space="preserve">
-    <value>Dette logikksystemet har ingen plasser for blokker ennå. Bytt kilden til Blokker og velg noen for å lage en.</value>
+    <value>Dette logikksystemet har ingen blokkplasser ennå. Gå tilbake, velg Blokker… og velg noen blokker for å lage en.</value>
   </data>
   <data name="Sprocket.Pick.SlotFillsOne" xml:space="preserve">
     <value>1 blokk i denne installasjonen</value>

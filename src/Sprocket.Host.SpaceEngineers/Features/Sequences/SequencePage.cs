@@ -501,7 +501,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var kinds = new List<AddOption>
             {
-                new AddOption(texts.SequenceDoSomething, texts.Codex.SequenceDoSomethingAbout, Changes(CommandKind.AddAction, () => _stepwork.AddAction(at))),
+                new AddOption(texts.SequenceDoSomething, texts.Codex.SequenceDoSomethingAbout,
+                    SourceSwitch.Options(texts, false, false, from => Changes(CommandKind.AddAction, () => _stepwork.AddAction(at, from)))),
                 new AddOption(SentenceText.WaitWord, texts.Codex.TermDelay, Changes(CommandKind.AddWait, () => AddWait(at)))
             };
 
@@ -514,7 +515,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             kinds.Add(new AddOption(SentenceText.RunWord, texts.Codex.TermRunAndStop, Changes(CommandKind.AddRun, () => _stepwork.AddRun(false, at))));
             kinds.Add(new AddOption(SentenceText.StopWord, texts.Codex.TermRunAndStop, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
             kinds.Add(new AddOption(SentenceText.SetStateWords, texts.Codex.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
-            kinds.Add(new AddOption(SentenceText.IfWord, texts.Codex.TermIf, Changes(CommandKind.AddIf, () => _stepwork.AddIf(at))));
+            kinds.Add(new AddOption(SentenceText.IfWord, texts.Codex.TermIf,
+                SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddIf, () => _stepwork.AddIf(at, from)))));
             return kinds;
         }
 
@@ -551,7 +553,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var ends = _sequence.Otherwise(_sequence.OpenOf(index)) < 0;
                 row.Adds.Add(new AddOption(texts.SequenceBranch, texts.Codex.SequenceBranchAbout, new[]
                 {
-                    new AddOption(SentenceText.OtherwiseIfWords, texts.Codex.SequenceOtherwiseIfAbout, Changes(CommandKind.AddBranch, () => _stepwork.AddBranch(index))),
+                    new AddOption(SentenceText.OtherwiseIfWords, texts.Codex.SequenceOtherwiseIfAbout,
+                        SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddBranch, () => _stepwork.AddBranch(index, from)))),
                     new AddOption(SentenceText.OtherwiseWord, texts.Codex.SequenceOtherwiseAbout,
                         ends ? Changes(CommandKind.AddBranch, () => _stepwork.AddLast(index)) : null)
                 }));
@@ -560,7 +563,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 row.Adds.Add(new AddOption(SentenceText.IfWord, texts.Codex.SequenceOtherwiseTestAbout, new[]
                 {
-                    new AddOption(SentenceText.IfWord, texts.Codex.SequenceOtherwiseTestAbout, Changes(CommandKind.AddBranch, () => _stepwork.GiveTest(step)))
+                    new AddOption(SentenceText.IfWord, texts.Codex.SequenceOtherwiseTestAbout,
+                        SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddBranch, () => _stepwork.GiveTest(step, from))))
                 }));
             }
         }
@@ -638,6 +642,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var host = branch.Test as HostTest;
                 if (host != null)
                     row.Slots.Add(new HostSlot(host, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, host, OpeningColumn.Blocks))));
+
+                // A condition written as an expression is shown as it reads; the builder does not yet make one.
+                var worked = branch.Test as ExpressionTest;
+                if (worked != null)
+                    row.Slots.Add(ArgumentsSlot.Testing(Shown(worked.Condition), null));
 
                 return;
             }
@@ -752,7 +761,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var opens = Changes(CommandKind.StepSlot, () => _stepwork.ChangeSetState(set));
             row.Slots.Add(new SystemStateSlot(set.State, opens));
             row.Slots.Add(StateValueQuestion.Part(_sequence.System, set.State, set.Value, set.From,
-                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set, () => Chip(set, ArgumentRole.NewValue))), ArgumentRole.NewValue, Shown(set.Expression)));
+                Changes(CommandKind.StepSlot, () => _stepwork.SetStateTo(set, () => Chip(set, ArgumentRole.NewValue), Asking)), ArgumentRole.NewValue, Shown(set.Expression)));
         }
 
         /// <summary>Gives the row of an if, or of a branch, that tests one of the system's states the parts of its test.</summary>
@@ -760,10 +769,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var opens = Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Blocks));
             row.Slots.Add(new SystemStateSlot(test.State, opens));
-            row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
+            row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(_sequence.System.FindState(test.State)?.IsOrdered == true),
                 Changes(CommandKind.StepSlot, () => _stepwork.RelateState(step, test)), ArgumentRole.Compared));
             row.Slots.Add(StateValueQuestion.Part(_sequence.System, test.State, test.Value, test.Other,
-                Changes(CommandKind.StepSlot, () => _stepwork.CompareState(step, test, () => Chip(step, ArgumentRole.Checked))), ArgumentRole.Checked));
+                Changes(CommandKind.StepSlot, () => _stepwork.CompareState(step, test, () => Chip(step, ArgumentRole.Checked), Asking)), ArgumentRole.Checked));
         }
 
         /// <summary>A row for a step, whose opening words explain their term with the codex's page on it.</summary>
@@ -954,6 +963,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _abort = new AbortQuestion(Editor, _sequence.System, abort, () => Chip<ArgumentsSlot>(abort),
                 (message, setting, expression, level, cancelled) => _stepwork.Closed(abort, message, setting, expression, level, cancelled));
             _abort.Hang();
+        }
+
+        /// <summary>Holds <paramref name="question" />, a panel just opened on a value, in place of any other, to hang until it closes.</summary>
+        void Asking(ValuesQuestion question)
+        {
+            if (_values != null && _values != question)
+                _values.Finish(true);
+
+            _values = question;
         }
 
         /// <summary>The places the row at <paramref name="from" /> may land, counted among the rows it does not carry.</summary>

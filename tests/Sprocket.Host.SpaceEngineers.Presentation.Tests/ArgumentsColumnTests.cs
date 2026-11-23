@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ArgumentsColumnTests
 {
-    const string ALight = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step press task 200 485";
+    const string ALight = "60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 press step press task press Blocks… 200 485";
 
     const string SetRadius = "press radius";
     const string SetColor = "press color";
@@ -106,8 +106,8 @@ public class ArgumentsColumnTests
     [Fact]
     public void ADoublePressOnSomethingThatTakesNothingFinishes()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step "
-            + "press task press \"Airlock Inner Door\"").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 press step "
+            + "press task press Blocks… press \"Airlock Inner Door\"").Split(' '));
         DoubleOn(screen, "reverse");
 
         Assert.Equal("Sequence 1", screen.Ended);
@@ -130,8 +130,8 @@ public class ArgumentsColumnTests
     [Fact]
     public void ADoublePressOnAWordFinishesWithIt()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step "
-            + "press task").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 press step "
+            + "press task press Blocks…").Split(' '));
         var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
         var speed = 0;
         door.Kind.WithValue("speed", "speed",

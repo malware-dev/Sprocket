@@ -62,7 +62,7 @@ public class IfStepTests
         var otherwise = rig.Editor.StepRows().Single(row => row.Kind == StepKind.Otherwise);
         var test = Assert.Single(Assert.Single(otherwise.Adds).Choices!);
         Assert.Equal(SentenceText.IfWord, test.Text);
-        test.Adds!.Execute();
+        test.Choices![0].Adds!.Execute();
         rig.Tick();
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Tick();
@@ -86,7 +86,7 @@ public class IfStepTests
         rig.Editor.Program.Edited();
         rig.Tick();
 
-        rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds[0].Choices![0].Adds!.Execute();
+        rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds[0].Choices![0].Choices![0].Adds!.Execute();
         rig.Tick();
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Tick();
@@ -391,7 +391,7 @@ public class IfStepTests
     }
 
     /// <summary>The words of those of <paramref name="choices" /> that may be added now.</summary>
-    static List<string> Offered(IList<AddOption> choices) => choices.Where(choice => choice.Adds != null).Select(choice => choice.Text).ToList();
+    static List<string> Offered(IList<AddOption> choices) => choices.Where(choice => choice.Adds != null || choice.Choices != null).Select(choice => choice.Text).ToList();
 
     /// <summary>Changing the blocks of a test written in the script keeps how it compares and that it is a sum.</summary>
     [Fact]

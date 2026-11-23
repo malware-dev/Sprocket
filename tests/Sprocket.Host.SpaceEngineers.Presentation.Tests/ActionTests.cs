@@ -246,8 +246,8 @@ public class ActionTests
     [Fact]
     public void TheTerminalLinkIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 200 509").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 "
+            + "press step press task press Blocks… 200 509").Split(' '));
 
         StageColumn what = screen.Editor.Pick().Stages.Last();
         Assert.NotNull(what.Views[1].Command);
@@ -461,8 +461,8 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Approach 200 360 press \"Terminal ›\" press \"Chime On Approach\"").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 "
+            + "press step press task press Blocks… 150 203 type Approach 200 360 press \"Terminal ›\" press \"Chime On Approach\"").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
         Assert.Equal(FieldEditor.Chosen, screen.Editor.Picking().Fields.Single().Edits);
@@ -530,8 +530,8 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\"").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 "
+            + "press step press task press Blocks… 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\"").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
             "the column does not show what the value may be");
@@ -555,8 +555,8 @@ public class ActionTests
     [Fact]
     public void AStepMadeInTheTerminalViewIsEditedThere()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\" press Recharge 1394 72").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 "
+            + "press step press task press Blocks… 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\" press Recharge 1394 72").Split(' '));
         var editor = screen.Editor;
         Assert.IsType<Act>(editor.Program.Sequences[0].Steps[0]);
 
@@ -579,8 +579,8 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Tug 200 360 press \"Terminal ›\" press \"Forward Direction\"").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 "
+            + "press step press task press Blocks… 150 203 type Tug 200 360 press \"Terminal ›\" press \"Forward Direction\"").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");
 

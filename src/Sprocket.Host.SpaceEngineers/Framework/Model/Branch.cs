@@ -30,6 +30,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             base.Worked(into);
             if (Compared != null && Compared.Value.IsExpression)
                 into.Add(Compared.Value.Tree);
+
+            var worked = Test as ExpressionTest;
+            if (worked != null)
+                into.Add(worked.Condition);
         }
     }
 }

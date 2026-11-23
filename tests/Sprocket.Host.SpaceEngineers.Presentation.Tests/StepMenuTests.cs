@@ -26,7 +26,7 @@ public class StepMenuTests
     [Fact]
     public void APlusWithOneChoiceLeftShowsThatChoice()
     {
-        var screen = Screen.Fresh((Kinds + " press step press if press \"Airlock Outer Door\" press closed press Done").Split(' '));
+        var screen = Screen.Fresh((Kinds + " press step press if press Blocks… press \"Airlock Outer Door\" press closed press Done").Split(' '));
 
         Assert.True(screen.Shows("+ branch"));
         Assert.False(screen.Shows("+ otherwise if"), "the branches were offered apart before one was taken");
@@ -47,6 +47,8 @@ public class StepMenuTests
         Assert.True(screen.Shows("every"));
 
         screen.Do("press", "when");
+        Assert.True(screen.Shows(screen.Editor.Texts.PickSourceStates));
+        screen.Do("press", screen.Editor.Texts.PickSourceBlocks);
 
         Assert.IsType<PickPage>(screen.Editor.Current);
     }

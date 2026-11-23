@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System;
@@ -89,15 +90,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// <summary>The name of the state being made: what its field holds, once it is asked.</summary>
         string Name => _heading != null ? _head.Fields[0].Text ?? "" : _name;
 
+        /// <summary>The built-in type the type word <paramref name="word" /> names, or null where it names none.</summary>
+        string BuiltInOf(string word)
+        {
+            foreach (var builtIn in State.BuiltIn)
+            {
+                if (StateValueQuestion.Holding(_editor.Texts, builtIn) == word)
+                    return builtIn;
+            }
+
+            return null;
+        }
+
         /// <summary>The word a new type is made with, at the end of the types.</summary>
         string NewTypeWord => StatusRow.Plus + _editor.Texts.PickNewType;
 
-        /// <summary>The words the type is chosen among: on or off, each type, then the way to make a new one, which stands for the type being made once there is one.</summary>
+        /// <summary>The words the type is chosen among: on or off, each built-in kind of value, each type, then the way to make a new one, which stands for the type being made once there is one.</summary>
         List<string> TypeWords
         {
             get
             {
                 var words = new List<string> { _editor.Texts.StateFlag };
+                foreach (var builtIn in State.BuiltIn)
+                    words.Add(StateValueQuestion.Holding(_editor.Texts, builtIn));
+
                 foreach (var type in _system.Types)
                     words.Add(type.Name);
 
@@ -150,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             type.About = texts.Codex.PickStateTypeAbout;
 
             _heading = new List<Field> { name, type };
-            var filled = new List<string> { _name, made != null ? NewTypeWord : _start.Type.Length == 0 ? texts.StateFlag : _start.Type };
+            var filled = new List<string> { _name, made != null ? NewTypeWord : StateValueQuestion.Holding(texts, _start.Type) };
             if (made != null)
             {
                 var named = Field.Called(texts.PickTypeName);
@@ -196,6 +212,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
 
             _startsAsked = asked;
             var texts = _editor.Texts;
+            if (State.IsBuiltInType(_start.Type))
+            {
+                var typed = SettingPanel.DefaultField(texts, _system, null, _start.Type, null, texts.StateStarts, false);
+                typed.About = texts.Codex.StateStartsAbout;
+                _starts.Show(new List<Field> { typed }, new[] { _start.Word }, null, texts);
+                return;
+            }
+
             var words = new List<string>();
             foreach (var start in StateValueQuestion.Starts(texts, _system, _start.Type, _made))
                 words.Add(start.Word);
@@ -262,7 +286,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 _made = TypeEditing.New(texts, _system.Types.Count, taken => _system.HasTypeInAnyCase(taken) || StateReader.IsBuiltInInAnyCase(taken));
             }
 
-            var type = typeWord == texts.StateFlag ? "" : typeWord == NewTypeWord ? _made.Name : typeWord;
+            var type = typeWord == texts.StateFlag ? "" : typeWord == NewTypeWord ? _made.Name : BuiltInOf(typeWord) ?? typeWord;
             if (_made != null && type == _made.Name && _head.Fields.Count > 2)
             {
                 var wanted = (_head.Fields[2].Text ?? "").Trim();
@@ -279,8 +303,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             _name = Name;
             if (type != _start.Type)
             {
-                var starts = StateValueQuestion.Starts(texts, _system, type, _made);
-                _start = type.Length == 0 ? StateValueQuestion.Off : starts[0];
+                if (State.IsBuiltInType(type))
+                {
+                    var initial = StateValueQuestion.Initial(type);
+                    _start = new StateStart(SettingPanel.Shown(type, initial).Said, initial, type);
+                }
+                else
+                {
+                    var starts = StateValueQuestion.Starts(texts, _system, type, _made);
+                    _start = type.Length == 0 ? StateValueQuestion.Off : starts[0];
+                }
+
                 TypeChanged?.Invoke(type);
             }
 
@@ -294,6 +327,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 return;
 
             var word = _starts.Fields[0].Text ?? "";
+            if (State.IsBuiltInType(_start.Type))
+            {
+                Literal value;
+                if (StateValueQuestion.Read(_system, new State("", _start.Type, _start.Value), word, out value))
+                    _start = new StateStart(word, value, _start.Type);
+
+                _editor.Invalidate();
+                return;
+            }
+
             foreach (var start in StateValueQuestion.Starts(_editor.Texts, _system, _start.Type, _made))
             {
                 if (start.Word == word)

@@ -21,6 +21,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             _ptr = new TextPtr(text ?? "");
         }
 
+        /// <summary>A lexer reading on from where this one is, which moves this one nowhere.</summary>
+        public Lexer Ahead()
+        {
+            return new Lexer("") { _ptr = _ptr, Earlier = Earlier };
+        }
+
         /// <summary>The whole script, so trouble can be placed on a line after the fact.</summary>
         public string Script => _ptr.Content;
 

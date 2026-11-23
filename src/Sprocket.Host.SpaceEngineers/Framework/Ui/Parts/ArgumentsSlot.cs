@@ -182,6 +182,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return new ArgumentsSlot(new[] { Literal.Name(verb) }, new[] { Field.Among("state", words, words) }, opens, ArgumentRole.NewValue);
         }
 
+        /// <summary>What an if or a when tests where it is an expression, <paramref name="condition" /> as it reads, pressed to <paramref name="opens" /> where that is given.</summary>
+        public static ArgumentsSlot Testing(string condition, ICommand opens)
+        {
+            return new ArgumentsSlot(new[] { Literal.Of(condition) }, new[] { Field.Called("") }, opens, ArgumentRole.Checked);
+        }
+
         /// <summary>
         /// What an abort says, <paramref name="message" />, or the setting it says, <paramref name="setting" />, by its name, and
         /// the level it shows at, <paramref name="level" />, pressed to <paramref name="opens" />.

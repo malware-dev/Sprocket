@@ -786,11 +786,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (state == null)
                 return ExpressionFailure.Mistyped;
 
-            var declared = state.IsFlag ? null : _sequence.System.FindType(state.Type);
-            if (state.IsFlag ? worked.Kind != ValueKind.Flag : worked.Kind != ValueKind.Name || declared == null || !declared.Has(worked.Text))
+            if (!StateValues.Fits(_sequence.System, state, worked))
                 return ExpressionFailure.Mistyped;
 
-            value = worked;
+            value = StateValues.Held(state, worked);
             return ExpressionFailure.None;
         }
 
@@ -1125,6 +1124,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 else if (test is HostTest)
                 {
                     holds = ((HostTest)test).Holds;
+                }
+                else if (test is ExpressionTest)
+                {
+                    Literal worked;
+                    var failure = _workings.Evaluate(((ExpressionTest)test).Condition, _bindings, out worked);
+                    if (failure == ExpressionFailure.None && worked.Kind != ValueKind.Flag)
+                        failure = ExpressionFailure.Mistyped;
+
+                    if (failure != ExpressionFailure.None)
+                    {
+                        Meet(SequenceFault.Worked(failure, at));
+                        return false;
+                    }
+
+                    holds = worked.Flag;
                 }
                 else
                 {

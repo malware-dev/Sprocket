@@ -4,7 +4,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
 {
     /// <summary>
     /// What a branch of an if tests: a member read on blocks, a <see cref="Comparison" />, one of the logic system's states, a
-    /// <see cref="StateTest" />, or whether the host has a namespace, a <see cref="HostTest" />.
+    /// <see cref="StateTest" />, whether the host has a namespace, a <see cref="HostTest" />, or an expression giving a flag, an
+    /// <see cref="ExpressionTest" />.
     /// </summary>
     public abstract class BranchTest
     {

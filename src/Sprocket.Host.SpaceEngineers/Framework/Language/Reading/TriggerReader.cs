@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
@@ -23,6 +24,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var when = trigger as WhenTrigger;
             for (var i = 0; when != null && i < when.Sources.Count; i++)
                 SystemReader.Uses(statement, when.Sources[i], system, program, false, trouble);
+
+            var watched = trigger as ExpressionTrigger;
+            if (watched != null)
+                StepReader.Used(statement, watched.Condition, system, program, trouble);
 
             var needed = trigger as SignalTrigger;
             if (needed != null && needed.IsWritten)
@@ -107,6 +112,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         static Trigger Kind(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
+            // A condition read as one expression stands alone before 'every' or 'then'.
+            if (statement.Key == Keyword.When && (statement.Says(1, Keyword.Then) || statement.Says(1, Keyword.Every)))
+                return Expressed(statement, system, trouble);
+
             if (statement.Key == Keyword.When && !StepReader.IsQuantifier(statement, 0) && StateReader.Called(statement, statement.ValueAt(0)) != null)
                 return Watched(statement, system, trouble);
 
@@ -219,31 +228,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             var at = 4;
             if (statement.Says(at, Keyword.Every))
             {
-                var setting = SettingReader.Referenced(statement, statement.ValueAt(at + 1), system);
                 Duration interval;
-                Literal worked;
-                if (ExpressionReader.Is(statement.ValueAt(at + 1)))
-                {
-                    if (!ExpressionReader.Read(statement, statement.ValueAt(at + 1), system, trouble, out worked))
-                        return null;
-
-                    when.IntervalExpression = worked.Tree;
-                }
-                else if (setting != null)
-                {
-                    if (!SettingReader.Owe(statement, setting, system, SettingReader.Lasting, "a duration", trouble))
-                        return null;
-
-                    when.IntervalSetting = setting;
-                }
-                else if (!StepReader.Lasting(statement.ValueAt(at + 1), 1, out interval))
-                {
-                    trouble.Say(statement, "expected a duration after 'every', like 30t.");
+                string setting;
+                Expression worked;
+                if (!Paced(statement, at + 1, system, trouble, out interval, out setting, out worked))
                     return null;
-                }
-                else
-                    when.Interval = interval;
 
+                when.Interval = interval;
+                when.IntervalSetting = setting;
+                when.IntervalExpression = worked;
                 at += 2;
             }
 
@@ -254,6 +247,91 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             }
 
             return when;
+        }
+
+        /// <summary>
+        /// How often a <c>when</c> looks, the value at <paramref name="at" /> after its <c>every</c>: a duration, a setting holding
+        /// one, or an expression coming to one; or false and trouble where it is none of those.
+        /// </summary>
+        static bool Paced(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble, out Duration interval, out string setting,
+            out Expression worked)
+        {
+            interval = default(Duration);
+            setting = "";
+            worked = null;
+            if (ExpressionReader.Is(statement.ValueAt(at)))
+            {
+                Literal value;
+                if (!ExpressionReader.Read(statement, statement.ValueAt(at), system, trouble, out value))
+                    return false;
+
+                worked = value.Tree;
+                return true;
+            }
+
+            var named = SettingReader.Referenced(statement, statement.ValueAt(at), system);
+            if (named != null)
+            {
+                if (!SettingReader.Owe(statement, named, system, SettingReader.Lasting, "a duration", trouble))
+                    return false;
+
+                setting = named;
+                return true;
+            }
+
+            if (StepReader.Lasting(statement.ValueAt(at), 1, out interval))
+                return true;
+
+            trouble.Say(statement, "expected a duration after 'every', like 30t.");
+            return false;
+        }
+
+        /// <summary>
+        /// <c>when average gearbox.fill on [ tanks ] &lt; setting(Low) or alarm == on then</c>: a trigger fired as an expression
+        /// comes to be on; or null and trouble where it is not one, reads neither a block nor a state, or is paced by an
+        /// <c>every</c> with no block to look at.
+        /// </summary>
+        static Trigger Expressed(Statement statement, AutomationSystem system, ScriptTrouble trouble)
+        {
+            Expression condition;
+            if (!ExpressionReader.Condition(statement, statement.ValueAt(0), system, trouble, out condition))
+                return null;
+
+            var when = new ExpressionTrigger(condition);
+            if (!when.ReadsBlocks && !when.ReadsStates)
+            {
+                trouble.Say(statement, "expected a condition that reads a block or a state; a when watches what can change.");
+                return null;
+            }
+
+            var at = 1;
+            if (statement.Says(at, Keyword.Every))
+            {
+                if (!when.ReadsBlocks)
+                {
+                    trouble.Say(statement, "unexpected 'every'; a when that reads no block is checked as a step sets its states, and takes no every.");
+                    return null;
+                }
+
+                Duration interval;
+                string setting;
+                Expression worked;
+                if (!Paced(statement, at + 1, system, trouble, out interval, out setting, out worked))
+                    return null;
+
+                when.Interval = interval;
+                when.IntervalSetting = setting;
+                when.IntervalExpression = worked;
+                at += 2;
+            }
+
+            if (!statement.Says(at, Keyword.Then))
+            {
+                trouble.Say(statement, "expected 'then'.");
+                return null;
+            }
+
+            return when.Simplest();
         }
 
         /// <summary>

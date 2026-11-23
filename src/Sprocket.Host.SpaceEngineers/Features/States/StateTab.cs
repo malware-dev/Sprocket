@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
@@ -29,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         readonly KeyedChildren<State, StateRow> _stateRows;
         readonly List<DeclaredType> _types = new List<DeclaredType>();
         readonly List<State> _states = new List<State>();
+        ValuesQuestion _asking;
 
         // Whether the values shown now can be changed by hand, as last offered; null where the rows were just made again.
         bool? _holdable;
@@ -122,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
 
         /// <summary>
         /// Offers the values <paramref name="state" /> can hold in a menu under what the installation shown holds now, that one
-        /// marked, and gives it the one chosen, by hand, as one edit.
+        /// marked, and gives it the one chosen, by hand, as one edit; a number, a text or a length is given in a panel instead.
         /// </summary>
         void Hold(State state)
         {
@@ -133,6 +135,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             Func<Literal> read = () => _editor.Runner.States.Read(_system, shown, state);
             Action<Literal> write = value => _editor.Hold(_system, shown, state, value);
             var now = read();
+            if (state.IsBuiltIn)
+            {
+                Ask(StateValueQuestion.Given(_editor, _system, state, now, () => _stateRows[state].Current, value =>
+                {
+                    if (!StateMentions.Same(now, value))
+                        _editor.Do(_system, new ChangeNow(shown, state, value, read, write));
+                }, null, false));
+                return;
+            }
+
             _editor.AskHere("");
             foreach (var word in StateValueQuestion.Words(_system, state))
             {
@@ -183,7 +195,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             row.Name.Command = _changes(CommandKind.RenameState, () => _editor.Rename(row.Name, StateNaming(state)));
             row.Name.CanRename = row.Name.Command != null;
             row.Name.About = editable ? texts.Codex.StateStateRenameAbout : locked;
-            row.Kind = Template.Fill(texts.StateHolds, "type", state.IsFlag ? texts.StateFlag : state.Type);
+            row.Kind = Template.Fill(texts.StateHolds, "type", StateValueQuestion.Holding(texts, state.Type ?? ""));
 
             var held = StateMentions.Mentions(_system, state.Name);
             row.KindOpens = held ? null : _changes(CommandKind.ChangeStart, () => Types(state));
@@ -214,9 +226,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 _editor.Answer(texts.StateRemoveChoice, () => _editor.Do(_system, new RemoveChoice(_system, type, choice)));
         }
 
-        /// <summary>Offers the values of the type <paramref name="state" /> holds to start as, the one it starts as marked.</summary>
+        /// <summary>Offers the values of the type <paramref name="state" /> holds to start as, the one it starts as marked; a number, a text or a length is given in a panel instead.</summary>
         void Starts(State state)
         {
+            if (state.IsBuiltIn)
+            {
+                Ask(StateValueQuestion.Given(_editor, _system, state, state.Start, () => _stateRows[state].Start, value =>
+                {
+                    if (!StateMentions.Same(state.Start, value))
+                        _editor.Do(_system, new ChangeStart(_system, state, value, state.Type));
+                }, null, false));
+                return;
+            }
+
             _editor.AskHere("");
             foreach (var start in StateValueQuestion.Starts(_editor.Texts, _system, state.Type))
             {
@@ -226,12 +248,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             }
         }
 
-        /// <summary>Offers on or off, each type and a new type for <paramref name="state" /> to hold, the one it holds marked; another starts the state as its first value, or off.</summary>
+        /// <summary>Offers on or off, each built-in kind of value, each type and a new type for <paramref name="state" /> to hold, the one it holds marked; another starts the state as its first value, or off.</summary>
         void Types(State state)
         {
             var texts = _editor.Texts;
             _editor.AskHere("");
             _editor.Answer(texts.StateFlag, () => Retype(state, ""), state.IsFlag);
+            foreach (var builtIn in State.BuiltIn)
+            {
+                var named = builtIn;
+                _editor.Answer(StateValueQuestion.Holding(texts, named), () => Retype(state, named), state.Type == named);
+            }
+
+            if (_system.Types.Count > 0)
+                _editor.AnswerRule();
+
             foreach (var type in _system.Types)
             {
                 var named = type.Name;
@@ -247,9 +278,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             if (state.Type == type)
                 return;
 
+            if (State.IsBuiltInType(type))
+            {
+                _editor.Do(_system, new ChangeStart(_system, state, StateValueQuestion.Initial(type), type));
+                return;
+            }
+
             var start = type.Length == 0 ? StateValueQuestion.Off : StateValueQuestion.Starts(_editor.Texts, _system, type)[0];
             _editor.Do(_system, new ChangeStart(_system, state, start.Value, start.Type));
         }
+
+        /// <summary>Holds <paramref name="question" />, a panel just opened on a state's value, in place of any other, to hang until it closes.</summary>
+        void Ask(ValuesQuestion question)
+        {
+            if (_asking != null && _asking != question)
+                _asking.Finish(true);
+
+            _asking = question;
+        }
+
+        /// <summary>Hangs the panel a state's value is being given in, where one is open.</summary>
+        /// <remarks>Called every tick while the logic system's page shows, as any panel's holder does.</remarks>
+        public void Hang()
+        {
+            if (_asking != null && _asking.IsOpen)
+                _asking.Hang();
+        }
+
+        /// <summary>The panel a state's value is being given in, or null where none is open.</summary>
+        public ValuesQuestion Asking => _asking != null && _asking.IsOpen ? _asking : null;
 
         /// <summary>Makes a new type and makes <paramref name="state" /> hold it, starting as its first choice, as one change.</summary>
         void RetypeToNew(State state)

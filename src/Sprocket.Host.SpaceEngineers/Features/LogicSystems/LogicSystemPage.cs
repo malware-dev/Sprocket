@@ -83,6 +83,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The panel values a trigger starts on or gives are being given in, or null while none is open.</summary>
         public ValuesQuestion Giving => _triggersWork?.Giving;
 
+        /// <summary>The panel a state's starting value or what it holds now is being given in, or null while none is open.</summary>
+        public ValuesQuestion Stating => _stateWork?.Asking;
+
         /// <summary>The logic system's annotation, or empty for a blueprint.</summary>
         public override string Subtitle => _system.IsBlueprint ? "" : _system.Annotation;
 
@@ -370,6 +373,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 _stateWork.Live();
 
             _triggersWork.Hang();
+            _stateWork.Hang();
 
             _sequenceCategories.Hang();
         }

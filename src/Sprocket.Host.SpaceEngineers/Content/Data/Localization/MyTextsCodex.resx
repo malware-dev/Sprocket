@@ -41,7 +41,7 @@
     <comment>Codex page on "Slot", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value>A [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s ![](mark:state)&amp;nbsp;**states** are what it remembers between jobs. Each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) has its own. A state holds one value at a time. Most are on or off, and others, like an airlock's cycle state, hold a choice from a custom [state type](Term.Type class=term).</value>
+    <value>A [![](mark:logic-system)&amp;nbsp;logic system](Term.LogicSystem class=term)'s ![](mark:state)&amp;nbsp;**states** are what it remembers between jobs. Each [![](mark:installation)&amp;nbsp;installation](Term.Installation class=term) has its own. A state holds one value at a time. Most are on or off. Others hold a number, a text or a length of time, like a count of cycles, or a choice from a custom [state type](Term.Type class=term), like an airlock's cycle state.</value>
     <comment>Codex page on "Logic system states", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
@@ -488,10 +488,6 @@
     <value>Show only one kind of block.</value>
     <comment>Tooltip on the line in the picker's column of blocks that opens the list of kinds of block.</comment>
   </data>
-  <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Select what this works with.</value>
-    <comment>Tooltip on the Source box heading the first column of a selector, which chooses what the thing being made works with, such as blocks or a slot the logic system already has.</comment>
-  </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>This is [![](mark:awaited)&amp;nbsp;awaitable](Term.Awaitable class=term). The [![](mark:sequence)&amp;nbsp;sequence](Term.Sequence class=term) goes straight on while it works, and a `wait for pending tasks` [step](Term.Step class=term) below waits for it to finish.</value>
     <comment>Tooltip on an awaitable action, one marked with the clock that works over several ticks: on its row in the selector and on its part of a sentence. Also the tooltip on a step's sentence on a sequence's screen when the step starts such an action and goes straight on. "wait for pending tasks" is the words of the step that waits, which stay English.</comment>
@@ -507,6 +503,10 @@
   <data name="Sprocket.Pick.StateFixedValueAbout" xml:space="preserve">
     <value>Use one of these values.</value>
     <comment>Said where the pointer rests on the label before the buttons for the state's own values, in the selector that sets, tests or watches one of the logic system's states.</comment>
+  </data>
+  <data name="Sprocket.Pick.StateTypedValueAbout" xml:space="preserve">
+    <value>Type the value here.</value>
+    <comment>Said where the pointer rests on the field where the value that a step gives a state, or compares it with, is typed, for a state holding a number, a text or a length of time.</comment>
   </data>
   <data name="Sprocket.State.TypeRenameAbout" xml:space="preserve">
     <value>Rename this state type</value>
@@ -545,7 +545,7 @@
     <comment>Tooltip on the grip beside a state on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.HoldsAbout" xml:space="preserve">
-    <value>Change the [state type](Term.Type class=term) of this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term). Its starting value becomes the first value of the new one.</value>
+    <value>Change what this [![](mark:state)&amp;nbsp;state](Term.LogicSystemStates class=term) holds. It starts over at the first choice of a [state type](Term.Type class=term), at off for on or off, at 0 for a number, empty for a text, and at one second for a length of time.</value>
     <comment>Said where the pointer rests on what a state holds, after its name on a logic system's State tab.</comment>
   </data>
   <data name="Sprocket.State.StartsAbout" xml:space="preserve">

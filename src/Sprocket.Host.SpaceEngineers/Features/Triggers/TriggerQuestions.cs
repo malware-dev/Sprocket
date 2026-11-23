@@ -45,6 +45,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// </summary>
         public void StartSequence(AutomationSystem system, Trigger trigger, Func<Trigger, Arrangement> placed)
         {
+            StartSequence(system, trigger, placed, null);
+        }
+
+        /// <summary>
+        /// Asks the questions a new sequence needs, one screen at a time, the first from the source <paramref name="from" /> where
+        /// it was chosen already, and puts the trigger made where <paramref name="placed" /> says among the others, as one step
+        /// back with making it; after them all, under no category, where that is null.
+        /// </summary>
+        public void StartSequence(AutomationSystem system, Trigger trigger, Func<Trigger, Arrangement> placed, PickSource? from)
+        {
             _placed = placed;
             _starting.Clear();
             _replaced = null;
@@ -55,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
 
             if (trigger is MomentTrigger || trigger is StateTrigger)
             {
-                Watching(system, trigger, true, aim, origin, OpeningColumn.Blocks);
+                Watching(system, trigger, true, aim, origin, OpeningColumn.Blocks, from);
                 return;
             }
 
@@ -319,30 +329,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// on one of the logic system's states where it watches one, its first column's heading switching between those, and the
         /// slots the logic system already has; and puts the answer in its place.
         /// </summary>
-        void Watching(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens)
+        void Watching(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens, PickSource? from = null)
         {
             var kept = was as SignalTrigger;
             var keeps = !fresh && kept != null && !kept.IsWritten && system.IsBlueprint ? kept.Part : "";
             var source = new SourceSwitch(_editor,
-                (choice, slots) =>
+                slots =>
                 {
                     var page = OnBlocks(system, was, fresh, aim, origin, opens, slots);
-                    page.Source = choice;
                     page.Slotted = system;
                     page.ListsSlots = slots;
                     page.Keeps = keeps;
                     page.Replacing = fresh ? null : (was as MomentTrigger)?.Sources;
                     return page;
                 },
-                choice =>
-                {
-                    var page = OnState(system, was, fresh, aim, origin);
-                    page.Source = choice;
-                    return page;
-                });
+                () => OnState(system, was, fresh, aim, origin));
 
-            var opened = source.Open(fresh ? source.Usual : was is StateTrigger ? PickSource.States : PickSource.Blocks);
-            _editor.Push(opened);
+            var current = fresh ? (PickSource?)null : was is StateTrigger ? PickSource.States : PickSource.Blocks;
+
+            // Only the part naming what it watches asks which source; any other opens on the one it has.
+            source.Open(from ?? (opens == OpeningColumn.Blocks ? null : current), current);
         }
 
         /// <summary>The selector of a state <paramref name="was" /> is to start on, as a trigger made new where <paramref name="fresh" />, or changed in place.</summary>

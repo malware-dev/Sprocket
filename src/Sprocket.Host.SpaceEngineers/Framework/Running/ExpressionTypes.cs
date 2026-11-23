@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (state == null)
                 return null;
 
-            return state.IsFlag ? ValueKind.Flag : ValueKind.Name;
+            return state.Kind;
         }
 
         /// <inheritdoc />

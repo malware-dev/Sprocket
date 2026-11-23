@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
@@ -64,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>The comparison <paramref name="value" /> is, or false where it is none.</summary>
-        static bool Related(Value value, out Relation relation)
+        public static bool Related(Value value, out Relation relation)
         {
             relation = Relation.Is;
             if (value.Form != ValueForm.Keyword)
@@ -425,6 +426,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (statement.Says(at + 1, Keyword.Is))
                 return HostTested(statement, at, trouble);
 
+            // A condition read as one expression stands alone before 'then'.
+            if (statement.Says(at + 1, Keyword.Then))
+            {
+                Expression condition;
+                if (!ExpressionReader.Condition(statement, statement.ValueAt(at), system, trouble, out condition) || !ScriptQuotes.Ends(statement, at + 2, trouble))
+                    return null;
+
+                Used(statement, condition, system, program, trouble);
+                return new ExpressionTest(condition);
+            }
+
             if (!IsQuantifier(statement, at) && StateReader.Called(statement, statement.ValueAt(at)) != null)
                 return StateTested(statement, at, system, trouble);
 
@@ -461,17 +473,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 SystemReader.Uses(statement, test.Targets[i], system, program, false, trouble);
 
             if (value.IsExpression)
-            {
-                var lists = new List<IList<string>>();
-                value.Tree.NameLists(lists);
-                foreach (var names in lists)
-                {
-                    for (var i = 0; i < names.Count; i++)
-                        SystemReader.Uses(statement, names[i], system, program, false, trouble);
-                }
-            }
+                Used(statement, value.Tree, system, program, trouble);
 
             return test;
+        }
+
+        /// <summary>Marks each block <paramref name="expression" /> reads as used by <paramref name="statement" />, which is trouble where it names none.</summary>
+        public static void Used(Statement statement, Expression expression, AutomationSystem system, Automation program, ScriptTrouble trouble)
+        {
+            var lists = new List<IList<string>>();
+            expression.NameLists(lists);
+            foreach (var names in lists)
+            {
+                for (var i = 0; i < names.Count; i++)
+                    SystemReader.Uses(statement, names[i], system, program, false, trouble);
+            }
         }
 
         /// <summary>

@@ -48,6 +48,34 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 return;
             }
 
+            var comparing = tree as Comparing;
+            if (comparing != null)
+            {
+                // Comparisons do not chain, so a comparison on either side is in parentheses.
+                Append(into, system, comparing.Left, Comparing.ComparisonPrecedence + 1);
+                into.Words(" " + Keywords.Name(ProgramWriter.Said(comparing.Relation)) + " ");
+                Append(into, system, comparing.Right, Comparing.ComparisonPrecedence + 1);
+                return;
+            }
+
+            var logical = tree as Logical;
+            if (logical != null)
+            {
+                var precedence = logical.Precedence;
+                Append(into, system, logical.Left, precedence);
+                into.Words(" " + (logical.Joins == Connective.And ? ExpressionWords.And : ExpressionWords.Or) + " ");
+                Append(into, system, logical.Right, precedence + 1);
+                return;
+            }
+
+            var inversion = tree as Inversion;
+            if (inversion != null)
+            {
+                into.Words(ExpressionWords.Not + " ");
+                Append(into, system, inversion.Operand, Negation.UnaryPrecedence);
+                return;
+            }
+
             var negation = tree as Negation;
             if (negation != null)
             {
@@ -76,6 +104,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             if (reading != null)
             {
                 into.Operand(reading, Reading(system, reading));
+                if (!reading.Checks)
+                    return;
+
+                // The value compared with takes arithmetic only, as the check's own comparison binds what follows it.
+                into.Words(" " + Keywords.Name(ProgramWriter.Said(reading.Relation)) + " ");
+                Append(into, system, reading.Compared, Comparing.ComparisonPrecedence + 1);
                 return;
             }
 
@@ -104,6 +138,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                 case Combination.Average: pen.Says(Keyword.Average); break;
                 case Combination.Min: pen.Says(Keyword.Min); break;
                 case Combination.Max: pen.Says(Keyword.Max); break;
+                case Combination.Any: pen.Says(Keyword.Any); break;
+                case Combination.All: pen.Says(Keyword.All); break;
             }
 
             ProgramWriter.WriteMember(pen, system, reading.Key.Namespace, reading.Key.Id, reading.Arguments, reading.Targets);

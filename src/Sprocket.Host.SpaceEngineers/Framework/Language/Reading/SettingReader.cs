@@ -178,7 +178,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// <paramref name="written" /> as one of <paramref name="type" />; or false where it is none, with
         /// <paramref name="said" /> true where trouble already says why.
         /// </summary>
-        static bool Typed(Statement statement, Value written, string type, AutomationSystem system, ScriptTrouble trouble, out bool said,
+        public static bool Typed(Statement statement, Value written, string type, AutomationSystem system, ScriptTrouble trouble, out bool said,
             out Literal value)
         {
             said = false;

@@ -16,8 +16,8 @@ public class ControlSoundTests
     {
         "",
         "press \"+ logic system\" type Airlock enter",
-        "press \"+ logic system\" type Airlock enter press Sequences press \"+ sequence\" press \"+ step\" press task press \"Airlock Inner Door\" press open press Done",
-        "press \"+ logic system\" type Airlock enter press Sequences press \"+ sequence\" press \"+ step\" press task type Standby press \"Standby Battery\" press \"Terminal ›\" press \"Charge Mode\"",
+        "press \"+ logic system\" type Airlock enter press Sequences press \"+ sequence\" press \"+ step\" press task press Blocks… press \"Airlock Inner Door\" press open press Done",
+        "press \"+ logic system\" type Airlock enter press Sequences press \"+ sequence\" press \"+ step\" press task press Blocks… type Standby press \"Standby Battery\" press \"Terminal ›\" press \"Charge Mode\"",
         "press Library",
         "press \"+ logic system\" type Airlock enter press \"Installation panel\" press Markup"
     };

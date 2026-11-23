@@ -504,6 +504,206 @@ public class ExpressionRunTests
         Assert.True(p.Runner.States.Read(system, system.First, system.FindState("lit")!).Flag);
     }
 
+    /// <summary>An integer state is counted up by an expression reading itself, and a real state given an integer holds it as a real.</summary>
+    [Fact]
+    public void ANumberStateIsCountedUpByItsExpression()
+    {
+        var p = new Plant();
+        var system = p.Cycle.System;
+        system.States.Add(new State("count", "integer", Literal.Of(4L)));
+        system.States.Add(new State("level", "real", Literal.Of(0.5)));
+        p.Cycle.Steps.Add(new SetState { State = "count", Expression = new Arithmetic(Operator.Add, new StateOperand("count"), Plant.Number(1)) });
+        p.Cycle.Steps.Add(new SetState { State = "level", Expression = Plant.Number(3) });
+        p.Start();
+
+        var count = p.Runner.States.Read(system, system.First, system.FindState("count")!);
+        Assert.Equal(ValueKind.Integer, count.Kind);
+        Assert.Equal(5, count.Integer);
+        var level = p.Runner.States.Read(system, system.First, system.FindState("level")!);
+        Assert.Equal(ValueKind.Real, level.Kind);
+        Assert.Equal(3.0, level.Real);
+    }
+
+    /// <summary>What a state of each built-in type holds is saved in the world's record and read back exactly by the next load.</summary>
+    [Theory]
+    [InlineData("integer")]
+    [InlineData("real")]
+    [InlineData("text")]
+    [InlineData("duration")]
+    public void ABuiltInStatesValueIsSavedAndReadBack(string type)
+    {
+        var p = new Plant();
+        var system = p.Cycle.System;
+        Literal start, given;
+        switch (type)
+        {
+            case "integer": start = Literal.Of(0L); given = Literal.Of(long.MaxValue - 7); break;
+            case "real": start = Literal.Of(0.0); given = Literal.Of(0.1 + 0.2); break;
+            case "text": start = Literal.Of(""); given = Literal.Of("Cycling \"in\""); break;
+            default: start = Literal.Of(Duration.OfTicks(1)); given = Literal.Of(Duration.OfTicks(150)); break;
+        }
+
+        var state = new State("held", type, start);
+        system.States.Add(state);
+        p.Start();
+        Assert.True(p.Runner.States.Write(system, system.First, state, given));
+
+        var read = new StateValues(p.Program).Read(system, system.First, state);
+        Assert.True(StateMentions.Same(given, read), $"{given.Said} came back as {read.Said}");
+    }
+
+    /// <summary>A number or a length of a state is compared by its order, as the spec allows, and a test of it holds as the values say.</summary>
+    [Theory]
+    [InlineData(Relation.Above, 3, true)]
+    [InlineData(Relation.Above, 4, false)]
+    [InlineData(Relation.AtLeast, 4, true)]
+    [InlineData(Relation.Below, 5, true)]
+    [InlineData(Relation.AtMost, 3, false)]
+    public void ANumberStateIsComparedByOrder(Relation relation, long with, bool holds)
+    {
+        var p = new Plant();
+        var system = p.Cycle.System;
+        system.States.Add(new State("count", "integer", Literal.Of(4L)));
+        system.States.Add(new State("pause", "duration", Literal.Of(Duration.OfTicks(4))));
+        p.Start();
+
+        Assert.Equal(holds, p.Runner.States.Holds(system, system.First, new StateTest { State = "count", Relation = relation, Value = Literal.Of(with) }));
+        Assert.Equal(holds, p.Runner.States.Holds(system, system.First, new StateTest { State = "pause", Relation = relation, Value = Literal.Of(Duration.OfTicks((int)with)) }));
+    }
+
+    /// <summary>An if testing an expression joins comparisons of readings and states with and, or and not.</summary>
+    [Theory]
+    [InlineData(2, false, true)]
+    [InlineData(2, true, false)]
+    [InlineData(4, false, false)]
+    public void AnIfTestsAnExpression(long than, bool lit, bool holds)
+    {
+        var p = new Plant();
+        p.Cycle.System.States.Add(new State("lit", "", Literal.Of(lit)));
+        var above = new Comparing(Relation.Above, p.Reading(Combination.None, p.First), Plant.Number(than));
+        p.Cycle.Steps.Add(new If(new ExpressionTest(new Logical(Connective.And, above, new Inversion(new StateOperand("lit"))))));
+        p.SetRadius(Plant.Number(9));
+        p.Cycle.Steps.Add(new EndIf());
+        p.Start();
+
+        // The first lamp's radius is 3.
+        Assert.Equal(holds ? 9.0 : 1.0, p.Radius);
+    }
+
+    /// <summary>And and or work out their right side only where the left does not decide, so a right side that would fail is never reached.</summary>
+    [Theory]
+    [InlineData(Connective.And, false)]
+    [InlineData(Connective.Or, true)]
+    public void AJoinedFlagWorksOutItsRightSideOnlyWhereItMatters(Connective joins, bool left)
+    {
+        var p = new Plant();
+        var failing = new Comparing(Relation.Above, new Arithmetic(Operator.Divide, Plant.Number(1), Plant.Number(0)), Plant.Number(0));
+        p.Cycle.Steps.Add(new If(new ExpressionTest(new Logical(joins, new Operand(Literal.Of(left)), failing))));
+        p.SetRadius(Plant.Number(9));
+        p.Cycle.Steps.Add(new EndIf());
+        p.Start();
+
+        Assert.NotEqual(SequenceProblem.DividedByZero, p.State.Fault.Problem);
+        Assert.Equal(left ? 9.0 : 1.0, p.Radius);
+    }
+
+    /// <summary>Any and all compare each block's value, and over no blocks any is off and all is on.</summary>
+    [Theory]
+    [InlineData(Combination.Any, 4.0, true)]
+    [InlineData(Combination.All, 4.0, false)]
+    [InlineData(Combination.All, 2.0, true)]
+    [InlineData(Combination.Any, 20.0, false)]
+    public void AnyAndAllCheckEachBlock(Combination checks, double than, bool holds)
+    {
+        var p = new Plant();
+        var reading = new BlockReading(MemberKey.Bare("Radius"), checks, new List<Literal>(),
+            new List<string> { p.Name(p.First), p.Name(p.Second), p.Name(p.Third) }, Relation.Above, new Operand(Literal.Of(than)));
+        p.Cycle.Steps.Add(new If(new ExpressionTest(reading)));
+        p.SetRadius(Plant.Number(9));
+        p.Cycle.Steps.Add(new EndIf());
+        p.Start();
+
+        // The radii are 3, 5 and 10.
+        Assert.Equal(holds ? 9.0 : 1.0, p.Radius);
+    }
+
+    /// <summary>Over no blocks, any is off and all is on.</summary>
+    [Theory]
+    [InlineData(Combination.Any, false)]
+    [InlineData(Combination.All, true)]
+    public void AnyAndAllOfNoBlocks(Combination checks, bool holds)
+    {
+        var p = new Plant();
+        var reading = new BlockReading(MemberKey.Bare("Radius"), checks, new List<Literal>(), new List<string>(), Relation.Above, Plant.Number(1));
+        p.Cycle.Steps.Add(new If(new ExpressionTest(reading)));
+        p.SetRadius(Plant.Number(9));
+        p.Cycle.Steps.Add(new EndIf());
+        p.Start();
+
+        Assert.Equal(holds ? 9.0 : 1.0, p.Radius);
+    }
+
+    /// <summary>An if whose expression cannot be worked out ends the run at it and says why.</summary>
+    [Fact]
+    public void AnIfWhoseExpressionFailsEndsTheRun()
+    {
+        var p = new Plant();
+        var average = new BlockReading(MemberKey.Bare("Radius"), Combination.Average, new List<Literal>(), new List<string>());
+        p.Cycle.Steps.Add(new If(new ExpressionTest(new Comparing(Relation.Above, average, Plant.Number(1)))));
+        p.SetRadius(Plant.Number(9));
+        p.Cycle.Steps.Add(new EndIf());
+        p.Start();
+
+        Assert.Equal(1.0, p.Radius);
+        Assert.Equal(SequenceProblem.NoValue, p.State.Fault.Problem);
+    }
+
+    /// <summary>A when on an expression of readings fires as it comes to hold, and not while it goes on holding.</summary>
+    [Fact]
+    public void AWhenOnAnExpressionFiresAsItComesToHold()
+    {
+        var p = new Plant();
+        var system = p.Cycle.System;
+        var when = new ExpressionTrigger(new Comparing(Relation.Above, p.Reading(Combination.None, p.Second), Plant.Number(6)));
+        var started = p.Program.AddSequence(system, when);
+        var act = new Act("Radius") { Form = ReachKind.Value };
+        act.Targets.Add(p.Name(p.Out));
+        act.Arguments.Add(Literal.Of(p.Radius + 1));
+        started.Steps.Add(act);
+        p.Start(20);
+        Assert.Equal(1.0, p.Radius);
+
+        p.Second.Set("Radius", Literal.Of(7.0));
+        p.Tick(20);
+        Assert.Equal(2.0, p.Radius);
+
+        p.Out.Set("Radius", Literal.Of(1.0));
+        p.Tick(40);
+        Assert.Equal(1.0, p.Radius);
+    }
+
+    /// <summary>A when on an expression reading a state fires as a step sets the state so that it holds, on the same tick.</summary>
+    [Fact]
+    public void AWhenOnAStateInAnExpressionFiresAsTheStateIsSet()
+    {
+        var p = new Plant();
+        var system = p.Cycle.System;
+        system.States.Add(new State("count", "integer", Literal.Of(0L)));
+        var when = new ExpressionTrigger(new Logical(Connective.And, new Comparing(Relation.AtLeast, new StateOperand("count"), Plant.Number(2)),
+            new Comparing(Relation.Below, new StateOperand("count"), Plant.Number(5))));
+        var started = p.Program.AddSequence(system, when);
+        p.Cycle.Steps.Add(new SetState { State = "count", Expression = new Arithmetic(Operator.Add, new StateOperand("count"), Plant.Number(2)) });
+        var act = new Act("Radius") { Form = ReachKind.Value };
+        act.Targets.Add(p.Name(p.Out));
+        act.Arguments.Add(Literal.Of(9.0));
+        started.Steps.Add(act);
+        p.Start(1);
+
+        Assert.Equal(2L, p.Runner.States.Read(system, system.First, system.FindState("count")!).Integer);
+        p.Tick(2);
+        Assert.Equal(9.0, p.Radius);
+    }
+
     /// <summary>The words of the problems an expression comes to are said in both languages.</summary>
     [Theory]
     [InlineData(SequenceProblem.DividedByZero)]

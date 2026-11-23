@@ -154,10 +154,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var every = trigger as EveryTrigger;
             var when = trigger as WhenTrigger;
             var signal = trigger as SignalTrigger;
+            var expressed = trigger as ExpressionTrigger;
             if (every != null)
                 copy = new EveryTrigger(every.Interval) { IntervalSetting = every.IntervalSetting, IntervalExpression = every.IntervalExpression?.Copied() };
             else if (when != null)
                 copy = when.Copy();
+            else if (expressed != null)
+                copy = expressed.Copy();
             else if (signal != null)
             {
                 var made = new SignalTrigger(signal.EventId);
@@ -248,6 +251,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var compared = test as Comparison;
             if (compared != null)
                 return compared.Copy();
+
+            var worked = test as ExpressionTest;
+            if (worked != null)
+                return worked.Copy();
 
             var host = test as HostTest;
             return host != null ? (BranchTest)host.Copy() : ((StateTest)test).Copy();

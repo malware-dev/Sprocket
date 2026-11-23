@@ -179,10 +179,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             return opening.ToArray();
         }
 
-        /// <summary>The fields a check for one state of a status asks for: the relation alone, the state being chosen already.</summary>
-        public static List<Field> StateFields()
+        /// <summary>
+        /// The fields a check for one state of a status asks for: the relation alone, the state being chosen already; is and is not,
+        /// and the orderings too where <paramref name="ordered" />, for a state holding a number or a length.
+        /// </summary>
+        public static List<Field> StateFields(bool ordered = false)
         {
-            var relation = Field.Among(Name, Same, SameMeans);
+            var relation = ordered ? Field.Among(Name, Measured, MeasuredMeans) : Field.Among(Name, Same, SameMeans);
             relation.Worded = texts => texts.PickComparison;
             relation.Entry = FieldInput.Name;
             relation.Default = Same[0];
@@ -214,6 +217,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             }
 
             return Literal.Name(MeasuredMeans[0]);
+        }
+
+        /// <summary>The relations a test of a state or setting asks between: is and is not, and where <paramref name="ordered" />, as for a number or a length, the four orderings too.</summary>
+        public static IList<Relation> StateRelations(bool ordered)
+        {
+            return ordered ? Relations : new[] { Relation.Is, Relation.IsNot };
         }
 
         /// <summary>The words <paramref name="relation" /> is said in where it is asked: "is", "is not", "is above".</summary>

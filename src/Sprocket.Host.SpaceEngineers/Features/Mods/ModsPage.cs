@@ -24,7 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Mods
         const string NotInstalled = "not-installed";
 
         readonly string _lead;
-        readonly SourceSwitch _source;
         readonly Action<HostTest> _done;
         readonly string _unlisted;
         readonly List<string> _keys = new List<string>();
@@ -43,13 +42,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Mods
 
         /// <summary>
         /// The mods of the host, opened on <paramref name="start" /> where there is one, its sentence led by <paramref name="lead" />,
-        /// the first column's heading choosing between this and the other sources through <paramref name="source" />; hands the
-        /// test chosen to <paramref name="done" />.
+        /// handing the test chosen to <paramref name="done" />.
         /// </summary>
-        public ModsPage(SprocketEditor editor, string lead, HostTest start, SourceSwitch source, Action<HostTest> done) : base(editor)
+        public ModsPage(SprocketEditor editor, string lead, HostTest start, Action<HostTest> done) : base(editor)
         {
             _lead = lead;
-            _source = source;
             _done = done;
             _chosen = start?.Namespace ?? "";
             _installed = start?.Installed ?? true;
@@ -126,8 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Mods
                 _finish = Editor.Act(CommandKind.Primary, Primary);
 
                 _list = new StageColumn(_strip.Width, true, null, texts);
-                _list.Title = texts.PickSource;
-                _list.Heads(_source.Box(PickSource.Mods));
+                _list.Title = texts.PickMods;
                 _list.EmptyText = texts.PickModsEmpty;
                 _list.Narrowed += Narrow;
                 _rows = new KeyedChildren<string, PickRow>(_list.Rows, Row);
@@ -166,7 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Mods
         /// <summary>The strip of the pick.</summary>
         protected override Element CreateView()
         {
-            return _strip;
+            return _strip.View;
         }
 
         /// <summary>The one field of the check: whether the namespace is installed or is not.</summary>

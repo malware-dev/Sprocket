@@ -168,9 +168,9 @@ public class SlotHeadingTests
         var inner = Assert.Single(Act(screen, 0).Targets);
         var parts = editor.Program.Systems[0].Parts.Count;
 
-        editor.PressAdd("task");
+        editor.PressAdd("task", editor.Texts.PickSourceSlots);
         screen.Run(2);
-        ToSlots(screen);
+        Assert.True(((PickPage)editor.Current!).ListsSlots);
         editor.PressBlock(inner);
         screen.Run(2);
         Assert.True(editor.Screen.Heading[0].Emphasized);
@@ -240,9 +240,9 @@ public class SlotHeadingTests
         editor.Program.Edited();
         screen.Run(2);
 
-        editor.PressAdd("task");
+        editor.PressAdd("task", editor.Texts.PickSourceSlots);
         screen.Run(2);
-        ToSlots(screen);
+        Assert.True(((PickPage)editor.Current!).ListsSlots);
         editor.PressBlock("lonely");
         screen.Run(2);
 
@@ -286,9 +286,9 @@ public class SlotHeadingTests
         editor.BackSaving();
         screen.Run(2);
 
-        editor.PressStart(SentenceText.WhenWord);
+        editor.PressStart(SentenceText.WhenWord, editor.Texts.PickSourceSlots);
         screen.Run(2);
-        ToSlots(screen);
+        Assert.True(((PickPage)editor.Current!).ListsSlots);
         editor.PressBlock(slot);
         screen.Run(2);
 
@@ -301,11 +301,4 @@ public class SlotHeadingTests
         Assert.Equal(slot, ((SignalTrigger)system.Triggers[1]).Part);
     }
 
-    /// <summary>Switches the selector showing, on blocks, to the slots already made, through its Source box.</summary>
-    static void ToSlots(Screen screen)
-    {
-        screen.Editor.ChooseSource(screen.Editor.Texts.PickSourceSlots);
-        screen.Run(1);
-        Assert.True(((PickPage)screen.Editor.Current!).ListsSlots);
-    }
 }

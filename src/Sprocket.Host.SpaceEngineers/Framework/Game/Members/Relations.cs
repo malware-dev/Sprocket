@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// Measures a reading against an operand, each carrying its own kind.
         /// </summary>
         /// <remarks>
-        /// Two integers are compared as integers and any other two numbers as reals. A flag, a color and text answer
+        /// Two integers are compared as integers and any other two numbers as reals. Two lengths of time are compared by their ticks. A flag, a color and text answer
         /// only sameness, and two of different kinds are never the same.
         /// </remarks>
         public static bool Holds(Literal reading, Relation relation, Literal operand)
@@ -60,6 +60,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
                           && (operand.Kind == ValueKind.Integer || operand.Kind == ValueKind.Real);
             if (numbers)
                 return Real(reading.Number, relation, operand.Number);
+
+            if (reading.Kind == ValueKind.Duration && operand.Kind == ValueKind.Duration)
+                return Integer(reading.Length.Ticks, relation, operand.Length.Ticks);
 
             if (reading.Kind != operand.Kind)
                 return Same(false, relation);

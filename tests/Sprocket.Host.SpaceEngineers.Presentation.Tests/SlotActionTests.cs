@@ -78,6 +78,8 @@ public class SlotActionTests
         var act = editor.Program.Sequences[0].Steps.OfType<Framework.Model.Act>().First();
 
         editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single().Opens!.Execute();
+        screen.Run(1);
+        editor.ChooseSource(editor.Texts.PickSourceBlocks);
         screen.Run(3);
         editor.Screen.Heading[0].Renames!("Inner door");
         screen.Run(3);

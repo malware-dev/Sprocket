@@ -1042,10 +1042,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
                 Mark = Palette.Accent,
                 MarkSize = 8f,
                 MarkSpacing = 12f,
+                ArrowSize = 8f,
+                ArrowSpacing = 12f,
                 HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
             },
             Highlighted = { Background = Palette.Line },
-            Disabled = { Color = Palette.Dim, Mark = Palette.Dim }
+            Disabled = { Color = Palette.Dim, Mark = Palette.Dim, Arrow = Palette.Dim }
         };
 
         /// <summary>A drop-down saying what is chosen in it, edged while it holds the keyboard; washed and edged in red while what it holds cannot be used, and dimmed while it cannot be changed.</summary>

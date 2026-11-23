@@ -217,6 +217,8 @@ public class MoveItemsScreenTests
         var slots = system.Parts.Count;
 
         target.Opens!.Execute();
+        screen.Run(1);
+        screen.Editor.ChooseSource(screen.Editor.Texts.PickSourceBlocks);
         screen.Run(3);
 
         Assert.Equal("inventory slot 2", screen.Editor.Screen.Title());
@@ -271,6 +273,8 @@ public class MoveItemsScreenTests
         var target = Finished(out var screen, out _);
 
         target.Opens!.Execute();
+        screen.Run(1);
+        screen.Editor.ChooseSource(screen.Editor.Texts.PickSourceBlocks);
         screen.Run(3);
         screen.Editor.Back();
         screen.Run(4);
@@ -279,6 +283,8 @@ public class MoveItemsScreenTests
         Assert.Equal(new[] { "inventory slot 2" }, Target(screen).Slots);
 
         screen.Editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single(slot => !slot.IsOption).Opens!.Execute();
+        screen.Run(1);
+        screen.Editor.ChooseSource(screen.Editor.Texts.PickSourceBlocks);
         screen.Run(3);
         screen.Editor.Back();
         screen.Run(4);
@@ -320,10 +326,8 @@ public class MoveItemsScreenTests
         var system = editor.Program.Systems[0];
         var made = ((Act)system.Sequences[0].Steps.First(step => (step as Act)?.ActionId == InventoryType.MoveItems)).Arguments[0].Names[0];
 
-        editor.PressAdd("if");
+        editor.PressAdd("if", editor.Texts.PickSourceSlots);
         screen.Run(2);
-        editor.ChooseSource(editor.Texts.PickSourceSlots);
-        screen.Run(1);
         editor.PressBlock(made);
         screen.Run(2);
         var offered = editor.Members();
@@ -333,11 +337,6 @@ public class MoveItemsScreenTests
         screen.Run(2);
         editor.PressAdd("if");
         screen.Run(2);
-
-        // A new selector opens on the source last chosen.
-        Assert.Equal(editor.Texts.PickSourceSlots, editor.Source());
-        editor.ChooseSource(editor.Texts.PickSourceBlocks);
-        screen.Run(1);
         editor.PressBlock("Cargo 1");
         screen.Run(2);
         offered = editor.Members();

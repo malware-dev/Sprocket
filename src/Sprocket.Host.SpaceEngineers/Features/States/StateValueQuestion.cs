@@ -1,4 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
@@ -23,7 +25,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// </summary>
         public static List<Field> Fields(Texts texts, AutomationSystem system, State state, bool tests, DeclaredType made = null)
         {
-            var fields = tests ? ComparisonQuestion.StateFields() : new List<Field>();
+            var fields = tests ? ComparisonQuestion.StateFields(state.IsOrdered) : new List<Field>();
+            if (state.IsBuiltIn)
+            {
+                var typed = SettingPanel.DefaultField(texts, system, null, state.Type, null, texts.PickStateFixedValue, true);
+                typed.About = texts.Codex.PickStateTypedValueAbout;
+                fields.Add(typed);
+                return fields;
+            }
+
             var words = Words(system, state, made);
             var value = Field.Among(texts.PickStateFixedValue, words, words);
             value.About = texts.Codex.PickStateFixedValueAbout;
@@ -62,6 +72,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         public static bool Read(AutomationSystem system, State state, string word, out Literal value, DeclaredType made = null)
         {
             value = default(Literal);
+            if (state.IsBuiltIn)
+            {
+                if (string.IsNullOrEmpty(word) && state.Kind != ValueKind.Text)
+                    return false;
+
+                value = SettingPanel.Held(state.Type, SettingSources.Read(state.Type, word ?? ""));
+                if (State.Takes(state.Kind, value.Kind))
+                {
+                    value = StateValues.Held(state, value);
+                    return true;
+                }
+
+                value = default(Literal);
+                return false;
+            }
+
             var at = Choices(system, state, made).IndexOf(word);
             if (at < 0)
                 return false;
@@ -93,10 +119,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// pressed, <paramref name="value" /> marked where <paramref name="other" /> is empty, then the value of another state where
         /// there is one to take, marked where <paramref name="other" /> is not empty, and in a blueprint a setting. <paramref name="chosen" /> is given a value
         /// chosen other than the one it has; <paramref name="picks" /> opens the selector, at once where the state is not the system's.
+        /// A state holding a number, a text or a length is given its value in a panel instead, handed to <paramref name="asking" /> to hang.
         /// Where <paramref name="expression" /> is given, an expression is offered last, which it is carried out for.
         /// </summary>
         public static void Offer(SprocketEditor editor, AutomationSystem system, string named, Literal value, string other, Func<Element> part,
-            Action<Literal> chosen, Action picks, Action expression = null)
+            Action<Literal> chosen, Action picks, Action<ValuesQuestion> asking, Action expression = null)
         {
             var state = system?.FindState(named);
             if (state == null)
@@ -106,6 +133,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             }
 
             var taken = string.IsNullOrEmpty(other);
+            if (state.IsBuiltIn)
+            {
+                asking(Given(editor, system, state, taken ? value : state.Start, part, chosen, !taken || Others(system, state).Count != 0 ? picks : null));
+                return;
+            }
+
             editor.AskHere("");
             foreach (var word in Words(system, state))
             {
@@ -129,6 +162,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
 
             if (expression != null)
                 editor.Answer(editor.Texts.ValueExpression, expression);
+        }
+
+        /// <summary>
+        /// A panel, hung from what <paramref name="part" /> finds, giving <paramref name="state" />, which holds a number, a text or
+        /// a length, a value in one field of its type, opening on <paramref name="now" />, its mark offering the settings that
+        /// fit where <paramref name="sourced" />; <paramref name="chosen" /> is given the value it closes on, and where
+        /// <paramref name="picks" /> is given, the panel offers the value of another state, which it carries out.
+        /// </summary>
+        /// <remarks>Its holder hangs it every tick, as any panel.</remarks>
+        public static ValuesQuestion Given(SprocketEditor editor, AutomationSystem system, State state, Literal now, Func<Element> part,
+            Action<Literal> chosen, Action picks, bool sourced = true)
+        {
+            var texts = editor.Texts;
+            var fields = new[] { SettingPanel.DefaultField(texts, system, null, state.Type, null, texts.PickStateFixedValue, false) };
+            fields[0].About = texts.Codex.PickStateTypedValueAbout;
+            var question = new ValuesQuestion(editor, sourced ? system : null, fields, new[] { SettingPanel.Shown(state.Type, now) }, part, (said, held, cancelled) =>
+            {
+                if (cancelled)
+                    return;
+
+                var values = FieldSet.Read(said, fields, held);
+                if (values.Count > 0)
+                    chosen(values[0].IsSetting || values[0].IsExpression ? values[0] : SettingPanel.Held(state.Type, values[0]));
+            });
+            if (picks != null)
+                question.Defaults(texts.PickStateValueOf, picks);
+
+            question.Hang();
+            return question;
         }
 
         /// <summary>
@@ -158,6 +220,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
 
             editor.Answer(settings, editor.Texts.ValueNewSetting, () => SettingSources.New(editor, system, type, value.IsSetting ? default(Literal) : value, part,
                 made => chosen(Literal.Setting(made)), delegate { }), false);
+        }
+
+        /// <summary>How a player reads the type <paramref name="type" /> a state holds: on or off, a kind of value, or a declared type's name.</summary>
+        public static string Holding(Texts texts, string type)
+        {
+            switch (type ?? "")
+            {
+                case "": return texts.StateFlag;
+                case "integer": return texts.SettingKindInteger;
+                case "real": return texts.SettingKindReal;
+                case "text": return texts.SettingKindText;
+                case "duration": return texts.SettingKindDuration;
+            }
+
+            return type;
+        }
+
+        /// <summary>The value a state made to hold the built-in <paramref name="type" /> starts at: nought, an empty text, or a second.</summary>
+        public static Literal Initial(string type)
+        {
+            switch (type)
+            {
+                case "integer": return Literal.Of(0L);
+                case "real": return Literal.Of(0.0);
+                case "duration": return Literal.Of(Duration.OfSeconds(1));
+            }
+
+            return Literal.Of("");
         }
 
         /// <summary>A flag starting off, which a state made new starts as.</summary>

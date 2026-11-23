@@ -126,11 +126,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return compared.Exists ? compared : Given(bindings, types, when.Arguments, when.Sources, when.Names, through, at);
             }
 
+            var expressed = trigger as ExpressionTrigger;
+            if (expressed != null)
+            {
+                var lasting = Lasting(expressed.IntervalExpression, types, mistyped);
+                return lasting.Exists ? lasting : Worded(expressed.Condition, ValueKind.Flag, types, mistyped);
+            }
+
             var wait = step as Wait;
             if (wait != null)
                 return Lasting(wait.Expression, types, mistyped);
 
             var branch = step as Branch;
+            var tested = branch?.Test as ExpressionTest;
+            if (tested != null)
+                return Worded(tested.Condition, ValueKind.Flag, types, mistyped);
+
             if (branch?.Compared != null)
                 return Compared(branch.Compared.Value, branch.Compared.Relation, branch.Compared.Quantifier, types, mistyped);
 
@@ -140,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
             var sets = step as SetState;
             if (sets != null)
-                return Worded(sets.Expression, types.State(sets.State), types, mistyped);
+                return Held(sets.Expression, types.State(sets.State), types, mistyped);
 
             var act = step as Act;
             return act == null || !act.HasAction ? SequenceFault.None : Given(bindings, types, act.Arguments, act.Targets, act.Names, through, at);
@@ -166,6 +177,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             ValueKind? kind;
             expression.TypeOf(types, out kind);
             return kind != null && wanted != null && kind != wanted ? mistyped : SequenceFault.None;
+        }
+
+        /// <summary>Whether <paramref name="expression" />, where there is one, comes to a kind a state holding <paramref name="held" /> takes, where both are known: its own, or an integer for a real.</summary>
+        static SequenceFault Held(Expression expression, ValueKind? held, ExpressionTypes types, SequenceFault mistyped)
+        {
+            if (expression == null)
+                return SequenceFault.None;
+
+            ValueKind? kind;
+            expression.TypeOf(types, out kind);
+            return kind != null && held != null && !State.Takes(held.Value, kind.Value) ? mistyped : SequenceFault.None;
         }
 
         /// <summary>Whether the expression a test compares with is a number where the test orders or totals, as a literal there would have to be.</summary>

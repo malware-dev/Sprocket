@@ -52,7 +52,7 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>The picking page the editor is on, or an exception naming the screen.</summary>
         public static PickPage Picking(this SprocketEditor editor) =>
-            editor.Current as PickPage ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not picking.");
+            editor.Sourced().Current as PickPage ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not picking.");
 
         /// <summary>The page of the blueprint the editor is on, its view made.</summary>
         public static BlueprintPage Blueprint(this SprocketEditor editor)
@@ -118,22 +118,34 @@ namespace Sprocket.Sim.Driving
             throw new InvalidOperationException($"No slot holds '{block}' alone.");
         }
 
-        /// <summary>Has the pick on the screen list <paramref name="source" /> in its first column, as its Source box offers it, by typing into the box as a person would.</summary>
-        public static void ChooseSource(this SprocketEditor editor, string source)
+        /// <summary>
+        /// The editor, its selector of blocks opened where the menu of sources stands asking which to select from, as a person
+        /// reaching for a block chooses blocks there.
+        /// </summary>
+        static SprocketEditor Sourced(this SprocketEditor editor)
         {
-            var box = SourceBox(editor);
-            for (var i = 0; i < 4 && box.Text != source; i++)
-                ((IInputTarget)box).Text(source[0]);
+            // A source already marked is what is being changed, and stays chosen.
+            if (editor.Screen.Answers.Any(answer => answer.Text == editor.Texts.PickSourceBlocks))
+                editor.PressAnswer(editor.Screen.Default?.Text ?? editor.Texts.PickSourceBlocks);
+
+            return editor;
         }
 
-        /// <summary>The source the selector's first column is on, in the words its box says it in.</summary>
-        public static string Source(this SprocketEditor editor) => SourceBox(editor).Text;
+        /// <summary>Chooses <paramref name="source" /> in the menu of sources that opens before a selector, by pressing it as a person would.</summary>
+        public static void ChooseSource(this SprocketEditor editor, string source) => editor.PressAnswer(source);
 
-        static ListField SourceBox(SprocketEditor editor)
+        /// <summary>The source the selector on top selects from, in the words the menu of sources offers it in.</summary>
+        public static string Source(this SprocketEditor editor)
         {
             var texts = editor.Texts;
-            var sources = new[] { texts.PickSourceBlocks, texts.PickSourceSlots, texts.PickSourceStates, texts.PickSourceMods };
-            return Within(editor.Pick().Stages[0]).OfType<ListField>().First(field => sources.Contains(field.Text));
+            var page = editor.Current;
+            if (page is StatePage)
+                return texts.PickSourceStates;
+
+            if (page is ModsPage)
+                return texts.PickSourceMods;
+
+            return ((PickPage)page).ListsSlots ? texts.PickSourceSlots : texts.PickSourceBlocks;
         }
 
         /// <summary>The parts of the blueprint the editor is on, one row each.</summary>
@@ -171,6 +183,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The strip of the pick the editor is on, or an exception naming the screen.</summary>
         public static PickStrip Pick(this SprocketEditor editor)
         {
+            editor.Sourced();
             var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip ?? (editor.Current as ModsPage)?.Strip;
             return strip ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a pick.");
         }
@@ -301,6 +314,9 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>Presses one of the ways to start something on this screen, wherever it sits.</summary>
         public static void PressStart(this SprocketEditor editor, string label) => PressOffered(editor, label);
+
+        /// <summary>Presses one of the ways to start a sequence, choosing <paramref name="source" /> in the menu of sources it opens.</summary>
+        public static void PressStart(this SprocketEditor editor, string label, string source) => PressOffered(editor, label, source);
 
         /// <summary>
         /// Switches on the logic system the editor is in, which a new one is not.
@@ -561,9 +577,37 @@ namespace Sprocket.Sim.Driving
         /// <summary>Presses one of the ways to add a step to the sequence the screen shows.</summary>
         public static void PressAdd(this SprocketEditor editor, string text) => PressOffered(editor, text);
 
-        /// <summary>Presses the first way on the screen to add <paramref name="text" />: a button saying it, or the entry saying it in a menu.</summary>
+        /// <summary>The sources the way to add <paramref name="text" /> on the screen offers in its menu, in the words it offers them in; none where it offers no menu of sources.</summary>
+        public static List<string> Sources(this SprocketEditor editor, string text)
+        {
+            var view = editor.Current.View
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is described in components and has no buttons.");
+
+            foreach (var menu in Within(view).Concat(OtherTabs(view).SelectMany(Within)).OfType<PlusMenu>())
+            {
+                foreach (var choice in menu.Choices)
+                {
+                    if (choice.Text == text && choice.Choices != null)
+                        return choice.Choices.Where(sourced => sourced.Adds != null).Select(sourced => sourced.Text).ToList();
+                }
+            }
+
+            return new List<string>();
+        }
+
+        /// <summary>The answers standing in the menu under what was last pressed, in the words they say.</summary>
+        public static List<string> Answers(this SprocketEditor editor) => editor.Screen.Answers.Select(answer => answer.Text).ToList();
+
+        /// <summary>Presses one of the ways to add a step to the sequence the screen shows, choosing <paramref name="source" /> in the menu of sources it opens.</summary>
+        public static void PressAdd(this SprocketEditor editor, string text, string source) => PressOffered(editor, text, source);
+
+        /// <summary>
+        /// Presses the first way on the screen to add <paramref name="text" />: a button saying it, or the entry saying it in a
+        /// menu, and where that entry opens a menu of sources, <paramref name="source" /> in it, or blocks where it is null, as a
+        /// person reaching for a block chooses blocks.
+        /// </summary>
         /// <remarks>A menu's entry is taken straight from what the menu offers, without hanging it open: what opening one does is its own test's.</remarks>
-        static void PressOffered(SprocketEditor editor, string text)
+        static void PressOffered(SprocketEditor editor, string text, string? source = null)
         {
             var view = editor.Current.View
                        ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is described in components and has no buttons.");
@@ -579,6 +623,15 @@ namespace Sprocket.Sim.Driving
                         if (choice.Text == text && choice.Adds != null)
                         {
                             choice.Adds.Execute();
+                            return;
+                        }
+
+                        var within = choice.Text == text && choice.Choices != null
+                            ? choice.Choices.FirstOrDefault(sourced => sourced.Text == (source ?? editor.Texts.PickSourceBlocks) && sourced.Adds != null)
+                            : default(AddOption);
+                        if (within.Adds != null)
+                        {
+                            within.Adds.Execute();
                             return;
                         }
                     }
@@ -702,6 +755,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The columns of any pick on the screen, from the page it is on.</summary>
         static IEnumerable<StageColumn> Stages(this SprocketEditor editor)
         {
+            editor.Sourced();
             var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip ?? (editor.Current as ModsPage)?.Strip;
             return strip == null ? Enumerable.Empty<StageColumn>() : strip.Stages;
         }

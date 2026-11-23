@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             _relation = start?.Relation ?? Relation.Is;
             var state = system.FindState(_state);
             _copy = start?.Other ?? "";
-            _word = start == null || state == null || _copy.Length != 0 ? "" : start.Value.Said;
+            _word = start == null || state == null || _copy.Length != 0 ? "" : SettingPanel.Shown(state.Type, start.Value).Said;
 
             if (aim == null)
                 return;
@@ -127,12 +127,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
 
         /// <summary>The strip the pick is drawn in.</summary>
         public PickStrip Strip => _strip;
-
-        /// <summary>
-        /// The choice between this and a selector of blocks, offered in the heading of the column of states, or null where the
-        /// pick is about states alone. Set before the page is shown.
-        /// </summary>
-        public SourceSwitch Source { get; set; }
 
         /// <summary>Where a new state's name and type, and a new type's name, are given, once the page is built.</summary>
         public FieldSet Head => _newState.Head;
@@ -213,11 +207,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 _finish = Editor.Act(CommandKind.Primary, Primary);
 
                 _states = new StageColumn(_strip.Width, false, null, texts);
-                _states.Title = Source == null ? texts.PickStates : texts.PickSource;
-                _states.TitleTerm = Source == null ? CodexPages.LogicSystemStates : null;
+                _states.Title = texts.PickStates;
+                _states.TitleTerm = CodexPages.LogicSystemStates;
                 _states.Explain(Editor.Codex);
-                if (Source != null)
-                    _states.Heads(Source.Box(PickSource.States));
 
                 _rows = new KeyedChildren<string, PickRow>(_states.Rows, Row);
 
@@ -289,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
         /// <summary>The strip of the pick.</summary>
         protected override Element CreateView()
         {
-            return _strip;
+            return _strip.View;
         }
 
         /// <summary>A row for the state <paramref name="key" /> names, or for a new one, choosing it when pressed and going on when pressed twice.</summary>
@@ -323,7 +315,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
                 _newState.Begin();
 
             var state = Chosen;
-            if (state != null && !StateValueQuestion.Words(_system, state, TypeMade).Contains(_word))
+            if (state != null && !state.IsBuiltIn && !StateValueQuestion.Words(_system, state, TypeMade).Contains(_word))
                 _word = "";
 
             if (state != null && !StateValueQuestion.Others(_system, state).Contains(_copy))
@@ -361,7 +353,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             {
                 var row = _rows[state.Name];
                 row.Text = state.Name;
-                row.Secondary = state.IsFlag ? Editor.Texts.StateFlag : state.Type;
+                row.Secondary = StateValueQuestion.Holding(Editor.Texts, state.Type);
                 row.IsChosen = !_making && state.Name == _state;
                 row.Show();
             }
@@ -413,7 +405,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.States
             if (!_sets)
                 filled.Add(ComparisonQuestion.Said(_relation));
 
-            filled.Add(StateValueQuestion.Words(_system, state, made).Contains(_word) && _copy.Length == 0 ? _word : "");
+            filled.Add((state.IsBuiltIn || StateValueQuestion.Words(_system, state, made).Contains(_word)) && _copy.Length == 0 ? _word : "");
             var asking = StateValueQuestion.Fields(texts, _system, state, !_sets, made);
 
             // A switch always shows one of its two words, so it holds the one it shows: off, until it is flipped.

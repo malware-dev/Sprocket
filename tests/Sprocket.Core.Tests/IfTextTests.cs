@@ -11,7 +11,7 @@ public class IfTextTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Top = "sprocket 3 alpha 1\n\n"
+    const string Top = "sprocket 3 alpha 3\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n"
         + "let door2 = block 'Door/LargeBlockDoor' [ 2 ]\n"
         + "\n"
@@ -88,7 +88,7 @@ public class IfTextTests
     [InlineData("        if all sprocket.status on [ door1 ] == closed then {\n        }\n        else {\n        }\n        else {\n        }\n")]
     [InlineData("        if all sprocket.status on [ door1 ] == closed {\n        }\n")]
     [InlineData("        if all sprocket.closed on [ door1 ] = on then {\n        }\n")]
-    [InlineData("        if sprocket.closed on [ door1 ] == on then {\n        }\n")]
+    [InlineData("        if sprocket.closed on [ door1 ] == on == off then {\n        }\n")]
     [InlineData("        if all sprocket.status on [ door9 ] == closed then {\n        }\n")]
     [InlineData("        if all sprocket.status on [ door1 ] == closed then\n")]
     [InlineData("        if all sprocket.closed on [ door1 ] == [ 1 ] then {\n        }\n")]

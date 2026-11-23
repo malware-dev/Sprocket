@@ -20,6 +20,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
 
         IList<AddOption> _choices = None;
 
+        // What the menu lists as it opens: its choices, or the menu of the one choice that may be added now where that offers one.
+        IList<AddOption> _listed = None;
+
         /// <summary>A plus offering nothing yet, hidden until it is shown something to add.</summary>
         public PlusMenu()
         {
@@ -42,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         public void Show(AddOption head)
         {
             _choices = head.Choices ?? None;
+            _listed = _choices;
 
             var offered = Offered();
             IsVisible = offered > 0;
@@ -57,8 +61,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             for (var i = 0; i < _choices.Count; i++)
             {
                 var only = _choices[i];
-                if (only.Adds == null)
+                if (!IsOffered(only))
                     continue;
+
+                // The one choice offering a menu of its own is offered as that choice, opening its menu.
+                if (only.Adds == null)
+                {
+                    _listed = only.Choices;
+                    Text = only.Shown;
+                    Tip = CodexTip.For(Tip, only.About);
+                    Command = _toggles;
+                    return;
+                }
 
                 Text = only.Shown;
                 Tip = CodexTip.For(Tip, only.About);
@@ -73,11 +87,48 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             var offered = 0;
             for (var i = 0; i < _choices.Count; i++)
             {
-                if (_choices[i].Adds != null)
+                if (IsOffered(_choices[i]))
                     offered++;
             }
 
             return offered;
+        }
+
+        /// <summary>Whether <paramref name="choice" /> may be added now, or offers a menu of its own holding something that may.</summary>
+        static bool IsOffered(AddOption choice)
+        {
+            if (choice.Adds != null)
+                return true;
+
+            for (var i = 0; choice.Choices != null && i < choice.Choices.Count; i++)
+            {
+                if (IsOffered(choice.Choices[i]))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Fills <paramref name="menu" /> with those of <paramref name="choices" /> that may be added now, a choice offering a menu of its own opening it beside itself.</summary>
+        static void Fill(Menu menu, IList<AddOption> choices)
+        {
+            menu.Items.Clear();
+            for (var i = 0; i < choices.Count; i++)
+            {
+                var choice = choices[i];
+                if (!IsOffered(choice))
+                    continue;
+
+                if (choice.Adds != null)
+                {
+                    menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = choice.Text, Command = choice.Adds, Tip = CodexTip.For(null, choice.About) });
+                    continue;
+                }
+
+                var within = new Menu { Style = Styles.Menu };
+                Fill(within, choice.Choices);
+                menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = choice.Text, Submenu = within, Tip = CodexTip.For(null, choice.About) });
+            }
         }
 
         /// <summary>Hangs the menu open with what may be added now, or puts it away where it is already open.</summary>
@@ -89,16 +140,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
                 return;
             }
 
-            _menu.Items.Clear();
-            for (var i = 0; i < _choices.Count; i++)
-            {
-                var choice = _choices[i];
-                if (choice.Adds == null)
-                    continue;
-
-                _menu.Items.Add(new MenuItem { Style = Styles.MenuItem, Text = choice.Text, Command = choice.Adds, Tip = CodexTip.For(null, choice.About) });
-            }
-
+            Fill(_menu, _listed);
             _menu.Open();
         }
     }

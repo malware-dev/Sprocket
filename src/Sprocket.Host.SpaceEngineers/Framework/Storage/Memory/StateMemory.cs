@@ -23,8 +23,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Storage.Memory
         [ProtoMember(4)]
         public string Choice { get; set; } = "";
 
-        /// <summary>The flag it holds, where it holds no choice.</summary>
+        /// <summary>The flag it holds, where it holds no choice and its state holds a flag.</summary>
         [ProtoMember(5)]
         public bool Flag { get; set; }
+
+        /// <summary>The number or length it holds, as the state's type reads it: an integer as it is, a real's double as its bits, a length as its ticks.</summary>
+        [ProtoMember(6)]
+        public long Bits { get; set; }
+
+        /// <summary>The text it holds, where its state holds text.</summary>
+        [ProtoMember(7)]
+        public string Text { get; set; } = "";
     }
 }

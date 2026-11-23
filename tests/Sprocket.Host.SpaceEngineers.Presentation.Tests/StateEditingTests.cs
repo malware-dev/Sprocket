@@ -103,9 +103,9 @@ public class StateEditingTests
         var screen = OnSequence(Program, out var sequence);
         var editor = screen.Editor;
 
-        editor.PressAdd(SentenceText.IfWord);
+        editor.PressAdd(SentenceText.IfWord, editor.Texts.PickSourceStates);
         screen.Run(1);
-        ToStates(screen);
+        Assert.IsType<StatePage>(editor.Current);
         PickState(screen, "where");
         Relate(screen, "is not");
         Give(screen, "inside");
@@ -129,9 +129,10 @@ public class StateEditingTests
         var editor = screen.Editor;
 
         var end = editor.StepRows().Single(row => row.Kind == StepKind.End);
-        Assert.Single(end.Adds).Choices!.Single(choice => choice.Text == SentenceText.OtherwiseIfWords).Adds!.Execute();
+        Assert.Single(end.Adds).Choices!.Single(choice => choice.Text == SentenceText.OtherwiseIfWords)
+            .Choices!.Single(choice => choice.Text == editor.Texts.PickSourceStates).Adds!.Execute();
         screen.Run(1);
-        ToStates(screen);
+        Assert.IsType<StatePage>(editor.Current);
         PickState(screen, "there");
         Give(screen, "inside");
         Assert.Equal("Otherwise if there is inside", editor.Screen.Title());
@@ -154,9 +155,11 @@ public class StateEditingTests
         var row = editor.StepRows()[0];
         row.Slots.OfType<EntitiesSlot>().Single().Opens!.Execute();
         screen.Run(1);
-        Assert.IsType<PickPage>(editor.Current);
+        Assert.Contains(editor.Texts.PickSourceBlocks, editor.Answers());
 
-        ToStates(screen);
+        editor.ChooseSource(editor.Texts.PickSourceStates);
+        screen.Run(1);
+        Assert.IsType<StatePage>(editor.Current);
         PickState(screen, "where");
         Give(screen, "inside");
         editor.PressPrimary();
@@ -169,7 +172,7 @@ public class StateEditingTests
         Assert.IsType<SequencePage>(editor.Current);
     }
 
-    /// <summary>The selector an if on a state is changed with opens on States, and switching back to Blocks offers the blocks again.</summary>
+    /// <summary>Changing an if on a state asks first which source, States marked, and Blocks offers the blocks instead.</summary>
     [Fact]
     public void AnIfOnAStateOpensOnStates()
     {
@@ -178,9 +181,10 @@ public class StateEditingTests
 
         editor.StepRows()[0].Slots[0].Opens!.Execute();
         screen.Run(1);
-        Assert.IsType<StatePage>(editor.Current);
+        Assert.Contains(editor.Texts.PickSourceStates, editor.Answers());
 
-        Press(screen, SourceBox(screen, editor.Texts.PickSourceStates), editor.Texts.PickSourceBlocks);
+        editor.ChooseSource(editor.Texts.PickSourceBlocks);
+        screen.Run(1);
         Assert.IsType<PickPage>(editor.Current);
         Assert.NotEmpty(editor.Pick().Stages[0].Entries());
     }
@@ -336,9 +340,9 @@ public class StateEditingTests
         var screen = OnSystem(Program, out var system);
         var editor = screen.Editor;
 
-        editor.PressAdd(SentenceText.WhenWord);
+        editor.PressAdd(SentenceText.WhenWord, editor.Texts.PickSourceStates);
         screen.Run(1);
-        ToStates(screen);
+        Assert.IsType<StatePage>(editor.Current);
         PickState(screen, editor.Texts.PickNewState);
         Page(screen).Head.Fields[0].Text = "alarm";
         Give(screen, "on");
@@ -358,6 +362,23 @@ public class StateEditingTests
         Assert.DoesNotContain(system.Triggers, trigger => trigger is StateTrigger);
     }
 
+    /// <summary>A new state's column on the selector of a when, more columns than fit, is scrolled to, as a selector of blocks scrolls to its new column.</summary>
+    [Fact]
+    public void ANewStatesColumnIsScrolledTo()
+    {
+        var screen = OnSystem(Program, out _);
+        var editor = screen.Editor;
+
+        editor.PressAdd(SentenceText.WhenWord, editor.Texts.PickSourceStates);
+        screen.Run(1);
+        PickState(screen, editor.Texts.PickNewState);
+        screen.Run(30);
+
+        var view = Assert.IsType<Lumel.Viewing.ScrollView>(editor.Current.View);
+        Assert.Equal(4, editor.Pick().Stages.Count);
+        Assert.True(view.HorizontalOffset > 0f, "the selector stayed at its first column, the new state's column out of reach");
+    }
+
     /// <summary>When state makes a trigger started as the state comes to hold a value, which runs a new sequence.</summary>
     [Fact]
     public void WhenStateMakesATrigger()
@@ -370,9 +391,9 @@ public class StateEditingTests
         editor.Push(new LogicSystemPage(editor, system));
         screen.Run(1);
 
-        editor.PressAdd(SentenceText.WhenWord);
+        editor.PressAdd(SentenceText.WhenWord, editor.Texts.PickSourceStates);
         screen.Run(1);
-        ToStates(screen);
+        Assert.IsType<StatePage>(editor.Current);
         PickState(screen, "where");
         Give(screen, "outside");
         editor.Pick().Stages[2].Entries().First(entry => entry.Text == editor.Texts.PickNewSequence).Pick(HeldModifier.Alone, 1);
@@ -561,7 +582,10 @@ public class StateEditingTests
 
         Target.Within(view).OfType<StateRow>().Last().TypeButton.Command!.Execute();
         screen.Run(1);
-        Assert.Equal(new[] { editor.Texts.StateFlag, "side", StatusRow.Plus + editor.Texts.PickNewType }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+        Assert.Equal(new[] { editor.Texts.StateFlag, editor.Texts.SettingKindInteger, editor.Texts.SettingKindReal, editor.Texts.SettingKindText,
+                editor.Texts.SettingKindDuration, "side", StatusRow.Plus + editor.Texts.PickNewType },
+            editor.Screen.Answers.Where(answer => !answer.IsRule).Select(answer => answer.Text).ToArray());
+        Assert.True(editor.Screen.Answers[5].IsRule, "the declared types stand apart, after a line");
 
         editor.PressAnswer("side");
         screen.Run(1);
@@ -645,9 +669,9 @@ public class StateEditingTests
             + "    sequence 1 {\n    }\n}\n", out var sequence);
         var editor = screen.Editor;
 
-        editor.PressAdd(SentenceText.IfWord);
+        editor.PressAdd(SentenceText.IfWord, editor.Texts.PickSourceStates);
         screen.Run(1);
-        ToStates(screen);
+        Assert.IsType<StatePage>(editor.Current);
         PickState(screen, editor.Texts.PickNewState);
 
         Assert.IsType<SwitchField>(Page(screen).Form.Fields[Page(screen).Form.Count - 1]);
@@ -711,9 +735,9 @@ public class StateEditingTests
         var screen = OnSequence(Program, out _);
         var editor = screen.Editor;
 
-        editor.PressAdd(SentenceText.IfWord);
+        editor.PressAdd(SentenceText.IfWord, editor.Texts.PickSourceStates);
         screen.Run(1);
-        ToStates(screen);
+        Assert.IsType<StatePage>(editor.Current);
         PickState(screen, editor.Texts.PickNewState);
         var form = Page(screen).Head;
         form.Fields[0].Text = "where";
@@ -910,7 +934,7 @@ public class StateEditingTests
         Assert.NotNull(system.FindState("there"));
     }
 
-    static Screen OnSystem(string program, out AutomationSystem system)
+    internal static Screen OnSystem(string program, out AutomationSystem system)
     {
         var screen = Screen.Holding(program);
         var editor = screen.Editor;
@@ -922,7 +946,7 @@ public class StateEditingTests
         return screen;
     }
 
-    static Screen OnSequence(string program, out Sequence sequence)
+    internal static Screen OnSequence(string program, out Sequence sequence)
     {
         var screen = Screen.Holding(program);
         var editor = screen.Editor;
@@ -933,18 +957,6 @@ public class StateEditingTests
         editor.Push(new SequencePage(editor, sequence));
         screen.Run(1);
         return screen;
-    }
-
-    /// <summary>The Source box heading the selector's first column, showing <paramref name="shows" />.</summary>
-    static ListField SourceBox(Screen screen, string shows) =>
-        Target.Within(screen.Editor.Pick().Stages[0]).OfType<ListField>().First(field => field.Text == shows);
-
-    /// <summary>Switches the selector showing, on blocks, to the logic system's states, through its Source box.</summary>
-    static void ToStates(Screen screen)
-    {
-        var texts = screen.Editor.Texts;
-        Press(screen, SourceBox(screen, texts.PickSourceBlocks), texts.PickSourceStates);
-        Assert.IsType<StatePage>(screen.Editor.Current);
     }
 
     static void PickState(Screen screen, string name)

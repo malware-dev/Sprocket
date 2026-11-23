@@ -46,7 +46,7 @@ public class SliderTests
     [Fact]
     public void ABoundedValueIsSlidAndOpensOnWhatTheBlockHolds()
     {
-        var screen = Screen.Fresh("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step press task 200 485 press radius".Split(' '));
+        var screen = Screen.Fresh("60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 press step press task press Blocks… 200 485 press radius".Split(' '));
 
         var form = screen.Editor.Pick().Arguments!.Form;
         var field = Assert.IsType<SliderField>(Assert.Single(form.Fields));

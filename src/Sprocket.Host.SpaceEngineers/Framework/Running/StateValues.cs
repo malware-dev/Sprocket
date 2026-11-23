@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Storage.Memory;
+using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Running
@@ -31,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (stored == null)
                 return Starting(instance, state);
 
-            var value = stored.Choice.Length > 0 ? Literal.Name(stored.Choice) : Literal.Of(stored.Flag);
+            var value = Recorded(state, stored);
             if (Fits(system, state, value))
                 return value;
 
@@ -51,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Gives <paramref name="state" /> of <paramref name="instance" /> the value <paramref name="value" />, answering whether that changed what it holds.</summary>
         public bool Write(AutomationSystem system, SystemInstance instance, State state, Literal value)
         {
+            value = Held(state, value);
             if (instance == null || StateMentions.Same(Read(system, instance, state), value))
                 return false;
 
@@ -58,7 +60,42 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             stored.State = state.Name;
             stored.Choice = value.Kind == ValueKind.Name ? value.Text : "";
             stored.Flag = value.Kind == ValueKind.Flag && value.Flag;
+            stored.Text = value.Kind == ValueKind.Text ? value.Text ?? "" : "";
+            stored.Bits = Bits(value);
             return true;
+        }
+
+        /// <summary>The bits the saved record holds <paramref name="value" /> in: an integer as it is, a real's double as its bits, a length as its ticks, and nought for anything else.</summary>
+        static long Bits(Literal value)
+        {
+            switch (value.Kind)
+            {
+                case ValueKind.Integer: return value.Integer;
+                case ValueKind.Real: return BitConverter.DoubleToInt64Bits(value.Real);
+                case ValueKind.Duration: return value.Length.Ticks;
+            }
+
+            return 0;
+        }
+
+        /// <summary>What <paramref name="stored" /> holds for <paramref name="state" />, read as the kind the state holds.</summary>
+        static Literal Recorded(State state, StateMemory stored)
+        {
+            if (stored.Choice.Length > 0)
+                return Literal.Name(stored.Choice);
+
+            if (stored.Flag)
+                return Literal.Of(true);
+
+            switch (state.Kind)
+            {
+                case ValueKind.Integer: return Literal.Of(stored.Bits);
+                case ValueKind.Real: return Literal.Of(BitConverter.Int64BitsToDouble(stored.Bits));
+                case ValueKind.Duration: return Literal.Of(Duration.OfTicks((int)stored.Bits));
+                case ValueKind.Text: return Literal.Of(stored.Text ?? "");
+            }
+
+            return Literal.Of(false);
         }
 
         /// <summary>Whether <paramref name="test" /> holds on what <paramref name="instance" /> holds in its states and gives its settings.</summary>
@@ -95,6 +132,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
                 other = Read(system, instance, compared);
             }
+
+            if (test.Relation != Relation.Is && test.Relation != Relation.IsNot)
+                return Relations.Holds(tested, test.Relation, other);
 
             var same = StateMentions.Same(tested, other);
             return test.Relation == Relation.IsNot ? !same : same;
@@ -204,11 +244,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// <summary>Whether <paramref name="state" /> can hold <paramref name="value" /> as it is declared now.</summary>
         public static bool Fits(AutomationSystem system, State state, Literal value)
         {
-            if (state.IsFlag)
-                return value.Kind == ValueKind.Flag;
+            if (!state.IsChoice)
+                return State.Takes(state.Kind, value.Kind);
 
             var type = system.FindType(state.Type);
             return value.Kind == ValueKind.Name && type != null && type.Has(value.Text);
+        }
+
+        /// <summary><paramref name="value" />, which <paramref name="state" /> holds, as the kind it holds: an integer given to a real state becomes a real.</summary>
+        public static Literal Held(State state, Literal value)
+        {
+            return state.Kind == ValueKind.Real && value.Kind == ValueKind.Integer ? Literal.Of((double)value.Integer) : value;
         }
     }
 }

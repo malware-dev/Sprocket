@@ -632,21 +632,21 @@
     <value>States</value>
     <comment>Heading of the column listing a logic system's states, on the page choosing a state to set, test or watch; shown in capitals.</comment>
   </data>
-  <data name="Sprocket.Pick.Source" xml:space="preserve">
-    <value>Source</value>
-    <comment>Heading of the first column of the selector a step, an if, an otherwise if or a when is made with, before the box choosing what it is about: blocks, a slot already made, one of the logic system's states, or a mod. Shown in capitals.</comment>
-  </data>
   <data name="Sprocket.Pick.SourceBlocks" xml:space="preserve">
-    <value>Blocks</value>
-    <comment>Choice in the Source box heading the first column of the selector an if, an otherwise if or a when is made with: it checks or watches blocks.</comment>
+    <value>Blocks…</value>
+    <comment>Choice in the menu that opens before the selector a step, an if, an otherwise if or a when is made with: it acts on, checks or watches blocks, chosen in the selector this opens.</comment>
   </data>
   <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
-    <value>States</value>
-    <comment>Choice in the Source box heading the first column of the selector an if, an otherwise if or a when is made with: it checks or watches one of the logic system's states.</comment>
+    <value>States…</value>
+    <comment>Choice in the menu that opens before the selector a step, an if, an otherwise if or a when is made with: it checks or watches one of the logic system's states, chosen in the selector this opens.</comment>
   </data>
   <data name="Sprocket.Pick.SourceMods" xml:space="preserve">
+    <value>Mods…</value>
+    <comment>Choice in the menu that opens before the selector a step, an if, an otherwise if or a when is made with: it checks whether a mod is installed, chosen in the selector this opens.</comment>
+  </data>
+  <data name="Sprocket.Pick.Mods" xml:space="preserve">
     <value>Mods</value>
-    <comment>Choice in the Source box heading the first column of the selector an if or an otherwise if is made with: it checks whether a mod is installed.</comment>
+    <comment>Heading of the column listing the mods the host has, in the selector an if or an otherwise if checks a mod with. Shown in capitals.</comment>
   </data>
   <data name="Sprocket.Pick.ModCheck" xml:space="preserve">
     <value>Check</value>
@@ -657,16 +657,16 @@
     <comment>Shown in the first column of the selector an if or an otherwise if is made with when its Source is Mods and the column lists no mod, because none is installed that Sprocket can check for or the search finds none.</comment>
   </data>
   <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
-    <value>Existing slot</value>
-    <comment>Choice in the Source box heading the first column of the selector a step, an if, an otherwise if or a when is made with: it acts on, checks or watches a slot the logic system already has, picked by its name, instead of blocks.</comment>
+    <value>Existing slot…</value>
+    <comment>Choice in the menu that opens before the selector a step, an if, an otherwise if or a when is made with: it acts on, checks or watches a slot the logic system already has, picked by its name in the selector this opens, instead of blocks.</comment>
   </data>
   <data name="Sprocket.Pick.Slots" xml:space="preserve">
     <value>Slots</value>
     <comment>Heading of the first column of a selector while it lists the logic system's slots, the Existing slot source chosen. Shown in capitals.</comment>
   </data>
   <data name="Sprocket.Pick.NoSlots" xml:space="preserve">
-    <value>This logic system has no block slots yet. Switch the source to Blocks and select some to make one.</value>
-    <comment>Said in the first column of a selector, the Existing slot source chosen, where the logic system has no slot holding blocks to list. Blocks is the name of the Source box's choice that lists blocks to select, whose selecting makes a slot.</comment>
+    <value>This logic system has no block slots yet. Go back, choose Blocks… and select some to make one.</value>
+    <comment>Said in the first column of a selector, opened from the Existing slot… source, where the logic system has no slot holding blocks to list. Blocks… is the source, chosen in the menu before the selector opens, that lists blocks to select, whose selecting makes a slot.</comment>
   </data>
   <data name="Sprocket.Pick.SlotFillsOne" xml:space="preserve">
     <value>1 block in this installation</value>

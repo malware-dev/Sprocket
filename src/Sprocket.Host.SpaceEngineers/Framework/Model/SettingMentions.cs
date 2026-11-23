@@ -78,6 +78,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             if (watched != null)
                 Walk(watched.Test, into, was, now);
 
+            var expressed = trigger as ExpressionTrigger;
+            if (expressed != null)
+            {
+                expressed.Condition = Walk(expressed.Condition, into, was, now);
+                expressed.IntervalSetting = Walk(expressed.IntervalSetting, into, was, now);
+                expressed.IntervalExpression = Walk(expressed.IntervalExpression, into, was, now);
+            }
+
             Walk(trigger.Does, into, was, now);
         }
 
@@ -94,6 +102,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 compared.Value = Walk(compared.Value, into, was, now);
             else
                 Walk(branch?.Test as StateTest, into, was, now);
+
+            var tested = branch?.Test as ExpressionTest;
+            if (tested != null)
+                tested.Condition = Walk(tested.Condition, into, was, now);
 
             var wait = step as Wait;
             if (wait != null)

@@ -32,7 +32,7 @@
     <value>En **plass** er et navngitt sted i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term), som den indre døra, som hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) fyller med sine egne blokker eller sitt eget [![](mark:signal)&amp;nbsp;signal](Term.Signal class=term). En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel class=term).</value>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value>![](mark:state)&amp;nbsp;**Tilstandene** i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) er det det husker mellom jobbene. Hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) har sine egne. En tilstand har én verdi om gangen. De fleste er på eller av, mens andre, som slusetilstanden i en luftsluse, har ett av alternativene i en egendefinert [tilstandstype](Term.Type class=term).</value>
+    <value>![](mark:state)&amp;nbsp;**Tilstandene** i et [![](mark:logic-system)&amp;nbsp;logikksystem](Term.LogicSystem class=term) er det det husker mellom jobbene. Hver [![](mark:installation)&amp;nbsp;installasjon](Term.Installation class=term) har sine egne. En tilstand har én verdi om gangen. De fleste er på eller av. Andre har et tall, en tekst eller en tidslengde, for eksempel et antall sykluser, eller et alternativ fra en egendefinert [tilstandstype](Term.Type class=term), som slusetilstanden i en luftsluse.</value>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
     <value>En **tilstandstype** bestemmer hvilke verdier en [![](mark:state)&amp;nbsp;tilstand](Term.LogicSystemStates class=term) kan ha. For eksempel kan slusetilstanden i en luftsluse være *inne*, *sluser inn*, *sluser ut* eller *ute*. Flere tilstander kan bruke samme tilstandstype.</value>
@@ -367,9 +367,6 @@
   <data name="Sprocket.Pick.KindAbout" xml:space="preserve">
     <value>Vis bare én sort blokk.</value>
   </data>
-  <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
-    <value>Velg hva dette arbeider med.</value>
-  </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>Dette er [![](mark:awaited)&amp;nbsp;avventbart](Term.Awaitable class=term). [![](mark:sequence)&amp;nbsp;Sekvensen](Term.Sequence class=term) går rett videre mens det virker, og et `wait for pending tasks`-[steg](Term.Step class=term) nedenfor venter til det er ferdig.</value>
   </data>
@@ -410,7 +407,7 @@
     <value>Dra for å flytte tilstanden.</value>
   </data>
   <data name="Sprocket.State.HoldsAbout" xml:space="preserve">
-    <value>Bytt [tilstandstypen](Term.Type class=term) til denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term). Startverdien blir den første verdien i den nye.</value>
+    <value>Endre hva denne [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term) inneholder. Den starter på nytt med det første alternativet i en [tilstandstype](Term.Type class=term), med av for på eller av, med 0 for et tall, tom for en tekst og med ett sekund for en tidslengde.</value>
   </data>
   <data name="Sprocket.State.StartsAbout" xml:space="preserve">
     <value>Verdien [![](mark:state)&amp;nbsp;tilstanden](Term.LogicSystemStates class=term) har når [![](mark:logic-system)&amp;nbsp;logikksystemet](Term.LogicSystem class=term) starter.</value>
@@ -3892,5 +3889,8 @@
   </data>
   <data name="Sprocket.Expression.TypedAbout" xml:space="preserve">
     <value>Slipp den på en tom plass, og still inn verdien med en gang.</value>
+  </data>
+  <data name="Sprocket.Pick.StateTypedValueAbout" xml:space="preserve">
+    <value>Skriv inn verdien her.</value>
   </data>
 </root>

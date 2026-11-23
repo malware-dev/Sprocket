@@ -47,7 +47,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         bool _listsSlots;
         Action _moveOn;
         long _anchor;
-        SourceSwitch _source;
         bool _fits;
         int _worded;
 
@@ -83,15 +82,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         }
 
         /// <summary>
-        /// Makes the column, headed by <paramref name="source" /> where it is given; it lists the slots <paramref name="slotted" />
-        /// has where <paramref name="listsSlots" />, and <paramref name="moveOn" /> finishes as a second press in quick
-        /// succession does.
+        /// Makes the column, which lists the slots <paramref name="slotted" /> has where <paramref name="listsSlots" />, and
+        /// <paramref name="moveOn" /> finishes as a second press in quick succession does.
         /// </summary>
-        public StageColumn Make(float width, SourceSwitch source, bool listsSlots, AutomationSystem slotted, bool fits, Action moveOn)
+        public StageColumn Make(float width, bool listsSlots, AutomationSystem slotted, bool fits, Action moveOn)
         {
             _listsSlots = listsSlots;
             _moveOn = moveOn;
-            _source = source;
             _fits = fits;
 
             _blocks = new StageColumn(width, true, null, _editor.Texts);
@@ -130,9 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         {
             var texts = _editor.Texts;
             _worded = _editor.Rewordings;
-            _blocks.Title = _source != null ? texts.PickSource : _listsSlots ? texts.PickSlots : texts.PickBlocks;
-            if (_source != null)
-                _blocks.Heads(_source.Box(_listsSlots ? PickSource.Slots : PickSource.Blocks));
+            _blocks.Title = _listsSlots ? texts.PickSlots : texts.PickBlocks;
 
             _blocks.EmptyText = _listsSlots
                 ? texts.PickNoSlots

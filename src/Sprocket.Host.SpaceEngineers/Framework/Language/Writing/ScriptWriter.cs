@@ -354,6 +354,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             return this;
         }
 
+        /// <summary>A real written so it reads back as a real alone, where nothing says its type: a whole number gains <c>.0</c>, <c>0.0</c> for nought.</summary>
+        public ScriptWriter RealAlone(double value)
+        {
+            Space();
+            var written = value.ToString("R", CultureInfo.InvariantCulture);
+            _text.Append(written);
+            if (written.IndexOfAny(new[] { '.', 'E', 'e', 'N', 'I' }) < 0)
+                _text.Append(".0");
+
+            return this;
+        }
+
         /// <summary>A color, written <c>#RRGGBBAA</c>.</summary>
         public ScriptWriter Color(byte r, byte g, byte b, byte a)
         {

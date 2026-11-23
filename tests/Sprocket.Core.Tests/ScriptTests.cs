@@ -20,7 +20,7 @@ public class ScriptTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 3 alpha 1\n\n";
+    const string Version = "sprocket 3 alpha 3\n\n";
 
     const string Head = Version + "system \"" + Identity + "\" as ";
 
@@ -157,7 +157,7 @@ public class ScriptTests
     public void AProgramReadsAsAScript()
     {
         Assert.Equal(
-            "sprocket 3 alpha 1\n" +
+            "sprocket 3 alpha 3\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
             "\n" +
@@ -218,7 +218,7 @@ public class ScriptTests
         system.AddTrigger(pressed);
 
         const string written =
-            "sprocket 3 alpha 1\n" +
+            "sprocket 3 alpha 3\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934 ]\n" +
             "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 74857693847562937 ]\n" +
@@ -259,9 +259,9 @@ public class ScriptTests
     /// A system with no identity, or one that is not a GUID, is trouble and is not read.
     /// </summary>
     [Theory]
-    [InlineData("sprocket 3 alpha 1\n\nsystem Airlock {\n}\n")]
-    [InlineData("sprocket 3 alpha 1\n\nsystem \"airlock\" as Airlock\n{\n}\n")]
-    [InlineData("sprocket 3 alpha 1\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock\n{\n}\n")]
+    [InlineData("sprocket 3 alpha 3\n\nsystem Airlock {\n}\n")]
+    [InlineData("sprocket 3 alpha 3\n\nsystem \"airlock\" as Airlock\n{\n}\n")]
+    [InlineData("sprocket 3 alpha 3\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock\n{\n}\n")]
     public void ASystemWithoutAnIdentityIsTrouble(string text)
     {
         var after = new Automation();
@@ -1339,7 +1339,7 @@ public class ScriptTests
     [Fact]
     public void APathAmongABlocksKeysComesBackAsWritten()
     {
-        const string written = "sprocket 3 alpha 1\n\nlet door1 = block 'Door/LargeBlockDoor' "
+        const string written = "sprocket 3 alpha 3\n\nlet door1 = block 'Door/LargeBlockDoor' "
             + "[ 74857693847562934, [ (0 2 -1), (3 0 0) ], \"Hangar Door\" ]\n\n"
             + Using;
 
@@ -1360,7 +1360,7 @@ public class ScriptTests
     public void AListThatIsNotCellsIsTrouble(string key)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 3 alpha 1\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
+        Assert.NotEqual("", Load("sprocket 3 alpha 3\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1369,7 +1369,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
-            "sprocket 3 alpha 1\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
+            "sprocket 3 alpha 3\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
 
         Assert.False(after.Intact);
     }
@@ -1505,7 +1505,7 @@ public class ScriptTests
     public void AnAnnotationWithNothingUnderItIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 3 alpha 1\n\n# about nothing at all\n", after));
+        Assert.NotEqual("", Load("sprocket 3 alpha 3\n\n# about nothing at all\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1525,12 +1525,12 @@ public class ScriptTests
     [InlineData("sprocket 1 alpha 11")]
     [InlineData("sprocket 1 alpha 12")]
     [InlineData("sprocket 2 alpha 5")]
-    [InlineData("sprocket 3 alpha 2")]
+    [InlineData("sprocket 3 alpha 4")]
     [InlineData("sprocket 4 alpha 1")]
     public void ASaveFromAnotherVersionOrDraftOfTheFormatIsRefusedAndNotWrittenBack(string head)
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 3 alpha 1", head), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 3 alpha 3", head), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -1539,22 +1539,24 @@ public class ScriptTests
     }
 
     /// <summary>
-    /// A save of version 2, finished or from any of its drafts a build wrote, is read and written back in the current
-    /// format, <c>sprocket 3 alpha 1</c>, saying what it said.
+    /// A save of version 2, finished or from any of its drafts a build wrote, or from an earlier draft of version 3, is read
+    /// and written back in the current format, <c>sprocket 3 alpha 3</c>, saying what it said.
     /// </summary>
     [Theory]
     [InlineData("sprocket 2 alpha 1")]
     [InlineData("sprocket 2 alpha 2")]
     [InlineData("sprocket 2 alpha 3")]
     [InlineData("sprocket 2")]
+    [InlineData("sprocket 3 alpha 1")]
+    [InlineData("sprocket 3 alpha 2")]
     public void ASaveOfVersionTwoIsReadAndWrittenInTheCurrentFormat(string head)
     {
         var after = new Automation();
         var saved = Save(Airlock());
 
-        Assert.Equal("", Load(saved.Replace("sprocket 3 alpha 1\n", head + "\n"), after));
+        Assert.Equal("", Load(saved.Replace("sprocket 3 alpha 3\n", head + "\n"), after));
         Assert.Equal(saved, Save(after));
-        Assert.StartsWith("sprocket 3 alpha 1\n", saved);
+        Assert.StartsWith("sprocket 3 alpha 3\n", saved);
     }
 
     [Fact]

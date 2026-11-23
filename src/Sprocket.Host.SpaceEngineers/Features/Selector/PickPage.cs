@@ -251,12 +251,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         /// <summary>The strip the pick is drawn in.</summary>
         public PickStrip Strip => _strip;
 
-        /// <summary>
-        /// The choice between this and a selector of the logic system's states, offered in the heading of the blocks column,
-        /// or null where the pick is about blocks alone. Set before the page is shown.
-        /// </summary>
-        public SourceSwitch Source { get; set; }
-
         /// <summary>Whether anything here differs from what was chosen when it opened: the blocks, what is done to them, any or all, or the values.</summary>
         bool Moved
         {
@@ -430,7 +424,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 _finish = Editor.Act(CommandKind.Primary, Primary);
 
             if (_blocks.Column == null)
-                _strip.Add(_blocks.Make(_strip.Width, Source, ListsSlots, Slotted, _fits != null, MoveOn));
+                _strip.Add(_blocks.Make(_strip.Width, ListsSlots, Slotted, _fits != null, MoveOn));
 
             _blocks.Fill(Limit);
 

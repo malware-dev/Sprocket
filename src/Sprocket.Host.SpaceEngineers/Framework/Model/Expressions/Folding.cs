@@ -5,7 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
 {
     /// <summary>
     /// An expression worked out as far as it can be while it comes to the same: every part of only fixed values becomes the value it
-    /// comes to, and a number times 0, times 1, plus 0, minus 0 or divided by 1 drops what makes no difference.
+    /// comes to, a number times 0, times 1, plus 0, minus 0 or divided by 1 drops what makes no difference, and a flag joined
+    /// to off by and, or to on by or, comes to that fixed flag, and joined to on by and, or to off by or, to itself.
     /// </summary>
     public static class Folding
     {
@@ -23,6 +24,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
             if (negation != null)
                 return Worked(new Negation(Fold(negation.Operand, types)));
 
+            var comparing = expression as Comparing;
+            if (comparing != null)
+                return Worked(new Comparing(comparing.Relation, Fold(comparing.Left, types), Fold(comparing.Right, types)));
+
+            var inversion = expression as Inversion;
+            if (inversion != null)
+                return Worked(new Inversion(Fold(inversion.Operand, types)));
+
+            var logical = expression as Logical;
+            if (logical != null)
+                return Joined(new Logical(logical.Joins, Fold(logical.Left, types), Fold(logical.Right, types)), types);
+
+            var reading = expression as BlockReading;
+            if (reading != null && reading.Checks)
+                return new BlockReading(reading.Key, reading.Combine, reading.Arguments, reading.Targets, reading.Relation, Fold(reading.Compared, types));
+
             var function = expression as Function;
             if (function == null)
                 return expression;
@@ -39,6 +56,37 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
         {
             var operand = expression as Operand;
             return operand != null && !operand.Value.IsSetting && !operand.Value.IsExpression;
+        }
+
+        // A flag joined to a fixed flag: off by and, or on by or, decides alone; on by and, or off by or, leaves the other flag.
+        static Expression Joined(Logical logical, ITypeScope types)
+        {
+            var worked = Worked(logical);
+            if (worked != logical)
+                return worked;
+
+            var deciding = logical.Joins == Connective.Or;
+            foreach (var pair in new[] { new[] { logical.Left, logical.Right }, new[] { logical.Right, logical.Left } })
+            {
+                bool flag;
+                if (!IsFlag(pair[0], out flag) || Kind(pair[1], types) != ValueKind.Flag)
+                    continue;
+
+                return flag == deciding ? pair[0] : pair[1];
+            }
+
+            return logical;
+        }
+
+        // Whether the expression is a fixed flag, into flag.
+        static bool IsFlag(Expression expression, out bool flag)
+        {
+            flag = false;
+            if (!IsFixed(expression) || ((Operand)expression).Value.Kind != ValueKind.Flag)
+                return false;
+
+            flag = ((Operand)expression).Value.Flag;
+            return true;
         }
 
         static Expression Folded(Arithmetic arithmetic, ITypeScope types)
@@ -88,7 +136,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
             expression.Walk(parts.Add);
             for (var i = 1; i < parts.Count; i++)
             {
-                if (!(parts[i] is Operand) && !(parts[i] is Arithmetic) && !(parts[i] is Negation) && !(parts[i] is Function))
+                if (!(parts[i] is Operand) && !(parts[i] is Arithmetic) && !(parts[i] is Negation) && !(parts[i] is Function)
+                    && !(parts[i] is Comparing) && !(parts[i] is Logical) && !(parts[i] is Inversion))
                     return expression;
 
                 var operand = parts[i] as Operand;

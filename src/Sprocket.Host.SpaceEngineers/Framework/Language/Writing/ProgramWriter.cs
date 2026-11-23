@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -418,7 +419,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             pen.Note(state.Annotation);
             pen.Attributes(state.Attributes);
             pen.Start(Keyword.Let).Word(state.Name).Says(Keyword.Equals);
-            Choice(pen, system, state.Type, state.Start, true);
+            // A real state's start is the one value that says its type, so it is written as a real even where it is whole.
+            if (state.Kind == ValueKind.Real && state.Start.Kind == ValueKind.Real)
+                pen.RealAlone(state.Start.Real);
+            else
+                Choice(pen, system, state.Type, state.Start, true);
+
             pen.End();
         }
 
@@ -825,12 +831,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         {
             var compared = test as Comparison;
             var host = test as HostTest;
+            var worked = test as ExpressionTest;
             if (compared != null)
                 WriteComparison(pen, system, compared);
             else if (host != null)
                 WriteHostTest(pen, host);
+            else if (worked != null)
+                pen.Expression(Condition(system, worked.Condition)).Says(Keyword.Then);
             else
                 WriteStateTest(pen, system, (StateTest)test);
+        }
+
+        /// <summary><paramref name="condition" /> as an <c>if</c> or a <c>when</c> writes it: in parentheses where it would otherwise read as a test written as the statement's parts.</summary>
+        static string Condition(AutomationSystem system, Expression condition)
+        {
+            var text = ExpressionWriter.Text(system, condition);
+            return ConditionShape.ReadsWhole(text) ? text : "(" + text + ")";
         }
 
         /// <summary><c>gearbox.lifts is installed then</c> or <c>gearbox.lifts is not installed then</c>: whether the host has a namespace.</summary>
@@ -854,7 +870,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             else
                 Named(pen, system, Kinds.State, test.State, true);
 
-            pen.Says(test.Relation == Relation.IsNot ? Keyword.NotEqualTo : Keyword.EqualTo);
+            pen.Says(Said(test.Relation));
             if (test.Other.Length > 0)
                 State(pen, system, test.Setting.Length > 0 ? SettingType(system, test.Setting) : TypeOf(system, test.State), test.Other);
             else
@@ -974,6 +990,23 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
                     pen.Says(Keyword.Every).Word(when.IntervalSetting);
                 else if (when.IntervalTicks > 0)
                     Lasting(pen.Says(Keyword.Every), when.Interval);
+
+                pen.Says(Keyword.Then);
+                WriteDoes(pen, system, trigger.Does);
+                pen.End();
+                return;
+            }
+
+            var expressed = trigger as ExpressionTrigger;
+            if (expressed != null)
+            {
+                pen.Start(Keyword.When).Expression(Condition(system, expressed.Condition));
+                if (expressed.IntervalExpression != null)
+                    pen.Says(Keyword.Every).Expression(ExpressionWriter.Text(system, expressed.IntervalExpression));
+                else if (expressed.IntervalSetting.Length > 0)
+                    pen.Says(Keyword.Every).Word(expressed.IntervalSetting);
+                else if (expressed.Interval.Ticks > 0)
+                    Lasting(pen.Says(Keyword.Every), expressed.Interval);
 
                 pen.Says(Keyword.Then);
                 WriteDoes(pen, system, trigger.Does);

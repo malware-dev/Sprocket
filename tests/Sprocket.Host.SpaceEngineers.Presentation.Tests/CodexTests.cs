@@ -246,7 +246,7 @@ public class CodexTests
         editor.NewSystem("Airlock");
         screen.Run(2);
 
-        var plus = Target.Within(editor.Current!.View!).OfType<PlusMenu>().First(menu => menu.IsVisible && menu.Choices.Count(c => c.Adds != null) > 1);
+        var plus = Target.Within(editor.Current!.View!).OfType<PlusMenu>().First(menu => menu.IsVisible && menu.Choices.Count(c => c.Adds != null || c.Choices != null) > 1);
         Press(screen, Middle(plus));
         var menu = editor.Windows!.Top!;
         var row = Target.Within(menu).OfType<Lumel.Menus.MenuItem>().First(item => item.Tip != null);

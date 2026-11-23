@@ -352,7 +352,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// type's choices, on or off, a length in seconds, a number or text, shaped by <paramref name="shaped" /> where it is not null;
         /// where <paramref name="mayBeEmpty" />, one that may be left empty.
         /// </summary>
-        static Field DefaultField(Texts texts, AutomationSystem system, DeclaredType made, string type, SettingEditor shaped, string called,
+        public static Field DefaultField(Texts texts, AutomationSystem system, DeclaredType made, string type, SettingEditor shaped, string called,
             bool mayBeEmpty)
         {
             var declared = system.FindType(type) ?? (made != null && made.Name == type ? made : null);
@@ -401,13 +401,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         }
 
         /// <summary><paramref name="start" /> as the default's field shows it: a length in seconds.</summary>
-        static Literal Shown(string type, Literal start)
+        public static Literal Shown(string type, Literal start)
         {
             return type == "duration" && start.Kind == ValueKind.Duration ? Literal.Of(start.Length.Seconds) : start;
         }
 
         /// <summary>A value given in its field, <paramref name="given" />, as a value of <paramref name="type" />: a length from its seconds.</summary>
-        static Literal Held(string type, Literal given)
+        public static Literal Held(string type, Literal given)
         {
             return type == "duration" ? Literal.Of(Duration.OfSeconds(given.Number)) : given;
         }

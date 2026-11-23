@@ -471,7 +471,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         void PickReading(Action<BlockReading> done)
         {
             var origin = _editor.Depth;
-            var source = new SourceSwitch(_editor, (choice, slots) =>
+            var source = new SourceSwitch(_editor, slots =>
             {
                 var page = new PickPage(_editor, _editor.Texts.PickHeadingReading, false, new List<long>(), default(MemberKey), ReachKind.Value,
                     answer => _editor.Picks.Name(_system, answer, false, null, named =>
@@ -480,12 +480,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
                         done(Reading(answer, named));
                     }),
                     true, forReadings: true);
-                page.Source = choice;
                 page.Slotted = _system;
                 page.ListsSlots = slots;
                 return page;
             }, null);
-            _editor.Push(source.Open(source.Usual));
+            source.Ask(null);
         }
 
         // The reading answer picked, of the blocks named.

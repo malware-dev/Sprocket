@@ -9,8 +9,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 public class OpeningTests
 {
-    const string ARadiusStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press radius 1348 276 type 5 1394 72";
+    const string ARadiusStep = "60 196 type Airlock enter press trigger press when press Blocks… 200 384 560 340 1394 72 "
+        + "press step press task press Blocks… 200 485 press radius 1348 276 type 5 1394 72";
 
     /// <summary>A stage of the pick showing, counted from its first.</summary>
     static StageColumn Stage(Screen screen, int at)
@@ -42,6 +42,11 @@ public class OpeningTests
         var screen = Screen.Fresh(ARadiusStep.Split(' '));
 
         PressStep(screen, part);
+
+        // The step's blocks are what it is about, so pressing them asks first which source.
+        if (column == 0)
+            screen.Editor.ChooseSource(screen.Editor.Texts.PickSourceBlocks);
+
         screen.Do("type", typed);
 
         Assert.Equal(typed, Stage(screen, column).NarrowText);
@@ -78,11 +83,11 @@ public class OpeningTests
     [Fact]
     public void ADoublePressOnAnotherBlockFinishes()
     {
-        const string anOpenStep = "60 196 type Airlock enter press trigger press when 200 359 560 341 1394 72 "
-            + "press step press task 400 404 press open 1394 72";
+        const string anOpenStep = "60 196 type Airlock enter press trigger press when press Blocks… 200 359 560 341 1394 72 "
+            + "press step press task press Blocks… 400 404 press open 1394 72";
 
         // The step's blocks, then the outer door pressed twice.
-        var screen = Screen.Fresh((anOpenStep + " 270 187 tick 2 double 138 553 tick 2").Split(' '));
+        var screen = Screen.Fresh((anOpenStep + " 270 187 press Blocks… tick 2 double 138 553 tick 2").Split(' '));
 
         Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
         var system = screen.Editor.Program.Systems[0];

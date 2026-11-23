@@ -79,6 +79,21 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Game.Members
         /// <summary>Whether <paramref name="space" /> is one of the namespaces the host has from the start, Sprocket's own or the game's, rather than a mod's.</summary>
         public static bool IsBuiltIn(HostNamespace space) => space.Owner == Sprocket;
 
+        /// <summary>Whether a mod has registered a namespace, which a program can check for.</summary>
+        public static bool HasMods
+        {
+            get
+            {
+                foreach (var space in Registered.Values)
+                {
+                    if (!IsBuiltIn(space))
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
         /// <summary>Forgets every namespace but Sprocket's own and the game's, as a session ends.</summary>
         public static void Clear()
         {

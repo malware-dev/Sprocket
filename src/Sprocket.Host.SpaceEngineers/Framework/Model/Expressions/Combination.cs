@@ -16,6 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
         Min,
 
         /// <summary>The largest value.</summary>
-        Max
+        Max,
+
+        /// <summary>Whether a comparison holds on any of the values, a flag.</summary>
+        Any,
+
+        /// <summary>Whether a comparison holds on all of the values, a flag.</summary>
+        All
     }
 }

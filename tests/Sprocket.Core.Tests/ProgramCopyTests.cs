@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Blocks;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Running;
 using Sprocket.Host.SpaceEngineers.Framework.Storage;
 using VRageMath;
@@ -197,6 +198,10 @@ public class ProgramCopyTests
         cycle.Steps.Add(new Else(new StateTest { State = "where", Relation = Relation.IsNot, Value = Literal.Name("outside") }));
         cycle.Steps.Add(new Await());
         cycle.Steps.Add(new Abort { Message = "Door \"B\" jammed", Level = AbortLevel.Problem });
+        cycle.Steps.Add(new Else(new ExpressionTest(new Logical(Connective.Or, new Inversion(new BlockReading(MemberKey.Bare("open"),
+            Combination.All, new List<Literal>(), new List<string> { "inner" }, Relation.Is, new Operand(Literal.Of(true)))),
+            new Comparing(Relation.Is, new StateOperand("where"), new Operand(Literal.Name("inside")))))));
+        cycle.Steps.Add(new Await());
         cycle.Steps.Add(new Else(null));
         cycle.Steps.Add(new SetState { State = "where", Value = Literal.Name("outside") });
         cycle.Steps.Add(new EndIf());
@@ -239,6 +244,14 @@ public class ProgramCopyTests
         var outside = new StateTrigger(new StateTest { State = "where", Relation = Relation.Is, Value = Literal.Name("outside") });
         outside.Does = new Run(1, true);
         system.AddTrigger(outside);
+
+        var away = new ExpressionTrigger(new Logical(Connective.And, new Comparing(Relation.IsNot, new StateOperand("where"), new Operand(Literal.Name("inside"))),
+            new BlockReading(MemberKey.Bare("open"), Combination.Any, new List<Literal>(), new List<string> { "inner" }, Relation.Is, new Operand(Literal.Of(true)))))
+        {
+            Interval = Duration.OfTicks(30)
+        };
+        away.Does = new Run(3);
+        system.AddTrigger(away);
 
         var port = system.Restore(1, "Port");
         port.Annotation = "The port airlock.";

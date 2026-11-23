@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             var held = _chosen != null ? _chosen.Targets : _replaces == null ? new List<long>() : _editor.Blocks(System, _replaces);
             var facet = _replaces == null ? "" : _editor.Picks.Facet(System, _replaces);
             var avoiding = SourceName == null ? "" : SourceName();
-            var source = new SourceSwitch(_editor, (choice, slots) => new PickPage(_editor, field.Label, slots ? new List<long>() : held, member, form, facet,
+            var source = new SourceSwitch(_editor, slots => new PickPage(_editor, field.Label, slots ? new List<long>() : held, member, form, facet,
                 block => type != null && block.Kind.Facets(type).Count > 0, answer =>
                 {
                     _chosen = answer;
@@ -92,13 +92,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                     finish?.Execute();
                 })
             {
-                Source = choice,
                 Slotted = System,
                 ListsSlots = slots,
                 Replacing = _replaces,
                 Avoiding = avoiding
             }, null);
-            _editor.Push(source.Open(source.Usual));
+            source.Ask(null);
         }
 
         /// <summary>The slots <paramref name="said" /> names, comma by comma.</summary>

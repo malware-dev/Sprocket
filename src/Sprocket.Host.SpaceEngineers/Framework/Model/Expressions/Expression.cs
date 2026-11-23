@@ -12,11 +12,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
     public abstract class Expression
     {
         /// <summary>How tightly an atom binds, which nothing needs parentheses around.</summary>
-        public const int AtomPrecedence = 4;
+        public const int AtomPrecedence = 7;
 
         string _written;
 
-        /// <summary>How tightly this binds its operands: an atom 4, a negation 3, a product or quotient 2, a sum or difference 1.</summary>
+        /// <summary>How tightly this binds its operands: an atom 7, a negation or a not 6, a product or quotient 5, a sum or difference 4, a comparison 3, an and 2, an or 1.</summary>
         public abstract int Precedence { get; }
 
         /// <summary>This as a program writes it, with only the parentheses its precedence needs.</summary>

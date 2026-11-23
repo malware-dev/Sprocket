@@ -126,10 +126,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             {
                 int asked;
                 var when = _trigger as WhenTrigger;
+                var expressed = _trigger as ExpressionTrigger;
                 if (when != null)
                 {
                     var ticks = IntervalTicks();
                     asked = ticks > 0 ? ticks : Default;
+                }
+                else if (expressed != null)
+                {
+                    // One that reads no block is looked at again as a step sets a state it reads; the backstop is for its settings.
+                    var ticks = IntervalTicks();
+                    asked = ticks > 0 ? ticks : expressed.ReadsBlocks ? Default : Backstop;
                 }
                 else
                 {
@@ -148,7 +155,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         {
             var when = _trigger as WhenTrigger;
             var every = _trigger as EveryTrigger;
-            var expression = when != null ? when.IntervalExpression : every?.IntervalExpression;
+            var expressed = _trigger as ExpressionTrigger;
+            var expression = when != null ? when.IntervalExpression : expressed != null ? expressed.IntervalExpression : every?.IntervalExpression;
             if (expression != null)
             {
                 // Worked out on each ask, from blocks made ready when the trigger was compiled.
@@ -156,9 +164,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return _scope.Evaluate(expression, out length) == ExpressionFailure.None && length.Kind == ValueKind.Duration ? length.Length.Ticks : 0;
             }
 
-            var setting = when != null ? when.IntervalSetting : every != null ? every.IntervalSetting : "";
+            var setting = when != null ? when.IntervalSetting : expressed != null ? expressed.IntervalSetting : every != null ? every.IntervalSetting : "";
             if (setting.Length == 0)
-                return when != null ? when.IntervalTicks : every != null ? every.IntervalTicks : 0;
+                return when != null ? when.IntervalTicks : expressed != null ? expressed.Interval.Ticks : every != null ? every.IntervalTicks : 0;
 
             var edits = _owner.Program.Edits;
             if (edits == _intervalEdits)
@@ -254,7 +262,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _worked.Clear();
             _trigger.Worked(_worked);
             _hasWorked = _worked.Count > 0;
-            _scope.Prepare(_worked, _bindings, watched != null);
+            var expressed = _trigger is ExpressionTrigger;
+            _scope.Prepare(_worked, _bindings, watched != null || expressed);
+            if (expressed)
+                _announced = _scope.AllHeard;
+
             if (watched == null)
                 return;
 
@@ -434,8 +446,38 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (_trigger is SignalTrigger)
                 return SampleWhen();
 
+            if (_trigger is ExpressionTrigger)
+                return SampleExpression() ? 1 : 0;
+
             var every = _trigger as EveryTrigger;
             return every != null && SampleEvery() ? 1 : 0;
+        }
+
+        /// <summary>
+        /// Looks again at once, after a step set a state the watched expression reads, and fires where that brought it to hold,
+        /// as a when on the state alone fires.
+        /// </summary>
+        public void Set()
+        {
+            _bindings = _owner.Current;
+            Compile();
+            if (!SampleExpression() || !_owner.Live)
+                return;
+
+            FiredCount++;
+            _owner.Fire(_system, _trigger, _instance);
+        }
+
+        /// <summary>
+        /// Fires when the watched expression comes to be on, and not again until it has been off; an expression with no value,
+        /// such as an average over no blocks, does not hold.
+        /// </summary>
+        bool SampleExpression()
+        {
+            Literal now;
+            var holds = _scope.Evaluate(((ExpressionTrigger)_trigger).Condition, out now) == ExpressionFailure.None && now.Kind == ValueKind.Flag && now.Flag;
+            Live = holds;
+            return Edge(holds);
         }
 
         /// <summary>Works out the blocks <paramref name="slots" /> come to, each once.</summary>

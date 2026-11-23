@@ -24,107 +24,99 @@ on screen     block slot 1
 017  Sprite     Lumel_Fill            {X:256 Y:998 W:460 H:1}  #5B737BFF
 018  Sprite     Lumel_Fill            {X:256 Y:118 W:1 H:882}  #5B737BFF
 019  Sprite     Lumel_Fill            {X:715 Y:118 W:1 H:882}  #5B737BFF
-020  Text       at {X:272 Y:139.6399} scale 0.694  #85A1A9FF  "SOURCE"
-021  Sprite     Lumel_Fill            {X:343 Y:134 W:123 H:36}  #20272DFF
-022  Sprite     Lumel_Fill            {X:343 Y:134 W:123 H:1}  #5B737BFF
-023  Sprite     Lumel_Fill            {X:343 Y:169 W:123 H:1}  #5B737BFF
-024  Sprite     Lumel_Fill            {X:343 Y:134 W:1 H:36}  #5B737BFF
-025  Sprite     Lumel_Fill            {X:465 Y:134 W:1 H:36}  #5B737BFF
-026  Text       at {X:355.35 Y:139.6399} scale 0.694  #DCF5FDFF  "Blocks"
-027  Sprite     Lumel_Fill            {X:440 Y:150 W:10 H:3}  #A2C3CDFF
-028  Sprite     Lumel_Fill            {X:446 Y:150 W:10 H:3}  #A2C3CDFF
-029  Text       at {X:676.1563 Y:140.5141} scale 0.401  #A2C3CDFF  "H"
-030  Text       at {X:272 Y:176.0543} scale 0.556  #A2C3CDFF  "1 picked"
-031  Sprite     Lumel_Fill            {X:272 Y:202 W:396 H:36}  #141B20FF
-032  Sprite     Lumel_Fill            {X:272 Y:202 W:396 H:1}  #5B737BFF
-033  Sprite     Lumel_Fill            {X:272 Y:237 W:396 H:1}  #5B737BFF
-034  Sprite     Lumel_Fill            {X:272 Y:202 W:1 H:36}  #5B737BFF
-035  Sprite     Lumel_Fill            {X:667 Y:202 W:1 H:36}  #5B737BFF
-036  SetClip    {X:272 Y:202 W:396 H:36}
-037  Text       at {X:284 Y:207.6399} scale 0.694  #DCF5FDFF  "Standby"
-038  SetClip    {X:256 Y:118 W:1396 H:882}
-039  Text       at {X:676.1563 Y:208.5141} scale 0.401  #A2C3CDFF  "x"
-040  Sprite     Lumel_Fill            {X:272 Y:246 W:104 H:36}  #20272DFF
-041  Sprite     Lumel_Fill            {X:272 Y:246 W:104 H:1}  #5B737BFF
-042  Sprite     Lumel_Fill            {X:272 Y:281 W:104 H:1}  #5B737BFF
-043  Sprite     Lumel_Fill            {X:272 Y:246 W:1 H:36}  #5B737BFF
-044  Sprite     Lumel_Fill            {X:375 Y:246 W:1 H:36}  #5B737BFF
-045  Text       at {X:284 Y:251.6399} scale 0.694  #A2C3CDFF  "Anything"
-046  Text       at {X:352.1938 Y:256.4932} scale 0.241  #A2C3CDFF  "v"
-047  Text       at {X:272 Y:288.0543} scale 0.556  #A2C3CDFF  "1 of 15"
-048  SetClip    {X:272 Y:314 W:428 H:670}
-049  Sprite     Lumel_Fill            {X:284 Y:342 W:16 H:1}  #3ACC00FF
-050  Sprite     Lumel_Fill            {X:284 Y:357 W:16 H:1}  #3ACC00FF
-051  Sprite     Lumel_Fill            {X:284 Y:342 W:1 H:16}  #3ACC00FF
-052  Sprite     Lumel_Fill            {X:299 Y:342 W:1 H:16}  #3ACC00FF
-053  Sprite     Lumel_Fill            {X:288 Y:346 W:8 H:8}  #3ACC00FF
-054  Sprite     Lumel_Fill            {X:312 Y:322 W:56 H:56}  #374851FF
-055  Sprite     MyObjectBuilder_BatteryBlock/LargeBlockBatteryBlock{X:312 Y:322 W:56 H:56}  #FFFFFFFF
-056  Text       at {X:376 Y:325.2255} scale 0.833  #DCF5FDFF  "Standby Battery"
-057  Text       at {X:376 Y:354.0543} scale 0.556  #A2C3CDFF  "Battery"
-058  SetClip    {X:256 Y:118 W:1396 H:882}
-059  Sprite     Lumel_Fill            {X:724 Y:118 W:460 H:882}  #29363EFF
-060  Sprite     Lumel_Fill            {X:724 Y:118 W:460 H:1}  #5B737BFF
-061  Sprite     Lumel_Fill            {X:724 Y:998 W:460 H:1}  #5B737BFF
-062  Sprite     Lumel_Fill            {X:724 Y:118 W:1 H:882}  #5B737BFF
-063  Sprite     Lumel_Fill            {X:1183 Y:118 W:1 H:882}  #5B737BFF
-064  Text       at {X:740 Y:139.6399} scale 0.694  #85A1A9FF  "WHAT TO DO"
-065  Text       at {X:1082.393 Y:139.6399} scale 0.694  #A2C3CDFF  "‹ Organized"
-066  Sprite     Lumel_Fill            {X:740 Y:202 W:428 H:36}  #141B20FF
-067  Sprite     Lumel_Fill            {X:740 Y:202 W:428 H:1}  #5B737BFF
-068  Sprite     Lumel_Fill            {X:740 Y:237 W:428 H:1}  #5B737BFF
-069  Sprite     Lumel_Fill            {X:740 Y:202 W:1 H:36}  #5B737BFF
-070  Sprite     Lumel_Fill            {X:1167 Y:202 W:1 H:36}  #5B737BFF
-071  SetClip    {X:740 Y:202 W:428 H:36}
-072  Text       at {X:752 Y:207.6399} scale 0.694  #85A1A9FF  "Search"
-073  SetClip    {X:256 Y:118 W:1396 H:882}
-074  SetClip    {X:740 Y:246 W:428 H:738}
-075  Sprite     Lumel_Fill            {X:740 Y:246 W:408 H:96}  #374851FF
-076  Text       at {X:756 Y:251.6399} scale 0.694  #A2C3CDFF  "Everything these blocks offer in the terminal, under the"
-077  Text       at {X:756 Y:271.6399} scale 0.694  #A2C3CDFF  "terminal's own names. Using them is your own call. The"
-078  Text       at {X:756 Y:291.6399} scale 0.694  #A2C3CDFF  "organized list holds the ones known to work with the"
-079  Text       at {X:756 Y:311.6399} scale 0.694  #A2C3CDFF  "automation."
-080  Text       at {X:752 Y:368.0543} scale 0.556  #85A1A9FF  "VALUES"
-081  Sprite     Lumel_Fill            {X:740 Y:390 W:408 H:40}  #5B737BFF
-082  Text       at {X:752 Y:398.5141} scale 0.401  #A2C3CDFF  "l"
-083  Text       at {X:779.6875 Y:395.2255} scale 0.833  #DCF5FDFF  "Charge Mode"
-084  Text       at {X:752 Y:442.5141} scale 0.401  #A2C3CDFF  "l"
-085  Text       at {X:779.6875 Y:439.2255} scale 0.833  #DCF5FDFF  "Name"
-086  Text       at {X:752 Y:500.0543} scale 0.556  #85A1A9FF  "TOOLBAR ACTIONS"
-087  Text       at {X:752 Y:530.514} scale 0.401  #A2C3CDFF  "i"
-088  Text       at {X:779.6875 Y:527.2255} scale 0.833  #DCF5FDFF  "Toggle block On/Off"
-089  Text       at {X:752 Y:574.514} scale 0.401  #A2C3CDFF  "i"
-090  Text       at {X:779.6875 Y:571.2255} scale 0.833  #DCF5FDFF  "Turn block Off"
-091  Text       at {X:752 Y:618.514} scale 0.401  #A2C3CDFF  "i"
-092  Text       at {X:779.6875 Y:615.2255} scale 0.833  #DCF5FDFF  "Turn block On"
-093  SetClip    {X:256 Y:118 W:1396 H:882}
-094  Sprite     Lumel_Fill            {X:1192 Y:118 W:460 H:882}  #29363EFF
-095  Sprite     Lumel_Fill            {X:1192 Y:118 W:460 H:1}  #5B737BFF
-096  Sprite     Lumel_Fill            {X:1192 Y:998 W:460 H:1}  #5B737BFF
-097  Sprite     Lumel_Fill            {X:1192 Y:118 W:1 H:882}  #5B737BFF
-098  Sprite     Lumel_Fill            {X:1651 Y:118 W:1 H:882}  #5B737BFF
-099  SetClip    {X:1192 Y:118 W:460 H:882}
-100  Text       at {X:1208 Y:139.6399} scale 0.694  #85A1A9FF  "CHARGE MODE"
-101  Text       at {X:1208 Y:207.6399} scale 0.694  #A2C3CDFF  "Charge Mode"
-102  Sprite     Lumel_Fill            {X:1397 Y:206 W:56 H:28}  #5B737BFF
-103  Sprite     Lumel_Fill            {X:1397 Y:206 W:56 H:1}  #5B737BFF
-104  Sprite     Lumel_Fill            {X:1397 Y:233 W:56 H:1}  #5B737BFF
-105  Sprite     Lumel_Fill            {X:1397 Y:206 W:1 H:28}  #5B737BFF
-106  Sprite     Lumel_Fill            {X:1452 Y:206 W:1 H:28}  #5B737BFF
-107  Text       at {X:1408.8 Y:207.6399} scale 0.694  #DCF5FDFF  "Auto"
-108  Sprite     Lumel_Fill            {X:1457 Y:206 W:85 H:28}  #20272DFF
-109  Sprite     Lumel_Fill            {X:1457 Y:206 W:85 H:1}  #5B737BFF
-110  Sprite     Lumel_Fill            {X:1457 Y:233 W:85 H:1}  #5B737BFF
-111  Sprite     Lumel_Fill            {X:1457 Y:206 W:1 H:28}  #5B737BFF
-112  Sprite     Lumel_Fill            {X:1541 Y:206 W:1 H:28}  #5B737BFF
-113  Text       at {X:1468.917 Y:207.6399} scale 0.694  #A2C3CDFF  "Recharge"
-114  Sprite     Lumel_Fill            {X:1546 Y:206 W:90 H:28}  #20272DFF
-115  Sprite     Lumel_Fill            {X:1546 Y:206 W:90 H:1}  #5B737BFF
-116  Sprite     Lumel_Fill            {X:1546 Y:233 W:90 H:1}  #5B737BFF
-117  Sprite     Lumel_Fill            {X:1546 Y:206 W:1 H:28}  #5B737BFF
-118  Sprite     Lumel_Fill            {X:1635 Y:206 W:1 H:28}  #5B737BFF
-119  Text       at {X:1558.383 Y:207.6399} scale 0.694  #A2C3CDFF  "Discharge"
-120  SetClip    {X:256 Y:118 W:1396 H:882}
-121  SetClip    {X:256 Y:118 W:1408 H:882}
-122  SetClip    {X:256 Y:118 W:1408 H:902}
-123  ClearClip  
+020  Text       at {X:272 Y:139.6399} scale 0.694  #85A1A9FF  "BLOCKS"
+021  Text       at {X:676.1563 Y:140.5141} scale 0.401  #A2C3CDFF  "H"
+022  Text       at {X:272 Y:176.0543} scale 0.556  #A2C3CDFF  "1 picked"
+023  Sprite     Lumel_Fill            {X:272 Y:202 W:396 H:36}  #141B20FF
+024  Sprite     Lumel_Fill            {X:272 Y:202 W:396 H:1}  #5B737BFF
+025  Sprite     Lumel_Fill            {X:272 Y:237 W:396 H:1}  #5B737BFF
+026  Sprite     Lumel_Fill            {X:272 Y:202 W:1 H:36}  #5B737BFF
+027  Sprite     Lumel_Fill            {X:667 Y:202 W:1 H:36}  #5B737BFF
+028  SetClip    {X:272 Y:202 W:396 H:36}
+029  Text       at {X:284 Y:207.6399} scale 0.694  #DCF5FDFF  "Standby"
+030  SetClip    {X:256 Y:118 W:1396 H:882}
+031  Text       at {X:676.1563 Y:208.5141} scale 0.401  #A2C3CDFF  "x"
+032  Sprite     Lumel_Fill            {X:272 Y:246 W:104 H:36}  #20272DFF
+033  Sprite     Lumel_Fill            {X:272 Y:246 W:104 H:1}  #5B737BFF
+034  Sprite     Lumel_Fill            {X:272 Y:281 W:104 H:1}  #5B737BFF
+035  Sprite     Lumel_Fill            {X:272 Y:246 W:1 H:36}  #5B737BFF
+036  Sprite     Lumel_Fill            {X:375 Y:246 W:1 H:36}  #5B737BFF
+037  Text       at {X:284 Y:251.6399} scale 0.694  #A2C3CDFF  "Anything"
+038  Text       at {X:352.1938 Y:256.4932} scale 0.241  #A2C3CDFF  "v"
+039  Text       at {X:272 Y:288.0543} scale 0.556  #A2C3CDFF  "1 of 15"
+040  SetClip    {X:272 Y:314 W:428 H:670}
+041  Sprite     Lumel_Fill            {X:284 Y:342 W:16 H:1}  #3ACC00FF
+042  Sprite     Lumel_Fill            {X:284 Y:357 W:16 H:1}  #3ACC00FF
+043  Sprite     Lumel_Fill            {X:284 Y:342 W:1 H:16}  #3ACC00FF
+044  Sprite     Lumel_Fill            {X:299 Y:342 W:1 H:16}  #3ACC00FF
+045  Sprite     Lumel_Fill            {X:288 Y:346 W:8 H:8}  #3ACC00FF
+046  Sprite     Lumel_Fill            {X:312 Y:322 W:56 H:56}  #374851FF
+047  Sprite     MyObjectBuilder_BatteryBlock/LargeBlockBatteryBlock{X:312 Y:322 W:56 H:56}  #FFFFFFFF
+048  Text       at {X:376 Y:325.2255} scale 0.833  #DCF5FDFF  "Standby Battery"
+049  Text       at {X:376 Y:354.0543} scale 0.556  #A2C3CDFF  "Battery"
+050  SetClip    {X:256 Y:118 W:1396 H:882}
+051  Sprite     Lumel_Fill            {X:724 Y:118 W:460 H:882}  #29363EFF
+052  Sprite     Lumel_Fill            {X:724 Y:118 W:460 H:1}  #5B737BFF
+053  Sprite     Lumel_Fill            {X:724 Y:998 W:460 H:1}  #5B737BFF
+054  Sprite     Lumel_Fill            {X:724 Y:118 W:1 H:882}  #5B737BFF
+055  Sprite     Lumel_Fill            {X:1183 Y:118 W:1 H:882}  #5B737BFF
+056  Text       at {X:740 Y:139.6399} scale 0.694  #85A1A9FF  "WHAT TO DO"
+057  Text       at {X:1082.393 Y:139.6399} scale 0.694  #A2C3CDFF  "‹ Organized"
+058  Sprite     Lumel_Fill            {X:740 Y:202 W:428 H:36}  #141B20FF
+059  Sprite     Lumel_Fill            {X:740 Y:202 W:428 H:1}  #5B737BFF
+060  Sprite     Lumel_Fill            {X:740 Y:237 W:428 H:1}  #5B737BFF
+061  Sprite     Lumel_Fill            {X:740 Y:202 W:1 H:36}  #5B737BFF
+062  Sprite     Lumel_Fill            {X:1167 Y:202 W:1 H:36}  #5B737BFF
+063  SetClip    {X:740 Y:202 W:428 H:36}
+064  Text       at {X:752 Y:207.6399} scale 0.694  #85A1A9FF  "Search"
+065  SetClip    {X:256 Y:118 W:1396 H:882}
+066  SetClip    {X:740 Y:246 W:428 H:738}
+067  Sprite     Lumel_Fill            {X:740 Y:246 W:408 H:96}  #374851FF
+068  Text       at {X:756 Y:251.6399} scale 0.694  #A2C3CDFF  "Everything these blocks offer in the terminal, under the"
+069  Text       at {X:756 Y:271.6399} scale 0.694  #A2C3CDFF  "terminal's own names. Using them is your own call. The"
+070  Text       at {X:756 Y:291.6399} scale 0.694  #A2C3CDFF  "organized list holds the ones known to work with the"
+071  Text       at {X:756 Y:311.6399} scale 0.694  #A2C3CDFF  "automation."
+072  Text       at {X:752 Y:368.0543} scale 0.556  #85A1A9FF  "VALUES"
+073  Sprite     Lumel_Fill            {X:740 Y:390 W:408 H:40}  #5B737BFF
+074  Text       at {X:752 Y:398.5141} scale 0.401  #A2C3CDFF  "l"
+075  Text       at {X:779.6875 Y:395.2255} scale 0.833  #DCF5FDFF  "Charge Mode"
+076  Text       at {X:752 Y:442.5141} scale 0.401  #A2C3CDFF  "l"
+077  Text       at {X:779.6875 Y:439.2255} scale 0.833  #DCF5FDFF  "Name"
+078  Text       at {X:752 Y:500.0543} scale 0.556  #85A1A9FF  "TOOLBAR ACTIONS"
+079  Text       at {X:752 Y:530.514} scale 0.401  #A2C3CDFF  "i"
+080  Text       at {X:779.6875 Y:527.2255} scale 0.833  #DCF5FDFF  "Toggle block On/Off"
+081  Text       at {X:752 Y:574.514} scale 0.401  #A2C3CDFF  "i"
+082  Text       at {X:779.6875 Y:571.2255} scale 0.833  #DCF5FDFF  "Turn block Off"
+083  Text       at {X:752 Y:618.514} scale 0.401  #A2C3CDFF  "i"
+084  Text       at {X:779.6875 Y:615.2255} scale 0.833  #DCF5FDFF  "Turn block On"
+085  SetClip    {X:256 Y:118 W:1396 H:882}
+086  Sprite     Lumel_Fill            {X:1192 Y:118 W:460 H:882}  #29363EFF
+087  Sprite     Lumel_Fill            {X:1192 Y:118 W:460 H:1}  #5B737BFF
+088  Sprite     Lumel_Fill            {X:1192 Y:998 W:460 H:1}  #5B737BFF
+089  Sprite     Lumel_Fill            {X:1192 Y:118 W:1 H:882}  #5B737BFF
+090  Sprite     Lumel_Fill            {X:1651 Y:118 W:1 H:882}  #5B737BFF
+091  SetClip    {X:1192 Y:118 W:460 H:882}
+092  Text       at {X:1208 Y:139.6399} scale 0.694  #85A1A9FF  "CHARGE MODE"
+093  Text       at {X:1208 Y:207.6399} scale 0.694  #A2C3CDFF  "Charge Mode"
+094  Sprite     Lumel_Fill            {X:1397 Y:206 W:56 H:28}  #5B737BFF
+095  Sprite     Lumel_Fill            {X:1397 Y:206 W:56 H:1}  #5B737BFF
+096  Sprite     Lumel_Fill            {X:1397 Y:233 W:56 H:1}  #5B737BFF
+097  Sprite     Lumel_Fill            {X:1397 Y:206 W:1 H:28}  #5B737BFF
+098  Sprite     Lumel_Fill            {X:1452 Y:206 W:1 H:28}  #5B737BFF
+099  Text       at {X:1408.8 Y:207.6399} scale 0.694  #DCF5FDFF  "Auto"
+100  Sprite     Lumel_Fill            {X:1457 Y:206 W:85 H:28}  #20272DFF
+101  Sprite     Lumel_Fill            {X:1457 Y:206 W:85 H:1}  #5B737BFF
+102  Sprite     Lumel_Fill            {X:1457 Y:233 W:85 H:1}  #5B737BFF
+103  Sprite     Lumel_Fill            {X:1457 Y:206 W:1 H:28}  #5B737BFF
+104  Sprite     Lumel_Fill            {X:1541 Y:206 W:1 H:28}  #5B737BFF
+105  Text       at {X:1468.917 Y:207.6399} scale 0.694  #A2C3CDFF  "Recharge"
+106  Sprite     Lumel_Fill            {X:1546 Y:206 W:90 H:28}  #20272DFF
+107  Sprite     Lumel_Fill            {X:1546 Y:206 W:90 H:1}  #5B737BFF
+108  Sprite     Lumel_Fill            {X:1546 Y:233 W:90 H:1}  #5B737BFF
+109  Sprite     Lumel_Fill            {X:1546 Y:206 W:1 H:28}  #5B737BFF
+110  Sprite     Lumel_Fill            {X:1635 Y:206 W:1 H:28}  #5B737BFF
+111  Text       at {X:1558.383 Y:207.6399} scale 0.694  #A2C3CDFF  "Discharge"
+112  SetClip    {X:256 Y:118 W:1396 H:882}
+113  SetClip    {X:256 Y:118 W:1408 H:882}
+114  SetClip    {X:256 Y:118 W:1408 H:902}
+115  ClearClip  

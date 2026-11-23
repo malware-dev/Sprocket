@@ -175,7 +175,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     _editor.Do(_sequence,
                         new ChangeStep(index, step, named, answer.Key, answer.Form, answer.Arguments, Awaited(index, step, lasts)));
                     _editor.Pop();
-                }), arguments: step.Arguments, opens: opens, facet: _editor.Picks.Facet(_sequence.System, step.Targets)), step.Targets);
+                }), arguments: step.Arguments, opens: opens, facet: _editor.Picks.Facet(_sequence.System, step.Targets)), step.Targets,
+                Sourcing(opens, PickSource.Blocks), PickSource.Blocks);
+        }
+
+        /// <summary>
+        /// The source a selector changing something opens on at once: <paramref name="current" />, where the part pressed,
+        /// opening <paramref name="opens" />, is not the one naming what it is about; null, to ask which, where it is.
+        /// </summary>
+        static PickSource? Sourcing(OpeningColumn opens, PickSource? current)
+        {
+            return opens == OpeningColumn.Blocks ? null : current;
         }
 
         /// <summary>
@@ -183,19 +193,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// logic system already has; <paramref name="make" /> is told which of the two to list. The pick goes in place of the
         /// list <paramref name="replacing" />, or null for a new one.
         /// </summary>
-        void Open(Func<bool, PickPage> make, IList<string> replacing)
+        void Open(Func<bool, PickPage> make, IList<string> replacing, PickSource? from = null, PickSource? current = null)
         {
-            var source = new SourceSwitch(_editor, (choice, slots) => Sourced(make(slots), choice, slots, replacing), null);
-            _editor.Push(source.Open(source.Usual));
+            new SourceSwitch(_editor, slots => Sourced(make(slots), slots, replacing), null).Open(from, current);
         }
 
         /// <summary>
-        /// <paramref name="page" />, headed by <paramref name="choice" />, naming the slots of the sequence's logic system, which it
-        /// lists where <paramref name="slots" /> says so, in place of the list <paramref name="replacing" /> or null for a new one.
+        /// <paramref name="page" />, naming the slots of the sequence's logic system, which it lists where <paramref name="slots" />
+        /// says so, in place of the list <paramref name="replacing" /> or null for a new one.
         /// </summary>
-        PickPage Sourced(PickPage page, SourceSwitch choice, bool slots, IList<string> replacing)
+        PickPage Sourced(PickPage page, bool slots, IList<string> replacing)
         {
-            page.Source = choice;
             page.Slotted = _sequence.System;
             page.ListsSlots = slots;
             page.Replacing = replacing;
@@ -220,8 +228,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return Waited(index) || lasts && !Lasting(step);
         }
 
-        /// <summary>Asks what to affect, then what to do to it, and adds the step once both are answered, with a wait after it where it takes time.</summary>
-        public void AddAction(int at)
+        /// <summary>
+        /// Asks what to affect, from the source <paramref name="from" /> where it was chosen already, then what to do to it, and
+        /// adds the step once both are answered, with a wait after it where it takes time.
+        /// </summary>
+        public void AddAction(int at, PickSource? from = null)
         {
             var origin = _editor.Depth;
 
@@ -241,25 +252,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         ? new AddStep(ChangeKind.AddStep, at, step, new Await())
                         : new AddStep(ChangeKind.AddStep, at, step));
                     _editor.UnwindTo(origin);
-                })), null);
+                })), null, from);
         }
 
-        /// <summary>Asks what to check, and adds an if that checks it, with nothing in it yet, at the line <paramref name="at" />.</summary>
-        public void AddIf(int at)
+        /// <summary>
+        /// Asks what to check, from the source <paramref name="from" /> where it was chosen already, and adds an if that checks
+        /// it, with nothing in it yet, at the line <paramref name="at" />.
+        /// </summary>
+        public void AddIf(int at, PickSource? from = null)
         {
             var origin = _editor.Depth;
             Ask(SentenceText.IfWord, null, OpeningColumn.Blocks, (test, made) =>
             {
                 Do(made, new AddStep(ChangeKind.AddIf, at, new If(test), new EndIf()));
                 _editor.UnwindTo(origin);
-            });
+            }, from);
         }
 
-        /// <summary>Offers is and is not in a menu under the part pressed, the one <paramref name="test" /> makes marked, and changes the test to the one chosen as one edit.</summary>
+        /// <summary>Offers is and is not in a menu under the part pressed, and the orderings for a number or a length, the one <paramref name="test" /> makes marked, and changes the test to the one chosen as one edit.</summary>
         public void RelateState(Step step, StateTest test)
         {
             _editor.AskHere("");
-            foreach (var related in new[] { Relation.Is, Relation.IsNot })
+            var state = _sequence.System.FindState(test.State);
+            foreach (var related in ComparisonQuestion.StateRelations(state != null && state.IsOrdered))
             {
                 var relation = related;
                 _editor.Answer(ComparisonQuestion.Said(relation), delegate
@@ -287,9 +302,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>
         /// Offers the values the state <paramref name="test" /> checks can hold in a menu under the part pressed, and changes the
         /// test to the one chosen as one edit; the value of another state opens the selector. A new setting is asked in a panel hung
-        /// from what <paramref name="part" /> finds.
+        /// from what <paramref name="part" /> finds; a number, text or length is given in a panel handed to <paramref name="asking" />.
         /// </summary>
-        public void CompareState(Step step, StateTest test, Func<Element> part)
+        public void CompareState(Step step, StateTest test, Func<Element> part, Action<ValuesQuestion> asking)
         {
             StateValueQuestion.Offer(_editor, _sequence.System, test.State, test.Value, test.Other, part, value =>
             {
@@ -297,18 +312,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 now.Value = value;
                 now.Other = "";
                 _editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
-            }, () => EditTest(step, test, OpeningColumn.Arguments));
+            }, () => EditTest(step, test, OpeningColumn.Arguments), asking);
         }
 
         /// <summary>
         /// Offers the values the state <paramref name="step" /> sets can hold in a menu under the part pressed, and sets it to the
         /// one chosen as one edit; the value of another state opens the selector, and an expression the page it is built on. A new
-        /// setting is asked in a panel hung from what <paramref name="part" /> finds.
+        /// setting is asked in a panel hung from what <paramref name="part" /> finds; a number, text or length is given in a panel
+        /// handed to <paramref name="asking" />.
         /// </summary>
-        public void SetStateTo(SetState step, Func<Element> part)
+        public void SetStateTo(SetState step, Func<Element> part, Action<ValuesQuestion> asking)
         {
-            StateValueQuestion.Offer(_editor, _sequence.System, step.State, step.Value, step.From, part, value => SetStateTo(step, value),
-                () => ChangeSetState(step), () => BuildStateValue(step));
+            var value = step.Expression != null ? Literal.Worked(step.Expression) : step.Value;
+            StateValueQuestion.Offer(_editor, _sequence.System, step.State, value, step.From, part, chosen => SetStateTo(step, chosen),
+                () => ChangeSetState(step), asking, () => BuildStateValue(step));
         }
 
         /// <summary>Has <paramref name="step" /> set its state to <paramref name="value" />, an expression, a setting or a value of its own, as one edit.</summary>
@@ -384,8 +401,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _editor.Do(system, WithMade.State(system, made.State, made.Type, new OnSequence(_sequence, edit)));
         }
 
-        /// <summary>Asks what to check, and adds an otherwise if checking it to the if closed at <paramref name="end" />: last, or above its otherwise, which comes last.</summary>
-        public void AddBranch(int end)
+        /// <summary>
+        /// Asks what to check, from the source <paramref name="from" /> where it was chosen already, and adds an otherwise if
+        /// checking it to the if closed at <paramref name="end" />: last, or above its otherwise, which comes last.
+        /// </summary>
+        public void AddBranch(int end, PickSource? from = null)
         {
             var origin = _editor.Depth;
             Ask(SentenceText.OtherwiseIfWords, null, OpeningColumn.Blocks, (test, made) =>
@@ -393,19 +413,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var last = _sequence.Otherwise(_sequence.OpenOf(end));
                 Do(made, new AddStep(ChangeKind.AddBranch, last < 0 ? end : last, new Else(test)));
                 _editor.UnwindTo(origin);
-            });
+            }, from);
         }
 
-        /// <summary>Asks what to check, and makes the otherwise <paramref name="step" /> an otherwise if checking it, where it stands.</summary>
-        public void GiveTest(Step step)
+        /// <summary>
+        /// Asks what to check, from the source <paramref name="from" /> where it was chosen already, and makes the otherwise
+        /// <paramref name="step" /> an otherwise if checking it, where it stands.
+        /// </summary>
+        public void GiveTest(Step step, PickSource? from = null)
         {
             var origin = _editor.Depth;
             Ask(SentenceText.OtherwiseIfWords, null, OpeningColumn.Blocks, (test, made) =>
             {
                 Do(made, new SetTest(_sequence.Steps.IndexOf(step), null, test));
                 _editor.UnwindTo(origin);
-            });
+            }, from);
         }
+
+        /// <summary>Whether a test may check a mod: checking for one is unfinished, so it is offered in developer mode, and only where a mod has a namespace to check for.</summary>
+        public bool ChecksMods => _editor.DeveloperMode && HostNamespaces.HasMods;
 
         /// <summary>Adds an otherwise to the if closed at <paramref name="end" />, as its last branch.</summary>
         public void AddLast(int end)
@@ -428,22 +454,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// logic system's states where <paramref name="was" /> tests a state, or on the host's mods where it tests one, its first
         /// column's heading switching between them. <paramref name="chosen" /> is given the test made, and the state made for it where one was.
         /// </summary>
-        void Ask(string lead, BranchTest was, OpeningColumn opens, Action<BranchTest, NewState> chosen)
+        void Ask(string lead, BranchTest was, OpeningColumn opens, Action<BranchTest, NewState> chosen, PickSource? from = null)
         {
             var source = new SourceSwitch(_editor,
-                (choice, slots) => Sourced(TestPage(was as Comparison, opens, test => chosen(test, null), slots), choice, slots, (was as Comparison)?.Targets),
-                choice =>
-                {
-                    var page = StateTestPage(lead, was as StateTest, (test, made) => chosen(test, made));
-                    page.Source = choice;
-                    return page;
-                },
-                // Checking for a mod is unfinished, so it is offered in developer mode, and to a test already checking one.
-                _editor.DeveloperMode || was is HostTest
-                    ? choice => new ModsPage(_editor, lead, was as HostTest, choice, test => chosen(test, null))
-                    : (Func<SourceSwitch, Framework.Ui.Shell.EditorPage>)null);
+                slots => Sourced(TestPage(was as Comparison, opens, test => chosen(test, null), slots), slots, (was as Comparison)?.Targets),
+                () => StateTestPage(lead, was as StateTest, (test, made) => chosen(test, made)),
+                // Checking for a mod is unfinished, so it is offered in developer mode where a mod has a namespace to check for, and to a test already checking one.
+                ChecksMods || was is HostTest
+                    ? () => new ModsPage(_editor, lead, was as HostTest, test => chosen(test, null))
+                    : (Func<Framework.Ui.Shell.EditorPage>)null);
 
-            _editor.Push(source.Open(was is StateTest ? PickSource.States : was is HostTest ? PickSource.Mods : was != null ? PickSource.Blocks : source.Usual));
+            var current = was is StateTest ? PickSource.States : was is HostTest ? PickSource.Mods : was != null ? PickSource.Blocks : (PickSource?)null;
+            source.Open(from ?? Sourcing(opens, current), current);
         }
 
         /// <summary>

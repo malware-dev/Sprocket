@@ -7,6 +7,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
     /// <summary>The negative of a number.</summary>
     public sealed class Negation : Expression
     {
+        /// <summary>How tightly a <c>-</c> or a <c>not</c> before an operand binds it, tighter than any operator between two.</summary>
+        public const int UnaryPrecedence = 6;
+
         /// <summary>The negative of <paramref name="operand" />.</summary>
         public Negation(Expression operand)
         {
@@ -17,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model.Expressions
         public Expression Operand { get; }
 
         /// <inheritdoc />
-        public override int Precedence => 3;
+        public override int Precedence => UnaryPrecedence;
 
         /// <inheritdoc />
         public override ExpressionFailure Evaluate(IExpressionScope scope, out Literal value)

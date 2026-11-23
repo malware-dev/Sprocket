@@ -5,10 +5,8 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
-using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
-using Lumel.Controls;
 using Lumel.Input;
 using Xunit;
 
@@ -38,11 +36,9 @@ public class ModsTests : IDisposable
         var screen = OnSequence(Head + Empty, out _);
         var editor = screen.Editor;
 
-        editor.PressAdd(SentenceText.IfWord);
-        screen.Run(2);
-        Assert.Contains(editor.Texts.PickSourceMods, Offered(editor));
+        Assert.Contains(editor.Texts.PickSourceMods, editor.Sources(SentenceText.IfWord));
 
-        editor.ChooseSource(editor.Texts.PickSourceMods);
+        editor.PressAdd(SentenceText.IfWord, editor.Texts.PickSourceMods);
         screen.Run(2);
 
         var page = Assert.IsType<ModsPage>(editor.Current);
@@ -59,10 +55,7 @@ public class ModsTests : IDisposable
         var screen = OnSequence(Head + Empty, out _, false);
         var editor = screen.Editor;
 
-        editor.PressAdd(SentenceText.IfWord);
-        screen.Run(2);
-
-        Assert.DoesNotContain(editor.Texts.PickSourceMods, Offered(editor));
+        Assert.DoesNotContain(editor.Texts.PickSourceMods, editor.Sources(SentenceText.IfWord));
     }
 
     /// <summary>A step that does something is not offered Mods.</summary>
@@ -72,10 +65,7 @@ public class ModsTests : IDisposable
         var screen = OnSequence(Head + Empty, out _);
         var editor = screen.Editor;
 
-        editor.PressAdd("task");
-        screen.Run(2);
-
-        Assert.DoesNotContain(editor.Texts.PickSourceMods, Offered(editor));
+        Assert.DoesNotContain(editor.Texts.PickSourceMods, editor.Sources(editor.Texts.SequenceDoSomething));
     }
 
     /// <summary>The list of mods is searched by title, author and namespace.</summary>
@@ -155,9 +145,8 @@ public class ModsTests : IDisposable
         var editor = screen.Editor;
 
         var end = editor.StepRows().Single(row => row.Kind == StepKind.End);
-        Assert.Single(end.Adds).Choices!.Single(choice => choice.Text == SentenceText.OtherwiseIfWords).Adds!.Execute();
-        screen.Run(2);
-        editor.ChooseSource(editor.Texts.PickSourceMods);
+        Assert.Single(end.Adds).Choices!.Single(choice => choice.Text == SentenceText.OtherwiseIfWords)
+            .Choices!.Single(choice => choice.Text == editor.Texts.PickSourceMods).Adds!.Execute();
         screen.Run(2);
         Assert.IsType<ModsPage>(editor.Current).List.Entries().Single(row => row.Text == "Pump Station").Pick(HeldModifier.Alone, 2);
         screen.Run(2);
@@ -176,6 +165,8 @@ public class ModsTests : IDisposable
 
         var slot = Assert.IsType<HostSlot>(Assert.Single(editor.StepRows()[0].Slots));
         slot.Opens!.Execute();
+        screen.Run(2);
+        editor.ChooseSource(editor.Texts.PickSourceMods);
         screen.Run(2);
 
         var page = Assert.IsType<ModsPage>(editor.Current);
@@ -221,6 +212,8 @@ public class ModsTests : IDisposable
 
         editor.StepRows()[0].Slots[0].Opens!.Execute();
         screen.Run(2);
+        editor.ChooseSource(editor.Texts.PickSourceMods);
+        screen.Run(2);
 
         var page = Assert.IsType<ModsPage>(editor.Current);
         var rows = page.List.Entries();
@@ -236,34 +229,22 @@ public class ModsTests : IDisposable
         Assert.False(test.Installed);
     }
 
-    /// <summary>With no mod registered, the list says there is nothing to choose from, and Done waits for a mod.</summary>
+    /// <summary>With no mod registered there is nothing to check for, so an if is not offered Mods.</summary>
     [Fact]
-    public void NoModsLeavesNothingToChoose()
+    public void NoModsOffersNoMods()
     {
         HostNamespaces.Clear();
         var screen = OnSequence(Head + Empty, out _);
         var editor = screen.Editor;
-        OpenMods(screen);
 
-        var page = Assert.IsType<ModsPage>(editor.Current);
-        Assert.Empty(page.List.Entries());
-        Assert.False(editor.Current.CanPrimary);
-    }
-
-    static IEnumerable<string> Offered(SprocketEditor editor)
-    {
-        var texts = editor.Texts;
-        var sources = new[] { texts.PickSourceBlocks, texts.PickSourceSlots, texts.PickSourceStates, texts.PickSourceMods };
-        var box = Target.Within(editor.Pick().Stages[0]).OfType<ListField>().First(field => sources.Contains(field.Text));
-        return box.Items.OfType<DropDownItem>().Select(item => item.Text).ToList();
+        Assert.Contains(editor.Texts.PickSourceStates, editor.Sources(SentenceText.IfWord));
+        Assert.DoesNotContain(editor.Texts.PickSourceMods, editor.Sources(SentenceText.IfWord));
     }
 
     static void OpenMods(Screen screen)
     {
         var editor = screen.Editor;
-        editor.PressAdd(SentenceText.IfWord);
-        screen.Run(2);
-        editor.ChooseSource(editor.Texts.PickSourceMods);
+        editor.PressAdd(SentenceText.IfWord, editor.Texts.PickSourceMods);
         screen.Run(2);
     }
 

@@ -186,7 +186,7 @@ public class StateScriptTests
     [InlineData("    type flag = inside | outside\n", "built-in type")]
     [InlineData("    type side = inside | outside\n    type side = up | down\n", "already the name of a type")]
     [InlineData("    let where = nowhere\n", "no choice 'nowhere'")]
-    [InlineData("    let where = 5\n", "a state starts as on, off or one of the system's choices")]
+    [InlineData("    let where = #FF0000FF\n", "a state starts as on, off, a number, a text, a length of time or one of the system's choices")]
     [InlineData("    let where = on\n    let where = off\n", "already the name of a state")]
     [InlineData("    type valve = open | shut\n    type hatch = open | shut\n    let intake = open\n", "write the one meant with its kind: valve(open) or hatch(open)")]
     [InlineData("    type side = inside | outside\n    let where = inside\n    let home = where\n", "'where' is a state")]
@@ -209,6 +209,85 @@ public class StateScriptTests
 
         var trouble = Load(text, new Automation());
         Assert.Contains(why, trouble);
+    }
+
+    /// <summary>A program of the draft whose states first held numbers, texts and lengths, the second of version 3, reads and is written in the current draft.</summary>
+    [Fact]
+    public void AProgramOfTheStateTypesDraftReadsInTheCurrentOne()
+    {
+        var program = new Automation();
+        Assert.Equal("", Load(Counter.Replace("sprocket 3 alpha 3\n", "sprocket 3 alpha 2\n"), program));
+        Assert.StartsWith(Host.SpaceEngineers.Framework.Language.Format.ScriptFormat.Line + "\n", ProgramWriter.Save(program, Store));
+    }
+
+    /// <summary>A program with states of every built-in type the spec names, set and compared as the spec allows.</summary>
+    const string Counter = "sprocket 3 alpha 3\n\n"
+        + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Counter\n{\n"
+        + "    optional slot Limit expects integer = 10\n\n"
+        + "    let count = 0\n"
+        + "    let level = 0.0\n"
+        + "    let share = real(2)\n"
+        + "    let label = \"Idle\"\n"
+        + "    let pause = 2s\n"
+        + "    let most = Limit\n"
+        + "    let other = 3\n\n"
+        + "    when count >= 5 then run 1\n\n"
+        + "    sequence 1 {\n"
+        + "        set count to count + 1\n"
+        + "        set level to 4\n"
+        + "        set label to \"Busy\"\n"
+        + "        set pause to 1.5s\n"
+        + "        set count to other\n"
+        + "        set count to Limit\n"
+        + "        if count < most then {\n"
+        + "            set level to 2.5\n"
+        + "        }\n"
+        + "        if label == \"Busy\" then {\n"
+        + "            set label to \"Idle\"\n"
+        + "        }\n"
+        + "    }\n"
+        + "}\n";
+
+    /// <summary>
+    /// A state takes the type of its starting value: a whole number an integer, <c>0.0</c> and <c>real(2)</c> a real, a text
+    /// and a length their own, a setting the type it holds; the program is written back as it was, a real state's whole
+    /// start written as a real.
+    /// </summary>
+    [Fact]
+    public void AStateHoldsTheTypeOfItsStartingValue()
+    {
+        var program = new Automation();
+        Assert.Equal("", Load(Counter, program));
+
+        var system = program.Systems[0];
+        Assert.Equal(ValueKind.Integer, system.FindState("count")!.Kind);
+        Assert.Equal(ValueKind.Real, system.FindState("level")!.Kind);
+        Assert.Equal(ValueKind.Real, system.FindState("share")!.Kind);
+        Assert.Equal(ValueKind.Text, system.FindState("label")!.Kind);
+        Assert.Equal(ValueKind.Duration, system.FindState("pause")!.Kind);
+        Assert.Equal(ValueKind.Integer, system.FindState("most")!.Kind);
+        Assert.True(system.FindState("count")!.IsOrdered);
+        Assert.False(system.FindState("label")!.IsOrdered);
+
+        Assert.Equal(Counter.Replace("let share = real(2)", "let share = 2.0"), Save(program));
+    }
+
+    /// <summary>What a built-in state is given or compared with that its type does not hold is an error that says what it holds.</summary>
+    [Theory]
+    [InlineData("    let count = 0\n    sequence 1 {\n        set count to \"five\"\n    }\n", "state 'count' holds an integer")]
+    [InlineData("    let count = 0\n    sequence 1 {\n        set count to 2.5\n    }\n", "state 'count' holds an integer")]
+    [InlineData("    let label = \"Idle\"\n    sequence 1 {\n        set label to 5\n    }\n", "state 'label' holds text")]
+    [InlineData("    let label = \"Idle\"\n    sequence 1 {\n        if label > \"a\" then {\n        }\n    }\n", "which has no order")]
+    [InlineData("    let count = 0\n    let label = \"Idle\"\n    sequence 1 {\n        set count to label\n    }\n", "of another type than state 'count'")]
+    [InlineData("    let count = text(0)\n", "is not written as a value of text")]
+    public void AValueABuiltInStateDoesNotHoldIsTrouble(string body, string why)
+    {
+        var text = "sprocket 3 alpha 3\n\n"
+            + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Counter\n{\n"
+            + body
+            + "}\n";
+
+        Assert.Contains(why, Load(text, new Automation()));
     }
 
     /// <summary>In a plain system a state may not take the name of a variable of the file.</summary>

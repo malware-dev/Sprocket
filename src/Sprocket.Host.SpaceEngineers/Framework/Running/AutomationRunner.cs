@@ -262,14 +262,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 held.Add(_states.Holds(system, instance, watched.Test));
             }
 
-            if (!_states.Write(system, instance, state, value) || watching == null || _setting >= DeepestSets)
+            if (!_states.Write(system, instance, state, value) || _setting >= DeepestSets)
                 return;
 
             _setting++;
-            for (var i = 0; i < watching.Count; i++)
+            for (var i = 0; watching != null && i < watching.Count; i++)
             {
                 if (!held[i] && _states.Holds(system, instance, watching[i].Test))
                     Fire(system, watching[i], instance);
+            }
+
+            // A when whose expression reads the state looks again now, as a when on the state alone is started now.
+            foreach (var trigger in system.Triggers)
+            {
+                var expressed = trigger as ExpressionTrigger;
+                if (expressed != null && expressed.States().Contains(state.Name))
+                    _watches.Poller(trigger, instance)?.Set();
             }
 
             _setting--;
@@ -571,7 +579,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 {
                     var trigger = triggers[t];
                     var signal = trigger as SignalTrigger;
-                    var watched = trigger is WhenTrigger || trigger is EveryTrigger || (signal != null && signal.IsWatched);
+                    var watched = trigger is WhenTrigger || trigger is EveryTrigger || trigger is ExpressionTrigger || (signal != null && signal.IsWatched);
 
                     for (var n = 0; n < instances.Count; n++)
                     {

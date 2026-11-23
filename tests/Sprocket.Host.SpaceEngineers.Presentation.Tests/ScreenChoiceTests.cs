@@ -607,10 +607,8 @@ public class ScreenChoiceTests
         var system = screen.Editor.Program.Systems[0];
         var slot = ((Act)system.Sequences[0].Steps[0]).Targets[0];
 
-        screen.Editor.PressAdd("task");
+        screen.Editor.PressAdd("task", screen.Editor.Texts.PickSourceSlots);
         screen.Run(2);
-        screen.Editor.ChooseSource(screen.Editor.Texts.PickSourceSlots);
-        screen.Run(1);
         screen.Editor.PressBlock(slot);
         screen.Run(2);
 

@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sharing.Text;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
-using Sprocket.Host.SpaceEngineers.Framework.Language.Format;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Language.Writing;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
@@ -17,7 +16,7 @@ public class ExpressionScriptTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 3 alpha 1\n\n";
+    const string Version = "sprocket 3 alpha 3\n\n";
 
     const string Head = "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n"
         + "    required slot pad expects InteriorLight\n"
@@ -245,18 +244,23 @@ public class ExpressionScriptTests
     public void AProgramOfTheDraftBeforeExpressionsIsUpgradedToTheCurrentOne()
     {
         var program = new Automation();
-        var text = Program("set Radius on [ pad ] to 4").Replace("sprocket 3 alpha 1", "sprocket 2 alpha 3");
+        var text = Program("set Radius on [ pad ] to 4").Replace("sprocket 3 alpha 3", "sprocket 2 alpha 3");
 
         Assert.Equal("", Load(text, program));
-        Assert.StartsWith("sprocket 3 alpha 1\n", ProgramWriter.Save(program, _store));
+        Assert.StartsWith("sprocket 3 alpha 3\n", ProgramWriter.Save(program, _store));
     }
 
-    /// <summary>The build writes the first draft of version 3, the one with expressions, so an older build refuses what holds one.</summary>
+    /// <summary>A program written for the first draft of version 3, where expressions arrived, reads with its expression and is written in the current draft.</summary>
     [Fact]
-    public void TheCurrentDraftIsTheOneWithExpressions()
+    public void AProgramOfTheDraftWithExpressionsIsReadAndWrittenInTheCurrentOne()
     {
-        Assert.Equal(3, ScriptFormat.Version);
-        Assert.Equal(1, ScriptFormat.Draft);
+        var program = new Automation();
+        var text = Program("set Radius on [ pad ] to 4 * 2").Replace("sprocket 3 alpha 3", "sprocket 3 alpha 1");
+
+        Assert.Equal("", Load(text, program));
+        var written = ProgramWriter.Save(program, _store);
+        Assert.StartsWith("sprocket 3 alpha 3\n", written);
+        Assert.Contains("4 * 2", written);
     }
 
     /// <summary>An attribute takes an expression as it takes a literal, and a program whose statement has one is written back as it was.</summary>

@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Framework.Model
@@ -21,7 +22,27 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                     return true;
             }
 
-            return false;
+            return Reads(system, state);
+        }
+
+        /// <summary>Whether an expression a step or trigger of <paramref name="system" /> holds reads the state called <paramref name="state" />.</summary>
+        static bool Reads(AutomationSystem system, string state)
+        {
+            var worked = new List<Expression>();
+            foreach (var trigger in system.Triggers)
+                trigger.Worked(worked);
+
+            foreach (var sequence in system.Sequences)
+            {
+                foreach (var step in sequence.Steps)
+                    step.Worked(worked);
+            }
+
+            var reads = false;
+            foreach (var tree in worked)
+                tree.Walk(e => reads |= (e as StateOperand)?.Name == state);
+
+            return reads;
         }
 
         /// <summary>Whether a state of the type <paramref name="type" /> starts at, is set to or is compared with its choice <paramref name="choice" />.</summary>
@@ -120,6 +141,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
                 var every = trigger as EveryTrigger;
                 if (every != null)
                     every.IntervalExpression = every.IntervalExpression?.Renamed(was, now, true);
+
+                var expressed = trigger as ExpressionTrigger;
+                if (expressed != null)
+                {
+                    expressed.Condition = expressed.Condition.Renamed(was, now, true);
+                    expressed.IntervalExpression = expressed.IntervalExpression?.Renamed(was, now, true);
+                }
             }
         }
 
@@ -136,6 +164,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
             var compared = (step as Branch)?.Compared;
             if (compared != null && compared.Value.IsExpression)
                 compared.Value = Literal.Worked(compared.Value.Tree.Renamed(was, now, true));
+
+            var tested = (step as Branch)?.Test as ExpressionTest;
+            if (tested != null)
+                tested.Condition = tested.Condition.Renamed(was, now, true);
 
             var wait = step as Wait;
             if (wait != null && wait.Expression != null)

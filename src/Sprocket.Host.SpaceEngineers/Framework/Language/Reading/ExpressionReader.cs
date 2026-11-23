@@ -73,6 +73,24 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return true;
         }
 
+        /// <summary>
+        /// The condition <paramref name="written" />, an expression an <c>if</c> or a <c>when</c> tests, into <paramref name="tree" />;
+        /// false, and trouble, where it is not one a statement of <paramref name="system" /> can have, or comes to a fixed value
+        /// that is no flag.
+        /// </summary>
+        public static bool Condition(Statement statement, Value written, AutomationSystem system, ScriptTrouble trouble, out Expression tree)
+        {
+            if (!Tree(statement, written, system, trouble, out tree))
+                return false;
+
+            var operand = tree as Operand;
+            if (operand == null || operand.Value.IsSetting || operand.Value.Kind == ValueKind.Flag)
+                return true;
+
+            trouble.Say(statement, "expected a condition, like ready or count >= 5, that comes to on or off.");
+            return false;
+        }
+
         static bool Tree(Statement statement, Value written, AutomationSystem system, ScriptTrouble trouble, out Expression tree)
         {
             tree = null;
@@ -96,6 +114,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 var term = terms[i];
                 if (term.Form != ValueForm.Operator)
                 {
+                    // A check of any or all of a reading's blocks follows the reading and the value it compares with.
+                    Combination checks;
+                    Relation relation;
+                    if (term.Form == ValueForm.Reference && i + 2 < terms.Count && terms[i + 2].Form == ValueForm.Operator
+                        && Checks(terms[i + 2].Word, out checks, out relation))
+                    {
+                        Expression compared, check;
+                        if (!Tree(statement, terms[i + 1], system, trouble, out compared)
+                            || !Reading(statement, term, checks, system, trouble, out check, relation, compared))
+                            return false;
+
+                        stack.Add(check);
+                        i += 2;
+                        continue;
+                    }
+
                     // A combining word follows the member it combines the readings of.
                     var combine = Combination.None;
                     if (term.Form == ValueForm.Reference && i + 1 < terms.Count && terms[i + 1].Form == ValueForm.Operator
@@ -167,10 +201,53 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 case ExpressionWords.AbsFunction:
                     stack.Add(new Function(FunctionKind.Abs, operands));
                     return true;
+                case ExpressionWords.Not:
+                    stack.Add(new Inversion(operands[0]));
+                    return true;
+                case ExpressionWords.And:
+                    stack.Add(new Logical(Connective.And, operands[0], operands[1]));
+                    return true;
+                case ExpressionWords.Or:
+                    stack.Add(new Logical(Connective.Or, operands[0], operands[1]));
+                    return true;
+            }
+
+            Relation relation;
+            if (count == 2 && Relating(term.Word, out relation))
+            {
+                stack.Add(new Comparing(relation, operands[0], operands[1]));
+                return true;
             }
 
             trouble.Say(statement, "unexpected operator in the expression.");
             return false;
+        }
+
+        /// <summary>The comparison the word <paramref name="word" /> spells, <c>==</c> or <c>&lt;=</c>, into <paramref name="relation" />; false where it spells none.</summary>
+        static bool Relating(string word, out Relation relation)
+        {
+            relation = Relation.Is;
+            return StepReader.Related(new Value(ValueForm.Keyword, null, 0, 0, Keywords.Find(word)), out relation);
+        }
+
+        /// <summary>Whether the term <paramref name="word" /> checks a comparison on any or all of a reading's blocks, into <paramref name="checks" /> and <paramref name="relation" />.</summary>
+        static bool Checks(string word, out Combination checks, out Relation relation)
+        {
+            checks = Combination.None;
+            relation = Relation.Is;
+            var space = word.IndexOf(' ');
+            if (space < 0)
+                return false;
+
+            var quantifier = word.Substring(0, space);
+            if (quantifier == Keywords.Name(Keyword.Any))
+                checks = Combination.Any;
+            else if (quantifier == Keywords.Name(Keyword.All))
+                checks = Combination.All;
+            else
+                return false;
+
+            return Relating(word.Substring(space + 1), out relation);
         }
 
         static bool Combining(string word, out Combination combine)
@@ -188,7 +265,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>A member read on blocks, <c>gearbox.fill on [ tanks ]</c>, its arguments each a value or an expression.</summary>
-        static bool Reading(Statement statement, Value written, Combination combine, AutomationSystem system, ScriptTrouble trouble, out Expression tree)
+        static bool Reading(Statement statement, Value written, Combination combine, AutomationSystem system, ScriptTrouble trouble, out Expression tree,
+            Relation relation = Relation.Is, Expression compared = null)
         {
             tree = null;
             var member = statement.Member(written);
@@ -216,13 +294,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             // Whether several blocks are read is also asked of what a slot holds, when the program is bound; where it names several
             // outright, no combining word before the member is plain.
-            if (targets.Count > 1)
+            if (combine == Combination.None && targets.Count > 1)
             {
                 trouble.Say(statement, "a member read on more than one block needs sum, average, min or max before it.");
                 return false;
             }
 
-            tree = new BlockReading(key, combine, arguments, targets);
+            tree = compared != null ? new BlockReading(key, combine, arguments, targets, relation, compared) : new BlockReading(key, combine, arguments, targets);
             return true;
         }
 

@@ -28,10 +28,19 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
         int _failures;
 
+        // How loosely binding an operator the value being read takes in: every operator, or only arithmetic.
+        const int Every = 1;
+
+        const int Arithmetic = 4;
+
+        const int Comparisons = 3;
+
         // The head and first value of the statement being read, which say where a value may combine readings.
         Keyword _key;
 
         int _from;
+
+        int _floor = Arithmetic;
 
         /// <summary>A parser at the start of <paramref name="text" />.</summary>
         public Parser(string text)
@@ -399,8 +408,39 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 if (!Valuish())
                     return;
 
-                values.Add(Next(Combines(values)));
+                // A value a statement takes, and a condition written as an expression, take every operator; any other value
+                // only arithmetic, as a comparison there is a part of the statement.
+                var condition = Conditions(values) && ReadsAsExpression();
+                var combine = condition || Combines(values);
+                values.Add(Floored(combine ? Every : Arithmetic, () => Next(combine)));
             }
+        }
+
+        /// <summary><paramref name="read" />, done with the loosest operator taken in at <paramref name="floor" />, which is set back after.</summary>
+        Value Floored(int floor, System.Func<Value> read)
+        {
+            var was = _floor;
+            _floor = floor;
+            var value = read();
+            _floor = was;
+            return value;
+        }
+
+        /// <summary>Whether the value to be read next, after the ones in <paramref name="values" />, starts what an <c>if</c>, an <c>else if</c> or a <c>when</c> tests.</summary>
+        bool Conditions(ValueChunks values)
+        {
+            if (_key == Keyword.If || _key == Keyword.When)
+                return values.Count == _from;
+
+            return _key == Keyword.Else && values.Count == _from + 1 && values[_from].Keyword == Keyword.If;
+        }
+
+        /// <summary>Whether the condition starting at the token now standing is read as one expression, as <see cref="ConditionShape.Whole" /> says.</summary>
+        /// <remarks>Reads ahead to the end of the condition on a copy of the lexer, which moves nothing the parser reads.</remarks>
+        bool ReadsAsExpression()
+        {
+            var ahead = _lexer.Ahead();
+            return ConditionShape.Whole(_token, _looked ? _ahead : ahead.Next(), ahead);
         }
 
         /// <summary>Whether <paramref name="token" /> starts a line of a system's header: <c>changed</c> or <c>from</c>.</summary>
@@ -477,41 +517,53 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return first;
 
             var terms = new List<Value> { first };
-            Climb(terms, 1);
+            Climb(terms, _floor);
             return Expressed(terms);
         }
 
-        static bool IsOperator(TokenKind kind)
+        /// <summary>Whether <paramref name="token" /> is an operator the value being read takes in.</summary>
+        bool IsOperator(Token token)
         {
-            return Precedence(kind) > 0;
+            var precedence = Precedence(token);
+            return precedence > 0 && precedence >= _floor;
         }
 
-        /// <summary>How tightly the operator <paramref name="kind" /> binds: 2 for <c>*</c> and <c>/</c>, 1 for <c>+</c> and <c>-</c>, and 0 where it is none.</summary>
-        static int Precedence(TokenKind kind)
+        /// <summary>
+        /// How tightly the operator <paramref name="token" /> binds: 5 for <c>*</c> and <c>/</c>, 4 for <c>+</c> and <c>-</c>, 3 for
+        /// a comparison, 2 for <c>and</c>, 1 for <c>or</c>, and 0 where it is none.
+        /// </summary>
+        static int Precedence(Token token)
         {
-            switch (kind)
+            switch (token.Kind)
             {
                 case TokenKind.Star:
                 case TokenKind.Slash:
-                    return 2;
+                    return 5;
                 case TokenKind.Plus:
                 case TokenKind.Minus:
-                    return 1;
+                    return 4;
+                case TokenKind.Comparison:
+                    return Comparisons;
             }
 
-            return 0;
+            if (!ConditionShape.Joins(token))
+                return 0;
+
+            return token.Text.ToString() == ExpressionWords.And ? 2 : 1;
         }
 
-        static string Spelling(TokenKind kind)
+        static string Spelling(Token token)
         {
-            switch (kind)
+            switch (token.Kind)
             {
                 case TokenKind.Star: return ExpressionWords.Multiply;
                 case TokenKind.Slash: return ExpressionWords.Divide;
                 case TokenKind.Plus: return ExpressionWords.Add;
+                case TokenKind.Minus: return ExpressionWords.Subtract;
+                case TokenKind.Comparison: return Keywords.Name(token.Keyword);
             }
 
-            return ExpressionWords.Subtract;
+            return token.Text.ToString();
         }
 
         /// <summary>
@@ -520,7 +572,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         /// </summary>
         bool Operates(Value first)
         {
-            if (!IsOperator(_token.Kind))
+            if (!IsOperator(_token))
                 return false;
 
             switch (first.Form)
@@ -548,11 +600,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         {
             while (true)
             {
-                var precedence = Precedence(_token.Kind);
-                if (precedence == 0 || precedence < least)
+                var precedence = Precedence(_token);
+                if (precedence == 0 || precedence < least || precedence < _floor)
                     return;
 
-                var op = _token.Kind;
+                var op = _token;
                 Step();
                 var failures = _failures;
                 if (!Valuish())
@@ -571,6 +623,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return;
 
                 terms.Add(Value.Operating(Spelling(op), 2));
+                if (precedence == Comparisons && _token.Kind == TokenKind.Comparison)
+                {
+                    Fail("comparisons do not chain; join two of them with and, like a < b and b < c.");
+                    return;
+                }
             }
         }
 
@@ -607,6 +664,72 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return new Value(ValueForm.Real, null, 0, -operand.Real);
 
             return Expressed(new List<Value> { operand, Value.Operating(ExpressionWords.Negate, 1) });
+        }
+
+        /// <summary>The other value of the flag after a <c>not</c>.</summary>
+        Value Inverted()
+        {
+            Step();
+            var failures = _failures;
+            if (!Valuish())
+            {
+                Fail("expected a value after 'not'.");
+                return Value.None;
+            }
+
+            var operand = Operand(true);
+            return _failures > failures ? Value.None : Expressed(new List<Value> { operand, Value.Operating(ExpressionWords.Not, 1) });
+        }
+
+        /// <summary>Whether the word <paramref name="token" /> checks a comparison on the blocks of the reading after it: <c>any</c> or <c>all</c> before a member.</summary>
+        bool Checking(Token token)
+        {
+            if (token.Keyword != Keyword.Any && token.Keyword != Keyword.All)
+                return false;
+
+            var after = Peek();
+            return after.Kind == TokenKind.Identifier && after.Keyword != Keyword.On;
+        }
+
+        /// <summary>
+        /// <c>any gearbox.status on [ doors ] == open</c>, from its word: the reading, the value compared with, then one term
+        /// saying the word and the comparison.
+        /// </summary>
+        /// <remarks>The value compared with takes arithmetic only, so an <c>and</c> after it joins the whole check.</remarks>
+        Value Checked(Token token)
+        {
+            var word = Keywords.Name(token.Keyword);
+            Step();
+            var failures = _failures;
+            var member = Operand(true);
+            if (_failures > failures)
+                return Value.None;
+
+            if (member.Form != ValueForm.Reference)
+            {
+                Fail($"expected a member on a list of names after '{word}', like {word} gearbox.status on [ doors ] == open.");
+                return Value.None;
+            }
+
+            if (_token.Kind != TokenKind.Comparison)
+            {
+                Fail($"expected a comparison and a value after the names, like {word} gearbox.status on [ doors ] == open.");
+                return Value.None;
+            }
+
+            var relation = _token.Keyword;
+            Step();
+            if (!Valuish())
+            {
+                Fail("expected a value after the comparison.");
+                return Value.None;
+            }
+
+            var compared = Floored(Arithmetic, () => Next());
+            if (_failures > failures)
+                return Value.None;
+
+            return Expressed(new List<Value> { member, compared, Value.Operating(ExpressionWords.Checking(word, Keywords.Name(relation)), 2) });
         }
 
         /// <summary>Whether the word <paramref name="token" /> combines the readings that follow it: <c>sum</c>, <c>average</c>, <c>min</c> or <c>max</c> before a member.</summary>
@@ -648,6 +771,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return Negated();
 
                 case TokenKind.Identifier:
+                    if (_floor <= Comparisons && Checking(token))
+                        return Checked(token);
+
                     if (combine && Combining(token))
                         return Combined(token);
 
@@ -668,6 +794,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return token.Keyword != Keyword.To && Referencing() ? Referenced(name, Value.Listed(0, 0)) : name;
 
                 case TokenKind.Keyword:
+                    if (_floor <= Comparisons && token.Keyword == Keyword.Not)
+                        return Inverted();
+
                     Step();
 
                     // A name spelled like a reserved keyword is quoted, beside a dot as anywhere: sprocket.'every'.
@@ -776,7 +905,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                     return Value.None;
                 }
 
-                held.Add(Next());
+                held.Add(Floored(Every, () => Next()));
                 if (_token.Kind != TokenKind.Comma)
                     break;
 
@@ -969,7 +1098,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return Value.None;
             }
 
-            var inner = Next();
+            var inner = Floored(Every, () => Next());
             if (_failures > failures)
                 return Value.None;
 

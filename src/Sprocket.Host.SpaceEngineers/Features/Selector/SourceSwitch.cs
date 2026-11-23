@@ -1,34 +1,30 @@
 using Sprocket.Host.SpaceEngineers.Framework.Text;
-using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
-using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Shell;
 using System;
 using System.Collections.Generic;
-using Lumel;
+using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Selector
 {
     /// <summary>
-    /// What a step, an if, an otherwise if or a when is about, chosen in the heading of its selector's first column: blocks, a
-    /// slot the logic system already has, one of its states, or a mod the host has. Each has a selector of its own, and choosing another puts its
-    /// selector in place.
+    /// What a step, an if, an otherwise if or a when is about, chosen before its selector opens, in the menu of the plus that adds
+    /// it or in a menu of its own: blocks, a slot the logic system already has, one of its states, or a mod the host has. Each has
+    /// a selector of its own.
     /// </summary>
     public sealed class SourceSwitch
     {
         readonly SprocketEditor _editor;
-        readonly Func<SourceSwitch, bool, EditorPage> _blocks;
-        readonly Func<SourceSwitch, EditorPage> _states;
-        readonly Func<SourceSwitch, EditorPage> _mods;
+        readonly Func<bool, EditorPage> _blocks;
+        readonly Func<EditorPage> _states;
+        readonly Func<EditorPage> _mods;
         readonly List<PickSource> _offered = new List<PickSource> { PickSource.Blocks, PickSource.Slots };
 
         /// <summary>
         /// The choice between the selectors <paramref name="blocks" /> makes, of blocks or of the slots already made where it is
         /// told so, the one <paramref name="states" /> makes and the one <paramref name="mods" /> makes, in <paramref name="editor" />;
-        /// the states are not offered where it is null, and the mods are not where theirs is. Each is handed this switch, to offer
-        /// in its heading.
+        /// the states are not offered where it is null, and the mods are not where theirs is.
         /// </summary>
-        public SourceSwitch(SprocketEditor editor, Func<SourceSwitch, bool, EditorPage> blocks, Func<SourceSwitch, EditorPage> states,
-            Func<SourceSwitch, EditorPage> mods = null)
+        public SourceSwitch(SprocketEditor editor, Func<bool, EditorPage> blocks, Func<EditorPage> states, Func<EditorPage> mods = null)
         {
             _editor = editor;
             _blocks = blocks;
@@ -41,48 +37,64 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 _offered.Add(PickSource.Mods);
         }
 
-        /// <summary>The source last switched to in any selector, where this one offers it, and blocks otherwise: where something new is looked for first.</summary>
-        public PickSource Usual
+        /// <summary>
+        /// The sources a plus offers in the menu of the thing it adds, each adding it from that source through <paramref name="adds" />:
+        /// blocks and the slots already made, then the states where <paramref name="states" />, and the mods where
+        /// <paramref name="mods" />, as a switch made with them offers them.
+        /// </summary>
+        public static List<AddOption> Options(Texts texts, bool states, bool mods, Func<PickSource, ICommand> adds)
         {
-            get
+            var options = new List<AddOption>
             {
-                var last = (PickSource)_editor.Habits.Source;
-                return _offered.Contains(last) ? last : PickSource.Blocks;
+                new AddOption(texts.PickSourceBlocks, null, adds(PickSource.Blocks)),
+                new AddOption(texts.PickSourceSlots, null, adds(PickSource.Slots))
+            };
+
+            if (states)
+                options.Add(new AddOption(texts.PickSourceStates, null, adds(PickSource.States)));
+
+            if (mods)
+                options.Add(new AddOption(texts.PickSourceMods, null, adds(PickSource.Mods)));
+
+            return options;
+        }
+
+        /// <summary>Opens the selector of <paramref name="from" /> where a source was chosen already, and otherwise asks as <see cref="Ask" /> does, <paramref name="current" /> marked.</summary>
+        public void Open(PickSource? from, PickSource? current)
+        {
+            if (from != null)
+                _editor.Push(Open(from.Value));
+            else
+                Ask(current);
+        }
+
+        /// <summary>
+        /// Asks in a menu under what was pressed which source to select from, <paramref name="current" /> marked where it is one,
+        /// and opens the selector of the one chosen; where only one is offered, opens its selector at once.
+        /// </summary>
+        public void Ask(PickSource? current)
+        {
+            if (_offered.Count == 1)
+            {
+                _editor.Push(Open(_offered[0]));
+                return;
+            }
+
+            _editor.AskHere("");
+            foreach (var offered in _offered)
+            {
+                var source = offered;
+                _editor.Answer(Word(_editor.Texts, source), () => _editor.Push(Open(source)), source == current);
             }
         }
 
-        /// <summary>The selector for <paramref name="source" />, to be opened first.</summary>
-        public EditorPage Open(PickSource source)
+        /// <summary>The selector for <paramref name="source" />.</summary>
+        EditorPage Open(PickSource source)
         {
             if (source == PickSource.States && _states != null)
-                return _states(this);
+                return _states();
 
-            return source == PickSource.Mods && _mods != null ? _mods(this) : _blocks(this, source == PickSource.Slots);
-        }
-
-        /// <summary>The box a selector's first column is headed by, saying which of the sources it is, <paramref name="source" />.</summary>
-        /// <remarks>Made by each selector as it makes its column, and again when the editor's words are read in another language.</remarks>
-        public Element Box(PickSource source)
-        {
-            var texts = _editor.Texts;
-            var words = new List<string>();
-            foreach (var offered in _offered)
-                words.Add(Word(texts, offered));
-
-            var box = new ListField(words) { Style = Styles.ListBox, Text = words[_offered.IndexOf(source)], Tip = CodexTip.For(null, texts.Codex.PickSourceAbout) };
-            box.Edited += delegate
-            {
-                var at = words.IndexOf(box.Text);
-                if (at < 0 || _offered[at] == source)
-                    return;
-
-                var wanted = _offered[at];
-                var swap = _editor.Act(CommandKind.PickChoice, () => Swap(wanted));
-                if (swap != null)
-                    swap.Execute();
-            };
-
-            return box;
+            return source == PickSource.Mods && _mods != null ? _mods() : _blocks(source == PickSource.Slots);
         }
 
         /// <summary>The words <paramref name="source" /> is offered in.</summary>
@@ -99,14 +111,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 default:
                     return texts.PickSourceMods;
             }
-        }
-
-        /// <summary>Puts the selector for <paramref name="source" /> in place of the one showing.</summary>
-        void Swap(PickSource source)
-        {
-            _editor.Habits.Source = (int)source;
-            _editor.Pop();
-            _editor.Push(Open(source));
         }
     }
 }

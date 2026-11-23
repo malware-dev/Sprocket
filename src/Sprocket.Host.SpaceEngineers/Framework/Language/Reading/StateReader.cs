@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary><c>let where = inside</c>: a state of <paramref name="system" />, its type that of its starting value.</summary>
-        /// <remarks>A starting value that is neither a flag nor one of the system's choices, or a name already taken, is trouble.</remarks>
+        /// <remarks>A starting value that is no flag, number, text, length of time or choice of the system, or a name already taken, is trouble.</remarks>
         public static void ReadState(Statement statement, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
             var name = statement.ValueAt(0);
@@ -159,6 +159,22 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
                 return true;
             }
 
+            var builtIn = StartsBuiltIn(statement, value);
+            if (builtIn != null)
+            {
+                bool said;
+                if (SettingReader.Typed(statement, value, builtIn, system, trouble, out said, out start))
+                {
+                    type = builtIn;
+                    return true;
+                }
+
+                if (!said)
+                    trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}, which is not written as a value of {builtIn}.");
+
+                return false;
+            }
+
             if (value.Form == ValueForm.Kinded)
             {
                 var setting = Kinds.Named(statement, value, Kinds.Setting);
@@ -167,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
                 if (Kinds.Named(statement, value, Kinds.State) != null)
                 {
-                    trouble.Say(statement, $"{ScriptQuotes.Spelled(statement, at)} is a state; a state starts as on, off or one of the system's choices.");
+                    trouble.Say(statement, $"{ScriptQuotes.Spelled(statement, at)} is a state; a state starts as on, off, a number, a text, a length of time or one of the system's choices.");
                     return false;
                 }
 
@@ -183,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             if (!ScriptQuotes.Named(value))
             {
-                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; a state starts as on, off or one of the system's choices.");
+                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, at)}; a state starts as on, off, a number, a text, a length of time or one of the system's choices.");
                 return false;
             }
 
@@ -214,7 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
 
             if (system.FindState(name) != null)
             {
-                trouble.Say(statement, $"'{name}' is a state; a state starts as on, off or one of the system's choices.");
+                trouble.Say(statement, $"'{name}' is a state; a state starts as on, off, a number, a text, a length of time or one of the system's choices.");
                 return false;
             }
 
@@ -227,6 +243,36 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             type = having[0];
             start = Literal.Name(name);
             return true;
+        }
+
+        /// <summary>
+        /// The built-in type other than a flag that <paramref name="written" />, a state's starting value, starts a state of: its
+        /// kind where it is written with one, <c>real(0)</c>, or else what it is written as, a whole number starting an integer
+        /// state; null where it is none of them.
+        /// </summary>
+        static string StartsBuiltIn(Statement statement, Value written)
+        {
+            if (written.Form == ValueForm.Kinded)
+            {
+                var kind = statement.KindOf(written);
+                return kind.IsWord && State.IsBuiltInType(kind.Word) ? kind.Word : null;
+            }
+
+            switch (written.Form)
+            {
+                case ValueForm.Integer: return SettingReader.Integer;
+                case ValueForm.Real: return SettingReader.Real;
+                case ValueForm.Text: return SettingReader.Text;
+                case ValueForm.Duration: return SettingReader.Duration;
+            }
+
+            return null;
+        }
+
+        /// <summary>What <paramref name="state" /> holds, in words for trouble: <c>a flag</c>, <c>an integer</c>, <c>a choice of side</c>.</summary>
+        static string Holding(State state)
+        {
+            return SettingReader.Holding(state.IsFlag ? SettingReader.Flag : state.Type);
         }
 
         /// <summary>
@@ -251,15 +297,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
         }
 
         /// <summary>
-        /// A state starting at the setting <paramref name="setting" />, which each installation gives a flag or a choice: its
-        /// type into <paramref name="type" />; or false and trouble where the setting holds neither.
+        /// A state starting at the setting <paramref name="setting" />, which each installation gives a value a state holds: its
+        /// type into <paramref name="type" />; or false and trouble where the setting holds none, such as a color.
         /// </summary>
         static bool StartingAt(Statement statement, string setting, AutomationSystem system, ScriptTrouble trouble, out string type, out Literal start)
         {
             type = "";
             start = Literal.Setting(setting);
-            if (!SettingReader.Owe(statement, setting, system, held => held == SettingReader.Flag || system.FindType(held) != null,
-                    "a flag or a choice", trouble))
+            if (!SettingReader.Owe(statement, setting, system, held => held == SettingReader.Flag || State.IsBuiltInType(held) || system.FindType(held) != null,
+                    "a flag, a number, a text, a length of time or a choice", trouble))
                 return false;
 
             var kind = system.FindPart(setting).Setting;
@@ -345,6 +391,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             value = default(Literal);
             other = "";
             var written = statement.ValueAt(at);
+            if (State.IsBuiltInType(type))
+                return BuiltInValued(statement, written, type, about, system, trouble, out value, out other);
+
             var flag = type == SettingReader.Flag;
             var expected = flag ? "on or off" : $"a choice of {type}";
             // A bare on or off is looked for among the type's choices where the type is not a flag, as any bare choice is.
@@ -461,6 +510,75 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return true;
         }
 
+        /// <summary>
+        /// What <paramref name="about" />, holding the built-in <paramref name="type" />, an integer, a real, a text or a length of
+        /// time, is set to or compared with: a value of the type, an integer for a real, or a setting holding one, into
+        /// <paramref name="value" />, or a state of the type into <paramref name="other" />; or false and trouble where it is
+        /// none of those.
+        /// </summary>
+        static bool BuiltInValued(Statement statement, Value written, string type, string about, AutomationSystem system,
+            ScriptTrouble trouble, out Literal value, out string other)
+        {
+            value = default(Literal);
+            other = "";
+            Func<string, bool> suits = held => held == type || type == SettingReader.Real && held == SettingReader.Integer;
+            if (written.Form == ValueForm.Kinded)
+            {
+                var stateName = Kinds.Named(statement, written, Kinds.State);
+                if (stateName != null)
+                {
+                    var named = system.FindState(stateName);
+                    if (named != null)
+                        return Other(statement, named, type, about, trouble, out other);
+
+                    trouble.Say(statement, $"no state called '{stateName}'.");
+                    return false;
+                }
+
+                var settingName = Kinds.Named(statement, written, Kinds.Setting);
+                if (settingName != null)
+                {
+                    value = Literal.Setting(settingName, true);
+                    return SettingReader.Owe(statement, settingName, system, suits, SettingReader.Holding(type), trouble);
+                }
+            }
+            else if (ScriptQuotes.Named(written) && written.Form != ValueForm.Text)
+            {
+                var name = written.Word;
+                var meanings = new List<string>();
+                var spellings = new List<string>();
+                Kinds.Meanings(system, name, meanings, spellings);
+                if (meanings.Count > 1)
+                {
+                    Kinds.Ambiguous(statement, name, meanings, spellings, trouble);
+                    return false;
+                }
+
+                var named = system.FindState(name);
+                if (named != null)
+                    return Other(statement, named, type, about, trouble, out other);
+
+                var part = system.FindPart(name);
+                if (part != null && part.IsSetting)
+                {
+                    value = Literal.Setting(name);
+                    return SettingReader.Owe(statement, name, system, suits, SettingReader.Holding(type), trouble);
+                }
+
+                trouble.Say(statement, $"no state or setting '{name}'; {about} holds {SettingReader.Holding(type)}.");
+                return false;
+            }
+
+            bool said;
+            if (SettingReader.Typed(statement, written, type, system, trouble, out said, out value))
+                return true;
+
+            if (!said)
+                trouble.Say(statement, $"unexpected {ScriptQuotes.Spelled(statement, written)}; {about} holds {SettingReader.Holding(type)}.");
+
+            return false;
+        }
+
         /// <summary>The state <paramref name="named" /> into <paramref name="other" />, where it holds <paramref name="type" />; or false and trouble where it holds another type than <paramref name="about" />.</summary>
         static bool Other(Statement statement, State named, string type, string about, ScriptTrouble trouble, out string other)
         {
@@ -538,10 +656,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             if (state == null)
                 return null;
 
-            var relation = statement.ValueAt(at + 1);
-            if (!relation.Says(Keyword.EqualTo) && !relation.Says(Keyword.NotEqualTo))
+            Relation relation;
+            var related = StepReader.Related(statement.ValueAt(at + 1), out relation);
+            var ordering = relation != Relation.Is && relation != Relation.IsNot;
+            if (!related || ordering && !state.IsOrdered)
             {
-                trouble.Say(statement, "expected == or != after the state.");
+                trouble.Say(statement, state.IsOrdered
+                    ? "expected ==, !=, <, <=, > or >= after the state."
+                    : $"expected == or != after the state; state '{state.Name}' holds {Holding(state)}, which has no order.");
                 return null;
             }
 
@@ -559,7 +681,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Reading
             return new StateTest
             {
                 State = state.Name,
-                Relation = relation.Says(Keyword.EqualTo) ? Relation.Is : Relation.IsNot,
+                Relation = relation,
                 Value = value,
                 Other = other
             };

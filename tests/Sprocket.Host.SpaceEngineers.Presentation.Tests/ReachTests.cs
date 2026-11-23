@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ReachTests
 {
-    const string OpenThePicker = "60 196 type Airlock enter press trigger press when";
+    const string OpenThePicker = "60 196 type Airlock enter press trigger press when press Blocks…";
 
     const string Older = "sprocket 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
 
