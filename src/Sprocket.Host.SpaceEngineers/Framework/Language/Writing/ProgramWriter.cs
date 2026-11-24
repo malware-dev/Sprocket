@@ -1034,7 +1034,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
         }
 
         /// <summary><c>call open on [ door ]</c>: one step as its line of script, without its note or its attributes, for a log to name it by.</summary>
-        /// <remarks>An if or an otherwise-if is its test, and the end of an if its closing brace.</remarks>
+        /// <remarks>An if or an otherwise-if is its test, the end of an if its closing brace, and a catch or a finally the line opening its block.</remarks>
         public static string Line(Step step)
         {
             var pen = new ScriptWriter();
@@ -1056,6 +1056,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Language.Writing
             }
             else if (step is EndIf)
                 return "}";
+            else if (step is Handler)
+            {
+                pen.Head(step is Catch ? SequenceWords.Catch : SequenceWords.Finally);
+                pen.Body();
+            }
             else
             {
                 Started(pen, step);
