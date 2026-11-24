@@ -56,6 +56,152 @@ public class HandlerTests
         return runner.States.Read(system, system.Uses[0], system.FindState(state)!).Said == Literal.Of(true).Said;
     }
 
+    /// <summary>
+    /// A run that fails into its catch and goes on into its finally, with the debug log on, logs both and finishes: the finally,
+    /// reached as the next step, by the line that opens it.
+    /// </summary>
+    [Fact]
+    public void TheDebugLogNamesTheHandlersItRuns()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(Head + "        abort saying \"Stuck\" as warning\n" + Handlers, program, Store));
+        var runner = new AutomationRunner(program, new Rigged().World);
+        var lines = new List<string>();
+        runner.Log = new RunLog(lines.Add, () => "Drill Rig");
+        runner.Tick(1);
+        var system = program.Systems[0];
+        runner.Call(system.FindSequence(1)!, system.Uses[0]);
+        Tick(runner, 2, 40);
+
+        Assert.Contains(lines, line => line.EndsWith("step 3 catch"));
+        Assert.Contains(lines, line => line.EndsWith("step 5: finally {"));
+        Assert.Contains(lines, line => line.EndsWith("finished"));
+    }
+
+    /// <summary>
+    /// The hangar gate reported in issue 105, its script as the player wrote it, runs with the debug log on: the opening gate's
+    /// sequence goes on into its catch as its next step, which the log names by the line that opens it.
+    /// </summary>
+    [Fact]
+    public void TheReportedHangarGateRunsWithTheDebugLogOn()
+    {
+        var rigged = new Rigged();
+        rigged.Door(101, "Hangar Gate");
+        rigged.Vent(102, "Hangar Vent");
+        rigged.Light(103, "Hangar Light");
+        rigged.Panel(104, "Hangar Button");
+        rigged.Rig.TextPanel(105, "Hangar Screen");
+        var text = "sprocket 2\n\n"
+        + "let gate1 = block 'Door/LargeBlockDoor' [ 101, \"Hangar Gate\" ]\n"
+        + "let vent1 = block 'AirVent/SmallAirVent' [ 102, \"Hangar Vent\" ]\n"
+        + "let light1 = block 'InteriorLight/LargeBlockLight_1corner' [ 103, \"Hangar Light\" ]\n"
+        + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 104, \"Hangar Button\" ]\n"
+        + "let screen1 = block 'TextPanel/LargeTextPanel' [ 105, \"Hangar Screen\" ]\n\n"
+        + "system blueprint \"5e1c7a90-2b3d-4f6e-8a9c-1d2e3f4a5b6c\" as Reported.Hangar\n{\n"
+        + "    required slot 'signal slot 1' expects signal\n"
+        + "    required slot 'hangar vent' expects AirVent\n"
+        + "    required slot gate expects Door\n"
+        + "    required slot light expects LightingBlock\n"
+        + "    required slot screen expects sprocket.screen\n"
+        + "\n"
+        + "    type door = opening | closing | open | close\n"
+        + "\n"
+        + "    let hangar = close\n"
+        + "\n"
+        + "    whenever 'signal slot 1' then run 1\n"
+        + "\n"
+        + "    when hangar == opening then run 2\n"
+        + "\n"
+        + "    when hangar == closing then run 3\n"
+        + "\n"
+        + "    when hangar == close then run 4\n"
+        + "\n"
+        + "    when hangar == open then run 4\n"
+        + "\n"
+        + "    sequence 1 as 'toggle gate' {\n"
+        + "        if hangar == open then {\n"
+        + "            set hangar to closing\n"
+        + "            call sprocket.show_text(\"closing\") on [ screen ]\n"
+        + "        }\n"
+        + "        else if hangar == opening then {\n"
+        + "            set hangar to closing\n"
+        + "            call sprocket.show_text(\"closing\") on [ screen ]\n"
+        + "        }\n"
+        + "        else {\n"
+        + "            set hangar to opening\n"
+        + "            call sprocket.show_text(\"opening\") on [ screen ]\n"
+        + "        }\n"
+        + "        set sprocket.power on [ light ] to on\n"
+        + "    }\n"
+        + "\n"
+        + "    sequence 2 as 'opening gate' {\n"
+        + "        call sprocket.depressurize(0) on [ 'hangar vent' ]\n"
+        + "        wait 0.5s\n"
+        + "        if any sprocket.flow_out_of_the_room on [ 'hangar vent' ] == 0 then {\n"
+        + "            call sprocket.open(off) on [ gate ]\n"
+        + "            await\n"
+        + "        }\n"
+        + "        await\n"
+        + "        call sprocket.open(off) on [ gate ]\n"
+        + "        await\n"
+        + "        set hangar to open\n"
+        + "        call sprocket.show_text(\"close\") on [ screen ]\n"
+        + "        catch {\n"
+        + "            call sprocket.open(off) on [ gate ]\n"
+        + "            await\n"
+        + "        }\n"
+        + "    }\n"
+        + "\n"
+        + "    sequence 3 as 'closing gate' {\n"
+        + "        call sprocket.close(off) on [ gate ]\n"
+        + "        await\n"
+        + "        call sprocket.pressurize(1) on [ 'hangar vent' ]\n"
+        + "        await\n"
+        + "        set hangar to close\n"
+        + "        call sprocket.show_text(\"open\") on [ screen ]\n"
+        + "    }\n"
+        + "\n"
+        + "    sequence 4 as done {\n"
+        + "        set sprocket.power on [ light ] to off\n"
+        + "    }\n"
+        + "}\n\n"
+        + "instance 1 of Reported.Hangar {\n"
+        + "    'signal slot 1' = [ sprocket.toolbar(1, 1, 1) on [ panel1 ] ]\n"
+        + "    'hangar vent' = [ vent1 ]\n"
+        + "    gate = [ gate1 ]\n"
+        + "    light = [ light1 ]\n"
+        + "    screen = [ sprocket.get_screen(1) on [ screen1 ] ]\n"
+        + "}\n";
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(text, program, Store));
+        var runner = new AutomationRunner(program, rigged.World);
+        var lines = new List<string>();
+        runner.Log = new RunLog(lines.Add, () => "Hangar");
+        runner.Tick(1);
+        var system = program.Systems[0];
+        runner.Call(system.FindSequence(1)!, system.Uses[0]);
+        for (var tick = 2; tick <= 1200; tick++)
+        {
+            rigged.Tick();
+            runner.Tick(tick);
+        }
+
+        Assert.Contains(lines, line => line.Contains("sequence 2 \"opening gate\"") && line.EndsWith("catch {"));
+    }
+
+    /// <summary>Every step of a sequence with handlers is named as its line of script for a log, the handlers by the lines that open them.</summary>
+    [Fact]
+    public void EveryStepIsNamedByItsLine()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(Head + Handlers, program, Store));
+
+        var named = program.Systems[0].FindSequence(1)!.Steps.Select(ProgramWriter.Line).ToList();
+
+        Assert.Contains("catch {", named);
+        Assert.Contains("finally {", named);
+    }
+
     /// <summary>The handlers are read in place, written back as they were, and their order and place are checked.</summary>
     [Fact]
     public void TheHandlersAreReadAndWrittenBack()
