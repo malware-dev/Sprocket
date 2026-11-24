@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Versioning
         public const int Minor = 1;
 
         /// <summary>The patch.</summary>
-        public const int Patch = 0;
+        public const int Patch = 1;
 
         /// <summary>The Bleeding Edge build of this version, from 1; 0 for a stable release.</summary>
         public const int Beta = 0;
