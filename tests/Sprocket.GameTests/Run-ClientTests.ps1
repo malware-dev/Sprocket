@@ -1,21 +1,28 @@
 <#
     Runs Sprocket's client tests in the game itself, against the mod as built from this repository.
 
-    1. Refuses to run while Space Engineers is running: the game is never closed by this script.
+    1. Refuses to run outside the test lease: the game is never closed by this script.
     2. Builds the test plugin and packs the mod into the test's own user data folder, -AppData, never the one played in, with
        the other local mods -LocalMods names beside it.
     3. Puts back a clean test world there, its Sprocket mod pointed at that local copy, and writes the scenarios' blueprints.
-    4. Starts the game through SevrLoader with the plugin, which loads the world, runs the tests, takes its pictures and closes
+    4. Starts the game through Mal.SeWorkbench's test loader with the plugin, which loads the world, runs the tests, takes its pictures and closes
        the game. A game that has not finished by -TimeoutSeconds is stopped.
     5. Prints the report and where the pictures are. The exit code is 0 when every check passed.
+
+    The run is started through the machine's test lease, which refuses while another run holds it, and beside any game or
+    server it did not start; every process the run started ends with it:
+
+        Mal.SeWorkbench.exe lease --project Sprocket --mode client --session <session> [--wait <minutes>] -- powershell -NoProfile -File Run-ClientTests.ps1 <arguments>
 #>
 param(
     [string]$AppData = 'E:\Data\sprocket-client-test',
     [string]$Game = 'E:\Steam\steamapps\common\SpaceEngineers',
-    [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
+    # The machine's test loader and lease: the game runs inside it, with the test plugin beside its own.
+    [string]$Workbench = 'D:\Space Engineers\Tools\Mal.SeWorkbench\Binaries\Mal.SeWorkbench.exe',
     [string]$Template = 'E:\Data\sprocket-ds-test\WorldTemplate',
     [string[]]$Scenarios = @('Sprocket Piston Status', 'Sprocket Kept Count', 'Sprocket Move Items', 'Sprocket Status Pages'),
-    [int]$TimeoutSeconds = 900,
+    # A whole run takes about 16 minutes (972 s, 2026-11-24).
+    [int]$TimeoutSeconds = 1500,
     # The parts to play, of scene, kept, pages, callouts, editor, sharedtext, settings, share, menus, move, remote and banner; every part where none is named. A test in the Local folder plays only when its part is named, with its scenario among -Scenarios.
     # hailstone plays only when named, with -Template a copy of Mal's world holding Hailstone Station.
     [string[]]$Only = @(),
@@ -30,8 +37,10 @@ $repo = Resolve-Path "$PSScriptRoot\..\.."
 $work = Join-Path $AppData 'run'
 New-Item -ItemType Directory -Force $work | Out-Null
 
-# 1. Nothing of the game running.
-if (Get-Process -Name 'SpaceEngineers', 'SevrLoader' -ErrorAction SilentlyContinue) { throw 'Space Engineers is running; it is never closed for a test.' }
+# 1. Inside the lease, which refuses to start beside any game or server a run did not start.
+if (-not $env:SE_TEST_LEASE) {
+    throw "Run it through the lease: & '$Workbench' lease --project Sprocket --mode client --session NAME -- powershell -NoProfile -File $($MyInvocation.MyCommand.Path)"
+}
 
 # 2. The plugin, and the mod packed as the game would load it, as a local mod of the test's own user data.
 dotnet build "$repo\tests\Sprocket.GameTests" -v q -p:MdkBuildConfiguration=none | Out-Null
@@ -74,8 +83,11 @@ foreach ($file in (Join-Path $world 'Sandbox.sbc'), (Join-Path $world 'Sandbox_c
 # An empty library and no player settings (the callouts seen and dismissed among them), as a player new to Sprocket has;
 # both are stored in the user data, beside the worlds.
 Get-ChildItem (Join-Path $AppData 'Storage') -Filter 'sprocket*' -ErrorAction SilentlyContinue | Remove-Item -Force
-# A run for pictures has a player who turned callouts off, written after the clean-up above.
+# A run for pictures has a player who turned callouts off, written after the clean-up above. A run of the callouts part has a
+# player who last saw release 1.0, so the callouts of every later release are due, whichever release this build is.
+New-Item -ItemType Directory -Force (Join-Path $AppData 'Storage') | Out-Null
 if ($NoCallouts) { Set-Content (Join-Path $AppData 'Storage\Sprocket.ini') "[Player]`ncallouts=false" }
+elseif ($Only.Count -eq 0 -or $Only -contains 'callouts') { Set-Content (Join-Path $AppData 'Storage\Sprocket.ini') "[Player]`nseen=1.0" }
 
 # The world's own mod storage, where Sprocket keeps its backups: for a world outside a player's folder the game keeps it in
 # Saves\<player id>\<session name>\Storage, which the fresh world above does not replace (seen 2026-11-12).
@@ -102,9 +114,9 @@ $env:SPROCKET_CLIENTTEST_ONLY = $Only -join ','
 $env:SPROCKET_GAMETEST_BLUEPRINTS = $blueprints
 $plugin = "$repo\tests\Sprocket.GameTests\bin\Debug\net48\Sprocket.GameTests.dll"
 $began = Get-Date
-$process = Start-Process $Loader -ArgumentList '--game', "`"$Game\Bin64`"", '--plugin', "`"$plugin`"", '-appdata', "`"$AppData`"", '-nosplash', '-skipintro' -WorkingDirectory (Split-Path $Loader) -PassThru
+$process = Start-Process $Workbench -ArgumentList 'test', '--game', "`"$Game\Bin64`"", '--plugin', "`"$plugin`"", '-appdata', "`"$AppData`"", '-nosplash', '-skipintro' -WorkingDirectory (Split-Path $Workbench) -PassThru
 if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
-    # The game this script started, and only that one: the first step refuses to run beside any other.
+    # The game this script started, and only that one: the lease refuses to run beside any other.
     Stop-Process -Id $process.Id -Force
     "The game did not finish within $TimeoutSeconds s, and was stopped."
 }

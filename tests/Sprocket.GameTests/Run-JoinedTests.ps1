@@ -2,25 +2,31 @@
     Runs Sprocket's tests of a game client joined to a local dedicated server, against the mod as built from this repository. The
     server's plugin stands in for the other players; the client's plugin drives the screens and takes the pictures.
 
-    1. Refuses to run while Space Engineers or its dedicated server is running: neither is ever closed by this script.
+    1. Refuses to run outside the test lease: no game or server is ever closed by this script but its own.
     2. Puts back the Workshop copy of Sprocket an earlier run left swapped, where one did.
     3. Builds the test plugin and packs the mod.
-    4. Puts the local build over the server's copy, as Run-ServerTests.ps1 does, and over the client's Workshop copy, which a
-       joining client loads from (the game refuses unpublished mods to a client joining a server). The client's copy is backed up
-       first and put back at the end, however the run ends.
+    4. Puts the local build over the server's copy, its record of the item marked current as Run-ServerTests.ps1 does, and
+       over the client's Workshop copy, which a joining client loads from (the game refuses unpublished mods to a client
+       joining a server). The client's copy is backed up first and put back at the end, however the run ends.
     5. Starts the server on a clean world with the plugin in its joined phase, waits for it to be ready, and starts the client
-       through SevrLoader, which joins it. A game or server not finished by -TimeoutSeconds is stopped: only the ones this
+       through Mal.SeWorkbench's test loader, which joins it. A game or server not finished by -TimeoutSeconds is stopped: only the ones this
        script started.
-    6. Prints both reports. The exit code is 0 when every check in both passed.
+    6. Prints both reports, and checks the server's copy is still the build. The exit code is 0 when every check in both passed.
 
     Runs only while Mal is away from the PC: the client takes the screen.
+
+    The run is started through the machine's test lease, which refuses while another run holds it, and beside any game or
+    server it did not start; every process the run started ends with it:
+
+        Mal.SeWorkbench.exe lease --project Sprocket --mode joined --session <session> [--wait <minutes>] -- powershell -NoProfile -File Run-JoinedTests.ps1 <arguments>
 #>
 param(
     [string]$AppData = 'E:\Data\sprocket-client-test',
     [string]$Instance = 'E:\Data\sprocket-ds-test',
     [string]$Game = 'E:\Steam\steamapps\common\SpaceEngineers',
     [string]$Server = 'E:\Steam\steamapps\common\SpaceEngineersDedicatedServer',
-    [string]$Loader = 'D:\Repos\Malforge\SevrLoader\dist\SevrLoader.exe',
+    # The machine's test loader and lease: the game runs inside it, with the test plugin beside its own.
+    [string]$Workbench = 'D:\Space Engineers\Tools\Mal.SeWorkbench\Binaries\Mal.SeWorkbench.exe',
     [string]$Workshop = 'E:\Steam\steamapps\workshop\content\244850\3807234771',
     [string]$Address = '127.0.0.1:27021',
     [int]$TimeoutSeconds = 1200,
@@ -34,9 +40,9 @@ New-Item -ItemType Directory -Force $work | Out-Null
 $backup = Join-Path $AppData 'workshop-backup'
 $mod = 'Sprocket Automation (Bleeding Edge)'
 
-# 1. Nothing of the game running.
-if (Get-Process -Name 'SpaceEngineers', 'SevrLoader', 'SpaceEngineersDedicated' -ErrorAction SilentlyContinue) {
-    throw 'Space Engineers or its dedicated server is running; neither is ever closed for a test.'
+# 1. Inside the lease, which refuses to start beside any game or server a run did not start.
+if (-not $env:SE_TEST_LEASE) {
+    throw "Run it through the lease: & '$Workbench' lease --project Sprocket --mode joined --session NAME -- powershell -NoProfile -File $($MyInvocation.MyCommand.Path)"
 }
 
 # 2. The player's own copy back, where a run that ended badly left it swapped.
@@ -61,11 +67,11 @@ $packed = Get-ChildItem $pack -Directory | Select-Object -First 1
 if ($null -eq $packed) { throw 'The pack wrote no mod folder.' }
 
 # 4. The local build over the server's copy and, once backed up, over the client's.
-$serverCopy = Join-Path $Instance 'content\244850\3807234771'
-if (-not (Test-Path $serverCopy)) { throw "The server has no copy of Sprocket at $serverCopy; start it once to download it." }
 if (-not (Test-Path $Workshop)) { throw "The client has no Workshop copy of Sprocket at $Workshop; subscribe to it once." }
-robocopy $packed.FullName $serverCopy /MIR /XF metadata.mod modinfo.sbmi /NJH /NJS /NP /NFL /NDL | Out-Null
-if ($LASTEXITCODE -ge 8) { throw "Copying the mod to the server failed (robocopy $LASTEXITCODE)." }
+# The server's record of the item is marked current, so it never downloads the published item over the build.
+& $Workbench server-mod --instance $Instance --item 3807234771 --from $packed.FullName | Out-Null
+if ($LASTEXITCODE -eq 107) { throw "The server has no copy of Sprocket; start it once on a world naming it, to download it." }
+if ($LASTEXITCODE -ne 0) { throw "Putting the build over the server's copy failed (server-mod $LASTEXITCODE)." }
 
 robocopy $Workshop $backup /MIR /NJH /NJS /NP /NFL /NDL | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Backing up the Workshop copy failed (robocopy $LASTEXITCODE)." }
@@ -122,7 +128,7 @@ try {
     $env:SPROCKET_CLIENTTEST_ONLY = $Only -join ','
     $env:SPROCKET_CLIENTTEST_SHOTS = Join-Path $work 'shots'
     Remove-Item Env:SPROCKET_CLIENTTEST_WORLD -ErrorAction SilentlyContinue
-    $clientProcess = Start-Process $Loader -ArgumentList '--game', "`"$Game\Bin64`"", '--plugin', "`"$plugin`"", '-appdata', "`"$AppData`"", '-nosplash', '-skipintro' -WorkingDirectory (Split-Path $Loader) -PassThru
+    $clientProcess = Start-Process $Workbench -ArgumentList 'test', '--game', "`"$Game\Bin64`"", '--plugin', "`"$plugin`"", '-appdata', "`"$AppData`"", '-nosplash', '-skipintro' -WorkingDirectory (Split-Path $Workbench) -PassThru
 
     if (-not $clientProcess.WaitForExit($TimeoutSeconds * 1000)) {
         Stop-Process -Id $clientProcess.Id -Force
@@ -143,9 +149,11 @@ finally {
     Restore-Workshop
 }
 
-# 6. The reports.
+# 6. The reports, and whether they are of the build the run put over the server's copy.
+& $Workbench server-mod --check --instance $Instance --item 3807234771 --from $packed.FullName | Out-Null
+$clean = $LASTEXITCODE -eq 0
+if (-not $clean) { "The server's copy of Sprocket is not the build (server-mod --check $LASTEXITCODE), so it ran the wrong mod." }
 '{0:n0} s' -f ((Get-Date) - $began).TotalSeconds
-$clean = $true
 foreach ($one in $serverReport, $clientReport) {
     if (Test-Path $one) { Get-Content $one } else { "No report was written to $one." }
     if (-not ((Test-Path $one) -and (Select-String $one -Pattern '^finished .*, 0 failed$' -Quiet))) { $clean = $false }
