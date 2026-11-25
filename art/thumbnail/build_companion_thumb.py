@@ -9,11 +9,12 @@ dress, with the colors of the reproduction sheet:
 - Rows 296 to 300: a line in the brass gradient, where the plain companions draw it blue (78, 159, 216).
 - Below: the band, #161B22.
 - The title at x 48, top 333, Bahnschrift SemiBold in the silver gradient with a 0 4 4 50% black shadow, line height
-  1.05: "Sprocket" at 32 px over the mod's short name at 40 px.
+  1.05: "Sprocket" at 32 px over the mod's short name at 40 px. A companion that does not carry the Sprocket name gives
+  its own first line with --over.
 - The Companion stamp (sprocket-companion.png, from build_companion.py) placed by its plate: 228 px wide, its top left
   at (456, 347), so the title and the plate share a vertical center.
 
-    python art/thumbnail/build_companion_thumb.py <screenshot> <name> <out.png> [left top right bottom]
+    python art/thumbnail/build_companion_thumb.py [--over <first line>] <screenshot> <name> <out.png> [left top right bottom]
 
 The crop is four fractions of the screenshot's width and height; the whole screenshot without one. The Sprocket
 Programmable Block's thumbnail is
@@ -22,6 +23,7 @@ Programmable Block's thumbnail is
 """
 
 import base64
+import html
 import io
 import os
 import subprocess
@@ -41,7 +43,7 @@ PICTURE_HEIGHT = 296
 STAMP_SCALE = 228 / 340
 STAMP_AT = (456 - 16 * STAMP_SCALE, 347 - 10 * STAMP_SCALE, 372 * STAMP_SCALE)
 
-PAGE = """<!doctype html><html><head><style>
+PAGE = """<!doctype html><html><head><meta charset="utf-8"><style>
 body {{ margin: 0; width: 720px; height: 450px; overflow: hidden; background: #161B22; font-family: Bahnschrift; }}
 .picture {{ position: absolute; left: 0; top: 0; width: 720px; height: 296px; }}
 .line {{ position: absolute; left: 0; top: 296px; width: 720px; height: 4px;
@@ -53,7 +55,7 @@ body {{ margin: 0; width: 720px; height: 450px; overflow: hidden; background: #1
 </style></head><body>
 <img class="picture" src="data:image/png;base64,{picture}">
 <div class="line"></div>
-<div class="title"><span style="font-size: 32px">Sprocket</span><br>{name}</div>
+<div class="title"><span style="font-size: 32px">{over}</span><br>{name}</div>
 <img class="stamp" src="data:image/png;base64,{stamp}">
 </body></html>"""
 
@@ -80,6 +82,11 @@ def encoded(path):
 
 
 def main(arguments):
+    over = "Sprocket"
+    if arguments[:1] == ["--over"]:
+        if len(arguments) < 2:
+            sys.exit(__doc__)
+        over, arguments = arguments[1], arguments[2:]
     if len(arguments) not in (3, 7):
         sys.exit(__doc__)
     screenshot, name, out = arguments[:3]
@@ -88,7 +95,7 @@ def main(arguments):
     page = os.path.join(work, "thumb.html")
     left, top, width = STAMP_AT
     with open(page, "w", encoding="utf-8") as f:
-        f.write(PAGE.format(picture=picture(screenshot, crop), stamp=encoded(STAMP), name=name,
+        f.write(PAGE.format(picture=picture(screenshot, crop), stamp=encoded(STAMP), name=html.escape(name), over=html.escape(over),
                             stamp_left=left, stamp_top=top, stamp_width=width))
     shot = os.path.join(work, "thumb.png")
     subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1",
