@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using System;
@@ -34,8 +35,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _heard = heard;
         }
 
-        /// <summary>Whether every block its readings name announces a change in what is read, so nothing needs a look on a cadence for them.</summary>
-        public bool AllHeard { get; private set; } = true;
+        /// <summary>
+        /// Whether every block its readings name is heard as it may change: it announces a change in what is read, or one that
+        /// rules such a change out, so a look on a cadence is needed for them only while <see cref="Possible" />.
+        /// </summary>
+        public bool BlocksHeard { get; private set; } = true;
+
+        /// <summary>Whether its expressions read a state, which a step sets and no block announces.</summary>
+        public bool ReadsStates { get; private set; }
+
+        /// <summary>Whether everything its expressions read is heard: every block, and no state.</summary>
+        public bool AllHeard => BlocksHeard && !ReadsStates;
+
+        /// <summary>Whether a block read since <see cref="Unmark" /> could change unannounced: it announces no change, and nothing rules one out now.</summary>
+        public bool Possible { get; private set; }
+
+        /// <summary>Starts a look, with no block yet found that could change unannounced.</summary>
+        public void Unmark()
+        {
+            Possible = false;
+        }
 
         /// <summary>Makes ready the blocks each reading of <paramref name="expressions" /> names, as <paramref name="bindings" /> finds them, listening to the ones that announce where <paramref name="listen" /> says to.</summary>
         /// <remarks>Done again only where the blocks or the program have changed, never on a tick.</remarks>
@@ -72,9 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             if (reading != null)
                 into.Add(reading);
 
-            // A state is set by a step, which no block announces, so a watcher reading one keeps its own cadence.
             if (tree is StateOperand)
-                AllHeard = false;
+                ReadsStates = true;
         }
 
         /// <summary>Stops listening to every block, and forgets what was made ready.</summary>
@@ -84,7 +102,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 made.Stop();
 
             _read.Clear();
-            AllHeard = true;
+            BlocksHeard = true;
+            ReadsStates = false;
         }
 
         /// <summary>Works out <paramref name="tree" /> into <paramref name="value" />, or says why it has none.</summary>
@@ -112,13 +131,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                     continue;
 
                 made.Probes.Add(probe);
-                // A change the block announces, or whose being ruled out it announces, is heard; only an announced one needs no look on a cadence.
+                made.Rulings.Add(probe.RuledOutBy != null && probe.RuledOutBy.Remembers ? new ReaderMemory { Clock = _owner.Clock } : null);
+
+                // A change the block announces, or whose being ruled out it announces, is heard; a look then marks where nothing rules it out.
                 var listening = _listen && (probe.Announced || probe.RuledOutBy != null) ? entity.Listen(_heard) : null;
                 if (listening != null)
                     made.Listening.Add(listening);
-
-                if (listening == null || !probe.Announced)
-                    AllHeard = false;
+                else
+                    BlocksHeard = false;
             }
 
             return made;
@@ -172,7 +192,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             }
 
             for (var i = 0; i < made.Probes.Count; i++)
-                into.Add(made.Probes[i].Current());
+            {
+                var probe = made.Probes[i];
+                into.Add(probe.Current());
+                if (_listen && !Possible && !probe.Announced && (probe.RuledOutBy == null || !probe.Entity.Reads(probe.RuledOutBy, made.Rulings[i])))
+                    Possible = true;
+            }
         }
     }
 }

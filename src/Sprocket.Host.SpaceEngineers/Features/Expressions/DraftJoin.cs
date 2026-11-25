@@ -29,10 +29,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         /// <summary>What stands in the box's places, in order.</summary>
         public IReadOnlyList<DraftPiece> Parts => _parts;
 
-        /// <summary>How many places a new box of <paramref name="kind" /> has: one for a sign, a rounding or a removed sign, else two.</summary>
+        /// <summary>How many places a new box of <paramref name="kind" /> has: one for a sign, a rounding, a removed sign or a not, else two.</summary>
         public static int Places(JoinKind kind)
         {
-            return kind == JoinKind.Negate || kind == JoinKind.Rounded || kind == JoinKind.WithoutSign ? 1 : 2;
+            return kind == JoinKind.Negate || kind == JoinKind.Rounded || kind == JoinKind.WithoutSign || kind == JoinKind.Not ? 1 : 2;
         }
 
         /// <summary>Puts <paramref name="piece" /> in the place <paramref name="at" />, in place of what stood there.</summary>

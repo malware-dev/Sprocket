@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sharing;
+using Lumel;
 using Lumel.Text;
 using System.Collections.Generic;
 using Lumel.Input;
@@ -44,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         string _question = "";
         Arguments _questionArguments;
         bool _questionIsHere;
+        Element _questionUnder;
         ChoiceEntry _default;
 
         /// <summary>A screen showing nothing yet.</summary>
@@ -272,6 +274,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
         /// <summary>Whether the question belongs to whatever was pressed, rather than to the screen.</summary>
         public bool QuestionIsHere => _questionIsHere;
 
+        /// <summary>The element the question hangs under where it was given one, or null where it hangs under what was pressed.</summary>
+        public Element QuestionUnder => _questionUnder;
+
         /// <summary>How many questions have been raised, so a target can tell a new one from the same one.</summary>
         public int Asked { get; private set; }
 
@@ -312,10 +317,18 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             _question = question ?? "";
             _questionArguments = arguments;
             _questionIsHere = here;
+            _questionUnder = null;
             _answers.Clear();
             _default = null;
             Asked++;
             _revision++;
+        }
+
+        /// <summary>Raises <paramref name="question" />, with no answers yet, hanging under <paramref name="under" />.</summary>
+        public void AskUnder(string question, Element under)
+        {
+            Ask(question, null, true);
+            _questionUnder = under;
         }
 
         /// <summary>Adds <paramref name="answer" /> to the standing question, as the one Enter takes where <paramref name="byDefault" />.</summary>
@@ -344,6 +357,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Shell
             _question = "";
             _questionArguments = null;
             _questionIsHere = false;
+            _questionUnder = null;
             _answers.Clear();
             _default = null;
             _revision++;

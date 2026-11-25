@@ -45,16 +45,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             Change(root => Filled(root, hole, piece));
         }
 
-        /// <summary>Puts <paramref name="piece" /> in a new box of <paramref name="kind" />, in its first place, where it stood.</summary>
-        public void Wrap(DraftPiece piece, JoinKind kind)
+        /// <summary>
+        /// Puts <paramref name="piece" /> in a new box of <paramref name="kind" />, in its first place, where it stood, as
+        /// <paramref name="placed" /> makes it there where given.
+        /// </summary>
+        public void Wrap(DraftPiece piece, JoinKind kind, Func<DraftPiece, DraftPiece> placed = null)
         {
-            Change(root => Wrapped(root, piece, kind));
+            Change(root => Wrapped(root, piece, kind, placed));
         }
 
-        /// <summary>Moves <paramref name="piece" /> to the empty place <paramref name="hole" />, leaving its own place empty.</summary>
-        public void Move(DraftPiece piece, DraftHole hole)
+        /// <summary>
+        /// Moves <paramref name="piece" /> to the empty place <paramref name="hole" />, leaving its own place empty, as
+        /// <paramref name="placed" /> makes it there where given.
+        /// </summary>
+        public void Move(DraftPiece piece, DraftHole hole, Func<DraftPiece, DraftPiece> placed = null)
         {
-            Change(root => Moved(root, piece, hole));
+            Change(root => Moved(root, piece, hole, placed));
+        }
+
+        /// <summary>Puts <paramref name="with" />, a new value or box, where <paramref name="piece" /> stands, an empty place or a value.</summary>
+        public void Replace(DraftPiece piece, DraftPiece with)
+        {
+            Change(root => Replaced(root, piece, with));
         }
 
         /// <summary>Takes <paramref name="piece" /> out, with everything in it, leaving its place empty.</summary>
@@ -94,6 +106,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             return true;
         }
 
+        /// <summary>
+        /// What Optimize makes of <paramref name="piece" /> itself once its parts are worked out, what values are read as told by
+        /// <paramref name="types" />, or null where it stays as it is; <paramref name="stays" /> is the place of the part that
+        /// takes its place alone, or -1 where none does.
+        /// </summary>
+        public static DraftPiece Folds(DraftPiece piece, ITypeScope types, out int stays)
+        {
+            stays = -1;
+            var join = piece as DraftJoin;
+            if (join == null || Built(piece) == null)
+                return null;
+
+            var parts = new List<DraftPiece>();
+            foreach (var part in join.Parts)
+                parts.Add(From(Folding.Fold(Built(part), types)));
+
+            var whole = new DraftJoin(join.Kind, parts);
+            var folded = From(Folding.Fold(Built(whole), types));
+            var written = Written(folded);
+            if (written == Written(whole))
+                return null;
+
+            for (var i = 0; i < parts.Count && stays < 0; i++)
+            {
+                if (Written(parts[i]) == written)
+                    stays = i;
+            }
+
+            return folded;
+        }
+
         /// <summary>Takes the last change back.</summary>
         public void Undo()
         {
@@ -125,6 +168,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         {
             var copy = _root.Copied();
             return Filled(copy, (DraftHole)At(copy, PathOf(hole)), piece.Copied());
+        }
+
+        /// <summary>What the whole expression would be after <paramref name="with" /> was put where <paramref name="piece" /> stands, the draft left as it is.</summary>
+        public DraftPiece TriedReplace(DraftPiece piece, DraftPiece with)
+        {
+            var copy = _root.Copied();
+            return Replaced(copy, At(copy, PathOf(piece)), with.Copied());
         }
 
         /// <summary>What the whole expression would be after <paramref name="piece" /> was put in a box of <paramref name="kind" />, the draft left as it is.</summary>
@@ -171,8 +221,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
                 parts.Add(built);
             }
 
+            if (JoinKinds.Compares(join.Kind))
+                return new Comparing(JoinKinds.RelationOf(join.Kind), parts[0], parts[1]);
+
             switch (join.Kind)
             {
+                case JoinKind.Not: return new Inversion(parts[0]);
+                case JoinKind.And: return new Logical(Connective.And, parts[0], parts[1]);
+                case JoinKind.Or: return new Logical(Connective.Or, parts[0], parts[1]);
                 case JoinKind.Add: return new Arithmetic(Operator.Add, parts[0], parts[1]);
                 case JoinKind.Subtract: return new Arithmetic(Operator.Subtract, parts[0], parts[1]);
                 case JoinKind.Multiply: return new Arithmetic(Operator.Multiply, parts[0], parts[1]);
@@ -195,6 +251,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             var negation = expression as Negation;
             if (negation != null)
                 return new DraftJoin(JoinKind.Negate, new[] { From(negation.Operand) });
+
+            var comparing = expression as Comparing;
+            if (comparing != null)
+                return new DraftJoin(JoinKinds.Of(comparing.Relation), new[] { From(comparing.Left), From(comparing.Right) });
+
+            var logical = expression as Logical;
+            if (logical != null)
+                return new DraftJoin(JoinKinds.Of(logical.Joins), new[] { From(logical.Left), From(logical.Right) });
+
+            var inversion = expression as Inversion;
+            if (inversion != null)
+                return new DraftJoin(JoinKind.Not, new[] { From(inversion.Operand) });
 
             var function = expression as Function;
             if (function == null)
@@ -266,18 +334,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
 
         static DraftPiece Filled(DraftPiece root, DraftHole hole, DraftPiece piece) => Replaced(root, hole, piece);
 
-        static DraftPiece Wrapped(DraftPiece root, DraftPiece piece, JoinKind kind)
+        static DraftPiece Wrapped(DraftPiece root, DraftPiece piece, JoinKind kind, Func<DraftPiece, DraftPiece> placed = null)
         {
             var join = new DraftJoin(kind);
             root = Replaced(root, piece, join);
-            join.Set(0, piece);
+            join.Set(0, placed == null ? piece : placed(piece));
             return root;
         }
 
-        static DraftPiece Moved(DraftPiece root, DraftPiece piece, DraftHole hole)
+        static DraftPiece Moved(DraftPiece root, DraftPiece piece, DraftHole hole, Func<DraftPiece, DraftPiece> placed = null)
         {
             root = Replaced(root, piece, new DraftHole());
-            return Replaced(root, hole, piece);
+            return Replaced(root, hole, placed == null ? piece : placed(piece));
         }
 
         // Puts with where old stood, and gives the whole expression after it.

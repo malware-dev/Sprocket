@@ -27,6 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         {
             Base.Spacing = Gaps.Items;
             Base.Padding = new Thickness(Gaps.Sections);
+            // Given the whole of the screen's room, it stands from the top, so the expression stays put as the hint over it comes and goes.
+            Align = Align.FillWidth | Align.Top;
 
             Children.Add(new ExpressionTray(Grab).As(out _tray));
             Children.Add(new Label { Style = Styles.Detail }.As(out _hint));

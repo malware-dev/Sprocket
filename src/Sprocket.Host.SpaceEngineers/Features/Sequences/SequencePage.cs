@@ -516,7 +516,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             kinds.Add(new AddOption(SentenceText.StopWord, texts.Codex.TermRunAndStop, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
             kinds.Add(new AddOption(SentenceText.SetStateWords, texts.Codex.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
             kinds.Add(new AddOption(SentenceText.IfWord, texts.Codex.TermIf,
-                SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddIf, () => _stepwork.AddIf(at, from)))));
+                SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddIf, () => _stepwork.AddIf(at, from)), true)));
             return kinds;
         }
 
@@ -554,7 +554,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Adds.Add(new AddOption(texts.SequenceBranch, texts.Codex.SequenceBranchAbout, new[]
                 {
                     new AddOption(SentenceText.OtherwiseIfWords, texts.Codex.SequenceOtherwiseIfAbout,
-                        SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddBranch, () => _stepwork.AddBranch(index, from)))),
+                        SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddBranch, () => _stepwork.AddBranch(index, from)), true)),
                     new AddOption(SentenceText.OtherwiseWord, texts.Codex.SequenceOtherwiseAbout,
                         ends ? Changes(CommandKind.AddBranch, () => _stepwork.AddLast(index)) : null)
                 }));
@@ -564,7 +564,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Adds.Add(new AddOption(SentenceText.IfWord, texts.Codex.SequenceOtherwiseTestAbout, new[]
                 {
                     new AddOption(SentenceText.IfWord, texts.Codex.SequenceOtherwiseTestAbout,
-                        SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddBranch, () => _stepwork.GiveTest(step, from))))
+                        SourceSwitch.Options(texts, true, _stepwork.ChecksMods, from => Changes(CommandKind.AddBranch, () => _stepwork.GiveTest(step, from)), true))
                 }));
             }
         }
@@ -643,10 +643,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (host != null)
                     row.Slots.Add(new HostSlot(host, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, host, OpeningColumn.Blocks))));
 
-                // A condition written as an expression is shown as it reads; the builder does not yet make one.
+                // A condition that is an expression reads as it does, and opens its builder.
                 var worked = branch.Test as ExpressionTest;
                 if (worked != null)
-                    row.Slots.Add(ArgumentsSlot.Testing(Shown(worked.Condition), null));
+                    row.Slots.Add(ArgumentsSlot.Testing(Shown(worked.Condition), Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, worked, OpeningColumn.What))));
 
                 return;
             }
@@ -894,11 +894,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>
         /// Opens the panel the values <paramref name="act" /> gives, asked for by <paramref name="fields" />, are given in, hung
-        /// from the part of its row saying them, which are <paramref name="holds" /> to it; the selector where a value is chosen
-        /// on a screen of its own.
+        /// from the part of its row saying them, which are <paramref name="holds" /> to it; the expression page or the page text is
+        /// written on where the one value is an expression or such a text, and the selector where a value is chosen on a screen of its own.
         /// </summary>
         void Give(Act act, List<Field> fields, ArgumentRole holds)
         {
+            if (ValuesQuestion.Opens(Editor, _sequence.System, fields, act.Arguments, values => _stepwork.Closed(act, values, false)))
+                return;
+
             if (ValuesQuestion.Chooses(fields))
             {
                 _stepwork.EditStep(act, OpeningColumn.Arguments);
@@ -923,26 +926,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// Opens the panel the values <paramref name="test" />, the test of <paramref name="step" />, takes are given in, asked
         /// for by <paramref name="fields" />: what it compares with where they are <paramref name="holds" />
         /// <see cref="ArgumentRole.Checked" />, what it reads with otherwise; hung from the part saying them, and changing the test
-        /// as one edit as it closes. The selector where a value is chosen on a screen of its own.
+        /// as one edit as it closes. The expression page or the page text is written on where the one value is an expression or such a text, and the selector where a value is chosen on a screen of its own.
         /// </summary>
         void Compare(Step step, Comparison test, List<Field> fields, ArgumentRole holds)
         {
+            var checks = holds == ArgumentRole.Checked;
+            var given = checks ? new[] { test.Value } : test.Arguments;
+            Action<List<Literal>> apply = values =>
+            {
+                var now = test.Copy();
+                ComparisonQuestion.Give(now.Arguments, values, checks, value => now.Value = value);
+                _stepwork.Retest(step, test, now);
+            };
+            if (ValuesQuestion.Opens(Editor, _sequence.System, fields, given, apply))
+                return;
+
             if (ValuesQuestion.Chooses(fields))
             {
                 _stepwork.EditTest(step, test, OpeningColumn.Arguments);
                 return;
             }
 
-            var checks = holds == ArgumentRole.Checked;
-            var given = checks ? new[] { test.Value } : test.Arguments;
             Action<string, List<Literal>, bool> answered = (said, held, cancelled) =>
             {
-                if (cancelled)
-                    return;
-
-                var now = test.Copy();
-                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, held), checks, value => now.Value = value);
-                _stepwork.Retest(step, test, now);
+                if (!cancelled)
+                    apply(FieldSet.Read(said, fields, held));
             };
             if (ValuesQuestion.Offer(Editor, fields, given, said => answered(said, new List<Literal>(given), false)))
                 return;

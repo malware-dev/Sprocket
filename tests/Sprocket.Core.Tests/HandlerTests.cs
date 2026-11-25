@@ -56,6 +56,41 @@ public class HandlerTests
         return runner.States.Read(system, system.Uses[0], system.FindState(state)!).Said == Literal.Of(true).Said;
     }
 
+    /// <summary>
+    /// A run that fails into its catch and goes on into its finally, with the debug log on, logs both and finishes: the finally,
+    /// reached as the next step, by the line that opens it.
+    /// </summary>
+    [Fact]
+    public void TheDebugLogNamesTheHandlersItRuns()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(Head + "        abort saying \"Stuck\" as warning\n" + Handlers, program, Store));
+        var runner = new AutomationRunner(program, new Rigged().World);
+        var lines = new List<string>();
+        runner.Log = new RunLog(lines.Add, () => "Drill Rig");
+        runner.Tick(1);
+        var system = program.Systems[0];
+        runner.Call(system.FindSequence(1)!, system.Uses[0]);
+        Tick(runner, 2, 40);
+
+        Assert.Contains(lines, line => line.EndsWith("step 3 catch"));
+        Assert.Contains(lines, line => line.EndsWith("step 5: finally {"));
+        Assert.Contains(lines, line => line.EndsWith("finished"));
+    }
+
+    /// <summary>Every step of a sequence with handlers is named as its line of script for a log, the handlers by the lines that open them.</summary>
+    [Fact]
+    public void EveryStepIsNamedByItsLine()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(Head + Handlers, program, Store));
+
+        var named = program.Systems[0].FindSequence(1)!.Steps.Select(ProgramWriter.Line).ToList();
+
+        Assert.Contains("catch {", named);
+        Assert.Contains("finally {", named);
+    }
+
     /// <summary>The handlers are read in place, written back as they were, and their order and place are checked.</summary>
     [Fact]
     public void TheHandlersAreReadAndWrittenBack()

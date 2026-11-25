@@ -49,6 +49,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         readonly WatchScope _scope;
         readonly List<Expression> _worked = new List<Expression>();
         bool _hasWorked;
+
+        // Whether an expression trigger's condition reads a block, which picks its cadence: worked out as it is compiled, since
+        // asking the trigger allocates and the cadence is asked on every look.
+        bool _readsBlocks;
+
+        // The states an expression trigger's condition reads, worked out as it is compiled for the reason _readsBlocks is.
+        List<string> _readsStates = new List<string>();
         bool _valueOk = true;
         bool _argumentsOk = true;
 
@@ -79,6 +86,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _scope = new WatchScope(system, instance, owner, _heard);
             trigger.Worked(_worked);
             _hasWorked = _worked.Count > 0;
+            _readsBlocks = (trigger as ExpressionTrigger)?.ReadsBlocks ?? false;
+            _readsStates = (trigger as ExpressionTrigger)?.States() ?? _readsStates;
 
             var kept = memory.Shift != null;
             if (!kept)
@@ -136,7 +145,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 {
                     // One that reads no block is looked at again as a step sets a state it reads; the backstop is for its settings.
                     var ticks = IntervalTicks();
-                    asked = ticks > 0 ? ticks : expressed.ReadsBlocks ? Default : Backstop;
+                    asked = ticks > 0 ? ticks : _readsBlocks ? Default : Backstop;
                 }
                 else
                 {
@@ -263,9 +272,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
             _trigger.Worked(_worked);
             _hasWorked = _worked.Count > 0;
             var expressed = _trigger is ExpressionTrigger;
+            _readsBlocks = expressed && ((ExpressionTrigger)_trigger).ReadsBlocks;
+            if (expressed)
+                _readsStates = ((ExpressionTrigger)_trigger).States();
             _scope.Prepare(_worked, _bindings, watched != null || expressed);
             if (expressed)
-                _announced = _scope.AllHeard;
+                // A state it reads is looked at again as a step sets it, so only its blocks need hearing.
+                _announced = _scope.BlocksHeard;
 
             if (watched == null)
                 return;
@@ -454,13 +467,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         }
 
         /// <summary>
-        /// Looks again at once, after a step set a state the watched expression reads, and fires where that brought it to hold,
-        /// as a when on the state alone fires.
+        /// Looks again at once, after a step set the state named <paramref name="state" />, where the watched expression reads
+        /// it, and fires where that brought it to hold, as a when on the state alone fires.
         /// </summary>
-        public void Set()
+        public void Set(string state)
         {
             _bindings = _owner.Current;
             Compile();
+            if (!_readsStates.Contains(state))
+                return;
+
             if (!SampleExpression() || !_owner.Live)
                 return;
 
@@ -474,9 +490,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         /// </summary>
         bool SampleExpression()
         {
+            _scope.Unmark();
             Literal now;
             var holds = _scope.Evaluate(((ExpressionTrigger)_trigger).Condition, out now) == ExpressionFailure.None && now.Kind == ValueKind.Flag && now.Flag;
             Live = holds;
+            _possible |= _scope.Possible;
             return Edge(holds);
         }
 

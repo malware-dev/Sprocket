@@ -14,6 +14,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             JoinKind.Lowest, JoinKind.Highest, JoinKind.Rounded, JoinKind.WithoutSign
         };
 
+        /// <summary>The comparisons and what joins and turns over flags, in the order the tray shows them, offered only where a condition is built.</summary>
+        public static readonly IReadOnlyList<JoinKind> Conditions = new[]
+        {
+            JoinKind.Is, JoinKind.IsNot, JoinKind.Above, JoinKind.AtLeast, JoinKind.Below, JoinKind.AtMost, JoinKind.Not, JoinKind.And, JoinKind.Or
+        };
+
         /// <summary>The kinds of value typed in, in the order the tray shows them.</summary>
         public static readonly IReadOnlyList<KindClass> Typables = new[] { KindClass.Number, KindClass.Duration, KindClass.Text, KindClass.Flag };
 
@@ -88,10 +94,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             return named;
         }
 
+        // Every box the tray can offer: the calculations, then the comparisons and what joins flags.
+        static IEnumerable<JoinKind> Joins()
+        {
+            foreach (var kind in Calculations)
+                yield return kind;
+
+            foreach (var kind in Conditions)
+                yield return kind;
+        }
+
         // Whether some calculation, a value of kind in one of its places, can come to one of usable.
         static bool TakenBySome(KindClass kind, KindClass usable, ITypeScope types)
         {
-            foreach (var calculation in Calculations)
+            foreach (var calculation in Joins())
             {
                 var places = new DraftJoin(calculation).Parts.Count;
                 for (var place = 0; place < places; place++)

@@ -162,4 +162,71 @@ public class ConditionScriptTests
         Assert.Equal("", Load(text, program));
         Assert.Contains("set lit to or", ProgramWriter.Save(program, _store));
     }
+
+    /// <summary>Renaming a state reaches the conditions of an if and a when that name it.</summary>
+    [Fact]
+    public void RenamingAStateReachesTheConditionsNamingIt()
+    {
+        var program = new Automation();
+        var text = Version + Head + "    when count > 2 and not lit then run 1\n\n"
+            + "    sequence 1 {\n        if lit or count >= 1 then {\n        }\n    }\n}\n";
+        Assert.Equal("", Load(text, program));
+
+        StateMentions.RenameState(program.Systems[0], "lit", "glowing");
+
+        var saved = ProgramWriter.Save(program, _store);
+        Assert.Contains("when count > 2 and not glowing then run 1", saved);
+        Assert.Contains("if glowing or count >= 1 then {", saved);
+    }
+
+    /// <summary>Renaming a setting reaches the conditions of an if and a when that name it.</summary>
+    [Fact]
+    public void RenamingASettingReachesTheConditionsNamingIt()
+    {
+        var program = new Automation();
+        var text = Version + Head + "    when average Radius on [ tanks ] < setting(Margin) or lit then run 1\n\n"
+            + "    sequence 1 {\n        if count > setting(Margin) and lit then {\n        }\n    }\n}\n";
+        Assert.Equal("", Load(text, program));
+
+        var system = program.Systems[0];
+        system.RenamePart(system.FindPart("Margin")!, "Slack");
+
+        var saved = ProgramWriter.Save(program, _store);
+        Assert.Contains("when average Radius on [ tanks ] < setting(Slack) or lit then run 1", saved);
+        Assert.Contains("if count > setting(Slack) and lit then {", saved);
+    }
+
+    /// <summary>A setting and a slot that only conditions name are in use, as the slots and settings of any step are.</summary>
+    [Theory]
+    [InlineData("    when all Radius on [ tanks ] > setting(Margin) and not lit then run 1\n\n", "")]
+    [InlineData("", "if any Radius on [ tanks ] == setting(Margin) or lit then {\n        }")]
+    public void WhatOnlyAConditionNamesIsInUse(string trigger, string step)
+    {
+        var program = new Automation();
+        var text = Version + Head + trigger + "    sequence 1 {\n        " + (step.Length > 0 ? step : "wait 1s") + "\n    }\n}\n";
+        Assert.Equal("", Load(text, program));
+
+        var used = new List<string>();
+        program.Systems[0].Acted(used);
+        Assert.Contains("tanks", used);
+        Assert.Contains("Margin", used);
+        Assert.DoesNotContain("pad", used);
+    }
+
+    /// <summary>Renaming a slot reaches the blocks the conditions of an if and a when read.</summary>
+    [Fact]
+    public void RenamingASlotReachesTheConditionsReadingIt()
+    {
+        var program = new Automation();
+        var text = Version + Head + "    when all Radius on [ tanks ] > 2 and not lit then run 1\n\n"
+            + "    sequence 1 {\n        if any Radius on [ tanks ] == 2 or lit then {\n        }\n    }\n}\n";
+        Assert.Equal("", Load(text, program));
+
+        var system = program.Systems[0];
+        system.RenamePart(system.FindPart("tanks")!, "cisterns");
+
+        var saved = ProgramWriter.Save(program, _store);
+        Assert.Contains("when all Radius on [ cisterns ] > 2 and not lit then run 1", saved);
+        Assert.Contains("if any Radius on [ cisterns ] == 2 or lit then {", saved);
+    }
 }

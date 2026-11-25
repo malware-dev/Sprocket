@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Features.Selector;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Slots.Edits;
@@ -8,6 +9,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Editing;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Grids;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
+using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 using System;
 using System.Collections.Generic;
@@ -320,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                 return;
             }
 
-            if (trigger is MomentTrigger || trigger is StateTrigger)
+            if (trigger is MomentTrigger || trigger is StateTrigger || trigger is ExpressionTrigger)
                 Watching(system, trigger, false, aim, origin, opens);
         }
 
@@ -343,12 +345,43 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
                     page.Replacing = fresh ? null : (was as MomentTrigger)?.Sources;
                     return page;
                 },
-                () => OnState(system, was, fresh, aim, origin));
+                () => OnState(system, was, fresh, aim, origin), null,
+                () => OnExpression(system, was, fresh, aim, origin));
 
-            var current = fresh ? (PickSource?)null : was is StateTrigger ? PickSource.States : PickSource.Blocks;
+            var current = fresh ? (PickSource?)null : was is StateTrigger ? PickSource.States : was is ExpressionTrigger ? PickSource.Expression : PickSource.Blocks;
 
             // Only the part naming what it watches asks which source; any other opens on the one it has.
             source.Open(from ?? (opens == OpeningColumn.Blocks ? null : current), current);
+        }
+
+        /// <summary>
+        /// The page the condition <paramref name="was" /> is to start on is built on, as a trigger made new where
+        /// <paramref name="fresh" />, or changed in place; a whole condition that is an any of some blocks starts as a when on each.
+        /// </summary>
+        ExpressionPage OnExpression(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin)
+        {
+            var expressed = was as ExpressionTrigger;
+            var start = expressed == null ? (Literal?)null : Literal.Worked(expressed.Condition);
+            return new ExpressionPage(_editor, system, "flag", null, start, built =>
+            {
+                var made = new ExpressionTrigger(built.IsExpression ? built.Tree : new Operand(built));
+                if (expressed != null)
+                {
+                    made.Interval = expressed.Interval;
+                    made.IntervalSetting = expressed.IntervalSetting;
+                    made.IntervalExpression = expressed.IntervalExpression;
+                }
+
+                var now = ConditionShapes.TriggerOf(system, made);
+                if (fresh)
+                {
+                    Aimed(system, now, aim, origin, true, null);
+                    return;
+                }
+
+                _copies.Remove(was);
+                Aimed(system, now, aim, origin, false, new ChangeTrigger(was, now));
+            }, true);
         }
 
         /// <summary>The selector of a state <paramref name="was" /> is to start on, as a trigger made new where <paramref name="fresh" />, or changed in place.</summary>

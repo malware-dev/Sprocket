@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
 
         /// <summary>What reads each block.</summary>
         public List<Probe> Probes { get; } = new List<Probe>();
+
+        /// <summary>What the reading that rules out a change in each block remembers between looks, in the order of <see cref="Probes" />; null where it remembers nothing.</summary>
+        public List<ReaderMemory> Rulings { get; } = new List<ReaderMemory>();
 
         /// <summary>What listens to the blocks that announce a change.</summary>
         public List<IDisposable> Listening { get; } = new List<IDisposable>();

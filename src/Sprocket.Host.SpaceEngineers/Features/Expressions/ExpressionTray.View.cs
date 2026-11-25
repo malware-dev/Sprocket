@@ -9,6 +9,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
     {
         Label _calculations;
         Flow _operators;
+        Label _conditionsHeading;
+        Flow _conditions;
         Label _typedHeading;
         Flow _typed;
         Label _values;
@@ -16,12 +18,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         HStack _bin;
         Label _binWords;
 
-        /// <summary>Makes the tray left to right: the calculations, the fixed values, the kinds of value, and the bin.</summary>
+        /// <summary>Makes the tray left to right: the calculations, the comparisons and what joins flags, the fixed values, the kinds of value, and the bin.</summary>
         void CreateView()
         {
             Base.Spacing = Gaps.Items;
             Align = Align.FillWidth;
             Children.Add(Shelf(out _calculations, out _operators));
+            Children.Add(Shelf(out _conditionsHeading, out _conditions));
             Children.Add(Shelf(out _typedHeading, out _typed));
             Children.Add(Shelf(out _values, out _sources));
             Children.Add(new HStack

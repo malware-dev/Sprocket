@@ -28,8 +28,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             if (first == KindClass.None || (join.Parts.Count > 1 && second == KindClass.None))
                 return KindClass.None;
 
+            if (JoinKinds.Compares(join.Kind))
+                return Compared(join.Kind, first, second);
+
             switch (join.Kind)
             {
+                case JoinKind.Not:
+                    return first & KindClass.Flag;
+                case JoinKind.And:
+                case JoinKind.Or:
+                    return Both(first, second, KindClass.Flag);
                 case JoinKind.Add:
                     return Both(first, second, KindClass.Number) | Both(first, second, KindClass.Duration) | Joined(first, second);
                 case JoinKind.Subtract:
@@ -88,6 +96,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             }
 
             return KindClass.None;
+        }
+
+        // A flag where the two sides can be of one kind, numbers counting as one, and for an ordering where both can be numbers or both timespans.
+        static KindClass Compared(JoinKind kind, KindClass first, KindClass second)
+        {
+            var shared = JoinKinds.Orders(kind) ? (first & second & (KindClass.Number | KindClass.Duration)) : first & second;
+            return shared != KindClass.None ? KindClass.Flag : KindClass.None;
         }
 
         // The kind where both sides can be it.

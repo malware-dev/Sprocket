@@ -3840,7 +3840,7 @@
     <value>Velg hvem du vil dele denne plantegningen med.</value>
   </data>
   <data name="Sprocket.Term.Expression" xml:space="preserve">
-    <value>En **formel** er en verdi som regnes ut fra [![](mark:value)&amp;nbsp;blokkverdier](Term.Value class=term), [![](mark:setting)&amp;nbsp;innstillinger](Term.Setting class=term) og [![](mark:state)&amp;nbsp;tilstander](Term.LogicSystemStates class=term), med +, -, × og ÷ og funksjonene min, max, round og abs. Den bygges på sin egen side ved å dra utregninger og verdier på plass. En blokkverdi som leses fra flere blokker settes sammen som summen, gjennomsnittet, den laveste eller den høyeste av dem. Den regnes ut hver gang [steget](Term.Step class=term) som bruker den, kjøres. Lag en med «Formel…», fra en verdis ![](mark:link)&amp;nbsp;lenkemerke eller fra menyen under verdien et steg setter en tilstand til. En verdi som må være fastsatt på forhånd, får ingen: en tilstands startverdi, en innstillings standardverdi og svaret til en [installasjon](Term.Installation class=term).</value>
+    <value>En **formel** er en verdi som regnes ut fra [![](mark:value)&amp;nbsp;blokkverdier](Term.Value class=term), [![](mark:setting)&amp;nbsp;innstillinger](Term.Setting class=term) og [![](mark:state)&amp;nbsp;tilstander](Term.LogicSystemStates class=term), med +, -, × og ÷ og funksjonene min, max, round og abs. Den bygges på sin egen side ved å dra utregninger og verdier på plass. En blokkverdi som leses fra flere blokker settes sammen som summen, gjennomsnittet, den laveste eller den høyeste av dem. Den regnes ut hver gang [steget](Term.Step class=term) som bruker den, kjøres. Lag en med «Formel…», fra en verdis ![](mark:link)&amp;nbsp;lenkemerke eller fra menyen under verdien et steg setter en tilstand til. En formel kan også være betingelsen et hvis eller et `when` sjekker: velg «Formel…» i kildemenyen under hvis, `otherwise if` eller `when`, ved siden av «Blokker…», «Eksisterende plass…» og «Tilstander…». En betingelse bygges av sammenligningene is, is not, is above, is at least, is below og is at most, og av not, and og or, som bare tilbys der. En blokkverdi, innstilling eller tilstand som er på eller av, satt der en betingelse står, sammenlignes med på, og den sammenligningen kan endres som alle andre. I en betingelse kan en blokkverdi som leses fra flere blokker også sjekkes på noen av dem eller på alle. Der på eller av settes i stedet for å sjekkes, som verdien et steg setter en tilstand til, er det én verdi alene: på, av, eller en blokkverdi, innstilling eller tilstand som er på eller av. Ingenting regnes ut der. En verdi som må være fastsatt på forhånd, får ingen: en tilstands startverdi, en innstillings standardverdi og svaret til en [installasjon](Term.Installation class=term).</value>
   </data>
   <data name="Sprocket.Expression.ReadingAbout" xml:space="preserve">
     <value>Slipp den der den hører hjemme, og velg så blokker og en av blokkenes [![](mark:value)&amp;nbsp;blokkverdier](Term.Value class=term). Flere blokker settes alltid sammen: som summen, med mindre du velger gjennomsnitt, laveste eller høyeste.</value>
@@ -3876,10 +3876,22 @@
     <value>Slipp en verdi eller en utregning her for å fjerne den og la plassen stå tom.</value>
   </data>
   <data name="Sprocket.Expression.OptimizeAbout" xml:space="preserve">
-    <value>Regner ut delene som bare består av faste verdier, og fjerner det som ikke endrer noe, som × 1 eller + 0. Hva formelen blir til, er det samme som før.</value>
+    <value>Regner ut delene som bare består av faste verdier, og fjerner det som ikke endrer noe, som × 1 eller + 0. Hva formelen blir til, er det samme som før. Det som ville endret seg, er markert i formelen.</value>
+  </data>
+  <data name="Sprocket.Expression.AlwaysAbout" xml:space="preserve">
+    <value>Dette blir alltid `{value}`. Trykk `Forenkle` for å sette inn `{value}` i stedet.</value>
+  </data>
+  <data name="Sprocket.Expression.NoDifferenceAbout" xml:space="preserve">
+    <value>Dette endrer ingenting her. Trykk `Forenkle` for å ta det bort.</value>
   </data>
   <data name="Sprocket.Expression.EmptyAbout" xml:space="preserve">
     <value>Tom: slipp en verdi eller en utregning her.</value>
+  </data>
+  <data name="Sprocket.Value.ExpressionHeldAbout" xml:space="preserve">
+    <value>Regnes ut av denne formelen. Trykk for å endre den. Merket ved siden av gir en fast verdi eller en innstilling i stedet.</value>
+  </data>
+  <data name="Sprocket.Expression.ChangeAbout" xml:space="preserve">
+    <value>Trykk for å velge en annen i stedet.</value>
   </data>
   <data name="Sprocket.Expression.SettingAbout" xml:space="preserve">
     <value>Slipp den der den hører hjemme, og velg så hvilken innstilling.</value>
@@ -3889,6 +3901,33 @@
   </data>
   <data name="Sprocket.Expression.TypedAbout" xml:space="preserve">
     <value>Slipp den på en tom plass, og still inn verdien med en gang.</value>
+  </data>
+  <data name="Sprocket.Expression.IsAbout" xml:space="preserve">
+    <value>På der de to verdiene er like, og av der de er forskjellige.</value>
+  </data>
+  <data name="Sprocket.Expression.IsNotAbout" xml:space="preserve">
+    <value>På der de to verdiene er forskjellige, og av der de er like.</value>
+  </data>
+  <data name="Sprocket.Expression.AboveAbout" xml:space="preserve">
+    <value>På der den første verdien er høyere enn den andre.</value>
+  </data>
+  <data name="Sprocket.Expression.AtLeastAbout" xml:space="preserve">
+    <value>På der den første verdien er lik den andre eller høyere.</value>
+  </data>
+  <data name="Sprocket.Expression.BelowAbout" xml:space="preserve">
+    <value>På der den første verdien er lavere enn den andre.</value>
+  </data>
+  <data name="Sprocket.Expression.AtMostAbout" xml:space="preserve">
+    <value>På der den første verdien er lik den andre eller lavere.</value>
+  </data>
+  <data name="Sprocket.Expression.NotAbout" xml:space="preserve">
+    <value>På der det den holder er av, og av der den er på.</value>
+  </data>
+  <data name="Sprocket.Expression.AndAbout" xml:space="preserve">
+    <value>På der begge er på. Der den første er av, ses det ikke på den andre.</value>
+  </data>
+  <data name="Sprocket.Expression.OrAbout" xml:space="preserve">
+    <value>På der en av dem er på. Der den første er på, ses det ikke på den andre.</value>
   </data>
   <data name="Sprocket.Pick.StateTypedValueAbout" xml:space="preserve">
     <value>Skriv inn verdien her.</value>

@@ -1,8 +1,10 @@
+using Sprocket.Host.SpaceEngineers.Features.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Look;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Writing;
 using System;
 using System.Collections.Generic;
 using Lumel;
@@ -59,6 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
             _form.Show(fields, filled, Offered(editor, fields), texts);
             Given(fields, given);
             _form.Sourcing += Source;
+            _form.Expressing += at => SettingSources.Rebuild(_editor, _system, _form, at);
             _form.Submitted += Done;
             _form.Edited += () => Explain(_form.Wrong);
 
@@ -132,6 +135,36 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 }, marked);
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Where <paramref name="fields" /> ask for one value that <paramref name="given" /> holds as an expression of
+        /// <paramref name="system" />, or as text written over several lines, opens the page it is changed on, the expression page
+        /// or the page text is written on, gives <paramref name="give" /> the value it closes on, and answers whether it did.
+        /// </summary>
+        public static bool Opens(SprocketEditor editor, AutomationSystem system, IList<Field> fields, IList<Literal> given, Action<List<Literal>> give)
+        {
+            if (fields.Count != 1 || fields[0].Covers != 1)
+                return false;
+
+            var field = fields[0];
+            var now = given.Count > 0 ? given[0] : default(Literal);
+            var title = field.Title(editor.Texts);
+            if (now.IsExpression)
+            {
+                var type = SettingTypes.Of(field);
+                if (system == null || type == null)
+                    return false;
+
+                editor.Push(new ExpressionPage(editor, system, type, title, now, built => give(new List<Literal> { built })));
+                return true;
+            }
+
+            if (field.Edits != FieldEditor.Lines || now.IsSetting)
+                return false;
+
+            editor.Push(new TextPage(editor, SentenceText.Capitalised(title), now.Text, field.Longest, text => give(new List<Literal> { Literal.Of(text) })));
             return true;
         }
 

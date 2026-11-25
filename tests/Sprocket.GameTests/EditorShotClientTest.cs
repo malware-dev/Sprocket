@@ -166,7 +166,8 @@ namespace Sprocket.GameTests
 
         /// <summary>
         /// Testing row #62's menus and lists, on the block called <paramref name="name" />, which an earlier test pasted: a sequence's
-        /// plus menu opened and walked with Up, Down and Enter, and the block selector's Source list opened, walked and chosen from.
+        /// plus menu opened and walked with Up, Down and Enter, and the submenu of where a task's blocks come from opened with Right,
+        /// walked and chosen from.
         /// </summary>
         public IEnumerator<int> Menus(string name)
         {
@@ -182,9 +183,9 @@ namespace Sprocket.GameTests
                 new[] { "menu down twice", "stay", "arrowdown" },
                 new[] { "menu up", "stay", "arrowup" },
                 new[] { "menu enter", "stay", "enter" },
-                new[] { "source list open", Kept, "Sequences", "Sequence 1", "add:task", "wait", "open:ListField" },
-                new[] { "source list down", "stay", "arrowdown" },
-                new[] { "source list chosen", "stay", "enter" }
+                new[] { "submenu open", Kept, "Sequences", "Sequence 1", "open:PlusMenu", "arrowdown", "arrowright" },
+                new[] { "submenu down", "stay", "arrowdown" },
+                new[] { "submenu chosen", "stay", "enter" }
             };
 
             var tour = _tour.Tour(editor, stops, "");

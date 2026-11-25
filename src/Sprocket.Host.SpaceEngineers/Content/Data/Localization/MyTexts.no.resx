@@ -2892,6 +2892,9 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Expression.NoValue" xml:space="preserve">
     <value>ikke ennå</value>
   </data>
+  <data name="Sprocket.Expression.Unfinished" xml:space="preserve">
+    <value>Fyll alle tomme plasser for å fullføre den.</value>
+  </data>
   <data name="Sprocket.Expression.Reading" xml:space="preserve">
     <value>En blokkverdi…</value>
   </data>
@@ -2925,6 +2928,12 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Expression.KindReading" xml:space="preserve">
     <value>blokkverdi</value>
   </data>
+  <data name="Sprocket.Expression.KindAny" xml:space="preserve">
+    <value>noen</value>
+  </data>
+  <data name="Sprocket.Expression.KindAll" xml:space="preserve">
+    <value>alle</value>
+  </data>
   <data name="Sprocket.Expression.KindSum" xml:space="preserve">
     <value>sum</value>
   </data>
@@ -2949,6 +2958,9 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
   <data name="Sprocket.Expression.Calculations" xml:space="preserve">
     <value>Utregninger</value>
   </data>
+  <data name="Sprocket.Expression.Compare" xml:space="preserve">
+    <value>Sammenlign og koble</value>
+  </data>
   <data name="Sprocket.Expression.CurrentValues" xml:space="preserve">
     <value>Gjeldende verdier</value>
   </data>
@@ -2965,7 +2977,7 @@ Advarsel: Din egen kopi oppdateres ikke med endringene til {sharer}.</value>
     <value>Dette har ingen plass å havne på ennå.</value>
   </data>
   <data name="Sprocket.Expression.Typed" xml:space="preserve">
-    <value>Skriv en verdi</value>
+    <value>Faste verdier</value>
   </data>
   <data name="Sprocket.Expression.TypedNumber" xml:space="preserve">
     <value>et tall</value>

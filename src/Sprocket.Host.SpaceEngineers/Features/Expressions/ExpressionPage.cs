@@ -14,15 +14,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         readonly string _of;
         readonly Literal? _start;
         readonly Action<Literal> _done;
+        readonly bool _tests;
         ExpressionPanel _panel;
 
         /// <summary>
         /// Builds the value <paramref name="of" /> names, of the type the language names <paramref name="wanted" />, in
         /// <paramref name="system" />, starting from <paramref name="start" />, or from one empty place where it is null; <paramref name="done" /> is given the value built.
+        /// A condition an if or a when tests where <paramref name="tests" />.
         /// </summary>
-        public ExpressionPage(SprocketEditor editor, AutomationSystem system, string wanted, string of, Literal? start, Action<Literal> done)
+        public ExpressionPage(SprocketEditor editor, AutomationSystem system, string wanted, string of, Literal? start, Action<Literal> done, bool tests = false)
             : base(editor)
         {
+            _tests = tests;
             _system = system;
             _wanted = wanted;
             _of = of ?? "";
@@ -47,6 +50,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
 
         /// <inheritdoc />
         public override string PrimaryAbout => "";
+
+        /// <inheritdoc />
+        public override bool ScrollsItself => true;
 
         /// <inheritdoc />
         public override bool HasHistory => true;
@@ -97,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
         /// <inheritdoc />
         protected override Element CreateView()
         {
-            _panel = new ExpressionPanel(Editor, _system, _wanted, _start);
+            _panel = new ExpressionPanel(Editor, _system, _wanted, _start, _tests);
             return _panel;
         }
     }

@@ -1700,6 +1700,10 @@
     <value>none yet</value>
     <comment>In place of the value in Sprocket.Expression.Now while the expression has an empty place or a mistake in it.</comment>
   </data>
+  <data name="Sprocket.Expression.Unfinished" xml:space="preserve">
+    <value>Fill every empty place to finish it.</value>
+    <comment>Under the expression being built while a place in it is empty: why it cannot be used yet.</comment>
+  </data>
   <data name="Sprocket.Expression.Reading" xml:space="preserve">
     <value>A block value…</value>
     <comment>Button on the expression page: picks blocks and a value of theirs, which goes into the expression as a reading.</comment>
@@ -1743,6 +1747,14 @@
   <data name="Sprocket.Expression.KindReading" xml:space="preserve">
     <value>block value</value>
     <comment>Small word in front of a reading of one block in an expression being built.</comment>
+  </data>
+  <data name="Sprocket.Expression.KindAny" xml:space="preserve">
+    <value>any</value>
+    <comment>The small word on a block value in the expression being built that checks a comparison on each of its blocks and holds where it holds on any of them.</comment>
+  </data>
+  <data name="Sprocket.Expression.KindAll" xml:space="preserve">
+    <value>all</value>
+    <comment>The small word on a block value in the expression being built that checks a comparison on each of its blocks and holds where it holds on all of them.</comment>
   </data>
   <data name="Sprocket.Expression.KindSum" xml:space="preserve">
     <value>sum</value>
@@ -3851,12 +3863,16 @@ Warning: Your own copy will not update with {sharer}'s changes.</value>
     <value>Calculations</value>
     <comment>Heading over the expression builder's calculations, the pieces dragged to add, subtract, multiply and so on.</comment>
   </data>
+  <data name="Sprocket.Expression.Compare" xml:space="preserve">
+    <value>Compare and join</value>
+    <comment>Heading over the expression builder's comparisons and the pieces that join or turn over values of on or off, shown only where a condition an if or a when tests is built.</comment>
+  </data>
   <data name="Sprocket.Expression.CurrentValues" xml:space="preserve">
     <value>Current values</value>
     <comment>Heading over the expression builder's kinds of value to drag in: a block value, a setting, a state or a typed value.</comment>
   </data>
   <data name="Sprocket.Expression.Typed" xml:space="preserve">
-    <value>Type a value</value>
+    <value>Fixed values</value>
     <comment>Heading of the expression builder's shelf of fixed values, each set where it stands once it is dropped.</comment>
   </data>
   <data name="Sprocket.Expression.Bin" xml:space="preserve">

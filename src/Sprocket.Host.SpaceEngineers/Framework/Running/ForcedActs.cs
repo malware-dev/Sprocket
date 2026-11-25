@@ -34,9 +34,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         public void Told(ActTarget act, SequenceRunner by)
         {
             Let(act.Entity);
-            if (act.Bound == null || !act.Bound.IsForced || act.Action.Until == null)
-                return;
+            if (act.Bound != null && act.Bound.IsForced && act.Action.Until != null)
+                Hold(act, by);
+        }
 
+        // Holds the block of act to the order by gave it. Its own method, since the listener's closure would otherwise be
+        // made on every order, forced or not, as the method holding the variable it captures begins.
+        void Hold(ActTarget act, SequenceRunner by)
+        {
             var entity = act.Entity;
             var listening = act.Action.ArrivalAnnounced ? entity.Listen(() => Heard(entity)) : null;
             _held.Add(new Held { Act = act, By = by, Listening = listening });

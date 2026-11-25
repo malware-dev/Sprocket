@@ -142,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
                 target.Add(source[i]);
         }
 
-        /// <summary>Whether two lists of arguments say the same thing.</summary>
+        /// <summary>Whether two lists of arguments say the same thing: each value written alike, and an expression only where the other is one.</summary>
         protected static bool Same(IList<Literal> left, IList<Literal> right)
         {
             if (left.Count != right.Count)
@@ -150,7 +150,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Editing
 
             for (var i = 0; i < left.Count; i++)
             {
-                if (left[i].Said != right[i].Said)
+                // A text can be written as an expression is, so the words alone do not tell the two apart.
+                if (left[i].IsExpression != right[i].IsExpression || left[i].Said != right[i].Said)
                     return false;
             }
 

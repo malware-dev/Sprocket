@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Writing
                         Window = this,
                         Content = new HStack
                         {
-                            Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, Padding = new Thickness(12f, 8f) },
+                            Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, FollowsUserBackgroundOpacity = true, Padding = new Thickness(12f, 8f) },
                             Children =
                             {
                                 new RichText { Style = Styles.Tip, Placement = Flex.Grow }.As(out _title),

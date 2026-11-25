@@ -39,6 +39,10 @@ namespace Sprocket.Sim.Fakes
         /// <remarks>For a test that has to say which questions a look costs, not only how many. A static for the reason <see cref="Asked" /> is.</remarks>
         public static List<string> Heard;
 
+        /// <summary>What counts the bytes the stand-ins allocate while a test measures, or null while none does.</summary>
+        /// <remarks>A static for the reason <see cref="Asked" /> is.</remarks>
+        public static StandInLedger? Ledger;
+
         /// <summary>One generator, because each one keeps a cache of the types it has made.</summary>
         public static readonly ProxyGenerator Generator = new ProxyGenerator();
 
@@ -159,6 +163,20 @@ namespace Sprocket.Sim.Fakes
             }
 
             public void Intercept(IInvocation invocation)
+            {
+                var ledger = Pretend.Ledger;
+                var entry = ledger?.Asking(invocation) ?? 0;
+                try
+                {
+                    Answer(invocation);
+                }
+                finally
+                {
+                    ledger?.Answered(entry);
+                }
+            }
+
+            void Answer(IInvocation invocation)
             {
                 Pretend.Asked++;
                 if (Pretend.Heard != null)

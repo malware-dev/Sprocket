@@ -117,11 +117,12 @@ namespace Sprocket.Host.SpaceEngineers
 
             _scroll = new ScrollView { Style = Styles.ScrollView, Content = new VStack().As(out _body) };
 
-            var root = _frame = new VStack { Base = { Background = Palette.Page } };
+            // The window's backgrounds take the player's own UI background opacity, as the game's screens do.
+            var root = _frame = new VStack { Base = { Background = Palette.Page, FollowsUserBackgroundOpacity = true } };
             Content = root;
             root.Children.Add(new VStack
             {
-                Base = { Background = Palette.Chrome, Padding = new Thickness(16f, 8f), Spacing = Gaps.Within },
+                Base = { Background = Palette.Chrome, FollowsUserBackgroundOpacity = true, Padding = new Thickness(16f, 8f), Spacing = Gaps.Within },
                 Children =
                 {
                     new HStack
@@ -175,7 +176,7 @@ namespace Sprocket.Host.SpaceEngineers
                     new Separator(),
                     new HStack
                     {
-                        Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, Padding = new Thickness(16f, 8f) },
+                        Base = { Spacing = Gaps.Parts, Background = Palette.Chrome, FollowsUserBackgroundOpacity = true, Padding = new Thickness(16f, 8f) },
                         Children =
                         {
                             new VitalsStrip { Align = Align.Center }.As(out _vitals),
@@ -513,10 +514,11 @@ namespace Sprocket.Host.SpaceEngineers
             _workspace.Windows.Close(_dialog);
             _workspace.Windows.Close(_confirm);
 
-            _hanging = screen.QuestionIsHere && _raisedBy != null;
+            var under = screen.QuestionUnder ?? _raisedBy;
+            _hanging = screen.QuestionIsHere && under != null;
             if (_hanging)
             {
-                _confirm.Ask(screen.Question, screen.QuestionArguments, screen.Answers, screen.Default, HangsUnder(_raisedBy), _workspace.Windows);
+                _confirm.Ask(screen.Question, screen.QuestionArguments, screen.Answers, screen.Default, HangsUnder(under), _workspace.Windows);
                 return;
             }
 

@@ -182,7 +182,7 @@ public class AbortEditorTests
         sim.Tick();
 
         form = Assert.IsType<SequencePage>(sim.Editor.Current).Aborting!;
-        Assert.Equal("\"Glow \" + Glow", form.Fields[0].Text);
+        Assert.Equal("\"Glow \" + Glow", form.ExpressionAt(0)!.Text);
         form.Parent!.Within().OfType<Button>().Single(button => button.Text == sim.Editor.Texts.ChromeDone).Command!.Execute();
         sim.Tick();
 

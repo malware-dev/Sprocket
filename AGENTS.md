@@ -87,6 +87,8 @@ profile restyles every file.
 - Sprocket runs inside the game's update loop, on servers with many players and constructs. Nothing runs per tick or
   per frame without a reason written beside it, repeating work joins the world's `Rota`, and a claim about cost is
   proved by a test that counts.
+- A new trigger or step comes with its row in the cost test, `LanguageCostTests`, proving 0 bytes on its repeating
+  path.
 - Before adding a way to report, store, show or choose something, find the one the repository already has and add a
   case to it. A new thing looks and behaves like its nearest sibling: its control, mark, wording and what a press
   opens. A behavior added to one screen goes to the screens of the same kind in the same change.

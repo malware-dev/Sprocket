@@ -145,6 +145,35 @@ public class ExpressionDraftTests
         Assert.Equal("6 + Count", Folding.Fold(expression, Scope).Written);
     }
 
+    /// <summary>A comparison and a not of fixed values are worked out, and a comparison reading a setting is left as it is.</summary>
+    [Fact]
+    public void FixedConditionsAreWorkedOut()
+    {
+        var two = new Operand(Literal.Of(2L));
+        var one = new Operand(Literal.Of(1L));
+        Assert.Equal("on", Folding.Fold(new Comparing(Relation.Above, two, one), Scope).Written);
+        Assert.Equal("off", Folding.Fold(new Inversion(new Comparing(Relation.Above, two, one)), Scope).Written);
+        Assert.Equal("Count > 2", Folding.Fold(new Comparing(Relation.Above, new Operand(Literal.Setting("Count")),
+            new Arithmetic(Operator.Add, one, one)), Scope).Written);
+    }
+
+    /// <summary>
+    /// A fixed flag beside a condition by and or or either decides alone, off by and and on by or, or leaves the condition,
+    /// whichever side it stands on.
+    /// </summary>
+    [Theory]
+    [InlineData(Connective.And, false, "off")]
+    [InlineData(Connective.And, true, "Count > 1")]
+    [InlineData(Connective.Or, true, "on")]
+    [InlineData(Connective.Or, false, "Count > 1")]
+    public void AFixedFlagBesideAConditionDecidesOrDrops(Connective joins, bool flag, string folded)
+    {
+        var condition = new Comparing(Relation.Above, new Operand(Literal.Setting("Count")), new Operand(Literal.Of(1L)));
+        var fixedFlag = new Operand(Literal.Of(flag));
+        Assert.Equal(folded, Folding.Fold(new Logical(joins, condition, fixedFlag), Scope).Written);
+        Assert.Equal(folded, Folding.Fold(new Logical(joins, fixedFlag, condition), Scope).Written);
+    }
+
     /// <summary>A number times 0 is 0, and times 1, plus 0 or minus 0 is the number, whatever it reads.</summary>
     [Fact]
     public void WhatMakesNoDifferenceIsDropped()
@@ -167,5 +196,31 @@ public class ExpressionDraftTests
         Assert.Equal("Count / 1", Folding.Fold(new Arithmetic(Operator.Divide, new Operand(Literal.Setting("Count")), new Operand(Literal.Of(1L))), Scope).Written);
         Assert.Equal("Ratio", Folding.Fold(new Arithmetic(Operator.Divide, new Operand(Literal.Setting("Ratio")), new Operand(Literal.Of(1L))), Scope).Written);
         Assert.Equal("1 / 0", Folding.Fold(new Arithmetic(Operator.Divide, new Operand(Literal.Of(1L)), new Operand(Literal.Of(0L))), Scope).Written);
+    }
+    /// <summary>
+    /// A box is put in brackets only where the order the language reads a formula in needs them: a looser box inside a tighter,
+    /// the same on the right of a subtraction or a division, a comparison beside a comparison, anything under a sign or a not.
+    /// </summary>
+    [Theory]
+    [InlineData(JoinKind.Add, JoinKind.Multiply, 0, true)]
+    [InlineData(JoinKind.Multiply, JoinKind.Add, 0, false)]
+    [InlineData(JoinKind.Add, JoinKind.Add, 1, false)]
+    [InlineData(JoinKind.Add, JoinKind.Subtract, 0, false)]
+    [InlineData(JoinKind.Add, JoinKind.Subtract, 1, true)]
+    [InlineData(JoinKind.Multiply, JoinKind.Divide, 1, true)]
+    [InlineData(JoinKind.Add, JoinKind.Is, 0, false)]
+    [InlineData(JoinKind.Is, JoinKind.And, 0, false)]
+    [InlineData(JoinKind.Or, JoinKind.And, 0, true)]
+    [InlineData(JoinKind.Is, JoinKind.IsNot, 0, true)]
+    [InlineData(JoinKind.Add, JoinKind.Lowest, 0, false)]
+    [InlineData(JoinKind.Add, JoinKind.Negate, 0, true)]
+    [InlineData(JoinKind.And, JoinKind.Not, 0, true)]
+    public void BracketsStandWhereTheOrderNeedsThem(JoinKind inner, JoinKind outer, int place, bool bracketed)
+    {
+        var box = new DraftJoin(inner);
+        var parent = new DraftJoin(outer);
+        parent.Set(place, box);
+
+        Assert.Equal(bracketed, JoinKinds.Bracketed(box));
     }
 }

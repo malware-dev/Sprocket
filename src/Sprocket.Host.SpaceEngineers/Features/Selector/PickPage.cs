@@ -60,10 +60,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             IList<long> targets, MemberKey chosen, ReachKind chosenForm, Action<PickAnswer> done,
             bool asksAll = false, Quantifier quantifier = Quantifier.Any, IList<Literal> arguments = null,
             OpeningColumn opens = OpeningColumn.Blocks, OutcomeColumn aim = null, Func<GridEntity, bool> admits = null,
-            bool signalsOnly = false, bool forTests = false, string facet = "", bool forReadings = false)
+            bool signalsOnly = false, bool forTests = false, string facet = "", bool forReadings = false, bool checksBlocks = false)
             : base(editor)
         {
             _picked.Facet = facet ?? "";
+            _picked.Checks = forReadings && checksBlocks;
             forTests = forTests || forReadings;
             _opens = opens;
             _aim = aim;

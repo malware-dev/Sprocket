@@ -156,7 +156,7 @@ public class ExpressionEntryTests
         for (var i = 0; i < 5; i++)
             sim.Tick();
 
-        sim.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().First().Opens!.Execute();
+        sim.Editor.StepRows()[0].Slots.OfType<ActionSlot>().First().Opens!.Execute();
         sim.Tick();
         var form = sim.Editor.Pick().Arguments!.Form;
         form.MarkOf(0)!.Command!.Execute();
@@ -181,6 +181,145 @@ public class ExpressionEntryTests
             sim.Tick();
 
         Assert.Equal("Reach 5", board.Text);
+    }
+
+    /// <summary>A text built of words around the average of some pistons' position shows on the panel as what it comes to once the step runs, and is saved as the expression.</summary>
+    [Fact]
+    public void ATextAroundAReadingShowsWhatItComesTo()
+    {
+        var sim = Simulation.Fresh();
+        var board = sim.Machine.TextPanel(60, "Board");
+        sim.Machine.Piston(61, "Arm Piston");
+        sim.Tick();
+        var program = "sprocket 3 alpha 1\n\n"
+            + "let 'Board' = block 'TextPanel/LargeTextPanel' [ 60, [ (60 0 0) ], \"Board\" ]\n"
+            + "let 'Arm Piston' = block 'ExtendedPistonBase/LargePistonBase' [ 61, [ (61 0 0) ], \"Arm Piston\" ]\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Sign\n{\n"
+            + "    required slot board expects sprocket.screen\n"
+            + "    required slot tanks expects ExtendedPistonBase\n\n"
+            + "    sequence 1 {\n        call sprocket.show_text(\"Shut\") on [ board ]\n    }\n}\n\n"
+            + "instance 1 of \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as 'Installation 1' {\n    board = [ sprocket.get_screen(1) on [ 'Board' ] ]\n    tanks = [ 'Arm Piston' ]\n}\n";
+        Assert.Equal("", ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        sim.Editor.StepRows()[0].Slots.OfType<ActionSlot>().First().Opens!.Execute();
+        sim.Tick();
+        var form = sim.Editor.Pick().Arguments!.Form;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueExpression);
+        sim.Tick();
+        var level = new BlockReading(new Framework.Game.Members.MemberKey("sprocket", "position"), Combination.Average, new List<Literal>(),
+            new List<string> { "tanks" });
+        Build(sim, draft =>
+        {
+            draft.Fill((DraftHole)draft.Root, new DraftJoin(JoinKind.Add));
+            var outer = (DraftJoin)draft.Root;
+            draft.Fill((DraftHole)outer.Parts[0], new DraftJoin(JoinKind.Add));
+            var inner = (DraftJoin)((DraftJoin)draft.Root).Parts[0];
+            draft.Fill((DraftHole)inner.Parts[0], new DraftValue(new Operand(Literal.Of("Oxygen: "))));
+            draft.Fill((DraftHole)((DraftJoin)((DraftJoin)draft.Root).Parts[0]).Parts[1], new DraftValue(level));
+            draft.Fill((DraftHole)((DraftJoin)draft.Root).Parts[1], new DraftValue(new Operand(Literal.Of("%"))));
+        });
+        sim.Editor.Current.Primary();
+        sim.Tick();
+
+        var act = Assert.IsType<Act>(Assert.Single(sequence.Steps));
+        Assert.True(act.Arguments[0].IsExpression, act.Arguments[0].Said);
+        system.Enabled = true;
+        sim.Editor.Program.Edited();
+        for (var i = 0; i < 3; i++)
+            sim.Tick();
+        sim.Runner.Call(sequence, system.First);
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        var halt = system.First.Halt ?? system.Halt;
+        Assert.True(halt == null, halt?.Problem.ToString());
+        Assert.Matches(@"^Oxygen: [0-9.]+%$", board.Text);
+    }
+
+    /// <summary>
+    /// A text built on the expression page for a new step or one given its text already, around a value of blocks picked there, which makes a slot of them, is
+    /// saved as the expression, never as its words.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ATextAroundBlocksPickedOnThePageIsSavedAsTheExpression(bool given)
+    {
+        var rig = Rig.Demo();
+        rig.TextPanel(40, "Status Panel");
+        var screen = Screen.On(rig);
+        var editor = screen.Editor;
+        editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        editor.PressAdd("task");
+        editor.PressBlock("Status Panel");
+        screen.Run(2);
+        editor.PressChoice("show text");
+        screen.Run(2);
+        if (given)
+        {
+            editor.Pick().Arguments!.Form.Fields.First(field => field is Framework.Ui.Fields.LinesField).Text = "Docked";
+            editor.PressPrimary();
+            screen.Run(2);
+            editor.StepRows().Last().Slots.OfType<ActionSlot>().First().Opens!.Execute();
+            screen.Run(2);
+        }
+
+        var form = editor.Pick().Arguments!.Form;
+        form.MarkOf(0)!.Command!.Execute();
+        screen.Run(2);
+        editor.PressAnswer(editor.Texts.ValueExpression);
+        screen.Run(2);
+
+        var panel = Assert.IsType<ExpressionPage>(editor.Current).Panel;
+        var draft = panel.Draft;
+        if (!(draft.Root is DraftHole))
+            draft.Remove(draft.Root);
+
+        draft.Fill((DraftHole)draft.Root, new DraftJoin(JoinKind.Add));
+        draft.Fill((DraftHole)((DraftJoin)draft.Root).Parts[0], new DraftValue(new Operand(Literal.Of("Oxygen: "))));
+        screen.Run(2);
+        var grip = ExpressionBuilderTests.Middle(((Lumel.Layout.HStack)panel.Tray.PieceFor(ValueSource.Reading)).Children[0]);
+        var place = ExpressionBuilderTests.Middle(panel.ShownFor(((DraftJoin)draft.Root).Parts[1])!);
+        screen.Do("drag", ExpressionBuilderTests.Say(grip.X), ExpressionBuilderTests.Say(grip.Y), ExpressionBuilderTests.Say(place.X), ExpressionBuilderTests.Say(place.Y));
+        screen.Run(3);
+        if (screen.Shows(editor.Texts.PickSourceBlocks))
+        {
+            editor.PressAnswer(editor.Texts.PickSourceBlocks);
+            screen.Run(2);
+        }
+
+        editor.TickBlock("Airlock Vent");
+        screen.Run(2);
+        editor.PressChoice("oxygen level");
+        screen.Run(2);
+        editor.PressPrimary();
+        screen.Run(2);
+        var builder = Assert.IsType<ExpressionPage>(editor.Current);
+        Assert.True(builder.Panel.Reads, builder.Panel.Why);
+        builder.Primary();
+        screen.Run(2);
+        editor.PressPrimary();
+        screen.Run(2);
+
+        var act = Assert.IsType<Act>(editor.Program.Systems[0].Sequences[0].Steps.Last());
+        Assert.True(act.Arguments[0].IsExpression, act.Arguments[0].Said);
+        var saved = ProgramWriter.Save(editor.Program, editor.World.Values);
+        var read = new Automation();
+        Assert.Equal("", ProgramReader.Load(saved, read, new Values()));
+        var reread = Assert.IsType<Act>(read.Systems[0].Sequences[0].Steps.Last());
+        Assert.True(reread.Arguments[0].IsExpression, reread.Arguments[0].Said + " " + saved);
     }
 
     /// <summary>Presses Expression… under the mark of the first value <paramref name="giving" /> asks for.</summary>

@@ -30,6 +30,11 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
         bool _reshaped = true;
         int _told = int.MinValue;
         int _setting;
+
+        // Each when on the state a set writes, and whether it held before the set: a pair of lists for each depth of sets
+        // that start one another, made once and cleared, so a set allocates nothing.
+        readonly List<StateTrigger>[] _watching = new List<StateTrigger>[DeepestSets + 1];
+        readonly List<bool>[] _held = new List<bool>[DeepestSets + 1];
         int _checkedEdits = -1;
         int _checkedWiring = -1;
         int _checkedUnstarted = -1;
@@ -244,19 +249,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return;
 
             // What held before the set, of each when on the state, so only what came to hold is started.
-            List<StateTrigger> watching = null;
-            List<bool> held = null;
-            foreach (var trigger in system.Triggers)
+            var watching = _watching[_setting] ?? (_watching[_setting] = new List<StateTrigger>());
+            var held = _held[_setting] ?? (_held[_setting] = new List<bool>());
+            watching.Clear();
+            held.Clear();
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
             {
-                var watched = trigger as StateTrigger;
+                var watched = triggers[i] as StateTrigger;
                 if (watched == null || watched.Test.State != state.Name && watched.Test.Other != state.Name)
                     continue;
-
-                if (watching == null)
-                {
-                    watching = new List<StateTrigger>();
-                    held = new List<bool>();
-                }
 
                 watching.Add(watched);
                 held.Add(_states.Holds(system, instance, watched.Test));
@@ -266,18 +268,17 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Running
                 return;
 
             _setting++;
-            for (var i = 0; watching != null && i < watching.Count; i++)
+            for (var i = 0; i < watching.Count; i++)
             {
                 if (!held[i] && _states.Holds(system, instance, watching[i].Test))
                     Fire(system, watching[i], instance);
             }
 
             // A when whose expression reads the state looks again now, as a when on the state alone is started now.
-            foreach (var trigger in system.Triggers)
+            for (var i = 0; i < triggers.Count; i++)
             {
-                var expressed = trigger as ExpressionTrigger;
-                if (expressed != null && expressed.States().Contains(state.Name))
-                    _watches.Poller(trigger, instance)?.Set();
+                if (triggers[i] is ExpressionTrigger)
+                    _watches.Poller(triggers[i], instance)?.Set(state.Name);
             }
 
             _setting--;

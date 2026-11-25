@@ -31,6 +31,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Ui.Tips;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Writing;
 using System;
 using System.Collections.Generic;
+using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -381,6 +382,12 @@ namespace Sprocket.Host.SpaceEngineers
         public void AskHere(string question)
         {
             _screen.Ask(question, true);
+        }
+
+        /// <summary>Puts the question <paramref name="question" /> under <paramref name="under" />, to be answered before anything else.</summary>
+        public void AskUnder(string question, Element under)
+        {
+            _screen.AskUnder(question, under);
         }
 
         /// <summary>Puts the question <paramref name="question" /> under the control somebody just pressed, to be answered before anything else, its named slots taking their words from <paramref name="arguments" />.</summary>

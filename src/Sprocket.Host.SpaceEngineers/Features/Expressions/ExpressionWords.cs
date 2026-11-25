@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Expressions
 {
@@ -52,7 +53,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
                 case JoinKind.Lowest: return texts.ExpressionLowest;
                 case JoinKind.Highest: return texts.ExpressionHighest;
                 case JoinKind.Rounded: return texts.ExpressionRounded;
-                default: return texts.ExpressionWithoutSign;
+                case JoinKind.WithoutSign: return texts.ExpressionWithoutSign;
+                case JoinKind.Not: return Framework.Language.Reading.ExpressionWords.Not;
+                case JoinKind.And: return Framework.Language.Reading.ExpressionWords.And;
+                case JoinKind.Or: return Framework.Language.Reading.ExpressionWords.Or;
+                default: return ComparisonQuestion.Said(JoinKinds.RelationOf(kind));
             }
         }
 
@@ -70,7 +75,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
                 case JoinKind.Lowest: return codex.ExpressionLowestAbout;
                 case JoinKind.Highest: return codex.ExpressionHighestAbout;
                 case JoinKind.Rounded: return codex.ExpressionRoundedAbout;
-                default: return codex.ExpressionWithoutSignAbout;
+                case JoinKind.WithoutSign: return codex.ExpressionWithoutSignAbout;
+                case JoinKind.Is: return codex.ExpressionIsAbout;
+                case JoinKind.IsNot: return codex.ExpressionIsNotAbout;
+                case JoinKind.Above: return codex.ExpressionAboveAbout;
+                case JoinKind.AtLeast: return codex.ExpressionAtLeastAbout;
+                case JoinKind.Below: return codex.ExpressionBelowAbout;
+                case JoinKind.AtMost: return codex.ExpressionAtMostAbout;
+                case JoinKind.Not: return codex.ExpressionNotAbout;
+                case JoinKind.And: return codex.ExpressionAndAbout;
+                default: return codex.ExpressionOrAbout;
             }
         }
 

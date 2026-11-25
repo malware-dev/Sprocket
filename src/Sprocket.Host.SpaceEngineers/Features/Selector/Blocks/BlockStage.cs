@@ -26,6 +26,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         // The ways an expression combines the values of several blocks it reads.
         static readonly IReadOnlyList<Quantifier> Combinings = new[] { Quantifier.Sum, Quantifier.Average, Quantifier.Min, Quantifier.Max };
 
+        // The ways a condition an expression builds reads several blocks: combined, or a comparison checked on any or all of them.
+        static readonly IReadOnlyList<Quantifier> Checkings = new[] { Quantifier.Sum, Quantifier.Average, Quantifier.Min, Quantifier.Max, Quantifier.Any, Quantifier.All };
+
         readonly SprocketEditor _editor;
         readonly PickChoices _picked;
         readonly EditorPage _screen;
@@ -322,7 +325,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
 
             if (_reads == null)
             {
-                var offered = _forReadings ? Combinings : SentenceText.Readings;
+                var offered = _forReadings ? _picked.Checks ? Checkings : Combinings : SentenceText.Readings;
                 var words = new List<string>();
                 for (var i = 0; i < offered.Count; i++)
                     words.Add(SentenceText.Quantified(offered[i]));
@@ -330,7 +333,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
                 _reads = new ListField(words) { Tip = CodexTip.For(null, _editor.Texts.Codex.SequenceReadAbout) };
                 _reads.Edited += delegate
                 {
-                    var reads = _editor.Act(CommandKind.ReadBlocks, () => Quantify(Read(_reads.Text)));
+                    var reads = _editor.Act(CommandKind.ReadBlocks, () =>
+                    {
+                        var quantifier = Read(_reads.Text);
+                        _picked.Checking = _forReadings && _picked.Checks && (quantifier == Quantifier.Any || quantifier == Quantifier.All);
+                        Quantify(quantifier);
+                    });
                     if (reads != null)
                         reads.Execute();
                 };
@@ -352,13 +360,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector.Blocks
         {
             if (_picked.Blocks.Count < 2)
             {
+                _picked.Checking = false;
                 if (_picked.Totals)
                     Quantify(Quantifier.Any);
 
                 return false;
             }
 
-            if (!_picked.Totals)
+            if (!_picked.Totals && !_picked.Checking)
                 Quantify(Quantifier.Sum);
 
             return true;

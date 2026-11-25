@@ -41,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         readonly List<Extra> _extras = new List<Extra>();
         InputRoot _input;
         readonly List<SettingChip> _chips = new List<SettingChip>();
+        readonly List<Button> _expressions = new List<Button>();
         readonly List<Glyph> _marks = new List<Glyph>();
         readonly RelayCommand _submit;
 
@@ -75,6 +76,9 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
         /// <summary>Raised with the place of a value and its mark when where the value comes from is to be chosen: a value of its own or a setting.</summary>
         public event Action<int, Element> Sourcing;
+
+        /// <summary>Raised with a value's place as the expression standing in for its field is pressed, to open the page it is built on.</summary>
+        public event Action<int> Expressing;
 
         /// <summary>Whether a value asked for by a field may come from a setting, which gives it a mark to choose that by; none may where it is null.</summary>
         /// <remarks>Read as the values are shown, so it is set before <see cref="Show" />.</remarks>
@@ -195,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             {
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (Asked(i) && _settings[i].Length == 0 && string.IsNullOrEmpty(_fields[i].Text) && !_wanted[i].IsOptional)
+                    if (Asked(i) && _settings[i].Length == 0 && !Holds(i) && string.IsNullOrEmpty(_fields[i].Text) && !_wanted[i].IsOptional)
                         return true;
                 }
 
@@ -230,7 +234,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             {
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (Asked(i) && (_settings[i].Length > 0 || !string.IsNullOrEmpty(_fields[i].Text)))
+                    if (Asked(i) && (_settings[i].Length > 0 || Holds(i) || !string.IsNullOrEmpty(_fields[i].Text)))
                         return true;
                 }
 
@@ -321,6 +325,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             _heldShown.Clear();
             _rows.Clear();
             _chips.Clear();
+            _expressions.Clear();
             _marks.Clear();
             _judged = false;
             _offered = false;
@@ -389,13 +394,16 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             for (var i = 0; i < _fields.Count; i++)
             {
                 _rows[i].IsVisible = Asked(i) && !_wanted[i].Fixed;
+                // A setting or an expression stands in the field's place while it gives the value.
                 if (_rows[i] != _fields[i])
-                    ((Element)_fields[i]).IsVisible = _settings[i].Length == 0;
+                    ((Element)_fields[i]).IsVisible = _settings[i].Length == 0 && !Holds(i);
                 if (_chips[i] != null)
                     _chips[i].IsVisible = _settings[i].Length > 0;
+                if (_expressions[i] != null)
+                    _expressions[i].IsVisible = Holds(i);
 
                 if (_marks[i] != null)
-                    _marks[i].Set(LookStates.Chosen, _settings[i].Length > 0);
+                    _marks[i].Set(LookStates.Chosen, _settings[i].Length > 0 || Holds(i));
                 Measure(i);
             }
         }
@@ -482,7 +490,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             var at = Keyed();
             for (var next = at + 1; at >= 0 && next < _fields.Count; next++)
             {
-                if (!Asked(next) || _wanted[next].Fixed || _settings[next].Length > 0 || !Takes(next))
+                if (!Asked(next) || _wanted[next].Fixed || _settings[next].Length > 0 || Holds(next) || !Takes(next))
                     continue;
 
                 _seen[next] = true;
@@ -661,11 +669,14 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             {
                 _rows.Add(field);
                 _chips.Add(null);
+                _expressions.Add(null);
                 _marks.Add(null);
                 return field;
             }
 
             var chip = new SettingChip { IsVisible = false };
+            var expression = new Button { Style = Styles.HeldExpression, IsVisible = false, Tip = CodexTip.For(null, _language.Codex.ValueExpressionHeldAbout) };
+            expression.Command = new RelayCommand(() => Expressing?.Invoke(at));
             var mark = new Glyph { Style = Styles.Source, Symbol = Symbols.Link, Tip = CodexTip.For(null, _language.ValueSourceAbout) };
             mark.Command = new RelayCommand(() => Sourcing?.Invoke(at, mark));
 
@@ -674,19 +685,25 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
                 field.Placement = Flex.Grow;
 
             chip.Placement = Flex.Grow;
-            var row = new HStack { Base = { Spacing = Gaps.Parts }, Children = { field, chip, mark } };
+            expression.Placement = Flex.Grow;
+            var row = new HStack { Base = { Spacing = Gaps.Parts }, Children = { field, chip, expression, mark } };
             _rows.Add(row);
             _chips.Add(chip);
+            _expressions.Add(expression);
             _marks.Add(mark);
             return row;
         }
 
-        /// <summary>Has the setting <paramref name="setting" /> give the value at <paramref name="at" />, its default said as <paramref name="said" />, or the value its own again where <paramref name="setting" /> is empty.</summary>
+        /// <summary>
+        /// Has the setting <paramref name="setting" /> give the value at <paramref name="at" />, its default said as <paramref name="said" />, or
+        /// the value its own again where <paramref name="setting" /> is empty; either way no expression gives it any longer.
+        /// </summary>
         public void Choose(int at, string setting, string said)
         {
             if (at < 0 || at >= _settings.Count || _chips[at] == null)
                 return;
 
+            _held[at] = default(Literal);
             _settings[at] = setting ?? "";
             _chips[at].Setting = _settings[at];
             _chips[at].Default = string.IsNullOrEmpty(said) ? "" : Template.Fill(_language.ValueByDefault, "value", said);
@@ -694,10 +711,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
         }
 
         /// <summary>
-        /// Has the value at <paramref name="at" /> hold <paramref name="expression" />, its field saying it as
-        /// <paramref name="shown" />, which passes as it stands.
+        /// Has the value at <paramref name="at" /> hold <paramref name="expression" />, said as <paramref name="shown" />, which
+        /// passes as it stands: in the field's place where the value may come from elsewhere, and in its field otherwise.
         /// </summary>
-        /// <remarks>An expression is no value its field's editor takes, so it is held to nothing while the field still says it; typing over it makes it a value like any other.</remarks>
+        /// <remarks>
+        /// Standing in the field's place, it gives the value until a fixed value or a setting is chosen for it; said in the field, until
+        /// the field is typed over.
+        /// </remarks>
         public void Hold(int at, Literal expression, string shown)
         {
             if (at < 0 || at >= _held.Count || !expression.IsExpression)
@@ -705,11 +725,26 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
 
             _held[at] = expression;
             _heldShown[at] = shown;
-            _fields[at].Text = shown;
+            if (_expressions[at] != null)
+            {
+                _settings[at] = "";
+                _expressions[at].Text = shown;
+            }
+            else
+            {
+                _fields[at].Text = shown;
+            }
+
             Changed();
         }
 
-        /// <summary>The expression the value at <paramref name="at" /> holds while its field still says it, or none.</summary>
+        /// <summary>The expression standing in the place of the field of the value at <paramref name="at" />, shown while it gives the value; null where the value may come from nowhere else.</summary>
+        public Button ExpressionAt(int at)
+        {
+            return at >= 0 && at < _expressions.Count ? _expressions[at] : null;
+        }
+
+        /// <summary>The expression that gives the value at <paramref name="at" />, or none.</summary>
         public Literal HeldAt(int at)
         {
             return at >= 0 && at < _held.Count && Holds(at) ? _held[at] : default(Literal);
@@ -732,7 +767,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             return at >= 0 && at < _wanted.Count ? Label(at) : "";
         }
 
-        /// <summary>The expressions the fields hold and still say, to read a line of their words back with.</summary>
+        /// <summary>The expressions that give values, to read a line of their words back with.</summary>
         public List<Literal> Holding()
         {
             var holding = new List<Literal>();
@@ -745,10 +780,10 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Fields
             return holding;
         }
 
-        /// <summary>Whether the field at <paramref name="at" /> still says the expression it was given to hold.</summary>
+        /// <summary>Whether an expression gives the value at <paramref name="at" />: standing in its field's place, or said in a field still saying it.</summary>
         bool Holds(int at)
         {
-            return _held[at].IsExpression && _fields[at].Text == _heldShown[at];
+            return _held[at].IsExpression && (_expressions[at] != null || _fields[at].Text == _heldShown[at]);
         }
 
         /// <summary>The mark choosing where the value at <paramref name="at" /> comes from, or null where it may come from nowhere else.</summary>

@@ -73,7 +73,7 @@
     <comment>Codex page on "Setting", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Expression" xml:space="preserve">
-    <value>An **expression** is a value worked out from [![](mark:value)&amp;nbsp;block values](Term.Value class=term), [![](mark:setting)&amp;nbsp;settings](Term.Setting class=term) and [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), with +, -, × and ÷ and the functions min, max, round and abs. It is built on its own page by dragging calculations and values into place. A block value read from several blocks is combined as their sum, average, lowest or highest. It is worked out each time the [step](Term.Step class=term) using it runs. Make one with "Expression…", from a value's ![](mark:link)&amp;nbsp;link mark or from the menu under the value a step sets a state to. A value that has to be fixed beforehand takes none: a state's starting value, a setting's default and an [installation](Term.Installation class=term)'s answer.</value>
+    <value>An **expression** is a value worked out from [![](mark:value)&amp;nbsp;block values](Term.Value class=term), [![](mark:setting)&amp;nbsp;settings](Term.Setting class=term) and [![](mark:state)&amp;nbsp;states](Term.LogicSystemStates class=term), with +, -, × and ÷ and the functions min, max, round and abs. It is built on its own page by dragging calculations and values into place. A block value read from several blocks is combined as their sum, average, lowest or highest. It is worked out each time the [step](Term.Step class=term) using it runs. Make one with "Expression…", from a value's ![](mark:link)&amp;nbsp;link mark or from the menu under the value a step sets a state to. An expression can also be the condition an if or a when tests: choose "Expression…" in the menu of sources under if, otherwise if or when, beside "Blocks…", "Existing slot…" and "States…". A condition is built from the comparisons is, is not, is above, is at least, is below and is at most, and from not, and and or, which are offered only there. A block value, setting or state that is on or off, put where a condition stands, is compared with on, and that comparison can be changed like any other. In a condition, a block value read from several blocks can also be checked on any of them or all of them. Where on or off is set rather than tested, such as the value a step sets a state to, it is one value alone: on, off, or a block value, setting or state that is on or off. Nothing is calculated there. A value that has to be fixed beforehand takes none: a state's starting value, a setting's default and an [installation](Term.Installation class=term)'s answer.</value>
     <comment>Codex page on "Expression", shown in a tip on the line an expression is built in. It says what the term is, naming it in bold.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
@@ -4121,12 +4121,28 @@
     <comment>Tip of the expression builder's bin, Sprocket.Expression.Bin.</comment>
   </data>
   <data name="Sprocket.Expression.OptimizeAbout" xml:space="preserve">
-    <value>Works out the parts made only of fixed values, and drops what changes nothing, such as × 1 or + 0. What the expression comes to stays the same.</value>
+    <value>Works out the parts made only of fixed values, and drops what changes nothing, such as × 1 or + 0. What the expression comes to stays the same. What it would change is marked in the expression.</value>
     <comment>Tip of Sprocket.Expression.Optimize, the button under the expression being built.</comment>
+  </data>
+  <data name="Sprocket.Expression.AlwaysAbout" xml:space="preserve">
+    <value>This always comes to `{value}`. Press `Optimize` to put `{value}` in its place.</value>
+    <comment>Tip of a box in the expression being built, marked as a warning, that comes to the same fixed value whatever the blocks, states and settings in it hold, such as anything and off. {value} is that value. Optimize is Sprocket.Expression.Optimize.</comment>
+  </data>
+  <data name="Sprocket.Expression.NoDifferenceAbout" xml:space="preserve">
+    <value>This changes nothing here. Press `Optimize` to take it out.</value>
+    <comment>Tip of a part of the expression being built, marked as a warning, that makes no difference to the box it is in, such as × 1, + 0, or the on in anything and on. Optimize is Sprocket.Expression.Optimize.</comment>
   </data>
   <data name="Sprocket.Expression.EmptyAbout" xml:space="preserve">
     <value>Empty: drop a value or a calculation here.</value>
     <comment>Tip of an empty place in the expression being built.</comment>
+  </data>
+  <data name="Sprocket.Value.ExpressionHeldAbout" xml:space="preserve">
+    <value>Worked out by this expression. Press to change it. The mark beside it gives a fixed value or a setting instead.</value>
+    <comment>Tip of an expression standing in the place of a value's field, after it was built with Sprocket.Value.Expression.</comment>
+  </data>
+  <data name="Sprocket.Expression.ChangeAbout" xml:space="preserve">
+    <value>Press to pick another in its place.</value>
+    <comment>Tip of the name of a block value, setting or state in the expression being built, which opens the choice of another to put where it stands.</comment>
   </data>
   <data name="Sprocket.Expression.SettingAbout" xml:space="preserve">
     <value>Drop it where it goes, then pick which setting.</value>
@@ -4139,5 +4155,41 @@
   <data name="Sprocket.Expression.TypedAbout" xml:space="preserve">
     <value>Drop it in an empty place, then set its value right there.</value>
     <comment>Tip of each of the expression builder's pieces for a fixed value, under Sprocket.Expression.Typed.</comment>
+  </data>
+  <data name="Sprocket.Expression.IsAbout" xml:space="preserve">
+    <value>On where the two values are the same, and off where they differ.</value>
+    <comment>Tip of the expression builder's piece is, under Sprocket.Expression.Compare.</comment>
+  </data>
+  <data name="Sprocket.Expression.IsNotAbout" xml:space="preserve">
+    <value>On where the two values differ, and off where they are the same.</value>
+    <comment>Tip of the expression builder's piece is not, under Sprocket.Expression.Compare.</comment>
+  </data>
+  <data name="Sprocket.Expression.AboveAbout" xml:space="preserve">
+    <value>On where the first value is higher than the second.</value>
+    <comment>Tip of the expression builder's piece comparing whether the first value is the higher, on the Compare and join shelf (Sprocket.Expression.Compare).</comment>
+  </data>
+  <data name="Sprocket.Expression.AtLeastAbout" xml:space="preserve">
+    <value>On where the first value is the second or higher.</value>
+    <comment>Tip of the expression builder's piece is at least, under Sprocket.Expression.Compare.</comment>
+  </data>
+  <data name="Sprocket.Expression.BelowAbout" xml:space="preserve">
+    <value>On where the first value is lower than the second.</value>
+    <comment>Tip of the expression builder's piece comparing whether the first value is the lower, on the Compare and join shelf (Sprocket.Expression.Compare).</comment>
+  </data>
+  <data name="Sprocket.Expression.AtMostAbout" xml:space="preserve">
+    <value>On where the first value is the second or lower.</value>
+    <comment>Tip of the expression builder's piece is at most, under Sprocket.Expression.Compare.</comment>
+  </data>
+  <data name="Sprocket.Expression.NotAbout" xml:space="preserve">
+    <value>On where what it holds is off, and off where it is on.</value>
+    <comment>Tip of the expression builder's piece not, under Sprocket.Expression.Compare.</comment>
+  </data>
+  <data name="Sprocket.Expression.AndAbout" xml:space="preserve">
+    <value>On where both are on. Where the first is off, the second is not looked at.</value>
+    <comment>Tip of the expression builder's piece and, under Sprocket.Expression.Compare.</comment>
+  </data>
+  <data name="Sprocket.Expression.OrAbout" xml:space="preserve">
+    <value>On where either is on. Where the first is on, the second is not looked at.</value>
+    <comment>Tip of the expression builder's piece or, under Sprocket.Expression.Compare.</comment>
   </data>
 </root>

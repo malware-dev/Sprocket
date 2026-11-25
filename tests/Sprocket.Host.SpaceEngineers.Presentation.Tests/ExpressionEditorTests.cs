@@ -78,7 +78,7 @@ public class ExpressionEditorTests
         for (var i = 0; i < 5; i++)
             sim.Tick();
 
-        OpenValues(sim);
+        OpenStep(sim);
         Assert.IsType<PickPage>(sim.Editor.Current);
         var form = sim.Editor.Pick().Arguments!.Form;
         form.MarkOf(0)!.Command!.Execute();
@@ -96,7 +96,9 @@ public class ExpressionEditorTests
         builder.Primary();
         sim.Tick();
 
-        Assert.Equal("\"Reach \" + Reach", form.Fields[0].Text);
+        Assert.True(form.ExpressionAt(0)!.IsVisible);
+        Assert.False(((Lumel.Element)form.Fields[0]).IsVisible);
+        Assert.Equal("\"Reach \" + Reach", form.ExpressionAt(0)!.Text);
         sim.Editor.Current.Primary();
         sim.Tick();
 
@@ -105,8 +107,124 @@ public class ExpressionEditorTests
         Assert.Equal("\"Reach \" + Reach", act.Arguments[0].Tree.Written);
     }
 
+    /// <summary>
+    /// A text whose words are those of an expression, built as that expression on the expression page, is a change, and Done
+    /// makes the step hold the expression.
+    /// </summary>
+    [Fact]
+    public void AnExpressionWrittenAsTheTextItReplacesIsAChange()
+    {
+        var sim = Simulation.Fresh();
+        sim.Machine.TextPanel(60, "Board");
+        sim.Tick();
+        var program = "sprocket 3 alpha 1\n\n"
+            + "let 'Board' = block 'TextPanel/LargeTextPanel' [ 60, [ (60 0 0) ], \"Board\" ]\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Sign\n{\n"
+            + "    required slot board expects sprocket.screen\n"
+            + "    optional slot Reach expects real = 5\n\n"
+            + "    sequence 1 {\n        call sprocket.show_text(\"\"\"Reach \"\" + Reach\") on [ board ]\n    }\n}\n\n"
+            + "instance 1 of \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as 'Installation 1' {\n    board = [ sprocket.get_screen(1) on [ 'Board' ] ]\n}\n";
+        Assert.Equal("", ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        Assert.Equal("\"Reach \" + Reach", ((Act)sequence.Steps[0]).Arguments[0].Text);
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        OpenStep(sim);
+        var form = sim.Editor.Pick().Arguments!.Form;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueExpression);
+        sim.Tick();
+        var builder = Assert.IsType<ExpressionPage>(sim.Editor.Current);
+        var draft = builder.Panel.Draft;
+        draft.Remove(draft.Root);
+        draft.Fill((DraftHole)draft.Root, new DraftJoin(JoinKind.Add));
+        draft.Fill((DraftHole)((DraftJoin)draft.Root).Parts[0], new DraftValue(new Framework.Model.Expressions.Operand(Literal.Of("Reach "))));
+        draft.Fill((DraftHole)((DraftJoin)draft.Root).Parts[1], new DraftValue(new Framework.Model.Expressions.Operand(Literal.Setting("Reach"))));
+        builder.Primary();
+        sim.Tick();
+
+        sim.Editor.Current.Primary();
+        sim.Tick();
+
+        var act = Assert.IsType<Act>(Assert.Single(sequence.Steps));
+        Assert.True(act.Arguments[0].IsExpression, act.Arguments[0].Said);
+        Assert.Equal("\"Reach \" + Reach", act.Arguments[0].Tree.Written);
+    }
+
+    /// <summary>A text panel's step, open on its page, its text written as <paramref name="text" />, the script's way.</summary>
+    static Simulation Board(string text, out Sequence sequence)
+    {
+        var sim = Simulation.Fresh();
+        sim.Machine.TextPanel(60, "Board");
+        sim.Tick();
+        var program = "sprocket 3 alpha 1\n\n"
+            + "let 'Board' = block 'TextPanel/LargeTextPanel' [ 60, [ (60 0 0) ], \"Board\" ]\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Sign\n{\n"
+            + "    required slot board expects sprocket.screen\n"
+            + "    optional slot Reach expects real = 5\n\n"
+            + "    sequence 1 {\n        call sprocket.show_text(" + text + ") on [ board ]\n    }\n}\n\n"
+            + "instance 1 of \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as 'Installation 1' {\n    board = [ sprocket.get_screen(1) on [ 'Board' ] ]\n}\n";
+        Assert.Equal("", ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        return sim;
+    }
+
+    /// <summary>Pressing a step's text in its sentence opens the page text is written on, and saving there gives the step that text.</summary>
+    [Fact]
+    public void PressingAStepsTextOpensItsPage()
+    {
+        var sim = Board("\"Shut\"", out var sequence);
+
+        OpenValues(sim);
+        var page = Assert.IsType<Framework.Ui.Writing.TextPage>(sim.Editor.Current);
+        Assert.NotNull(page.View);
+        Assert.Equal("Shut", page.Box.Text);
+        page.Box.Text = "Open";
+        page.Primary();
+        sim.Tick();
+
+        Assert.IsType<SequencePage>(sim.Editor.Current);
+        Assert.Equal("Open", Assert.IsType<Act>(Assert.Single(sequence.Steps)).Arguments[0].Text);
+    }
+
+    /// <summary>Pressing a step's text in its sentence where an expression gives it opens the expression page on it.</summary>
+    [Fact]
+    public void PressingAStepsExpressionOpensItsPage()
+    {
+        var sim = Board("\"Reach \" + Reach", out _);
+
+        OpenValues(sim);
+
+        var builder = Assert.IsType<ExpressionPage>(sim.Editor.Current);
+        Assert.Equal("\"Reach \" + Reach", builder.Panel.Draft.Built()!.Written);
+    }
+
     static Simulation Moving(out AutomationSystem system, out Sequence sequence) =>
         Arm("call sprocket.move_to(" + Expression + ", 0.3) on [ arm ]", out system, out sequence);
+
+    // Opens the first step in the selector, by its action, where its values can come from somewhere else.
+    static void OpenStep(Simulation sim)
+    {
+        sim.Editor.StepRows()[0].Slots.OfType<ActionSlot>().First().Opens!.Execute();
+        sim.Tick();
+    }
 
     static void OpenValues(Simulation sim)
     {
@@ -131,7 +249,8 @@ public class ExpressionEditorTests
         var sim = Moving(out _, out var sequence);
         OpenValues(sim);
         var page = Assert.IsType<SequencePage>(sim.Editor.Current);
-        Assert.Equal(Shown, page.Giving!.Form.Fields[0].Text);
+        Assert.Equal(Shown, page.Giving!.Form.ExpressionAt(0)!.Text);
+        Assert.False(((Lumel.Element)page.Giving!.Form.Fields[0]).IsVisible);
 
         page.Giving!.Done();
         sim.Tick();
@@ -197,14 +316,119 @@ public class ExpressionEditorTests
         Assert.Equal(Expression, Assert.IsType<Act>(Assert.Single(sequence.Steps)).Arguments[0].Tree.Written);
     }
 
-    /// <summary>The value's mark replaces the expression with a fixed value, typed in its place.</summary>
+    /// <summary>
+    /// An expression stands in its value's place, not in its field, so its words cannot be typed over, and pressing it opens the
+    /// expression page on it.
+    /// </summary>
+    [Fact]
+    public void PressingTheExpressionOpensItsPage()
+    {
+        var sim = Moving(out _, out _);
+        OpenValues(sim);
+        var form = Assert.IsType<SequencePage>(sim.Editor.Current).Giving!.Form;
+        Assert.False(((Lumel.Element)form.Fields[0]).IsVisible);
+        Assert.True(form.MarkOf(0)!.Is(Framework.Ui.Look.LookStates.Chosen));
+
+        form.ExpressionAt(0)!.Command!.Execute();
+        sim.Tick();
+
+        var builder = Assert.IsType<ExpressionPage>(sim.Editor.Current);
+        Assert.Equal(Expression, builder.Panel.Draft.Built()!.Written);
+    }
+
+    /// <summary>Opening an expression and leaving it untouched changes nothing: the page has nothing to undo, and the step is as it was.</summary>
+    [Fact]
+    public void OpeningAnExpressionUntouchedChangesNothing()
+    {
+        // Every value given, its optional one too, so only the expression is left to tell apart.
+        var sim = Arm("call sprocket.move_to(" + Expression + ", 0.3, each) on [ arm ]", out var system, out var sequence);
+        var before = string.Join(" | ", ((Act)sequence.Steps[0]).Arguments.Select(a => a.Kind + ":" + a.Said));
+        OpenValues(sim);
+        var form = Assert.IsType<SequencePage>(sim.Editor.Current).Giving!.Form;
+        form.ExpressionAt(0)!.Command!.Execute();
+        sim.Tick();
+        var builder = Assert.IsType<ExpressionPage>(sim.Editor.Current);
+        Assert.False(builder.CanUndo, "the expression page had something to undo before anything was touched");
+
+        Assert.True(builder.Panel.Reads, builder.Panel.Why);
+        builder.Primary();
+        sim.Tick();
+        var page = Assert.IsType<SequencePage>(sim.Editor.Current);
+        page.Giving!.Done();
+        sim.Tick();
+
+        Assert.False(sim.Editor.CanUndo(system, sequence), $"closing an untouched expression made a change: was [{before}] now [{string.Join(" | ", ((Act)sequence.Steps[0]).Arguments.Select(a => a.Kind + ":" + a.Said))}]");
+    }
+
+    /// <summary>A text panel's text held as an expression, opened in the selector and on its page and left untouched, is no change: leaving asks nothing, and Done changes nothing.</summary>
+    [Fact]
+    public void AnUntouchedTextExpressionInTheSelectorIsNoChange()
+    {
+        var sim = Simulation.Fresh();
+        sim.Machine.TextPanel(60, "Board");
+        sim.Tick();
+        var program = "sprocket 3 alpha 1\n\n"
+            + "let 'Board' = block 'TextPanel/LargeTextPanel' [ 60, [ (60 0 0) ], \"Board\" ]\n\n"
+            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.Sign\n{\n"
+            + "    required slot board expects sprocket.screen\n"
+            + "    optional slot Reach expects real = 5\n\n"
+            + "    sequence 1 {\n        call sprocket.show_text(\"Reach \" + Reach) on [ board ]\n    }\n}\n\n"
+            + "instance 1 of \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as 'Installation 1' {\n    board = [ sprocket.get_screen(1) on [ 'Board' ] ]\n}\n";
+        Assert.Equal("", ProgramReader.Load(program, sim.Editor.Program, sim.World.Values));
+        var system = sim.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        system.Enabled = false;
+        sim.Editor.Program.Edited();
+        sim.Editor.Invalidate();
+        sim.Tick();
+        sim.Editor.Push(new SequencePage(sim.Editor, sequence));
+        for (var i = 0; i < 5; i++)
+            sim.Tick();
+
+        OpenStep(sim);
+        var form = sim.Editor.Pick().Arguments!.Form;
+        Assert.True(sim.Editor.Current.Leaving(), "the selector thought something moved before anything was touched");
+        form.ExpressionAt(0)!.Command!.Execute();
+        sim.Tick();
+        Assert.IsType<ExpressionPage>(sim.Editor.Current).Primary();
+        sim.Tick();
+
+        Assert.True(sim.Editor.Current.Leaving(), "the selector thought something moved after the expression page closed untouched");
+        sim.Editor.Current.Primary();
+        sim.Tick();
+        Assert.False(sim.Editor.CanUndo(system, sequence), $"Done on an untouched expression made a change: {((Act)sequence.Steps[0]).Arguments[0].Said}");
+    }
+
+    /// <summary>The menu under the mark of a value an expression gives marks Expression…, not a fixed value.</summary>
+    [Fact]
+    public void TheMarkSaysTheExpressionGivesTheValue()
+    {
+        var sim = Moving(out _, out _);
+        OpenValues(sim);
+        var form = Assert.IsType<SequencePage>(sim.Editor.Current).Giving!.Form;
+
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+
+        var texts = sim.Editor.Texts;
+        Assert.Equal(texts.ValueExpression, sim.Editor.Screen.Default?.Text);
+    }
+
+    /// <summary>The value's mark replaces the expression with a fixed value, its field back in the expression's place to type it in.</summary>
     [Fact]
     public void TheMarkReplacesTheExpressionWithAFixedValue()
     {
         var sim = Moving(out _, out var sequence);
         OpenValues(sim);
         var page = Assert.IsType<SequencePage>(sim.Editor.Current);
-        page.Giving!.Form.Fields[0].Text = "7";
+        var form = page.Giving!.Form;
+        form.MarkOf(0)!.Command!.Execute();
+        sim.Tick();
+        sim.Editor.PressAnswer(sim.Editor.Texts.ValueFixed);
+        sim.Tick();
+        Assert.False(form.ExpressionAt(0)!.IsVisible);
+        Assert.True(((Lumel.Element)form.Fields[0]).IsVisible);
+        form.Fields[0].Text = "7";
         page.Giving!.Done();
         sim.Tick();
 

@@ -55,6 +55,28 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <remarks>Chosen rather than sampled.</remarks>
         public static readonly Color Veil = new Color(20, 27, 32, 153);
 
+        /// <summary>The wash of a calculation in an expression being built while its grip is under the pointer: <see cref="Accent" />, one part in twelve opaque, so a calculation inside another shows deeper.</summary>
+        /// <remarks>Chosen rather than sampled.</remarks>
+        public static readonly Color Nesting = new Color(142, 188, 207, 21);
+
+        /// <summary>
+        /// The ground of a value in an expression being built: <see cref="Accent" />, laid over what is behind it, so it stands the same
+        /// step above a calculation's wash as above the bare <see cref="Well" />, where it comes to <see cref="SlotFill" />.
+        /// </summary>
+        /// <remarks>
+        /// Worked out from <see cref="Well" /> and <see cref="SlotFill" /> as the game blends, in linear light: the wash measured in game,
+        /// <see cref="Nesting" /> over the well coming to (52, 69, 78), matches that blend and not one in the colors as written.
+        /// </remarks>
+        public static readonly Color ValueGround = new Color(142, 188, 207, 24);
+
+        /// <summary>The ground of a value in an expression being built that a grip under the pointer would take: a step past <see cref="ValueGround" />.</summary>
+        /// <remarks>Chosen rather than sampled.</remarks>
+        public static readonly Color ValueGroundHot = new Color(142, 188, 207, 40);
+
+        /// <summary>The ground of a value in an expression being built that would be taken along inside a calculation whose grip is under the pointer: a step short of <see cref="ValueGround" />.</summary>
+        /// <remarks>Chosen rather than sampled.</remarks>
+        public static readonly Color ValueGroundQuiet = new Color(142, 188, 207, 12);
+
         /// <summary>The words of a link, wherever one stands.</summary>
         /// <remarks>Chosen rather than sampled.</remarks>
         public static readonly Color Link = new Color(79, 195, 247);

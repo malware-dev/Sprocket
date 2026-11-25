@@ -126,7 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             return new AddOption(texts.SystemTrigger, null, new[]
             {
                 new AddOption(SentenceText.WhenWord, texts.Codex.SystemWhenAbout,
-                    SourceSwitch.Options(texts, true, false, from => _changes(CommandKind.StartWhen, () => _editor.Starts.StartSequence(_system, new WhenTrigger(""), placed, from)))),
+                    SourceSwitch.Options(texts, true, false, from => _changes(CommandKind.StartWhen, () => _editor.Starts.StartSequence(_system, new WhenTrigger(""), placed, from)), true)),
                 new AddOption(SentenceText.EveryWord, texts.Codex.SystemEveryAbout,
                     _changes(CommandKind.StartEvery, () => _editor.Starts.StartSequence(_system, new EveryTrigger(_editor.NewLength), placed)))
             });
@@ -264,10 +264,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
             if (watch != null)
                 Watched(row, watch);
 
-            // A condition written as an expression is shown as it reads; the builder does not yet make one.
+            // A condition that is an expression reads as it does, and opens its builder.
             var expressed = trigger as ExpressionTrigger;
             if (expressed != null)
-                row.Starts.Add(ArgumentsSlot.Testing(Shown(expressed.Condition), null));
+                row.Starts.Add(ArgumentsSlot.Testing(Shown(expressed.Condition), Starts(trigger, OpeningColumn.What)));
 
             Doing(row, trigger);
 
@@ -372,27 +372,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers
         /// <summary>
         /// Opens the panel the values <paramref name="when" /> starts on are given in, asked for by <paramref name="fields" />: what
         /// it compares with where they are <paramref name="holds" /> <see cref="ArgumentRole.Checked" />, what it reads with
-        /// otherwise; hung from the part saying them, and changing the trigger as it closes. The selector where a value is chosen
-        /// on a screen of its own.
+        /// otherwise; hung from the part saying them, and changing the trigger as it closes. The expression page or the page text is written on
+        /// where the one value is an expression or such a text, and the selector where a value is chosen on a screen of its own.
         /// </summary>
         void Compare(WhenTrigger when, List<Field> fields, ArgumentRole holds)
         {
+            var checks = holds == ArgumentRole.Checked;
+            var given = checks ? new[] { when.Value } : when.Arguments;
+            Action<List<Literal>> apply = values =>
+            {
+                if (_system.IndexOfTrigger(when) < 0)
+                    return;
+
+                var now = when.Copy();
+                ComparisonQuestion.Give(now.Arguments, values, checks, value => now.Value = value);
+                _editor.Do(_system, new ChangeTrigger(when, now));
+            };
+            if (ValuesQuestion.Opens(_editor, _system, fields, given, apply))
+                return;
+
             if (ValuesQuestion.Chooses(fields))
             {
                 _editor.Starts.ChangeTrigger(_system, when, OpeningColumn.Arguments);
                 return;
             }
 
-            var checks = holds == ArgumentRole.Checked;
-            var given = checks ? new[] { when.Value } : when.Arguments;
             Action<string, List<Literal>, bool> answered = (said, held, cancelled) =>
             {
-                if (cancelled || _system.IndexOfTrigger(when) < 0)
-                    return;
-
-                var now = when.Copy();
-                ComparisonQuestion.Give(now.Arguments, FieldSet.Read(said, fields, held), checks, value => now.Value = value);
-                _editor.Do(_system, new ChangeTrigger(when, now));
+                if (!cancelled)
+                    apply(FieldSet.Read(said, fields, held));
             };
             if (ValuesQuestion.Offer(_editor, fields, given, said => answered(said, new List<Literal>(given), false)))
                 return;

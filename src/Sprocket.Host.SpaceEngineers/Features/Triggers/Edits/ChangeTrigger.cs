@@ -57,6 +57,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Triggers.Edits
                 if (_wasKey != _nowKey || _wasSources != null && _nowSources != null && !Same(_wasSources, _nowSources))
                     return true;
 
+                var wasExpressed = _was as ExpressionTrigger;
+                var nowExpressed = _now as ExpressionTrigger;
+                if (wasExpressed != null && nowExpressed != null)
+                    return wasExpressed.Condition.Written != nowExpressed.Condition.Written;
+
                 var wasWhen = _was as WhenTrigger;
                 var nowWhen = _now as WhenTrigger;
                 return wasWhen != null && nowWhen != null

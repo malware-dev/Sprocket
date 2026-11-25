@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Game.Players;
-using Sprocket.Host.SpaceEngineers.Framework.Language.Reading;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Fields;
 using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
@@ -97,7 +96,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
             string value = "", state;
             var stated = _forTests && ComparisonQuestion.Split(_picked.Member.Id, out value, out state);
             var read = stated ? _picked.Member.WithId(value) : _picked.Member;
-            if (_forReadings)
+            // A check of any or all of the blocks asks how each is compared, and with what, as a test of blocks does.
+            if (_forReadings && !_picked.Checking)
                 return ComparisonQuestion.Parameters(Vocabulary.ValueOf(_editor.World, selection, read));
 
             return ComparisonQuestion.Asked(Vocabulary.ValueOf(_editor.World, selection, read), Vocabulary.EventsOf(_editor.World, selection), stated);
@@ -148,8 +148,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                 if (_entered == null)
                     return false;
 
-                var entered = new List<Literal>();
-                ValueLine.Read(_entered, entered);
+                // Read as Done reads them, an expression given whole rather than as the words it is written in.
+                var entered = Read(_entered);
                 if (entered.Count != _arrivedValues.Count)
                     return true;
 
@@ -264,6 +264,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
                     var slotted = (_page as PickPage)?.Slotted;
                     if (_editor.Current == _page && slotted != null)
                         SettingSources.Source(_editor, slotted, arguments.Form, at, mark, question => _making = question);
+                };
+
+                arguments.Form.Expressing += at =>
+                {
+                    var slotted = (_page as PickPage)?.Slotted;
+                    if (_editor.Current == _page && slotted != null)
+                        SettingSources.Rebuild(_editor, slotted, arguments.Form, at);
                 };
 
                 arguments.Form.Selects += field => Target.Select(field, null);

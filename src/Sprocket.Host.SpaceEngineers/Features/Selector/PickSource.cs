@@ -13,6 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Selector
         States,
 
         /// <summary>The mods the host has, each by the namespace it registered.</summary>
-        Mods
+        Mods,
+
+        /// <summary>An expression built on its own page, for a condition an if or a when tests.</summary>
+        Expression
     }
 }

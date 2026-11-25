@@ -21,7 +21,7 @@ namespace Sprocket.GameTests
     /// A stop is its picture's name and its steps, each one of: <c>hover:</c> rests the pointer on what follows, <c>page:</c> opens
     /// the codex page it names in the tip that is open, <c>type:</c> types what follows, <c>add:</c> takes the entry it names from a plus menu, <c>pick:</c> picks the row of a selector's list it names, such as a block, <c>click</c> clicks where the pointer rests, <c>down</c> and <c>up</c> press and let go of its button, so a <c>hover:</c> between them drags, <c>right:</c> moves the pointer that many units right,
     /// <c>open:</c> presses the first shown element of the type it names, such as a plus menu or a list field, <c>tab</c>,
-    /// <c>escape</c>, <c>arrowdown</c>, <c>arrowup</c> and <c>enter</c> press their keys, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds Alt,
+    /// <c>escape</c>, <c>arrowdown</c>, <c>arrowup</c>, <c>arrowright</c> and <c>enter</c> press their keys, <c>on</c> and <c>off</c> flip the logic system's switch, <c>alt</c> holds Alt,
     /// <c>answer</c> answers a question where one is asked, <c>wait</c> gives a page two seconds, <c>stay</c> first starts where the last stop left the editor, and anything else is pressed by
     /// its words. A stop ending <c>frame:</c> and a count is pictured that many plugin updates after its last press.
     /// </remarks>
@@ -200,6 +200,8 @@ namespace Sprocket.GameTests
                     return _input.Press(MyKeys.Down);
                 case "arrowup":
                     return _input.Press(MyKeys.Up);
+                case "arrowright":
+                    return _input.Press(MyKeys.Right);
                 case "enter":
                     return _input.Press(MyKeys.Enter);
                 case "escape":

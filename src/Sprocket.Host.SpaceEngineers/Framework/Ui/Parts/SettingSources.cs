@@ -16,15 +16,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
         /// each setting of <paramref name="system" /> <paramref name="fits" /> takes and, after a line, a new setting; the one it
         /// comes from, <paramref name="now" />, marked. <paramref name="chosen" /> is given the setting chosen and its default as
         /// said, or two empty texts for a fixed value, and <paramref name="fresh" /> is carried out for a new one. Where
-        /// <paramref name="expression" /> is given, an expression is offered last, which it is carried out for; a value that has
-        /// to be a constant is given none.
+        /// <paramref name="expression" /> is given, an expression is offered last, which it is carried out for, and marked where
+        /// <paramref name="expressed" /> says one gives the value now; a value that has to be a constant is given none.
         /// </summary>
         public static void Offer(SprocketEditor editor, AutomationSystem system, Func<string, bool> fits, string now, Action<string, string> chosen,
-            Action fresh, Action expression = null)
+            Action fresh, Action expression = null, bool expressed = false)
         {
             var texts = editor.Texts;
             editor.AskHere("");
-            editor.Answer(texts.ValueFixed, () => chosen("", ""), now.Length == 0);
+            editor.Answer(texts.ValueFixed, () => chosen("", ""), now.Length == 0 && !expressed);
             var settings = editor.AnswerOpening(texts.ValueSetting);
             foreach (var part in system.Parts)
             {
@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
 
             editor.Answer(settings, texts.ValueNewSetting, fresh, false);
             if (expression != null)
-                editor.Answer(texts.ValueExpression, expression);
+                editor.Answer(texts.ValueExpression, expression, expressed);
         }
 
         /// <summary>
@@ -58,7 +58,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Parts
                 (setting, said) => form.Choose(at, setting, said),
                 () => making(New(editor, system, shaped != null ? shaped.Name : type, Read(type, form.ValueAt(at)), () => mark,
                     made => form.Choose(at, made, Default(system, made)), () => making(null))),
-                type == null ? null : (Action)(() => Build(editor, system, form, at, type)));
+                type == null ? null : (Action)(() => Build(editor, system, form, at, type)), form.HeldAt(at).IsExpression);
+        }
+
+        /// <summary>Opens the page the expression giving the value at <paramref name="at" /> in <paramref name="form" /> is changed on, as an expression of <paramref name="system" />.</summary>
+        public static void Rebuild(SprocketEditor editor, AutomationSystem system, FieldSet form, int at)
+        {
+            var type = SettingTypes.Of(form.Field(at));
+            if (type != null)
+                Build(editor, system, form, at, type);
         }
 
         /// <summary>Opens the page the value at <paramref name="at" /> in <paramref name="form" />, of <paramref name="type" />, is built on as an expression of <paramref name="system" />.</summary>

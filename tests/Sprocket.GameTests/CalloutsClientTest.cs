@@ -4,7 +4,8 @@ using VRage.Input;
 namespace Sprocket.GameTests
 {
     /// <summary>
-    /// The what's-new bubbles of the current release, in the game client on Kept Automation, with the test's own fresh user data: the
+    /// The what's-new bubbles of release 1.1, in the game client on Kept Automation, with the test's own user data of a player who
+    /// last saw release 1.0 (Run-ClientTests.ps1 writes it), so every bubble newer than that is due: the
     /// share bubble hangs at home, Escape and a press elsewhere leave it due, a press on it dismisses it for good, and the import
     /// and settings bubbles hang where they belong. The harness cannot show this: it is the real game window, with its own
     /// pointer, Escape and player file, drawing the bubble over the real editor.
@@ -43,7 +44,7 @@ namespace Sprocket.GameTests
 
             var due = string.Join(", ", editor.DueCallouts());
             _report.Check("callouts due", editor.DueCallouts().Contains("share") && editor.DueCallouts().Contains("import") && editor.DueCallouts().Contains("settings"),
-                $"with fresh user data the editor has due: {due}");
+                $"for a player who last saw release 1.0 the editor has due: {due}");
 
             // The share bubble at home.
             _report.Check("callout share at home", editor.ShownCallout() == "share" && _input.Shows(editor.ShownCalloutSaid() ?? "?"),
@@ -120,7 +121,7 @@ namespace Sprocket.GameTests
             pressed = _input.PressNamed(said);
             yield return 2 * PluginUpdates.PerSecond;
             _report.Check("callout settings dismissed", pressed && editor.CalloutDismissed("settings") && editor.DueCallouts().Count == 0,
-                $"the pointer {(pressed ? "found" : "did not find")} the bubble saying \"{said}\"; settings dismissed {editor.CalloutDismissed("settings")}, still due: {string.Join(", ", editor.DueCallouts())}, release seen {editor.SeenRelease()?.ToString() ?? "none"}");
+                $"the pointer {(pressed ? "found" : "did not find")} the bubble saying \"{said}\"; settings dismissed {editor.CalloutDismissed("settings")}, still due: {string.Join(", ", editor.DueCallouts())}, release seen {editor.SeenRelease() ?? "none"}");
             shot = _tour.Tour(editor, new[] { new[] { "callout none left", "stay" } }, "");
             while (shot.MoveNext())
                 yield return shot.Current;

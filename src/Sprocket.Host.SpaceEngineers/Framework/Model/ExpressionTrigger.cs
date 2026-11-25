@@ -28,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Model
         public Expression IntervalExpression { get; set; }
 
         /// <summary>Whether the condition reads a block, which is what an <c>every</c> paces.</summary>
+        /// <remarks>Allocates: asked as a program is read or compiled, never on a look.</remarks>
         public bool ReadsBlocks
         {
             get

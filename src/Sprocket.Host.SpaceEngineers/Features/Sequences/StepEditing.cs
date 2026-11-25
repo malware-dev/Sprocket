@@ -442,10 +442,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed: on blocks or on a state, as it is now.</summary>
         public void EditTest(Step step, BranchTest test, OpeningColumn opens)
         {
+            var origin = _editor.Depth;
             Ask(step is If ? SentenceText.IfWord : SentenceText.OtherwiseIfWords, test, opens, (now, made) =>
             {
                 Do(made, new SetTest(_sequence.Steps.IndexOf(step), test, now));
-                _editor.Pop();
+                _editor.UnwindTo(origin);
             });
         }
 
@@ -462,9 +463,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 // Checking for a mod is unfinished, so it is offered in developer mode where a mod has a namespace to check for, and to a test already checking one.
                 ChecksMods || was is HostTest
                     ? () => new ModsPage(_editor, lead, was as HostTest, test => chosen(test, null))
-                    : (Func<Framework.Ui.Shell.EditorPage>)null);
+                    : (Func<Framework.Ui.Shell.EditorPage>)null,
+                () => new ExpressionPage(_editor, _sequence.System, "flag", null, was is ExpressionTest ? Literal.Worked(((ExpressionTest)was).Condition) : (Literal?)null,
+                    built => chosen(ConditionShapes.TestOf(_sequence.System, built.IsExpression ? built.Tree : new Operand(built)), null), true));
 
-            var current = was is StateTest ? PickSource.States : was is HostTest ? PickSource.Mods : was != null ? PickSource.Blocks : (PickSource?)null;
+            var current = was is StateTest ? PickSource.States : was is HostTest ? PickSource.Mods : was is ExpressionTest ? PickSource.Expression
+                : was != null ? PickSource.Blocks : (PickSource?)null;
             source.Open(from ?? Sourcing(opens, current), current);
         }
 

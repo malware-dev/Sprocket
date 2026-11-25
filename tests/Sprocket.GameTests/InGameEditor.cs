@@ -194,11 +194,17 @@ namespace Sprocket.GameTests
         /// <summary>
         /// Adds what the entry saying <paramref name="text" /> in a plus menu on the page adds, such as <c>task</c> under a sequence's
         /// steps, as choosing it in the open menu does, or presses the add button saying it where no menu offers it. Says whether
-        /// either was there.
+        /// either was there. An entry with a submenu of sources takes the source named after a slash, as the submenu says it, or
+        /// the first where none is named.
         /// </summary>
         /// <remarks>The menu opens in a window of its own, out of the page's elements, so its entry is taken from what the menu offers.</remarks>
         public bool Add(string text)
         {
+            var slash = text.IndexOf('/');
+            var source = slash < 0 ? null : text.Substring(slash + 1);
+            if (slash >= 0)
+                text = text.Substring(0, slash);
+
             foreach (var element in Within(Root()))
             {
                 if (element.GetType().Name != PlusMenu)
@@ -206,10 +212,25 @@ namespace Sprocket.GameTests
 
                 foreach (dynamic choice in ((dynamic)element).Choices)
                 {
-                    if (choice.Text == text && choice.Adds != null)
+                    if (choice.Text != text)
+                        continue;
+
+                    if (choice.Adds != null)
                     {
                         choice.Adds.Execute();
                         return true;
+                    }
+
+                    if (choice.Choices == null)
+                        continue;
+
+                    foreach (dynamic from in choice.Choices)
+                    {
+                        if (from.Adds != null && (source == null || from.Text == source))
+                        {
+                            from.Adds.Execute();
+                            return true;
+                        }
                     }
                 }
             }
@@ -442,11 +463,11 @@ namespace Sprocket.GameTests
             return (bool)_editor.Callouts.Choices.HasDismissed(id);
         }
 
-        /// <summary>The number of the release the player has dismissed every callout of, or null where there is none.</summary>
-        public int? SeenRelease()
+        /// <summary>The release the player has dismissed every callout of, as major.minor, or null where there is none.</summary>
+        public string SeenRelease()
         {
             dynamic seen = _editor.Callouts.Choices.Seen;
-            return seen == null ? (int?)null : (int)seen;
+            return seen == null ? null : (string)seen.Text;
         }
 
         /// <summary>Answers the question the editor asks with the answer saying <paramref name="text" />, and says whether there was one.</summary>
@@ -455,9 +476,9 @@ namespace Sprocket.GameTests
             if (!(bool)_editor.Screen.HasQuestion)
                 return false;
 
-            foreach (dynamic answer in _editor.Screen.Answers)
+            foreach (dynamic answer in Every(_editor.Screen.Answers))
             {
-                if ((string)answer.Text != text)
+                if ((string)answer.Text != text || answer.Command == null)
                     continue;
 
                 Run(answer.Command);
@@ -467,17 +488,31 @@ namespace Sprocket.GameTests
             return false;
         }
 
+        // Each answer offered, and the answers in the submenu of each that opens one, in order.
+        static IEnumerable<object> Every(dynamic answers)
+        {
+            foreach (dynamic answer in answers)
+            {
+                yield return answer;
+                foreach (var within in Every(answer.Within))
+                    yield return within;
+            }
+        }
+
         /// <summary>The words of the answers the editor offers now.</summary>
         public string Answers()
         {
             return string.Join(", ", AnswerTexts());
         }
 
-        /// <summary>The words of each answer the editor's question offers, in order, whole, since an answer's words may hold a comma.</summary>
+        /// <summary>
+        /// The words of each answer the editor's question offers, in order, with the answers in a submenu after the one opening it,
+        /// whole, since an answer's words may hold a comma.
+        /// </summary>
         public List<string> AnswerTexts()
         {
             var said = new List<string>();
-            foreach (dynamic answer in _editor.Screen.Answers)
+            foreach (dynamic answer in Every(_editor.Screen.Answers))
                 said.Add((string)answer.Text);
             return said;
         }

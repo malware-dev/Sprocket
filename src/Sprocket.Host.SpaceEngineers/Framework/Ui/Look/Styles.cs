@@ -6,6 +6,7 @@ using VRage.Game;
 using Lumel.Controls;
 using Lumel.Drawing;
 using Lumel.Images;
+using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Menus;
 using Lumel.Text;
@@ -166,13 +167,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>The guide to rich text's window: the page's own color, edged, with nothing veiled behind it, casting a floating window's shadow.</summary>
         public static readonly IStyle<Window> GuideWindow = new WindowStyle
         {
-            Base = { Background = Palette.Page, Border = Palette.Line, Shadow = Shadow }
+            Base = { Background = Palette.Page, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Shadow = Shadow }
         };
 
         /// <summary>A dialog: a panel in the middle of the screen, with the screen veiled behind it.</summary>
         public static readonly IStyle<Dialog> Dialog = new DialogStyle
         {
-            Base = { Background = Palette.Chrome, Border = Palette.Line, Padding = new Thickness(24f), Backdrop = Palette.Veil }
+            Base = { Background = Palette.Chrome, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Padding = new Thickness(24f), Backdrop = Palette.Veil }
         };
 
         /// <summary>What a dialog asks.</summary>
@@ -463,7 +464,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>The strip between the library's panes, a step darker than the buttons in it.</summary>
         public static readonly IStyle<Stack> MoveStrip = new StackStyle
         {
-            Base = { Background = Palette.Well, Padding = new Thickness(Gaps.Within), Spacing = Gaps.Parts }
+            Base = { Background = Palette.Well, FollowsUserBackgroundOpacity = true, Padding = new Thickness(Gaps.Within), Spacing = Gaps.Parts }
         };
 
         /// <summary>A button in the strip between the library's panes, lit under the pointer; quiet where it cannot be pressed.</summary>
@@ -578,7 +579,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             Base = { Background = Palette.Page, Border = Palette.Line, Padding = new Thickness(8f) }
         };
 
-        /// <summary>An on/off switch: a square thumb and the word, sunk into a dark track while off, and edged under the pointer.</summary>
+        /// <summary>An on/off switch: a square thumb and the word, sunk into a dark track while off, and edged under the pointer; dim while disabled, and on a place in an expression what is dragged cannot go.</summary>
         public static readonly IStyle<Switch> Switch = new SwitchStyle
         {
             Base =
@@ -596,7 +597,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             On = { Track = Palette.None },
             PointerOver = { Border = Palette.ControlEdgeHot },
             [State.FocusVisible] = { Border = Palette.ControlEdgeHot },
-            Disabled = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, Track = Palette.Well }
+            Disabled = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, Track = Palette.Well },
+            [LookStates.Off] = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, Track = Palette.Well }
         };
 
         /// <summary>A bar of the player's vitals at the editor's foot: ink on a well, amber when low, red as it blinks nearly gone.</summary>
@@ -626,6 +628,12 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         public static readonly IStyle<Swatch> ColorSample = new SwatchStyle
         {
             Base = { Border = Palette.Line }
+        };
+
+        /// <summary>The lit edge of a value in an expression being built, telling its kind; faint on a place what is dragged cannot go.</summary>
+        public static readonly IStyle<Swatch> ExpressionEdge = new SwatchStyle
+        {
+            [LookStates.Off] = { Opacity = 0.3f }
         };
 
         /// <summary>A box a whole script or text is read and typed in: the fixed-width face, its lines numbered in a dim color, and the game's scroll bar.</summary>
@@ -873,11 +881,15 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             [State.FocusVisible] = { Border = Palette.Ink }
         };
 
-        /// <summary>A box a value is typed into, in a form of values; washed and edged in red while what was typed cannot be used.</summary>
+        /// <summary>
+        /// A box a value is typed into, in a form of values; washed and edged in red while what was typed cannot be used, and dim
+        /// on a place in an expression what is dragged cannot go.
+        /// </summary>
         public static readonly IStyle<TextBox> Value = new TextBoxStyle(Field)
         {
             Base = { FontSize = TextSizes.Small, Padding = new Thickness(12f, 8f) },
-            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem }
+            [LookStates.Wrong] = { Background = Palette.WrongFill, Border = Palette.Problem },
+            [LookStates.Off] = { Color = Palette.Dim, Background = Palette.Chrome, Border = Palette.Well }
         };
 
         /// <summary>A box a number is typed into, in a form of values, the number standing against its right edge; washed and edged in red while what was typed cannot be used.</summary>
@@ -941,40 +953,112 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
             [LookStates.Chosen] = { Color = Palette.Ink, Background = Palette.Line }
         };
 
-        /// <summary>A box of an expression being built, joining the values in it, edged where what is dragged can go on it.</summary>
+        /// <summary>
+        /// A box of an expression being built, joining the values in it as a formula writes them, with no ground or edge of its own:
+        /// washed while a grip under the pointer would take it, so a box inside another washes deeper; edged where what is dragged
+        /// can go on it, and striped where Optimize would change it.
+        /// </summary>
         public static readonly IStyle<Stack> ExpressionBox = new StackStyle
         {
-            Base = { Background = Palette.Well, Border = Palette.Line, Padding = new Thickness(4f), Spacing = Gaps.Parts },
-            [LookStates.Lit] = { Border = Palette.Live, BorderThickness = 2f },
-            [LookStates.Aimed] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
+            Base = { Padding = new Thickness(2f, 3f), Spacing = Gaps.Parts },
+            [LookStates.Grabbable] = { Background = Palette.Nesting },
+            [LookStates.Warned] = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
+            [DragDrop.Accepting] = { Border = Palette.Live, BorderThickness = 2f },
+            [DragDrop.DraggedOver] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
         };
 
         /// <summary>An empty place in an expression being built, lit where what is dragged can go in it.</summary>
         public static readonly IStyle<Stack> ExpressionHole = new StackStyle
         {
             Base = { Background = Palette.Page, Border = Palette.ControlEdge, Padding = new Thickness(12f, 4f) },
-            [LookStates.Lit] = { Border = Palette.Live, Background = Palette.LiveWash, BorderThickness = 2f },
-            [LookStates.Aimed] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
+            [LookStates.Off] = { Background = Palette.Chrome, Border = Palette.Well },
+            [DragDrop.Accepting] = { Border = Palette.Live, Background = Palette.LiveWash, BorderThickness = 2f },
+            [DragDrop.DraggedOver] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
         };
 
-        /// <summary>A value in an expression being built: square, like the editor's other chips, its kind told by a lit left edge and a small word.</summary>
+        /// <summary>
+        /// A value in an expression being built: square, like the editor's other chips, its kind told by a lit left edge and a small
+        /// word, a step lighter than what is behind it at any depth, a step more while its own grip is under the pointer, and a step less while it would be taken along inside a calculation, and striped where Optimize would take it out.
+        /// </summary>
         public static readonly IStyle<Stack> ExpressionChip = new StackStyle
         {
-            Base = { Background = Palette.SlotFill, Border = Palette.Line, Padding = new Thickness(0f, 0f, 8f, 0f), Spacing = Gaps.Parts },
-            [LookStates.Lit] = { Border = Palette.Live, BorderThickness = 2f },
-            [LookStates.Aimed] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
+            Base = { Background = Palette.ValueGround, Padding = new Thickness(3f, 3f, 8f, 3f), Spacing = Gaps.Parts },
+            [LookStates.Grabbable] = { Background = Palette.ValueGroundHot },
+            [LookStates.TakenAlong] = { Background = Palette.ValueGroundQuiet },
+            [LookStates.Off] = { Background = Palette.Chrome },
+            [LookStates.Warned] = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
+            [DragDrop.Accepting] = { Border = Palette.Live, BorderThickness = 2f },
+            [DragDrop.DraggedOver] = { Background = Palette.LiveWashHot, Border = Palette.Live, BorderThickness = 3f }
+        };
+
+        /// <summary>A word of an expression being built, such as a box's sign; dim on a place what is dragged cannot go.</summary>
+        public static readonly IStyle<Label> ExpressionWord = new LabelStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink },
+            [LookStates.Off] = { Color = Palette.Dim }
+        };
+
+        /// <summary>
+        /// The name of a block value, setting or state in an expression being built, pressed to pick another; lifted under the
+        /// pointer, and dim on a place what is dragged cannot go.
+        /// </summary>
+        public static readonly IStyle<Button> ExpressionName = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink, Background = Palette.None,
+                Padding = new Thickness(4f, 0f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
+            },
+            PointerOver = { Background = Palette.PanelHot },
+            [State.FocusVisible] = { Background = Palette.PanelHot },
+            [LookStates.Off] = { Color = Palette.Dim }
+        };
+
+        /// <summary>The small word on a value in an expression being built saying what kind it is, where it cannot be pressed: muted enough to read on the chip, dim on a place what is dragged cannot go.</summary>
+        public static readonly IStyle<Label> ExpressionKindWord = new LabelStyle(Detail)
+        {
+            Base = { Color = Palette.Muted },
+            [LookStates.Off] = { Color = Palette.Dim }
+        };
+
+        /// <summary>
+        /// The small word saying how a reading in an expression being built combines its blocks, pressed to pick another; lifted
+        /// under the pointer, and dim on a place what is dragged cannot go.
+        /// </summary>
+        public static readonly IStyle<Button> ExpressionKind = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White, FontSize = TextSizes.Tiny, Color = Palette.Muted, Background = Palette.None,
+                Padding = new Thickness(2f, 0f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
+            },
+            PointerOver = { Color = Palette.Ink, Background = Palette.PanelHot },
+            [State.FocusVisible] = { Color = Palette.Ink, Background = Palette.PanelHot },
+            [LookStates.Off] = { Color = Palette.Dim }
+        };
+
+        /// <summary>An expression standing where a value's field would be, framed as a setting standing there is, pressed to change it; lifted under the pointer.</summary>
+        public static readonly IStyle<Button> HeldExpression = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White, FontSize = TextSizes.Body, Color = Palette.Ink, Background = Palette.Page, Border = Palette.Link,
+                Padding = new Thickness(8f, 4f, 8f, 4f), HoverSound = ControlCues.Hover, ClickSound = ControlCues.Click
+            },
+            PointerOver = { Background = Palette.PanelHot },
+            [State.FocusVisible] = { Background = Palette.PanelHot }
         };
 
         /// <summary>The well an expression is built in, across the page.</summary>
         public static readonly IStyle<Stack> ExpressionLine = new StackStyle
         {
-            Base = { Background = Palette.Well, Border = Palette.Line, Padding = new Thickness(12f, 16f) }
+            Base = { Background = Palette.Well, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Padding = new Thickness(12f, 16f) }
         };
 
         /// <summary>A shelf of the tray over an expression being built: its heading over the pieces it holds.</summary>
         public static readonly IStyle<Stack> ExpressionShelf = new StackStyle
         {
-            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(8f), Spacing = Gaps.Parts }
+            Base = { Background = Palette.Panel, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Padding = new Thickness(8f), Spacing = Gaps.Parts }
         };
 
         /// <summary>A piece to drag into an expression being built: a calculation or a kind of value.</summary>
@@ -987,8 +1071,8 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         public static readonly IStyle<Stack> ExpressionBin = new StackStyle
         {
             Base = { Background = Palette.Well, Border = Palette.ControlEdge, Padding = new Thickness(12f, 8f) },
-            [LookStates.Lit] = { Border = Palette.Problem, BorderThickness = 2f },
-            [LookStates.Aimed] = { Background = Palette.WrongFill, Border = Palette.Problem, BorderThickness = 3f }
+            [DragDrop.Accepting] = { Border = Palette.Problem, BorderThickness = 2f },
+            [DragDrop.DraggedOver] = { Background = Palette.WrongFill, Border = Palette.Problem, BorderThickness = 3f }
         };
 
         /// <summary>A length to pick in a row of them, its words given the row's narrow width.</summary>
@@ -1009,13 +1093,13 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>Controls hanging from what opened them, on the ground a form's controls stand on, so they look as they do in a form.</summary>
         public static readonly IStyle<Popup> Panel = new PopupStyle
         {
-            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(12f), Shadow = ShortShadow }
+            Base = { Background = Palette.Panel, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Padding = new Thickness(12f), Shadow = ShortShadow }
         };
 
         /// <summary>Something hanging open from what opened it, on the tone every hanging thing shares: the one a form's controls stand on.</summary>
         public static readonly IStyle<Popup> Popup = new PopupStyle
         {
-            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
+            Base = { Background = Palette.Panel, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
         };
 
         /// <summary>A callout: the tone every hanging thing shares, edged in the accent, its words quiet, with a tail aimed at what it points out.</summary>
@@ -1112,7 +1196,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>One column of a pick: a panel with a hairline round it.</summary>
         public static readonly IStyle<Stack> Column = new StackStyle
         {
-            Base = { Background = Palette.Panel, Border = Palette.Line, Padding = new Thickness(16f) }
+            Base = { Background = Palette.Panel, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Padding = new Thickness(16f) }
         };
 
 
@@ -1271,7 +1355,7 @@ namespace Sprocket.Host.SpaceEngineers.Framework.Ui.Look
         /// <summary>A list in a frame of its own, as a dialog holds one.</summary>
         public static readonly IStyle<ScrollView> FramedList = new ScrollViewStyle(ScrollView)
         {
-            Base = { Background = Palette.Page, Border = Palette.Line, Padding = new Thickness(4f) }
+            Base = { Background = Palette.Page, FollowsUserBackgroundOpacity = true, Border = Palette.Line, Padding = new Thickness(4f) }
         };
 
         /// <summary>A mark beside words, muted: the kind of thing they name; dim on a paused step.</summary>

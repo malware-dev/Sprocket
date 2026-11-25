@@ -59,7 +59,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 (setting, said) => _form.Choose(at, setting, said),
                 () => _making = SettingSources.New(editor, system, "text", Literal.Of(_form.ValueAt(at)), () => mark,
                     made => _form.Choose(at, made, SettingSources.Default(system, made)), () => _making = null),
-                () => SettingSources.Build(editor, system, _form, at, "text"));
+                () => SettingSources.Build(editor, system, _form, at, "text"), _form.HeldAt(at).IsExpression);
+            _form.Expressing += at => SettingSources.Build(editor, system, _form, at, "text");
             _form.Submitted += Accept;
 
             _window = new Popup

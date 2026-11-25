@@ -2,6 +2,7 @@ using Sprocket.Host.SpaceEngineers.Framework.Game.Members;
 using Sprocket.Host.SpaceEngineers.Framework.Model;
 using Sprocket.Host.SpaceEngineers.Framework.Model.Expressions;
 using Sprocket.Host.SpaceEngineers.Framework.Text;
+using Sprocket.Host.SpaceEngineers.Framework.Ui.Parts;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Expressions
 {
@@ -28,7 +29,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
                 kind = Combined(texts, reading.Combine);
                 var value = EntityAction.Value(Vocabulary.ActionsOf(editor.World, editor.Blocks(system, reading.Targets)), reading.Key);
                 var join = value != null && value.Join.Length > 0 ? value.Join : "of";
-                return $"{value?.Named ?? reading.Key.Id} {join} {string.Join(", ", reading.Targets)}";
+                var read = $"{value?.Named ?? reading.Key.Id} {join} {string.Join(", ", reading.Targets)}";
+                // A check says what it compares each block's value with, as the box of a comparison does.
+                return reading.Checks ? $"{read} {ComparisonQuestion.Said(reading.Relation)} {ExpressionShown.Of(editor, system, reading.Compared)}" : read;
             }
 
             var operand = atom as Operand;
@@ -42,8 +45,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
             return operand != null ? operand.Value.Said : atom.Written;
         }
 
-        // The small word for a reading combined as combine says.
-        static string Combined(Texts texts, Combination combine)
+        /// <summary>The small word for a reading combined as <paramref name="combine" /> says, in <paramref name="texts" />.</summary>
+        public static string Combined(Texts texts, Combination combine)
         {
             switch (combine)
             {
@@ -51,6 +54,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Expressions
                 case Combination.Average: return texts.ExpressionKindAverage;
                 case Combination.Min: return texts.ExpressionKindLowest;
                 case Combination.Max: return texts.ExpressionKindHighest;
+                case Combination.Any: return texts.ExpressionKindAny;
+                case Combination.All: return texts.ExpressionKindAll;
             }
 
             return texts.ExpressionKindReading;
